@@ -1,9 +1,9 @@
 # Plan: User Authentication Flow
 
 ## Phase 1: Backend Scaffolding & Security Config
-- [ ] Task: Configure Spring Boot with `spring-boot-starter-oauth2-client` and `spring-boot-starter-security`
-    - [ ] Write tests to verify security configuration blocks unauthorized access
-    - [ ] Implement initial security configuration
+- [x] Task: Configure Spring Boot with `spring-boot-starter-oauth2-client` and `spring-boot-starter-security`
+    - [x] Write tests to verify security configuration blocks unauthorized access
+    - [x] Implement initial security configuration
 - [ ] Task: Set up Google OAuth2 properties in `application.yml`
     - [ ] Write tests to verify configuration loading
     - [ ] Implement configuration

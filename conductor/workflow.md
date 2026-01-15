@@ -195,10 +195,9 @@ cd frontend
 npm run dev
 
 # Run Tests
-# Backend
-./mvnw test
-# Frontend
-cd frontend && npm test
+# Delegate to Kilo to save context
+kilo --auto --nosplash --mode code "run backend tests using ./mvnw test and return only the results and logs of failed tests"
+kilo --auto --nosplash --mode code "run frontend tests using npm test and return only the results and logs of failed tests"
 ```
 
 ### Before Committing
