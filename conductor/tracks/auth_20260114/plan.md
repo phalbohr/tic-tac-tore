@@ -4,7 +4,7 @@
 - [x] Task: Configure Spring Boot with `spring-boot-starter-oauth2-client` and `spring-boot-starter-security` [f00c598]
     - [x] Write tests to verify security configuration blocks unauthorized access
     - [x] Implement initial security configuration
-- [x] Task: Set up Google OAuth2 properties in `application.yml`
+- [x] Task: Set up Google OAuth2 properties in `application.yml` [2917a81]
     - [x] Write tests to verify configuration loading
     - [x] Implement configuration
 - [ ] Task: Conductor - User Manual Verification 'Backend Scaffolding & Security Config' (Protocol in workflow.md)
