@@ -7,7 +7,7 @@
 - [x] Task: Set up Google OAuth2 properties in `application.yml` [2917a81]
     - [x] Write tests to verify configuration loading
     - [x] Implement configuration
-- [ ] Task: Conductor - User Manual Verification 'Backend Scaffolding & Security Config' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Backend Scaffolding & Security Config' (Protocol in workflow.md)
 
 ## Phase 2: JWT Implementation & User Persistence
 - [ ] Task: Implement `User` entity and `UserRepository`
