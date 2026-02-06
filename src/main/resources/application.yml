@@ -8,12 +8,15 @@ spring:
     console:
       enabled: true
   security:
+    jwt:
+      secret-key: ${TTT_JWT_SECRET}
+      expiration: 86400000 # 1 day
     oauth2:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${TTT_GOOGLE_CLIENT_ID}
+            client-secret: ${TTT_GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile

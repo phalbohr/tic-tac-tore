@@ -13,9 +13,9 @@
 - [x] Task: Implement `User` entity and `UserRepository` [224ca3e]
     - [x] Write unit tests for User persistence
     - [x] Implement User entity and Repository
-- [ ] Task: Implement JWT Service for token generation and validation
-    - [ ] Write unit tests for JWT generation and claims extraction
-    - [ ] Implement JWT Service
+- [x] Task: Implement JWT Service for token generation and validation
+    - [x] Write unit tests for JWT generation and claims extraction
+    - [x] Implement JWT Service
 - [ ] Task: Implement OAuth2 Success Handler to issue JWT
     - [ ] Write tests for the success handler behavior
     - [ ] Implement Custom OAuth2 Success Handler
