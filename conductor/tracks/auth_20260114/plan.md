@@ -25,7 +25,7 @@
 - [x] Task: Scaffold Vue 3 frontend with Pinia and Vue Router [a54bb41]
     - [x] Write tests for initial router and store setup
     - [x] Implement scaffolding
-- [ ] Task: Implement `authStore` in Pinia
+- [~] Task: Implement `authStore` in Pinia
     - [ ] Write tests for login/logout actions and state changes
     - [ ] Implement authStore
 - [ ] Task: Create Login Page with Google sign-in button
