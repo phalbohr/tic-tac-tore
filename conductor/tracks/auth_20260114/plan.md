@@ -22,9 +22,9 @@
 - [x] Task: Conductor - User Manual Verification 'JWT Implementation & User Persistence' (Protocol in workflow.md) [ceb5e46]
 
 ## Phase 3: Frontend Login Integration
-- [ ] Task: Scaffold Vue 3 frontend with Pinia and Vue Router
-    - [ ] Write tests for initial router and store setup
-    - [ ] Implement scaffolding
+- [x] Task: Scaffold Vue 3 frontend with Pinia and Vue Router [a54bb41]
+    - [x] Write tests for initial router and store setup
+    - [x] Implement scaffolding
 - [ ] Task: Implement `authStore` in Pinia
     - [ ] Write tests for login/logout actions and state changes
     - [ ] Implement authStore
