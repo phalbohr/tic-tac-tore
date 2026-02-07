@@ -9,7 +9,7 @@
     - [x] Implement configuration
 - [x] Task: Conductor - User Manual Verification 'Backend Scaffolding & Security Config' (Protocol in workflow.md)
 
-## Phase 2: JWT Implementation & User Persistence
+## Phase 2: JWT Implementation & User Persistence [checkpoint: 4d4c186]
 - [x] Task: Implement `User` entity and `UserRepository` [224ca3e]
     - [x] Write unit tests for User persistence
     - [x] Implement User entity and Repository
