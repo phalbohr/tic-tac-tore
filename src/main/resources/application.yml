@@ -8,9 +8,6 @@ spring:
     console:
       enabled: true
   security:
-    jwt:
-      secret-key: ${TTT_JWT_SECRET}
-      expiration: 86400000 # 1 day
     oauth2:
       client:
         registration:
@@ -20,3 +17,11 @@ spring:
             scope:
               - email
               - profile
+
+application:
+  security:
+    jwt:
+      secret-key: ${TTT_JWT_SECRET}
+      expiration: 86400000 # 1 day
+    oauth2:
+      redirect-uri: ${TTT_OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
