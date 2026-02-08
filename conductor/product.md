@@ -31,6 +31,7 @@ To create a vibrant, engaging foosball culture within the office by providing a 
 - **Comprehensive Positional Statistics:** Deep-dive analytics for 1v1 and 2v2 formats, focusing on specific performance metrics for Attacker and Defender roles.
 - **Public Office Leaderboards:** High-visibility rankings (Overall, Attack, and Defense) to drive daily engagement and healthy office rivalry.
 - **Head-to-Head Analytics:** Detailed breakdown of performance against specific opponents and team compositions.
+- **Secure Authentication:** User sign-in via Google OAuth2 to ensure data privacy and personalized player profiles.
 
 ## Experience & Tone
 - **Socially Competitive:** A balance of friendly, approachable social play with the excitement of semi-competitive rankings. The platform is designed to be transparent, public, and encouraging for the entire office.
