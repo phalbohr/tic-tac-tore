@@ -37,7 +37,7 @@
 - [x] Task: Implement Authentication Middleware/Guards on Frontend [43ec658]
     - [x] Write tests for route protection
     - [x] Implement navigation guards
-- [ ] Task: Verify end-to-end flow
-    - [ ] Write integration tests for the full login flow
-    - [ ] Perform manual end-to-end verification
+- [x] Task: Verify end-to-end flow [16f3bcf]
+    - [x] Write integration tests for the full login flow
+    - [x] Perform manual end-to-end verification
 - [ ] Task: Conductor - User Manual Verification 'Final Integration & Verification' (Protocol in workflow.md)
