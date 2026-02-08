@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import OAuth2Redirect from '../OAuth2Redirect.vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 // Создаем общую мок-функцию для push
 const pushMock = vi.fn()
@@ -25,7 +25,7 @@ describe('OAuth2Redirect', () => {
   it('logs in and redirects when token is present in query', () => {
     const token = 'test-token'
     // Настраиваем мок useRoute для возврата токена
-    ;(useRoute as any).mockReturnValue({
+    ;(useRoute as ReturnType<typeof vi.fn>).mockReturnValue({
       query: { token }
     })
     
@@ -39,7 +39,7 @@ describe('OAuth2Redirect', () => {
   })
 
   it('redirects to login when token is missing', () => {
-    ;(useRoute as any).mockReturnValue({
+    ;(useRoute as ReturnType<typeof vi.fn>).mockReturnValue({
       query: {}
     })
     

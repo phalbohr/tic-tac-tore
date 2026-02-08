@@ -21,7 +21,7 @@
     - [x] Implement Custom OAuth2 Success Handler
 - [x] Task: Conductor - User Manual Verification 'JWT Implementation & User Persistence' (Protocol in workflow.md) [ceb5e46]
 
-## Phase 3: Frontend Login Integration
+## Phase 3: Frontend Login Integration [checkpoint: b40b94e]
 - [x] Task: Scaffold Vue 3 frontend with Pinia and Vue Router [a54bb41]
     - [x] Write tests for initial router and store setup
     - [x] Implement scaffolding
@@ -31,10 +31,10 @@
 - [x] Task: Create Login Page with Google sign-in button [8bdcbd3]
     - [x] Write component tests for the Login page
     - [x] Implement Login page
-- [~] Task: Conductor - User Manual Verification 'Frontend Login Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Frontend Login Integration' (Protocol in workflow.md) [b40b94e]
 
 ## Phase 4: Final Integration & Verification
-- [ ] Task: Implement Authentication Middleware/Guards on Frontend
+- [~] Task: Implement Authentication Middleware/Guards on Frontend
     - [ ] Write tests for route protection
     - [ ] Implement navigation guards
 - [ ] Task: Verify end-to-end flow
