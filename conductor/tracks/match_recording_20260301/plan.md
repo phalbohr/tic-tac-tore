@@ -1,9 +1,9 @@
 # Plan: 2v2 Match Recording & Confirmation Workflow
 
 ## Phase 1: Backend Scaffolding & Data Persistence
-- [ ] Task: Implement `Match` and `Game` entities with `MatchStatus`
-    - [ ] Write unit tests for Match persistence
-    - [ ] Implement entities and Repository
+- [x] Task: Implement `Match` and `Game` entities with `MatchStatus` c009da2
+    - [x] Write unit tests for Match persistence
+    - [x] Implement entities and Repository
 - [ ] Task: Implement Match Creation API
     - [ ] Write integration tests for `POST /api/v1/matches` (validation and initial PENDING state)
     - [ ] Implement Controller and Service for match submission
