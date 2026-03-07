@@ -1,6 +1,8 @@
 package com.tictactore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -27,31 +29,38 @@ public class Match {
     @ToString.Include
     private UUID id;
 
+    @NotNull(message = "Creator is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
+    @NotNull(message = "Team A Attacker is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_a_attacker_id", nullable = false)
     private User teamAAttacker;
 
+    @NotNull(message = "Team A Defender is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_a_defender_id", nullable = false)
     private User teamADefender;
 
+    @NotNull(message = "Team B Attacker is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_b_attacker_id", nullable = false)
     private User teamBAttacker;
 
+    @NotNull(message = "Team B Defender is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_b_defender_id", nullable = false)
     private User teamBDefender;
 
+    @NotNull(message = "Match status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @ToString.Include
-    private MatchStatus status = MatchStatus.DRAFT;
+    private MatchStatus status = MatchStatus.PENDING_APPROVAL;
 
+    @Size(min = 1, max = 3, message = "Match must have between 1 and 3 games")
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Game> games = new ArrayList<>();
 
