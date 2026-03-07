@@ -37,7 +37,17 @@ All tasks follow a strict lifecycle:
    - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
    - Rerun tests to ensure they still pass after refactoring.
 
-7. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
+7. **Automated Headless Code Review:**
+   - For every newly created or significantly modified file, delegate the review to a headless agent using the following shell command:
+     ```bash
+     kilo --auto --nosplash --mode code "Check <file_path> using the instructions in .gemini/rules/review-guide.md"
+     ```
+   - **Analyze Output:** Display and carefully review the feedback from the headless agent.
+   - **User Interaction:** If the review suggests changes that are subjective, ambiguous, or require design decisions, immediately use `ask_user` to gather feedback or ask open-ended questions.
+   - **Action:** If the review identifies clear bugs, violations of the `review-guide.md`, or provides objective improvements (e.g., fixing potential N+1, initializing variables), implement the fixes before proceeding.
+   - **Goal:** Ensure every file meets the project's quality standards through impartial verification.
+
+8. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
    ```bash
    pytest --cov=app --cov-report=html
    ```
