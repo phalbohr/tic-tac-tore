@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: 2v2 Match Recording & Confirmation Workflow**
+- [~] **Track: 2v2 Match Recording & Confirmation Workflow**
 *Link: [./tracks/match_recording_20260301/](./tracks/match_recording_20260301/)*

@@ -31,8 +31,13 @@ public class MatchController {
      */
     @PostMapping
     public ResponseEntity<MatchResponse> createMatch(@Valid @RequestBody MatchRequest request) {
-        log.info("Received request to create a new match");
+        log.info("Received request to create a new match. Participants: {}, {}, {}, {}", 
+            request.teamAAttackerId(), request.teamADefenderId(), 
+            request.teamBAttackerId(), request.teamBDefenderId());
+        
         MatchResponse createdMatch = matchService.createMatch(request);
+        
+        log.info("Successfully created match with ID: {}", createdMatch.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMatch);
     }
 }

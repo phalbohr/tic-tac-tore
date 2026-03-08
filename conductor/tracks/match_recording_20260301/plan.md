@@ -4,9 +4,9 @@
 - [x] Task: Implement `Match` and `Game` entities with `MatchStatus` c009da2
     - [x] Write unit tests for Match persistence
     - [x] Implement entities and Repository
-- [ ] Task: Implement Match Creation API
-    - [ ] Write integration tests for `POST /api/v1/matches` (validation and initial PENDING state)
-    - [ ] Implement Controller and Service for match submission
+- [x] Task: Implement Match Creation API 0537e65
+    - [x] Write integration tests for `POST /api/v1/matches` (validation and initial PENDING state)
+    - [x] Implement Controller and Service for match submission
 - [ ] Task: Conductor - User Manual Verification 'Backend Scaffolding & Data Persistence' (Protocol in workflow.md)
 
 ## Phase 2: Confirmation Workflow Logic

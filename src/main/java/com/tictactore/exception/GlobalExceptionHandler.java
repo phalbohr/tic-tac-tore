@@ -26,11 +26,21 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error -> 
             errors.put(error.getField(), error.getDefaultMessage()));
         
+        // Also handle global errors (like @AssertTrue on the class/record)
+        ex.getBindingResult().getGlobalErrors().forEach(error ->
+            errors.put(error.getObjectName(), error.getDefaultMessage()));
+        
         log.warn("Validation failed: {}", errors);
         Map<String, Object> body = new HashMap<>();
         body.put("error", "Validation failed");
         body.put("details", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn("Invalid argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)

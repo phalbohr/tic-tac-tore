@@ -1,5 +1,28 @@
 # Project Workflow
 
+## Table of Contents
+1. [Language & Communication Policy](#language--communication-policy)
+2. [Guiding Principles](#guiding-principles)
+3. [Task Workflow](#task-workflow)
+4. [Phase Completion Verification](#phase-completion-verification-and-checkpointing-protocol)
+5. [Quality Gates](#quality-gates)
+6. [Development Commands](#development-commands)
+7. [Persona & Educational Mandate](#persona--educational-mandate)
+8. [Testing Requirements](#testing-requirements)
+9. [Code Review Process](#code-review-process)
+10. [Commit Guidelines](#commit-guidelines)
+11. [Definition of Done](#definition-of-done)
+12. [Emergency Procedures](#emergency-procedures)
+13. [Deployment Workflow](#deployment-workflow)
+
+---
+
+## Language & Communication Policy
+- **Chat Interaction:** All communication with the user in the chat MUST be in **Russian**.
+- **File Content:** All code, documentation, commit messages, and notes written to files MUST be in **English**.
+
+---
+
 ## Guiding Principles
 
 1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`
@@ -112,8 +135,8 @@ All tasks follow a strict lifecycle:
     -   **Step 2.2: List Changed Files:** Execute `git diff --name-only <previous_checkpoint_sha> HEAD` to get a precise list of all files modified during this phase.
     -   **Step 2.3: Verify and Create Tests:** For each file in the list:
         -   **CRITICAL:** First, check its extension. Exclude non-code files (e.g., `.json`, `.md`, `.yaml`).
-        -   For each remaining code file, verify a corresponding test file exists.
-        -   If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`plan.md`).
+        - For each remaining code file, verify a corresponding test file exists.
+        - If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`plan.md`).
 
 3.  **Execute Automated Tests with Proactive Debugging:**
     -   Before execution, you **must** announce the exact shell command you will use to run the tests.
