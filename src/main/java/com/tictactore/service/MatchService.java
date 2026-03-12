@@ -6,6 +6,7 @@ import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.mapper.MatchMapper;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchStatus;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
@@ -32,6 +33,58 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchMapper matchMapper;
+
+    @Transactional
+    public void approveMatch(UUID matchId) {
+        log.info("Attempting to approve match with ID: {}", matchId);
+
+        User currentUser = getCurrentUser();
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        if (match.getStatus() != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
+        }
+
+        validateUserIsOpponent(currentUser, match);
+
+        match.setStatus(MatchStatus.CONFIRMED);
+        matchRepository.save(match);
+        log.info("Match {} successfully approved by user {}", matchId, currentUser.getId());
+    }
+
+    private User getCurrentUser() {
+        String email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Authentication::getName)
+                .orElseThrow(() -> new IllegalStateException("Authentication context is missing"));
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private void validateUserIsOpponent(User user, Match match) {
+        boolean isCreatorTeamA = isUserInTeamA(match.getCreator(), match);
+        boolean isUserTeamA = isUserInTeamA(user, match);
+        boolean isUserTeamB = isUserInTeamB(user, match);
+
+        if (!isUserTeamA && !isUserTeamB) {
+            throw new IllegalArgumentException("User is not a participant in this match");
+        }
+
+        if (isCreatorTeamA == isUserTeamA) {
+            throw new IllegalArgumentException("Only an opponent can approve this match");
+        }
+    }
+
+    private boolean isUserInTeamA(User user, Match match) {
+        return user.getId().equals(match.getTeamAAttacker().getId()) ||
+               user.getId().equals(match.getTeamADefender().getId());
+    }
+
+    private boolean isUserInTeamB(User user, Match match) {
+        return user.getId().equals(match.getTeamBAttacker().getId()) ||
+               user.getId().equals(match.getTeamBDefender().getId());
+    }
 
     @Transactional
     public MatchResponse createMatch(MatchRequest request) {
