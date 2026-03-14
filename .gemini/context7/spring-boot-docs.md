@@ -1,0 +1,10 @@
+- /springprojects/spring-boot  — Spring Boot 3 (main framework)
+- /spring-projects/spring-framework  — Spring Framework (DI, AOP, Web MVC)
+- /spring-projects/spring-security  — Spring Security 6
+- /spring-projects/spring-data-jpa  — Spring Data JPA
+- /spring-projects/spring-data-redis  — Spring Data Redis
+- /spring-projects/spring-kafka  — Spring Kafka
+- /springdoc/springdoc-openapi  — OpenAPI / Swagger for Spring Boot 3
+- /spring-projects/spring-cloud  — Spring Cloud (microservices, configuration)
+- /spring-projects/spring-batch  — Spring Batch (batch processing)
+- /spring-projects/spring-amqp  — Spring AMQP / RabbitMQ
