@@ -47,7 +47,7 @@ All tasks follow a strict lifecycle:
 2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
 
 3. **Context Retrieval:**
-   - **Action:** Fetch documentation relevant for the task from context7 MCP.
+   - **Action:** Fetch documentation relevant for the task from context7 MCP. Lists of relevant libraries is available in `.gemini/context7/` directory.
    - **Goal:** Avoid misuse of working resources because of irrelevant information.
 
 4. **Write Failing Tests (Red Phase):**
