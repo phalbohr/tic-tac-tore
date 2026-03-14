@@ -53,26 +53,23 @@ All tasks follow a strict lifecycle:
 4. **Write Failing Tests (Red Phase):**
    - Create a new test file for the feature or bug fix.
    - Write one or more unit tests that clearly define the expected behavior and acceptance criteria for the task.
-   - **CRITICAL:** Run the tests using kilo and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
+   - **CRITICAL:** Run the tests using Generalist Agent and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
 
 5. **Implement to Pass Tests (Green Phase):**
    - Write the minimum amount of application code necessary to make the failing tests pass.
-   - Run the test suite again using kilo and confirm that all tests now pass. This is the "Green" phase.
+   - Run the test suite again using Generalist Agent and confirm that all tests now pass. This is the "Green" phase.
 
 6. **Refactor (Optional but Recommended):**
    - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
-   - Rerun tests using kilo to ensure they still pass after refactoring.
+   - Rerun tests using Generalist Agent to ensure they still pass after refactoring.
 
 7. **Automated Headless Code Review:**
-   - For every newly created or significantly modified file do review. Delegate the review to a headless agent using the following shell command:
-     ```bash
-     kilo --auto --nosplash --mode code "Check <file_path> using the instructions in .gemini/rules/review-guide.md"
-     ```
-   - **Analyze Output:** Display and carefully review the feedback from the headless agent.
+   - For every newly created or significantly modified file do review. Delegate the review to the Generalist Agent using instruction `.gemini/workflows/quick-review.toml`.
+   - **Analyze Output:** Display and carefully review the feedback from the Generalist Agent.
    - **User Interaction:** If the review suggests changes that are subjective, ambiguous, or require design decisions, immediately use `ask_user` to gather feedback or ask open-ended questions.
    - **Action:** If the review identifies clear bugs, violations of the `review-guide.md`, or provides objective improvements (e.g., fixing potential N+1, initializing variables), implement the fixes before proceeding.
    - **Goal:** Ensure every file meets the project's quality standards through impartial verification.
-   - **Final check:** Rerun tests using kilo to ensure they still pass after refactoring.
+   - **Final check:** Rerun tests using Generalist Agent to ensure they still pass after refactoring.
 
 8. **Verify Coverage:** Run coverage reports using the project's chosen tools.
 
@@ -150,7 +147,7 @@ All tasks follow a strict lifecycle:
     - If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
 
 4.  **Execute deep review of the phase:**
-    - Launch deep review using kilo by using the mandatory phrase: "conduct deep-review [list of files]" and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
+    - Launch deep review using Generalist Agent by using the mandatory phrase: "conduct deep-review [list of files]" and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
 
 5.  **Review and Categorize Findings:**
     - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
@@ -162,7 +159,7 @@ All tasks follow a strict lifecycle:
     - Wait for the command from the user to continue working.
 
 8.  **Address [FIX_NOW] Issues:**
-    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review.md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from kilo.
+    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review.md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
     - Mark the fixed finding with the status `[FIXED]`.
     - Process all remaining `[FIX_NOW]` findings sequentially in the same manner.
 
@@ -268,9 +265,9 @@ cd frontend
 npm run dev
 
 # Run Tests
-# Delegate to Kilo to save context
-kilo --auto --nosplash --mode code "run backend tests using ./mvnw test and return only the results and logs of failed tests. If some tests fail DO NOT try to fix them, just return results."
-kilo --auto --nosplash --mode code "run frontend tests using cd frontend && npm run test:unit and return only the results and logs of failed tests. If some tests fail DO NOT try to fix them, just return results."
+# Delegate to Generalist Agent to save context
+Generalist Agent "run backend tests using ./mvnw test and return only the results and logs of failed tests. If some tests fail DO NOT try to fix them, just return results."
+Generalist Agent "run frontend tests using cd frontend && npm run test:unit and return only the results and logs of failed tests. If some tests fail DO NOT try to fix them, just return results."
 ```
 
 ### Before Committing
