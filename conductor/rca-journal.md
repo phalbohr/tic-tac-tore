@@ -15,3 +15,15 @@
 - **Root Cause:** `DefaultRedirectStrategy` calls `response.encodeRedirectURL()` before `sendRedirect`. Since it wasn't mocked, it returned `null`, causing the redirect to fail.
 - **Resolution:** Added a mock for `encodeRedirectURL` to return the input URL.
 - **Lesson:** Be aware of internal framework behaviors when mocking infrastructure components like HttpServletResponse.
+
+## [2026-03-14] Task: Implement Match Approval API
+
+- **Issue:** ConstraintViolationException during integration tests setup.
+- **Root Cause:** The 'Game' entity requires a 'gameNumber' field, which was missing in the manual object creation within the test's @BeforeEach method.
+- **Resolution:** Added 'game.setGameNumber(1)' to the test setup.
+- **Lesson:** Always verify that manual object creation in tests satisfies all JPA/Bean Validation constraints.
+
+- **Issue:** UnsupportedOperationException during MatchRepository.save().
+- **Root Cause:** Used 'List.of(game)' to initialize the games collection in the 'Match' entity within the test. Hibernate/JPA may attempt to modify this collection during the persistence lifecycle, but 'List.of()' returns an immutable list.
+- **Resolution:** Wrapped the list in a mutable ArrayList: 'new ArrayList<>(List.of(game))'.
+- **Lesson:** Use mutable collections (like ArrayList) when initializing entities in tests to allow JPA providers to manage them.
