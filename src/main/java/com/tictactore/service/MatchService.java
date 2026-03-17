@@ -1,5 +1,6 @@
 package com.tictactore.service;
 
+import com.tictactore.dto.GameRequest;
 import com.tictactore.dto.MatchRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.ResourceNotFoundException;
@@ -25,6 +26,28 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @brief Orchestrates match-related business operations and lifecycle.
+ *
+ * @purpose
+ * Provides high-level operations for recording matches, approving or rejecting 
+ * them by opponents, and managing the overall state of match records.
+ *
+ * @usage
+ * - Call {@link #createMatch(MatchRequest)} to start a new match confirmation workflow.
+ * - Call {@link #approveMatch(UUID)} or {@link #rejectMatch(UUID)} during the confirmation phase.
+ *
+ * @documentation
+ * - See: conductor/tracks/match_recording_20260301/spec.md
+ *
+ * @restrictions
+ * - Only an opponent participant can approve or reject a match.
+ * - Matches in {@code CONFIRMED} status cannot be modified.
+ *
+ * @dependencies
+ * - Uses {@link MatchRepository} for persistence.
+ * - Interacts with {@link SecurityContextHolder} to identify the current user.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,6 +74,25 @@ public class MatchService {
         match.setStatus(MatchStatus.CONFIRMED);
         matchRepository.save(match);
         log.info("Match {} successfully approved by user {}", matchId, currentUser.getId());
+    }
+
+    @Transactional
+    public void rejectMatch(UUID matchId) {
+        log.info("Attempting to reject match with ID: {}", matchId);
+
+        User currentUser = getCurrentUser();
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        if (match.getStatus() != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be rejected if it is in PENDING_APPROVAL status");
+        }
+
+        validateUserIsOpponent(currentUser, match);
+
+        match.setStatus(MatchStatus.DRAFT);
+        matchRepository.save(match);
+        log.info("Match {} successfully rejected by user {}", matchId, currentUser.getId());
     }
 
     private User getCurrentUser() {
@@ -122,7 +164,7 @@ public class MatchService {
         match.setTeamBDefender(getUserFromMap(usersMap, request.teamBDefenderId(), "Team B Defender"));
 
         for (int i = 0; i < request.games().size(); i++) {
-            var gameReq = request.games().get(i);
+            GameRequest gameReq = request.games().get(i);
             Game game = new Game();
             game.setGameNumber(i + 1);
             game.setTeamAScore(gameReq.teamAScore());

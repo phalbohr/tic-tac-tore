@@ -20,23 +20,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 /**
- * MatchController
+ * @brief REST Controller for managing 2v2 foosball matches.
  *
- * <p>Responsibility: REST Controller for managing 2v2 foosball matches.
- * Handles match creation and the confirmation workflow (approve/reject).</p>
+ * @purpose
+ * Exposes endpoints for recording new matches and managing the confirmation 
+ * workflow (approval or rejection by opponents). Acts as the entry point 
+ * for the match recording system.
  *
- * <p>Usage:
- * <ul>
- *   <li>POST /api/v1/matches - Record a new match</li>
- *   <li>PUT /api/v1/matches/{id}/approve - Opponent confirmation</li>
- * </ul>
- * </p>
+ * @usage
+ * - POST /api/v1/matches to submit a new match.
+ * - PUT /api/v1/matches/{id}/approve for opponent confirmation.
+ * - PUT /api/v1/matches/{id}/reject for opponent rejection.
  *
- * <p>Dependencies:
- * <ul>
- *   <li>MatchService - Business logic for match operations</li>
- * </ul>
- * </p>
+ * @documentation
+ * - See: conductor/tracks/match_recording_20260301/spec.md
+ *
+ * @restrictions
+ * - Does not handle singles (1v1) matches.
+ * - Does not perform statistical calculations (handled by a separate service).
+ *
+ * @dependencies
+ * - Delegates all business logic to {@link MatchService}.
  */
 @RestController
 @RequestMapping("/api/v1/matches")
@@ -89,6 +93,27 @@ public class MatchController {
         log.info("Received request to approve match with ID: {}", id);
         matchService.approveMatch(id);
         log.info("Successfully processed approval for match with ID: {}", id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Rejects a pending match.
+     * Only an opponent can reject a match in PENDING_APPROVAL status.
+     * @param id The ID of the match to reject.
+     * @return 204 No Content if successful.
+     */
+    @Operation(summary = "Reject a pending match", description = "Allows an opponent to dispute the results of a match. Changes status from PENDING_APPROVAL back to DRAFT for corrections.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Match rejected successfully"),
+        @ApiResponse(responseCode = "400", description = "Only an opponent can reject this match or invalid match status"),
+        @ApiResponse(responseCode = "404", description = "Match not found")
+    })
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Void> rejectMatch(
+            @Parameter(description = "ID of the match to be rejected") @PathVariable UUID id) {
+        log.info("Received request to reject match with ID: {}", id);
+        matchService.rejectMatch(id);
+        log.info("Successfully processed rejection for match with ID: {}", id);
         return ResponseEntity.noContent().build();
     }
 }
