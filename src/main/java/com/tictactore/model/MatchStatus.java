@@ -9,7 +9,5 @@ public enum MatchStatus {
     /** Match is submitted and awaiting opponent confirmation */
     PENDING_APPROVAL,
     /** Match is confirmed by opponent and affects rankings */
-    CONFIRMED,
-    /** Match was rejected by an opponent */
-    REJECTED
+    CONFIRMED
 }

@@ -6,6 +6,7 @@ import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.mapper.MatchMapper;
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchStatus;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
@@ -57,6 +58,7 @@ class MatchServiceTest {
     private User opponent1;
     private User opponent2;
     private MatchRequest validRequest;
+    private Match pendingMatch;
 
     @BeforeEach
     void setUp() {
@@ -70,6 +72,15 @@ class MatchServiceTest {
                 opponent1.getId(), opponent2.getId(),
                 List.of(new GameRequest(10, 5))
         );
+
+        pendingMatch = new Match();
+        pendingMatch.setId(UUID.randomUUID());
+        pendingMatch.setCreator(creator);
+        pendingMatch.setTeamAAttacker(creator);
+        pendingMatch.setTeamADefender(teammate);
+        pendingMatch.setTeamBAttacker(opponent1);
+        pendingMatch.setTeamBDefender(opponent2);
+        pendingMatch.setStatus(MatchStatus.PENDING_APPROVAL);
 
         SecurityContextHolder.setContext(securityContext);
     }
@@ -134,5 +145,70 @@ class MatchServiceTest {
         assertThatThrownBy(() -> matchService.createMatch(validRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("participant");
+    }
+
+    @Test
+    @DisplayName("Should successfully approve match when user is an opponent")
+    void approveMatch_Success() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("opponent1@test.com");
+        when(userRepository.findByEmail("opponent1@test.com")).thenReturn(Optional.of(opponent1));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act
+        matchService.approveMatch(pendingMatch.getId());
+
+        // Assert
+        assertThat(pendingMatch.getStatus()).isEqualTo(MatchStatus.CONFIRMED);
+        verify(matchRepository).save(pendingMatch);
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when creator tries to approve")
+    void approveMatch_FailAsCreator() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("creator@test.com");
+        when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act & Assert
+        assertThatThrownBy(() -> matchService.approveMatch(pendingMatch.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Only an opponent");
+    }
+
+    @Test
+    @DisplayName("Should successfully reject match when user is an opponent")
+    void rejectMatch_Success() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("opponent2@test.com");
+        when(userRepository.findByEmail("opponent2@test.com")).thenReturn(Optional.of(opponent2));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act
+        matchService.rejectMatch(pendingMatch.getId());
+
+        // Assert
+        assertThat(pendingMatch.getStatus()).isEqualTo(MatchStatus.DRAFT);
+        verify(matchRepository).save(pendingMatch);
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when rejecting non-pending match")
+    void rejectMatch_InvalidStatus() {
+        // Arrange
+        pendingMatch.setStatus(MatchStatus.CONFIRMED);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("opponent1@test.com");
+        when(userRepository.findByEmail("opponent1@test.com")).thenReturn(Optional.of(opponent1));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act & Assert
+        assertThatThrownBy(() -> matchService.rejectMatch(pendingMatch.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("PENDING_APPROVAL");
     }
 }
