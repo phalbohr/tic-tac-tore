@@ -14,7 +14,7 @@
     - [x] Write tests for `PUT /api/v1/matches/{id}/approve` (verify only opponent can approve)
     - [x] Implement approval logic and transition to `CONFIRMED`
     - [x] Implement `PUT /api/v1/matches/{id}/approve` endpoint in `MatchController`
-- [ ] Task: Implement Match Rejection API
+- [x] Task: Implement Match Rejection API 9208c94
     - [ ] Write tests for `PUT /api/v1/matches/{id}/reject` (verify return to `DRAFT`)
     - [ ] Implement rejection logic in `MatchService`
     - [ ] Implement `PUT /api/v1/matches/{id}/reject` endpoint in `MatchController`
