@@ -18,6 +18,13 @@
 
 ---
 
+## Step 0
+
+Before starting any task, you MUST:
+
+- **Read the project guidelines:** (`.gemini/rules`)
+- **Read the project workflow:** (`conductor/workflow.md`)
+
 ## Language & Communication Policy
 
 - **Chat Interaction:** All communication with the user in the chat MUST be in **Russian**.
@@ -147,7 +154,7 @@ All tasks follow a strict lifecycle:
     - If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
 
 4.  **Execute deep review of the phase:**
-    - Launch deep review using Generalist Agent by using the mandatory phrase: "conduct deep-review [list of files]" and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
+    - Launch deep review using Generalist Agent with `deep-review` skill and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
 
 5.  **Review and Categorize Findings:**
     - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
