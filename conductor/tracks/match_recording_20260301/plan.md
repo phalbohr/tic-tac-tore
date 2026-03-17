@@ -9,16 +9,16 @@
     - [x] Implement Controller and Service for match submission
 - [x] Task: Conductor - User Manual Verification 'Backend Scaffolding & Data Persistence' (Protocol in workflow.md)
 
-## Phase 2: Confirmation Workflow Logic
+## Phase 2: Confirmation Workflow Logic [checkpoint: 1a25915]
 - [x] Task: Implement Match Approval API f132440
     - [x] Write tests for `PUT /api/v1/matches/{id}/approve` (verify only opponent can approve)
     - [x] Implement approval logic and transition to `CONFIRMED`
     - [x] Implement `PUT /api/v1/matches/{id}/approve` endpoint in `MatchController`
 - [x] Task: Implement Match Rejection API 9208c94
-    - [ ] Write tests for `PUT /api/v1/matches/{id}/reject` (verify return to `DRAFT`)
-    - [ ] Implement rejection logic in `MatchService`
-    - [ ] Implement `PUT /api/v1/matches/{id}/reject` endpoint in `MatchController`
-- [ ] Task: Conductor - User Manual Verification 'Confirmation Workflow Logic' (Protocol in workflow.md)
+    - [x] Write tests for `PUT /api/v1/matches/{id}/reject` (verify return to `DRAFT`)
+    - [x] Implement rejection logic in `MatchService`
+    - [x] Implement `PUT /api/v1/matches/{id}/reject` endpoint in `MatchController`
+- [x] Task: Conductor - User Manual Verification 'Confirmation Workflow Logic' (Protocol in workflow.md)
 
 ## Phase 3: Frontend - Match Recording UI
 - [ ] Task: Create Match Recording Form Component
