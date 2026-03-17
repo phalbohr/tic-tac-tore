@@ -12,7 +12,28 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Root entity for a 2v2 Foosball Match record.
+ * @brief Root entity for a 2v2 Foosball Match record.
+ *
+ * @purpose
+ * This entity stores the core data of a foosball match, including the participants, 
+ * the games played (scores), and the current approval status. It serves as the primary 
+ * record for ranking and history tracking.
+ *
+ * @usage
+ * - Create a new {@code Match} when a user records a game result.
+ * - Manage status transitions (DRAFT -> PENDING_APPROVAL -> CONFIRMED) through the lifecycle.
+ * - Use {@link #addGame(Game)} to maintain the bidirectional relationship with games.
+ *
+ * @documentation
+ * - See: conductor/product.md for match rules.
+ *
+ * @restrictions
+ * - **DO NOT** modify a match once it is in {@code CONFIRMED} status.
+ * - Participants (attacker/defender) must be unique across teams in a single match.
+ *
+ * @dependencies
+ * - Governed by {@link MatchStatus} for lifecycle management.
+ * - Contains a list of {@link Game} entities for scoring details.
  */
 @Entity
 @Table(name = "matches")
@@ -28,6 +49,9 @@ public class Match {
     @EqualsAndHashCode.Include
     @ToString.Include
     private UUID id;
+
+    @Version
+    private long version;
 
     @NotNull(message = "Creator is required")
     @ManyToOne(fetch = FetchType.LAZY)
