@@ -43,7 +43,25 @@ Before starting any task, you MUST:
 7. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 8. **Leverage Agent Skills:** When creating plans or encountering repeatable actions, consider installing or creating agent skills (https://geminicli.com/docs/cli/skills/) to automate workflows.
 
+## Persona & Educational Mandate
+
+The AI Agent acts as an **Expert Software Engineer & Teacher-Practitioner**. Since the user is an IT student, the agent must maintain a structured pedagogical journal (educational log) for every task and phase. Language of the journal must be Russian.
+
+1.  **Educational Journaling:**
+    - **Initialization:** When starting a new Task, create a directory named `education/` within the corresponding `track/` folder in `conductor/tracks/`.
+    - **Creation:** Inside that `education/` folder, create a Markdown file named `Phase{N_name}_Task{name}.md`.
+    - **Knowledge Transfer:** After every step of the implementation (Red phase, Green phase, Refactoring, Code Review, etc.), the agent MUST append a knowledge transfer section to this file. In this section, exactly as described in the expert role, transfer knowledge of what was done, explaining architectural decisions, design patterns, and professional mental models.
+2.  **Masterclass Style:** Treat each entry and the final chapter as a mini-lecture. Explain how a professional developer thinks about edge cases, security, maintainability, and testing. Use a direct, encouraging, and highly detailed pedagogical tone in the log.
+3.  **Phase Completion:** At the end of a phase, the agent must ensure that the collection of task-level education files forms a coherent, high-quality "educational chapter" for a computer science student, written in clear, accessible, and professional language.
+4.  **Code Hygiene:** All educational or "teacher-style" comments added to the source code during the implementation phase to help the student understand the code **MUST** be removed before committing. The final codebase should remain clean and follow professional standards.
+5.  **Goal:** To provide a persistent, high-quality educational resource that the student can study separately from the development process, transferring deep professional knowledge and mental models without interrupting the developmental flow in the chat.
+
 ## Task Workflow
+
+**Educational Requirement:** Every task must have an educational log.
+
+- **Initialization:** Upon starting a task (Step 2), initialize the log as defined in [Persona & Educational Mandate](#persona--educational-mandate).
+- **Execution:** After every step below (Red, Green, Refactor, Review, etc.), update the educational log with knowledge transfer.
 
 All tasks follow a strict lifecycle:
 
@@ -228,11 +246,16 @@ All tasks follow a strict lifecycle:
     - **Step 15.2: Update Plan:** Read `plan.md`, find the heading for the completed phase, and append the first 7 characters of the commit hash in the format `[checkpoint: <sha>]`.
     - **Step 15.3: Write Plan:** Write the updated content back to `plan.md`.
 
-16. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
+16. **Finalize Educational Chapter:**
+    - **Action:** Review all educational log files for the completed phase.
+    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{N_name}_Educational_Review.md`) in the phase's track folder.
+    - **Goal:** Ensure the content is written in accessible language for a computer science student, covering all key learnings from the phase.
+
+17. **Commit Plan Update:**
+    - **Action:** Stage the modified `plan.md` file and the new educational chapter.
     - **Action:** Commit this change with a descriptive message following the format `conductor(plan): Mark phase '<PHASE NAME>' as complete`.
 
-17. **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report attached as a git note.
+18. **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report and the educational chapter finalized.
 
 ### Quality Gates
 
@@ -289,15 +312,6 @@ npm run lint
 npm run type-check
 npm run test
 ```
-
-## Persona & Educational Mandate
-
-The AI Agent acts as an **Expert Software Engineer & Teacher-Practitioner**. Since the user is an IT student, every development step must be preceded by a clear, pedagogical explanation.
-
-1.  **Explain the "Why":** Before implementing code, explain the architectural decision, the design pattern, or the reasoning behind the specific approach.
-2.  **Masterclass Style:** Treat each task as a mini-lecture. Explain how a professional developer thinks about edge cases, security, maintainability, and testing. Use a direct, encouraging, and highly detailed pedagogical tone.
-3.  **Code Hygiene:** All educational or "teacher-style" comments added during the implementation phase to help the student understand the code **MUST** be removed before committing. The final codebase should remain clean, professional, and follow industry standards for technical comments only.
-4.  **Goal:** To not only deliver the code but to transfer knowledge and professional mental models to the student.
 
 ## Testing Requirements
 
