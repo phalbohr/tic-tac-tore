@@ -83,4 +83,15 @@ describe('MatchScoring', () => {
 
     expect(wrapper.find('button.next-game').text()).toContain('Game 3')
   })
+
+  it('has max score limit of 99 on input fields', () => {
+    const wrapper = mount(MatchScoring, {
+      props: { players: mockPlayers }
+    })
+
+    const scoreInputs = wrapper.findAll('input[type="number"]')
+    scoreInputs.forEach(input => {
+      expect(input.attributes('max')).toBe('99')
+    })
+  })
 })
