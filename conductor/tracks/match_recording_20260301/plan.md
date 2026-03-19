@@ -20,14 +20,14 @@
     - [x] Implement `PUT /api/v1/matches/{id}/reject` endpoint in `MatchController`
 - [x] Task: Conductor - User Manual Verification 'Confirmation Workflow Logic' (Protocol in workflow.md)
 
-## Phase 3: Frontend - Match Recording UI
+## Phase 3: Frontend - Match Recording UI [checkpoint: dd7cd73]
 - [x] Task: Create Match Recording Form Component a0d0637
     - [x] Write component tests for player selection and initial score setup
     - [x] Implement basic match creation form with user searching
 - [x] Task: Implement Multi-Game Scoring with Position Swap Enforcement c118c47
     - [x] Write tests for the system-enforced position swap between Game 1 and Game 2
     - [x] Implement the step-by-step scoring UI
-- [ ] Task: Conductor - User Manual Verification 'Frontend - Match Recording UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Frontend - Match Recording UI' (Protocol in workflow.md)
 
 ## Phase 4: Frontend - Dashboard & Final Integration
 - [ ] Task: Create Pending Approvals View
