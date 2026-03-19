@@ -27,6 +27,7 @@
 - [x] Task: Implement Multi-Game Scoring with Position Swap Enforcement c118c47
     - [x] Write tests for the system-enforced position swap between Game 1 and Game 2
     - [x] Implement the step-by-step scoring UI
+    - [x] Add score limit (max 99) constraint 851a908
 - [x] Task: Conductor - User Manual Verification 'Frontend - Match Recording UI' (Protocol in workflow.md)
 
 ## Phase 4: Frontend - Dashboard & Final Integration
