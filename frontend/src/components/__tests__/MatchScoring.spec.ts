@@ -26,8 +26,8 @@ describe('MatchScoring', () => {
 
     // Set Game 1 positions and score
     const selects = wrapper.findAll('select')
-    await selects[0].setValue('Alice-Bob') // Alice Attacker, Bob Defender
-    await selects[1].setValue('Charlie-David') // Charlie Attacker, David Defender
+    await selects[0].setValue('creator-teammate') // Alice Attacker, Bob Defender
+    await selects[1].setValue('opponent1-opponent2') // Charlie Attacker, David Defender
     
     await wrapper.find('input[name="team1Score"]').setValue(10)
     await wrapper.find('input[name="team2Score"]').setValue(5)
@@ -47,6 +47,10 @@ describe('MatchScoring', () => {
       props: { players: mockPlayers }
     })
 
+    const selects = wrapper.findAll('select')
+    await selects[0].setValue('creator-teammate')
+    await selects[1].setValue('opponent1-opponent2')
+
     // Game 1: 10-5
     await wrapper.find('input[name="team1Score"]').setValue(10)
     await wrapper.find('input[name="team2Score"]').setValue(5)
@@ -63,6 +67,10 @@ describe('MatchScoring', () => {
     const wrapper = mount(MatchScoring, {
       props: { players: mockPlayers }
     })
+
+    const selects = wrapper.findAll('select')
+    await selects[0].setValue('creator-teammate')
+    await selects[1].setValue('opponent1-opponent2')
 
     // Game 1: 10-5 (Team 1 wins)
     await wrapper.find('input[name="team1Score"]').setValue(10)

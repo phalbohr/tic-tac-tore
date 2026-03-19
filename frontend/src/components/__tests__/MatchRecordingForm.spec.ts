@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MatchRecordingForm from '../MatchRecordingForm.vue'
 import { createPinia, setActivePinia } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 
 // Mock users for testing
 const mockUsers = [
@@ -14,6 +15,8 @@ const mockUsers = [
 describe('MatchRecordingForm', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    const authStore = useAuthStore()
+    authStore.user = { id: 10, name: 'Current User', email: 'me@example.com' }
   })
 
   it('renders correctly with player selection fields', () => {
@@ -32,9 +35,6 @@ describe('MatchRecordingForm', () => {
   })
 
   it('allows selecting players from the list', async () => {
-    // We'll need a way to provide users to the component. 
-    // Usually this would be via an API call or a store.
-    // For now, let's assume it accepts users as a prop or fetches them.
     const wrapper = mount(MatchRecordingForm, {
       props: {
         availableUsers: mockUsers
@@ -88,9 +88,6 @@ describe('MatchRecordingForm', () => {
     // Select Alice as Teammate
     await selects[0].setValue(mockUsers[0].id)
     
-    // Try to select Alice as Opponent 1
-    // The component should probably filter out already selected users from other selects
-    // or show an error. Let's assume it filters them out.
     const opponent1Options = selects[1].findAll('option')
     const aliceOption = opponent1Options.find(opt => opt.attributes('value') === mockUsers[0].id.toString())
     

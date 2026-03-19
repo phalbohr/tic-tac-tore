@@ -1,231 +1,28 @@
-# Deep Review Report
+# Deep Review Report - Phase 3 (Match Recording UI)
 
-**Date:** 2024-05-24
-**Files reviewed:**
-- `src/main/java/com/tictactore/controller/MatchController.java`
-- `src/main/java/com/tictactore/model/Match.java`
-- `src/main/java/com/tictactore/service/MatchService.java`
-**Project context:** Foosball 2v2 match recording system with approval workflow.
+**Date:** 2026-03-19
+**Files reviewed:** 
+- frontend/src/components/MatchRecordingForm.vue
+- frontend/src/components/MatchScoring.vue
 
----
+## MatchRecordingForm.vue
 
-## 01-Architecture & Design Review
+### Findings
 
-### Status: [🟡]
+- **`[FIX_NOW]`** — The `selectedIds` computed property should explicitly check if `authStore.user` is present to ensure the creator is always filtered out from the teammate/opponent selection.
+- **`[FIX_NOW]`** — Use a single `reactive` object for the form state instead of multiple individual `ref`s for `teammateId`, `opponent1Id`, etc. This aligns better with standard Vue 3 practices for forms.
+- **`[FIX_NOW]`** — Simplify the `selectedIds` filter: `.filter((id): id is number => id != null)`.
+- **`[POSTPONE]`** — Refactor to accept `currentUser` as a prop. While better for reusability, it's not strictly necessary for the current architectural phase.
+- **`[POSTPONE]`** — Optimize `getAvailableFor` calls by pre-calculating filtered lists. Not a performance issue with small user lists.
+- **`[POSTPONE]`** — Add debug logging on submission.
 
-### 🔴 Critical issues
-_None found_
+## MatchScoring.vue
 
-### 🟡 Potential risks
-- **`src/main/java/com/tictactore/model/MatchStatus.java`** — Status `REJECTED` is present in the enum but is not used in `MatchService.java`. The `rejectMatch` method transitions the match to `DRAFT`. This creates a disconnect between the model's capabilities and the business logic.
+### Findings
 
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/service/MatchService.java:108`** — Centralize user retrieval. Currently, `getCurrentUser()` is private. Consider moving this to a `SecurityService` or similar abstraction to follow DRY and simplify testing.
-
----
-
-## 02-Functionality & Reliability Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-- **`src/main/java/com/tictactore/service/MatchService.java:152`** — Although `MatchRequest` validates that players are unique, the service should theoretically ensure that the database state is consistent (though JPA/DB constraints should handle this).
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## 03-Secure Code Review
-
-### Status: [🟡]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-- **`src/main/java/com/tictactore/service/MatchService.java:62`** — Authorization is manually checked via `validateUserIsOpponent`. While correct, it's less declarative than Spring Security annotations.
-
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/service/MatchService.java:54`** — Use `@PreAuthorize` or similar Spring Security annotations to handle participant-based authorization if the system architecture allows it, making the security policy more transparent.
-
----
-
-## 04-Performance Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/service/MatchService.java:166`** — `getUserFromMap` is called 4 times. While efficient, ensure `usersMap` is always expected to contain the keys to avoid repeated `ResourceNotFoundException` overhead in failure cases (though it's correctly handled).
-
----
-
-## 05-Test Review
-
-### Status: [🔴]
-
-### 🔴 Critical issues
-- **`src/test/java/com/tictactore/service/MatchServiceTest.java`** — Complete lack of unit tests for `approveMatch` and `rejectMatch` in `MatchServiceTest`. These methods contain critical business logic (status transition and opponent validation) that must be verified in isolation.
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-- **`src/test/java/com/tictactore/service/MatchServiceTest.java`** — Add tests for `validateUserIsOpponent` failure cases (e.g., teammate trying to approve, non-participant trying to approve).
-
----
-
-## 06-Clean Code Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/service/MatchService.java:115`** — `validateUserIsOpponent` could be simplified for readability.
-
-```java
-    private void validateUserIsOpponent(User user, Match match) {
-        boolean isCreatorInTeamA = isUserInTeamA(match.getCreator(), match);
-        boolean isUserInTeamA = isUserInTeamA(user, match);
-        boolean isUserInTeamB = isUserInTeamB(user, match);
-
-        if (!isUserInTeamA && !isUserInTeamB) {
-            throw new IllegalArgumentException("User is not a participant in this match");
-        }
-
-        if (isCreatorInTeamA == isUserInTeamA) {
-            throw new IllegalArgumentException("Only an opponent can approve this match");
-        }
-    }
-```
-
----
-
-## 07-Style & Automation Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## 08-Documentation Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## 09-Nitpick Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/model/MatchStatus.java`** — Remove `REJECTED` if it's not intended to be used, or use it instead of `DRAFT` in `rejectMatch` if a distinction is needed.
-
----
-
-## 10-Logging Security Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-- **`src/main/java/com/tictactore/model/User.java`** — `User` uses `@Data` which includes `toString()`. If `providerId` is considered sensitive, it should be excluded from `toString()`.
-
-### 🔵 Recommendations for improvement
-- **`src/main/java/com/tictactore/model/User.java`** — Use `@ToString(exclude = "providerId")`.
-
----
-
-## 11-Logging Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## 12-Logging & Error Handling Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## 13-Log Retention Review
-
-### Status: [🟢]
-
-### 🔴 Critical issues
-_None found_
-
-### 🟡 Potential risks
-_None found_
-
-### 🔵 Recommendations for improvement
-_None found_
-
----
-
-## Summary
-
-| Severity | Count |
-|----------|-------|
-| 🔴 Critical | 1 |
-| 🟡 Risks | 5 |
-| 🔵 Recommendations | 7 |
-
-**Total issues found:** 13
+- **`[FIX_NOW] (CRITICAL)`** — `needsGame3` should be more robust and ensure G1 and G2 are completed (scores entered).
+- **`[FIX_NOW] (CRITICAL)`** — `getPlayerByRole` logic for Game 2 potentially uses inconsistent position data if Game 1 positions are changed after navigating to Game 2.
+- **`[FIX_NOW]`** — Refactor `getPlayerByRole` to use a more declarative approach (e.g., a mapping object) to reduce complexity and nested `if` statements.
+- **`[FIX_NOW]`** — Use constants or an enum for position strings (`'creator-teammate'`, etc.) to prevent typos and improve maintainability.
+- **`[POSTPONE]`** — Add upper limits for scores.
+- **`[POSTPONE]`** — Document the "Mandatory Swap" rule in code comments.

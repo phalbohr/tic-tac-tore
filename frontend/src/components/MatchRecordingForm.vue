@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { reactive, computed } from 'vue'
 import { useAuthStore, type User } from '@/stores/auth'
+
+/**
+ * MatchRecordingForm component for player selection in a 2v2 match.
+ * Creator (current user) is automatically included as a participant.
+ */
 
 interface Props {
   availableUsers?: User[]
@@ -12,28 +17,35 @@ const props = withDefaults(defineProps<Props>(), {
 
 const authStore = useAuthStore()
 
-const teammateId = ref<number | null>(null)
-const opponent1Id = ref<number | null>(null)
-const opponent2Id = ref<number | null>(null)
+const form = reactive({
+  teammateId: null as number | null,
+  opponent1Id: null as number | null,
+  opponent2Id: null as number | null
+})
 
-const selectedIds = computed(() => [
-  authStore.user?.id,
-  teammateId.value,
-  opponent1Id.value,
-  opponent2Id.value
-].filter(id => id !== undefined && id !== null) as number[])
+const selectedIds = computed(() => {
+  const currentUserId = authStore.user?.id
+  const ids = [
+    currentUserId,
+    form.teammateId,
+    form.opponent1Id,
+    form.opponent2Id
+  ]
+  return ids.filter((id): id is number => id != null)
+})
 
 const isFormValid = computed(() => {
-  return teammateId.value !== null && 
-         opponent1Id.value !== null && 
-         opponent2Id.value !== null
+  return authStore.user !== null && 
+         form.teammateId !== null && 
+         form.opponent1Id !== null && 
+         form.opponent2Id !== null
 })
 
 const fields = computed(() => [
-  { id: 'teammate', label: 'Your Teammate', model: teammateId, placeholder: 'Select teammate...' },
-  { id: 'opponent1', label: 'Opponent 1', model: opponent1Id, placeholder: 'Select opponent 1...' },
-  { id: 'opponent2', label: 'Opponent 2', model: opponent2Id, placeholder: 'Select opponent 2...' }
-])
+  { id: 'teammate', label: 'Your Teammate', key: 'teammateId', placeholder: 'Select teammate...' },
+  { id: 'opponent1', label: 'Opponent 1', key: 'opponent1Id', placeholder: 'Select opponent 1...' },
+  { id: 'opponent2', label: 'Opponent 2', key: 'opponent2Id', placeholder: 'Select opponent 2...' }
+] as const)
 
 const getAvailableFor = (currentId: number | null) => {
   return props.availableUsers.filter(user => 
@@ -48,9 +60,9 @@ const emit = defineEmits<{
 const handleSubmit = () => {
   if (isFormValid.value) {
     emit('submit', {
-      teammateId: teammateId.value!,
-      opponent1Id: opponent1Id.value!,
-      opponent2Id: opponent2Id.value!
+      teammateId: form.teammateId!,
+      opponent1Id: form.opponent1Id!,
+      opponent2Id: form.opponent2Id!
     })
   }
 }
@@ -71,11 +83,11 @@ const handleSubmit = () => {
         <div class="relative">
           <select
             :id="field.id"
-            v-model="field.model.value"
+            v-model="form[field.key]"
             class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none pr-10"
           >
             <option :value="null">{{ field.placeholder }}</option>
-            <option v-for="user in getAvailableFor(field.model.value)" :key="user.id" :value="user.id">
+            <option v-for="user in getAvailableFor(form[field.key])" :key="user.id" :value="user.id">
               {{ user.name }}
             </option>
           </select>

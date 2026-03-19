@@ -13,82 +13,95 @@ interface Players {
   opponent2: Player
 }
 
+/**
+ * MatchScoring component for recording game-by-game scores.
+ * Enforces Best-of-3 format and mandatory position swaps.
+ */
+
 const props = defineProps<{
   players: Players
 }>()
 
+// Constants for position mapping
+const POSITIONS = {
+  T1_NORMAL: 'creator-teammate',
+  T1_SWAPPED: 'teammate-creator',
+  T2_NORMAL: 'opponent1-opponent2',
+  T2_SWAPPED: 'opponent2-opponent1'
+} as const
+
 const currentGameIndex = ref(0) // 0, 1, 2 (Game 1, 2, 3)
 const games = ref([
-  { team1Score: 0, team2Score: 0, team1Pos: '', team2Pos: '' },
-  { team1Score: 0, team2Score: 0, team1Pos: '', team2Pos: '' },
-  { team1Score: 0, team2Score: 0, team1Pos: '', team2Pos: '' }
+  { team1Score: 0, team2Score: 0, team1Pos: '' as string, team2Pos: '' as string },
+  { team1Score: 0, team2Score: 0, team1Pos: '' as string, team2Pos: '' as string },
+  { team1Score: 0, team2Score: 0, team1Pos: '' as string, team2Pos: '' as string }
 ])
 
-// Derived positions for Game 2 (mandatory swap)
+// Derived mandatory positions for Game 2 based on Game 1 choices
 const game2Team1Pos = computed(() => {
   const g1Pos = games.value[0].team1Pos
-  if (g1Pos === 'creator-teammate') return 'teammate-creator'
-  if (g1Pos === 'teammate-creator') return 'creator-teammate'
-  return ''
+  return g1Pos === POSITIONS.T1_NORMAL ? POSITIONS.T1_SWAPPED : (g1Pos === POSITIONS.T1_SWAPPED ? POSITIONS.T1_NORMAL : '')
 })
 
 const game2Team2Pos = computed(() => {
   const g1Pos = games.value[0].team2Pos
-  if (g1Pos === 'opponent1-opponent2') return 'opponent2-opponent1'
-  if (g1Pos === 'opponent2-opponent1') return 'opponent1-opponent2'
-  return ''
+  return g1Pos === POSITIONS.T2_NORMAL ? POSITIONS.T2_SWAPPED : (g1Pos === POSITIONS.T2_SWAPPED ? POSITIONS.T2_NORMAL : '')
 })
 
 const team1Options = [
-  { value: 'creator-teammate', label: `${props.players.creator.name} (A) - ${props.players.teammate.name} (D)` },
-  { value: 'teammate-creator', label: `${props.players.teammate.name} (A) - ${props.players.creator.name} (D)` }
+  { value: POSITIONS.T1_NORMAL, label: `${props.players.creator.name} (A) - ${props.players.teammate.name} (D)` },
+  { value: POSITIONS.T1_SWAPPED, label: `${props.players.teammate.name} (A) - ${props.players.creator.name} (D)` }
 ]
 
 const team2Options = [
-  { value: 'opponent1-opponent2', label: `${props.players.opponent1.name} (A) - ${props.players.opponent2.name} (D)` },
-  { value: 'opponent2-opponent1', label: `${props.players.opponent2.name} (A) - ${props.players.opponent1.name} (D)` }
+  { value: POSITIONS.T2_NORMAL, label: `${props.players.opponent1.name} (A) - ${props.players.opponent2.name} (D)` },
+  { value: POSITIONS.T2_SWAPPED, label: `${props.players.opponent2.name} (A) - ${props.players.opponent1.name} (D)` }
 ]
 
+const getWinner = (gameIdx: number) => {
+  const g = games.value[gameIdx]
+  if (g.team1Score === g.team2Score) return null
+  return g.team1Score > g.team2Score ? 1 : 2
+}
+
 const canFinish = computed(() => {
+  const g1Winner = getWinner(0)
+  const g2Winner = getWinner(1)
+  
   if (currentGameIndex.value === 1) {
-    const g1Winner = games.value[0].team1Score > games.value[0].team2Score ? 1 : 2
-    const g2Winner = games.value[1].team1Score > games.value[1].team2Score ? 1 : 2
-    if (g1Winner === g2Winner) return true
+    return g1Winner !== null && g2Winner !== null && g1Winner === g2Winner
   }
-  return currentGameIndex.value === 2
+  return currentGameIndex.value === 2 && getWinner(2) !== null
 })
 
 const needsGame3 = computed(() => {
   if (currentGameIndex.value !== 1) return false
-  const g1Winner = games.value[0].team1Score > games.value[0].team2Score ? 1 : 2
-  const g2Winner = games.value[1].team1Score > games.value[1].team2Score ? 1 : 2
-  return g1Winner !== g2Winner
+  const g1Winner = getWinner(0)
+  const g2Winner = getWinner(1)
+  return g1Winner !== null && g2Winner !== null && g1Winner !== g2Winner
 })
 
+/**
+ * Resolves player name based on team, role (Attacker/Defender), and game index.
+ */
 const getPlayerByRole = (team: number, role: 'A' | 'D', gameIdx: number) => {
-  let pos = ''
-  if (gameIdx === 1) {
-    pos = team === 1 ? game2Team1Pos.value : game2Team2Pos.value
-  } else {
-    pos = team === 1 ? games.value[gameIdx].team1Pos : games.value[gameIdx].team2Pos
-  }
+  // Use derived positions for Game 2 to ensure consistency
+  const pos = gameIdx === 1 
+    ? (team === 1 ? game2Team1Pos.value : game2Team2Pos.value)
+    : (team === 1 ? games.value[gameIdx].team1Pos : games.value[gameIdx].team2Pos)
   
-  if (team === 1) {
-    if (pos === 'creator-teammate') return role === 'A' ? props.players.creator.name : props.players.teammate.name
-    return role === 'A' ? props.players.teammate.name : props.players.creator.name
-  } else {
-    if (pos === 'opponent1-opponent2') return role === 'A' ? props.players.opponent1.name : props.players.opponent2.name
-    return role === 'A' ? props.players.opponent2.name : props.players.opponent1.name
+  const map: Record<string, Record<'A' | 'D', string>> = {
+    [POSITIONS.T1_NORMAL]: { A: props.players.creator.name, D: props.players.teammate.name },
+    [POSITIONS.T1_SWAPPED]: { A: props.players.teammate.name, D: props.players.creator.name },
+    [POSITIONS.T2_NORMAL]: { A: props.players.opponent1.name, D: props.players.opponent2.name },
+    [POSITIONS.T2_SWAPPED]: { A: props.players.opponent2.name, D: props.players.opponent1.name }
   }
+
+  return map[pos]?.[role] || 'Unknown'
 }
 
 const nextGame = () => {
   if (currentGameIndex.value < 2) {
-    // Sync Game 2 positions if moving from Game 1
-    if (currentGameIndex.value === 0) {
-      games.value[1].team1Pos = game2Team1Pos.value
-      games.value[1].team2Pos = game2Team2Pos.value
-    }
     currentGameIndex.value++
   }
 }
