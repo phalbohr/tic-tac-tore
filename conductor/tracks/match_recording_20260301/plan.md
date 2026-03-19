@@ -21,9 +21,9 @@
 - [x] Task: Conductor - User Manual Verification 'Confirmation Workflow Logic' (Protocol in workflow.md)
 
 ## Phase 3: Frontend - Match Recording UI
-- [ ] Task: Create Match Recording Form Component
-    - [ ] Write component tests for player selection and initial score setup
-    - [ ] Implement basic match creation form with user searching
+- [x] Task: Create Match Recording Form Component a0d0637
+    - [x] Write component tests for player selection and initial score setup
+    - [x] Implement basic match creation form with user searching
 - [ ] Task: Implement Multi-Game Scoring with Position Swap Enforcement
     - [ ] Write tests for the system-enforced position swap between Game 1 and Game 2
     - [ ] Implement the step-by-step scoring UI
