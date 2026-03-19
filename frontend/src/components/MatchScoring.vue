@@ -174,25 +174,26 @@ const finishMatch = () => {
     <div class="grid grid-cols-2 gap-8 items-center mb-8">
       <div class="text-center">
         <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Team 1</label>
-        <input 
-          type="number" 
+        <input
+          type="number"
           name="team1Score"
           min="0"
+          max="99"
           v-model.number="games[currentGameIndex].team1Score"
           class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all"
         />
-      </div>
-      <div class="text-center">
+        </div>
+        <div class="text-center">
         <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Team 2</label>
-        <input 
-          type="number" 
+        <input
+          type="number"
           name="team2Score"
           min="0"
+          max="99"
           v-model.number="games[currentGameIndex].team2Score"
           class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all"
         />
-      </div>
-    </div>
+        </div>    </div>
 
     <div class="flex gap-4">
       <button 
