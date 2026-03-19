@@ -21,6 +21,11 @@ const router = createRouter({
       component: () => import('../views/OAuth2Redirect.vue'),
     },
     {
+      path: '/dev-recording',
+      name: 'dev-recording',
+      component: () => import('../views/DevRecordingView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       meta: { requiresAuth: true },

@@ -84,11 +84,7 @@ All tasks follow a strict lifecycle:
    - Write the minimum amount of application code necessary to make the failing tests pass.
    - Run the test suite again using Generalist Agent and confirm that all tests now pass. This is the "Green" phase.
 
-6. **Refactor (Optional but Recommended):**
-   - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
-   - Rerun tests using Generalist Agent to ensure they still pass after refactoring.
-
-7. **Automated Headless Code Review:**
+6. **Automated Headless Code Review:**
    - For every newly created or significantly modified file do review. Delegate the review to the Generalist Agent using instruction `.gemini/workflows/quick-review.toml`.
    - **Analyze Output:** Display and carefully review the feedback from the Generalist Agent.
    - **User Interaction:** If the review suggests changes that are subjective, ambiguous, or require design decisions, immediately use `ask_user` to gather feedback or ask open-ended questions.
@@ -96,45 +92,45 @@ All tasks follow a strict lifecycle:
    - **Goal:** Ensure every file meets the project's quality standards through impartial verification.
    - **Final check:** Rerun tests using Generalist Agent to ensure they still pass after refactoring.
 
-8. **Verify Coverage:** Run coverage reports using the project's chosen tools.
+7. **Verify Coverage:** Run coverage reports using the project's chosen tools.
 
    Target: >80% coverage for new code. The specific tools and commands will vary by language and framework.
 
-9. **Document Deviations:** If implementation differs from tech stack:
+8. **Document Deviations:** If implementation differs from tech stack:
    - **STOP** implementation
    - Update `tech-stack.md` with new design
    - Add dated note explaining the change
    - Resume implementation
 
-10. **Root Cause Analysis (RCA) & Process Improvement:**
-    - **Step 9.1: RCA Journaling:** If any failure (test failure, build error, logic bug) occurred:
-      - Create or append to `conductor/rca-journal.md`.
-      - **Format:**
+9. **Root Cause Analysis (RCA) & Process Improvement:**
+   - **Step 9.1: RCA Journaling:** If any failure (test failure, build error, logic bug) occurred:
+     - Create or append to `conductor/rca-journal.md`.
+     - **Format:**
 
-        ```markdown
-        ## [Date] Task: [Task Name]
+       ```markdown
+       ## [Date] Task: [Task Name]
 
-        - **Issue:** [Brief description]
-        - **Root Cause:** [Why it happened]
-        - **Resolution:** [How it was fixed]
-        - **Lesson:** [What to do differently next time]
-        ```
+       - **Issue:** [Brief description]
+       - **Root Cause:** [Why it happened]
+       - **Resolution:** [How it was fixed]
+       - **Lesson:** [What to do differently next time]
+       ```
 
-    - **Step 9.2: Style Guide Review:** Review the new RCA entry (or the task experience in general).
-      - **Question:** "Could a new or modified rule in `code_styleguides/` have prevented this?"
-      - **Action:** If yes, immediately propose an update to the relevant style guide in `conductor/code_styleguides/`.
+   - **Step 9.2: Style Guide Review:** Review the new RCA entry (or the task experience in general).
+     - **Question:** "Could a new or modified rule in `code_styleguides/` have prevented this?"
+     - **Action:** If yes, immediately propose an update to the relevant style guide in `conductor/code_styleguides/`.
 
-11. **Decision Logging:**
+10. **Decision Logging:**
     - **Trigger:** If the user interaction led to changing decisions or selecting specific alternatives.
     - **Action:** Create or append to `conductor/decisions.md`.
     - **Content:** Document what alternatives were approved, what were declined, and the rationale.
 
-12. **Commit Code Changes:**
+11. **Commit Code Changes:**
     - Stage all code changes related to the task.
     - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
     - Perform the commit.
 
-13. **Attach Task Summary with Git Notes:**
+12. **Attach Task Summary with Git Notes:**
     - **Step 12.1: Get Commit Hash:** Obtain the hash of the _just-completed commit_ (`git log -1 --format="%H"`).
     - **Step 12.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
     - **Step 12.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
@@ -143,11 +139,11 @@ All tasks follow a strict lifecycle:
       git notes add -m "<note content>" <commit_hash>
       ```
 
-14. **Get and Record Task Commit SHA:**
+13. **Get and Record Task Commit SHA:**
     - **Step 13.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the _just-completed commit's_ commit hash.
     - **Step 13.2: Write Plan:** Write the updated content back to `plan.md`.
 
-15. **Commit Plan Update:**
+14. **Commit Plan Update:**
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
 
@@ -172,7 +168,7 @@ All tasks follow a strict lifecycle:
     - If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
 
 4.  **Execute deep review of the phase:**
-    - Launch deep review using Generalist Agent with `deep-review` skill and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
+    - For all the files changed during the phase, sequentially one by one conduct deep review using Generalist Agent with `deep-review` skill by giving it a single file at a time for review.
 
 5.  **Review and Categorize Findings:**
     - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
