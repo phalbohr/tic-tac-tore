@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @purpose REST Controller for managing 2v2 foosball matches.
- */
 @RestController
 @RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor

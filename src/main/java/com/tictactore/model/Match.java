@@ -11,30 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @brief Root entity for a 2v2 Foosball Match record.
- *
- * @purpose
- * This entity stores the core data of a foosball match, including the participants, 
- * the games played (scores), and the current approval status. It serves as the primary 
- * record for ranking and history tracking.
- *
- * @usage
- * - Create a new {@code Match} when a user records a game result.
- * - Manage status transitions (DRAFT -> PENDING_APPROVAL -> CONFIRMED) through the lifecycle.
- * - Use {@link #addGame(Game)} to maintain the bidirectional relationship with games.
- *
- * @documentation
- * - See: conductor/product.md for match rules.
- *
- * @restrictions
- * - **DO NOT** modify a match once it is in {@code CONFIRMED} status.
- * - Participants (attacker/defender) must be unique across teams in a single match.
- *
- * @dependencies
- * - Governed by {@link MatchStatus} for lifecycle management.
- * - Contains a list of {@link Game} entities for scoring details.
- */
 @Entity
 @Table(name = "matches")
 @Getter
@@ -93,9 +69,6 @@ public class Match {
     @ToString.Include
     private LocalDateTime createdAt;
 
-    /**
-     * Confirms the match results after opponent approval.
-     */
     public void approve() {
         if (this.status != MatchStatus.PENDING_APPROVAL) {
             throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
@@ -103,9 +76,6 @@ public class Match {
         this.status = MatchStatus.CONFIRMED;
     }
 
-    /**
-     * Disputes the match results and returns it to DRAFT for correction.
-     */
     public void reject() {
         if (this.status != MatchStatus.PENDING_APPROVAL) {
             throw new IllegalStateException("Match can only be rejected if it is in PENDING_APPROVAL status");
@@ -113,26 +83,16 @@ public class Match {
         this.status = MatchStatus.DRAFT;
     }
 
-    /**
-     * Checks if the user is a participant in Team A.
-     */
     public boolean isUserInTeamA(User user) {
         return user.getId().equals(this.teamAAttacker.getId()) ||
                user.getId().equals(this.teamADefender.getId());
     }
 
-    /**
-     * Checks if the user is a participant in Team B.
-     */
     public boolean isUserInTeamB(User user) {
         return user.getId().equals(this.teamBAttacker.getId()) ||
                user.getId().equals(this.teamBDefender.getId());
     }
 
-    /**
-     * Helper method to maintain bidirectional relationship between Match and Game.
-     * @param game The game to add to this match.
-     */
     public void addGame(Game game) {
         games.add(game);
         game.setMatch(this);
