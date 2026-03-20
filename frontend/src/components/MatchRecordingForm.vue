@@ -18,9 +18,9 @@ const props = withDefaults(defineProps<Props>(), {
 const authStore = useAuthStore()
 
 const form = reactive({
-  teammateId: null as number | null,
-  opponent1Id: null as number | null,
-  opponent2Id: null as number | null
+  teammateId: null as string | null,
+  opponent1Id: null as string | null,
+  opponent2Id: null as string | null
 })
 
 const selectedIds = computed(() => {
@@ -31,7 +31,7 @@ const selectedIds = computed(() => {
     form.opponent1Id,
     form.opponent2Id
   ]
-  return ids.filter((id): id is number => id != null)
+  return ids.filter((id): id is string => id != null)
 })
 
 const isFormValid = computed(() => {
@@ -47,14 +47,14 @@ const fields = computed(() => [
   { id: 'opponent2', label: 'Opponent 2', key: 'opponent2Id', placeholder: 'Select opponent 2...' }
 ] as const)
 
-const getAvailableFor = (currentId: number | null) => {
+const getAvailableFor = (currentId: string | null) => {
   return props.availableUsers.filter(user => 
     user.id === currentId || !selectedIds.value.includes(user.id)
   )
 }
 
 const emit = defineEmits<{
-  (e: 'submit', data: { teammateId: number, opponent1Id: number, opponent2Id: number }): void
+  (e: 'submit', data: { teammateId: string, opponent1Id: string, opponent2Id: string }): void
 }>()
 
 const handleSubmit = () => {

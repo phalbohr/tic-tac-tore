@@ -114,6 +114,22 @@ public class Match {
     }
 
     /**
+     * Checks if the user is a participant in Team A.
+     */
+    public boolean isUserInTeamA(User user) {
+        return user.getId().equals(this.teamAAttacker.getId()) ||
+               user.getId().equals(this.teamADefender.getId());
+    }
+
+    /**
+     * Checks if the user is a participant in Team B.
+     */
+    public boolean isUserInTeamB(User user) {
+        return user.getId().equals(this.teamBAttacker.getId()) ||
+               user.getId().equals(this.teamBDefender.getId());
+    }
+
+    /**
      * Helper method to maintain bidirectional relationship between Match and Game.
      * @param game The game to add to this match.
      */

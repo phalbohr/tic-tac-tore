@@ -25,8 +25,8 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
            "JOIN FETCH m.teamBDefender " +
            "LEFT JOIN FETCH m.games " +
            "WHERE m.status = :status AND (" +
-           "((m.teamBAttacker = :user OR m.teamBDefender = :user) AND (m.creator = m.teamAAttacker OR m.creator = m.teamADefender)) OR " +
-           "((m.teamAAttacker = :user OR m.teamADefender = :user) AND (m.creator = m.teamBAttacker OR m.creator = m.teamBDefender))" +
+           "  ((m.creator.id = m.teamAAttacker.id OR m.creator.id = m.teamADefender.id) AND (m.teamBAttacker.id = :userId OR m.teamBDefender.id = :userId)) OR " +
+           "  ((m.creator.id = m.teamBAttacker.id OR m.creator.id = m.teamBDefender.id) AND (m.teamAAttacker.id = :userId OR m.teamADefender.id = :userId))" +
            ")")
-    List<Match> findPendingApprovalsForUser(@Param("user") User user, @Param("status") MatchStatus status);
+    List<Match> findPendingApprovalsForUser(@Param("userId") UUID userId, @Param("status") MatchStatus status);
 }

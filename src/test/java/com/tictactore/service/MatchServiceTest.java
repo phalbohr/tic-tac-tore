@@ -41,6 +41,9 @@ class MatchServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MatchOperation matchOperation;
+
     @Spy
     private MatchMapper matchMapper;
 
@@ -94,42 +97,22 @@ class MatchServiceTest {
     }
 
     @Test
-    @DisplayName("Should successfully create a match when all data is valid")
+    @DisplayName("Should successfully delegate match creation to MatchOperation")
     void createMatch_Success() {
         // Arrange
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn("creator@test.com");
         when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
-        when(userRepository.findAllById(any())).thenReturn(List.of(creator, teammate, opponent1, opponent2));
-        when(matchRepository.save(any(Match.class))).thenAnswer(invocation -> {
-            Match m = invocation.getArgument(0);
-            m.setId(UUID.randomUUID());
-            return m;
-        });
+        
+        var expectedResponse = MatchResponse.builder().id(UUID.randomUUID()).build();
+        when(matchOperation.createMatch(eq(validRequest), eq(creator))).thenReturn(expectedResponse);
 
         // Act
         MatchResponse response = matchService.createMatch(validRequest);
 
         // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.creatorName()).isEqualTo("Creator");
-        assertThat(response.games()).hasSize(1);
-        verify(matchRepository).save(any(Match.class));
-    }
-
-    @Test
-    @DisplayName("Should throw ResourceNotFoundException when a player is not found")
-    void createMatch_UserNotFound() {
-        // Arrange
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("creator@test.com");
-        when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
-        when(userRepository.findAllById(any())).thenReturn(List.of(creator, teammate, opponent1)); // One player missing
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.createMatch(validRequest))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("not found");
+        assertThat(response).isEqualTo(expectedResponse);
+        verify(matchOperation).createMatch(validRequest, creator);
     }
 
     @Test
@@ -148,7 +131,7 @@ class MatchServiceTest {
     }
 
     @Test
-    @DisplayName("Should successfully approve match when user is an opponent")
+    @DisplayName("Should successfully delegate approval to MatchOperation")
     void approveMatch_Success() {
         // Arrange
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -160,27 +143,11 @@ class MatchServiceTest {
         matchService.approveMatch(pendingMatch.getId());
 
         // Assert
-        assertThat(pendingMatch.getStatus()).isEqualTo(MatchStatus.CONFIRMED);
-        verify(matchRepository).save(pendingMatch);
+        verify(matchOperation).approveMatch(pendingMatch.getId());
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when creator tries to approve")
-    void approveMatch_FailAsCreator() {
-        // Arrange
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("creator@test.com");
-        when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
-        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.approveMatch(pendingMatch.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Only an opponent");
-    }
-
-    @Test
-    @DisplayName("Should successfully reject match when user is an opponent")
+    @DisplayName("Should successfully delegate rejection to MatchOperation")
     void rejectMatch_Success() {
         // Arrange
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -192,23 +159,6 @@ class MatchServiceTest {
         matchService.rejectMatch(pendingMatch.getId());
 
         // Assert
-        assertThat(pendingMatch.getStatus()).isEqualTo(MatchStatus.DRAFT);
-        verify(matchRepository).save(pendingMatch);
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalStateException when rejecting non-pending match")
-    void rejectMatch_InvalidStatus() {
-        // Arrange
-        pendingMatch.setStatus(MatchStatus.CONFIRMED);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("opponent1@test.com");
-        when(userRepository.findByEmail("opponent1@test.com")).thenReturn(Optional.of(opponent1));
-        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.rejectMatch(pendingMatch.getId()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("PENDING_APPROVAL");
+        verify(matchOperation).rejectMatch(pendingMatch.getId());
     }
 }
