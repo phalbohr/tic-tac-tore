@@ -31,10 +31,10 @@
 - [x] Task: Conductor - User Manual Verification 'Frontend - Match Recording UI' (Protocol in workflow.md)
 
 ## Phase 4: Frontend - Dashboard & Final Integration
-- [~] Task: Create Pending Approvals View
-    - [ ] Task: Implement `GET /api/v1/matches/pending` in Backend
-    - [ ] Write tests for listing pending matches and action buttons (Approve/Reject)
-    - [ ] Implement the dashboard view for match verification
+- [x] Task: Create Pending Approvals View 89d6ab7
+    - [x] Task: Implement `GET /api/v1/matches/pending` in Backend
+    - [x] Write tests for listing pending matches and action buttons (Approve/Reject)
+    - [x] Implement the dashboard view for match verification
 - [ ] Task: Verify End-to-End Match Flow
     - [ ] Write integration tests for the full create-then-approve lifecycle
     - [ ] Perform manual end-to-end verification
