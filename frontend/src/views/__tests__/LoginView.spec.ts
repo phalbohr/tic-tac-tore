@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import LoginView from '../LoginView.vue'
 
 describe('LoginView', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   it('renders login button with correct oauth2 link', () => {
     const wrapper = mount(LoginView)
     

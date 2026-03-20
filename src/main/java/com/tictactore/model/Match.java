@@ -11,9 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Root entity for a 2v2 Foosball Match record.
- */
 @Entity
 @Table(name = "matches")
 @Getter
@@ -28,6 +25,9 @@ public class Match {
     @EqualsAndHashCode.Include
     @ToString.Include
     private UUID id;
+
+    @Version
+    private long version;
 
     @NotNull(message = "Creator is required")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,10 +69,30 @@ public class Match {
     @ToString.Include
     private LocalDateTime createdAt;
 
-    /**
-     * Helper method to maintain bidirectional relationship between Match and Game.
-     * @param game The game to add to this match.
-     */
+    public void approve() {
+        if (this.status != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
+        }
+        this.status = MatchStatus.CONFIRMED;
+    }
+
+    public void reject() {
+        if (this.status != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be rejected if it is in PENDING_APPROVAL status");
+        }
+        this.status = MatchStatus.DRAFT;
+    }
+
+    public boolean isUserInTeamA(User user) {
+        return user.getId().equals(this.teamAAttacker.getId()) ||
+               user.getId().equals(this.teamADefender.getId());
+    }
+
+    public boolean isUserInTeamB(User user) {
+        return user.getId().equals(this.teamBAttacker.getId()) ||
+               user.getId().equals(this.teamBDefender.getId());
+    }
+
     public void addGame(Game game) {
         games.add(game);
         game.setMatch(this);

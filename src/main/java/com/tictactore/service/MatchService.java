@@ -4,7 +4,6 @@ import com.tictactore.dto.MatchRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.mapper.MatchMapper;
-import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.MatchStatus;
 import com.tictactore.model.User;
@@ -12,17 +11,16 @@ import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -33,28 +31,55 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchMapper matchMapper;
+    private final MatchOperation matchOperation;
 
-    @Transactional
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public void approveMatch(UUID matchId) {
         log.info("Attempting to approve match with ID: {}", matchId);
-
-        User currentUser = getCurrentUser();
-        Match match = matchRepository.findById(matchId)
+        var currentUser = getCurrentUser();
+        var match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
 
-        if (match.getStatus() != MatchStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
-        }
-
         validateUserIsOpponent(currentUser, match);
-
-        match.setStatus(MatchStatus.CONFIRMED);
-        matchRepository.save(match);
+        matchOperation.approveMatch(matchId);
         log.info("Match {} successfully approved by user {}", matchId, currentUser.getId());
     }
 
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
+    public void rejectMatch(UUID matchId) {
+        log.info("Attempting to reject match with ID: {}", matchId);
+        var currentUser = getCurrentUser();
+        var match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        validateUserIsOpponent(currentUser, match);
+        matchOperation.rejectMatch(matchId);
+        log.info("Match {} successfully rejected by user {}", matchId, currentUser.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchResponse> getPendingMatchesForCurrentUser() {
+        var currentUser = getCurrentUser();
+        log.debug("Fetching pending matches for user ID: {}", currentUser.getId());
+        
+        var pendingMatches = matchRepository.findPendingApprovalsForUser(currentUser.getId(), MatchStatus.PENDING_APPROVAL);
+        log.debug("Found {} pending matches", pendingMatches.size());
+        
+        return pendingMatches.stream()
+                .map(matchMapper::toResponse)
+                .toList();
+    }
+
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
+    public MatchResponse createMatch(MatchRequest request) {
+        log.info("Creating a new 2v2 match record");
+        var creator = getCurrentUser();
+        validateCreatorIsParticipant(creator.getId(), request);
+        return matchOperation.createMatch(request, creator);
+    }
+
     private User getCurrentUser() {
-        String email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+        var email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Authentication::getName)
                 .orElseThrow(() -> new IllegalStateException("Authentication context is missing"));
 
@@ -63,9 +88,9 @@ public class MatchService {
     }
 
     private void validateUserIsOpponent(User user, Match match) {
-        boolean isCreatorTeamA = isUserInTeamA(match.getCreator(), match);
-        boolean isUserTeamA = isUserInTeamA(user, match);
-        boolean isUserTeamB = isUserInTeamB(user, match);
+        var isCreatorTeamA = match.isUserInTeamA(match.getCreator());
+        var isUserTeamA = match.isUserInTeamA(user);
+        var isUserTeamB = match.isUserInTeamB(user);
 
         if (!isUserTeamA && !isUserTeamB) {
             throw new IllegalArgumentException("User is not a participant in this match");
@@ -76,68 +101,8 @@ public class MatchService {
         }
     }
 
-    private boolean isUserInTeamA(User user, Match match) {
-        return user.getId().equals(match.getTeamAAttacker().getId()) ||
-               user.getId().equals(match.getTeamADefender().getId());
-    }
-
-    private boolean isUserInTeamB(User user, Match match) {
-        return user.getId().equals(match.getTeamBAttacker().getId()) ||
-               user.getId().equals(match.getTeamBDefender().getId());
-    }
-
-    @Transactional
-    public MatchResponse createMatch(MatchRequest request) {
-        log.info("Creating a new 2v2 match record");
-
-        String creatorEmail = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .map(Authentication::getName)
-                .orElseThrow(() -> {
-                    log.error("Attempted to create match without authentication context");
-                    return new IllegalStateException("Authentication context is missing");
-                });
-
-        User creator = userRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> {
-                    log.error("Authenticated principal not found as a registered user");
-                    return new ResourceNotFoundException("Creator not found");
-                });
-
-        validateCreatorIsParticipant(creator.getId(), request);
-
-        // Batch fetch all players to avoid N+1 queries
-        List<UUID> playerIds = List.of(
-                request.teamAAttackerId(), request.teamADefenderId(),
-                request.teamBAttackerId(), request.teamBDefenderId()
-        );
-
-        Map<UUID, User> usersMap = userRepository.findAllById(playerIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        Match match = new Match();
-        match.setCreator(creator);
-        match.setTeamAAttacker(getUserFromMap(usersMap, request.teamAAttackerId(), "Team A Attacker"));
-        match.setTeamADefender(getUserFromMap(usersMap, request.teamADefenderId(), "Team A Defender"));
-        match.setTeamBAttacker(getUserFromMap(usersMap, request.teamBAttackerId(), "Team B Attacker"));
-        match.setTeamBDefender(getUserFromMap(usersMap, request.teamBDefenderId(), "Team B Defender"));
-
-        for (int i = 0; i < request.games().size(); i++) {
-            var gameReq = request.games().get(i);
-            Game game = new Game();
-            game.setGameNumber(i + 1);
-            game.setTeamAScore(gameReq.teamAScore());
-            game.setTeamBScore(gameReq.teamBScore());
-            match.addGame(game);
-        }
-
-        Match savedMatch = matchRepository.save(match);
-        log.info("Match created successfully with ID: {} and status: {}", savedMatch.getId(), savedMatch.getStatus());
-        
-        return matchMapper.toResponse(savedMatch);
-    }
-
     private void validateCreatorIsParticipant(UUID creatorId, MatchRequest request) {
-        boolean isParticipant = Stream.of(
+        var isParticipant = Stream.of(
                 request.teamAAttackerId(), request.teamADefenderId(),
                 request.teamBAttackerId(), request.teamBDefenderId()
         ).anyMatch(id -> id.equals(creatorId));
@@ -146,13 +111,5 @@ public class MatchService {
             log.warn("User {} attempted to record a match they didn't participate in", creatorId);
             throw new IllegalArgumentException("You must be a participant in the match to record it");
         }
-    }
-
-    private User getUserFromMap(Map<UUID, User> usersMap, UUID id, String roleName) {
-        return Optional.ofNullable(usersMap.get(id))
-                .orElseThrow(() -> {
-                    log.error("{} with ID {} not found during match creation", roleName, id);
-                    return new ResourceNotFoundException(roleName + " not found");
-                });
     }
 }

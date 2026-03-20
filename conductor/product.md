@@ -28,6 +28,8 @@ To create a vibrant, engaging foosball culture within the office by providing a 
 
 ## Core Features
 - **Match Confirmation Workflow:** A critical system for data integrity where participants verify match results, preventing "stat padding" and building platform trust.
+    - **Multi-Stage Lifecycle:** Matches progress through `PENDING_APPROVAL` (submitted), `CONFIRMED` (verified by opponent), or return to `DRAFT` if rejected for correction.
+    - **Opponent Sovereignty:** Only players from the opposing team have the authority to confirm or dispute a match record.
 - **Comprehensive Positional Statistics:** Deep-dive analytics for 1v1 and 2v2 formats, focusing on specific performance metrics for Attacker and Defender roles.
 - **Public Office Leaderboards:** High-visibility rankings (Overall, Attack, and Defense) to drive daily engagement and healthy office rivalry.
 - **Head-to-Head Analytics:** Detailed breakdown of performance against specific opponents and team compositions.

@@ -4,6 +4,7 @@
 
 - **Language:** Java 21
 - **Framework:** Spring Boot 3.x
+- **Stability:** Spring Retry, Spring AOP (Three-Layer Transaction Architecture / Rule 5)
 - **Persistence:** Spring Data JPA
 - **Security:** Spring Security
 - **Database:** PostgreSQL (Supabase-compatible)
