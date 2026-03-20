@@ -11,9 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Repository interface for Match entities.
- */
 @Repository
 public interface MatchRepository extends JpaRepository<Match, UUID> {
 
