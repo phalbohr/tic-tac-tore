@@ -1,0 +1,36 @@
+package com.tictactore.controller;
+
+import com.tictactore.model.User;
+import com.tictactore.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/v1/dev/seed")
+@RequiredArgsConstructor
+public class DevTestController {
+    private final UserRepository userRepository;
+
+    @PostMapping
+    public Map<String, UUID> seed() {
+        return Map.of(
+            "me", createUser("ppolukhin@itemis.com", "Pavel"),
+            "opp1", createUser("pavel.polukhin.de@gmail.com", "Account B"),
+            "teammate", createUser("teammate@test.com", "Teammate"),
+            "opp2", createUser("opponent2@test.com", "Opponent 2")
+        );
+    }
+
+    private UUID createUser(String email, String name) {
+        return userRepository.findByEmail(email)
+            .map(User::getId)
+            .orElseGet(() -> {
+                User user = new User();
+                user.setEmail(email);
+                user.setName(name);
+                return userRepository.save(user).getId();
+            });
+    }
+}
