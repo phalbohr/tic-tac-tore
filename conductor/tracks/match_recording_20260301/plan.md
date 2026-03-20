@@ -30,7 +30,7 @@
     - [x] Add score limit (max 99) constraint 851a908
 - [x] Task: Conductor - User Manual Verification 'Frontend - Match Recording UI' (Protocol in workflow.md)
 
-## Phase 4: Frontend - Dashboard & Final Integration
+## Phase 4: Frontend - Dashboard & Final Integration [checkpoint: 4027860]
 - [x] Task: Create Pending Approvals View 89d6ab7
     - [x] Task: Implement `GET /api/v1/matches/pending` in Backend
     - [x] Write tests for listing pending matches and action buttons (Approve/Reject)
