@@ -27,26 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @brief Orchestrates match-related business operations and lifecycle.
- *
- * @purpose
- * Provides high-level operations for recording matches, approving or rejecting 
- * them by opponents, and managing the overall state of match records.
- *
- * @usage
- * - Call {@link #createMatch(MatchRequest)} to start a new match confirmation workflow.
- * - Call {@link #approveMatch(UUID)} or {@link #rejectMatch(UUID)} during the confirmation phase.
- *
- * @documentation
- * - See: conductor/tracks/match_recording_20260301/spec.md
- *
- * @restrictions
- * - Only an opponent participant can approve or reject a match.
- * - Matches in {@code CONFIRMED} status cannot be modified.
- *
- * @dependencies
- * - Uses {@link MatchRepository} for persistence.
- * - Interacts with {@link SecurityContextHolder} to identify the current user.
+ * @purpose Orchestrates match-related business operations and lifecycle.
  */
 @Service
 @RequiredArgsConstructor
@@ -61,17 +42,13 @@ public class MatchService {
     public void approveMatch(UUID matchId) {
         log.info("Attempting to approve match with ID: {}", matchId);
 
-        User currentUser = getCurrentUser();
-        Match match = matchRepository.findById(matchId)
+        var currentUser = getCurrentUser();
+        var match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
-
-        if (match.getStatus() != MatchStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
-        }
 
         validateUserIsOpponent(currentUser, match);
 
-        match.setStatus(MatchStatus.CONFIRMED);
+        match.approve();
         matchRepository.save(match);
         log.info("Match {} successfully approved by user {}", matchId, currentUser.getId());
     }
@@ -80,23 +57,31 @@ public class MatchService {
     public void rejectMatch(UUID matchId) {
         log.info("Attempting to reject match with ID: {}", matchId);
 
-        User currentUser = getCurrentUser();
-        Match match = matchRepository.findById(matchId)
+        var currentUser = getCurrentUser();
+        var match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
-
-        if (match.getStatus() != MatchStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Match can only be rejected if it is in PENDING_APPROVAL status");
-        }
 
         validateUserIsOpponent(currentUser, match);
 
-        match.setStatus(MatchStatus.DRAFT);
+        match.reject();
         matchRepository.save(match);
         log.info("Match {} successfully rejected by user {}", matchId, currentUser.getId());
     }
 
+    @Transactional(readOnly = true)
+    public List<MatchResponse> getPendingMatchesForCurrentUser() {
+        var currentUser = getCurrentUser();
+        log.info("Fetching pending matches for user {}", currentUser.getEmail());
+        
+        var pendingMatches = matchRepository.findPendingApprovalsForUser(currentUser, MatchStatus.PENDING_APPROVAL);
+        
+        return pendingMatches.stream()
+                .map(matchMapper::toResponse)
+                .toList();
+    }
+
     private User getCurrentUser() {
-        String email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+        var email = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Authentication::getName)
                 .orElseThrow(() -> new IllegalStateException("Authentication context is missing"));
 
@@ -105,9 +90,9 @@ public class MatchService {
     }
 
     private void validateUserIsOpponent(User user, Match match) {
-        boolean isCreatorTeamA = isUserInTeamA(match.getCreator(), match);
-        boolean isUserTeamA = isUserInTeamA(user, match);
-        boolean isUserTeamB = isUserInTeamB(user, match);
+        var isCreatorTeamA = isUserInTeamA(match.getCreator(), match);
+        var isUserTeamA = isUserInTeamA(user, match);
+        var isUserTeamB = isUserInTeamB(user, match);
 
         if (!isUserTeamA && !isUserTeamB) {
             throw new IllegalArgumentException("User is not a participant in this match");
@@ -132,14 +117,14 @@ public class MatchService {
     public MatchResponse createMatch(MatchRequest request) {
         log.info("Creating a new 2v2 match record");
 
-        String creatorEmail = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+        var creatorEmail = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Authentication::getName)
                 .orElseThrow(() -> {
                     log.error("Attempted to create match without authentication context");
                     return new IllegalStateException("Authentication context is missing");
                 });
 
-        User creator = userRepository.findByEmail(creatorEmail)
+        var creator = userRepository.findByEmail(creatorEmail)
                 .orElseThrow(() -> {
                     log.error("Authenticated principal not found as a registered user");
                     return new ResourceNotFoundException("Creator not found");
@@ -147,8 +132,7 @@ public class MatchService {
 
         validateCreatorIsParticipant(creator.getId(), request);
 
-        // Batch fetch all players to avoid N+1 queries
-        List<UUID> playerIds = List.of(
+        var playerIds = List.of(
                 request.teamAAttackerId(), request.teamADefenderId(),
                 request.teamBAttackerId(), request.teamBDefenderId()
         );
@@ -156,7 +140,7 @@ public class MatchService {
         Map<UUID, User> usersMap = userRepository.findAllById(playerIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-        Match match = new Match();
+        var match = new Match();
         match.setCreator(creator);
         match.setTeamAAttacker(getUserFromMap(usersMap, request.teamAAttackerId(), "Team A Attacker"));
         match.setTeamADefender(getUserFromMap(usersMap, request.teamADefenderId(), "Team A Defender"));
@@ -164,22 +148,22 @@ public class MatchService {
         match.setTeamBDefender(getUserFromMap(usersMap, request.teamBDefenderId(), "Team B Defender"));
 
         for (int i = 0; i < request.games().size(); i++) {
-            GameRequest gameReq = request.games().get(i);
-            Game game = new Game();
+            var gameReq = request.games().get(i);
+            var game = new Game();
             game.setGameNumber(i + 1);
             game.setTeamAScore(gameReq.teamAScore());
             game.setTeamBScore(gameReq.teamBScore());
             match.addGame(game);
         }
 
-        Match savedMatch = matchRepository.save(match);
+        var savedMatch = matchRepository.save(match);
         log.info("Match created successfully with ID: {} and status: {}", savedMatch.getId(), savedMatch.getStatus());
         
         return matchMapper.toResponse(savedMatch);
     }
 
     private void validateCreatorIsParticipant(UUID creatorId, MatchRequest request) {
-        boolean isParticipant = Stream.of(
+        var isParticipant = Stream.of(
                 request.teamAAttackerId(), request.teamADefenderId(),
                 request.teamBAttackerId(), request.teamBDefenderId()
         ).anyMatch(id -> id.equals(creatorId));

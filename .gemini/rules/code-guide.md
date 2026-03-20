@@ -84,8 +84,7 @@ High-level methods must read like a narrative. Bury implementation details insid
 
 ## 14. Class Purpose Documentation (CPUD)
 
-Keep PRODUCTION classes extremely clean from text boilerplate. The ONLY allowed JavaDoc tag is `@purpose`. Keep it minimal: one concise sentence explaining what it does and why (e.g. `/** @purpose Orchestrates the checkout process. */`).
-**CRITICAL:** This does NOT apply to test classes. Test classes must follow an absolute **Zero Comments Policy** (no JavaDoc, no class-level comments).
+Keep PRODUCTION classes extremely clean from text boilerplate. All classes must follow an absolute **Zero Comments Policy** (no JavaDoc, no class-level comments).
 
 ## 15. Layer Dependency Rules
 
