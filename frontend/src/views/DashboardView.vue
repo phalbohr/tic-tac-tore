@@ -31,14 +31,23 @@ const fetchPendingMatches = async () => {
   loading.value = true
   error.value = null
   try {
+    console.log('DEBUG: Current User ID:', authStore.user?.id)
+    console.log('Fetching pending matches for user token...', authStore.token?.substring(0, 10) + '...')
     const response = await fetch(`${API_BASE_URL}/matches/pending`, {
       headers: {
         'Authorization': `Bearer ${authStore.token}`
       }
     })
-    if (!response.ok) throw new Error('Failed to fetch pending matches')
-    pendingMatches.value = await response.json()
+    if (!response.ok) {
+      const errBody = await response.text()
+      console.error('Fetch failed:', response.status, errBody)
+      throw new Error(`Failed to fetch pending matches: ${response.status}`)
+    }
+    const data = await response.json()
+    console.log('Pending matches received:', data)
+    pendingMatches.value = data
   } catch (err: any) {
+    console.error('Fetch error:', err)
     error.value = err.message
   } finally {
     loading.value = false
@@ -85,6 +94,19 @@ onMounted(fetchPendingMatches)
 <template>
   <div class="min-h-screen bg-gray-50 py-12 px-4 font-sans">
     <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
+          Match Approvals
+        </h1>
+        <router-link
+          to="/dev-recording"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
+        >
+          ← Back to Recorder
+        </router-link>
+      </div>
+
       <div v-if="loading" class="flex justify-center items-center py-20">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>

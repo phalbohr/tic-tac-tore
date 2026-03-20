@@ -35,7 +35,7 @@
     - [x] Task: Implement `GET /api/v1/matches/pending` in Backend
     - [x] Write tests for listing pending matches and action buttons (Approve/Reject)
     - [x] Implement the dashboard view for match verification
-- [ ] Task: Verify End-to-End Match Flow
-    - [ ] Write integration tests for the full create-then-approve lifecycle
-    - [ ] Perform manual end-to-end verification
+- [x] Task: Verify End-to-End Match Flow 89d6ab7
+    - [x] Write integration tests for the full create-then-approve lifecycle
+    - [x] Perform manual end-to-end verification
 - [ ] Task: Conductor - User Manual Verification 'Frontend - Dashboard & Final Integration' (Protocol in workflow.md)

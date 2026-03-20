@@ -19,34 +19,40 @@ const players = ref<{
   opponent2: User
 } | null>(null)
 
-// Mock users for development
-const availableUsers: User[] = [
-  { id: 1, name: 'Alice', email: 'alice@example.com' },
-  { id: 2, name: 'Bob', email: 'bob@example.com' },
-  { id: 3, name: 'Charlie', email: 'charlie@example.com' },
-  { id: 4, name: 'David', email: 'david@example.com' },
-  { id: 5, name: 'Eve', email: 'eve@example.com' }
-]
+const seedData = ref<any>(null)
+const availableUsers = ref<User[]>([])
 
-const devLogin = () => {
-  authStore.login('dev-mock-token', {
-    id: 10,
-    name: 'Dev User',
-    email: 'dev@example.com'
+const handleSeed = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/dev/seed', { method: 'POST' })
+    const data = await response.json()
+    seedData.value = data
+    availableUsers.value = Object.values(data).map((u: any) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email
+    }))
+  } catch (err) {
+    console.error('Seed failed:', err)
+  }
+}
+
+const loginAs = (key: 'me' | 'opp1') => {
+  if (!seedData.value) return
+  const u = seedData.value[key]
+  authStore.login(u.token, {
+    id: u.id,
+    name: u.name,
+    email: u.email
   })
 }
 
-// Auto-login in dev mode if not authenticated
-onMounted(() => {
-  if (!authStore.isAuthenticated) {
-    devLogin()
-  }
-})
+onMounted(handleSeed)
 
-const handleFormSubmit = (data: { teammateId: number, opponent1Id: number, opponent2Id: number }) => {
-  const teammate = availableUsers.find(u => u.id === data.teammateId)!
-  const opponent1 = availableUsers.find(u => u.id === data.opponent1Id)!
-  const opponent2 = availableUsers.find(u => u.id === data.opponent2Id)!
+const handleFormSubmit = (data: { teammateId: string, opponent1Id: string, opponent2Id: string }) => {
+  const teammate = availableUsers.value.find(u => u.id === data.teammateId)!
+  const opponent1 = availableUsers.value.find(u => u.id === data.opponent1Id)!
+  const opponent2 = availableUsers.value.find(u => u.id === data.opponent2Id)!
   
   players.value = {
     creator: authStore.user!,
@@ -57,11 +63,34 @@ const handleFormSubmit = (data: { teammateId: number, opponent1Id: number, oppon
   step.value = 2
 }
 
-const handleFinish = (games: any) => {
-  console.log('Match Finished:', games)
-  alert('Match recorded locally! Data printed to console.')
-  step.value = 1
-  players.value = null
+const handleFinish = async (games: any) => {
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/matches', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        teamAAttackerId: players.value!.creator.id,
+        teamADefenderId: players.value!.teammate.id,
+        teamBAttackerId: players.value!.opponent1.id,
+        teamBDefenderId: players.value!.opponent2.id,
+        games: games.map((g: any) => ({
+          teamAScore: g.team1Score,
+          teamBScore: g.team2Score
+        }))
+      })
+    })
+
+    if (!response.ok) throw new Error('Failed to record match')
+    
+    alert('Match recorded successfully! Now logout and login as Account B to approve.')
+    step.value = 1
+    players.value = null
+  } catch (err: any) {
+    alert(err.message)
+  }
 }
 
 const copyToClipboard = async () => {
@@ -99,6 +128,12 @@ const copyToClipboard = async () => {
         
         <div class="flex gap-2">
           <template v-if="authStore.isAuthenticated">
+            <router-link
+              to="/dashboard"
+              class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
+            >
+              Dashboard
+            </router-link>
             <button
               @click="showToken = !showToken"
               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
@@ -112,14 +147,26 @@ const copyToClipboard = async () => {
               Logout
             </button>
           </template>
-          <button
-            v-else
-            @click="devLogin"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
-          >
-            Mock Login
-          </button>
+          <div v-else class="flex gap-2">
+            <button
+              @click="loginAs('me')"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
+            >
+              Login as Pavel
+            </button>
+            <button
+              @click="loginAs('opp1')"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
+            >
+              Login as Account B
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Seed Status -->
+      <div v-if="!seedData" class="mb-8 p-4 bg-yellow-50 text-yellow-700 rounded-xl text-center font-bold text-sm">
+        Connecting to backend to seed data...
       </div>
 
       <!-- Token Panel -->
@@ -144,7 +191,7 @@ const copyToClipboard = async () => {
       <div v-if="!authStore.isAuthenticated" class="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
         <div class="text-4xl mb-4">🔐</div>
         <h2 class="text-xl font-bold text-gray-900 mb-2">Authentication Required</h2>
-        <p class="text-gray-500 text-sm">Please log in to use the development tools.</p>
+        <p class="text-gray-500 text-sm">Please choose a mock account to log in.</p>
       </div>
 
       <div v-else class="animate-in fade-in duration-500">
