@@ -94,6 +94,26 @@ public class Match {
     private LocalDateTime createdAt;
 
     /**
+     * Confirms the match results after opponent approval.
+     */
+    public void approve() {
+        if (this.status != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
+        }
+        this.status = MatchStatus.CONFIRMED;
+    }
+
+    /**
+     * Disputes the match results and returns it to DRAFT for correction.
+     */
+    public void reject() {
+        if (this.status != MatchStatus.PENDING_APPROVAL) {
+            throw new IllegalStateException("Match can only be rejected if it is in PENDING_APPROVAL status");
+        }
+        this.status = MatchStatus.DRAFT;
+    }
+
+    /**
      * Helper method to maintain bidirectional relationship between Match and Game.
      * @param game The game to add to this match.
      */
