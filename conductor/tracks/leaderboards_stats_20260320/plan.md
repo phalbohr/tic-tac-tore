@@ -1,6 +1,6 @@
 # Plan: Public Leaderboards & Comprehensive Player Statistics
 
-## Phase 1: Backend Statistics Calculation & APIs [checkpoint: ]
+## Phase 1: Backend Statistics Calculation & APIs [checkpoint: ba38412]
 - [x] Task: Implement Statistics DTOs and Repository Queries (45f7a2d)
     - [x] Create `PlayerStatsResponse` and `H2HStatsResponse` DTOs
     - [x] Write unit tests for statistics calculation logic (calculating wins, losses, win rates from match lists)
@@ -12,7 +12,7 @@
     - [x] Write integration tests for `GET /api/v1/statistics/me` (personal position-based stats)
     - [x] Write integration tests for `GET /api/v1/statistics/h2h` (head-to-head records against opponents)
     - [x] Implement service and controller logic for user-specific stats
-- [~] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md) (ba38412)
 
 ## Phase 2: Frontend - Global Leaderboards UI [checkpoint: ]
 - [ ] Task: Create Leaderboard View and Service
