@@ -22,7 +22,7 @@
 
 Before starting any task, you MUST:
 
-- **Read the project guidelines:** (`.gemini/rules`)
+- **Read the project guidelines:** (`.gemini/rules/*.*`)
 - **Read the project workflow:** (`conductor/workflow.md`)
 
 ## Language & Communication Policy
@@ -171,18 +171,18 @@ All tasks follow a strict lifecycle:
     - For all the files changed during the phase, sequentially one by one conduct deep review using Generalist Agent with `deep-review` skill by giving it a single file at a time for review.
 
 5.  **Review and Categorize Findings:**
-    - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
+    - Read the generated `.gemini/reviews/deep-review/deep-review-[file-to-review].md` files. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
 
 6.  **User Review:**
-    - Propose the user to review the marked file with findings.
+    - Propose the user to review the marked files with findings.
 
 7.  **Wait for Confirmation:**
     - Wait for the command from the user to continue working.
 
 8.  **Address [FIX_NOW] Issues:**
-    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review.md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
+    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review-[file-to-review].md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
     - Mark the fixed finding with the status `[FIXED]`.
-    - Process all remaining `[FIX_NOW]` findings sequentially in the same manner.
+    - Process all remaining `[FIX_NOW]` findings in all the report files sequentially in the same manner.
 
 9.  **Ensure Test Coverage for Phase Changes:**
     - **Step 9.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the _previous_ phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
@@ -244,7 +244,7 @@ All tasks follow a strict lifecycle:
 
 16. **Finalize Educational Chapter:**
     - **Action:** Review all educational log files for the completed phase.
-    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{N_name}_Educational_Review.md`) in the phase's track folder.
+    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{Number}_Task{Number}_Educational_Review.md`) in the phase's track folder.
     - **Goal:** Ensure the content is written in accessible language for a computer science student, covering all key learnings from the phase.
 
 17. **Commit Plan Update:**

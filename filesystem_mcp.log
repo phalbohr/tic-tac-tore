@@ -6130,3 +6130,437 @@
 2026-03-20 18:15:50,106 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
 2026-03-20 18:15:50,106 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
 2026-03-20 18:15:50,107 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 00:51:32,372 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 00:51:32,374 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 00:51:32,374 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 00:51:32,375 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 00:51:32,375 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 00:51:32,375 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 00:51:32,375 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 00:51:32,376 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 00:51:32,384 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 00:51:32,415 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 00:51:32,422 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 00:51:32,422 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 00:51:32,424 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 00:51:32,467 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 00:51:32,467 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 00:51:32,467 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 00:51:32,470 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 00:51:32,470 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 00:51:32,471 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 00:51:32,479 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 00:51:32,479 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 00:51:32,480 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 02:10:30,192 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 02:10:30,192 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 02:10:30,193 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 02:10:30,200 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 02:10:30,229 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 02:10:30,234 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 02:10:30,234 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 02:10:30,236 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 02:10:30,275 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 02:10:30,275 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 02:10:30,276 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 02:10:30,279 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 02:10:30,279 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 02:10:30,280 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 02:10:30,293 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 02:10:30,293 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 02:10:30,294 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 03:48:04,318 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 03:48:04,318 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 03:48:04,319 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 03:48:04,330 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 03:48:04,377 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 03:48:04,430 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 03:48:04,431 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 03:48:04,435 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 03:48:11,636 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 03:48:11,645 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 03:48:11,645 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 03:48:11,646 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 03:48:11,646 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 03:48:11,646 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 03:48:11,646 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 03:48:11,646 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 03:48:11,659 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 03:48:11,699 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 03:48:11,704 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 03:48:11,704 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 03:48:11,706 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 03:48:11,755 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 03:48:11,756 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 03:48:11,756 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 03:48:11,771 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 03:48:11,772 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 03:48:11,773 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 03:48:11,802 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 03:48:11,802 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 03:48:11,809 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 05:59:05,536 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 05:59:05,537 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 05:59:05,537 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 05:59:05,538 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 05:59:05,538 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 05:59:05,538 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 05:59:05,538 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 05:59:05,538 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 05:59:05,549 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 05:59:05,596 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 05:59:05,609 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 05:59:05,610 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 05:59:05,611 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 05:59:11,523 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 05:59:11,524 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 05:59:11,524 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 05:59:11,525 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 05:59:11,525 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 05:59:11,525 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 05:59:11,525 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 05:59:11,525 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 05:59:11,536 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 05:59:11,574 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 05:59:11,578 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 05:59:11,579 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 05:59:11,580 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 05:59:11,620 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 05:59:11,620 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 05:59:11,621 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 05:59:11,623 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 05:59:11,623 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 05:59:11,625 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 05:59:11,634 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 05:59:11,634 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 05:59:11,635 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 07:40:09,974 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 07:40:09,974 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 07:40:09,975 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 07:40:09,983 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 07:40:10,005 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 07:40:10,009 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 07:40:10,009 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 07:40:10,011 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 07:40:10,042 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 07:40:10,042 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 07:40:10,043 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 07:40:10,044 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 07:40:10,044 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 07:40:10,045 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 07:40:10,049 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 07:40:10,050 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 07:40:10,050 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 09:08:49,884 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 09:08:49,884 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 09:08:49,885 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 09:08:49,895 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 09:08:49,935 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 09:08:49,956 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 09:08:49,956 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 09:08:49,962 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 09:08:59,608 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 09:08:59,610 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 09:08:59,610 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 09:08:59,611 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 09:08:59,611 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 09:08:59,611 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 09:08:59,611 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 09:08:59,611 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 09:08:59,628 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 09:08:59,696 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 09:08:59,703 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 09:08:59,703 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 09:08:59,704 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 09:08:59,768 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 09:08:59,768 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 09:08:59,769 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 09:08:59,773 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 09:08:59,774 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 09:08:59,777 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 09:08:59,787 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 09:08:59,787 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 09:08:59,790 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 10:09:55,591 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 10:09:55,592 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 10:09:55,592 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 10:09:55,592 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 10:09:55,592 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 10:09:55,593 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 10:09:55,593 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 10:09:55,593 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 10:09:55,601 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 10:09:55,641 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 10:09:55,647 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 10:09:55,647 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 10:09:55,650 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 10:09:55,698 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 10:09:55,698 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 10:09:55,698 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 10:09:55,701 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 10:09:55,701 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 10:09:55,702 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 10:09:55,718 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 10:09:55,719 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 10:09:55,722 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 11:10:57,306 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 11:10:57,307 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 11:10:57,307 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 11:10:57,308 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 11:10:57,308 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 11:10:57,308 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 11:10:57,308 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 11:10:57,308 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 11:10:57,317 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 11:10:57,372 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 11:10:57,414 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 11:10:57,414 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 11:10:57,416 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 11:11:02,552 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 11:11:02,552 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 11:11:02,552 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 11:11:02,553 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 11:11:02,553 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 11:11:02,553 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 11:11:02,553 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 11:11:02,553 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 11:11:02,560 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 11:11:02,593 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 11:11:02,600 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 11:11:02,601 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 11:11:02,602 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 11:11:02,672 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 11:11:02,673 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 11:11:02,673 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 11:11:02,677 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 11:11:02,678 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 11:11:02,679 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 11:11:02,690 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 11:11:02,690 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 11:11:02,691 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 12:11:56,496 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 12:11:56,498 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 12:11:56,498 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 12:11:56,498 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 12:11:56,498 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 12:11:56,498 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 12:11:56,500 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 12:11:56,500 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 12:11:56,526 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 12:11:56,569 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 12:11:56,597 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 12:11:56,597 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 12:11:56,604 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 12:12:06,335 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 12:12:06,336 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 12:12:06,336 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 12:12:06,336 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 12:12:06,337 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 12:12:06,337 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 12:12:06,337 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 12:12:06,337 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 12:12:06,352 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 12:12:06,387 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 12:12:06,397 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 12:12:06,397 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 12:12:06,400 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 12:12:06,471 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 12:12:06,471 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 12:12:06,472 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 12:12:06,474 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 12:12:06,474 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 12:12:06,477 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 12:12:06,487 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 12:12:06,487 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 12:12:06,489 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 13:12:53,892 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 13:12:53,892 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 13:12:53,893 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 13:12:53,908 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 13:12:53,962 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 13:12:53,987 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 13:12:53,987 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 13:12:53,991 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 13:12:54,195 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 13:12:54,195 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 13:12:54,199 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 13:12:54,217 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 13:12:54,217 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 13:12:54,228 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 13:12:54,251 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 13:12:54,251 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 13:12:54,253 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 14:13:50,234 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 14:13:50,235 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 14:13:50,236 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 14:13:50,243 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 14:13:50,286 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 14:13:50,294 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 14:13:50,294 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 14:13:50,296 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 14:13:59,129 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 14:13:59,130 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 14:13:59,130 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 14:13:59,131 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 14:13:59,131 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 14:13:59,131 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 14:13:59,131 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 14:13:59,131 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 14:13:59,138 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 14:13:59,177 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 14:13:59,183 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 14:13:59,183 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 14:13:59,185 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 14:13:59,228 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 14:13:59,228 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 14:13:59,229 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 14:13:59,232 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 14:13:59,232 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 14:13:59,233 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 14:13:59,242 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 14:13:59,243 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 14:13:59,243 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 15:14:49,860 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 15:14:49,861 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 15:14:49,861 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 15:14:49,861 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 15:14:49,861 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 15:14:49,862 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 15:14:49,862 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 15:14:49,862 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 15:14:49,869 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 15:14:49,911 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 15:14:49,919 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 15:14:49,920 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 15:14:49,923 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 15:14:56,691 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 15:14:56,692 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 15:14:56,692 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 15:14:56,693 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 15:14:56,693 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 15:14:56,693 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 15:14:56,694 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 15:14:56,694 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 15:14:56,700 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 15:14:56,739 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 15:14:56,744 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 15:14:56,744 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 15:14:56,747 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 15:14:56,812 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 15:14:56,813 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 15:14:56,813 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 15:14:56,816 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 15:14:56,816 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 15:14:56,820 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 15:14:56,828 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 15:14:56,828 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 15:14:56,829 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 16:12:22,622 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 16:12:22,625 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 16:12:22,625 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 16:12:22,637 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 16:12:22,637 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 16:12:22,640 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 16:12:22,640 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 16:12:22,640 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 16:12:22,640 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 16:12:22,641 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 16:12:22,641 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 16:12:22,655 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 16:12:22,656 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 16:12:22,656 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:12:22,656 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 16:12:22,657 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 16:12:22,657 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:12:22,660 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 16:12:22,660 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 16:12:22,660 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 16:37:03,890 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 16:37:03,892 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 16:37:03,902 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 16:37:03,903 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 16:37:03,903 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 16:37:03,904 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 16:37:03,916 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 16:37:03,916 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 16:37:03,916 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:37:03,916 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 16:37:03,916 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 16:37:03,917 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 16:37:03,920 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 16:37:03,920 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 16:37:03,920 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Initializing server 'filesystem-mcp'
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListToolsRequest
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourcesRequest
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Registering handler for ListResourceTemplatesRequest
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Registering handler for PromptListRequest
+2026-03-21 17:31:44,690 - mcp.server.lowlevel.server - DEBUG - Registering handler for CallToolRequest
+2026-03-21 17:31:44,691 - mcp.server.lowlevel.server - DEBUG - Registering handler for ReadResourceRequest
+2026-03-21 17:31:44,691 - mcp.server.lowlevel.server - DEBUG - Registering handler for GetPromptRequest
+2026-03-21 17:31:44,693 - filesystem_mcp.tools - INFO - Tool modules will be imported by the main application
+2026-03-21 17:31:44,703 - filesystem_mcp - DEBUG - Tool module .tools.file_operations imported successfully
+2026-03-21 17:31:44,705 - filesystem_mcp - ERROR - Failed to import tool module .tools.docker_operations: No module named 'docker'
+2026-03-21 17:31:44,705 - filesystem_mcp - ERROR - Failed to import tool modules: No module named 'docker'
+2026-03-21 17:31:44,705 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-03-21 17:31:44,719 - mcp.server.lowlevel.server - INFO - Processing request of type ListPromptsRequest
+2026-03-21 17:31:44,719 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListPromptsRequest
+2026-03-21 17:31:44,719 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 17:31:44,720 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+2026-03-21 17:31:44,720 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListToolsRequest
+2026-03-21 17:31:44,720 - mcp.server.lowlevel.server - DEBUG - Response sent
+2026-03-21 17:31:44,723 - mcp.server.lowlevel.server - INFO - Processing request of type ListResourcesRequest
+2026-03-21 17:31:44,723 - mcp.server.lowlevel.server - DEBUG - Dispatching request of type ListResourcesRequest
+2026-03-21 17:31:44,723 - mcp.server.lowlevel.server - DEBUG - Response sent
