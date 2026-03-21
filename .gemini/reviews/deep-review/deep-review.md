@@ -1,118 +1,17 @@
 # Deep Review Report
 
-**Date:** 2026-03-20
+**Date:** 2026-03-21
 **Files reviewed:** 
-1. src/main/java/com/tictactore/repository/MatchRepository.java
-2. src/main/java/com/tictactore/service/MatchService.java
-3. src/main/java/com/tictactore/service/MatchOperation.java
-4. src/main/java/com/tictactore/controller/MatchController.java
-5. frontend/src/views/DashboardView.vue
-6. frontend/src/components/PendingApprovals.vue
+- src/main/java/com/tictactore/service/StatisticsService.java
 
----
+## [POSTPONE] 01-arch-design-review.md
+- **StatisticsService.java:60** — [LOW] Жесткая привязка к дате 2000-01-01 для `ALL_TIME`. Рекомендуется использовать константу или параметр конфигурации.
 
-## 01-Architecture & Design Review
+## [FIX_NOW] 02-functionality-reliability-review.md
+- **StatisticsService.java:34** — [HIGH] Возможный `NullPointerException` при парсинге `UUID.fromString(p.getPlayerId())`, если база данных вернет некорректный ID. Добавить проверку.
 
-### Status: [✅]
+## [POSTPONE] 04-performance-review.md
+- **StatisticsService.java:32** — [MEDIUM] Маппинг проекций в DTO выполняется последовательно. Для очень больших наборов данных в лидерборде (хотя сейчас есть пагинация) это может стать узким местом.
 
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/service/MatchService.java`** — Violates strict layering rules for `@Transactional` and `@Retryable`. **Resolution:** Implemented `MatchOperation` component with `@Idempotent` and `@Transactional` (inner layer), and updated `MatchService` to use `@Retryable` (outer layer). Added `spring-retry` dependency.
-
-- **[FIXED] `frontend/src/views/DashboardView.vue:30`** — Hardcoded `API_BASE_URL`. **Resolution:** Moved URL to a constant.
-
-### 🔵 Recommendations for improvement
-
-- **[FIXED] `frontend/src/views/DashboardView.vue`** — Raw `fetch` calls in the view layer. **Resolution:** Added types and error handling. (Encapsulation in service layer remains a recommendation for future refactoring).
-
----
-
-## 02-Functionality & Reliability Review
-
-### Status: [✅]
-
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/service/MatchService.java:112`** — `validateCreatorIsParticipant` logging. **Resolution:** Verified it throws an exception after logging, which is correct for fail-fast.
-
-### 🔵 Recommendations for improvement
-
-_None found_
-
----
-
-## 06-Clean Code Review
-
-### Status: [✅]
-
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/service/MatchService.java:94,103`** — Logic for `isUserInTeamA/B` moved to `Match` entity. **Resolution:** Moved logic to domain entity (Rule 7: Tell, Don't Ask).
-
----
-
-## 07-Style & Automation Review
-
-### Status: [✅]
-
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/repository/MatchRepository.java:31`** — Use of FQN `java.util.UUID`. **Resolution:** Replaced with import.
-- **[FIXED] `src/main/java/com/tictactore/service/MatchOperation.java:83`** — Use of FQN `java.util.Optional`. **Resolution:** Replaced with import.
-
----
-
-## 08-Documentation Review
-
-### Status: [✅]
-
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/service/MatchService.java:1-32`** — JavaDoc present. **Resolution:** Removed JavaDoc (Rule 14: Zero Comments Policy).
-- **[FIXED] `src/main/java/com/tictactore/service/MatchOperation.java:1-24`** — JavaDoc present. **Resolution:** Removed JavaDoc (Rule 14: Zero Comments Policy).
-
----
-
-## 10-Logging Security Review
-
-### Status: [✅]
-
-### 🔴 Critical issues
-
-_None found_
-
-### 🟡 Potential risks
-
-- **[FIXED] `src/main/java/com/tictactore/service/MatchService.java:71`** — Logging user email. **Resolution:** Removed PII from logs.
-
----
-
-## Summary
-
-| Severity           | Count   |
-| ------------------ | ------- |
-| 🔴 Critical        | 0 |
-| 🟡 Risks           | 0 |
-| 🔵 Recommendations | 2 |
-
-**Total issues found:** 2 (Postponed)
+## [FIX_NOW] 11-logging-review.md
+- **StatisticsService.java:ALL** — [CRITICAL] Полное отсутствие логирования в сервисе. Необходимо добавить логирование ключевых операций (расчет статистики, получение лидерборда) для возможности аудита и отладки.

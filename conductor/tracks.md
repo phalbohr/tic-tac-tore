@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Public Leaderboards & Comprehensive Player Statistics**
+- [~] **Track: Public Leaderboards & Comprehensive Player Statistics**
 *Link: [./tracks/leaderboards_stats_20260320/](./tracks/leaderboards_stats_20260320/)*

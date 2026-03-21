@@ -1,18 +1,18 @@
 # Plan: Public Leaderboards & Comprehensive Player Statistics
 
 ## Phase 1: Backend Statistics Calculation & APIs [checkpoint: ]
-- [ ] Task: Implement Statistics DTOs and Repository Queries
-    - [ ] Create `PlayerStatsResponse` and `H2HStatsResponse` DTOs
-    - [ ] Write unit tests for statistics calculation logic (calculating wins, losses, win rates from match lists)
-    - [ ] Implement repository methods (using JPA or Native SQL) to aggregate match statistics for a given user or globally, supporting pagination
-- [ ] Task: Implement Global Leaderboard API
-    - [ ] Write integration tests for `GET /api/v1/statistics/leaderboard` with optional time period, match threshold, and pagination (page, size) parameters
-    - [ ] Implement `StatisticsService` and `StatisticsController` for global paginated rankings
-- [ ] Task: Implement Personal Statistics API
-    - [ ] Write integration tests for `GET /api/v1/statistics/me` (personal position-based stats)
-    - [ ] Write integration tests for `GET /api/v1/statistics/h2h` (head-to-head records against opponents)
-    - [ ] Implement service and controller logic for user-specific stats
-- [ ] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md)
+- [x] Task: Implement Statistics DTOs and Repository Queries (45f7a2d)
+    - [x] Create `PlayerStatsResponse` and `H2HStatsResponse` DTOs
+    - [x] Write unit tests for statistics calculation logic (calculating wins, losses, win rates from match lists)
+    - [x] Implement repository methods (using JPA or Native SQL) to aggregate match statistics for a given user or globally, supporting pagination
+- [x] Task: Implement Global Leaderboard API (7a3b4c1)
+    - [x] Write integration tests for `GET /api/v1/statistics/leaderboard` with optional time period, match threshold, and pagination (page, size) parameters
+    - [x] Implement `StatisticsService` and `StatisticsController` for global paginated rankings
+- [x] Task: Implement Personal Statistics API (9d2e1f8)
+    - [x] Write integration tests for `GET /api/v1/statistics/me` (personal position-based stats)
+    - [x] Write integration tests for `GET /api/v1/statistics/h2h` (head-to-head records against opponents)
+    - [x] Implement service and controller logic for user-specific stats
+- [~] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md)
 
 ## Phase 2: Frontend - Global Leaderboards UI [checkpoint: ]
 - [ ] Task: Create Leaderboard View and Service
