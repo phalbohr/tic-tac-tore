@@ -19,10 +19,10 @@
     - [x] Implement API client for `GET /api/v1/statistics/leaderboard`
     - [x] Write component tests for displaying paginated rankings (Overall, Attack, Defense) with page size selector (10, 20, 50, 100)
     - [x] Create `LeaderboardView.vue` with tabbed layout for different roles and pagination controls
-- [ ] Task: Implement Time Period and Threshold Filters
-    - [ ] Add Weekly/Monthly/Yearly/All-time selector in the UI
-    - [ ] Implement the threshold filtering logic to re-fetch or filter leaderboard results
-    - [ ] Verify that filters and pagination work correctly together
+- [x] Task: Implement Time Period and Threshold Filters (68bd4a5)
+    - [x] Add Weekly/Monthly/Yearly/All-time selector in the UI
+    - [x] Implement the threshold filtering logic to re-fetch or filter leaderboard results
+    - [x] Verify that filters and pagination work correctly together
 - [ ] Task: Conductor - User Manual Verification 'Frontend - Global Leaderboards UI' (Protocol in workflow.md)
 
 ## Phase 3: Frontend - Player Profile & Position Breakdown [checkpoint: ]
