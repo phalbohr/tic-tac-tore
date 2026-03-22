@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import LeaderboardView from '../LeaderboardView.vue'
 import * as statisticsService from '../../services/statisticsService'
+import { useAuthStore } from '@/stores/auth'
 
 vi.mock('../../services/statisticsService', () => ({
   getLeaderboard: vi.fn()
@@ -12,6 +13,10 @@ describe('LeaderboardView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.resetAllMocks()
+    
+    // Mock user login
+    const authStore = useAuthStore()
+    authStore.login('test-token', { id: 'user-1', name: 'Test User', email: 'test@example.com' })
   })
 
   it('renders correctly and fetches data on mount', async () => {
@@ -40,6 +45,7 @@ describe('LeaderboardView', () => {
     expect(wrapper.find('h1').text()).toBe('Leaderboards')
     expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ 
         type: 'OVERALL',
+        token: 'test-token',
         signal: expect.any(AbortSignal)
     }))
 
@@ -87,7 +93,7 @@ describe('LeaderboardView', () => {
     })
 
     const wrapper = mount(LeaderboardView)
-    const select = wrapper.find('select')
+    const select = wrapper.find('select#page-size-selector')
     await select.setValue(20)
 
     expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ size: 20, page: 0 }))
@@ -102,5 +108,37 @@ describe('LeaderboardView', () => {
     const retryButton = wrapper.find('button.bg-red-600')
     await retryButton.trigger('click')
     expect(statisticsService.getLeaderboard).toHaveBeenCalledTimes(2)
+  })
+
+  it('filters by time period correctly', async () => {
+    vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
+      content: [], totalPages: 1, totalElements: 0, size: 10, number: 0
+    })
+
+    const wrapper = mount(LeaderboardView)
+    
+    const select = wrapper.find('select#period-selector')
+    await select.setValue('MONTHLY')
+
+    expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ 
+        period: 'MONTHLY',
+        page: 0 
+    }))
+  })
+
+  it('filters by minimum matches threshold correctly', async () => {
+    vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
+      content: [], totalPages: 1, totalElements: 0, size: 10, number: 0
+    })
+
+    const wrapper = mount(LeaderboardView)
+    
+    const input = wrapper.find('input#min-matches-input')
+    await input.setValue(5)
+
+    expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ 
+        minMatches: 5,
+        page: 0 
+    }))
   })
 })

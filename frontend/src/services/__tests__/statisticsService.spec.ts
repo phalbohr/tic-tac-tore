@@ -1,14 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createPinia, setActivePinia } from 'pinia'
 import { getLeaderboard } from '../statisticsService'
 
 describe('statisticsService', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('fetches leaderboard data correctly', async () => {
+  it('fetches leaderboard data correctly with token', async () => {
     const mockData = {
       content: [
         {
@@ -30,21 +28,31 @@ describe('statisticsService', () => {
       json: async () => mockData
     } as Response)
 
-    const result = await getLeaderboard({ type: 'OVERALL', page: 0, size: 10 })
+    const result = await getLeaderboard({ 
+      type: 'OVERALL', 
+      page: 0, 
+      size: 10,
+      token: 'test-token' 
+    })
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/leaderboard?type=OVERALL&page=0&size=10'),
-      expect.any(Object)
+      expect.objectContaining({
+        headers: {
+          'Authorization': 'Bearer test-token'
+        }
+      })
     )
     expect(result).toEqual(mockData)
   })
 
-  it('handles fetch failure', async () => {
+  it('handles fetch failure and parses error message', async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
-      status: 500
+      status: 400,
+      json: async () => ({ message: 'Invalid parameters' })
     } as Response)
 
-    await expect(getLeaderboard({})).rejects.toThrow('Failed to fetch leaderboard: 500')
+    await expect(getLeaderboard({})).rejects.toThrow('Invalid parameters')
   })
 })
