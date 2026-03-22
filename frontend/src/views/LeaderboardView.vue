@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { getLeaderboard, type LeaderboardEntry, type LeaderboardType, type LeaderboardParams, type TimePeriod } from '@/services/statisticsService'
+
+const authStore = useAuthStore()
 
 const leaderboard = ref<LeaderboardEntry[]>([])
 const loading = ref(true)
@@ -17,6 +20,10 @@ const PAGE_SIZES = [10, 20, 50, 100]
 
 let controller: AbortController | null = null
 
+/**
+ * Fetches the leaderboard data using the statistics service.
+ * Handles AbortController to prevent race conditions.
+ */
 const fetchLeaderboard = async () => {
   if (controller) controller.abort()
   controller = new AbortController()
@@ -30,13 +37,16 @@ const fetchLeaderboard = async () => {
       minMatches: minMatches.value > 0 ? minMatches.value : undefined,
       page: page.value,
       size: size.value,
-      signal: controller.signal
+      signal: controller.signal,
+      token: authStore.token || undefined
     }
     const response = await getLeaderboard(params)
-    leaderboard.value = response.content
-    totalPages.value = response.totalPages
+    leaderboard.value = response.content || []
+    totalPages.value = response.totalPages || 0
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') return
+    
+    console.error('Leaderboard fetch error:', err)
     error.value = err instanceof Error ? err.message : 'Unknown error occurred'
   } finally {
     loading.value = false
@@ -132,8 +142,9 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
 
         <div class="flex items-center gap-3">
-          <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Page Size</label>
+          <label for="page-size-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Page Size</label>
           <select 
+            id="page-size-selector"
             v-model="size" 
             class="bg-white border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold text-gray-600 focus:outline-none shadow-sm cursor-pointer"
           >
