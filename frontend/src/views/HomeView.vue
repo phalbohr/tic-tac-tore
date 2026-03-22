@@ -35,6 +35,12 @@ const goToLogin = () => {
           Dev Token Panel
         </h1>
         <div class="flex gap-2">
+          <router-link
+            to="/leaderboards"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
+          >
+            Leaderboards
+          </router-link>
           <button
             v-if="!authStore.isAuthenticated"
             @click="goToLogin"

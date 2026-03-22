@@ -32,6 +32,11 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue'),
     },
     {
+      path: '/leaderboards',
+      name: 'leaderboards',
+      component: () => import('../views/LeaderboardView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       meta: { requiresAuth: true },

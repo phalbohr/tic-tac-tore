@@ -17,6 +17,7 @@ const size = ref(10)
 const totalPages = ref(0)
 
 const PAGE_SIZES = [10, 20, 50, 100]
+const MIN_MATCHES_OPTIONS = [0, 10, 20, 50, 100]
 
 let controller: AbortController | null = null
 
@@ -57,17 +58,20 @@ onUnmounted(() => {
   if (controller) controller.abort()
 })
 
-const setType = (newType: LeaderboardType) => {
-  type.value = newType
-}
-
-// Reset page when filters change
+// Combined watch for filters to prevent double fetch when resetting page
 watch([type, period, minMatches, size], () => {
-  page.value = 0
+  if (page.value !== 0) {
+    page.value = 0
+  } else {
+    fetchLeaderboard()
+  }
 })
 
-// Fetch data when filters or page change
-watch([type, period, minMatches, page, size], fetchLeaderboard, { immediate: true })
+// Watch for manual page changes
+watch(page, fetchLeaderboard)
+
+// Initial load
+fetchLeaderboard()
 
 const tabs: { label: string, value: LeaderboardType }[] = [
   { label: 'Overall', value: 'OVERALL' },
@@ -103,7 +107,7 @@ const periods: { label: string, value: TimePeriod }[] = [
           <button
             v-for="tab in tabs"
             :key="tab.value"
-            @click="setType(tab.value)"
+            @click="type = tab.value"
             :class="[
               'flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap',
               type === tab.value 
@@ -131,14 +135,14 @@ const periods: { label: string, value: TimePeriod }[] = [
       <!-- Additional Filters -->
       <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
-          <label for="min-matches-input" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Matches</label>
-          <input
-            id="min-matches-input"
-            type="number"
-            v-model.number="minMatches"
-            min="0"
-            class="w-16 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-          />
+          <label for="min-matches-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Matches</label>
+          <select
+            id="min-matches-selector"
+            v-model="minMatches"
+            class="bg-gray-50 border border-gray-100 rounded-lg px-2 py-1 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+          >
+            <option v-for="opt in MIN_MATCHES_OPTIONS" :key="opt" :value="opt">{{ opt }}</option>
+          </select>
         </div>
 
         <div class="flex items-center gap-3">
@@ -153,12 +157,19 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
       </div>
 
-      <!-- Content -->
-      <div v-if="loading && leaderboard.length === 0" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
+      <!-- Main Content Container -->
+      <div class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
+        <!-- Loading Overlay -->
+        <div 
+          v-if="loading" 
+          class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex justify-center items-center z-10 transition-opacity duration-200"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+            <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Updating...</span>
+          </div>
+        </div>
 
-      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div v-if="error" class="p-4 bg-red-50 text-red-600 text-sm font-bold border-b border-red-100 flex justify-between items-center">
           <span>{{ error }}</span>
           <button @click="fetchLeaderboard" class="px-3 py-1 bg-red-600 text-white rounded-lg text-xs uppercase font-black">Retry</button>
@@ -200,7 +211,7 @@ const periods: { label: string, value: TimePeriod }[] = [
                   </span>
                 </td>
               </tr>
-              <tr v-if="leaderboard.length === 0">
+              <tr v-if="leaderboard.length === 0 && !loading">
                 <td colspan="6" class="px-6 py-20 text-center text-gray-400 font-medium italic">
                   No rankings available yet.
                 </td>
@@ -214,14 +225,14 @@ const periods: { label: string, value: TimePeriod }[] = [
           <div class="flex gap-2">
             <button 
               @click="page--" 
-              :disabled="page === 0"
+              :disabled="page === 0 || loading"
               class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
             >
               Previous
             </button>
             <button 
               @click="page++" 
-              :disabled="page >= totalPages - 1"
+              :disabled="page >= totalPages - 1 || loading"
               class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
             >
               Next
