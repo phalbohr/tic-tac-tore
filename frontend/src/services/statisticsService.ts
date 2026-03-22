@@ -51,7 +51,7 @@ export async function getLeaderboard(params: LeaderboardParams): Promise<Page<Le
     headers['Authorization'] = `Bearer ${params.token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}/leaderboard?${queryParams.toString()}`, {
+  const response = await fetch(`${API_BASE_URL}/statistics/leaderboard?${queryParams.toString()}`, {
     headers,
     signal: params.signal
   })

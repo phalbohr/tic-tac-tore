@@ -14,7 +14,7 @@
     - [x] Implement service and controller logic for user-specific stats
 - [x] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md) (ba38412)
 
-## Phase 2: Frontend - Global Leaderboards UI [checkpoint: ]
+## Phase 2: Frontend - Global Leaderboards UI [checkpoint: e3a5ae6]
 - [x] Task: Create Leaderboard View and Service (97319b7)
     - [x] Implement API client for `GET /api/v1/statistics/leaderboard`
     - [x] Write component tests for displaying paginated rankings (Overall, Attack, Defense) with page size selector (10, 20, 50, 100)

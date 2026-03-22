@@ -55,6 +55,7 @@ describe('LeaderboardView', () => {
     })
 
     expect(wrapper.findAll('tr').length).toBe(2) // Header + 1 data row
+    expect(statisticsService.getLeaderboard).toHaveBeenCalledTimes(1)
   })
 
   it('changes type when tab is clicked', async () => {
@@ -133,11 +134,11 @@ describe('LeaderboardView', () => {
 
     const wrapper = mount(LeaderboardView)
     
-    const input = wrapper.find('input#min-matches-input')
-    await input.setValue(5)
+    const select = wrapper.find('select#min-matches-selector')
+    await select.setValue(10)
 
     expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ 
-        minMatches: 5,
+        minMatches: 10,
         page: 0 
     }))
   })

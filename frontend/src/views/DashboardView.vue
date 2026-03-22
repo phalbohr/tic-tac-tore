@@ -99,12 +99,20 @@ onMounted(fetchPendingMatches)
         <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
           Match Approvals
         </h1>
-        <router-link
-          to="/dev-recording"
-          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
-        >
-          ← Back to Recorder
-        </router-link>
+        <div class="flex gap-2">
+          <router-link
+            to="/leaderboards"
+            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
+          >
+            Leaderboards
+          </router-link>
+          <router-link
+            to="/dev-recording"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
+          >
+            ← Back to Recorder
+          </router-link>
+        </div>
       </div>
 
       <div v-if="loading" class="flex justify-center items-center py-20">

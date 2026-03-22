@@ -36,7 +36,7 @@ describe('statisticsService', () => {
     })
 
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/leaderboard?type=OVERALL&page=0&size=10'),
+      expect.stringContaining('/statistics/leaderboard?type=OVERALL&page=0&size=10'),
       expect.objectContaining({
         headers: {
           'Authorization': 'Bearer test-token'

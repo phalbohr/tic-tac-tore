@@ -67,7 +67,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             ps.total_matches as totalMatches,
             ps.wins as wins,
             ps.losses as losses,
-            ROUND(CAST(ps.wins * 100.0 / ps.total_matches AS NUMERIC), 2) as winRate
+            CAST(ps.wins * 100.0 / ps.total_matches AS DOUBLE) as winRate
         FROM player_stats ps
         JOIN users u ON ps.player_id = u.id
         ORDER BY winRate DESC, totalMatches DESC
@@ -109,7 +109,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
         h2h_stats AS (
             SELECT opponent_id, COUNT(*) as total_matches, COUNT(CASE WHEN is_win THEN 1 END) as wins, COUNT(CASE WHEN NOT is_win THEN 1 END) as losses FROM match_pairs GROUP BY opponent_id
         )
-        SELECT CAST(u.id AS VARCHAR) as opponentId, u.name as opponentName, hs.total_matches as totalMatches, hs.wins as wins, hs.losses as losses, ROUND(CAST(hs.wins * 100.0 / hs.total_matches AS NUMERIC), 2) as winRate
+        SELECT CAST(u.id AS VARCHAR) as opponentId, u.name as opponentName, hs.total_matches as totalMatches, hs.wins as wins, hs.losses as losses, CAST(hs.wins * 100.0 / hs.total_matches AS DOUBLE) as winRate
         FROM h2h_stats hs JOIN users u ON hs.opponent_id = u.id ORDER BY winRate DESC, totalMatches DESC
         """, 
         countQuery = """
