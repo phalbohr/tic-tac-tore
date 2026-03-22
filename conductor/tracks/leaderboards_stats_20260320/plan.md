@@ -23,7 +23,7 @@
     - [x] Add Weekly/Monthly/Yearly/All-time selector in the UI
     - [x] Implement the threshold filtering logic to re-fetch or filter leaderboard results
     - [x] Verify that filters and pagination work correctly together
-- [ ] Task: Conductor - User Manual Verification 'Frontend - Global Leaderboards UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Frontend - Global Leaderboards UI' (Protocol in workflow.md) (9586496)
 
 ## Phase 3: Frontend - Player Profile & Position Breakdown [checkpoint: ]
 - [ ] Task: Create Player Profile Dashboard
