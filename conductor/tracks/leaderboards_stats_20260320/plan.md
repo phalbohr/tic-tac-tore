@@ -15,10 +15,10 @@
 - [x] Task: Conductor - User Manual Verification 'Backend Statistics Calculation & APIs' (Protocol in workflow.md) (ba38412)
 
 ## Phase 2: Frontend - Global Leaderboards UI [checkpoint: ]
-- [ ] Task: Create Leaderboard View and Service
-    - [ ] Implement API client for `GET /api/v1/statistics/leaderboard`
-    - [ ] Write component tests for displaying paginated rankings (Overall, Attack, Defense) with page size selector (10, 20, 50, 100)
-    - [ ] Create `LeaderboardView.vue` with tabbed layout for different roles and pagination controls
+- [x] Task: Create Leaderboard View and Service (97319b7)
+    - [x] Implement API client for `GET /api/v1/statistics/leaderboard`
+    - [x] Write component tests for displaying paginated rankings (Overall, Attack, Defense) with page size selector (10, 20, 50, 100)
+    - [x] Create `LeaderboardView.vue` with tabbed layout for different roles and pagination controls
 - [ ] Task: Implement Time Period and Threshold Filters
     - [ ] Add Weekly/Monthly/Yearly/All-time selector in the UI
     - [ ] Implement the threshold filtering logic to re-fetch or filter leaderboard results
