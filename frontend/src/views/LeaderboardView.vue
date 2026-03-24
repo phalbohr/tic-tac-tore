@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { getLeaderboard, type LeaderboardEntry, type LeaderboardType, type LeaderboardParams, type TimePeriod } from '@/services/statisticsService'
+import { getLeaderboard, getPersonalStats, type LeaderboardEntry, type LeaderboardType, type LeaderboardParams, type TimePeriod, type PlayerStats } from '@/services/statisticsService'
+import PlayerStatsSummary from '@/components/PlayerStatsSummary.vue'
 
 const authStore = useAuthStore()
 
 const leaderboard = ref<LeaderboardEntry[]>([])
+const personalStats = ref<PlayerStats | null>(null)
+const showPersonalStats = ref(false)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
 const type = ref<LeaderboardType>('OVERALL')
 const period = ref<TimePeriod>('ALL_TIME')
-const minMatches = ref<number>(0)
+const minMatches = ref(0)
 const page = ref(0)
 const size = ref(10)
 const totalPages = ref(0)
@@ -21,33 +24,37 @@ const MIN_MATCHES_OPTIONS = [0, 10, 20, 50, 100]
 
 let controller: AbortController | null = null
 
-/**
- * Fetches the leaderboard data using the statistics service.
- * Handles AbortController to prevent race conditions.
- */
-const fetchLeaderboard = async () => {
+async function fetchData() {
   if (controller) controller.abort()
   controller = new AbortController()
 
   loading.value = true
   error.value = null
   try {
-    const params: LeaderboardParams = {
-      type: type.value,
-      period: period.value,
-      minMatches: minMatches.value > 0 ? minMatches.value : undefined,
-      page: page.value,
-      size: size.value,
-      signal: controller.signal,
-      token: authStore.token || undefined
+    if (showPersonalStats.value) {
+      personalStats.value = await getPersonalStats({
+        period: period.value,
+        token: authStore.token || undefined,
+        signal: controller.signal
+      })
+    } else {
+      const params: LeaderboardParams = {
+        type: type.value,
+        period: period.value,
+        minMatches: minMatches.value > 0 ? minMatches.value : undefined,
+        page: page.value,
+        size: size.value,
+        signal: controller.signal,
+        token: authStore.token || undefined
+      }
+      const response = await getLeaderboard(params)
+      leaderboard.value = response.content || []
+      totalPages.value = response.totalPages || 0
     }
-    const response = await getLeaderboard(params)
-    leaderboard.value = response.content || []
-    totalPages.value = response.totalPages || 0
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') return
     
-    console.error('Leaderboard fetch error:', err)
+    console.error('Fetch error:', err)
     error.value = err instanceof Error ? err.message : 'Unknown error occurred'
   } finally {
     loading.value = false
@@ -58,20 +65,17 @@ onUnmounted(() => {
   if (controller) controller.abort()
 })
 
-// Combined watch for filters to prevent double fetch when resetting page
-watch([type, period, minMatches, size], () => {
+watch([type, period, minMatches, size, showPersonalStats], () => {
   if (page.value !== 0) {
     page.value = 0
   } else {
-    fetchLeaderboard()
+    fetchData()
   }
 })
 
-// Watch for manual page changes
-watch(page, fetchLeaderboard)
+watch(page, fetchData)
 
-// Initial load
-fetchLeaderboard()
+fetchData()
 
 const tabs: { label: string, value: LeaderboardType }[] = [
   { label: 'Overall', value: 'OVERALL' },
@@ -90,7 +94,6 @@ const periods: { label: string, value: TimePeriod }[] = [
 <template>
   <div class="min-h-screen bg-gray-50 py-12 px-4 font-sans">
     <div class="max-w-4xl mx-auto">
-      <!-- Header -->
       <div class="mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
         <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
           Leaderboards
@@ -100,26 +103,35 @@ const periods: { label: string, value: TimePeriod }[] = [
         </router-link>
       </div>
 
-      <!-- Filters & Tabs Container -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Tabs (Type Selector) -->
         <div class="md:col-span-2 flex gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <button
             v-for="tab in tabs"
             :key="tab.value"
-            @click="type = tab.value"
+            @click="type = tab.value; showPersonalStats = false"
             :class="[
               'flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap',
-              type === tab.value 
+              !showPersonalStats && type === tab.value 
                 ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
                 : 'text-gray-500 hover:bg-gray-50'
             ]"
           >
             {{ tab.label }}
           </button>
+          <button
+            v-if="authStore.isAuthenticated"
+            @click="showPersonalStats = true"
+            :class="[
+              'flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap',
+              showPersonalStats
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
+                : 'text-gray-500 hover:bg-gray-50'
+            ]"
+          >
+            My Stats
+          </button>
         </div>
 
-        <!-- Time Period Selector -->
         <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex items-center px-4">
           <label for="period-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-3">Period</label>
           <select
@@ -132,8 +144,7 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
       </div>
 
-      <!-- Additional Filters -->
-      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div v-if="!showPersonalStats" class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
           <label for="min-matches-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Matches</label>
           <select
@@ -157,9 +168,10 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
       </div>
 
-      <!-- Main Content Container -->
-      <div class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
-        <!-- Loading Overlay -->
+      <div v-if="showPersonalStats && personalStats" class="animate-in fade-in duration-300">
+        <PlayerStatsSummary :stats="personalStats" />
+      </div>
+      <div v-else class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
         <div 
           v-if="loading" 
           class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex justify-center items-center z-10 transition-opacity duration-200"
@@ -172,7 +184,7 @@ const periods: { label: string, value: TimePeriod }[] = [
 
         <div v-if="error" class="p-4 bg-red-50 text-red-600 text-sm font-bold border-b border-red-100 flex justify-between items-center">
           <span>{{ error }}</span>
-          <button @click="fetchLeaderboard" class="px-3 py-1 bg-red-600 text-white rounded-lg text-xs uppercase font-black">Retry</button>
+          <button @click="fetchData" class="px-3 py-1 bg-red-600 text-white rounded-lg text-xs uppercase font-black">Retry</button>
         </div>
 
         <div class="overflow-x-auto">
@@ -220,7 +232,6 @@ const periods: { label: string, value: TimePeriod }[] = [
           </table>
         </div>
 
-        <!-- Pagination -->
         <div v-if="totalPages > 1" class="p-6 border-t border-gray-100 flex items-center justify-between">
           <div class="flex gap-2">
             <button 
