@@ -44,6 +44,15 @@ export interface PlayerStats {
   defender: PositionStats
 }
 
+export interface H2HStats {
+  opponentId: string
+  opponentName: string
+  matches: number
+  wins: number
+  losses: number
+  winRate: number
+}
+
 export interface PersonalStatsParams {
   period?: TimePeriod
   token?: string
@@ -92,4 +101,8 @@ export async function getLeaderboard(params: LeaderboardParams): Promise<Page<Le
     page: params.page,
     size: params.size
   }, params)
+}
+
+export async function getH2HStats(params: PersonalStatsParams): Promise<H2HStats[]> {
+  return apiFetch<H2HStats[]>('/statistics/h2h', { period: params.period }, params)
 }

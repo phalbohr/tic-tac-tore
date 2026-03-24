@@ -7,7 +7,8 @@ import { useAuthStore } from '@/stores/auth'
 
 vi.mock('../../services/statisticsService', () => ({
   getLeaderboard: vi.fn(),
-  getPersonalStats: vi.fn()
+  getPersonalStats: vi.fn(),
+  getH2HStats: vi.fn()
 }))
 
 describe('LeaderboardView', () => {
@@ -47,6 +48,7 @@ describe('LeaderboardView', () => {
       attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
       defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
     })
+    vi.mocked(statisticsService.getH2HStats).mockResolvedValue([])
 
     const wrapper = mount(LeaderboardView)
 
@@ -66,7 +68,7 @@ describe('LeaderboardView', () => {
     expect(statisticsService.getLeaderboard).toHaveBeenCalledTimes(1)
   })
 
-  it('switches to personal stats when My Stats tab is clicked', async () => {
+  it('switches to personal stats and H2H when My Stats tab is clicked', async () => {
     const mockPersonalStats = {
       playerId: 'user-1',
       playerName: 'Test User',
@@ -74,11 +76,15 @@ describe('LeaderboardView', () => {
       attacker: { matches: 10, wins: 8, losses: 2, winRate: 80.0 },
       defender: { matches: 10, wins: 7, losses: 3, winRate: 70.0 }
     }
+    const mockH2H = [
+      { opponentId: 'opp-1', opponentName: 'Rival 1', matches: 5, wins: 3, losses: 2, winRate: 60.0 }
+    ]
     
     vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
       content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
     })
     vi.mocked(statisticsService.getPersonalStats).mockResolvedValue(mockPersonalStats)
+    vi.mocked(statisticsService.getH2HStats).mockResolvedValue(mockH2H)
 
     const wrapper = mount(LeaderboardView)
     
@@ -90,9 +96,14 @@ describe('LeaderboardView', () => {
         token: 'test-token',
         period: 'ALL_TIME'
     }))
+    expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
+        token: 'test-token',
+        period: 'ALL_TIME'
+    }))
 
     await vi.waitFor(() => {
         expect(wrapper.text()).toContain('75.0%')
+        expect(wrapper.text()).toContain('Rival 1')
     })
     expect(wrapper.text()).toContain('Attacker')
     expect(wrapper.text()).toContain('Defender')

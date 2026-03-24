@@ -1,9 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getLeaderboard, getPersonalStats, type PlayerStats } from '../statisticsService'
+import { getLeaderboard, getPersonalStats, getH2HStats, type PlayerStats } from '../statisticsService'
 
 describe('statisticsService', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('fetches H2H stats correctly', async () => {
+    const mockH2H = [
+      {
+        opponentId: 'opp-1',
+        opponentName: 'Rival 1',
+        matches: 5,
+        wins: 3,
+        losses: 2,
+        winRate: 60.0
+      }
+    ]
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockH2H
+    } as Response)
+
+    const result = await getH2HStats({ 
+      period: 'YEARLY',
+      token: 'test-token' 
+    })
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/statistics/h2h?period=YEARLY'),
+      expect.objectContaining({
+        headers: {
+          'Authorization': 'Bearer test-token'
+        }
+      })
+    )
+    expect(result).toEqual(mockH2H)
   })
 
   it('fetches personal stats correctly', async () => {

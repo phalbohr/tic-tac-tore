@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { getLeaderboard, getPersonalStats, type LeaderboardEntry, type LeaderboardType, type LeaderboardParams, type TimePeriod, type PlayerStats } from '@/services/statisticsService'
+import { getLeaderboard, getPersonalStats, getH2HStats, type LeaderboardEntry, type LeaderboardType, type LeaderboardParams, type TimePeriod, type PlayerStats, type H2HStats } from '@/services/statisticsService'
 import PlayerStatsSummary from '@/components/PlayerStatsSummary.vue'
+import H2HAnalyticsTable from '@/components/H2HAnalyticsTable.vue'
 
 const authStore = useAuthStore()
 
 const leaderboard = ref<LeaderboardEntry[]>([])
 const personalStats = ref<PlayerStats | null>(null)
+const h2hRecords = ref<H2HStats[]>([])
 const showPersonalStats = ref(false)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -32,11 +34,20 @@ async function fetchData() {
   error.value = null
   try {
     if (showPersonalStats.value) {
-      personalStats.value = await getPersonalStats({
+      const statsPromise = getPersonalStats({
         period: period.value,
         token: authStore.token || undefined,
         signal: controller.signal
       })
+      const h2hPromise = getH2HStats({
+        period: period.value,
+        token: authStore.token || undefined,
+        signal: controller.signal
+      })
+
+      const [statsResult, h2hResult] = await Promise.all([statsPromise, h2hPromise])
+      personalStats.value = statsResult
+      h2hRecords.value = h2hResult
     } else {
       const params: LeaderboardParams = {
         type: type.value,
@@ -168,8 +179,9 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
       </div>
 
-      <div v-if="showPersonalStats && personalStats" class="animate-in fade-in duration-300">
+      <div v-if="showPersonalStats && personalStats" class="animate-in fade-in duration-300 space-y-8">
         <PlayerStatsSummary :stats="personalStats" />
+        <H2HAnalyticsTable :h2hRecords="h2hRecords" />
       </div>
       <div v-else class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
         <div 
