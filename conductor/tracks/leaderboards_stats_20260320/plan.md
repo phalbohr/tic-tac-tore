@@ -30,10 +30,10 @@
     - [x] Implement API client for `GET /api/v1/statistics/me`
     - [x] Write component tests for the position-based breakdown (Matches, Wins, Win%)
     - [x] Design and implement the profile summary section on the "Stats" page
-- [ ] Task: Implement Head-to-Head (H2H) Analytics Table
-    - [ ] Implement API client for `GET /api/v1/statistics/h2h`
-    - [ ] Write component tests for the H2H table with sorting capabilities
-    - [ ] Add the H2H table to the player profile section
+- [x] Task: Implement Head-to-Head (H2H) Analytics Table (14f13ea)
+    - [x] Implement API client for `GET /api/v1/statistics/h2h`
+    - [x] Write component tests for the H2H table with sorting capabilities
+    - [x] Add the H2H table to the player profile section
 - [ ] Task: Implement Positional H2H Filters
     - [ ] Implement UI for positional H2H filtering (4 combinations: Me as Att/Def vs Opponent as Att/Def)
     - [ ] Write tests to verify positional filtering logic in the H2H table
