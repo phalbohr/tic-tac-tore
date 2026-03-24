@@ -6,7 +6,8 @@ import * as statisticsService from '../../services/statisticsService'
 import { useAuthStore } from '@/stores/auth'
 
 vi.mock('../../services/statisticsService', () => ({
-  getLeaderboard: vi.fn()
+  getLeaderboard: vi.fn(),
+  getPersonalStats: vi.fn()
 }))
 
 describe('LeaderboardView', () => {
@@ -39,6 +40,13 @@ describe('LeaderboardView', () => {
     }
 
     vi.mocked(statisticsService.getLeaderboard).mockResolvedValue(mockData)
+    vi.mocked(statisticsService.getPersonalStats).mockResolvedValue({
+      playerId: 'user-1',
+      playerName: 'Test User',
+      overall: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+      attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+      defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
+    })
 
     const wrapper = mount(LeaderboardView)
 
@@ -56,6 +64,38 @@ describe('LeaderboardView', () => {
 
     expect(wrapper.findAll('tr').length).toBe(2) // Header + 1 data row
     expect(statisticsService.getLeaderboard).toHaveBeenCalledTimes(1)
+  })
+
+  it('switches to personal stats when My Stats tab is clicked', async () => {
+    const mockPersonalStats = {
+      playerId: 'user-1',
+      playerName: 'Test User',
+      overall: { matches: 20, wins: 15, losses: 5, winRate: 75.0 },
+      attacker: { matches: 10, wins: 8, losses: 2, winRate: 80.0 },
+      defender: { matches: 10, wins: 7, losses: 3, winRate: 70.0 }
+    }
+    
+    vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
+      content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
+    })
+    vi.mocked(statisticsService.getPersonalStats).mockResolvedValue(mockPersonalStats)
+
+    const wrapper = mount(LeaderboardView)
+    
+    // Switch to My Stats tab
+    const myStatsTab = wrapper.findAll('button').find(b => b.text().includes('My Stats'))
+    await myStatsTab?.trigger('click')
+
+    expect(statisticsService.getPersonalStats).toHaveBeenCalledWith(expect.objectContaining({ 
+        token: 'test-token',
+        period: 'ALL_TIME'
+    }))
+
+    await vi.waitFor(() => {
+        expect(wrapper.text()).toContain('75.0%')
+    })
+    expect(wrapper.text()).toContain('Attacker')
+    expect(wrapper.text()).toContain('Defender')
   })
 
   it('changes type when tab is clicked', async () => {

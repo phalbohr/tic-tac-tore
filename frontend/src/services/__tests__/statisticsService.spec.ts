@@ -1,9 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getLeaderboard } from '../statisticsService'
+import { getLeaderboard, getPersonalStats, type PlayerStats } from '../statisticsService'
 
 describe('statisticsService', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn())
+  })
+
+  it('fetches personal stats correctly', async () => {
+    const mockStats: PlayerStats = {
+      playerId: 'user-uuid',
+      playerName: 'Current Player',
+      overall: { matches: 20, wins: 15, losses: 5, winRate: 75 },
+      attacker: { matches: 10, wins: 8, losses: 2, winRate: 80 },
+      defender: { matches: 10, wins: 7, losses: 3, winRate: 70 }
+    }
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStats
+    } as Response)
+
+    const result = await getPersonalStats({ 
+      period: 'MONTHLY',
+      token: 'test-token' 
+    })
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/statistics/me?period=MONTHLY'),
+      expect.objectContaining({
+        headers: {
+          'Authorization': 'Bearer test-token'
+        }
+      })
+    )
+    expect(result).toEqual(mockStats)
   })
 
   it('fetches leaderboard data correctly with token', async () => {

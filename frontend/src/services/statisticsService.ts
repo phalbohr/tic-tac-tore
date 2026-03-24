@@ -29,38 +29,67 @@ export interface LeaderboardParams {
   token?: string
 }
 
+export interface PositionStats {
+  matches: number
+  wins: number
+  losses: number
+  winRate: number
+}
+
+export interface PlayerStats {
+  playerId: string
+  playerName: string
+  overall: PositionStats
+  attacker: PositionStats
+  defender: PositionStats
+}
+
+export interface PersonalStatsParams {
+  period?: TimePeriod
+  token?: string
+  signal?: AbortSignal
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1'
 
-/**
- * Fetches the global leaderboard from the backend.
- * 
- * @param params Filtering and pagination parameters
- * @returns A paginated list of leaderboard entries
- */
-export async function getLeaderboard(params: LeaderboardParams): Promise<Page<LeaderboardEntry>> {
+async function apiFetch<T>(endpoint: string, params: Record<string, string | number | undefined>, options: { token?: string, signal?: AbortSignal }): Promise<T> {
   const queryParams = new URLSearchParams()
-  
-  if (params.type) queryParams.append('type', params.type)
-  if (params.period) queryParams.append('period', params.period)
-  if (params.minMatches !== undefined) queryParams.append('minMatches', params.minMatches.toString())
-  if (params.page !== undefined) queryParams.append('page', params.page.toString())
-  if (params.size !== undefined) queryParams.append('size', params.size.toString())
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) queryParams.append(key, value.toString())
+  })
+
+  const queryString = queryParams.toString()
+  const url = `${API_BASE_URL}${endpoint}${queryString ? '?' + queryString : ''}`
 
   const headers: Record<string, string> = {}
-  if (params.token) {
-    headers['Authorization'] = `Bearer ${params.token}`
+  if (options.token) {
+    headers['Authorization'] = `Bearer ${options.token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}/statistics/leaderboard?${queryParams.toString()}`, {
+  const response = await fetch(url, {
     headers,
-    signal: params.signal
+    signal: options.signal
   })
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}))
-    const message = errorBody.message || `Failed to fetch leaderboard: ${response.status}`
+    const message = errorBody.message || `API error: ${response.status}`
     throw new Error(message)
   }
 
   return response.json()
+}
+
+export async function getPersonalStats(params: PersonalStatsParams): Promise<PlayerStats> {
+  return apiFetch<PlayerStats>('/statistics/me', { period: params.period }, params)
+}
+
+export async function getLeaderboard(params: LeaderboardParams): Promise<Page<LeaderboardEntry>> {
+  return apiFetch<Page<LeaderboardEntry>>('/statistics/leaderboard', {
+    type: params.type,
+    period: params.period,
+    minMatches: params.minMatches,
+    page: params.page,
+    size: params.size
+  }, params)
 }
