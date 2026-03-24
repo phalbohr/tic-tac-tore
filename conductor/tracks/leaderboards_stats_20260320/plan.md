@@ -26,10 +26,10 @@
 - [x] Task: Conductor - User Manual Verification 'Frontend - Global Leaderboards UI' (Protocol in workflow.md) (9586496)
 
 ## Phase 3: Frontend - Player Profile & Position Breakdown [checkpoint: ]
-- [ ] Task: Create Player Profile Dashboard
-    - [ ] Implement API client for `GET /api/v1/statistics/me`
-    - [ ] Write component tests for the position-based breakdown (Matches, Wins, Win%)
-    - [ ] Design and implement the profile summary section on the "Stats" page
+- [x] Task: Create Player Profile Dashboard (a2e6539)
+    - [x] Implement API client for `GET /api/v1/statistics/me`
+    - [x] Write component tests for the position-based breakdown (Matches, Wins, Win%)
+    - [x] Design and implement the profile summary section on the "Stats" page
 - [ ] Task: Implement Head-to-Head (H2H) Analytics Table
     - [ ] Implement API client for `GET /api/v1/statistics/h2h`
     - [ ] Write component tests for the H2H table with sorting capabilities
