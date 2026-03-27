@@ -85,7 +85,6 @@
 ### Documentation
 
 - Update README/API
-- Code comments must explain **WHY**, not **WHAT**
 
 ### Nits
 

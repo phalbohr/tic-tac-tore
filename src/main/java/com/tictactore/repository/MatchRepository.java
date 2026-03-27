@@ -97,31 +97,82 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             Pageable pageable);
 
     @Query(value = """
-        WITH match_pairs AS (
-            SELECT team_b_attacker_id as opponent_id, (winner_team = 'TEAM_A') as is_win FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_a_attacker_id = :userId OR team_a_defender_id = :userId)
+        WITH match_info AS (
+            SELECT 
+                m.*,
+                CASE 
+                    WHEN m.team_a_attacker_id = :userId THEN 'ATTACKER'
+                    WHEN m.team_a_defender_id = :userId THEN 'DEFENDER'
+                    WHEN m.team_b_attacker_id = :userId THEN 'ATTACKER'
+                    WHEN m.team_b_defender_id = :userId THEN 'DEFENDER'
+                END as my_role,
+                CASE
+                    WHEN m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId THEN 'TEAM_A'
+                    ELSE 'TEAM_B'
+                END as my_team
+            FROM matches m
+            WHERE m.status = 'CONFIRMED' AND m.created_at >= :since 
+              AND (m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId OR m.team_b_attacker_id = :userId OR m.team_b_defender_id = :userId)
+        ),
+        opponent_participation AS (
+            SELECT m.id as match_id, m.my_role, (m.my_team = m.winner_team) as is_win, m.team_b_attacker_id as opponent_id, 'ATTACKER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_A'
             UNION ALL
-            SELECT team_b_defender_id, (winner_team = 'TEAM_A') FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_a_attacker_id = :userId OR team_a_defender_id = :userId)
+            SELECT m.id as match_id, m.my_role, (m.my_team = m.winner_team) as is_win, m.team_b_defender_id as opponent_id, 'DEFENDER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_A'
             UNION ALL
-            SELECT team_a_attacker_id, (winner_team = 'TEAM_B') FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_b_attacker_id = :userId OR team_b_defender_id = :userId)
+            SELECT m.id as match_id, m.my_role, (m.my_team = m.winner_team) as is_win, m.team_a_attacker_id as opponent_id, 'ATTACKER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_B'
             UNION ALL
-            SELECT team_a_defender_id, (winner_team = 'TEAM_B') FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_b_attacker_id = :userId OR team_b_defender_id = :userId)
+            SELECT m.id as match_id, m.my_role, (m.my_team = m.winner_team) as is_win, m.team_a_defender_id as opponent_id, 'DEFENDER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_B'
+        ),
+        filtered_pairs AS (
+            SELECT * FROM opponent_participation
+            WHERE (:myPosition = 'OVERALL' OR my_role = :myPosition)
+              AND (:opponentPosition = 'OVERALL' OR opponent_role = :opponentPosition)
         ),
         h2h_stats AS (
-            SELECT opponent_id, COUNT(*) as total_matches, COUNT(CASE WHEN is_win THEN 1 END) as wins, COUNT(CASE WHEN NOT is_win THEN 1 END) as losses FROM match_pairs GROUP BY opponent_id
+            SELECT opponent_id, COUNT(*) as total_matches, COUNT(CASE WHEN is_win THEN 1 END) as wins, COUNT(CASE WHEN NOT is_win THEN 1 END) as losses FROM filtered_pairs GROUP BY opponent_id
         )
         SELECT CAST(u.id AS VARCHAR) as opponentId, u.name as opponentName, hs.total_matches as totalMatches, hs.wins as wins, hs.losses as losses, CAST(hs.wins * 100.0 / hs.total_matches AS DOUBLE) as winRate
-        FROM h2h_stats hs JOIN users u ON hs.opponent_id = u.id ORDER BY winRate DESC, totalMatches DESC
+        FROM h2h_stats hs JOIN users u ON hs.opponent_id = u.id 
+        ORDER BY winRate DESC, totalMatches DESC, opponentName ASC
         """, 
         countQuery = """
-        SELECT COUNT(DISTINCT opponent_id) FROM (
-            SELECT team_b_attacker_id as opponent_id FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_a_attacker_id = :userId OR team_a_defender_id = :userId)
-            UNION SELECT team_b_defender_id FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_a_attacker_id = :userId OR team_a_defender_id = :userId)
-            UNION SELECT team_a_attacker_id FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_b_attacker_id = :userId OR team_b_defender_id = :userId)
-            UNION SELECT team_a_defender_id FROM matches WHERE status = 'CONFIRMED' AND created_at >= :since AND (team_b_attacker_id = :userId OR team_b_defender_id = :userId)
+        WITH match_info AS (
+            SELECT 
+                m.*,
+                CASE 
+                    WHEN m.team_a_attacker_id = :userId THEN 'ATTACKER'
+                    WHEN m.team_a_defender_id = :userId THEN 'DEFENDER'
+                    WHEN m.team_b_attacker_id = :userId THEN 'ATTACKER'
+                    WHEN m.team_b_defender_id = :userId THEN 'DEFENDER'
+                END as my_role,
+                CASE
+                    WHEN m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId THEN 'TEAM_A'
+                    ELSE 'TEAM_B'
+                END as my_team
+            FROM matches m
+            WHERE m.status = 'CONFIRMED' AND m.created_at >= :since 
+              AND (m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId OR m.team_b_attacker_id = :userId OR m.team_b_defender_id = :userId)
+        ),
+        opponent_participation AS (
+            SELECT m.my_role, m.team_b_attacker_id as opponent_id, 'ATTACKER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_A'
+            UNION ALL
+            SELECT m.my_role, m.team_b_defender_id as opponent_id, 'DEFENDER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_A'
+            UNION ALL
+            SELECT m.my_role, m.team_a_attacker_id as opponent_id, 'ATTACKER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_B'
+            UNION ALL
+            SELECT m.my_role, m.team_a_defender_id as opponent_id, 'DEFENDER' as opponent_role FROM match_info m WHERE m.my_team = 'TEAM_B'
         )
+        SELECT COUNT(DISTINCT opponent_id) FROM opponent_participation
+        WHERE (:myPosition = 'OVERALL' OR my_role = :myPosition)
+          AND (:opponentPosition = 'OVERALL' OR opponent_role = :opponentPosition)
         """,
         nativeQuery = true)
-    Page<H2HProjection> findH2HStats(@Param("userId") UUID userId, @Param("since") LocalDateTime since, Pageable pageable);
+    Page<H2HProjection> findH2HStats(
+            @Param("userId") UUID userId, 
+            @Param("since") LocalDateTime since, 
+            @Param("myPosition") String myPosition,
+            @Param("opponentPosition") String opponentPosition,
+            Pageable pageable);
 
     @Query(value = """
         WITH participation AS (

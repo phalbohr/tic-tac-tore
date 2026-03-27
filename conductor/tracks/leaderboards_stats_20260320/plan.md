@@ -34,9 +34,10 @@
     - [x] Implement API client for `GET /api/v1/statistics/h2h`
     - [x] Write component tests for the H2H table with sorting capabilities
     - [x] Add the H2H table to the player profile section
-- [ ] Task: Implement Positional H2H Filters
-    - [ ] Implement UI for positional H2H filtering (4 combinations: Me as Att/Def vs Opponent as Att/Def)
-    - [ ] Write tests to verify positional filtering logic in the H2H table
+- [x] Task: Implement Positional H2H Filters (de0bc60)
+    - [x] Update Backend API and Repository to support `myPosition` and `opponentPosition` parameters using CTEs
+    - [x] Add reactive UI filters in `LeaderboardView.vue` for all positional combinations
+    - [x] Add integration and unit tests to verify end-to-end filtering logic
 - [ ] Task: Conductor - User Manual Verification 'Frontend - Player Profile & Position Breakdown' (Protocol in workflow.md)
 
 ## Phase 4: Integration & Mobile Polish [checkpoint: ]
