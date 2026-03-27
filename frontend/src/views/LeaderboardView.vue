@@ -21,6 +21,9 @@ const page = ref(0)
 const size = ref(10)
 const totalPages = ref(0)
 
+const myPosition = ref<LeaderboardType>('OVERALL')
+const opponentPosition = ref<LeaderboardType>('OVERALL')
+
 const PAGE_SIZES = [10, 20, 50, 100]
 const MIN_MATCHES_OPTIONS = [0, 10, 20, 50, 100]
 
@@ -41,6 +44,8 @@ async function fetchData() {
       })
       const h2hPromise = getH2HStats({
         period: period.value,
+        myPosition: myPosition.value,
+        opponentPosition: opponentPosition.value,
         token: authStore.token || undefined,
         signal: controller.signal
       })
@@ -86,10 +91,18 @@ watch([type, period, minMatches, size, showPersonalStats], () => {
 
 watch(page, fetchData)
 
+watch([myPosition, opponentPosition], fetchData)
+
 fetchData()
 
 const tabs: { label: string, value: LeaderboardType }[] = [
   { label: 'Overall', value: 'OVERALL' },
+  { label: 'Attacker', value: 'ATTACKER' },
+  { label: 'Defender', value: 'DEFENDER' }
+]
+
+const h2hPositions: { label: string, value: LeaderboardType }[] = [
+  { label: 'Any Role', value: 'OVERALL' },
   { label: 'Attacker', value: 'ATTACKER' },
   { label: 'Defender', value: 'DEFENDER' }
 ]
@@ -181,6 +194,37 @@ const periods: { label: string, value: TimePeriod }[] = [
 
       <div v-if="showPersonalStats && personalStats" class="animate-in fade-in duration-300 space-y-8">
         <PlayerStatsSummary :stats="personalStats" />
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <h3 class="text-sm font-black text-gray-900 uppercase tracking-tighter">Positional H2H Filters</h3>
+            
+            <div class="flex flex-wrap gap-4">
+              <div class="flex items-center gap-3">
+                <label for="my-pos-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Me as</label>
+                <select
+                  id="my-pos-selector"
+                  v-model="myPosition"
+                  class="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer min-w-[120px]"
+                >
+                  <option v-for="pos in h2hPositions" :key="pos.value" :value="pos.value">{{ pos.label }}</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <label for="opp-pos-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Opponent as</label>
+                <select
+                  id="opp-pos-selector"
+                  v-model="opponentPosition"
+                  class="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer min-w-[120px]"
+                >
+                  <option v-for="pos in h2hPositions" :key="pos.value" :value="pos.value">{{ pos.label }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <H2HAnalyticsTable :h2hRecords="h2hRecords" />
       </div>
       <div v-else class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">

@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,33 +23,47 @@ public class StatisticsController implements StatisticsApi {
     private final StatisticsService statisticsService;
 
     @Override
+    @GetMapping("/leaderboard")
     public ResponseEntity<Page<LeaderboardEntryResponse>> getLeaderboard(
-            LeaderboardType type, 
-            TimePeriod period, 
-            Integer minMatches, 
+            LeaderboardParams params, 
             Pageable pageable) {
         log.debug("Leaderboard request: type={}, period={}, minMatches={}, page={}", 
-                type, period, minMatches, pageable.getPageNumber());
+                params.getType(), params.getPeriod(), params.getMinMatches(), pageable.getPageNumber());
         
-        var leaderboard = statisticsService.getLeaderboard(type, period, minMatches, pageable);
+        var leaderboard = statisticsService.getLeaderboard(
+                params.getType(), 
+                params.getPeriod(), 
+                params.getMinMatches(), 
+                pageable);
         return ResponseEntity.ok(leaderboard);
     }
 
     @Override
-    public ResponseEntity<PlayerStatsResponse> getPersonalStats(TimePeriod period) {
+    @GetMapping("/me")
+    public ResponseEntity<PlayerStatsResponse> getPersonalStats(
+            @RequestParam(required = false, defaultValue = "ALL_TIME") String period) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Personal stats request: user={}, period={}", email, period);
         
-        var stats = statisticsService.getPersonalStats(period);
+        TimePeriod timePeriod = TimePeriod.valueOf(period);
+        var stats = statisticsService.getPersonalStats(timePeriod);
         return ResponseEntity.ok(stats);
     }
 
     @Override
-    public ResponseEntity<Page<H2HStatsResponse>> getH2HStats(TimePeriod period, Pageable pageable) {
+    @GetMapping("/h2h")
+    public ResponseEntity<Page<H2HStatsResponse>> getH2HStats(
+            H2HParams params, 
+            Pageable pageable) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("H2H stats request: user={}, period={}, page={}", email, period, pageable.getPageNumber());
+        log.debug("H2H stats request: user={}, period={}, myPosition={}, opponentPosition={}, page={}", 
+                email, params.getPeriod(), params.getMyPosition(), params.getOpponentPosition(), pageable.getPageNumber());
         
-        var h2hStats = statisticsService.getH2HStats(period, pageable);
+        var h2hStats = statisticsService.getH2HStats(
+                params.getPeriod(), 
+                params.getMyPosition(), 
+                params.getOpponentPosition(), 
+                pageable);
         return ResponseEntity.ok(h2hStats);
     }
 }

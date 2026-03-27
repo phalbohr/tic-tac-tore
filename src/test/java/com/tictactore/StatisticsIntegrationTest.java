@@ -49,8 +49,35 @@ class StatisticsIntegrationTest {
         player3 = createUser("player3@example.com", "Player Three");
         player4 = createUser("player4@example.com", "Player Four");
 
-        // Create a confirmed match: Team A (p1, p2) wins against Team B (p3, p4)
+        // Match 1: Team A (p1:Att, p2:Def) wins against Team B (p3:Att, p4:Def)
         createConfirmedMatch(player1, player2, player3, player4, WinnerTeam.TEAM_A);
+        
+        // Match 2: Team A (p2:Att, p1:Def) wins against Team B (p4:Att, p3:Def)
+        // p1 is now Defender
+        createConfirmedMatch(player2, player1, player4, player3, WinnerTeam.TEAM_A);
+    }
+
+    @Test
+    @WithMockUser(username = "player1@example.com")
+    @DisplayName("GET /api/v1/statistics/h2h - should filter by positional combinations")
+    void getH2HStats_shouldFilterByPositions() throws Exception {
+        // As Attacker, p1 played Match 1 vs p3 (Att) and p4 (Def)
+        mockMvc.perform(get("/api/v1/statistics/h2h")
+                .param("myPosition", "ATTACKER")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].wins").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2));
+
+        // As Defender, p1 played Match 2 vs p3 (Def) and p4 (Att)
+        // If we filter p1 as Defender and opponent as Attacker, we should only see p4
+        mockMvc.perform(get("/api/v1/statistics/h2h")
+                .param("myPosition", "DEFENDER")
+                .param("opponentPosition", "ATTACKER")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].opponentName").value("Player Four"))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -58,23 +85,21 @@ class StatisticsIntegrationTest {
     @DisplayName("GET /api/v1/statistics/leaderboard - should filter by role")
     void getLeaderboard_shouldFilterByRole() throws Exception {
         // player1 is Attacker in Match 1 (win)
-        // player2 is Defender in Match 1 (win)
+        // player2 is Attacker in Match 2 (win)
         
         // Attacker Leaderboard
         mockMvc.perform(get("/api/v1/statistics/leaderboard")
                 .param("type", "ATTACKER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].playerName").value("Player One"))
-                .andExpect(jsonPath("$.totalElements").value(2)); // p1 (win), p3 (loss)
+                .andExpect(jsonPath("$.totalElements").value(4)); // p1, p2, p3, p4 all played as Attacker
         
         // Defender Leaderboard
         mockMvc.perform(get("/api/v1/statistics/leaderboard")
                 .param("type", "DEFENDER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].playerName").value("Player Two"))
-                .andExpect(jsonPath("$.totalElements").value(2)); // p2 (win), p4 (loss)
+                .andExpect(jsonPath("$.totalElements").value(4));
     }
 
     @Test
@@ -86,9 +111,9 @@ class StatisticsIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.playerName").value("Player One"))
-                .andExpect(jsonPath("$.overall.wins").value(1))
+                .andExpect(jsonPath("$.overall.wins").value(2))
                 .andExpect(jsonPath("$.attacker.wins").value(1))
-                .andExpect(jsonPath("$.defender.wins").value(0));
+                .andExpect(jsonPath("$.defender.wins").value(1));
     }
 
     @Test
@@ -101,10 +126,10 @@ class StatisticsIntegrationTest {
                 .param("size", "10")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].opponentName").value("Player Three"))
-                .andExpect(jsonPath("$.content[0].wins").value(1))
-                .andExpect(jsonPath("$.content[1].opponentName").value("Player Four"))
-                .andExpect(jsonPath("$.content[1].wins").value(1));
+                .andExpect(jsonPath("$.content[0].opponentName").value("Player Four"))
+                .andExpect(jsonPath("$.content[0].wins").value(2))
+                .andExpect(jsonPath("$.content[1].opponentName").value("Player Three"))
+                .andExpect(jsonPath("$.content[1].wins").value(2));
     }
 
     private User createUser(String email, String name) {

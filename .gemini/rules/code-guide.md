@@ -31,9 +31,11 @@ Below are the mandatory conventions for this project. They are compressed for AI
 
 All developer-facing text (comments, logs, exceptions, APIs, tests) MUST be in English.
 
-## 3. OpenAPI Annotations
+## 3. OpenAPI Annotations (Hybrid Split)
 
-Keep controllers clean. Use Interface-Driven Documentation (extract `@Operation` etc. to an `XxxxApi` interface). Rely on `therapi-runtime-javadoc` for descriptions. Use `@ParameterObject`. Do NOT duplicate JSR-303 constraints in API docs.
+Keep controllers clean. Use Hybrid Split Interface-Driven Documentation (extract `@Operation` etc. to an `XxxxApi` interface). Rely on `therapi-runtime-javadoc` for descriptions. Use `@ParameterObject`. Do NOT duplicate JSR-303 constraints in API docs.
+- **Interface:** Documentation only (`@Operation`, `@ApiResponse`, `@Parameter`).
+- **Controller:** Routing & Validation (`@XxxMapping`, `@Valid`, `@PathVariable`, etc.).
 
 ## 4. Optimistic Locking
 

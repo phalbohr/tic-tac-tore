@@ -90,14 +90,27 @@ public class StatisticsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<H2HStatsResponse> getH2HStats(TimePeriod period, Pageable pageable) {
+    public Page<H2HStatsResponse> getH2HStats(
+            TimePeriod period, 
+            LeaderboardType myPosition, 
+            LeaderboardType opponentPosition, 
+            Pageable pageable) {
         Objects.requireNonNull(period, "period is required");
+        Objects.requireNonNull(myPosition, "myPosition is required");
+        Objects.requireNonNull(opponentPosition, "opponentPosition is required");
         Objects.requireNonNull(pageable, "pageable is required");
+        
         var user = getCurrentUser();
-        log.debug("Calculating H2H stats for user={} with period={}", user.getEmail(), period);
+        log.debug("Calculating H2H stats for user={} with period={}, myPosition={}, opponentPosition={}", 
+                user.getEmail(), period, myPosition, opponentPosition);
         
         var since = calculateSinceDate(period);
-        var projections = matchRepository.findH2HStats(user.getId(), since, pageable);
+        var projections = matchRepository.findH2HStats(
+                user.getId(), 
+                since, 
+                myPosition.name(), 
+                opponentPosition.name(), 
+                pageable);
         
         return projections.map(p -> H2HStatsResponse.builder()
                 .opponentId(UUID.fromString(p.getOpponentId()))

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import LeaderboardView from '../LeaderboardView.vue'
 import * as statisticsService from '../../services/statisticsService'
@@ -191,6 +192,44 @@ describe('LeaderboardView', () => {
     expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ 
         minMatches: 10,
         page: 0 
+    }))
+  })
+
+  it('filters H2H statistics by positions correctly', async () => {
+    vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
+      content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
+    })
+    vi.mocked(statisticsService.getPersonalStats).mockResolvedValue({
+      playerId: 'user-1', playerName: 'Test User', 
+      overall: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+      attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+      defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
+    })
+    vi.mocked(statisticsService.getH2HStats).mockResolvedValue([])
+
+    const wrapper = mount(LeaderboardView)
+    
+    // Switch to My Stats tab
+    const myStatsTab = wrapper.findAll('button').find(b => b.text().includes('My Stats'))
+    await myStatsTab?.trigger('click')
+    await nextTick()
+
+    // Find and change "Me as" filter
+    const myPosSelect = wrapper.find('select#my-pos-selector')
+    await myPosSelect.setValue('ATTACKER')
+
+    expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
+        myPosition: 'ATTACKER',
+        opponentPosition: 'OVERALL'
+    }))
+
+    // Find and change "Opponent as" filter
+    const oppPosSelect = wrapper.find('select#opp-pos-selector')
+    await oppPosSelect.setValue('DEFENDER')
+
+    expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
+        myPosition: 'ATTACKER',
+        opponentPosition: 'DEFENDER'
     }))
   })
 })
