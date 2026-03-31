@@ -37,6 +37,11 @@ const router = createRouter({
       component: () => import('../views/LeaderboardView.vue'),
     },
     {
+      path: '/token',
+      name: 'token',
+      component: () => import('../views/TokenView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       meta: { requiresAuth: true },
@@ -52,15 +57,10 @@ router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
   
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    // Если маршрут требует авторизации и пользователь не вошел в систему,
-    // перенаправляем его на страницу логина.
     next({ name: 'login' })
   } else if (to.name === 'login' && auth.isAuthenticated) {
-    // Если пользователь уже авторизован и пытается зайти на страницу логина,
-    // отправляем его на главную.
     next({ name: 'home' })
   } else {
-    // В остальных случаях разрешаем переход.
     next()
   }
 })

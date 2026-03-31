@@ -171,19 +171,18 @@ All tasks follow a strict lifecycle:
 4.  **Execute deep review of the phase:**
     - For all the files changed during the phase, sequentially one by one conduct deep review using Generalist Agent with `deep-review` skill by giving it a single file at a time for review.
 
-5.  **Review and Categorize Findings:**
-    - Read the generated `.gemini/reviews/deep-review/deep-review-[file-to-review].md` files. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
+5.  **Assess and Categorize Findings:**
+    - Execute `deep-review-assess` skill to automatically categorize findings in `.gemini/reviews/deep-review/` as `[FIX_NOW]`, `[POSTPONE]`, or `[IT_DEPENDS]`.
 
-6.  **User Review:**
-    - Propose the user to review the marked files with findings.
+6.  **User Review & Confirmation:**
+    - Present the categorized findings to the user and wait for their explicit confirmation or modifications to the categories.
 
-7.  **Wait for Confirmation:**
-    - Wait for the command from the user to continue working.
+7.  **Address [FIX_NOW] Issues:**
+    - After confirmation, execute `deep-review-fix` skill to automatically apply fixes for all items marked as `[FIX_NOW]`.
+    - **CRITICAL:** The `deep-review-fix` skill will sequentially apply fixes and delegate test verification to the current agent session. Ensure all tests pass after each fix.
 
-8.  **Address [FIX_NOW] Issues:**
-    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review-[file-to-review].md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
-    - Mark the fixed finding with the status `[FIXED]`.
-    - Process all remaining `[FIX_NOW]` findings in all the report files sequentially in the same manner.
+8.  **Final Verification of Fixes:**
+    - Verify that all `[FIX_NOW]` findings are marked as `[FIXED]` in the report files.
 
 9.  **Ensure Test Coverage for Phase Changes:**
     - **Step 9.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the _previous_ phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.

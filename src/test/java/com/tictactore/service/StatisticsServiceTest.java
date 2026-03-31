@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ class StatisticsServiceTest {
     void setUp() {
         matchRepository = mock(MatchRepository.class);
         userRepository = mock(UserRepository.class);
-        statisticsService = new StatisticsService(matchRepository, userRepository);
+        statisticsService = new StatisticsService(matchRepository, userRepository, Clock.systemDefaultZone());
         player = new User();
         player.setId(UUID.randomUUID());
         player.setName("Player");

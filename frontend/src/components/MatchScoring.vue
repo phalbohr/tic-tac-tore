@@ -130,20 +130,21 @@ const finishMatch = () => {
     <!-- Position Selection (Only for Game 1 and Game 3) -->
     <div v-if="currentGameIndex !== 1" class="space-y-4 mb-8">
       <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-        <label :for="'t1pos-'+currentGameIndex" class="block text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">Team 1 Positions</label>
-        <select :id="'t1pos-'+currentGameIndex" v-model="games[currentGameIndex].team1Pos" class="w-full p-2 bg-white border border-indigo-200 rounded-lg text-sm">
+        <label :for="'t1pos-'+currentGameIndex" class="block text-xs font-bold text-indigo-700 uppercase tracking-widest mb-2">Team 1 Positions</label>
+        <select :id="'t1pos-'+currentGameIndex" v-model="games[currentGameIndex].team1Pos" class="w-full p-2 bg-white border border-indigo-200 rounded-lg text-sm text-gray-900 font-bold">
           <option value="">Select positions...</option>
           <option v-for="opt in team1Options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
       <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-        <label :for="'t2pos-'+currentGameIndex" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Team 2 Positions</label>
-        <select :id="'t2pos-'+currentGameIndex" v-model="games[currentGameIndex].team2Pos" class="w-full p-2 bg-white border border-gray-200 rounded-lg text-sm">
+        <label :for="'t2pos-'+currentGameIndex" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Team 2 Positions</label>
+        <select :id="'t2pos-'+currentGameIndex" v-model="games[currentGameIndex].team2Pos" class="w-full p-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 font-bold">
           <option value="">Select positions...</option>
           <option v-for="opt in team2Options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
     </div>
+
 
     <!-- Position Display (For Game 2 - Swapped) -->
     <div v-else class="space-y-4 mb-8">
@@ -173,25 +174,25 @@ const finishMatch = () => {
     <!-- Scores -->
     <div class="grid grid-cols-2 gap-8 items-center mb-8">
       <div class="text-center">
-        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Team 1</label>
+        <label class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">Team 1</label>
         <input
           type="number"
           name="team1Score"
           min="0"
           max="99"
           v-model.number="games[currentGameIndex].team1Score"
-          class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all"
+          class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all text-gray-900"
         />
         </div>
         <div class="text-center">
-        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Team 2</label>
+        <label class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">Team 2</label>
         <input
           type="number"
           name="team2Score"
           min="0"
           max="99"
           v-model.number="games[currentGameIndex].team2Score"
-          class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all"
+          class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all text-gray-900"
         />
         </div>    </div>
 
