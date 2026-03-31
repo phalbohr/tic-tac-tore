@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import TheNavigation from '@/components/TheNavigation.vue'
 </script>
 
 <template>
-  <main>
-    <RouterView />
-  </main>
+  <div class="min-h-screen bg-gray-50 font-sans">
+    <TheNavigation />
+    <main>
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style>
-/* Global reset or minimal styles if needed */
 body {
   margin: 0;
   padding: 0;

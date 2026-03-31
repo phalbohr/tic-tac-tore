@@ -40,8 +40,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/api/v1/statistics/**").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
-                .requestMatchers("/api/v1/dev/seed").permitAll()
+                .requestMatchers("/api/v1/dev/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )

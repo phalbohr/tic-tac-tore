@@ -6,3 +6,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Create user authentication flow for user sign in.**
   *Link: [./archive/auth_20260114/](./archive/auth_20260114/)*
+
+---
+
+- [x] **Track: Public Leaderboards & Comprehensive Player Statistics**
+*Link: [./archive/leaderboards_stats_20260320/](./archive/leaderboards_stats_20260320/)*

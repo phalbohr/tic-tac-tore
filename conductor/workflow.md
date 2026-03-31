@@ -22,7 +22,7 @@
 
 Before starting any task, you MUST:
 
-- **Read the project guidelines:** (`.gemini/rules`)
+- **Read the project guidelines:** (`.gemini/rules/*.*`)
 - **Read the project workflow:** (`conductor/workflow.md`)
 
 ## Language & Communication Policy
@@ -50,7 +50,8 @@ The AI Agent acts as an **Expert Software Engineer & Teacher-Practitioner**. Sin
 1.  **Educational Journaling:**
     - **Initialization:** When starting a new Task, create a directory named `education/` within the corresponding `track/` folder in `conductor/tracks/`.
     - **Creation:** Inside that `education/` folder, create a Markdown file named `Phase{N_name}_Task{name}.md`.
-    - **Knowledge Transfer:** After every step of the implementation (Red phase, Green phase, Refactoring, Code Review, etc.), the agent MUST append a knowledge transfer section to this file. In this section, exactly as described in the expert role, transfer knowledge of what was done, explaining architectural decisions, design patterns, and professional mental models.
+    - **Knowledge Transfer:** After every step of the implementation (Red phase, Green phase, Refactoring, Code Review, etc.), the agent MUST append a new chapter to this file (do not replace old entries). In this section, exactly as described in the expert role, transfer knowledge of what was done, explaining architectural decisions, design patterns, and professional mental models.
+    - **Structure:** Each entry MUST be formatted as a new chapter (e.g., `## Глава N: [Stage Name]`) with a date. This provides a clear evolutionary trail of the solution.
 2.  **Masterclass Style:** Treat each entry and the final chapter as a mini-lecture. Explain how a professional developer thinks about edge cases, security, maintainability, and testing. Use a direct, encouraging, and highly detailed pedagogical tone in the log.
 3.  **Phase Completion:** At the end of a phase, the agent must ensure that the collection of task-level education files forms a coherent, high-quality "educational chapter" for a computer science student, written in clear, accessible, and professional language.
 4.  **Code Hygiene:** All educational or "teacher-style" comments added to the source code during the implementation phase to help the student understand the code **MUST** be removed before committing. The final codebase should remain clean and follow professional standards.
@@ -170,19 +171,18 @@ All tasks follow a strict lifecycle:
 4.  **Execute deep review of the phase:**
     - For all the files changed during the phase, sequentially one by one conduct deep review using Generalist Agent with `deep-review` skill by giving it a single file at a time for review.
 
-5.  **Review and Categorize Findings:**
-    - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
+5.  **Assess and Categorize Findings:**
+    - Execute `deep-review-assess` skill to automatically categorize findings in `.gemini/reviews/deep-review/` as `[FIX_NOW]`, `[POSTPONE]`, or `[IT_DEPENDS]`.
 
-6.  **User Review:**
-    - Propose the user to review the marked file with findings.
+6.  **User Review & Confirmation:**
+    - Present the categorized findings to the user and wait for their explicit confirmation or modifications to the categories.
 
-7.  **Wait for Confirmation:**
-    - Wait for the command from the user to continue working.
+7.  **Address [FIX_NOW] Issues:**
+    - After confirmation, execute `deep-review-fix` skill to automatically apply fixes for all items marked as `[FIX_NOW]`.
+    - **CRITICAL:** The `deep-review-fix` skill will sequentially apply fixes and delegate test verification to the current agent session. Ensure all tests pass after each fix.
 
-8.  **Address [FIX_NOW] Issues:**
-    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review.md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
-    - Mark the fixed finding with the status `[FIXED]`.
-    - Process all remaining `[FIX_NOW]` findings sequentially in the same manner.
+8.  **Final Verification of Fixes:**
+    - Verify that all `[FIX_NOW]` findings are marked as `[FIXED]` in the report files.
 
 9.  **Ensure Test Coverage for Phase Changes:**
     - **Step 9.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the _previous_ phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
@@ -244,7 +244,7 @@ All tasks follow a strict lifecycle:
 
 16. **Finalize Educational Chapter:**
     - **Action:** Review all educational log files for the completed phase.
-    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{N_name}_Educational_Review.md`) in the phase's track folder.
+    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{Number}_Task{Number}_Educational_Review.md`) in the phase's track folder.
     - **Goal:** Ensure the content is written in accessible language for a computer science student, covering all key learnings from the phase.
 
 17. **Commit Plan Update:**
