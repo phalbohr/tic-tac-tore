@@ -27,7 +27,7 @@ public class Match {
     private UUID id;
 
     @Version
-    private long version;
+    private Long version;
 
     @NotNull(message = "Creator is required")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,6 +60,10 @@ public class Match {
     @ToString.Include
     private MatchStatus status = MatchStatus.PENDING_APPROVAL;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "winner_team")
+    private WinnerTeam winner;
+
     @Size(min = 1, max = 3, message = "Match must have between 1 and 3 games")
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Game> games = new ArrayList<>();
@@ -69,10 +73,33 @@ public class Match {
     @ToString.Include
     private LocalDateTime createdAt;
 
+    public void calculateWinner() {
+        if (games == null || games.isEmpty()) {
+            this.winner = null;
+            return;
+        }
+
+        var teamAWins = games.stream()
+                .filter(g -> g.getTeamAScore() > g.getTeamBScore())
+                .count();
+        var teamBWins = games.stream()
+                .filter(g -> g.getTeamBScore() > g.getTeamAScore())
+                .count();
+
+        if (teamAWins > teamBWins) {
+            this.winner = WinnerTeam.TEAM_A;
+        } else if (teamBWins > teamAWins) {
+            this.winner = WinnerTeam.TEAM_B;
+        } else {
+            this.winner = null;
+        }
+    }
+
     public void approve() {
         if (this.status != MatchStatus.PENDING_APPROVAL) {
             throw new IllegalStateException("Match can only be approved if it is in PENDING_APPROVAL status");
         }
+        calculateWinner();
         this.status = MatchStatus.CONFIRMED;
     }
 
@@ -91,6 +118,26 @@ public class Match {
     public boolean isUserInTeamB(User user) {
         return user.getId().equals(this.teamBAttacker.getId()) ||
                user.getId().equals(this.teamBDefender.getId());
+    }
+
+    public boolean isAttacker(User user) {
+        return user.getId().equals(this.teamAAttacker.getId()) ||
+               user.getId().equals(this.teamBAttacker.getId());
+    }
+
+    public boolean isDefender(User user) {
+        return user.getId().equals(this.teamADefender.getId()) ||
+               user.getId().equals(this.teamBDefender.getId());
+    }
+
+    public boolean isWinner(User user) {
+        if (winner == null) {
+            return false;
+        }
+        if (winner == WinnerTeam.TEAM_A) {
+            return isUserInTeamA(user);
+        }
+        return isUserInTeamB(user);
     }
 
     public void addGame(Game game) {

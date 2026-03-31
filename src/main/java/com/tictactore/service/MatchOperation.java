@@ -31,7 +31,6 @@ public class MatchOperation {
     private final UserRepository userRepository;
     private final MatchMapper matchMapper;
 
-    @Idempotent
     @Transactional
     public MatchResponse createMatch(MatchRequest request, User creator) {
         var playerIds = List.of(
@@ -58,28 +57,27 @@ public class MatchOperation {
             match.addGame(game);
         }
 
-        var savedMatch = matchRepository.save(match);
+        match.calculateWinner();
+        var savedMatch = matchRepository.saveAndFlush(match);
         log.info("Match created successfully with ID: {}", savedMatch.getId());
         
         return matchMapper.toResponse(savedMatch);
     }
 
-    @Idempotent
     @Transactional
     public void approveMatch(UUID matchId) {
         var match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
         match.approve();
-        matchRepository.save(match);
+        matchRepository.saveAndFlush(match);
     }
 
-    @Idempotent
     @Transactional
     public void rejectMatch(UUID matchId) {
         var match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
         match.reject();
-        matchRepository.save(match);
+        matchRepository.saveAndFlush(match);
     }
 
     private User getUserFromMap(Map<UUID, User> usersMap, UUID id, String roleName) {

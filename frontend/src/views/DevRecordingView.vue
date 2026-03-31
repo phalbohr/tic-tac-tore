@@ -83,7 +83,10 @@ const handleFinish = async (games: any) => {
       })
     })
 
-    if (!response.ok) throw new Error('Failed to record match')
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || 'Failed to record match')
+    }
     
     alert('Match recorded successfully! Now logout and login as Account B to approve.')
     step.value = 1
@@ -110,68 +113,12 @@ const copyToClipboard = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-12 px-4 font-sans">
+  <div class="py-12 px-4">
     <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div>
-          <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
-            Match Recording Dev Tool
-          </h1>
-          <div v-if="authStore.isAuthenticated" class="flex items-center gap-2 mt-1">
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">
-              Logged in as {{ authStore.user?.name }}
-            </span>
-          </div>
-        </div>
-        
-        <div class="flex gap-2">
-          <template v-if="authStore.isAuthenticated">
-            <router-link
-              to="/dashboard"
-              class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider flex items-center"
-            >
-              Dashboard
-            </router-link>
-            <button
-              @click="showToken = !showToken"
-              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
-            >
-              {{ showToken ? 'Hide Token' : 'Show Token' }}
-            </button>
-            <button
-              @click="authStore.logout()"
-              class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg border border-red-200 transition-all active:scale-95 text-xs uppercase tracking-wider"
-            >
-              Logout
-            </button>
-          </template>
-          <div v-else class="flex gap-2">
-            <button
-              @click="loginAs('me')"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
-            >
-              Login as Pavel
-            </button>
-            <button
-              @click="loginAs('opp1')"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-all active:scale-95 text-xs uppercase tracking-wider"
-            >
-              Login as Account B
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Seed Status -->
-      <div v-if="!seedData" class="mb-8 p-4 bg-yellow-50 text-yellow-700 rounded-xl text-center font-bold text-sm">
-        Connecting to backend to seed data...
-      </div>
-
-      <!-- Token Panel -->
+      <!-- Token Panel (Optional here, can stay if useful for dev) -->
       <div v-if="showToken && authStore.isAuthenticated" class="mb-8 bg-white p-6 rounded-2xl shadow-xl border border-indigo-100 animate-in fade-in slide-in-from-top-4 duration-300">
         <div class="relative">
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Current JWT Token</label>
           <textarea
             readonly
             :value="authStore.token"
@@ -191,10 +138,17 @@ const copyToClipboard = async () => {
       <div v-if="!authStore.isAuthenticated" class="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
         <div class="text-4xl mb-4">🔐</div>
         <h2 class="text-xl font-bold text-gray-900 mb-2">Authentication Required</h2>
-        <p class="text-gray-500 text-sm">Please choose a mock account to log in.</p>
+        <p class="text-gray-500 text-sm">Please use the login buttons in the navigation bar.</p>
       </div>
 
       <div v-else class="animate-in fade-in duration-500">
+        <div class="mb-8 flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight">Record New Match</h2>
+          <button @click="showToken = !showToken" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">
+            {{ showToken ? 'Hide Debug Token' : 'Show Debug Token' }}
+          </button>
+        </div>
+
         <!-- Form Flow -->
         <div v-if="step === 1">
           <MatchRecordingForm 
