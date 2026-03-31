@@ -21,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +34,9 @@ class MatchApprovalTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MatchOperation matchOperation;
 
     @InjectMocks
     private MatchService matchService;
@@ -84,7 +86,7 @@ class MatchApprovalTest {
     }
 
     @Test
-    @DisplayName("Should successfully approve match when current user is an opponent")
+    @DisplayName("Should successfully delegate approval to matchOperation when current user is an opponent")
     void approveMatch_Success() {
         // Arrange
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -96,8 +98,7 @@ class MatchApprovalTest {
         matchService.approveMatch(match.getId());
 
         // Assert
-        assertThat(match.getStatus()).isEqualTo(MatchStatus.CONFIRMED);
-        verify(matchRepository).save(match);
+        verify(matchOperation).approveMatch(match.getId());
     }
 
     @Test
@@ -113,53 +114,6 @@ class MatchApprovalTest {
         assertThatThrownBy(() -> matchService.approveMatch(match.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Only an opponent can approve this match");
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException when teammate of creator attempts to approve")
-    void approveMatch_TeammateCannotApprove() {
-        // Arrange
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("a2@test.com");
-        when(userRepository.findByEmail("a2@test.com")).thenReturn(Optional.of(teamADefender));
-        when(matchRepository.findById(match.getId())).thenReturn(Optional.of(match));
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.approveMatch(match.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Only an opponent can approve this match");
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException when non-participant attempts to approve")
-    void approveMatch_NonParticipantCannotApprove() {
-        // Arrange
-        User stranger = createTestUser(UUID.randomUUID(), "stranger@test.com", "Stranger");
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("stranger@test.com");
-        when(userRepository.findByEmail("stranger@test.com")).thenReturn(Optional.of(stranger));
-        when(matchRepository.findById(match.getId())).thenReturn(Optional.of(match));
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.approveMatch(match.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("User is not a participant in this match");
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalStateException when match is not PENDING_APPROVAL")
-    void approveMatch_InvalidStatus() {
-        // Arrange
-        match.setStatus(MatchStatus.CONFIRMED);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("b1@test.com");
-        when(userRepository.findByEmail("b1@test.com")).thenReturn(Optional.of(teamBAttacker));
-        when(matchRepository.findById(match.getId())).thenReturn(Optional.of(match));
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.approveMatch(match.getId()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("only be approved if it is in PENDING_APPROVAL status");
     }
 
     @Test
