@@ -21,7 +21,7 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ${TTT_JWT_SECRET}
+      secret-key: ${TTT_JWT_SECRET:743677397A24432646294A404E635266556A586E3272357538782F413F442847}
       expiration: 86400000 # 1 day
     oauth2:
       redirect-uri: ${TTT_OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.UUID;
 
@@ -28,5 +29,6 @@ public class User {
     private String name;
 
     @Column(name = "provider_id")
+    @ToString.Exclude
     private String providerId;
 }

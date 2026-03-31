@@ -18,6 +18,13 @@
 
 ---
 
+## Step 0
+
+Before starting any task, you MUST:
+
+- **Read the project guidelines:** (`.gemini/rules/*.*`)
+- **Read the project workflow:** (`conductor/workflow.md`)
+
 ## Language & Communication Policy
 
 - **Chat Interaction:** All communication with the user in the chat MUST be in **Russian**.
@@ -36,7 +43,26 @@
 7. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 8. **Leverage Agent Skills:** When creating plans or encountering repeatable actions, consider installing or creating agent skills (https://geminicli.com/docs/cli/skills/) to automate workflows.
 
+## Persona & Educational Mandate
+
+The AI Agent acts as an **Expert Software Engineer & Teacher-Practitioner**. Since the user is an IT student, the agent must maintain a structured pedagogical journal (educational log) for every task and phase. Language of the journal must be Russian.
+
+1.  **Educational Journaling:**
+    - **Initialization:** When starting a new Task, create a directory named `education/` within the corresponding `track/` folder in `conductor/tracks/`.
+    - **Creation:** Inside that `education/` folder, create a Markdown file named `Phase{N_name}_Task{name}.md`.
+    - **Knowledge Transfer:** After every step of the implementation (Red phase, Green phase, Refactoring, Code Review, etc.), the agent MUST append a new chapter to this file (do not replace old entries). In this section, exactly as described in the expert role, transfer knowledge of what was done, explaining architectural decisions, design patterns, and professional mental models.
+    - **Structure:** Each entry MUST be formatted as a new chapter (e.g., `## Глава N: [Stage Name]`) with a date. This provides a clear evolutionary trail of the solution.
+2.  **Masterclass Style:** Treat each entry and the final chapter as a mini-lecture. Explain how a professional developer thinks about edge cases, security, maintainability, and testing. Use a direct, encouraging, and highly detailed pedagogical tone in the log.
+3.  **Phase Completion:** At the end of a phase, the agent must ensure that the collection of task-level education files forms a coherent, high-quality "educational chapter" for a computer science student, written in clear, accessible, and professional language.
+4.  **Code Hygiene:** All educational or "teacher-style" comments added to the source code during the implementation phase to help the student understand the code **MUST** be removed before committing. The final codebase should remain clean and follow professional standards.
+5.  **Goal:** To provide a persistent, high-quality educational resource that the student can study separately from the development process, transferring deep professional knowledge and mental models without interrupting the developmental flow in the chat.
+
 ## Task Workflow
+
+**Educational Requirement:** Every task must have an educational log.
+
+- **Initialization:** Upon starting a task (Step 2), initialize the log as defined in [Persona & Educational Mandate](#persona--educational-mandate).
+- **Execution:** After every step below (Red, Green, Refactor, Review, etc.), update the educational log with knowledge transfer.
 
 All tasks follow a strict lifecycle:
 
@@ -59,11 +85,7 @@ All tasks follow a strict lifecycle:
    - Write the minimum amount of application code necessary to make the failing tests pass.
    - Run the test suite again using Generalist Agent and confirm that all tests now pass. This is the "Green" phase.
 
-6. **Refactor (Optional but Recommended):**
-   - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
-   - Rerun tests using Generalist Agent to ensure they still pass after refactoring.
-
-7. **Automated Headless Code Review:**
+6. **Automated Headless Code Review:**
    - For every newly created or significantly modified file do review. Delegate the review to the Generalist Agent using instruction `.gemini/workflows/quick-review.toml`.
    - **Analyze Output:** Display and carefully review the feedback from the Generalist Agent.
    - **User Interaction:** If the review suggests changes that are subjective, ambiguous, or require design decisions, immediately use `ask_user` to gather feedback or ask open-ended questions.
@@ -71,45 +93,45 @@ All tasks follow a strict lifecycle:
    - **Goal:** Ensure every file meets the project's quality standards through impartial verification.
    - **Final check:** Rerun tests using Generalist Agent to ensure they still pass after refactoring.
 
-8. **Verify Coverage:** Run coverage reports using the project's chosen tools.
+7. **Verify Coverage:** Run coverage reports using the project's chosen tools.
 
    Target: >80% coverage for new code. The specific tools and commands will vary by language and framework.
 
-9. **Document Deviations:** If implementation differs from tech stack:
+8. **Document Deviations:** If implementation differs from tech stack:
    - **STOP** implementation
    - Update `tech-stack.md` with new design
    - Add dated note explaining the change
    - Resume implementation
 
-10. **Root Cause Analysis (RCA) & Process Improvement:**
-    - **Step 9.1: RCA Journaling:** If any failure (test failure, build error, logic bug) occurred:
-      - Create or append to `conductor/rca-journal.md`.
-      - **Format:**
+9. **Root Cause Analysis (RCA) & Process Improvement:**
+   - **Step 9.1: RCA Journaling:** If any failure (test failure, build error, logic bug) occurred:
+     - Create or append to `conductor/rca-journal.md`.
+     - **Format:**
 
-        ```markdown
-        ## [Date] Task: [Task Name]
+       ```markdown
+       ## [Date] Task: [Task Name]
 
-        - **Issue:** [Brief description]
-        - **Root Cause:** [Why it happened]
-        - **Resolution:** [How it was fixed]
-        - **Lesson:** [What to do differently next time]
-        ```
+       - **Issue:** [Brief description]
+       - **Root Cause:** [Why it happened]
+       - **Resolution:** [How it was fixed]
+       - **Lesson:** [What to do differently next time]
+       ```
 
-    - **Step 9.2: Style Guide Review:** Review the new RCA entry (or the task experience in general).
-      - **Question:** "Could a new or modified rule in `code_styleguides/` have prevented this?"
-      - **Action:** If yes, immediately propose an update to the relevant style guide in `conductor/code_styleguides/`.
+   - **Step 9.2: Style Guide Review:** Review the new RCA entry (or the task experience in general).
+     - **Question:** "Could a new or modified rule in `code_styleguides/` have prevented this?"
+     - **Action:** If yes, immediately propose an update to the relevant style guide in `conductor/code_styleguides/`.
 
-11. **Decision Logging:**
+10. **Decision Logging:**
     - **Trigger:** If the user interaction led to changing decisions or selecting specific alternatives.
     - **Action:** Create or append to `conductor/decisions.md`.
     - **Content:** Document what alternatives were approved, what were declined, and the rationale.
 
-12. **Commit Code Changes:**
+11. **Commit Code Changes:**
     - Stage all code changes related to the task.
     - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
     - Perform the commit.
 
-13. **Attach Task Summary with Git Notes:**
+12. **Attach Task Summary with Git Notes:**
     - **Step 12.1: Get Commit Hash:** Obtain the hash of the _just-completed commit_ (`git log -1 --format="%H"`).
     - **Step 12.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
     - **Step 12.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
@@ -118,11 +140,11 @@ All tasks follow a strict lifecycle:
       git notes add -m "<note content>" <commit_hash>
       ```
 
-14. **Get and Record Task Commit SHA:**
+13. **Get and Record Task Commit SHA:**
     - **Step 13.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the _just-completed commit's_ commit hash.
     - **Step 13.2: Write Plan:** Write the updated content back to `plan.md`.
 
-15. **Commit Plan Update:**
+14. **Commit Plan Update:**
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
 
@@ -147,21 +169,20 @@ All tasks follow a strict lifecycle:
     - If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
 
 4.  **Execute deep review of the phase:**
-    - Launch deep review using Generalist Agent by using the mandatory phrase: "conduct deep-review [list of files]" and provide the list of files changed during the phase obtained in **Step 2.2: List Changed Files:**
+    - For all the files changed during the phase, sequentially one by one conduct deep review using Generalist Agent with `deep-review` skill by giving it a single file at a time for review.
 
-5.  **Review and Categorize Findings:**
-    - Read the generated `.gemini/reviews/deep-review/deep-review.md`. Mark findings that must be fixed at this stage with the status `[FIX_NOW]`. Mark findings whose fix can be postponed to later stages with the status `[POSTPONE]`.
+5.  **Assess and Categorize Findings:**
+    - Execute `deep-review-assess` skill to automatically categorize findings in `.gemini/reviews/deep-review/` as `[FIX_NOW]`, `[POSTPONE]`, or `[IT_DEPENDS]`.
 
-6.  **User Review:**
-    - Propose the user to review the marked file with findings.
+6.  **User Review & Confirmation:**
+    - Present the categorized findings to the user and wait for their explicit confirmation or modifications to the categories.
 
-7.  **Wait for Confirmation:**
-    - Wait for the command from the user to continue working.
+7.  **Address [FIX_NOW] Issues:**
+    - After confirmation, execute `deep-review-fix` skill to automatically apply fixes for all items marked as `[FIX_NOW]`.
+    - **CRITICAL:** The `deep-review-fix` skill will sequentially apply fixes and delegate test verification to the current agent session. Ensure all tests pass after each fix.
 
-8.  **Address [FIX_NOW] Issues:**
-    - Take the first finding marked `[FIX_NOW]` from `.gemini/reviews/deep-review/deep-review.md` and process it in the same way as after receiving a review in `### Standard Task Workflow 7. **Automated Headless Code Review:**` after receiving the report from Generalist Agent.
-    - Mark the fixed finding with the status `[FIXED]`.
-    - Process all remaining `[FIX_NOW]` findings sequentially in the same manner.
+8.  **Final Verification of Fixes:**
+    - Verify that all `[FIX_NOW]` findings are marked as `[FIXED]` in the report files.
 
 9.  **Ensure Test Coverage for Phase Changes:**
     - **Step 9.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the _previous_ phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
@@ -221,11 +242,16 @@ All tasks follow a strict lifecycle:
     - **Step 15.2: Update Plan:** Read `plan.md`, find the heading for the completed phase, and append the first 7 characters of the commit hash in the format `[checkpoint: <sha>]`.
     - **Step 15.3: Write Plan:** Write the updated content back to `plan.md`.
 
-16. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
+16. **Finalize Educational Chapter:**
+    - **Action:** Review all educational log files for the completed phase.
+    - **Action:** Consolidate them into a coherent, high-quality educational chapter (e.g., `Phase{Number}_Task{Number}_Educational_Review.md`) in the phase's track folder.
+    - **Goal:** Ensure the content is written in accessible language for a computer science student, covering all key learnings from the phase.
+
+17. **Commit Plan Update:**
+    - **Action:** Stage the modified `plan.md` file and the new educational chapter.
     - **Action:** Commit this change with a descriptive message following the format `conductor(plan): Mark phase '<PHASE NAME>' as complete`.
 
-17. **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report attached as a git note.
+18. **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report and the educational chapter finalized.
 
 ### Quality Gates
 
@@ -282,15 +308,6 @@ npm run lint
 npm run type-check
 npm run test
 ```
-
-## Persona & Educational Mandate
-
-The AI Agent acts as an **Expert Software Engineer & Teacher-Practitioner**. Since the user is an IT student, every development step must be preceded by a clear, pedagogical explanation.
-
-1.  **Explain the "Why":** Before implementing code, explain the architectural decision, the design pattern, or the reasoning behind the specific approach.
-2.  **Masterclass Style:** Treat each task as a mini-lecture. Explain how a professional developer thinks about edge cases, security, maintainability, and testing. Use a direct, encouraging, and highly detailed pedagogical tone.
-3.  **Code Hygiene:** All educational or "teacher-style" comments added during the implementation phase to help the student understand the code **MUST** be removed before committing. The final codebase should remain clean, professional, and follow industry standards for technical comments only.
-4.  **Goal:** To not only deliver the code but to transfer knowledge and professional mental models to the student.
 
 ## Testing Requirements
 

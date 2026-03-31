@@ -6,6 +6,7 @@ import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.mapper.MatchMapper;
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchStatus;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
@@ -40,6 +41,9 @@ class MatchServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MatchOperation matchOperation;
+
     @Spy
     private MatchMapper matchMapper;
 
@@ -57,6 +61,7 @@ class MatchServiceTest {
     private User opponent1;
     private User opponent2;
     private MatchRequest validRequest;
+    private Match pendingMatch;
 
     @BeforeEach
     void setUp() {
@@ -71,6 +76,15 @@ class MatchServiceTest {
                 List.of(new GameRequest(10, 5))
         );
 
+        pendingMatch = new Match();
+        pendingMatch.setId(UUID.randomUUID());
+        pendingMatch.setCreator(creator);
+        pendingMatch.setTeamAAttacker(creator);
+        pendingMatch.setTeamADefender(teammate);
+        pendingMatch.setTeamBAttacker(opponent1);
+        pendingMatch.setTeamBDefender(opponent2);
+        pendingMatch.setStatus(MatchStatus.PENDING_APPROVAL);
+
         SecurityContextHolder.setContext(securityContext);
     }
 
@@ -83,42 +97,22 @@ class MatchServiceTest {
     }
 
     @Test
-    @DisplayName("Should successfully create a match when all data is valid")
+    @DisplayName("Should successfully delegate match creation to MatchOperation")
     void createMatch_Success() {
         // Arrange
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn("creator@test.com");
         when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
-        when(userRepository.findAllById(any())).thenReturn(List.of(creator, teammate, opponent1, opponent2));
-        when(matchRepository.save(any(Match.class))).thenAnswer(invocation -> {
-            Match m = invocation.getArgument(0);
-            m.setId(UUID.randomUUID());
-            return m;
-        });
+        
+        var expectedResponse = MatchResponse.builder().id(UUID.randomUUID()).build();
+        when(matchOperation.createMatch(eq(validRequest), eq(creator))).thenReturn(expectedResponse);
 
         // Act
         MatchResponse response = matchService.createMatch(validRequest);
 
         // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.creatorName()).isEqualTo("Creator");
-        assertThat(response.games()).hasSize(1);
-        verify(matchRepository).save(any(Match.class));
-    }
-
-    @Test
-    @DisplayName("Should throw ResourceNotFoundException when a player is not found")
-    void createMatch_UserNotFound() {
-        // Arrange
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("creator@test.com");
-        when(userRepository.findByEmail("creator@test.com")).thenReturn(Optional.of(creator));
-        when(userRepository.findAllById(any())).thenReturn(List.of(creator, teammate, opponent1)); // One player missing
-
-        // Act & Assert
-        assertThatThrownBy(() -> matchService.createMatch(validRequest))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("not found");
+        assertThat(response).isEqualTo(expectedResponse);
+        verify(matchOperation).createMatch(validRequest, creator);
     }
 
     @Test
@@ -134,5 +128,37 @@ class MatchServiceTest {
         assertThatThrownBy(() -> matchService.createMatch(validRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("participant");
+    }
+
+    @Test
+    @DisplayName("Should successfully delegate approval to MatchOperation")
+    void approveMatch_Success() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("opponent1@test.com");
+        when(userRepository.findByEmail("opponent1@test.com")).thenReturn(Optional.of(opponent1));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act
+        matchService.approveMatch(pendingMatch.getId());
+
+        // Assert
+        verify(matchOperation).approveMatch(pendingMatch.getId());
+    }
+
+    @Test
+    @DisplayName("Should successfully delegate rejection to MatchOperation")
+    void rejectMatch_Success() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("opponent2@test.com");
+        when(userRepository.findByEmail("opponent2@test.com")).thenReturn(Optional.of(opponent2));
+        when(matchRepository.findById(pendingMatch.getId())).thenReturn(Optional.of(pendingMatch));
+
+        // Act
+        matchService.rejectMatch(pendingMatch.getId());
+
+        // Assert
+        verify(matchOperation).rejectMatch(pendingMatch.getId());
     }
 }
