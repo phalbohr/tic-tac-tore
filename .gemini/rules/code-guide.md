@@ -22,6 +22,7 @@ Below are the mandatory conventions for this project. They are compressed for AI
 16. [Imports vs FQN](#16-imports-vs-fqn)
 17. [Nested Idempotency Keys](#17-nested-idempotency-keys)
 18. [Backend vs Frontend Boundary](#18-backend-vs-frontend-boundary)
+19. [No Magic Values](#19-no-magic-values)
 
 ## 1. Variable Declarations
 
@@ -33,9 +34,14 @@ All developer-facing text (comments, logs, exceptions, APIs, tests) MUST be in E
 
 ## 3. OpenAPI Annotations (Hybrid Split)
 
-Keep controllers clean. Use Hybrid Split Interface-Driven Documentation (extract `@Operation` etc. to an `XxxxApi` interface). Rely on `therapi-runtime-javadoc` for descriptions. Use `@ParameterObject`. Do NOT duplicate JSR-303 constraints in API docs.
-- **Interface:** Documentation only (`@Operation`, `@ApiResponse`, `@Parameter`).
-- **Controller:** Routing & Validation (`@XxxMapping`, `@Valid`, `@PathVariable`, etc.).
+Keep controllers clean. Use Hybrid Split Interface-Driven Documentation: extract `@Operation`, `@ApiResponse`, `@Tag` to an `XxxxApi` interface. Rely on `therapi-runtime-javadoc` for descriptions to minimize annotation noise.
+
+- **Interface:** Documentation only (`@Operation`, `@ApiResponse`, `@Parameter`, etc.).
+- **Controller:** Routing & Validation ONLY (`@XxxMapping`, `@Valid`, `@PathVariable`, etc.).
+- **Rule:** Do NOT duplicate JSR-303 constraints in API docs (SpringDoc does it automatically).
+- **Rule:** Use `@ParameterObject` for grouping >2 query parameters.
+
+For detailed technical rules (constants, global error handling, external YAML refs), see [OpenAPI Specialized Guide](./openapi-guide.md).
 
 ## 4. Optimistic Locking
 
@@ -107,3 +113,7 @@ Never reuse an outer/parent idempotency key for nested sub-operations. Derive in
 ## 18. Backend vs Frontend Boundary
 
 **Strict Layer SRP:** Backend = business logic, auth, domain data. Frontend = UI, formatting (dates/i18n), presentation. NEVER leak frontend presentation concerns into backend APIs. NEVER leak backend business rules into frontend execution. Solve problems ONLY in their native domain.
+
+## 19. No Magic Values
+
+No magic numbers, strings, or other literals in logic. Extract every non-obvious constant to a named `static final` field. The name must explain *what* the value represents, not restate the value itself. Example: `PAGINATION_PARAMS = Set.of("page", "size", "sort")` — callers understand intent without reading the literal.

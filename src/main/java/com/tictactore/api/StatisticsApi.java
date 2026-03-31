@@ -5,6 +5,7 @@ import com.tictactore.dto.statistics.H2HStatsResponse;
 import com.tictactore.dto.statistics.LeaderboardEntryResponse;
 import com.tictactore.dto.statistics.LeaderboardParams;
 import com.tictactore.dto.statistics.PlayerStatsResponse;
+import com.tictactore.dto.statistics.TimePeriod;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ public interface StatisticsApi {
 
     @Operation(summary = "Get personal statistics", operationId = "getPersonalStats")
     ResponseEntity<PlayerStatsResponse> getPersonalStats(
-            @Parameter(description = "Time period for statistics") String period);
+            @Parameter(description = "Time period for statistics") TimePeriod period);
 
     @Operation(summary = "Get Head-to-Head statistics", operationId = "getH2HStats")
     ResponseEntity<Page<H2HStatsResponse>> getH2HStats(

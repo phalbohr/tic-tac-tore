@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class StatisticsService {
 
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public Page<LeaderboardEntryResponse> getLeaderboard(
@@ -63,11 +65,12 @@ public class StatisticsService {
     }
 
     private LocalDateTime calculateSinceDate(TimePeriod period) {
+        var now = LocalDateTime.now(clock);
         return switch (period) {
-            case WEEKLY -> LocalDateTime.now().minusWeeks(1);
-            case MONTHLY -> LocalDateTime.now().minusMonths(1);
-            case YEARLY -> LocalDateTime.now().minusYears(1);
-            case ALL_TIME -> LocalDate.of(2000, 1, 1).atStartOfDay();
+            case WEEKLY -> now.minusWeeks(1);
+            case MONTHLY -> now.minusMonths(1);
+            case YEARLY -> now.minusYears(1);
+            case ALL_TIME -> LocalDate.of(1970, 1, 1).atStartOfDay();
         };
     }
 
@@ -75,7 +78,7 @@ public class StatisticsService {
     public PlayerStatsResponse getPersonalStats(TimePeriod period) {
         Objects.requireNonNull(period, "period is required");
         var user = getCurrentUser();
-        log.debug("Calculating personal stats for user={} with period={}", user.getEmail(), period);
+        log.debug("Calculating personal stats for user={} with period={}", user.getId(), period);
         
         var since = calculateSinceDate(period);
         var p = matchRepository.findPlayerStats(user.getId(), since);
@@ -102,7 +105,7 @@ public class StatisticsService {
         
         var user = getCurrentUser();
         log.debug("Calculating H2H stats for user={} with period={}, myPosition={}, opponentPosition={}", 
-                user.getEmail(), period, myPosition, opponentPosition);
+                user.getId(), period, myPosition, opponentPosition);
         
         var since = calculateSinceDate(period);
         var projections = matchRepository.findH2HStats(

@@ -23,6 +23,8 @@ const totalPages = ref(0)
 
 const myPosition = ref<LeaderboardType>('OVERALL')
 const opponentPosition = ref<LeaderboardType>('OVERALL')
+const h2hPage = ref(0)
+const h2hTotalPages = ref(0)
 
 const PAGE_SIZES = [10, 20, 50, 100]
 const MIN_MATCHES_OPTIONS = [0, 10, 20, 50, 100]
@@ -30,8 +32,9 @@ const MIN_MATCHES_OPTIONS = [0, 10, 20, 50, 100]
 let controller: AbortController | null = null
 
 async function fetchData() {
+  const currentController = new AbortController()
   if (controller) controller.abort()
-  controller = new AbortController()
+  controller = currentController
 
   loading.value = true
   error.value = null
@@ -40,19 +43,25 @@ async function fetchData() {
       const statsPromise = getPersonalStats({
         period: period.value,
         token: authStore.token || undefined,
-        signal: controller.signal
+        signal: currentController.signal
       })
       const h2hPromise = getH2HStats({
         period: period.value,
         myPosition: myPosition.value,
         opponentPosition: opponentPosition.value,
+        page: h2hPage.value,
+        size: size.value,
         token: authStore.token || undefined,
-        signal: controller.signal
+        signal: currentController.signal
       })
 
       const [statsResult, h2hResult] = await Promise.all([statsPromise, h2hPromise])
+      
+      if (controller !== currentController) return
+
       personalStats.value = statsResult
-      h2hRecords.value = h2hResult
+      h2hRecords.value = h2hResult.content
+      h2hTotalPages.value = h2hResult.totalPages
     } else {
       const params: LeaderboardParams = {
         type: type.value,
@@ -60,20 +69,26 @@ async function fetchData() {
         minMatches: minMatches.value > 0 ? minMatches.value : undefined,
         page: page.value,
         size: size.value,
-        signal: controller.signal,
+        signal: currentController.signal,
         token: authStore.token || undefined
       }
       const response = await getLeaderboard(params)
+      
+      if (controller !== currentController) return
+
       leaderboard.value = response.content || []
       totalPages.value = response.totalPages || 0
     }
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') return
+    if (controller !== currentController) return
     
     console.error('Fetch error:', err)
     error.value = err instanceof Error ? err.message : 'Unknown error occurred'
   } finally {
-    loading.value = false
+    if (controller === currentController) {
+      loading.value = false
+    }
   }
 }
 
@@ -82,16 +97,21 @@ onUnmounted(() => {
 })
 
 watch([type, period, minMatches, size, showPersonalStats], () => {
-  if (page.value !== 0) {
+  if (page.value !== 0 || h2hPage.value !== 0) {
     page.value = 0
+    h2hPage.value = 0
   } else {
     fetchData()
   }
 })
 
 watch(page, fetchData)
+watch(h2hPage, fetchData)
 
-watch([myPosition, opponentPosition], fetchData)
+watch([myPosition, opponentPosition], () => {
+  h2hPage.value = 0
+  fetchData()
+})
 
 fetchData()
 
@@ -116,15 +136,12 @@ const periods: { label: string, value: TimePeriod }[] = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-12 px-4 font-sans">
+  <div class="py-12 px-4">
     <div class="max-w-4xl mx-auto">
-      <div class="mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+      <div class="mb-8 flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
           Leaderboards
         </h1>
-        <router-link to="/" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest">
-          Back to Dashboard
-        </router-link>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -168,8 +185,8 @@ const periods: { label: string, value: TimePeriod }[] = [
         </div>
       </div>
 
-      <div v-if="!showPersonalStats" class="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div v-if="!showPersonalStats" class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
           <label for="min-matches-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Matches</label>
           <select
             id="min-matches-selector"
@@ -180,7 +197,7 @@ const periods: { label: string, value: TimePeriod }[] = [
           </select>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 ml-auto">
           <label for="page-size-selector" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Page Size</label>
           <select 
             id="page-size-selector"
@@ -225,7 +242,31 @@ const periods: { label: string, value: TimePeriod }[] = [
           </div>
         </div>
 
-        <H2HAnalyticsTable :h2hRecords="h2hRecords" />
+        <div class="space-y-4">
+          <H2HAnalyticsTable :h2hRecords="h2hRecords" />
+          
+          <div v-if="h2hTotalPages > 1" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div class="flex gap-2">
+              <button 
+                @click="h2hPage--" 
+                :disabled="h2hPage === 0 || loading"
+                class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                @click="h2hPage++" 
+                :disabled="h2hPage >= h2hTotalPages - 1 || loading"
+                class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Page {{ h2hPage + 1 }} of {{ h2hTotalPages }}
+            </div>
+          </div>
+        </div>
       </div>
       <div v-else class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
         <div 

@@ -41,12 +41,11 @@ public class StatisticsController implements StatisticsApi {
     @Override
     @GetMapping("/me")
     public ResponseEntity<PlayerStatsResponse> getPersonalStats(
-            @RequestParam(required = false, defaultValue = "ALL_TIME") String period) {
+            @RequestParam(required = false, defaultValue = "ALL_TIME") TimePeriod period) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Personal stats request: user={}, period={}", email, period);
         
-        TimePeriod timePeriod = TimePeriod.valueOf(period);
-        var stats = statisticsService.getPersonalStats(timePeriod);
+        var stats = statisticsService.getPersonalStats(period);
         return ResponseEntity.ok(stats);
     }
 

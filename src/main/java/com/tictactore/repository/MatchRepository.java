@@ -34,7 +34,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
            "JOIN FETCH m.teamADefender " +
            "JOIN FETCH m.teamBAttacker " +
            "JOIN FETCH m.teamBDefender " +
-           "WHERE m.status = com.tictactore.model.MatchStatus.CONFIRMED AND (" +
+           "WHERE m.status = MatchStatus.CONFIRMED AND (" +
            "  m.teamAAttacker.id = :userId OR m.teamADefender.id = :userId OR " +
            "  m.teamBAttacker.id = :userId OR m.teamBDefender.id = :userId" +
            ")")
@@ -67,7 +67,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             ps.total_matches as totalMatches,
             ps.wins as wins,
             ps.losses as losses,
-            CAST(ps.wins * 100.0 / ps.total_matches AS DOUBLE) as winRate
+            CAST(ps.wins * 100.0 / NULLIF(ps.total_matches, 0) AS DOUBLE) as winRate
         FROM player_stats ps
         JOIN users u ON ps.player_id = u.id
         ORDER BY winRate DESC, totalMatches DESC
@@ -131,7 +131,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
         h2h_stats AS (
             SELECT opponent_id, COUNT(*) as total_matches, COUNT(CASE WHEN is_win THEN 1 END) as wins, COUNT(CASE WHEN NOT is_win THEN 1 END) as losses FROM filtered_pairs GROUP BY opponent_id
         )
-        SELECT CAST(u.id AS VARCHAR) as opponentId, u.name as opponentName, hs.total_matches as totalMatches, hs.wins as wins, hs.losses as losses, CAST(hs.wins * 100.0 / hs.total_matches AS DOUBLE) as winRate
+        SELECT CAST(u.id AS VARCHAR) as opponentId, u.name as opponentName, hs.total_matches as totalMatches, hs.wins as wins, hs.losses as losses, CAST(hs.wins * 100.0 / NULLIF(hs.total_matches, 0) AS DOUBLE) as winRate
         FROM h2h_stats hs JOIN users u ON hs.opponent_id = u.id 
         ORDER BY winRate DESC, totalMatches DESC, opponentName ASC
         """, 

@@ -7,13 +7,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Overall Stats Card -->
+  <div v-if="stats" class="space-y-6">
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-black text-gray-900 uppercase tracking-tighter">Your Performance</h2>
         <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black">
-          Overall Win Rate: {{ stats.overall.winRate.toFixed(1) }}%
+          Overall Win Rate: {{ (stats.overall.winRate || 0).toFixed(1) }}%
         </span>
       </div>
 
@@ -32,14 +31,12 @@ defineProps<{
         </div>
         <div class="bg-indigo-50 p-4 rounded-xl">
           <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Win Rate</p>
-          <p class="text-2xl font-black text-indigo-700">{{ stats.overall.winRate.toFixed(1) }}%</p>
+          <p class="text-2xl font-black text-indigo-700">{{ (stats.overall.winRate || 0).toFixed(1) }}%</p>
         </div>
       </div>
     </div>
 
-    <!-- Position Breakdown -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Attacker Stats -->
       <div data-test="attacker-stats" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 bg-orange-100 rounded-xl flex justify-center items-center text-orange-600">
@@ -55,7 +52,7 @@ defineProps<{
 
         <div class="flex items-end justify-between">
           <div>
-            <span class="text-3xl font-black text-gray-900">{{ stats.attacker.winRate.toFixed(1) }}%</span>
+            <span class="text-3xl font-black text-gray-900">{{ (stats.attacker.winRate || 0).toFixed(1) }}%</span>
             <span class="ml-2 text-xs font-bold text-gray-400">Win Rate</span>
           </div>
           <div class="text-right">
@@ -67,12 +64,11 @@ defineProps<{
         <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
           <div 
             class="h-full bg-orange-500 rounded-full" 
-            :style="{ width: `${Math.min(Math.max(stats.attacker.winRate, 0), 100)}%` }"
+            :style="{ width: `${Math.min(Math.max(stats.attacker.winRate || 0, 0), 100)}%` }"
           ></div>
         </div>
       </div>
 
-      <!-- Defender Stats -->
       <div data-test="defender-stats" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 bg-blue-100 rounded-xl flex justify-center items-center text-blue-600">
@@ -88,7 +84,7 @@ defineProps<{
 
         <div class="flex items-end justify-between">
           <div>
-            <span class="text-3xl font-black text-gray-900">{{ stats.defender.winRate.toFixed(1) }}%</span>
+            <span class="text-3xl font-black text-gray-900">{{ (stats.defender.winRate || 0).toFixed(1) }}%</span>
             <span class="ml-2 text-xs font-bold text-gray-400">Win Rate</span>
           </div>
           <div class="text-right">
@@ -100,7 +96,7 @@ defineProps<{
         <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
           <div 
             class="h-full bg-blue-500 rounded-full" 
-            :style="{ width: `${Math.min(Math.max(stats.defender.winRate, 0), 100)}%` }"
+            :style="{ width: `${Math.min(Math.max(stats.defender.winRate || 0, 0), 100)}%` }"
           ></div>
         </div>
       </div>

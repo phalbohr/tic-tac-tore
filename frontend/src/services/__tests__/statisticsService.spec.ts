@@ -7,16 +7,22 @@ describe('statisticsService', () => {
   })
 
   it('fetches H2H stats correctly', async () => {
-    const mockH2H = [
-      {
-        opponentId: 'opp-1',
-        opponentName: 'Rival 1',
-        matches: 5,
-        wins: 3,
-        losses: 2,
-        winRate: 60.0
-      }
-    ]
+    const mockH2H = {
+      content: [
+        {
+          opponentId: 'opp-1',
+          opponentName: 'Rival 1',
+          matches: 5,
+          wins: 3,
+          losses: 2,
+          winRate: 60.0
+        }
+      ],
+      totalPages: 1,
+      totalElements: 1,
+      size: 10,
+      number: 0
+    }
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -83,7 +89,9 @@ describe('statisticsService', () => {
         }
       ],
       totalPages: 1,
-      totalElements: 1
+      totalElements: 1,
+      size: 10,
+      number: 0
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({

@@ -57,6 +57,8 @@ export interface PersonalStatsParams {
   period?: TimePeriod
   myPosition?: LeaderboardType
   opponentPosition?: LeaderboardType
+  page?: number
+  size?: number
   token?: string
   signal?: AbortSignal
 }
@@ -105,16 +107,26 @@ export async function getLeaderboard(params: LeaderboardParams): Promise<Page<Le
   }, params)
 }
 
-export async function getH2HStats(params: PersonalStatsParams): Promise<H2HStats[]> {
+export async function getH2HStats(params: PersonalStatsParams): Promise<Page<H2HStats>> {
   const res = await apiFetch<Page<H2HStats> | H2HStats[]>('/statistics/h2h', { 
     period: params.period,
     myPosition: params.myPosition,
-    opponentPosition: params.opponentPosition
+    opponentPosition: params.opponentPosition,
+    page: params.page,
+    size: params.size
   }, params)
   
-  // Backend returns Page<H2HStatsResponse>, so we extract content if it's a Page
   if ('content' in res && Array.isArray(res.content)) {
-    return res.content
+    return res
   }
-  return res as H2HStats[]
+  
+  // Fallback for non-paged response
+  const content = res as H2HStats[]
+  return {
+    content,
+    totalPages: 1,
+    totalElements: content.length,
+    size: content.length,
+    number: 0
+  }
 }

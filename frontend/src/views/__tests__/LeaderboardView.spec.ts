@@ -49,7 +49,9 @@ describe('LeaderboardView', () => {
       attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
       defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
     })
-    vi.mocked(statisticsService.getH2HStats).mockResolvedValue([])
+    vi.mocked(statisticsService.getH2HStats).mockResolvedValue({
+      content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
+    })
 
     const wrapper = mount(LeaderboardView)
 
@@ -77,9 +79,10 @@ describe('LeaderboardView', () => {
       attacker: { matches: 10, wins: 8, losses: 2, winRate: 80.0 },
       defender: { matches: 10, wins: 7, losses: 3, winRate: 70.0 }
     }
-    const mockH2H = [
-      { opponentId: 'opp-1', opponentName: 'Rival 1', matches: 5, wins: 3, losses: 2, winRate: 60.0 }
-    ]
+    const mockH2H = {
+      content: [{ opponentId: 'opp-1', opponentName: 'Rival 1', matches: 5, wins: 3, losses: 2, winRate: 60.0 }],
+      totalPages: 1, totalElements: 1, size: 10, number: 0
+    }
     
     vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
       content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
@@ -205,31 +208,41 @@ describe('LeaderboardView', () => {
       attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
       defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
     })
-    vi.mocked(statisticsService.getH2HStats).mockResolvedValue([])
+    vi.mocked(statisticsService.getH2HStats).mockResolvedValue({
+      content: [], totalPages: 0, totalElements: 0, size: 10, number: 0
+    })
 
     const wrapper = mount(LeaderboardView)
     
     // Switch to My Stats tab
     const myStatsTab = wrapper.findAll('button').find(b => b.text().includes('My Stats'))
     await myStatsTab?.trigger('click')
-    await nextTick()
+    
+    // Wait for initial H2H fetch
+    await vi.waitFor(() => expect(statisticsService.getH2HStats).toHaveBeenCalled())
+    vi.mocked(statisticsService.getH2HStats).mockClear()
 
     // Find and change "Me as" filter
     const myPosSelect = wrapper.find('select#my-pos-selector')
     await myPosSelect.setValue('ATTACKER')
 
-    expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
-        myPosition: 'ATTACKER',
-        opponentPosition: 'OVERALL'
-    }))
+    await vi.waitFor(() => {
+        expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
+            myPosition: 'ATTACKER',
+            opponentPosition: 'OVERALL'
+        }))
+    })
+    vi.mocked(statisticsService.getH2HStats).mockClear()
 
     // Find and change "Opponent as" filter
     const oppPosSelect = wrapper.find('select#opp-pos-selector')
     await oppPosSelect.setValue('DEFENDER')
 
-    expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
-        myPosition: 'ATTACKER',
-        opponentPosition: 'DEFENDER'
-    }))
+    await vi.waitFor(() => {
+        expect(statisticsService.getH2HStats).toHaveBeenCalledWith(expect.objectContaining({ 
+            myPosition: 'ATTACKER',
+            opponentPosition: 'DEFENDER'
+        }))
+    })
   })
 })
