@@ -1,0 +1,41 @@
+{
+  "repository_type": "multi-part",
+  "project_name": "tic-tac-tore",
+  "description": "Foosball statistics platform for office environments",
+  "parts": [
+    {
+      "part_id": "backend",
+      "display_name": "Spring Boot REST API",
+      "project_type_id": "backend",
+      "root_path": "src/",
+      "tech_stack": "Java 21, Spring Boot 3.4.0, Spring Security, Spring Data JPA, PostgreSQL",
+      "entry_point": "src/main/java/com/tictactore/TicTacToreApplication.java",
+      "architecture_pattern": "Layered Architecture (Controller → Service → Operation → Entity → Repository)"
+    },
+    {
+      "part_id": "frontend",
+      "display_name": "Vue 3 SPA",
+      "project_type_id": "web",
+      "root_path": "frontend/",
+      "tech_stack": "Vue 3, TypeScript, Pinia, Vue Router, Tailwind CSS, Vite",
+      "entry_point": "frontend/src/main.ts",
+      "architecture_pattern": "Component-Based SPA (Views → Components → Stores → Services)"
+    }
+  ],
+  "integration_points": [
+    {
+      "from": "frontend",
+      "to": "backend",
+      "type": "REST API",
+      "protocol": "HTTP/JSON",
+      "details": "All data flows via REST endpoints on port 8080"
+    },
+    {
+      "from": "backend",
+      "to": "frontend",
+      "type": "OAuth2 Redirect",
+      "protocol": "HTTP Redirect with JWT query param",
+      "details": "Post-OAuth2 redirect with JWT token to /oauth2/redirect"
+    }
+  ]
+}
