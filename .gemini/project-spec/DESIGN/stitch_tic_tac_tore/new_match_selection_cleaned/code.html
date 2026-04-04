@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Clubhouse - New Match</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#231f1d",
+                        "on-secondary-container": "#ffa084",
+                        "on-tertiary-container": "#4e3e00",
+                        "secondary": "#ffb59f",
+                        "tertiary": "#efc209",
+                        "secondary-fixed-dim": "#ffb59f",
+                        "surface-container-lowest": "#110d0c",
+                        "primary-fixed": "#bcf0ae",
+                        "on-secondary": "#5d1802",
+                        "surface-dim": "#171211",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#231b00",
+                        "surface-bright": "#3e3836",
+                        "on-primary-fixed": "#002201",
+                        "surface-container-high": "#2e2927",
+                        "primary-fixed-dim": "#a1d494",
+                        "tertiary-fixed-dim": "#eec209",
+                        "background": "#171211",
+                        "secondary-container": "#7f3017",
+                        "inverse-on-surface": "#352f2d",
+                        "surface-tint": "#a1d494",
+                        "outline": "#8c9387",
+                        "tertiary-fixed": "#ffe084",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#393431",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "on-primary": "#0a3909",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#ebe0dd",
+                        "on-surface-variant": "#c2c9bb",
+                        "on-surface": "#ebe0dd",
+                        "on-primary-container": "#9dd090",
+                        "surface": "#171211",
+                        "on-tertiary": "#3c2f00",
+                        "inverse-surface": "#ebe0dd",
+                        "secondary-fixed": "#ffdbd1",
+                        "surface-variant": "#393431",
+                        "primary": "#a1d494",
+                        "inverse-primary": "#3b6934",
+                        "tertiary-container": "#cea700",
+                        "surface-container-low": "#1f1b19",
+                        "primary-container": "#2d5a27",
+                        "on-secondary-fixed": "#3a0a00",
+                        "on-primary-fixed-variant": "#23501e",
+                        "outline-variant": "#42493e",
+                        "on-secondary-fixed-variant": "#7c2e15"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #171211;
+            color: #ebe0dd;
+        }
+        .font-headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(31, 27, 25, 0.7);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen bg-background pb-12">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#171211]/80 backdrop-blur-xl">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#a1d494] cursor-pointer hover:bg-[#393431] hover:text-[#ffb59f] p-2 rounded-full transition-all" data-icon="home" style="">home</span>
+</div>
+<h1 class="text-xl font-bold tracking-tighter text-[#ebe0dd] font-headline uppercase" style="">new match</h1>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#ebe0dd] cursor-pointer hover:bg-[#393431] hover:text-[#ffb59f] p-2 rounded-full transition-all" data-icon="arrow_back" style="">arrow_back</span>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-lg mx-auto">
+<!-- Section: Match Format -->
+<section class="mb-10">
+<div class="flex items-center gap-2 mb-6">
+<span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary" style="">01 / FORMAT</span>
+<div class="h-px flex-grow bg-outline-variant/30"></div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Standalone Match (Selected) -->
+<button class="relative group w-full text-left overflow-hidden rounded-xl bg-surface-container-high ring-2 ring-primary transition-all duration-300" style="">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-50"></div>
+<div class="p-5 flex items-start gap-4">
+<div class="bg-primary text-on-primary p-3 rounded-lg">
+<span class="material-symbols-outlined" data-icon="sports_handball" style="">sports_handball</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface" style="">Standalone Match</h3>
+<p class="text-on-surface-variant text-sm mt-1" style="">Single competitive bout with custom rules.</p>
+</div>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" data-weight="fill" style='font-variation-settings: "FILL" 1;'>check_circle</span>
+</div>
+</div>
+</button>
+<!-- Tournament Match -->
+<button class="relative group w-full text-left overflow-hidden rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all duration-300" style="">
+<div class="p-5 flex items-start gap-4 opacity-60 group-hover:opacity-100">
+<div class="bg-surface-container-highest text-on-surface p-3 rounded-lg group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="emoji_events" style="">emoji_events</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface" style="">Tournament Match</h3>
+<p class="text-on-surface-variant text-sm mt-1" style="">Multi-stage progression matches.</p>
+</div>
+</div>
+</button>
+</div>
+</section>
+<!-- Section: Standalone Configuration -->
+<section class="space-y-8">
+<!-- Rule Selection -->
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary" style="">02 / REGULATIONS</span>
+<div class="h-px flex-grow bg-outline-variant/30"></div>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-primary text-on-primary font-headline font-bold text-xs" style="">
+                        ITSF
+                    </button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-headline font-bold text-xs transition-all" style="">
+                        DTFB
+                    </button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-headline font-bold text-xs transition-all" style="">
+                        CUSTOM
+                    </button>
+</div>
+</div>
+<!-- Match Type (1-on-1 or 2-on-2) -->
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary" style="">03 / ROSTER</span>
+<div class="h-px flex-grow bg-outline-variant/30"></div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center gap-3 p-5 rounded-xl bg-surface-container-low ring-1 ring-outline-variant/20 hover:ring-primary/40 transition-all" style="">
+<span class="material-symbols-outlined text-secondary" data-icon="person" style="">person</span>
+<span class="font-headline font-bold uppercase text-sm tracking-widest" style="">1 VS 1</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-3 p-5 rounded-xl bg-surface-container-highest ring-2 ring-primary shadow-lg shadow-black/40 transition-all" style="">
+<span class="material-symbols-outlined text-primary" data-icon="group" style="">group</span>
+<span class="font-headline font-bold uppercase text-sm tracking-widest" style="">2 VS 2</span>
+</button>
+</div>
+</div>
+<!-- Choice of Two Modes -->
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary" style="">04 / EXPERIENCE</span>
+<div class="h-px flex-grow bg-outline-variant/30"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="group p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-transparent hover:border-outline-variant/50 flex flex-col items-center text-center" style="">
+<div class="mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-highest group-hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="edit_note" style="">edit_note</span>
+</div>
+<span class="font-headline font-bold uppercase text-sm mb-1" style="">Results Entry</span>
+<span class="text-[10px] text-on-surface-variant font-medium leading-tight" style="">Record past match data quickly</span>
+</button>
+<button class="group p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-transparent hover:border-outline-variant/50 flex flex-col items-center text-center" style="">
+<div class="mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-highest group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="timer" style="">timer</span>
+</div>
+<span class="font-headline font-bold uppercase text-sm mb-1" style="">Live Match</span>
+<span class="text-[10px] text-on-surface-variant font-medium leading-tight" style="">Real-time scoring &amp; clock</span>
+</button>
+</div>
+</div>
+</section>
+<!-- CTA Action -->
+<div class="mt-12 flex flex-col gap-4">
+<button class="w-full h-16 bg-gradient-to-br from-[#a1d494] to-[#2d5a27] text-[#171211] rounded-xl font-headline font-bold text-lg uppercase tracking-tighter shadow-xl shadow-primary/10 active:scale-95 transition-transform" style="">
+                Configure Teams
+            </button>
+<p class="text-center text-[11px] text-on-surface-variant/60 font-medium px-4" style="">
+                Confirming will lock the match format. You can adjust specific player handicaps in the next step.
+            </p>
+</div>
+<!-- Visual Decorative Element (The Rod) -->
+</main>
+<!-- Bottom Nav is suppressed per instructions -->
+</body></html>

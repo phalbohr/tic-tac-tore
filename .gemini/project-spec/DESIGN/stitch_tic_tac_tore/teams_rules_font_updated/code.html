@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface": "#ebe0dd",
+            "on-secondary-fixed-variant": "#7c2e15",
+            "on-error-container": "#ffdad6",
+            "outline-variant": "#42493e",
+            "secondary": "#ffb59f",
+            "on-tertiary": "#3c2f00",
+            "on-secondary-fixed": "#3a0a00",
+            "secondary-container": "#7f3017",
+            "surface-variant": "#393431",
+            "on-primary-fixed": "#002201",
+            "tertiary": "#efc209",
+            "surface-tint": "#a1d494",
+            "error-container": "#93000a",
+            "primary-fixed": "#bcf0ae",
+            "primary": "#a1d494",
+            "on-secondary-container": "#ffa084",
+            "on-secondary": "#5d1802",
+            "tertiary-fixed": "#ffe084",
+            "on-tertiary-fixed-variant": "#574500",
+            "surface-container-high": "#2e2927",
+            "surface-container": "#231f1d",
+            "primary-container": "#2d5a27",
+            "inverse-on-surface": "#352f2d",
+            "surface-bright": "#3e3836",
+            "surface-container-highest": "#393431",
+            "surface-container-lowest": "#110d0c",
+            "on-primary": "#0a3909",
+            "on-primary-fixed-variant": "#23501e",
+            "on-error": "#690005",
+            "secondary-fixed": "#ffdbd1",
+            "on-tertiary-container": "#4e3e00",
+            "secondary-fixed-dim": "#ffb59f",
+            "inverse-primary": "#3b6934",
+            "surface": "#171211",
+            "primary-fixed-dim": "#a1d494",
+            "on-background": "#ebe0dd",
+            "inverse-surface": "#ebe0dd",
+            "surface-dim": "#171211",
+            "on-surface-variant": "#c2c9bb",
+            "outline": "#8c9387",
+            "surface-container-low": "#1f1b19",
+            "on-primary-container": "#9dd090",
+            "background": "#171211",
+            "error": "#ffb4ab",
+            "on-tertiary-fixed": "#231b00",
+            "tertiary-fixed-dim": "#eec209",
+            "tertiary-container": "#cea700"
+          },
+          fontFamily: {
+            "headline": ["Space Grotesk"],
+            "body": ["Manrope"],
+            "label": ["Manrope"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .glass-nav {
+      background: rgba(31, 27, 25, 0.8);
+      backdrop-filter: blur(20px);
+    }
+    .speakeasy-gradient {
+      background: linear-gradient(135deg, #a1d494 0%, #2d5a27 100%);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 0px;
+      height: 0px;
+    }
+    .brick-texture {
+      background-image: radial-gradient(#1f1b19 0.5px, transparent 0.5px), radial-gradient(#1f1b19 0.5px, #171211 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body brick-texture selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/10">
+<div class="flex items-center justify-between px-6 py-3 w-full">
+<button class="hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-150 text-on-surface">
+<span class="material-symbols-outlined text-xl" data-icon="home">home</span>
+</button>
+<h1 class="font-headline font-bold text-lg text-on-surface flex-1 text-center whitespace-nowrap overflow-hidden text-ellipsis px-2 tracking-tight">Teams &amp; Rules</h1>
+<button class="hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-150 text-on-surface">
+<span class="material-symbols-outlined text-xl" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-12 px-6 max-w-5xl mx-auto space-y-10">
+<!-- Favorite Players Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Favorite Players</h2>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Global List</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+<!-- Player 1 -->
+<div class="flex-shrink-0 group text-center">
+<div class="w-20 h-20 rounded-xl overflow-hidden mb-2 ring-2 ring-offset-2 ring-offset-surface ring-transparent group-hover:ring-primary transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a young man with a slight smile and messy hair, warm moody cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyqELDLBoyPEw9hfejbr-DWDiBv5q85C0xvaDYcfKeJPKn93TKgf-pYuNCHIXqvevhJzyJbpX0zCGm7cnaqBCtbxuCwqE2cYFTTjQLkGWHZDwNRoNcpsc1EXJRCa5vZdEYcZZICtigc-IunWDjICuKVk9i5-jquT8pGphb8TPMiVDetHETZy2fzukSA5Sq60Bhgb4_S6VRsOVwXRgIQZ0GdNg2ScNVcguj5kul6v0JIrSk3W_0vyHoEktxbMampnoh-vGBgAwXzvk"/>
+</div>
+<p class="font-headline text-sm font-bold text-on-surface">Alex R.</p>
+</div>
+<!-- Player 2 -->
+<div class="flex-shrink-0 group text-center">
+<div class="w-20 h-20 rounded-xl overflow-hidden mb-2 ring-2 ring-offset-2 ring-offset-surface ring-transparent group-hover:ring-primary transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="portrait of a man with a beard and glasses in a dimly lit studio setting, sophisticated atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBph3k1qjG7Yaq_dCIZChipTGt-sSKzCYNj51dIVT9NHhcXxgfCi1fg0jxEsUWUCY6-AkdUxWroXaon6_9bybE3KMX-aCjaf7WT1Jq2yK_zaYsufQcmCnGG70eRRkyBRe-oG7gPFj4zLcVaKXppGOovaZ5fITdp3Snur4ApOjWQjC5xkkjKQOq-4gXbxS3b_DrIKdFH0FIw-2WECZ0JTOVrQzx_uAN6exj5x35KUUCoNqdt9hHvzMjZn4vD727SdC-zoDPTLxRRfG4"/>
+</div>
+<p class="font-headline text-sm font-bold text-on-surface">Mark V.</p>
+</div>
+<!-- Player 3 -->
+<div class="flex-shrink-0 group text-center">
+<div class="w-20 h-20 rounded-xl overflow-hidden mb-2 ring-2 ring-offset-2 ring-offset-surface ring-transparent group-hover:ring-primary transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="vibrant portrait of a woman with a confident expression, soft lighting against a dark textured wall" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQk--IkZKocPfTnQQNOSlcs_jpYvLEFcPwoOcNOi-LFGDf7AVoBonXGFOaB8n6XID9TgsVsYGOl4Zmb9mQEIxo_Ts1YtUvdoMMyWyfdVBT7DnlhlYc6CxmekP34WqbGziawDK-iW2s-JKpYlXGYh4hwI0xeFLVeJODKI7A-RFFT-zriWq5TolCiceP0Yv5FoPcA9pyi4BCTh-u22Nmep_hYhmaqpJyW3NSbhUERRcB8EWXrDS3jNgz6ltFCiO0JCPs1VH8Uq1NvpU"/>
+</div>
+<p class="font-headline text-sm font-bold text-on-surface">Sarah J.</p>
+</div>
+<!-- Player 4 -->
+<div class="flex-shrink-0 group text-center">
+<div class="w-20 h-20 rounded-xl overflow-hidden mb-2 ring-2 ring-offset-2 ring-offset-surface ring-transparent group-hover:ring-primary transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a man in a dark polo shirt, warm ambient lighting in an upscale lounge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQLfVjpZ6dv6yz5QoMuA3HnLDF0NKgDZZ8PQfHzKNz6_aWs54By72-y7aSTtScoa4wXRkpDjuAtGlddJQTMGRzXLTArWbF6Ia_0vHS_vfcJ4DJ9rboLbK3dEStn0duQrTTfyjq3Jm3wsrWCGfbspnr6RihyWz_uNBWN9jdjnHcLJ3z1N7rhdpJnP9U2ln64Ns1RwX_c7Y8TQ69LfAAeSIG9uN6bPtuf7NXSIl1PvFGiJVkuiBr9uQnfT5GNGTmp2ImKO9W8I39NQc"/>
+</div>
+<p class="font-headline text-sm font-bold text-on-surface">Leo K.</p>
+</div>
+<!-- Add Button -->
+<div class="flex-shrink-0 text-center">
+<button class="w-20 h-20 rounded-xl border-2 border-dashed border-outline-variant flex items-center justify-center text-outline hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<p class="font-headline text-[10px] mt-2 font-bold uppercase tracking-wider text-outline">New Fav</p>
+</div>
+</div>
+</section>
+<!-- Teams Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Saved Teams</h2>
+<button class="text-[10px] font-headline font-bold text-secondary flex items-center gap-1 uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm" data-icon="group_add">group_add</span>
+          Create New
+        </button>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<!-- Team Card 1 -->
+<div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary hover:bg-surface-container transition-colors relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<h3 class="font-headline text-lg font-bold text-on-surface mb-3">The Strikers</h3>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-4">
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="small circular avatar of alex" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGkVnnpz-HcAm0IlnxKea0sYxKinxok8GRewu7LWa955_RlCwKqY9GJcj1FygzQszwqwskvhwUOn6jMlwqeL1CwcXFQDaSZqx6GXbUfjqO_BiJ3n0mcl9J35OGKwnobXC-RkV5lLO7_FKn4wbZPROedu3-GUvO1UixsngcQd3aJbKKAd9Kb1_X1aYeCDC-Vqtsz63k5YBoGzwnWiy-Ndljy1TMe_T0TEfl3yZCTvWAu1Kz0-3FyI-f-SCyhGpGxOpV3LW84Zu6nd4"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="small circular avatar of mark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlsJloV7lafA3PwCSMH-xZ_-Y-EMrMV8RHs0lB9YE5X9Zgsxq7z2qjm8F93qduD17TtkpDzEdxIRpv4QyyRJo7RbMHPYXpaBRT8A_ybl_K7QW60FPTjrDFkk4SuxqYzyIL1Vya51hPHAs14JBGsc4Srljg2K9YWRtBIPHpI5mcG6M91xRsF6xxvau30nQgc7T3mqaAVoeJWKHAHQuyNBb6EGwbaNueB7MzZ7dD635QN_SKDA72rk5Nim-vdMNWkEt6Uxyphripo7E"/>
+</div>
+<div class="text-[11px] text-on-surface-variant font-body">
+<span class="block font-bold">Alex R. &amp; Mark V.</span>
+<span class="text-tertiary uppercase font-black tracking-tight font-headline">Elite Rank</span>
+</div>
+</div>
+</div>
+<!-- Team Card 2 -->
+<div class="bg-surface-container-low p-4 rounded-xl hover:bg-surface-container transition-colors relative overflow-hidden">
+<h3 class="font-headline text-lg font-bold text-on-surface mb-3">Backcourt Kings</h3>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-4">
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="small circular avatar of sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxPAsbXRoCYevZet4dwNa59Yocza9uWVOYiDRCeUvAVI2rl6CnPQXm34099i1O1x4FRt8LeqLPDr5jqr5raq60THg2o1j2V96Ibmz70Lvl9Y3ndA1RDk504MSJSvn8qs3kmaGZW-_3DvvZuYzupF0sKEkFBiBm43WC6dPnOtRCk3D258l2VNGa3bB1_FJF5rCPtoW60tCUMjlskaNXNa9XfxXja3-LI3QdB0v89FzvGjPaKB-b8FPPAPrjL8UenCWxD5zqDSm8Gqo"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-low" data-alt="small circular avatar of leo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIuuuSHFGL0G2wbZm4Ucj0i5LsyogtHf90W1tfS8ujyVSdkD83mdoFOhWgqM2NRrdf6qGvrFuQPqXp2p1GUU_oAgeJuTiH7_sQ7RF5zuIlsxL-QV_RjgjnbEpwxYUYnrHn2b___S79UM5p32daAqB2E9HQbYcR-S3UskCTgZX_BXn1eNmjgGW1SuyRQzbdLUJS1tJvWqXwrLOV05Txlh_e6L6M2HaeH_4aCRi_-wt50d_oy9Ut0me4PudSvjy5mXr0Ev7PosxQULk"/>
+</div>
+<div class="text-[11px] text-on-surface-variant font-body">
+<span class="block font-bold">Sarah J. &amp; Leo K.</span>
+<span class="text-secondary uppercase font-black tracking-tight font-headline">Casual Duo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Custom Rule Templates -->
+<section>
+<h2 class="font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Rule Templates</h2>
+<div class="space-y-3">
+<!-- Rule 1 -->
+<div class="flex items-center justify-between bg-surface-container-low p-4 rounded-xl group hover:bg-surface-container transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+</div>
+<div>
+<h4 class="font-headline text-sm font-bold text-on-surface leading-tight">ITSF Standard</h4>
+<p class="text-[10px] text-on-surface-variant font-body">Official tournament rules, first to 5, no spinning.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-xl" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Rule 2 -->
+<div class="flex items-center justify-between bg-surface-container-low p-4 rounded-xl group hover:bg-surface-container transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="celebration">celebration</span>
+</div>
+<div>
+<h4 class="font-headline text-sm font-bold text-on-surface leading-tight">Friday Night Fun</h4>
+<p class="text-[10px] text-on-surface-variant font-body">Best of 5, 7 goals per set, all goals count.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-xl" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Default Settings -->
+<section class="bg-surface-container-highest rounded-xl p-6 relative overflow-hidden">
+<div class="flex items-start justify-between mb-6">
+<div>
+<h2 class="font-headline text-lg font-bold text-on-surface leading-tight">Quick Match Defaults</h2>
+<p class="text-[10px] text-on-surface-variant font-body">Pre-selected for single-tap match starts.</p>
+</div>
+<span class="material-symbols-outlined text-tertiary" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<!-- Default Team Picker -->
+<div>
+<label class="block text-[10px] font-bold uppercase tracking-widest text-primary mb-2 font-headline">Default Team</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 font-headline font-bold text-sm text-on-surface appearance-none focus:ring-1 focus:ring-primary">
+<option>The Strikers</option>
+<option>Backcourt Kings</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-xl" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+<!-- Default Rules Picker -->
+<div>
+<label class="block text-[10px] font-bold uppercase tracking-widest text-primary mb-2 font-headline">Default Ruleset</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-3 font-headline font-bold text-sm text-on-surface appearance-none focus:ring-1 focus:ring-primary">
+<option>Friday Night Fun</option>
+<option>ITSF Standard</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-xl" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+</div>
+<div class="mt-8">
+<button class="w-full speakeasy-gradient text-on-primary py-4 rounded-lg font-headline font-bold uppercase tracking-widest shadow-lg active:scale-[0.98] transition-all">
+          Save Configuration
+        </button>
+</div>
+</section>
+</main>
+<footer class="h-10"></footer>
+</body></html>

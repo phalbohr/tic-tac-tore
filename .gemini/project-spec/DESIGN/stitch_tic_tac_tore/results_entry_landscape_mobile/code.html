@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-high": "#2e2927",
+            "background": "#171211",
+            "secondary": "#ffb59f",
+            "tertiary-container": "#cea700",
+            "surface-variant": "#393431",
+            "on-error": "#690005",
+            "primary": "#a1d494",
+            "on-primary-fixed": "#002201",
+            "surface-container-highest": "#393431",
+            "error-container": "#93000a",
+            "on-secondary-fixed-variant": "#7c2e15",
+            "surface": "#171211",
+            "on-primary-container": "#9dd090",
+            "on-background": "#ebe0dd",
+            "on-secondary-container": "#ffa084",
+            "outline-variant": "#42493e",
+            "on-tertiary": "#3c2f00",
+            "primary-container": "#2d5a27",
+            "inverse-on-surface": "#352f2d",
+            "surface-bright": "#3e3836",
+            "on-primary": "#0a3909",
+            "on-secondary-fixed": "#3a0a00",
+            "on-error-container": "#ffdad6",
+            "on-tertiary-container": "#4e3e00",
+            "tertiary-fixed-dim": "#eec209",
+            "on-surface-variant": "#c2c9bb",
+            "error": "#ffb4ab",
+            "secondary-fixed": "#ffdbd1",
+            "inverse-surface": "#ebe0dd",
+            "on-tertiary-fixed-variant": "#574500",
+            "tertiary-fixed": "#ffe084",
+            "surface-container-lowest": "#110d0c",
+            "on-surface": "#ebe0dd",
+            "inverse-primary": "#3b6934",
+            "surface-dim": "#171211",
+            "surface-container": "#231f1d",
+            "on-tertiary-fixed": "#231b00",
+            "surface-container-low": "#1f1b19",
+            "primary-fixed": "#bcf0ae",
+            "outline": "#8c9387",
+            "on-primary-fixed-variant": "#23501e",
+            "tertiary": "#efc209",
+            "secondary-fixed-dim": "#ffb59f",
+            "secondary-container": "#7f3017",
+            "primary-fixed-dim": "#a1d494",
+            "on-secondary": "#5d1802",
+            "surface-tint": "#a1d494"
+          },
+          fontFamily: {
+            "headline": ["Space Grotesk"],
+            "body": ["Manrope"],
+            "label": ["Manrope"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .perspective-text {
+      transform: perspective(200px) rotateX(2deg);
+    }
+    .felt-texture {
+      background-image: radial-gradient(circle at center, #2d5a27 0%, #171211 100%);
+    }
+    .foosball-pitch {
+      background: linear-gradient(to bottom, transparent 49.5%, rgba(161, 212, 148, 0.1) 50%, transparent 50.5%),
+                  linear-gradient(to right, transparent 49.5%, rgba(161, 212, 148, 0.1) 50%, transparent 50.5%);
+      background-size: 80px 80px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body select-none overflow-hidden h-[390px] w-[884px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#171211]/80 backdrop-blur-xl bg-gradient-to-b from-[#1f1b19] to-transparent flex justify-between items-center px-6 h-14">
+<div class="flex items-center active:scale-95 duration-200 hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-[#a1d494]" data-icon="home">home</span>
+</div>
+<h1 class="font-headline tracking-tight uppercase text-lg font-bold text-[#ebe0dd] mt-1">
+      MATCH ENTRY
+    </h1>
+<div class="flex items-center active:scale-95 duration-200 hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-[#ebe0dd]" data-icon="arrow_back">arrow_back</span>
+</div>
+</header>
+<!-- Main Canvas: Styled Foosball Table View -->
+<main class="relative h-full pt-14 pb-4 px-8 flex flex-col justify-between felt-texture">
+<!-- Stylized Grid Overlays -->
+<div class="absolute inset-0 foosball-pitch pointer-events-none opacity-20"></div>
+<!-- Players & Swap Positions (Floating over the table) -->
+<div class="absolute inset-x-8 inset-y-16 flex justify-between pointer-events-none">
+<!-- Left Side (Team A Top / Team B Bottom) -->
+<div class="flex flex-col justify-between items-center w-24 pointer-events-auto">
+<!-- Player A1 -->
+<div class="group flex flex-col items-center">
+<div class="w-14 h-14 rounded-full border-2 border-secondary overflow-hidden bg-surface-container-highest shadow-lg transition-transform group-active:scale-90">
+<img alt="Player portrait" class="w-full h-full object-cover" data-alt="Close-up studio portrait of a young man with focused expression, warm dramatic lighting, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChZgKXIDlVtQd38GRz-bf80xcYpoYI_EDKJVixdf-wk5fX4GEk1z5Y2TGoP_7gvQMqt3nmtdGRId1dm3AeG3a2UrCSe2v3LxXRrvJ7GqkwNKnq074fueaJjAkSMqQ8KXYmRqPDafz5C_J4gyb_SwE1NvoqdCAoMYhPL6jGu1gRJhk7A3XQaRbGLeJSEK8Rq_UnJgBsPyxoIALDcwR96XL_4byFQu2YC52vAKohRoPvK5_sLEdP_rrNK9E1W63r1jnxRQuV6uPjHS4"/>
+</div>
+<span class="font-headline text-[10px] text-secondary mt-1 tracking-widest font-bold">STRIKER A</span>
+</div>
+<!-- Swap Left -->
+<button class="bg-surface-container-high/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-outline-variant/30 flex items-center gap-2 active:scale-95 transition-all hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="swap_vert">swap_vert</span>
+<span class="font-headline text-[9px] font-bold tracking-tighter text-on-surface">SWAP POSITIONS</span>
+</button>
+<!-- Player B1 -->
+<div class="group flex flex-col items-center">
+<span class="font-headline text-[10px] text-tertiary mt-1 tracking-widest font-bold mb-1">DEFENSE B</span>
+<div class="w-14 h-14 rounded-full border-2 border-tertiary overflow-hidden bg-surface-container-highest shadow-lg transition-transform group-active:scale-90">
+<img alt="Player portrait" class="w-full h-full object-cover" data-alt="Portrait of a male player looking sharp, warm lighting reminiscent of a high-end clubhouse lounge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATsT759mNeSNwH5pN_EJg7pypqwq96ZaTrx-tv-IApt71zgy9Xas7mK1HQll31ldRxdyejSOckDqYdC-q7Nte5a26GhtErAnIg7LY2D_lk_QNuLAHNXx6sVcaNj4lR4ktsCaFpVbI8HHKpHl-hGmrL5jTcYuMLbgXlM0ZP0nsYprTsjw_pGf4-P4WwQLaI3ZT9FYCOwTOz__cUlnHWWzrOcaG7V8dmpY_EprnAFod-M5Deu9hHW30_wDEO5POLx4ZOEEGgtRM_K6g"/>
+</div>
+</div>
+</div>
+<!-- Right Side (Team A Bottom / Team B Top) -->
+<div class="flex flex-col justify-between items-center w-24 pointer-events-auto">
+<!-- Player B2 -->
+<div class="group flex flex-col items-center">
+<div class="w-14 h-14 rounded-full border-2 border-tertiary overflow-hidden bg-surface-container-highest shadow-lg transition-transform group-active:scale-90">
+<img alt="Player portrait" class="w-full h-full object-cover" data-alt="Portrait of a determined female player, soft rim lighting, editorial sports photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnIfz5N5k1dsRihIRfvlUfU5cM1soVKs30EphzGf5Vdt24LAYXyXvU5pRLF-_BmEMBLQe7GFDYQ-GzUiHqL7wSySuViZ265W3_b4joMqJnTWgKQqylqH6YF5H16VRO2ZX8JJ0VrCblWIOvkHyg7P61xS1xiUWlZI-2vgXqUtyJ8aVSWjqeYRM6o6f_alM3SyhIq4wrP-duyS7m3v0wUTmdosjTMyJKevRssJzhV8WOcYW6xKTKVUzd7lVRq3q0ob5NlTgv0-_qDZs"/>
+</div>
+<span class="font-headline text-[10px] text-tertiary mt-1 tracking-widest font-bold">STRIKER B</span>
+</div>
+<!-- Swap Right -->
+<button class="bg-surface-container-high/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-outline-variant/30 flex items-center gap-2 active:scale-95 transition-all hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="swap_vert">swap_vert</span>
+<span class="font-headline text-[9px] font-bold tracking-tighter text-on-surface">SWAP POSITIONS</span>
+</button>
+<!-- Player A2 -->
+<div class="group flex flex-col items-center">
+<span class="font-headline text-[10px] text-secondary mt-1 tracking-widest font-bold mb-1">DEFENSE A</span>
+<div class="w-14 h-14 rounded-full border-2 border-secondary overflow-hidden bg-surface-container-highest shadow-lg transition-transform group-active:scale-90">
+<img alt="Player portrait" class="w-full h-full object-cover" data-alt="Detailed portrait of a confident woman, warm amber tones, dark atmospheric background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6qobZXT8AS2ZSWR1-8gmOVUG7L0DCFgqUZrvjtKF4UGhyFSvHhylLmViJ6_R9ZvBzhTDLlgZm6UGbMAnUH_EX8_ghgHuvIIB4y2NahChb6X_GUhqJ79cL86cg6KUqnr7K2VXsIXzb-OAffBfiz8Xlqh-AOH8aEbC5BUuMZ3uyWWTEqCwDgC3EcuYHXrTW-9OBLv8_H-wyvQyILwcyZONScUliPTKK0YZOrQCpGFfRYjdHO_jwDBvby67myxE-GQj58VJMtxSUPtI"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Center Scoring Section -->
+<div class="flex-1 flex flex-col items-center justify-center relative z-10">
+<!-- Previous Match Context -->
+<div class="mb-2 bg-surface-container-lowest/40 backdrop-blur-sm px-4 py-1 rounded-full border border-outline-variant/10">
+<p class="font-headline text-[10px] tracking-widest font-medium text-on-surface-variant/80">
+          PREVIOUS MATCH: <span class="text-secondary">10</span> — <span class="text-tertiary">08</span>
+</p>
+</div>
+<!-- Scoreboard Container -->
+<div class="flex flex-col gap-6 items-center">
+<!-- Team A Score (Top) -->
+<div class="flex items-center gap-8">
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary active:scale-90 transition-transform shadow-md">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="font-headline text-7xl font-extrabold tracking-tighter text-secondary leading-none perspective-text">09</span>
+<span class="font-headline text-[10px] font-bold tracking-[0.3em] text-secondary/60 -mt-1">TEAM ALPHA</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary active:scale-90 transition-transform shadow-lg">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Central Rod/Divider Line -->
+<div class="w-64 h-1 bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent relative">
+<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary blur-sm opacity-50"></div>
+</div>
+<!-- Team B Score (Bottom) -->
+<div class="flex items-center gap-8">
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-tertiary active:scale-90 transition-transform shadow-md">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="font-headline text-7xl font-extrabold tracking-tighter text-tertiary leading-none perspective-text">07</span>
+<span class="font-headline text-[10px] font-bold tracking-[0.3em] text-tertiary/60 -mt-1">TEAM BRAVO</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary active:scale-90 transition-transform shadow-lg">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Finalize Action -->
+<div class="flex justify-center mt-2 pb-2">
+<button class="group relative px-12 py-3 bg-gradient-to-br from-primary to-primary-container rounded-xl shadow-[0_8px_32px_rgba(45,90,39,0.3)] active:scale-95 transition-all overflow-hidden">
+<div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="relative font-headline text-sm font-extrabold tracking-widest text-on-primary">
+          COMPLETE MATCH
+        </span>
+</button>
+</div>
+</main>
+<!-- Ambient Light Effects -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-40 bg-gradient-to-t from-background via-transparent to-transparent opacity-40"></div>
+<div class="fixed -bottom-32 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="fixed -top-32 -left-32 w-96 h-96 bg-secondary/5 rounded-full blur-[120px] pointer-events-none"></div>
+</body></html>

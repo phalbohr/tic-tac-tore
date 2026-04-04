@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#231f1d",
+              "on-secondary-container": "#ffa084",
+              "on-tertiary-container": "#4e3e00",
+              "secondary": "#ffb59f",
+              "tertiary": "#efc209",
+              "secondary-fixed-dim": "#ffb59f",
+              "surface-container-lowest": "#110d0c",
+              "primary-fixed": "#bcf0ae",
+              "on-secondary": "#5d1802",
+              "surface-dim": "#171211",
+              "error-container": "#93000a",
+              "on-tertiary-fixed": "#231b00",
+              "surface-bright": "#3e3836",
+              "on-primary-fixed": "#002201",
+              "surface-container-high": "#2e2927",
+              "primary-fixed-dim": "#a1d494",
+              "tertiary-fixed-dim": "#eec209",
+              "background": "#171211",
+              "secondary-container": "#7f3017",
+              "inverse-on-surface": "#352f2d",
+              "surface-tint": "#a1d494",
+              "outline": "#8c9387",
+              "tertiary-fixed": "#ffe084",
+              "error": "#ffb4ab",
+              "on-error": "#690005",
+              "surface-container-highest": "#393431",
+              "on-tertiary-fixed-variant": "#574500",
+              "on-primary": "#0a3909",
+              "on-error-container": "#ffdad6",
+              "on-background": "#ebe0dd",
+              "on-surface-variant": "#c2c9bb",
+              "on-surface": "#ebe0dd",
+              "on-primary-container": "#9dd090",
+              "surface": "#171211",
+              "on-tertiary": "#3c2f00",
+              "inverse-surface": "#ebe0dd",
+              "secondary-fixed": "#ffdbd1",
+              "surface-variant": "#393431",
+              "primary": "#a1d494",
+              "inverse-primary": "#3b6934",
+              "tertiary-container": "#cea700",
+              "surface-container-low": "#1f1b19",
+              "primary-container": "#2d5a27",
+              "on-secondary-fixed": "#3a0a00",
+              "on-primary-fixed-variant": "#23501e",
+              "outline-variant": "#42493e",
+              "on-secondary-fixed-variant": "#7c2e15"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+        }
+        body {
+            font-family: "Manrope", sans-serif;
+            touch-action: manipulation;
+        }
+        .font-space {
+            font-family: "Space Grotesk", sans-serif
+        }
+        .table-gradient {
+            background: radial-gradient(circle at center, #2d5a27 0%, #171211 120%)
+        }
+        .wood-texture {
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDJ9-5oDlEm8Pc-6C1ip8GGBIpBJ-hk8gxkuKGHgtD3I-K87vm2JFn0y1skt-D2CqPecn8StIEiGnTsgaw25cMND4uDfftaB2G6pHdZ4Ijlb-WBNcQqQOj1sAPDAP9y5bYb9dBE9Udffd_QFEnPtVcti-Ow-vR9Sa1ILtIg7uDd-70rJ-yvW_iPjTiVsY2s6eU9pO2YLgdtKauKslgX2rEL8kKA1OpyZvHb5HHTY3R3NXduac9yEauShNNkRelWjh_-8mi4LQTmaXg);
+            background-size: cover;
+            background-blend-mode: overlay;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background h-[390px] w-[884px] overflow-hidden flex flex-col border border-outline/10 mx-auto">
+<!-- Header -->
+<header class="w-full flex items-center justify-between px-6 h-12 bg-[#171211]/90 backdrop-blur-xl z-50 shrink-0">
+<div class="flex items-center">
+<button class="p-2 text-[#ebe0dd] hover:bg-[#393431] rounded-lg transition-transform active:scale-95">
+<span class="material-symbols-outlined text-2xl">home</span>
+</button>
+</div>
+<div class="font-space tracking-widest font-bold uppercase text-[#a1d494] text-sm">
+            LIVE MATCH
+        </div>
+<div class="flex items-center">
+<button class="p-2 text-[#ebe0dd] hover:bg-[#393431] rounded-lg transition-transform active:scale-95">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+</div>
+</header>
+<!-- Goal Progress Bar Section -->
+<div class="w-full h-10 bg-surface-container-low/80 backdrop-blur-md z-40 border-y border-outline-variant/10 shrink-0 px-6 flex items-center relative">
+<div class="flex-1"></div>
+<!-- Central Progress Bar Area -->
+<div class="relative w-full h-[2px] bg-outline-variant/20 mx-4">
+<!-- Goal Indicators Above (Top Team - Team A) -->
+<div class="absolute bottom-[4px] left-0 right-0 flex gap-1 items-end">
+<div class="w-4 h-4 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[7px] font-bold shadow-sm">JD</div>
+<div class="w-4 h-4 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[7px] font-bold shadow-sm">JD</div>
+</div>
+<!-- Goal Indicators Below (Bottom Team - Team B) -->
+<div class="absolute top-[4px] left-0 right-0 flex gap-1 items-start pl-10">
+<div class="w-4 h-4 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-[7px] font-bold shadow-sm">MK</div>
+</div>
+</div>
+<div class="flex-1 flex items-center justify-end">
+<!-- Cancel Last Goal Button -->
+<button class="p-1.5 bg-error-container/20 text-error hover:bg-error-container/40 rounded-full transition-all active:scale-90" title="Cancel last goal">
+<span class="material-symbols-outlined text-xl leading-none">do_not_disturb_on</span>
+</button>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative flex items-center justify-center p-3 overflow-hidden bg-surface-dim">
+<!-- The Foosball Table Container -->
+<div class="relative w-full h-full bg-surface-container-low rounded-xl overflow-hidden shadow-2xl border-[6px] border-surface-container-high wood-texture p-2">
+<!-- Interior Play Surface (The Felt) -->
+<div class="relative w-full h-full table-gradient rounded-lg flex items-center justify-center shadow-inner group overflow-hidden">
+<!-- Table Markings -->
+<div class="absolute inset-y-0 left-1/2 w-px bg-on-surface/10"></div>
+<!-- Central Horizontal Line -->
+<div class="absolute inset-x-0 top-1/2 h-px bg-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-on-surface/10"></div>
+<!-- Team Labels positioned above central line -->
+<div class="absolute top-[calc(50%-24px)] left-8">
+<span class="font-space text-xs font-bold text-secondary tracking-[0.2em] uppercase">TEAM A</span>
+</div>
+<div class="absolute top-[calc(50%-24px)] right-8 text-right">
+<span class="font-space text-xs font-bold text-tertiary tracking-[0.2em] uppercase">TEAM B</span>
+</div>
+<!-- Activity Arrows (Horizontal) -->
+<!-- Above Team A Score -->
+<div class="absolute top-12 left-1/2 -translate-x-1/2 z-40">
+<button class="p-1 bg-tertiary/20 backdrop-blur-md rounded-md text-tertiary hover:text-tertiary/80 active:scale-90 border border-tertiary/20">
+<span class="material-symbols-outlined text-base">swap_horiz</span>
+</button>
+</div>
+<!-- Below Team B Score -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 z-40">
+<button class="p-1 bg-tertiary/20 backdrop-blur-md rounded-md text-tertiary hover:text-tertiary/80 active:scale-90 border border-tertiary/20">
+<span class="material-symbols-outlined text-base">swap_horiz</span>
+</button>
+</div>
+<!-- CENTRAL SCORE COUNTER -->
+<div class="relative z-20 flex flex-col items-center justify-center gap-2 select-none pointer-events-none">
+<div class="flex flex-col items-center">
+<span class="text-8xl leading-none font-space font-bold text-secondary drop-shadow-[0_0_25px_rgba(255,181,159,0.4)]">02</span>
+<div class="text-[8px] font-space tracking-[0.4em] text-secondary/60 mt-0.5">GOALS</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-8xl leading-none font-space font-bold text-tertiary drop-shadow-[0_0_25px_rgba(239,194,9,0.4)]">01</span>
+<div class="text-[8px] font-space tracking-[0.4em] text-tertiary/60 mt-0.5">GOALS</div>
+</div>
+</div>
+<!-- PLAYER ICONS -->
+<!-- Top Left: Team A Defense -->
+<div class="absolute top-4 left-6 flex flex-col items-center gap-2">
+<div class="w-14 h-14 bg-surface-container-highest rounded-xl p-1 shadow-lg ring-2 ring-secondary/40">
+<img alt="Player A1" class="w-full h-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKUGHrbmXERzaG8MvCONRofbj1f9oU2JpDE6gL3azMgV0-0-DjqCr_9fPDaFqkUUzIrgU5M5T-pgD7ywhuS8IHTZtQ0M90rWKUws1dMHMELdqQVvovHQYNk8wCbpOcUJeFcYQcf-cYP_rz9R5j9Fa3IFMeTHAbqTcXDQNuieoLh-1gg3J9XG1TFBqo-axaXhy9B_7mDZRdEQWRlWTGq8ePYb3rsV2y--bmQXoUfG47E4CLRfJfUEsENrqYqG1qBpWIL2RoSqwQIto"/>
+</div>
+<span class="font-space text-[10px] font-bold text-secondary uppercase tracking-wider">J. DOE</span>
+</div>
+<!-- Bottom Left: Team B Defense -->
+<div class="absolute bottom-4 left-6 flex flex-col items-center gap-2">
+<div class="w-14 h-14 bg-surface-container-highest rounded-xl p-1 shadow-lg ring-2 ring-tertiary/10 opacity-70">
+<img alt="Player B2" class="w-full h-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXwecEub-g7Xtim30GH0BMBigQGbdzWAs6Bha9gvZLdZTYG5loGQr6YWyZLdJ7ArCJUa1WtQll5DRCM-eMwRDWAjdKKTafaUMF6sJbovDmwK6JAJ5UXeWwFKxQS1Du4FXvAyEXjie7x_pTlXkYAyvb9DKbRbvXdLY6zo5QG_e2AT94pIj6GnxheoDlDNisek6aRPKfWHWzRSRLK6nuwFUWYKwipHunyRaMrsNX7pa8Lmv6xpTu4BYMxyRxNEL4l7xZMWHXOS6wAGY"/>
+</div>
+<span class="font-space text-[10px] font-bold text-tertiary/50 uppercase tracking-wider">S. SMITH</span>
+</div>
+<!-- Top Right: Team A Attack -->
+<div class="absolute top-4 right-6 flex flex-col items-center gap-2">
+<div class="w-14 h-14 bg-surface-container-highest rounded-xl p-1 shadow-lg ring-2 ring-secondary/10 opacity-70">
+<img alt="Player A2" class="w-full h-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDk4lGNayNbFjooHjMt-0cLZOCfP_wKO6TUp0hY8PMqgUhM09awUW4YOqYBRcttFtvZT_fFbFVIzj-RucICnWJP4Rhvv5BsREqrYXOQMwBgrxjsbWwaRCZvG-9uEpRBFJ2KdQUpI-EhdcHNo4HlUBs9ez0Ct2_C31AnSHPauIq_y9rRgvq8Zrx6a4JCM2zIa1cjHJCsHTIE07fCdc5z2AjRieXo0K0ip_Y6jyFA5jmPoL4C9kWMzckMcMVlLnv0YhJdb-hsYkHnRx8"/>
+</div>
+<span class="font-space text-[10px] font-bold text-secondary/50 uppercase tracking-wider">M. KING</span>
+</div>
+<!-- Bottom Right: Team B Attack (P. BOSS) -->
+<div class="absolute bottom-4 right-6 flex flex-col items-center gap-2">
+<div class="w-14 h-14 bg-surface-container-highest rounded-xl p-1 shadow-lg ring-2 ring-tertiary/40">
+<img alt="Player B1" class="w-full h-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg_ir22jNEc8oW8xjZDBOsbWhry2KSpiDaIIhiPQ9D-56eeckh2p6kqB3BFARmsQqo9Qt2sgew1NNmCjz-CPhG0bhYEuYyOkc9q_R75Y6rH0AmziutySp9dTXl1o0dJqitdz03e3uyWBnXnU2xQ5mCr5hE3p7ugDX1GaYGXNNfCWci7VgwRnTBJYwELtRTvcwWXhDpVE76Z0BbXt9_2FZXkhVS96hyOk2Up5O_fh1BNHZFJgqajAISS65G-ZcElXgwaXI_9gvohlo"/>
+</div>
+<span class="font-space text-[10px] font-bold text-tertiary uppercase tracking-wider">P. BOSS</span>
+</div>
+<!-- INTERACTION OVERLAYS -->
+<div class="absolute inset-0 grid grid-cols-2 grid-rows-2 z-30">
+<!-- Top-Left -->
+<button class="w-full h-full hover:bg-secondary/5 active:bg-secondary/10 transition-all border-r border-b border-white/5"></button>
+<!-- Top-Right -->
+<button class="w-full h-full hover:bg-secondary/5 active:bg-secondary/10 transition-all border-b border-white/5"></button>
+<!-- Bottom-Left -->
+<button class="w-full h-full hover:bg-tertiary/5 active:bg-tertiary/10 transition-all border-r border-white/5"></button>
+<!-- Bottom-Right (P. BOSS Zone with Confirmation) -->
+<div class="w-full h-full relative group/boss">
+<!-- Default interaction area -->
+<div class="absolute inset-0 hover:bg-tertiary/5 transition-all"></div>
+<!-- Specific Buttons for P.BOSS -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 w-full px-4 items-end">
+<button class="flex-1 py-1.5 bg-error/20 border border-error/30 rounded-md text-[10px] font-space font-bold text-error uppercase shadow-lg active:scale-95 transition-all">
+                                Cancel Goal
+                            </button>
+<button class="flex-1 py-1.5 bg-primary/20 border border-primary/30 rounded-md text-[10px] font-space font-bold text-primary uppercase shadow-lg active:scale-95 transition-all">
+                                Confirm Goal
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Controls -->
+<footer class="px-6 h-14 flex items-center justify-between shrink-0 bg-surface-container-low/50 backdrop-blur-sm">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-xl text-on-surface active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined text-xl">undo</span>
+<span class="font-space font-bold text-xs uppercase tracking-widest">Undo Action</span>
+</button>
+<div class="h-8 w-px bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-[9px] font-space text-on-surface-variant tracking-widest uppercase">Prev Match</span>
+<span class="font-space text-xs font-bold text-on-surface">A 10 - 08 B</span>
+</div>
+</div>
+<button class="px-8 py-2.5 bg-gradient-to-br from-primary to-primary-container text-on-primary font-space font-extrabold uppercase text-xs rounded-xl shadow-lg active:scale-95 transition-all">
+            Complete Match
+        </button>
+</footer>
+<!-- Home Indicator -->
+<div class="h-1.5 w-full flex justify-center pb-1">
+<div class="w-32 h-1 bg-on-surface/10 rounded-full"></div>
+</div>
+</body></html>

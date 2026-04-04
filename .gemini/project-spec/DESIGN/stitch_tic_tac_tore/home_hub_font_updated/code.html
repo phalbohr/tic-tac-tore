@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tic-Tac-Tore | Main Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-background": "#ebe0dd",
+              "inverse-surface": "#ebe0dd",
+              "tertiary-container": "#cea700",
+              "tertiary-fixed-dim": "#eec209",
+              "on-primary-fixed-variant": "#23501e",
+              "primary-container": "#2d5a27",
+              "on-tertiary-fixed": "#231b00",
+              "on-tertiary-fixed-variant": "#574500",
+              "secondary": "#ffb59f",
+              "on-primary-container": "#9dd090",
+              "on-secondary-fixed-variant": "#7c2e15",
+              "on-primary": "#0a3909",
+              "background": "#171211",
+              "secondary-fixed-dim": "#ffb59f",
+              "on-primary-fixed": "#002201",
+              "surface-container-low": "#1f1b19",
+              "on-secondary-fixed": "#3a0a00",
+              "surface-container-high": "#2e2927",
+              "surface-container-highest": "#393431",
+              "error": "#ffb4ab",
+              "surface-dim": "#171211",
+              "primary": "#a1d494",
+              "surface": "#171211",
+              "primary-fixed-dim": "#a1d494",
+              "outline-variant": "#42493e",
+              "on-tertiary-container": "#4e3e00",
+              "on-secondary": "#5d1802",
+              "secondary-container": "#7f3017",
+              "inverse-on-surface": "#352f2d",
+              "surface-container": "#231f1d",
+              "error-container": "#93000a",
+              "primary-fixed": "#bcf0ae",
+              "surface-container-lowest": "#110d0c",
+              "surface-bright": "#3e3836",
+              "inverse-primary": "#3b6934",
+              "tertiary-fixed": "#ffe084",
+              "on-surface": "#ebe0dd",
+              "tertiary": "#efc209",
+              "outline": "#8c9387",
+              "secondary-fixed": "#ffdbd1",
+              "surface-variant": "#393431",
+              "surface-tint": "#a1d494",
+              "on-surface-variant": "#c2c9bb",
+              "on-error-container": "#ffdad6",
+              "on-tertiary": "#3c2f00",
+              "on-secondary-container": "#ffa084",
+              "on-error": "#690005"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Space Grotesk"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brick-texture {
+            background-image: radial-gradient(#1f1b19 0.5px, transparent 0.5px), radial-gradient(#1f1b19 0.5px, #171211 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        body {
+          min-height: 100dvh;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen flex flex-col brick-texture overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-[#1f1b19]/80 backdrop-blur-xl docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-6 py-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="close-up portrait of a professional foosball player" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS6rNj3eT9auL-FZUkrFuUvvYxvruSDTySPPWhOcum3ZPqugLta7Q0ahr4pctU1gYlgmKafgtIuILaOmPZ2ob7JYao9lLQzzAr9Ei4F-REUo5E9MWIyHXFzdN-aFx32-aPEiGNsnCQCU9sJp_apMYBcs1xnRhBuA27t6lkouLEHLjga51Nqdu4_87w6b2wpiVCihzEUnY3sToE83y2AH0jcFcipKc8AKZ5D9hZsFaaeoluMlrJB_r__MmD2xHVUFMfy4oMdNNx_ls"/>
+</div>
+</div>
+<h1 class="text-lg font-bold text-[#ebe0dd] font-headline tracking-tight whitespace-nowrap">Tic-Tac-Tore</h1>
+<div class="relative group cursor-pointer hover:opacity-80 transition-opacity active:scale-95 active:duration-100">
+<span class="material-symbols-outlined text-[#a1d494] text-xl">notifications</span>
+<span class="absolute top-0 right-0 w-1.5 h-1.5 bg-secondary rounded-full"></span>
+</div>
+</header>
+<main class="flex-1 px-6 pt-4 pb-8 overflow-y-auto">
+<!-- Main Bento Grid Buttons -->
+<div class="grid grid-cols-2 gap-3 auto-rows-min">
+<!-- 1. New Match (Primary Large) -->
+<button class="col-span-2 relative overflow-hidden bg-gradient-to-br from-[#a1d494] to-[#2d5a27] rounded-xl p-4 flex flex-col justify-between items-start h-32 active:scale-95 transition-transform duration-100 group shadow-lg">
+<div class="absolute -right-4 -top-4 opacity-20 group-hover:rotate-12 transition-transform">
+<span class="material-symbols-outlined text-[100px]" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
+</div>
+<div class="flex justify-between w-full items-start">
+<span class="material-symbols-outlined text-on-primary bg-on-primary-container/20 p-1.5 rounded-lg text-xl">add_circle</span>
+<span class="font-label text-[8px] font-extrabold uppercase tracking-widest text-on-primary/80 border border-on-primary/20 px-1.5 py-0.5 rounded whitespace-nowrap">LIVE NOW</span>
+</div>
+<div class="text-left mt-auto">
+<h3 class="font-headline text-2xl font-bold text-on-primary leading-none whitespace-nowrap">New Match</h3>
+<p class="font-body text-xs text-on-primary/70 mt-0.5 whitespace-nowrap">Friendly or ranked duel</p>
+</div>
+</button>
+<!-- 2. Teams & Rules -->
+<button class="bg-surface-container-high rounded-xl p-3 flex flex-col justify-between items-start h-32 active:scale-95 transition-transform duration-100 relative overflow-hidden">
+<div class="absolute right-1 top-1 opacity-5">
+<span class="material-symbols-outlined text-5xl">group</span>
+</div>
+<div class="p-1.5 bg-secondary/10 rounded-lg">
+<span class="material-symbols-outlined text-secondary text-xl">groups</span>
+</div>
+<div class="text-left overflow-hidden w-full">
+<h3 class="font-headline text-base font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Teams &amp; Rules</h3>
+<p class="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap">THE PLAYBOOK</p>
+</div>
+</button>
+<!-- 3. Played Matches -->
+<button class="bg-surface-container-high rounded-xl p-3 flex flex-col justify-between items-start h-32 active:scale-95 transition-transform duration-100 relative overflow-hidden">
+<div class="absolute right-1 top-1 opacity-5">
+<span class="material-symbols-outlined text-5xl">history</span>
+</div>
+<div class="p-1.5 bg-tertiary/10 rounded-lg">
+<span class="material-symbols-outlined text-tertiary text-xl">history</span>
+</div>
+<div class="text-left overflow-hidden w-full">
+<h3 class="font-headline text-base font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Played Matches</h3>
+<p class="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap">History</p>
+</div>
+</button>
+<!-- 4. Statistics -->
+<button class="bg-surface-container-high rounded-xl p-3 flex flex-col justify-between items-start h-32 active:scale-95 transition-transform duration-100 relative overflow-hidden">
+<div class="absolute right-1 top-1 opacity-5">
+<span class="material-symbols-outlined text-5xl">leaderboard</span>
+</div>
+<div class="p-1.5 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary text-xl">leaderboard</span>
+</div>
+<div class="text-left overflow-hidden w-full">
+<h3 class="font-headline text-base font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Statistics</h3>
+<p class="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap">Performance</p>
+</div>
+</button>
+<!-- 5. Tournaments -->
+<button class="bg-surface-container-high rounded-xl p-3 flex flex-col justify-between items-start h-32 active:scale-95 transition-transform duration-100 relative overflow-hidden">
+<div class="absolute right-1 top-1 opacity-5">
+<span class="material-symbols-outlined text-5xl">emoji_events</span>
+</div>
+<div class="p-1.5 bg-secondary-container/30 rounded-lg">
+<span class="material-symbols-outlined text-on-secondary-container text-xl">emoji_events</span>
+</div>
+<div class="text-left overflow-hidden w-full">
+<h3 class="font-headline text-base font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Tournaments</h3>
+<p class="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap">CHAMPIONSHIPS</p>
+</div>
+</button>
+<!-- 6. I Want to Play (Queue) -->
+<button class="col-span-2 bg-[#110d0c] border border-outline-variant/20 rounded-xl p-3 flex items-center gap-4 active:scale-[0.98] transition-transform duration-100 group">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2d5a27] to-[#a1d494] flex items-center justify-center shadow-[0_0_10px_rgba(161,212,148,0.2)] group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-on-primary text-2xl" style="font-variation-settings: 'FILL' 1;">campaign</span>
+</div>
+</div>
+<div class="text-left flex-1 min-w-0">
+<h3 class="font-headline text-base font-bold text-on-surface leading-tight whitespace-nowrap overflow-hidden text-ellipsis">I Want to Play</h3>
+<p class="font-body text-[11px] text-on-surface-variant whitespace-nowrap overflow-hidden text-ellipsis">Queue for the next game</p>
+</div>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-on-surface-variant text-xl">group_add</span>
+</div>
+</button>
+</div>
+<!-- Game Pools Section -->
+<div class="mt-6">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-headline font-bold text-[10px] uppercase tracking-widest text-on-surface-variant whitespace-nowrap">Game Pools</h4>
+<span class="text-[10px] text-primary font-bold whitespace-nowrap">4 ACTIVE</span>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Active Pool -->
+<div class="bg-surface-container/60 border-l-4 border-primary rounded-r-xl p-3 flex items-center justify-between gap-2">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person_add</span>
+</div>
+<div class="min-w-0">
+<h5 class="font-headline text-sm font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Lunch Break 2v2</h5>
+<p class="text-[10px] text-on-surface-variant whitespace-nowrap overflow-hidden text-ellipsis">3/4 Players • Starts in 15m</p>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tight active:scale-95 transition-transform flex-shrink-0">Join</button>
+</div>
+<!-- Registration Pool -->
+<div class="bg-surface-container/60 border-l-4 border-secondary rounded-r-xl p-3 flex items-center justify-between gap-2">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 bg-secondary/10 rounded-full flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">app_registration</span>
+</div>
+<div class="min-w-0">
+<h5 class="font-headline text-sm font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Weekend Open</h5>
+<p class="text-[10px] text-on-surface-variant whitespace-nowrap overflow-hidden text-ellipsis">Registration Open • Feb 24</p>
+</div>
+</div>
+<button class="border border-secondary text-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tight active:scale-95 transition-transform flex-shrink-0">Register</button>
+</div>
+<!-- New Registration Pool -->
+<div class="bg-surface-container/60 border-l-4 border-primary rounded-r-xl p-3 flex items-center justify-between gap-2">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person_add</span>
+</div>
+<div class="min-w-0">
+<h5 class="font-headline text-sm font-bold leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Evening 1v1 Open</h5>
+<p class="text-[10px] text-on-surface-variant whitespace-nowrap overflow-hidden text-ellipsis">1/2 Players • Starts in 6h</p>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tight active:scale-95 transition-transform flex-shrink-0">Join</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Decorative background element -->
+<div class="fixed top-0 right-0 -z-10 w-full h-full opacity-30 pointer-events-none">
+<div class="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4"></div>
+<div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary/5 blur-[100px] rounded-full translate-y-1/4 -translate-x-1/4"></div>
+</div>
+</body></html>
