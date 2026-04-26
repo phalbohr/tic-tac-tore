@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 inputDocuments:
   - "_bmad-output/planning-artifacts/product-brief-tic-tac-tore.md"
   - "_bmad-output/planning-artifacts/product-brief-tic-tac-tore-distillate.md"
@@ -1266,5 +1266,292 @@ Cross-flow rules promoted from per-flow optimizations.
 7. **One gesture per outcome.** Confirm = one tap. Submit = one tap. Reject + reason = one tap to open reason picker, one tap to choose reason. Multi-tap reserved for power-user flows (template creation).
 
 8. **Match scope is rule-template-determined.** Number of games and win condition fixed by selected rule template before play begins. Auto-detected match end is deterministic. No mid-match "add another game?" prompts.
+
+## Component Strategy
+
+### Design System Components
+
+The project does **not** use a pre-built UI component library (no Vuetify, PrimeVue, shadcn-vue, etc.). The design system "foundation" is composed of primitives and tokens, not widgets.
+
+**Foundation layer:**
+
+| Layer | Provides | Coverage |
+|-------|----------|----------|
+| Tailwind v4 utilities | layout, spacing, typography scale, colors via tokens | 100% of visual language |
+| MD3 token palette (10 MVP tokens) | `surface*`, `on-surface`, `primary*`, `secondary*`, `tertiary`, `error`, `outline-variant` | Color/surface system |
+| Native HTML + browser APIs | `<button>`, `<input>`, `<dialog>` (Safari ≥15.4), Web Share API, Service Worker push | Base behavior |
+| Stitch screens | Visual references for ~12-15 MVP screens after regeneration | Composition |
+
+**Browser baseline:** Chrome ≥110, Safari ≥15.4, Firefox ≥115. Older Safari users see degraded modal positioning, not broken UX. Native `<dialog>` fallback (div + focus-trap) deferred to Phase 2 if telemetry warrants.
+
+All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level reuse from external libraries.
+
+### Custom Components
+
+**Component inventory (37 total) by domain:**
+
+**A. Match Recording (Flow 1):** `MatchTypeToggle`, `PlayerSlotGrid`, `FrequencyOrderedPlayerList`, `RuleTemplateChip`, `RuleTemplateBuilder`, `ScoreStepper`, `SubmitFAB`
+
+**B. Confirmation (Flows 2, 2b):** `MatchReviewCard`, `ConfirmRejectButtonPair`, `UndoToast`, `MicroCelebrationBanner`, `RejectReasonSelector`, `RejectFreeTextField`
+
+**C. Statistics & Discovery (Flows 3, 7):** `LeaderboardTable`, `PositionTab`, `RankMovementBanner`, `PlayerDetailDrawer`, `H2HCrossTabMatrix`, `QuickStatsPopover`, `MatchCard`, `MatchFilterChips`, `MatchDetailView`
+
+**D. Identity & Onboarding (Flows 4, 5):** `GoogleOAuthButton`, `NicknameInput`, `AvatarPicker`, `AvatarBase`, `AvatarSelfHub`, `AvatarQuickStats`, `AvatarHeaderButton` (alias of `AvatarSelfHub`), `TutorialCarousel`, `PersonalCabinetView`, `LocaleSwitcher`, `DemoDataToggle`, `SignOutConfirmDialog`
+
+> Note: `OAuthRedirectHandler` is **not a component** — it is a router guard. Specified in `architecture-frontend.md` Routing section, not in this inventory.
+
+**E. Global / Cross-cutting:** `HomeHub`, `MyMatchesView`, `AppThrottleBanner`, `WarningBanner`, `ToastNotification` (generic), `ShareButton`, `EmptyState`
+
+**F. Layout primitives:** `Surface`, `AmbientShadow`, `EditorialHeading`
+
+#### Decision Boundaries (explicit non-goals)
+
+- **No virtualized scroll** — pagination 20/page chosen for MVP (`LeaderboardTable`). Re-evaluate if telemetry shows scroll fatigue at 100+ players.
+- **No drag-and-drop** — slot assignment via tap, no rearrangement.
+- **No rich text editor** — reject free-text is plain ≤200-char `<textarea>`.
+- **No image upload** — avatars are 24 preset SVG only.
+- **No automated visual regression suite** — manual Stitch comparison at story acceptance (MVP); Percy/Chromatic deferred to Phase 2.
+- **No native `<dialog>` fallback** — accept Safari ≥15.4 baseline.
+
+#### Component Spec Template
+
+```markdown
+### [Component Name]
+
+**Purpose:** [Clear purpose statement]
+**Usage:** [When and how to use]
+**Anatomy:** [Visual breakdown of parts]
+**States:** [All possible states]
+**Variants:** [Different sizes/styles]
+**Responsive:** [Breakpoint behavior — mobile-first, sm:/lg: changes]
+**Accessibility:** [ARIA labels, keyboard navigation]
+**Content Guidelines:** [What content works best]
+**Interaction Behavior:** [How users interact]
+**Last Synced:** YYYY-MM-DD with Stitch screen [name]
+```
+
+#### Tier 1 — Full Specs (6 critical-path components)
+
+##### ScoreStepper
+
+**Purpose:** Capture per-game score per team in ≤2 taps to common values (≤5 goals).
+**Usage:** Score Entry screen, one instance per team per game.
+**Anatomy:** `[-]` button · numeric display (`headline-md`) · `[+]` button · `[+5]` button (conditional).
+**States:** `default` · `at-min` (0, `[-]` disabled) · `at-effective-max` (computed from `effective_max = win_condition === 'continue_on_tie' && tied ? null : score_limit`; null = no max) · `error` (server-rejected value, red border + hint) · `disabled` (game complete).
+**Variants:** `with-plus5` (when `score_limit ≥ 5`) / `compact` (when `< 5`).
+**Responsive:** Touch target ≥44×44px both breakpoints. `lg:` increases spacing between steppers; button size unchanged.
+**Accessibility:** `<button aria-label="Increase score for [team]">`, `aria-live="polite"` on numeric display, keyboard `+`/`-` shortcuts when focused, `role="spinbutton"` with `aria-valuenow`/`aria-valuemin`/`aria-valuemax` (max omitted when null).
+**Content:** 0–99 integers. No decimals.
+**Interaction:** Tap `+1` → optimistic increment, auto-advance to next game when both teams reach win_condition AND tie_break resolved.
+**Last Synced:** —
+
+##### PlayerSlotGrid
+
+**Purpose:** Select 2 (1v1) or 4 (2v2) players in ≤3 taps via auto-fill from frequency-ordered avatar grid.
+**Usage:** Match recording Step 1.
+**Anatomy:** Slot frame (`surface-bright`) · avatar placeholder · player name label · clear `[×]`. 2v2: 2-column layout — own team bottom (Defense / Attack), opponents top.
+**States:** `empty` · `filled` · `duplicate-error` (red border + "Already in match") · `team-switching` (2v2 only) · `submitter-not-included-warning` (third-party submitter — shows hint "Confirmation requires 1 player from each team").
+**Variants:** `1v1` (2 slots, vertical) / `2v2` (4 slots, defense-attack columns).
+**Responsive:** 1v1 stays vertical at all breakpoints. 2v2: columns at all breakpoints; `lg:` widens slot frames, no layout reflow.
+**Accessibility:** Each slot `<button aria-label="Empty slot, tap to assign player">` / `aria-label="Alex, tap to remove"`. Team-switcher separate labeled control with `aria-pressed`.
+**Content:** 24px SVG emoji avatar + nickname truncated at 14 chars + ellipsis.
+**Interaction:** Tap empty slot → `FrequencyOrderedPlayerList` overlay → tap player → auto-advance to next empty slot.
+**Last Synced:** —
+
+##### UndoToast
+
+**Purpose:** Provide server-authoritative reversal window after Submit/Confirm without blocking dialog.
+**Usage:** Bottom-screen overlay after Flow 1 submit and Flow 2 confirm.
+**Anatomy:** Toast container (`surface-container-highest`, `AmbientShadow`) · message · circular countdown indicator · `[Undo]` text button.
+**States:** `active` (countdown running, server window open) · `undoing` (Undo tapped, POST in flight, button disabled) · `undone` (server confirmed undo, dismiss + revert) · `expired` (server window closed, dismiss + invoke `onExpired`).
+**Variants:** `submit` ("Match submitted — undo?") / `confirm` ("Match confirmed — undo?").
+**Responsive:** Fixed bottom inset; `sm:` full-width; `lg:` max-width 480px centered.
+**Accessibility:** `role="status"` `aria-live="polite"`. Countdown announced once at appearance ("undo available for 15 seconds"). Undo button focusable; Esc dismisses without undo.
+**Content:** ≤60 chars message, single CTA.
+**Interaction:** **Server is source of truth for the 15s window.** Client countdown is decorative. Component accepts `clock` provider (default = real `Date.now`, tests inject fake) and callbacks `onUndo`, `onExpired`. Host composer (`useMatchSubmitWithUndo`) wires server confirmation of undo state. No event-bus emission — explicit callbacks only.
+**Last Synced:** —
+
+##### LeaderboardTable
+
+**Purpose:** Discover own rank movement and positional standing via paginated list with sticky self-row.
+**Usage:** Flow 3 Leaderboard view; Hub deep-link target.
+**Anatomy:** Sortable column headers · paginated row list (20 rows/page) · **sticky self-row at viewport top** with original-rank numeric badge · pagination controls · empty-state slot.
+**States:** `loading` (skeleton rows) · `viewer-ineligible` (current user has <5 confirmed matches → demo-data toggle CTA, table shows other players normally) · `data-empty` (no players match filter at all) · `filtered-empty` ("Try removing filters") · `error`.
+**Variants:** `overall` / `attack` / `defense` (driven by `PositionTab`).
+**Responsive:** Mobile (`<sm`): hide secondary metric column. `lg:` shows all columns + denser row spacing.
+**Accessibility:** Headers `<th aria-sort>`, sticky self-row uses `aria-current="row"`, pagination controls `aria-label="Page X of Y"`. Sort interactions: keyboard Enter/Space on headers.
+**Content:** Rank · avatar · nickname · primary metric · secondary metric (`lg:` only on small viewports). Self-row visually distinguished via `primary-container` background.
+**Interaction:** Tap row → `PlayerDetailDrawer`. Sort header → re-rank within page. Sticky self-row preserved across sort/page changes (server returns self-row separately if not on current page).
+**Last Synced:** —
+
+##### MatchReviewCard
+
+**Purpose:** Confirm or reject a match in ≤5s from push deep-link with full glance context.
+**Usage:** `/match/:id/review` (Flow 2 entry).
+**Anatomy:** Players block (avatars + names per team) · scores grid · rule template chip · timestamp · `ConfirmRejectButtonPair`.
+**States:** `default` (await action) · `confirming` (POST in flight, both buttons disabled with spinner) · `rejecting` (mirrored) · `confirmed-by-other` (banner: "Already confirmed", Confirm replaced with "View match") · `rejected-by-other-opponent` (race state — banner: "This match was rejected by another opponent. Contact the creator to dispute." Action buttons hidden) · `submitter-deleted` ("A retired player submitted...").
+**Variants:** `1v1` / `2v2` slot composition.
+**Responsive:** Mobile: vertical stack. `lg:` two-column (players left, scores right) with action buttons full-width below.
+**Accessibility:** Logical reading order — players, scores, rule, then actions. Confirm/Reject explicit `aria-label` ("Confirm match between Alex and you, score 5-3"). Race state uses `role="alert"` for opponent-already-rejected banner.
+**Content:** Zero PII. Pseudonymized for deleted submitter.
+**Interaction:** Confirm → `confirming` state until server ACK → `UndoToast`. Reject → `rejecting` state → push to `RejectReasonSelector`.
+**Last Synced:** —
+
+##### AvatarBase + Wrappers (replaces polymorphic AvatarInteractive)
+
+**`AvatarBase`** — pure visual primitive.
+
+- **Purpose:** Render player avatar with optional rank badge and team-color outline.
+- **Usage:** Used inside wrappers; not used directly by feature views.
+- **Anatomy:** Circular SVG avatar · optional rank badge slot · optional team-color outline.
+- **States:** `default` · `pressed` · `loading` (async deleted-player check pending — neutral skeleton) · `disabled` (deleted-player resolved → grey placeholder, no PII).
+- **Variants:** Sizes `sm` (24px), `md` (40px), `lg` (64px).
+- **Responsive:** Size invariant across breakpoints; chosen by parent.
+- **Accessibility:** Renders as `<span>` (no interactivity). Decorative `aria-hidden="true"` on SVG; alt text exposed by parent wrapper.
+- **Content:** SVG emoji from preset grid.
+- **Interaction:** None (pure visual). Wrappers add behavior.
+
+**`AvatarSelfHub`** — Hub-header only, opens Personal Cabinet.
+
+- **Purpose:** Single explicit Cabinet entry per Avatar Interaction Rule (cross-reference Step 12 UX Patterns).
+- **Usage:** Hub header exclusively.
+- **Anatomy:** `AvatarBase` size `md` + invisible button overlay.
+- **Accessibility:** `<button aria-label="Open your personal cabinet">`.
+- **Interaction:** Tap → route `/cabinet`.
+
+**`AvatarQuickStats`** — anywhere-else, opens popover.
+
+- **Purpose:** Quick-stats popover entry (own avatar non-Hub OR any other player anywhere).
+- **Usage:** Leaderboard rows, match cards, popovers, detail screens.
+- **Anatomy:** `AvatarBase` + invisible button overlay.
+- **Accessibility:** `<button aria-label="Open [nickname]'s quick stats">`.
+- **Interaction:** Tap → opens `QuickStatsPopover`.
+
+`AvatarHeaderButton` is an alias of `AvatarSelfHub`.
+
+#### Tier 1 — Medium Specs (6 newly promoted; full content/interaction at story time)
+
+##### Surface
+
+**Purpose:** Enforce No-Line Rule + 3-level surface hierarchy as wrapper primitive. Every container surface uses this — no raw `bg-*` classes in feature components.
+**Anatomy:** `<div>` with token-driven background, no border ever.
+**States:** `default`.
+**Variants:** `level="base"` (`surface`) / `level="container"` (`surface-container`) / `level="highest"` (`surface-container-highest`) / `level="bright"` (`surface-bright`, match-flow inputs only).
+**Accessibility:** Pure wrapper, `role` and ARIA inherited from content.
+**Responsive:** None — wrapper is layout-agnostic.
+
+##### HomeHub
+
+**Purpose:** Predictable start screen, phase-aware via feature flags. Never branches contextually on launch.
+**Anatomy:** Avatar header (uses `AvatarSelfHub`) · rank movement banner slot · primary action buttons (gated by feature flags) · `MyMatches` entry.
+**States:** `loading` (initial profile fetch) · `default` · `error` (profile load failed → retry CTA, no nuclear logout).
+**Variants:** Phase-driven via `useFeatureFlags` — MVP shows `["New Match", "My Matches", "My Game"]`; Phase 2 adds "Want to Play"; Phase 3 adds "Tournament".
+**Responsive:** Mobile single-column; `lg:` two-column with feed/banner left, actions right.
+**Accessibility:** Action buttons explicit `aria-label`; rank movement banner `role="status"` `aria-live="polite"`.
+
+##### ConfirmRejectButtonPair
+
+**Purpose:** Single-tap commit pair for match review. Idempotency-aware (reads key from `useMatchReviewStore`, does not generate).
+**Anatomy:** Two side-by-side buttons — Confirm (`primary-container`) / Reject (text button).
+**States:** `default` · `confirming` (Confirm shows spinner, Reject disabled) · `rejecting` (mirrored) · `disabled` (review state changed externally).
+**Variants:** None.
+**Responsive:** Stacks vertically on `<sm`, side-by-side `sm+`.
+**Accessibility:** Both buttons explicit labels with match context. Disabled state announces reason via `aria-describedby`.
+
+##### MicroCelebrationBanner
+
+**Purpose:** Post-confirmation reward surface (after `UndoToast` `expired`). Cheap emotional payoff per Step 4 principles.
+**Anatomy:** Inline banner with insight chip + optional drill-link CTA.
+**States:** `entering` (fade-in) · `default` · `dismissing` (fade-out, auto after 4s).
+**Variants:** Insight templates — `streak`, `partnership`, `personal-best`, `rank-jump`. Content sourced from i18n catalog.
+**Responsive:** Full-width on mobile; `lg:` constrained to feed column width.
+**Accessibility:** `role="status"` `aria-live="polite"`. Drill-link is real `<a>`/`<button>`, not div+onclick.
+**Content Catalog Dependency:** Trigger conditions + EN/DE copy live in `i18n/celebrations.yaml`. Content design owned by UX (Sally); translation owned by Pavel (current solo setup). Block component story acceptance until catalog populated for MVP triggers.
+
+##### MatchTypeToggle
+
+**Purpose:** Switch between 1v1 and 2v2 in match draft.
+**Anatomy:** Segmented control with two options.
+**States:** `default` · `disabled` (after first player selected — switching would clear slots).
+**Variants:** None.
+**Responsive:** Fixed compact size both breakpoints.
+**Accessibility:** `role="radiogroup"`; each segment `role="radio"` with `aria-checked`.
+
+##### FrequencyOrderedPlayerList
+
+**Purpose:** Player picker overlay with frequency-based ordering (recent partners first), alphabetical tiebreak.
+**Anatomy:** Modal overlay · search input · scrollable avatar grid (3 columns mobile, 5 columns `lg:`).
+**States:** `loading` · `default` · `empty-search-result` (CTA: "Invite [search term]" if Phase 2+) · `error`.
+**Variants:** None.
+**Responsive:** Bottom sheet on mobile; centered modal on `lg:`.
+**Accessibility:** Search input `aria-label="Search players"`; results announced via `aria-live`. Modal traps focus; Esc dismisses.
+
+#### Tier 2/3 — Stub Specs
+
+Each Tier 2/3 component carries a stub spec (purpose + usage). Full spec is authored at story-implementation time per Definition of Done (see Implementation Strategy). Component lists appear in the Implementation Roadmap below.
+
+### Component Implementation Strategy
+
+**Implementation principles:**
+
+1. **Build on Tailwind tokens, not raw hex.** Design-token contract enforced via lint/code-review.
+2. **Stitch first → Vue second sync rule, enforced by export step in commit pipeline.** Every Stitch screen change exports `screen.png` + DESIGN.md to `_project-spec/DESIGN/<screen-name>/` via Stitch MCP `get_screen` before commit. CI rejects PRs that touch a Vue component without a corresponding `_project-spec/DESIGN/` artifact (when applicable). Manual visual comparison at story acceptance — no automated visual regression for MVP (Phase 2 deferred).
+3. **Idempotency keys live in stores, not components.** `useMatchDraftStore` generates a key on draft start; `useMatchReviewStore` generates a key on review-screen mount. Components read the key from the store and pass it to POST. Same intent across re-mounts → same key.
+4. **Server is source of truth for time-bounded state.** Undo windows, cooldowns, rate limits — client surfaces decoratively, server enforces.
+5. **Polymorphism via wrappers, not props.** Three-mode `AvatarInteractive` rejected → three explicit components over `AvatarBase`. Rule: behavior variants get separate components; visual variants get props.
+6. **Component extraction rule.** Extract into a named SFC if **≥2 use sites OR ≥3 states/variants OR non-trivial behavior (timer, async, focus management)**. Otherwise inline at use site. Re-evaluate when a third use site appears.
+7. **A11y baseline.** Every component ships ARIA label, keyboard support, `aria-live` for dynamic content. Tier 1 fully tested; Tier 2 happy path; Tier 3 smoke (per Test Priority below).
+8. **State is shared via Pinia, not prop-drilled.** `useMatchDraftStore`, `useMatchReviewStore`, `useFeatureFlags`, `useAuthStore`. Components stateless where possible.
+
+**Definition of Done — component:**
+
+A component is "done" when ALL of the following hold:
+
+- ✅ Stitch screen exists (or n/a if pure logical/wrapper) and exported to `_project-spec/DESIGN/<screen>/`
+- ✅ Vue 3 SFC implements all spec'd states and variants
+- ✅ Unit tests cover state transitions (Tier 1: 100%; Tier 2: happy path + critical edges; Tier 3: smoke)
+- ✅ A11y check: ARIA labels present, keyboard navigation tested, `axe-core` reports no violations on default state
+- ✅ Manual visual comparison vs Stitch screen at story acceptance (Pavel signs off in PR)
+- ✅ Spec frontmatter `Last Synced: YYYY-MM-DD with Stitch screen [name]` updated
+- ✅ Used in at least one feature view OR documented as primitive-only with reference
+
+**Test Priority Strategy:**
+
+| Tier | State coverage | A11y | Visual |
+|------|---------------|------|--------|
+| Tier 1 | 100% (all states, all variants) | full audit (axe + manual keyboard) | manual comparison Stitch → component at story |
+| Tier 2 | happy path + critical edges (errors, empty) | axe-core scan | manual comparison |
+| Tier 3 | smoke (default state renders) | axe-core scan | spot-check |
+
+**Cross-references:** Avatar Interaction Rule is documented in Step 12 (UX Patterns) as a global pattern. `AvatarSelfHub` and `AvatarQuickStats` specs reference it; they do not duplicate it.
+
+### Implementation Roadmap
+
+**Phase 1 — Tier 1 Core (12 components — blocks MVP critical path):**
+
+| Component | Blocks Flow | Reason |
+|-----------|-------------|--------|
+| `Surface` | All | Foundation invariant — No-Line Rule + 3-level hierarchy |
+| `ScoreStepper` | F1 | Score Entry impossible without |
+| `PlayerSlotGrid` | F1 | Player Selection core |
+| `MatchTypeToggle` | F1 | Match draft entry point |
+| `FrequencyOrderedPlayerList` | F1 | Player picker overlay |
+| `MatchReviewCard` | F2 | Push deep-link target |
+| `ConfirmRejectButtonPair` | F2 | Single-tap commit primitive |
+| `UndoToast` | F1, F2 | Replaces FR13 double-check; commit-protection invariant |
+| `MicroCelebrationBanner` | F2 | Post-undo reward — Phase 1 epic completion |
+| `LeaderboardTable` | F3 | Loop payoff surface |
+| `AvatarBase` + `AvatarSelfHub` + `AvatarQuickStats` | F2, F3, F5, F7 | Cross-flow universal nav primitive |
+| `HomeHub` | All | First-impression critical path |
+
+**Phase 2 — Tier 2 MVP-required (~14 components):**
+
+`SubmitFAB`, `RuleTemplateChip`, `RuleTemplateBuilder` (promoted from Tier 3 — custom rule templates = MVP differentiator vs spreadsheet alternatives), `RejectReasonSelector`, `RejectFreeTextField`, `PositionTab`, `MatchCard`, `MatchFilterChips`, `GoogleOAuthButton`, `NicknameInput`, `AvatarPicker`, `TutorialCarousel`, `PersonalCabinetView`, `MyMatchesView`, `EmptyState` (promoted from Tier 3 — global pattern requires Tier 2 baseline; used as slot composition by `LeaderboardTable`, `MyMatchesView`, `H2HCrossTabMatrix`).
+
+**Phase 3 — Tier 3 supporting + polish (~11 components):**
+
+`RankMovementBanner`, `PlayerDetailDrawer`, `H2HCrossTabMatrix`, `QuickStatsPopover`, `MatchDetailView`, `LocaleSwitcher`, `DemoDataToggle`, `SignOutConfirmDialog`, `AppThrottleBanner`, `WarningBanner`, `ToastNotification` (generic), `ShareButton`, `AmbientShadow`, `EditorialHeading`.
+
+**Phase 1.5 deferred:** "Rod" Scoreboard (live mode signature component).
 
 9. **Telemetry for speed budgets** (forecast for Step 14 instrumentation): every critical flow emits `flow_completed { flow_name, elapsed_ms }` event. Without instrumentation, speed targets are aspirational.
