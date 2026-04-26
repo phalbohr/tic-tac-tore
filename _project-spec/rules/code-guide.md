@@ -108,7 +108,7 @@ ALWAYS use `import`. Avoid fully-qualified class names (FQN) inline unless resol
 
 ## 17. Nested Idempotency Keys
 
-Never reuse an outer/parent idempotency key for nested sub-operations. Derive inner keys deterministically (e.g. `UUID.nameUUIDFromBytes((parentKey + "sub").getBytes())`).
+No parent key reuse. Derive nested keys: `UUID.nameUUIDFromBytes((parentKey + ":" + opId).getBytes(UTF_8))`. Suffix `opId` MUST be unique per sub-op type.
 
 ## 18. Backend vs Frontend Boundary
 
@@ -116,4 +116,4 @@ Never reuse an outer/parent idempotency key for nested sub-operations. Derive in
 
 ## 19. No Magic Values
 
-No magic numbers, strings, or other literals in logic. Extract every non-obvious constant to a named `static final` field. The name must explain *what* the value represents, not restate the value itself. Example: `PAGINATION_PARAMS = Set.of("page", "size", "sort")` — callers understand intent without reading the literal.
+No magic numbers, strings, or other literals in logic. Extract every non-obvious constant to a named `static final` field. The name must explain _what_ the value represents, not restate the value itself. Example: `PAGINATION_PARAMS = Set.of("page", "size", "sort")` — callers understand intent without reading the literal.

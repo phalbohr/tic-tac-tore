@@ -4,12 +4,12 @@ status: "complete"
 created: "2026-04-03"
 updated: "2026-04-04"
 inputs:
-  - ".gemini/project-spec/DESIGN/project-design-description.md"
+  - "_project-spec/DESIGN/project-design-description.md"
   - "docs/project-overview.md"
   - "conductor/product.md"
   - "conductor/product-guidelines.md"
   - "conductor/tech-stack.md"
-  - ".gemini/project-spec/table-soccer-rules/"
+  - "_project-spec/table-soccer-rules/"
 ---
 
 # Product Brief: Tic-Tac-Tore
