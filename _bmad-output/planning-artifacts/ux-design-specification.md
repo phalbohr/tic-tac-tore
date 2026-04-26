@@ -1,5 +1,6 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+lastStep: 14
 inputDocuments:
   - "_bmad-output/planning-artifacts/product-brief-tic-tac-tore.md"
   - "_bmad-output/planning-artifacts/product-brief-tic-tac-tore-distillate.md"
@@ -197,7 +198,7 @@ The loop is asymmetric by design: one person records (proactive effort), multipl
 | Complete match when win condition met | Automatically based on rule system |
 | Publish to statistics after cooldown | 24h timer or second confirmation |
 | Tournament bracket progression | Automatic after match confirmation |
-| Rate limiting on submissions | Automatic, context-aware thresholds |
+| Rate limiting on submissions | Automatically, context-aware thresholds |
 
 ### Critical Success Moments
 
@@ -346,7 +347,7 @@ This project is not inspired by any specific product. It grows organically from 
 
 | Pattern | How It Works | Application in Tic-Tac-Tore |
 |---------|-------------|------------------------------|
-| **Spatial UI mapping** | Screen layout mirrors physical space | Live mode: screen corners = player positions at the table |
+| **Spatial UI mapping** | Screen layout mirrors physical space | Live mode: screen layout mirrors physical space |
 | **Wake lock for active sessions** | Screen stays on during physical activity | Live match: screen never dims while match is in progress |
 | **One-hand operation** | All critical actions reachable with thumb | Portrait mode: action buttons in bottom half of screen |
 | **Glanceable status** | Key info visible at arm's length | Live mode scores: large numerals readable by all players at the table |
@@ -372,7 +373,7 @@ Derived from competitor analysis (Kicktrack, Kickertool, Kicker.cool, Foosball G
 - Smart defaults + frequency-sorted lists for match entry speed
 - Single-action + undo toast for confirmation flow
 - Summary → detail drill-down for statistics progressive disclosure
-- Activity feed as Home Hub landing content
+- Activity feed bundle landing content
 - Avatar as universal interactive element
 
 **Adapt (proven patterns, modify for context):**
@@ -428,374 +429,6 @@ The creative north star defined in Stitch is **"The Speakeasy Stadium"** — mov
 ### Implementation Approach
 
 **Design-to-code pipeline:**
-
-```
-UX Specification (this document)
-    ↓ screen descriptions
-Stitch (generate/edit screens via MCP)
-    ↓ visual validation
-Tailwind CSS (tokens mapped 1:1 from Stitch)
-    ↓ implementation
-Vue 3 components
-```
-
-**Available Stitch MCP tools:**
-- `generate_screen_from_text` — create new screens from UX descriptions
-- `edit_screens` — iterate on existing screens based on UX decisions
-- `generate_variants` — explore alternative layouts
-- `apply_design_system` / `update_design_system` — manage design tokens
-- `get_screen` — retrieve screen specs for implementation reference
-
-**Available design skills:**
-- `stitch-design` — primary tool for screen design and updates
-- `stitch-loop` — iterative design refinement cycles
-- `design-md` — design system documentation generation
-- `enhance-prompt` — improve screen generation prompts
-- `taste-design` — aesthetic evaluation and refinement
-
-**Consistency rule:** UX spec change → Stitch screen update → code update. Never change code without updating Stitch first. Stitch = source of truth for visuals.
-
-### MVP Design Token Subset
-
-Full Stitch color scheme contains 30+ named tokens. MVP uses ~10 critical tokens:
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `surface` | #171211 | Page backgrounds |
-| `surface-container` | #231F1D | Card backgrounds |
-| `surface-container-highest` | #393431 | Active/highlighted elements, inputs |
-| `surface-bright` | #3E3836 | Match flow inputs (elevated prominence) |
-| `on-surface` | #EBE0DD | Primary text (warm cream, never pure white) |
-| `primary` | #A1D494 | Accent text, icons |
-| `primary-container` | #2D5A27 | Primary button backgrounds, branded areas |
-| `on-primary-container` | #9DD090 | Text on green surfaces (title-md+ only; small text uses on-surface) |
-| `secondary` / `secondary-container` | #FFB59F / #7F3017 | Team B / red player color |
-| `tertiary` | #EFC209 | Team A / yellow player color, highlights |
-| `error` | #FFB4AB | Error states |
-| `outline-variant` | #42493E | Ghost dividers on data-dense screens (10-15% opacity) |
-
-All 30+ tokens defined in `tailwind.config` for future use. Component specs maintained in Stitch design document, referenced during implementation.
-
-### Implementation Guidelines
-
-| Guideline | Detail |
-|-----------|--------|
-| **Token naming** | 1:1 with Stitch: `bg-surface-container-highest`, not abbreviated |
-| **No-Line Rule enforcement** | Code review checklist: no `border-*` classes except on data tables with ghost dividers |
-| **Dark theme migration** | Atomic task — all screens in one pass, no mixed light/dark state |
-| **Font loading** | Self-hosted via @fontsource: Space Grotesk Bold + Manrope Regular/SemiBold/Bold. 4 weights, ~80KB. Cached by Service Worker |
-| **Green-on-green accessibility** | `on-primary-container` only for title-md and larger. Small text on green surfaces → `on-surface` |
-| **Match flow inputs** | Player selection: `surface-bright` for elevated visual prominence |
-| **Responsive breakpoints** | Mobile-first. `sm:` (640px), `lg:` (1024px). Two breakpoints sufficient |
-| **Transitions** | UI interactions: `150ms ease-out`. Page transitions: `300ms ease-in-out`. Minimal, not flashy |
-
-## Defining Experience
-
-### The Core Interaction
-
-**"Tap, tap, done — and the data remembers what you'd forget."**
-
-The defining experience of Tic-Tac-Tore is the seamless capture of competitive moments that would otherwise vanish. Every office foosball match is a micro-event: intense for 5 minutes, forgotten by lunch. The app's job is to make the 10-second recording act so automatic that the data accumulates invisibly — and then, weeks later, surfaces truths nobody could see without it.
-
-This is a **delayed-reward loop**: the effort happens now (record), the payoff emerges later (discover). Unlike instant-gratification products, Tic-Tac-Tore asks users to invest before they see returns. The design challenge is maintaining recording motivation during the investment phase — before statistics become meaningful (~10-15 confirmed matches). Demo data bridges this gap visually; micro-acknowledgments and confirmation celebrations bridge it emotionally.
-
-### User Mental Model
-
-**How users currently solve this problem:** They don't. Matches are played and immediately debated from memory. "I beat you last week" has no proof. The only tracking tools are memory (unreliable), spreadsheets (nobody maintains), and verbal reputation (biased toward attackers who score visibly).
-
-**Mental model users bring:** Users expect a sports score tracker — select players, enter scores, see results. They do NOT expect:
-- Confirmation workflow (new concept — "why can't I just save it?")
-- Positional statistics depth (they expect simple win/loss, not attack-vs-defense breakdowns)
-- Multiple rule systems as first-class entities (they expect one set of rules)
-
-**Where confusion is likely:**
-- First encounter with confirmation flow — "I entered the match, why isn't it in the stats?"
-- Rule system selection — "which one should I pick?" (mitigated by smart defaults)
-- Positional statistics — "what does 'defense win rate' mean for me?" (mitigated by progressive disclosure)
-
-**Key insight:** Users arrive expecting a simple tracker and gradually discover it's a competitive intelligence platform. The UX must support this journey: start simple, reveal depth through use.
-
-### Success Criteria
-
-| Criteria | Metric | How We'll Know |
-|----------|--------|----------------|
-| **Recording feels automatic** | <10 seconds, <5 taps from Home Hub to score entry | User doesn't consciously decide "should I record this?" — they just do it |
-| **Confirmation is trivial** | <5 seconds from push notification to confirmed | Confirmation rate >90% |
-| **First insight surprises** | Occurs within first 2 weeks of use | User shares a stat unsolicited ("look at this!") |
-| **Data is trusted** | Zero disputes about confirmed match accuracy | Players reference app stats in conversations as objective truth |
-| **Return is habitual** | Daily app opens without push prompt | Users check Home Hub for rank changes and activity feed voluntarily |
-
-### Novel vs. Established Patterns
-
-**Established patterns (adopt directly):**
-
-| Pattern | Users Already Know | Our Application |
-|---------|-------------------|-----------------|
-| Score entry with +/- steppers | Every sports tracker | +1, -1, +5 buttons for game scores |
-| Tab navigation | Every mobile app | Home / My Matches / Statistics / Profile |
-| Push notification → action | Every messaging app | Confirm match from notification |
-| Avatar as identity | Every social app | Player avatars in lists, match cards, leaderboards |
-
-**Novel patterns (require education):**
-
-| Pattern | Why It's New | How We Teach It |
-|---------|-------------|-----------------|
-| **Match confirmation by opponent** | No existing foosball app does this | Onboarding tutorial slide: "Your opponent confirms → data is trustworthy" |
-| **Undo toast instead of "Are you sure?"** | Users expect confirmation dialogs | First confirmation: brief animation highlighting the undo toast. After 3 uses: muscle memory |
-| **Positional statistics** | No competitor tracks this | Progressive disclosure: overall stats first, positional breakdown one tap deeper |
-| **Rule system as template** | Users expect one fixed rule set | Default pre-selected. Template creation in settings. Most users never touch it |
-| **Live mode phone-on-table (Phase 1.5)** | Completely novel interaction | Organic discovery: see someone else doing it. In-app animated tutorial on first entry |
-
-**Key principle:** Every novel pattern has an established fallback. Undo toast fails? Reject within 24h. Rule templates confuse? Default works for 90%. Live mode unavailable? Retrospective entry covers everything.
-
-### Experience Mechanics: Retrospective Match Entry
-
-#### 1. Initiation
-
-```
-Home Hub → [New Match] button (primary, top position)
-```
-- Always one tap from Home Hub. Button position never changes.
-
-#### 2. Configuration (auto + override)
-
-```
-Format: [1v1] [2v2]                    ← default: last used
-Rules:  [ITSF] [DTFB] [Custom Name]   ← default: last used
-```
-- Defaults pre-selected. One tap to override if needed. Most matches: zero taps here.
-
-#### 3. Player Selection
-
-**Slot layout (2v2) — mirrors physical table:**
-```
-  Team A:  [🧑 Attack A]   [🧑 Defense A]
-           ─────────────────────────────
-  Team B:  [🧑 YOU ✓ Defense B]  [🧑 Attack B]
-```
-- Left column: Defense B (bottom) vs Attack A (top) — defender faces attacker.
-- Right column: Attack B (bottom) vs Defense A (top) — attacker faces defender.
-- Recording player auto-placed at bottom-left (Defense B).
-- Teams stacked vertically: own team bottom (closer), opponents top (farther) — mirrors physical table position.
-- Each team has a [⇄ Swap] button to exchange attack/defense positions.
-- Referee auto-detect: when all 4 slots filled and current user not among them → banner: "📋 You are recording as referee. Both teams will need to confirm this match." Referee mode: neutral color scheme for both teams (no red/yellow branding).
-
-**Slot layout (1v1):**
-```
-  Opponent:  [🧑 ___]
-  ─────────────────────
-  You:       [🧑 YOU ✓]
-```
-- Vertical: opponent above, you below — same physical metaphor.
-
-**Auto-fill order (left→right, bottom→top):**
-```
-YOU (bottom-left, Defense B) → tap 1 (bottom-right, Attack B)
-→ tap 2 (top-left, Attack A) → tap 3 (top-right, Defense A)
-```
-- Simple: fill slots like reading — left to right, bottom to top.
-- 3 taps = 3 players. No slot targeting needed.
-
-**Team roster (below slots):**
-```
-  Team: [⭐ Favorites] [The Strikers] [🔍 All]
-  ┌──────────────────────────────────────────┐
-  │ 🧑 Alex  🧑 Chris  🧑 Erik  🧑 Jonas   │
-  │ 🧑 Lisa  🧑 Max    🧑 Oleg  🧑 Viktor  │
-  └──────────────────────────────────────────┘
-  ↑ alphabetical within team, always same order
-                                    [🧹 Clear All]
-```
-- **Horizontal pill tabs** to switch teams. Default team pre-selected.
-- `[🔍 All]` → inline swap to full player list with search input. Non-team players sorted by match frequency, then alphabetical.
-- All players visible as avatar + name grid. No dropdown, no hidden list.
-- **Alphabetical order within each team — always the same** for muscle memory.
-- On avatar tap: immediate visual highlight. On slot fill: avatar slides into slot.
-- Already-placed players dimmed in roster.
-- **Replace player in filled slot:** tap occupied slot → slot opens → tap different avatar.
-- **[🧹 Clear All]** clears all slots except creator. Rules preserved. Available always.
-- **"Player not found?"** — link in search to share app invite URL.
-
-#### 4. Score Entry
-
-```
-Game 1:  Team A  [+5][ +1 ][ 07 ][ -1 ]  :  [ 09 ][+1][+5]  Team B
-                  ↑ larger                              ↑ larger
-```
-- **+5 button visually larger than +1** — eye orients by size faster than reading text.
-- **+5 visible only when score_limit ≥ 5.** At lower limits: only +1/-1.
-- Auto-advance to next game when score limit reached (respecting all win conditions including tie-break "win by 2").
-- **Retrospective mode:** when one team reaches score limit, hide +buttons for that team + toast "Maximum goals reached."
-- [⇄ Swap Positions] button between games (mandatory or free per rule system).
-- Position swap free on preparation screen regardless of rules. Rules enforce from first score entry.
-- Current positions displayed alongside scores as visual reminder.
-
-**Total tap count (optimal 2v2 path):**
-
-| Step | Taps |
-|------|------|
-| New Match | 1 |
-| Format + Rules (defaults) | 0 |
-| Select 3 players (auto-fill) | 3 |
-| Enter ~3 game scores (with +5) | ~6-10 |
-| Submit | 1 |
-| **Total** | **~11-15 taps, ~8-10 seconds** |
-
-#### 5. Submission & Next Action
-
-```
-[SUBMIT MATCH] ← single tap, no confirmation dialog
-```
-
-**Success state (replaces match entry screen):**
-```
-  ✓ Match submitted!
-  Awaiting confirmation from Alex and Viktor.
-
-  [🔄 Record Another Match]    [🏠 Home]
-```
-- No timer, no auto-return. Player decides.
-- **"Record Another Match"** → preparation screen pre-filled with same players, positions, and rules. Zero taps if same teams play again; swap/replace/clear if lineup changes.
-- **"Home"** → Home Hub with toast acknowledgment.
-- **[🧹 Clear All]** on preparation screen clears all except creator when coming from "Record Another" with completely different teams.
-
-#### 6. Confirmation Flow (opponent side)
-
-- Push notification: `"Pavel submitted: 10:7, 8:10, 10:5 — Team Alpha won"`
-- Rich notification with full match details — enough to decide without opening app.
-- Tap notification → match detail screen with [Confirm] button.
-- Single tap confirms + 15-second undo toast.
-- Reject option with message field to creator.
-- Micro-celebration after confirmation: "Win streak: 4!" or rank insight.
-- 24h reminder notification if no response.
-
-## Visual Design Foundation
-
-### Color System
-
-Defined in Stitch design system "The Clubhouse Editorial" (project `6006028140652349802`). Full specification in Design System Foundation section. Key principles:
-
-- **Dark mode only** — no light/dark toggle. Background: `surface` (#171211).
-- **Foosball-inspired palette:** green table, red/yellow player figures, warm brown surroundings.
-- **Team colors reserved:** Red (`secondary`) = Team B figures. Yellow (`tertiary`) = Team A figures. Used strictly for team identification, not general UI accent.
-- **No pure white:** all light text uses `on-surface` (#EBE0DD) — warm cream.
-- **Referee neutrality:** in referee mode, both teams use `on-surface` instead of team colors.
-
-### Typography System
-
-| Role | Font | Weight | Size Range | Usage |
-|------|------|--------|------------|-------|
-| **Display / Scores (live mode)** | Space Grotesk | Bold (700) | 48-64px | Live match scores, hero stats |
-| **Display / Scores (retrospective)** | Space Grotesk | Bold (700) | 36-40px | Retrospective entry scores — smaller to fit with controls |
-| **Headlines** | Space Grotesk | Bold (700) | 24-32px | Section headers, screen titles |
-| **Body** | Manrope | Regular (400) | 14-16px | Match details, descriptions, long text |
-| **Labels / Emphasis** | Manrope | SemiBold (600) | 12-14px | Button labels, stat labels, tab names |
-| **Strong actions** | Manrope | Bold (700) | 14-16px | Primary CTA text |
-
-**Scale principle:** Extreme contrast between display and body creates editorial magazine feel — the visual identity of "The Clubhouse Editorial."
-
-**Font loading:** Self-hosted via @fontsource. 4 files WOFF2, ~65-75KB total. Cached by Service Worker after first load.
-
-### Spacing & Layout Foundation
-
-**Base unit:** 4px (Tailwind default). All spacing expressed as multiples of 4.
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `spacing-1` | 4px | Inline spacing, icon padding |
-| `spacing-2` | 8px | Between related elements (label + value), interactive-to-static gap |
-| `spacing-3` | 12px | Between components, **minimum gap between interactive elements** |
-| `spacing-4` | 16px | Between groups, card padding |
-| `spacing-6` | 24px | Between sections, major breaks |
-| `spacing-8` | 32px | Screen-level margins, hero spacing |
-
-**Spacing rule:** Interactive element gap ≥ 12px (spacing-3). Interactive-to-static gap ≥ 8px (spacing-2). Prevents misclicks on mobile.
-
-**Breathing zones — spacing adapts to screen purpose:**
-
-| Zone | Emotional Density | Card Padding | Element Gap | Section Gap |
-|------|------------------|-------------|-------------|-------------|
-| **Match entry** | Compressed | spacing-3 (12px) | spacing-2 to spacing-3 | spacing-4 (16px) |
-| **Home Hub** | Relaxed | spacing-4 (16px) | spacing-3 (12px) | spacing-6 (24px) |
-| **Statistics** | Dense-readable | spacing-4 (16px) | spacing-2 (8px) rows | spacing-6 (24px) sections |
-
-**Layout principles:**
-
-1. **Mobile-first, thumb-zone aware.** Primary actions in bottom half of screen. Navigation and status at top. Score entry buttons sized for thumb reach (minimum 48x48px, +5 button larger).
-2. **Content density: moderate (level 2).** Not cramped, not airy. Office tool that respects break-time urgency.
-3. **Card-based composition.** Content grouped in surface-elevated cards. No borders — tonal shift only (No-Line Rule). Cards use `rounded-lg` (1rem).
-4. **Player avatar grid:** 2 rows visible without scroll. Additional rows accessible via scroll with fade gradient indicator. Each avatar ~70-80px with spacing-3 gap.
-5. **Grid system:** CSS Grid / Flexbox, not rigid columns. Mobile: single column. `sm:` (640px): optional 2-column. `lg:` (1024px): full desktop layout for statistics.
-
-### Accessibility Considerations
-
-| Aspect | Requirement | Implementation |
-|--------|------------|----------------|
-| **Contrast (text)** | WCAG AA minimum (4.5:1) | `on-surface` on `surface` = 14.2:1 ✓. `on-primary-container` on `primary-container` = 4.8:1 ✓ for title-md+, use `on-surface` for smaller text |
-| **Touch targets** | Minimum 48x48px | All interactive elements. +5 button larger. Score quadrants in live mode naturally oversized |
-| **Touch spacing** | Minimum 12px between tappable elements | Prevents misclicks on mobile, especially in score entry area |
-| **Focus indicators** | Visible keyboard focus | `primary` ring on focus for all interactive elements |
-| **Semantic HTML** | Proper heading hierarchy, ARIA labels | Every icon-only button gets `aria-label`. Tables use proper `<th>` scope |
-| **Color independence** | No info by color alone | Win/loss indicators use text + icon, not just green/red |
-| **Motion** | Respect `prefers-reduced-motion` | All transitions disabled when reduced motion preferred |
-
-## Design Direction Decision
-
-The visual design direction for Tic-Tac-Tore is locked. This section declares the chosen direction, how it will be implemented, why it was chosen, and what alternatives were considered — in that order, because the forward-looking content matters more than the historical narrative.
-
-### Chosen Direction
-
-**"The Clubhouse Editorial"** — a dark, warm, atmospheric visual direction evoking a tactile office lounge (the *clubhouse*) expressed through magazine-style typographic hierarchy and restraint (the *editorial*). Defined and maintained in Google Stitch project `6006028140652349802` and mapped 1:1 to Tailwind CSS v4 tokens in implementation.
-
-The two terms carry distinct operational meaning:
-
-- **Clubhouse** governs palette, texture, and atmosphere: warm dark surfaces, cream-over-dark text, ambient depth. *Not* cold, corporate, or gaming-inspired.
-- **Editorial** governs typographic hierarchy and layout rhythm: extreme scale contrast between display and body, context-dependent asymmetry, generous spacing in browse-mode screens. *Not* dense dashboards, pulsing CTAs, or uniform grid stamping.
-
-Both must be present for a screen to honor the direction. A warm dark screen with default-weight uniform typography is "Clubhouse without Editorial" — atmospheric but flat. A high-contrast editorial layout on a neutral palette is "Editorial without Clubhouse" — magazine-style but cold. Neither alone is the direction.
-
-**Structural vs. stylistic rules.** Three rules encode structure or accessibility (Surface Hierarchy, Context-Dependent Asymmetry, Reserved Team Colors) and are load-bearing — violations are bugs. Two rules carry structural justification (No Pure White for contrast comfort, Editorial Typography for reading rhythm balanced against speed). Two rules are stylistic with explicit exceptions (No-Line Rule — focus indicators excepted; Ambient Shadows — currently a single-token placeholder).
-
-**Core visual rules** (canonical, enforced in all screens):
-
-- **No-Line Rule** — no 1px solid borders for layout separation; boundaries expressed through surface-color shifts. Ghost dividers (10–15% opacity) allowed only on data-dense screens. **Exception:** accessibility focus indicators (rings on interactive elements via `ring-*` utilities) are required, not permitted — they serve keyboard navigation and are independent of this rule. The rule targets decorative and layout borders, not focus management.
-
-- **Surface Hierarchy** — physical layering via `surface` → `surface-container` → `surface-container-highest` (MVP: 3 levels; full 5-level spec preserved for later phases).
-
-- **No Pure White** — all light text uses `on-surface` (#EBE0DD). **Rationale:** pure white on the dark background produces ~21:1 contrast, which exceeds WCAG AAA (7:1) and causes eye strain on prolonged reading. `on-surface` provides 14.2:1 — still well above AAA, but visually warmer and comfortable for extended use. Zero exceptions; if a component needs higher emphasis, use weight or size, not whiter white.
-
-- **Editorial Typography** — extreme scale contrast between display (Space Grotesk Bold, 36–64px) and body (Manrope Regular/SemiBold, 14–16px). Display sizes are defined for the iPhone-class default viewport (≥375px width). On viewports below 375px, display sizes scale down by one step via Tailwind's responsive modifier (e.g., retrospective scores: 32px at 320–374px, 36–40px at 375px+). Minimum supported viewport: 320px.
-
-- **Context-Dependent Asymmetry** — symmetric layouts for speed-critical flows (match entry, confirmation); editorial off-center placement for browse-mode (Home Hub feed, statistics). **Default classification:** match entry, confirmation, score entry, and all time-critical transactional screens are speed-critical (symmetric). Home Hub, Statistics, My Matches browse lists, Profile, and all discovery/browse-mode screens are editorial (asymmetric permitted). New screens inherit the default of their category; reclassification requires updating the Stitch design document.
-
-- **Reserved Team Colors** — red (`secondary` #FFB59F / #7F3017) and yellow (`tertiary` #EFC209) are used exclusively for team identification, never as decorative accents.
-
-- **Ambient Shadows** — a single `shadow-ambient` token reserved for floating elements (modals, toasts, popovers). MVP uses exactly one elevation level; this bullet is a placeholder for a future elevation spectrum (Phase 2+), not a fully realized rule set. Do not layer multiple shadow values in MVP — one shadow or none.
-
-**Signature component:** the "Rod" scoreboard (horizontal line with team-colored player icons mapping to physical foosball rods) is tied to live mode and therefore to Phase 1.5. If Phase 1.5 is deprioritized, the signature migrates to another Phase 1.5 component (e.g., portrait score display with team rod accents) to preserve the direction's visual identity even without live mode.
-
-**Success criteria for the direction.** How will we know in 6 months whether The Clubhouse Editorial was the right choice? The direction succeeds if:
-
-- **Cohesion test:** a screenshot of any MVP screen, shown in isolation, is recognizable as belonging to this product rather than to a generic PWA. The dark warm palette, on-surface cream, and editorial typography should read as a signature, not a theme swap away from default Tailwind.
-- **Speed test:** retrospective match entry consistently completes in under 10 seconds (primary UX goal from Step 3). If the editorial direction adds friction — large display sizes slow scanning, asymmetric layouts confuse targets — the direction is failing on its core constraint.
-- **Adoption test:** at least one office player mentions the app's visual character unprompted ("it feels nice to look at", "it doesn't feel like a generic tracker"). Silence on aesthetics is acceptable; active complaints about cold/sterile/generic feel are a direction failure signal.
-- **Consistency test:** after 3 months of active development, fewer than 3 instances of pure-white text, fewer than 3 instances of `border-*` classes for layout (outside ghost dividers), and zero instances of team colors used as decorative accents. Quality gates from Implementation Approach should have caught these; if they slipped through, the rules didn't hold.
-
-Failure signals reviewed at each phase transition.
-
-**Design direction lock.** This direction is locked for MVP (Phase 1) and Phase 1.5. The lock is not enforced by process (this is a solo-developer project without review boards); it exists as a constraint on future-you and on AI agents reading this document as instructions. Intentional drift is permitted but must update this document first — direction change → document update → implementation. The inverse order ("implement first, document later") is the failure mode this lock guards against.
-
-**Document freshness.** This specification is a snapshot of design intent as of its last revision (see frontmatter `date`). It is expected to drift over time — product decisions evolve, rules acquire nuance, new edge cases emerge. Re-review triggers:
-
-- At the start of each phase transition (MVP → Phase 1.5 → Phase 2 → Phase 3)
-- When an implementation PR diverges significantly from the direction and the divergence should become the new intent
-- At least once per quarter during active development
-
-The lock is strict about one thing only: direction changes must update this document **before** appearing in code.
-
-### Implementation Approach
-
-**Stitch-to-code pipeline:**
 
 ```
 UX Specification (this document)
@@ -964,7 +597,7 @@ flowchart TD
 - Push permission denied at OAuth time → fallback flow: My Matches badge, Hub banner "3 matches awaiting your confirmation"
 - Push permission revoked mid-session → on next app foreground, detect via `Notification.permission === "denied"` → show one-time re-prompt banner with "Enable notifications" CTA
 - Second opponent confirms during 24h cooldown → publish immediately, both confirmers see micro-celebration
-- 24h cooldown expires with only 1 confirmation (2v2 standard) → publish (one confirmation sufficient per PRD). Server is source of truth for cooldown timer; client-side countdown is decorative
+- 24h cooldown expires with only 1 confirmation (2v2 standard) → publish (one confirmation sufficient per PRD). Server is source of truth for the 15s window; client-side countdown is decorative
 - Confirmer offline → push queued by OS; processed on reconnect
 - Stale push (match already confirmed by other opponent) → review screen shows "Already confirmed" state, Confirm button replaced with "View match"
 - **Match submitted by deleted account (placeholder identity)** → review screen shows "A retired player submitted..." copy instead of `ex-player-0042`; preserves DSGVO pseudonymization without confusing UX
@@ -1389,7 +1022,7 @@ All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level re
 **Purpose:** Confirm or reject a match in ≤5s from push deep-link with full glance context.
 **Usage:** `/match/:id/review` (Flow 2 entry).
 **Anatomy:** Players block (avatars + names per team) · scores grid · rule template chip · timestamp · `ConfirmRejectButtonPair`.
-**States:** `default` (await action) · `confirming` (POST in flight, both buttons disabled with spinner) · `rejecting` (mirrored) · `confirmed-by-other` (banner: "Already confirmed", Confirm replaced with "View match") · `rejected-by-other-opponent` (race state — banner: "This match was rejected by another opponent. Contact the creator to dispute." Action buttons hidden) · `submitter-deleted` ("A retired player submitted...").
+**States:** `default` (await action) · `confirming` (POST in flight, both buttons disabled with spinner) · `rejecting` (mirrored) · `disabled` (review state changed externally).
 **Variants:** `1v1` / `2v2` slot composition.
 **Responsive:** Mobile: vertical stack. `lg:` two-column (players left, scores right) with action buttons full-width below.
 **Accessibility:** Logical reading order — players, scores, rule, then actions. Confirm/Reject explicit `aria-label` ("Confirm match between Alex and you, score 5-3"). Race state uses `role="alert"` for opponent-already-rejected banner.
@@ -1404,7 +1037,7 @@ All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level re
 - **Purpose:** Render player avatar with optional rank badge and team-color outline.
 - **Usage:** Used inside wrappers; not used directly by feature views.
 - **Anatomy:** Circular SVG avatar · optional rank badge slot · optional team-color outline.
-- **States:** `default` · `pressed` · `loading` (async deleted-player check pending — neutral skeleton) · `disabled` (deleted-player resolved → grey placeholder, no PII).
+- **States:** `default` · `pressed` · `loading` (async deleted-player check pending — neutral skeleton) · `default-error` (deleted-player resolved → grey placeholder, no PII).
 - **Variants:** Sizes `sm` (24px), `md` (40px), `lg` (64px).
 - **Responsive:** Size invariant across breakpoints; chosen by parent.
 - **Accessibility:** Renders as `<span>` (no interactivity). Decorative `aria-hidden="true"` on SVG; alt text exposed by parent wrapper.
@@ -1488,7 +1121,7 @@ All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level re
 
 #### Tier 2/3 — Stub Specs
 
-Each Tier 2/3 component carries a stub spec (purpose + usage). Full spec is authored at story-implementation time per Definition of Done (see Implementation Strategy). Component lists appear in the Implementation Roadmap below.
+Each Tier 2/3 component carries a stub spec (purpose + usage). Full spec is authored at story-implementation time per Definition of DoD (see Implementation Strategy). Component lists appear in the Implementation Roadmap below.
 
 ### Component Implementation Strategy
 
@@ -1555,3 +1188,90 @@ A component is "done" when ALL of the following hold:
 **Phase 1.5 deferred:** "Rod" Scoreboard (live mode signature component).
 
 9. **Telemetry for speed budgets** (forecast for Step 14 instrumentation): every critical flow emits `flow_completed { flow_name, elapsed_ms }` event. Without instrumentation, speed targets are aspirational.
+
+## UX Consistency Patterns
+
+For Tic-Tac-Tore, "predictability = speed." We use a limited set of patterns so that users can act on muscle memory, especially under time constraints (office breaks).
+
+### Button Hierarchy
+
+We strictly separate buttons by importance and context:
+
+| Hierarchy | Component / Style | Usage |
+|-----------|-------------------|-------|
+| **Primary (Floating)** | `SubmitFAB` | Single primary action on match recording screen. Always in the same place (bottom-right). |
+| **Primary (Container)** | `primary-container` | Key transitions and confirmations (e.g., "Confirm" in match review). |
+| **Secondary** | `surface-container-highest` | Secondary actions, toggles (e.g., match type selection 1v1/2v2). |
+| **Tertiary / Utility** | Text buttons (`on-surface`) | "Undo", "Reject", "Cancel" actions. Minimal visual weight. |
+| **Contextual Speed** | Large vs. Small Steppers | `+5` button is visually larger than `+1` in score entry to be instantly found by the eye. |
+
+### Feedback Patterns
+
+Feedback is always non-blocking and aimed at reinforcing success or preventing errors without breaking the flow.
+
+- **Optimistic UI + Undo:** We don't ask "Are you sure?". We perform the action and give a 15-second window to cancel via `UndoToast`. This removes redundant clicks in 99% of cases.
+- **Micro-Celebrations:** After final confirmation (when the Undo window closes), a `MicroCelebrationBanner` appears with an insight. This turns routine into a reward.
+- **Inline Validation:** Errors (exceeding score limit, duplicate player) are shown via red borders and hint text directly at the element. No modal error dialogs.
+- **Global Throttling:** When server limits are hit (spam), a non-blocking banner appears at the top with a wait timer.
+
+### Form Patterns
+
+Our forms are selections, not text entry.
+
+- **Smart Defaults:** We always pre-fill the last used rules and match type. In 90% of cases, the user needs zero setup.
+- **3-Tap Player Selection:** Slot auto-filling works "left-to-right, bottom-to-top." The user simply taps avatars in the list 3 times, and they fly into their slots.
+- **Frequency-First Sorting:** In player selection lists, recent opponents are always at the top. Alphabetical order is a fallback for rare cases.
+
+### Navigation Patterns
+
+- **Avatar Interaction Rule:** 
+    - Avatar in Hub header → route to Personal Cabinet.
+    - Avatar anywhere else → open `QuickStatsPopover`.
+- **Education via Onboarding:** Instead of visual hints in the interface, avatar interaction rules are explained on the 3rd slide of onboarding (Flow 4). This keeps the UI "clean" for experienced users.
+- **Push-First Entry:** The primary entry point for match confirmations is via rich push notifications.
+- **Home Hub Predictability:** The main screen structure is fixed to build muscle memory.
+
+### Additional Patterns
+
+- **Empty State is a CTA:** Every empty screen (no matches, no stats) must contain a Call to Action: "Record First Match," "Toggle Demo Data," or "Invite a Colleague."
+- **Spatial UI Mapping:** In Live mode (Phase 1.5), element placement strictly maps to physical player positions at the table.
+- **No-Line Separation:** Boundaries between sections are created by tonal shifts (Surface Hierarchy), not lines. This makes the interface feel less "cluttered" and more modern.
+
+## Responsive Design & Accessibility
+
+### Responsive Strategy
+
+The Tic-Tac-Tore experience is designed for the modern mobile ecosystem, acknowledging that users in an office environment (itemis GmbH) utilize current-generation devices.
+
+- **Modern Mobile Focus:** Primary optimization for high-resolution displays (Pixel 7 Pro, S10 Plus, iPhone 14+). 
+- **Landscape Live Mode (Phase 1.5):** A dedicated spatial layout for matches in progress, where the device sits flat on the table and maps to the physical field.
+- **Desktop Dashboarding:** Large screens (≥1024px) utilize a multi-panel layout for statistics analysis, providing persistent side navigation and data-dense H2H matrices to minimize vertical scrolling.
+
+### Breakpoint Strategy
+
+Targeting modern viewports allows for a more relaxed and readable "Clubhouse" atmosphere.
+
+- **Compact (Standard Mobile):** 375px – 639px. Focused single-column flows.
+- **Medium (Tablet / Large Mobile):** 640px – 1023px. Two-column Hub layout, increased data density in lists.
+- **Expanded (Desktop):** 1024px+. Full-screen dashboards with spatial separation of navigation and content.
+
+### Accessibility Strategy
+
+Targeting **WCAG AA** compliance to ensure a professional and inclusive experience.
+
+- **Visual Clarity:** "The Clubhouse Editorial" theme provides a 14.2:1 contrast ratio (exceeding AAA) for primary text.
+- **Tactile Reliability:** Touch targets are maintained at a minimum of 48x48px to prevent errors during high-intensity office sessions.
+- **Focus Management:** Bright `ring-primary` indicators are mandatory for keyboard navigation, compensating for the lack of visual borders (No-Line Rule).
+- **Safe Area Awareness:** Layout explicitly respects `env(safe-area-inset-*)` to ensure interactive elements are never obscured by modern device notches or rounded corners.
+
+### Testing Strategy
+
+- **Real Device Matrix:** Testing is conducted on owner-available Pixel 7 Pro and Samsung S10 Plus, plus colleague-provided iPhone 14+ devices.
+- **Browser Baseline:** Optimization for Chromium (Android) and WebKit (iOS) rendering engines.
+- **Automated Checks:** Integration of `axe-core` within the Playwright test suite for component-level accessibility audits.
+
+### Implementation Guidelines
+
+- **Relative Units:** Use `rem` and `em` for typography and spacing to support user-driven text scaling.
+- **Tailwind v4 Modern Primitives:** Leverage container queries and logical properties where beneficial for modern viewports.
+- **Semantic HTML First:** Use native elements (`<button>`, `<main>`, `<nav>`) to ensure consistent assistive technology behavior.
