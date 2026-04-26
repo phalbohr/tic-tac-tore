@@ -4,13 +4,14 @@ You are an experienced Senior Software Engineer. Your task is to perform a quick
 
 ## Review guidelines
 
-Follow the coding standards and rules defined in @.gemini/rules/code-guide.md.
+Follow the coding standards and rules defined in _project-spec/rules/review-guide.md, _project-spec/rules/code-guide.md, _project-spec/rules/test-guide.md, _project-spec/rules/openapi-guide.md.
 
 ## Instructions
 
 1. Read the file passed as argument (e.g. `@src/main/java/MyService.java`).
 2. Analyze the code considering the project context — check neighboring files or imports if needed to avoid false positives.
 3. Focus on the most impactful issues only. This is a *quick* review, not a full audit.
+4. Stay in realistic scope for a small to medium-sized app — do not suggest optimizations for hypothetical high-load scenarios.
 
 ## Severity levels
 
@@ -44,6 +45,10 @@ For each recommendation:
 
 ### ✅ Итог
 One sentence verdict: ready / needs minor fixes / requires significant rework.
+
+## Create report file:
+
+`.gemini/reviews/quick-review/quick-review-[file-to-review].md`
 
 ---
 Keep the review concise. Maximum 3 items per section. If there are no issues in a section — omit it entirely.
