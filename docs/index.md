@@ -54,25 +54,25 @@
 
 ### Product & Design Specifications
 
-- [Design Description](../.gemini/project-spec/DESIGN/project-design-description.md) — **Full product vision:** all screens, match modes, rule systems, tournaments, statistics
-- [Design System](../.gemini/project-spec/DESIGN/DESIGN.md) — Dark theme, color palette, typography (Space Grotesk/Manrope)
-- [UI Mockups](../.gemini/project-spec/DESIGN/stitch_tic_tac_tore/) — Google Stitch mockups (10 screens)
+- [Design Description](../_project-spec/DESIGN/project-design-description.md) — **Full product vision:** all screens, match modes, rule systems, tournaments, statistics
+- [Design System](../_project-spec/DESIGN/DESIGN.md) — Dark theme, color palette, typography (Space Grotesk/Manrope)
+- [UI Mockups](../_project-spec/DESIGN/stitch_tic_tac_tore/) — Google Stitch mockups (10 screens)
 - [Product Definition](../conductor/product.md) — Vision, audience, strategic goals, core features
 - [Product Guidelines](../conductor/product-guidelines.md) — Visual identity, UX philosophy, notification strategy
 - [Tech Stack](../conductor/tech-stack.md) — Technology decisions and justifications
 
 ### Table Soccer Rules (Reference)
 
-- [ITSF Standard Matchplay Rules 2024](../.gemini/project-spec/table-soccer-rules/ITSF_Standard_Matchplay_Rules_2024.md) — International rules standard
-- [ITSF Rules Summary (DE)](../.gemini/project-spec/table-soccer-rules/ITSF-Regelwerk_Kurzfassung.md) — Condensed ITSF rules in German
-- [DTFB Bundesliga Regulations 2024](../.gemini/project-spec/table-soccer-rules/Regularien_der_Bundesligen_2024.md) — German league regulations
+- [ITSF Standard Matchplay Rules 2024](../_project-spec/table-soccer-rules/ITSF_Standard_Matchplay_Rules_2024.md) — International rules standard
+- [ITSF Rules Summary (DE)](../_project-spec/table-soccer-rules/ITSF-Regelwerk_Kurzfassung.md) — Condensed ITSF rules in German
+- [DTFB Bundesliga Regulations 2024](../_project-spec/table-soccer-rules/Regularien_der_Bundesligen_2024.md) — German league regulations
 
 ### Code Conventions
 
-- [Code Guide](../.gemini/rules/code-guide.md) — 19 mandatory coding conventions (backend)
-- [OpenAPI Guide](../.gemini/rules/openapi-guide.md) — OpenAPI documentation rules
-- [Test Guide](../.gemini/rules/test-guide.md) — Testing conventions (AAA, naming, structure)
-- [Code Review Guide](../.gemini/rules/review-guide.md) — Review checklist (architecture, security, performance)
+- [Code Guide](../_project-spec/rules/code-guide.md) — 19 mandatory coding conventions (backend)
+- [OpenAPI Guide](../_project-spec/rules/openapi-guide.md) — OpenAPI documentation rules
+- [Test Guide](../_project-spec/rules/test-guide.md) — Testing conventions (AAA, naming, structure)
+- [Code Review Guide](../_project-spec/rules/review-guide.md) — Review checklist (architecture, security, performance)
 
 ### Project Management
 

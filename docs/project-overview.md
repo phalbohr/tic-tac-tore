@@ -18,7 +18,7 @@
 
 ## Full Product Scope (Target)
 
-The complete product vision is defined in the [Design Description](../.gemini/project-spec/DESIGN/project-design-description.md). Key planned screens and features:
+The complete product vision is defined in the [Design Description](../_project-spec/DESIGN/project-design-description.md). Key planned screens and features:
 
 ### Screens
 
@@ -61,7 +61,7 @@ The complete product vision is defined in the [Design Description](../.gemini/pr
 
 ## Implementation Status
 
-> The current codebase is an early MVP/prototype. Most implemented features deviate from the target [Design Description](../.gemini/project-spec/DESIGN/project-design-description.md) and will require significant rework to match the full spec.
+> The current codebase is an early MVP/prototype. Most implemented features deviate from the target [Design Description](../_project-spec/DESIGN/project-design-description.md) and will require significant rework to match the full spec.
 
 ### Implemented (MVP — Needs Rework to Match Spec)
 
@@ -97,7 +97,7 @@ The complete product vision is defined in the [Design Description](../.gemini/pr
 
 ## Design System
 
-Defined in [DESIGN.md](../.gemini/project-spec/DESIGN/DESIGN.md):
+Defined in [DESIGN.md](../_project-spec/DESIGN/DESIGN.md):
 
 - **Color mode:** Dark
 - **Primary:** `#2d5a27` (green — foosball table)
@@ -107,7 +107,7 @@ Defined in [DESIGN.md](../.gemini/project-spec/DESIGN/DESIGN.md):
 - **Headlines:** Space Grotesk
 - **Body/Labels:** Manrope
 - **Roundedness:** Moderate (level 2)
-- **UI Mockups:** Available in `.gemini/project-spec/DESIGN/stitch_tic_tac_tore/` (Google Stitch)
+- **UI Mockups:** Available in `_project-spec/DESIGN/stitch_tic_tac_tore/` (Google Stitch)
 
 > **Note:** The current frontend uses Tailwind CSS with a light Indigo/Gray theme. The dark warm design system from the specs has not yet been implemented.
 
