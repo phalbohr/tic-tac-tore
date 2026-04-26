@@ -146,7 +146,7 @@ tic-tac-tore/
 │   ├── manual-testing/             # Manual test procedures
 │   └── archive/                    # Completed track archives
 │
-├── .gemini/rules/                  # ── CODE CONVENTIONS ──
+├── _project-spec/rules/                  # ── CODE CONVENTIONS ──
 │   ├── code-guide.md               # 19 mandatory coding rules
 │   ├── openapi-guide.md            # OpenAPI documentation rules
 │   ├── test-guide.md               # Testing conventions
@@ -175,7 +175,7 @@ tic-tac-tore/
 | `frontend/src/services/`        | API client layer                    | Frontend |
 | `frontend/src/router/`          | Route definitions + guards          | Frontend |
 | `conductor/`                    | Project management & tracking       | Shared   |
-| `.gemini/rules/`                | Code conventions & guidelines       | Shared   |
+| `_project-spec/rules/`                | Code conventions & guidelines       | Shared   |
 
 ## Integration Points
 

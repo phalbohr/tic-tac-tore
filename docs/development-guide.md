@@ -163,7 +163,7 @@ cd frontend && npm run test:e2e
 
 ## Code Conventions
 
-The project follows strict coding conventions documented in `.gemini/rules/`:
+The project follows strict coding conventions documented in `_project-spec/rules/`:
 
 ### Backend (Java)
 - **`code-guide.md`** — 19 mandatory rules including:
@@ -197,7 +197,7 @@ The project follows strict coding conventions documented in `.gemini/rules/`:
 | `frontend/src/` | Frontend Vue/TypeScript source |
 | `frontend/e2e/` | Playwright E2E tests |
 | `conductor/` | Project management & tracking |
-| `.gemini/rules/` | Code convention guides |
+| `_project-spec/rules/` | Code convention guides |
 | `docs/` | Generated project documentation |
 
 ---

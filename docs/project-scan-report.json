@@ -15,7 +15,7 @@
   ],
   "completed_steps": [
     {"step": "step_1", "status": "completed", "timestamp": "2026-03-31T18:00:00Z", "summary": "Classified as multi-part with 2 parts: backend (Spring Boot) + frontend (Vue 3)"},
-    {"step": "step_2", "status": "completed", "timestamp": "2026-03-31T18:02:00Z", "summary": "Found 13 existing docs across conductor/, .gemini/rules/, frontend/, .stitch/"},
+    {"step": "step_2", "status": "completed", "timestamp": "2026-03-31T18:02:00Z", "summary": "Found 13 existing docs across conductor/, _project-spec/rules/, frontend/, .stitch/"},
     {"step": "step_3", "status": "completed", "timestamp": "2026-03-31T18:05:00Z", "summary": "Tech stack: Spring Boot 3.4.0 (Java 21) + Vue 3 (TypeScript 5.9.3)"},
     {"step": "step_4", "status": "completed", "timestamp": "2026-03-31T18:15:00Z", "summary": "Deep scan: 41 Java files (backend), 30+ Vue/TS files (frontend). API contracts and data models documented."},
     {"step": "step_5", "status": "completed", "timestamp": "2026-03-31T18:18:00Z", "summary": "Source tree with 15 critical folders documented"},
