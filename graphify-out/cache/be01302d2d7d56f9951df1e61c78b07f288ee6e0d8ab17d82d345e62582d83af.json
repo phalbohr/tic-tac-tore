@@ -1,0 +1,1 @@
+{"nodes": [], "edges": [], "hyperedges": [{"id": "match_lifecycle_management", "label": "Match Lifecycle Management", "nodes": ["architecture_ad02", "integration_architecture_match_recording_flow", "live_match_annotated_updates_refined_live_match"], "relation": "implement", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "docs/index.md"}]}
