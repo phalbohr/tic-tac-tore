@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Rationale: Speed over Precision** (0 connections) — `_bmad-output/planning-artifacts/prd.md`
+- **WinnerTeam.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `_bmad-output/planning-artifacts/prd.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java`
 
 ## Audit Trail
 

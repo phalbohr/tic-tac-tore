@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **auth.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts`
+- **playwright.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/playwright.config.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/playwright.config.ts`
 
 ## Audit Trail
 

@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **GameRequest.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameRequest.java`
+- **Scaffold.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameRequest.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts`
 
 ## Audit Trail
 

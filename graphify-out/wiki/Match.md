@@ -2,7 +2,7 @@
 
 > God node · 12 connections · `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/Match.java`
 
-**Community:** [[Community 3]]
+**Community:** [[Match Model & Domain Logic]]
 
 ## Connections by Relation
 

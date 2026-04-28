@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **vitest.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts`
+- **Idempotent.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
 
 ## Audit Trail
 

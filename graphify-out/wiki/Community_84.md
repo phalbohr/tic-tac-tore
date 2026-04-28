@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **IconCommunity.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue`
+- **vue.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts`
 
 ## Audit Trail
 

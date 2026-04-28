@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Scaffold.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts`
+- **TheNavigation.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue`
 
 ## Audit Trail
 

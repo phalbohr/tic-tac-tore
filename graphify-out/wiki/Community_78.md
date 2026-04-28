@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **counter.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/counter.ts`
+- **env.d.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/counter.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts`
 
 ## Audit Trail
 

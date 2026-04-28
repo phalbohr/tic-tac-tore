@@ -2,7 +2,7 @@
 
 > God node · 10 connections · `_project-spec/DESIGN/stitch_tic_tac_tore/live_match_annotated_updates_refined/screen.png`
 
-**Community:** [[Community 11]]
+**Community:** [[Live Match UI Controls]]
 
 ## Connections by Relation
 

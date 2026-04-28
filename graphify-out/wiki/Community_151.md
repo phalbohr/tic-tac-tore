@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Tic-Tac-Tore Home Hub Screen** (0 connections) — `_project-spec/DESIGN/stitch_tic_tac_tore/home_hub_font_updated/screen.png`
+- **Privacy & DSGVO Compliance** (0 connections) — `_bmad-output/planning-artifacts/prd.md`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `_project-spec/DESIGN/stitch_tic_tac_tore/home_hub_font_updated/screen.png`
+- `_bmad-output/planning-artifacts/prd.md`
 
 ## Audit Trail
 

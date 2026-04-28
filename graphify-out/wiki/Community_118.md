@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **TheNavigation.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue`
+- **vitest.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts`
 
 ## Audit Trail
 

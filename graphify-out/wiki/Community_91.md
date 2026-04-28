@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **DevRecordingView.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue`
+- **IconCommunity.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue`
 
 ## Audit Trail
 

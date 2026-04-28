@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **statisticsService.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/services/__tests__/statisticsService.spec.ts`
+- **IconTooling.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconTooling.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/services/__tests__/statisticsService.spec.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconTooling.vue`
 
 ## Audit Trail
 

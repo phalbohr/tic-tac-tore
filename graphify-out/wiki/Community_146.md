@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Component-Based SPA** (0 connections) — `docs/architecture-frontend.md`
+- **PlayerStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `docs/architecture-frontend.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java`
 
 ## Audit Trail
 

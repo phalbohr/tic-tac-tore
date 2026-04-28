@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **auth.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/auth.ts`
+- **eslint.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/auth.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts`
 
 ## Audit Trail
 

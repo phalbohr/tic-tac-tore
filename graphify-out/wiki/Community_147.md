@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Statistics API** (0 connections) — `docs/api-contracts-backend.md`
+- **Idempotent.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `docs/api-contracts-backend.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
 
 ## Audit Trail
 

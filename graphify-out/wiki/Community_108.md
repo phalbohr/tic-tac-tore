@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **eslint.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts`
+- **PositionStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
 
 ## Audit Trail
 

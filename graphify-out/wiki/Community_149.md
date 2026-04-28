@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Pitch Parquet Design** (0 connections) — `_project-spec/DESIGN/stitch_tic_tac_tore/pitch_parquet/DESIGN.md`
+- **MatchStatus.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `_project-spec/DESIGN/stitch_tic_tac_tore/pitch_parquet/DESIGN.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java`
 
 ## Audit Trail
 

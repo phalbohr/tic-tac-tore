@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **env.d.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts`
+- **TimePeriod.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/TimePeriod.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/TimePeriod.java`
 
 ## Audit Trail
 

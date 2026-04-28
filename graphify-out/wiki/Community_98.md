@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **LeaderboardType.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java`
+- **DevRecordingView.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue`
 
 ## Audit Trail
 
