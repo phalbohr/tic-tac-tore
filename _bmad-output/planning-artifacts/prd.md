@@ -84,6 +84,12 @@ designPrinciples:
   - "Local competition context drives real usage patterns"
   - "Extensible-by-design without overengineering — store data correctly, reveal UI progressively"
 workflowType: 'prd'
+lastEdited: '2026-04-28'
+editHistory:
+  - date: '2026-04-28'
+    changes: 'Harmonized with UX spec: FR13 double-check → single-tap + 15s undo toast; portrait orientation for retrospective MVP; inline entity creation (FR39-40); undo atomicity NFR added'
+  - date: '2026-04-28'
+    changes: 'Post-validation improvements: FR16/FR27 actor format; FR43 seeding open question → blocking spike dependency; FR55/FR59 implementation leakage removed; Security NFR policy/mechanism separation (HS256 note retained as brownfield context); Testability NFR → Test Architecture document reference; Reliability @Version → optimistic locking; Observability Spring Boot Actuator → health check endpoint; Dependabot → automated vulnerability scanning'
 ---
 
 # Product Requirements Document - Tic-Tac-Tore
@@ -97,7 +103,7 @@ Tic-Tac-Tore is a mobile-first web application that transforms office foosball f
 
 The core thesis: friendly competition deserves a history — not oral legends, but verified data that becomes part of office culture. Players at similar skill levels cannot distinguish who excels at defense versus attack, which teammate pairings outperform others, or how they fare against specific opponents. Tic-Tac-Tore makes these hidden layers visible, creating a new dimension of conversation beyond "I played well today." And because foosball is fundamentally a team game, winning together with a partner creates a shared history between two people — a bonding force that individual statistics alone cannot produce.
 
-The product consolidates match recording, statistics, matchmaking ("Want to Play" pools), and tournament management into a single platform — replacing the current patchwork of nothing, spreadsheets, chat channels, and paper notes. Two match entry modes serve different moments: retrospective entry for quick post-game logging (<10 seconds), and live mode where the phone placed flat on the table becomes both a scoreboard and a goal-by-goal protocol — blending physical and digital play into something that feels like augmented reality for foosball.
+The product consolidates match recording, statistics, matchmaking ("Want to Play" pools), and tournament management into a single platform — replacing the current patchwork of nothing, spreadsheets, chat channels, and paper notes. Two match entry modes serve different moments: retrospective entry for quick post-game logging in portrait orientation (<10 seconds), and live mode where the phone placed flat on the table in landscape orientation becomes both a scoreboard and a goal-by-goal protocol — blending physical and digital play into something that feels like augmented reality for foosball.
 
 No existing product in the market offers positional statistics (attack vs. defense performance), multi-rule-system support (ITSF, DTFB, custom house rules), or integrated tournament management with statistical continuity. Tic-Tac-Tore is the first to address the full problem space.
 
@@ -145,10 +151,10 @@ No existing product in the market offers positional statistics (attack vs. defen
 
 ### Technical Success
 
-- **Data integrity from day one.** Confirmation workflow, double-check, immutability, and 24-hour cooldown are non-negotiable MVP requirements. Poisoned statistics at any point — early or late — contaminate the entire dataset irreversibly.
-- **Sub-10-second retrospective entry.** Match recording must be fast enough that players record immediately after playing, not "later" (which means never).
+- **Data integrity from day one.** Confirmation workflow, single-tap with 15-second undo window, immutability, and 24-hour cooldown are non-negotiable MVP requirements. Poisoned statistics at any point — early or late — contaminate the entire dataset irreversibly.
+- **Sub-10-second retrospective entry.** Match recording in portrait mode must be fast enough that players record immediately after playing, not "later" (which means never).
 - **Cross-rule-system statistical accuracy.** Statistics aggregated across ITSF, DTFB, and custom rules must never produce misleading comparisons. The 3-tier statistics model (universal → conditional → exact config) ensures clean separation.
-- **Mobile-first performance.** Core flows (match entry, statistics viewing, confirmation) must be responsive and usable on smartphone screens without horizontal scrolling in portrait mode.
+- **Mobile-first performance.** Core flows (match entry in portrait, statistics viewing, confirmation) must be responsive and usable on smartphone screens without horizontal scrolling.
 
 ### Measurable Outcomes
 
@@ -170,7 +176,7 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 - **Retrospective match entry** (1v1 and 2v2) with kicker table top-view UI
 - **Multiple rule system support** (ITSF, DTFB, Custom) — unified RuleConfiguration model
-- **Match confirmation workflow** — double-check, 24-hour cooldown, immutability (full Verified Match Data spec)
+- **Match confirmation workflow** — single-tap with 15s undo window, 24-hour cooldown, immutability (full Verified Match Data spec)
 - **Individual statistics** — leaderboard with positional breakdown (attack/defense), points, W/L/D
 - **Team statistics** — pair-level performance tracking
 - **Head-to-head statistics** — cross-tabulated match/game/goal breakdowns between specific players
@@ -216,13 +222,13 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 **Opening Scene:** Lisa sees a notification on her phone: "A Want to Play pool needs 1 more player for a 2v2 match. Join now?" She taps it, joins, and within five minutes gets another notification: "Pool full — head to the table!" She finishes her task and walks down. All four players are there, ready to play.
 
-**Rising Action:** After the match, her partner records the result in under 10 seconds. Lisa gets a confirmation request — she taps "Confirm," double-checks, done. She doesn't think about statistics or rankings — but the next time she's bored, she creates her own pool: "2v2, anyone free after 14:00?" Two people join within the hour.
+**Rising Action:** After the match, her partner records the result in under 10 seconds using the portrait-oriented retrospective entry mode. Lisa gets a confirmation request — she taps "Confirm", and a toast notification appears: "Match confirmed. You have 15 seconds to undo." She sees everything is correct, waits for the toast to fade, and goes back to work.
 
 **Climax:** Over the following weeks, Lisa notices she's playing more often — not because she seeks out games, but because the pools come to her. She opens the app one day and discovers she's accumulated 30 confirmed matches. Out of curiosity, she checks her stats and sees she has a surprisingly high win rate when paired with one specific colleague. She messages him: "Hey, apparently we're an unbeatable duo — want to sign up for the office tournament as a team?"
 
 **Resolution:** Lisa never set out to become competitive, but the frictionless matchmaking turned her from a casual drop-in player into a regular with a team partner she discovered through data. The pool system didn't just find her games — it created relationships.
 
-**Capabilities revealed:** Want to Play pools (fill-based and scheduled), push notifications, quick confirmation flow, passive statistics accumulation, team composition discovery.
+**Capabilities revealed:** Want to Play pools (fill-based and scheduled), push notifications, quick confirmation flow (single-tap + undo), passive statistics accumulation, team composition discovery.
 
 ---
 
@@ -232,7 +238,7 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 **Opening Scene:** Oleg opens Tic-Tac-Tore and taps "Create Tournament." He sets the parameters: Championship format, 2v2 with fixed teams, DTFB rules (the group's preferred rule set for competitions), minimum 6 teams, registration open for one week. He posts the tournament link in the office chat: "Sign up — first official championship, no spreadsheets required."
 
-**Rising Action:** Teams register through the app. Partners receive confirmation notifications — both must accept. After one week, 8 teams are registered. The tournament generates the full round-robin table automatically. Matches are visible to all participants — they can play in any order, at their own pace, whenever both teams are free. Results are entered via the app and confirmed through the standard double-check workflow. The 48-hour confirmation window keeps things moving.
+**Rising Action:** Teams register through the app. Partners receive confirmation notifications — both must accept. After one week, 8 teams are registered. The tournament generates the full round-robin table automatically. Matches are visible to all participants — they can play in any order, at their own pace, whenever both teams are free. Results are entered via the app and confirmed through the standard single-tap + undo toast workflow. The 48-hour confirmation window keeps things moving.
 
 **Climax:** Three weeks in, all but two matches are played. The leaderboard is live — every office break becomes a conversation about standings. One team that was written off stages a comeback with three consecutive wins. The tournament statistics page shows who the MVP is, which team has the tightest defense, and which matchup produced the most dramatic games. Oleg hasn't touched a single spreadsheet.
 
@@ -248,7 +254,7 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 **Opening Scene:** "We're recording the match live — want to play next?" Kai joins the next game. Afterward, a colleague says: "Download the app, I'll add you to the match." Kai signs in with Google, picks a nickname ("Kai-zer"), chooses an avatar, and is greeted by a quick tutorial: "Welcome! Here's what you can do — challenge friends, join a pool, record matches live, check your stats, enter a tournament."
 
-**Rising Action:** Kai's first match is already recorded — his colleague entered it, and Kai gets a confirmation notification. He reviews the score, taps "Confirm," then "Are you sure? This data is permanent." Confirmed. Over the next week, Kai plays four more matches. Each time, someone else enters the result, and Kai just confirms. He hasn't recorded a single match himself yet.
+**Rising Action:** Kai's first match is already recorded — his colleague entered it, and Kai gets a confirmation notification. He reviews the score, taps "Confirm," and a toast notification appears: "Match confirmed. You have 15 seconds to undo." He waits for it to fade. Confirmed. Over the next week, Kai plays four more matches. Each time, someone else enters the result, and Kai just confirms. He hasn't recorded a single match himself yet.
 
 **Climax:** After a week, Kai opens Statistics out of curiosity. He has 5 matches, a 60% win rate, and he's ranked 8th overall. He notices he's won every match where he played defense but lost both matches as attacker. He didn't know that about himself. The next game, he asks: "Can I play defense this time?"
 
@@ -264,7 +270,7 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 **Opening Scene:** Viktor opens the tournament, selects the semifinal match, and enters live mode. The UI detects he's not one of the four registered players and switches to portrait referee view. The four player positions are visible on screen. The match begins.
 
-**Rising Action:** Goal scored by Team A's attacker — Viktor taps the corresponding quadrant, and the goal is immediately registered. The scorer's initials appear on the activity timeline. If Viktor misidentifies the scorer, one tap on the crossed-out ball icon removes the last goal. Game 1 ends 5:3. The app automatically starts Game 2 with mandatory position swap. Viktor records 6 more matches in the tournament bracket that afternoon — all confirmed by players via double-check within hours.
+**Rising Action:** Goal scored by Team A's attacker — Viktor taps the corresponding quadrant, and the goal is immediately registered. The scorer's initials appear on the activity timeline. If Viktor misidentifies the scorer, one tap on the crossed-out ball icon removes the last goal. Game 1 ends 5:3. The app automatically starts Game 2 with mandatory position swap. Viktor records 6 more matches in the tournament bracket that afternoon — all confirmed by players via single-tap + undo window within hours.
 
 **Climax:** At the end of the day, the tournament bracket is half-complete. Every match has a full goal-by-goal protocol with positional attribution. Viktor didn't need a clipboard, a spreadsheet, or a pen. He just tapped his phone.
 
@@ -354,7 +360,7 @@ The recording and verified statistics engine. Match data is the atomic unit — 
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Poisoned data (confirmed false results) | Irreversible — corrupts all downstream statistics | Double-check confirmation workflow; 24h cooldown; immutability makes both creation and correction deliberate |
+| Poisoned data (confirmed false results) | Irreversible — corrupts all downstream statistics | Single-tap + 15s Undo Toast confirmation; 24h cooldown; immutability makes both creation and correction deliberate |
 | Statistical distortion across rule systems | Misleading comparisons, loss of trust in data | 3-tier statistics model (KD-02); rule-agnostic Tier 1, conditional Tier 2, exact-config Tier 3 |
 | Template parameter drift | Incomparable statistics under "same" template | Immutable templates; parameter change = new template; stats matched by parameter combination |
 | Account deletion data loss | Broken match graph, orphaned statistics | Placeholder identity ("boots on a nail" avatar); irreversible anonymization; match graph preserved |
@@ -436,7 +442,7 @@ Tic-Tac-Tore is a Single-Page Application (Vue 3) delivered as an installable Pr
 
 | Screen Context | Orientation | Layout Approach |
 |---------------|-------------|-----------------|
-| Match entry (retrospective) | Landscape (mobile) | Kicker table top-view, full-width |
+| Match entry (retrospective) | Portrait (mobile) | Kicker table top-view, adapted for vertical |
 | Live match (player) | Landscape (mobile) | Kicker table top-view, wake lock active |
 | Live match (referee) | Portrait (mobile) | Adapted referee view from table end |
 | Statistics, leaderboards | Portrait (mobile) / Responsive (desktop) | Tables with horizontal scroll on mobile; full layout on desktop |
@@ -452,7 +458,7 @@ Tic-Tac-Tore is a Single-Page Application (Vue 3) delivered as an installable Pr
 | **Installability** | Yes | — | Add to Home Screen, app-like experience |
 | **Push notifications** | Yes | — | System-level notifications via Service Worker + Push API. Critical for: pool fill alerts, confirmation requests, tournament updates |
 | **Screen wake lock** | Yes | — | Prevents screen dimming during live match mode |
-| **Orientation lock** | Yes | — | Force landscape for match entry/live mode on mobile |
+| **Orientation lock** | Yes | — | Portrait for retrospective; Landscape for live mode |
 | **Offline support** | No | Future | Not needed — home office has reliable connectivity. Add when external adoption creates demand |
 | **Camera access** | No | — | Not needed — avatar is uploaded as image file, not captured |
 | **Background sync** | No | Future | Could enable offline match entry queuing in future |
@@ -534,7 +540,7 @@ See [Non-Functional Requirements > Accessibility](#accessibility) for WCAG targe
 | Capability | Justification |
 |-----------|--------------|
 | Retrospective match entry (1v1 + 2v2) | Atomic unit of the product — without matches, nothing exists |
-| Kicker table top-view UI (landscape) | The signature interaction; differentiates from generic forms |
+| Kicker table top-view UI (portrait) | The signature interaction for retrospective entry; differentiates from generic forms |
 | Multiple rule systems (ITSF, DTFB, Custom) | First users use 2–3 rule sets; immutable templates as parameter pointers |
 | Match confirmation workflow (full spec) | Data integrity from day one — non-negotiable |
 | Individual statistics with positional breakdown | The "That's me on top" moment; recognition engine |
@@ -642,10 +648,10 @@ Flexible scheduling
 ### Match Verification
 
 - **FR12:** System sends a confirmation request to the appropriate opponents when a match is submitted
-- **FR13:** Confirming player must complete a double-check flow ("I agree" → "Are you sure? This is permanent") before a match is confirmed
-- **FR14:** System applies confirmation rules based on match context: 1v1 participant-entered (one opponent confirms), 1v1 referee-entered (both confirm), 2v2 standard (one opponent confirms, second triggers immediate publication), 2v2 random pairings (both opponents confirm), referee-entered 2v2 (one per team, or all four for immediate publication)
+- **FR13:** Confirming player completes confirmation via single-tap; upon tapping "Confirm," a 15-second undo toast appears ("Match confirmed. Tap to undo."). The match is committed only after the undo window expires without cancellation. If cancelled within 15 seconds, the confirmation is voided and the match returns to pending state
+- **FR14:** System applies confirmation rules based on match context: 1v1 participant-entered (one opponent confirms), 1v1 referee-entered (both confirm), 2v2 standard (one opponent confirms, second triggers immediate publication), 2v2 random pairings (both opponents confirm), referee-entered 2v2 (one per team, or all four for immediate publication). In all cases, "confirms" means single-tap followed by the 15-second undo window completing without cancellation
 - **FR15:** System enforces a 24-hour cooldown after first confirmation before publishing to statistics; second opponent's confirmation triggers immediate publication
-- **FR16:** Confirmed match data is immutable — cannot be modified or deleted
+- **FR16:** System ensures confirmed match data is immutable — it cannot be modified or deleted
 - **FR17:** Player can reject a submitted match, returning it to the creator for correction with a notification
 - **FR18:** System enforces a 48-hour confirmation window for tournament matches; non-confirmation results in technical defeat (Phase 3)
 
@@ -659,7 +665,7 @@ Flexible scheduling
 - **FR24:** Player can view head-to-head statistics with three cross-tabulated tables: matches (with/vs), games (with/vs), and goals (with detailed positional breakdowns: attacker-vs-defender, attacker-vs-attacker, etc.)
 - **FR25:** Player can filter any statistics view by: all players, a specific named team, or the built-in "Favorites" team. In player selection during match creation, the same filter applies — favorites first by default, with quick team switching
 - **FR26:** Player can filter statistics by a specific tournament and tournament stage (Phase 3)
-- **FR27:** Statistics are paginated with configurable page size (10/20/50/100)
+- **FR27:** System paginates statistics with player-configurable page size (10/20/50/100)
 - **FR28:** Player can set a minimum games played threshold (0/10/20/50/100) when viewing any statistics table, filtering out players with insufficient data for statistically meaningful comparisons
 
 ### Player Identity & Profile
@@ -677,14 +683,14 @@ Flexible scheduling
 - **FR36:** Player can join an existing open pool from a list view (Phase 2)
 - **FR37:** System sends push notifications when a pool fills or when a new pool matching user preferences is created (Phase 2)
 - **FR38:** Player can challenge a specific player or group to a match (Phase 2)
-- **FR39:** Player can create named player groups ("teams") — curated lists of players. "Favorites" is a built-in default team. All teams function identically: they filter player selection lists and statistics views to show only members of the selected team (Phase 2)
-- **FR40:** Player can set a default team and default rule template that auto-populate when creating a new match (Phase 2)
+- **FR39:** Player can create named player groups ("teams") — curated lists of players — inline during match creation or from profile settings. "Favorites" is a built-in default team. All teams function identically: they filter player selection lists and statistics views to show only members of the selected team (Phase 2)
+- **FR40:** Player can set a default team and default rule template that auto-populate when creating a new match; both can be set inline during match creation without navigating to a separate settings screen (Phase 2)
 
 ### Tournament Management
 
 - **FR41:** Player can create a tournament with configurable parameters: format (cup/championship), mode (1v1 personal, 2v2 fixed teams, 2v2 random pairings), rule system, min/max participants, registration deadline or wait time, round count, playoff option (Phase 3)
 - **FR42:** Player can register for an open tournament; team partner receives confirmation notification and must accept (Phase 3)
-- **FR43:** System generates the complete match table/bracket automatically when tournament starts. Seeding is strength-based: initial rounds pair players/teams of similar strength using statistical data. Multiple seeding algorithms may be offered as a tournament creation option. **Open question:** research needed on ITSF and DTFB tournament seeding rules (Phase 3)
+- **FR43:** System generates the complete match table/bracket automatically when tournament starts. Seeding is strength-based: initial rounds pair players/teams by relative statistical strength, with specific algorithm and strength metric (e.g., ELO difference threshold, rank distance) defined by the pre-Phase 3 seeding spike. Tournament creators may select from available seeding algorithms as a creation parameter. **Blocking dependency:** Phase 3 implementation requires a completed seeding research spike — deliverables: evaluated ITSF/DTFB tournament seeding standards, selected algorithm, defined strength metric, documented as Phase 3 pre-implementation requirement. (Phase 3)
 - **FR44:** Players can play tournament matches in any order at their own pace — not locked to a schedule (Phase 3)
 - **FR45:** Tournament matches use the tournament's configured rule system and are entered through the standard match entry flow (Phase 3)
 - **FR46:** System maintains tournament-specific standings, statistics, and match archive accessible after tournament completion (Phase 3)
@@ -702,11 +708,11 @@ Flexible scheduling
 ### Platform & System
 
 - **FR54:** Application is installable as a Progressive Web App (Add to Home Screen)
-- **FR55:** System delivers push notifications for match confirmations, pool events, tournament updates, and achievements via Service Worker
+- **FR55:** System delivers push notifications for match confirmations, pool events, tournament updates, and achievements
 - **FR56:** New users are presented with an onboarding tutorial explaining key features
 - **FR57:** System provides demo/seed data so new users see populated statistics rather than empty tables; demo data is hidden after a configurable threshold
 - **FR58:** System enforces automated rate limiting on match submissions to prevent spam, with context-aware thresholds that accommodate tournament referee throughput
-- **FR59:** System supports English and German interface languages with externalized string resources (i18n)
+- **FR59:** System supports English and German interface languages; adding a new language requires only a new translation file with no code changes
 - **FR60:** Player can view match history with options to filter by all players or a specific team, and a separate section for pending confirmations
 
 ## Non-Functional Requirements
@@ -734,17 +740,17 @@ Flexible scheduling
 
 ### Security
 
-- **Authentication:** Google OAuth2 with backend-issued JWT tokens (HS256, 24h expiry). Stateless — no server-side sessions.
+- **Authentication:** Google OAuth2 with backend-issued authentication tokens with 24-hour expiry (currently HS256 JWT). Stateless — no server-side sessions.
 - **Authorization:** Match creation restricted to participants or designated referees. Match confirmation restricted to opponents of the creator. No cross-user data access beyond public statistics.
 - **Transport:** All communication over HTTPS. No exceptions.
 - **Data storage:** Passwords are never stored (OAuth2 delegation). JWT signing key stored as environment variable, never in source code.
-- **Token handling:** JWT stored in localStorage on the client. Token refresh and expiry handled gracefully — expired sessions redirect to login without data loss.
-- **Token invalidation on account deletion:** Deleted user's JWT must be rejected immediately, not after natural 24h expiry. Implementation: short-lived revocation list checked only for delete/ban events — minimal impact on stateless architecture.
+- **Token handling:** Authentication tokens stored client-side. Expired sessions redirect to login without data loss. Tokens must migrate from client-accessible storage to HttpOnly cookies before public rollout beyond home office.
+- **Token invalidation on account deletion:** Deleted or banned user tokens must be rejected immediately upon next request, without waiting for natural expiry.
 - **Input validation:** All user input validated server-side. Game scores bounded by rule system constraints. Player UUIDs validated for existence and uniqueness within a match.
-- **XSS prevention:** Strict input sanitization on all user-generated content (nicknames, team names, template names). Content Security Policy (CSP) headers enforced from MVP. Migration to HttpOnly cookies planned before public rollout beyond home office.
+- **XSS prevention:** Strict input sanitization on all user-generated content (nicknames, team names, template names). Content Security Policy (CSP) headers enforced from MVP.
 - **Rate limiting baselines:** Max 10 standalone match submissions/hour/user; max 30/hour in tournament referee context; 5+ rejections within 24h triggers submission throttle. Thresholds configurable, not hardcoded.
 - **Content filter:** Basic blocklist filter on user-generated display names (nicknames, team names) — obviously offensive terms rejected at save time. Not full moderation — minimal hygiene filter. Priority: post-MVP, before expansion beyond home office.
-- **Dependency vulnerability monitoring:** Automated scanning (Dependabot or equivalent). Critical CVEs patched within 7 days. No dependencies with known critical vulnerabilities in production.
+- **Dependency vulnerability monitoring:** Automated dependency vulnerability scanning required. Critical CVEs patched within 7 days. No dependencies with known critical vulnerabilities in production.
 - **DSGVO compliance:** Pseudonymization by design; minimal data collection; irreversible anonymization on account deletion; Privacy Policy with transparent data retention disclosure; Legitimate Interest Assessment (LIA) before production launch.
 - **Data portability (GDPR Art. 20):** Player data export available upon request (not required as in-app feature). Product owner can generate export manually via database query. Structured JSON format. Response within 30 days per GDPR. In-app self-service export is a future enhancement, not an MVP requirement.
 
@@ -786,7 +792,8 @@ Flexible scheduling
 
 - **Data durability:** Confirmed match data is the most critical asset. Zero tolerance for data loss on confirmed matches. Database backups with point-in-time recovery.
 - **Backup & Recovery:** Daily automated backups. RPO < 24 hours. RTO < 4 hours during business hours. Backup restoration procedure documented and tested at least once before production launch.
-- **Optimistic locking:** Concurrent match confirmation handled via `@Version` + retry. No silent data overwrites.
+- **Optimistic locking:** Concurrent match confirmation handled via optimistic locking with automatic retry. No silent data overwrites.
+- **Undo window atomicity:** Match confirmation is committed server-side only after the 15-second undo window expires without cancellation. If the client cancels during the window, the server performs an atomic rollback — no partial confirmation state is persisted. Concurrent cancellation and window-expiry events are resolved via server-side timestamp authority; the client clock is never trusted for this decision.
 - **Server-side match validation:** Match data validated against rule system constraints before confirmation is accepted. Confirmation audit log recording actor, timestamp, and action for every match state transition. Emergency data correction procedure documented for confirmed bug scenarios (direct DB access, not UI-exposed).
 - **Write failure resilience:** If database is temporarily unavailable for writes, match submission data must be preserved client-side and retried automatically upon recovery. Live match continues recording in client memory. Read operations (statistics) remain available.
 - **Live match session recovery:** In-progress live match state auto-saved to client storage at minimum every goal event. Session recovery allows resuming a live match after browser crash, tab closure, or device restart (Phase 1.5).
@@ -802,7 +809,7 @@ Flexible scheduling
 ### Observability
 
 - **Structured logging:** All backend log output in structured JSON format. Log entries include correlation IDs for request tracing.
-- **Health check:** Spring Boot Actuator health endpoint exposed for monitoring.
+- **Health check:** Machine-readable health check endpoint exposed for monitoring.
 - **Anomaly alerting:** System must detect and log anomalous patterns — e.g., sudden spike in rejected matches (spam signal), unusual submission volume from a single user.
 - **Push notification audit trail:** Every notification sent must be logged with timestamp, recipient, delivery status. Queryable for dispute resolution (tournament technical defeats).
 - **Mass push failure detection:** If push delivery failure rate exceeds threshold (e.g., >50% within 1 hour), system logs alert for operational investigation.
@@ -825,7 +832,7 @@ Flexible scheduling
 ### Testability
 
 - **ATDD-first strategy:** Testing follows TEA workflow (ATDD). Acceptance tests derived from functional requirements are the primary quality gate — does the implementation fulfill what the product owner specified?
-- **Detailed test architecture:** Coverage targets, execution time constraints, test pyramid structure, and CI integration to be defined by the Test Architect during implementation planning.
+- **Detailed test architecture:** Coverage targets, execution time constraints, test pyramid structure, and CI integration are defined in the Test Architecture document — a required pre-implementation artifact for Phase 1.
 - **Statistical query validation:** Every statistics aggregation query must have a dedicated integration test with seed data verifying correctness across all supported rule systems.
 - **Critical path E2E smoke tests as deploy gate:** Match submission, confirm, reject, login, and statistics load must be verified by automated E2E tests before any production deploy.
 
