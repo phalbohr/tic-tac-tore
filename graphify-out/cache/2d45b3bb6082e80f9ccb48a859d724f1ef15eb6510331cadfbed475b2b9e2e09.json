@@ -1,1 +1,0 @@
-{"nodes": [{"id": "source_tree_analysis_backend", "label": "Backend (Spring Boot 3.4.0, Java 21)", "file_type": "document", "source_file": "docs/source-tree-analysis.md"}, {"id": "source_tree_analysis_frontend", "label": "Frontend (Vue 3, TypeScript)", "file_type": "document", "source_file": "docs/source-tree-analysis.md"}], "edges": [], "hyperedges": []}
