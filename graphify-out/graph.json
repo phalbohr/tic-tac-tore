@@ -4,56 +4,18 @@
   "graph": {
     "hyperedges": [
       {
-        "id": "core_product_loop",
-        "label": "Record -> Confirm -> Discover Loop",
+        "id": "prd_domain_hierarchy",
+        "label": "Domain Hierarchy",
         "nodes": [
-          "integrationarchitecture_match_recording_flow",
-          "apicontractsbackend_matchapi",
-          "apicontractsbackend_statisticsapi"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.95,
-        "source_file": "_bmad-output/planning-artifacts/prd.md"
-      },
-      {
-        "id": "verified_data_capture",
-        "label": "Verified Data Capture System",
-        "nodes": [
-          "prd_data_integrity",
-          "apicontractsbackend_matchapi",
-          "rationale_data_integrity_existential"
-        ],
-        "relation": "form",
-        "confidence": "INFERRED",
-        "confidence_score": 0.9,
-        "source_file": "_bmad-output/planning-artifacts/prd.md"
-      },
-      {
-        "id": "mobile_first_design_paradigm",
-        "label": "Mobile-First PWA Design Paradigm",
-        "nodes": [
-          "uxspec_tictactore",
-          "architecturefrontend_component_based_spa",
-          "projectdesigndescription_live_match"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.85,
-        "source_file": "_bmad-output/planning-artifacts/ux-design-specification.md"
-      },
-      {
-        "id": "match_lifecycle_management",
-        "label": "Match Lifecycle Management",
-        "nodes": [
-          "architecture_ad02",
-          "integration_architecture_match_recording_flow",
-          "live_match_annotated_updates_refined_live_match"
+          "prd_layer_verified_data_capture",
+          "prd_layer_multi_rule_analytics_engine",
+          "prd_layer_tournament_management",
+          "prd_layer_social_matchmaking"
         ],
         "relation": "implement",
-        "confidence": "INFERRED",
-        "confidence_score": 0.85,
-        "source_file": "docs/index.md"
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "_bmad-output/planning-artifacts/prd.md"
       }
     ]
   },
@@ -63,7 +25,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts",
       "source_location": "L1",
-      "community": 74,
+      "community": 78,
       "norm_label": "env.d.ts",
       "id": "frontend_env_d_ts"
     },
@@ -72,7 +34,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts",
       "source_location": "L1",
-      "community": 75,
+      "community": 79,
       "norm_label": "eslint.config.ts",
       "id": "frontend_eslint_config_ts"
     },
@@ -81,7 +43,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/playwright.config.ts",
       "source_location": "L1",
-      "community": 76,
+      "community": 80,
       "norm_label": "playwright.config.ts",
       "id": "frontend_playwright_config_ts"
     },
@@ -90,7 +52,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/vite.config.ts",
       "source_location": "L1",
-      "community": 77,
+      "community": 81,
       "norm_label": "vite.config.ts",
       "id": "frontend_vite_config_ts"
     },
@@ -99,7 +61,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts",
       "source_location": "L1",
-      "community": 78,
+      "community": 82,
       "norm_label": "vitest.config.ts",
       "id": "frontend_vitest_config_ts"
     },
@@ -108,7 +70,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/auth.spec.ts",
       "source_location": "L1",
-      "community": 79,
+      "community": 83,
       "norm_label": "auth.spec.ts",
       "id": "frontend_e2e_auth_spec_ts"
     },
@@ -117,7 +79,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts",
       "source_location": "L1",
-      "community": 80,
+      "community": 84,
       "norm_label": "vue.spec.ts",
       "id": "frontend_e2e_vue_spec_ts"
     },
@@ -396,7 +358,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/App.vue",
       "source_location": "L1",
-      "community": 48,
+      "community": 50,
       "norm_label": "app.vue",
       "id": "frontend_src_app_vue"
     },
@@ -405,7 +367,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/main.ts",
       "source_location": "L1",
-      "community": 48,
+      "community": 50,
       "norm_label": "main.ts",
       "id": "frontend_src_main_ts"
     },
@@ -414,7 +376,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/counter.ts",
       "source_location": "L1",
-      "community": 81,
+      "community": 85,
       "norm_label": "counter.ts",
       "id": "frontend_src_stores_counter_ts"
     },
@@ -423,7 +385,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/auth.ts",
       "source_location": "L1",
-      "community": 82,
+      "community": 86,
       "norm_label": "auth.ts",
       "id": "frontend_src_stores_auth_ts"
     },
@@ -432,7 +394,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts",
       "source_location": "L1",
-      "community": 83,
+      "community": 87,
       "norm_label": "auth.spec.ts",
       "id": "frontend_src_stores_tests_auth_spec_ts"
     },
@@ -441,7 +403,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/MatchRecordingForm.vue",
       "source_location": "L1",
-      "community": 49,
+      "community": 51,
       "norm_label": "matchrecordingform.vue",
       "id": "frontend_src_components_matchrecordingform_vue"
     },
@@ -450,7 +412,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/HelloWorld.vue",
       "source_location": "L1",
-      "community": 50,
+      "community": 52,
       "norm_label": "helloworld.vue",
       "id": "frontend_src_components_helloworld_vue"
     },
@@ -459,7 +421,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/H2HAnalyticsTable.vue",
       "source_location": "L1",
-      "community": 51,
+      "community": 53,
       "norm_label": "h2hanalyticstable.vue",
       "id": "frontend_src_components_h2hanalyticstable_vue"
     },
@@ -468,7 +430,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/PlayerStatsSummary.vue",
       "source_location": "L1",
-      "community": 52,
+      "community": 54,
       "norm_label": "playerstatssummary.vue",
       "id": "frontend_src_components_playerstatssummary_vue"
     },
@@ -477,7 +439,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/PendingApprovals.vue",
       "source_location": "L1",
-      "community": 54,
+      "community": 56,
       "norm_label": "pendingapprovals.vue",
       "id": "frontend_src_components_pendingapprovals_vue"
     },
@@ -486,7 +448,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/MatchScoring.vue",
       "source_location": "L1",
-      "community": 53,
+      "community": 55,
       "norm_label": "matchscoring.vue",
       "id": "frontend_src_components_matchscoring_vue"
     },
@@ -495,7 +457,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/WelcomeItem.vue",
       "source_location": "L1",
-      "community": 84,
+      "community": 88,
       "norm_label": "welcomeitem.vue",
       "id": "frontend_src_components_welcomeitem_vue"
     },
@@ -504,7 +466,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue",
       "source_location": "L1",
-      "community": 85,
+      "community": 89,
       "norm_label": "thenavigation.vue",
       "id": "frontend_src_components_thenavigation_vue"
     },
@@ -513,7 +475,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue",
       "source_location": "L1",
-      "community": 86,
+      "community": 90,
       "norm_label": "thewelcome.vue",
       "id": "frontend_src_components_thewelcome_vue"
     },
@@ -522,7 +484,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/MatchRecordingForm.spec.ts",
       "source_location": "L1",
-      "community": 49,
+      "community": 51,
       "norm_label": "matchrecordingform.spec.ts",
       "id": "frontend_src_components_tests_matchrecordingform_spec_ts"
     },
@@ -531,7 +493,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/MatchScoring.spec.ts",
       "source_location": "L1",
-      "community": 53,
+      "community": 55,
       "norm_label": "matchscoring.spec.ts",
       "id": "frontend_src_components_tests_matchscoring_spec_ts"
     },
@@ -540,7 +502,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/PendingApprovals.spec.ts",
       "source_location": "L1",
-      "community": 54,
+      "community": 56,
       "norm_label": "pendingapprovals.spec.ts",
       "id": "frontend_src_components_tests_pendingapprovals_spec_ts"
     },
@@ -549,7 +511,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/HelloWorld.spec.ts",
       "source_location": "L1",
-      "community": 50,
+      "community": 52,
       "norm_label": "helloworld.spec.ts",
       "id": "frontend_src_components_tests_helloworld_spec_ts"
     },
@@ -558,7 +520,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/H2HAnalyticsTable.spec.ts",
       "source_location": "L1",
-      "community": 51,
+      "community": 53,
       "norm_label": "h2hanalyticstable.spec.ts",
       "id": "frontend_src_components_tests_h2hanalyticstable_spec_ts"
     },
@@ -567,7 +529,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/PlayerStatsSummary.spec.ts",
       "source_location": "L1",
-      "community": 52,
+      "community": 54,
       "norm_label": "playerstatssummary.spec.ts",
       "id": "frontend_src_components_tests_playerstatssummary_spec_ts"
     },
@@ -576,7 +538,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue",
       "source_location": "L1",
-      "community": 87,
+      "community": 91,
       "norm_label": "iconcommunity.vue",
       "id": "frontend_src_components_icons_iconcommunity_vue"
     },
@@ -585,7 +547,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconSupport.vue",
       "source_location": "L1",
-      "community": 88,
+      "community": 92,
       "norm_label": "iconsupport.vue",
       "id": "frontend_src_components_icons_iconsupport_vue"
     },
@@ -594,7 +556,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconTooling.vue",
       "source_location": "L1",
-      "community": 89,
+      "community": 93,
       "norm_label": "icontooling.vue",
       "id": "frontend_src_components_icons_icontooling_vue"
     },
@@ -603,7 +565,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue",
       "source_location": "L1",
-      "community": 90,
+      "community": 94,
       "norm_label": "icondocumentation.vue",
       "id": "frontend_src_components_icons_icondocumentation_vue"
     },
@@ -612,7 +574,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue",
       "source_location": "L1",
-      "community": 91,
+      "community": 95,
       "norm_label": "iconecosystem.vue",
       "id": "frontend_src_components_icons_iconecosystem_vue"
     },
@@ -621,7 +583,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts",
       "source_location": "L1",
-      "community": 92,
+      "community": 96,
       "norm_label": "scaffold.spec.ts",
       "id": "frontend_src_tests_scaffold_spec_ts"
     },
@@ -630,7 +592,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/OAuth2Redirect.vue",
       "source_location": "L1",
-      "community": 55,
+      "community": 59,
       "norm_label": "oauth2redirect.vue",
       "id": "frontend_src_views_oauth2redirect_vue"
     },
@@ -639,7 +601,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue",
       "source_location": "L1",
-      "community": 93,
+      "community": 97,
       "norm_label": "aboutview.vue",
       "id": "frontend_src_views_aboutview_vue"
     },
@@ -648,7 +610,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/LeaderboardView.vue",
       "source_location": "L1",
-      "community": 58,
+      "community": 60,
       "norm_label": "leaderboardview.vue",
       "id": "frontend_src_views_leaderboardview_vue"
     },
@@ -657,7 +619,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/LoginView.vue",
       "source_location": "L1",
-      "community": 56,
+      "community": 57,
       "norm_label": "loginview.vue",
       "id": "frontend_src_views_loginview_vue"
     },
@@ -666,7 +628,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DashboardView.vue",
       "source_location": "L1",
-      "community": 57,
+      "community": 58,
       "norm_label": "dashboardview.vue",
       "id": "frontend_src_views_dashboardview_vue"
     },
@@ -684,7 +646,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue",
       "source_location": "L1",
-      "community": 94,
+      "community": 98,
       "norm_label": "devrecordingview.vue",
       "id": "frontend_src_views_devrecordingview_vue"
     },
@@ -693,7 +655,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/WelcomeView.vue",
       "source_location": "L1",
-      "community": 95,
+      "community": 99,
       "norm_label": "welcomeview.vue",
       "id": "frontend_src_views_welcomeview_vue"
     },
@@ -702,7 +664,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/DashboardView.spec.ts",
       "source_location": "L1",
-      "community": 57,
+      "community": 58,
       "norm_label": "dashboardview.spec.ts",
       "id": "frontend_src_views_tests_dashboardview_spec_ts"
     },
@@ -711,7 +673,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/OAuth2Redirect.spec.ts",
       "source_location": "L1",
-      "community": 55,
+      "community": 59,
       "norm_label": "oauth2redirect.spec.ts",
       "id": "frontend_src_views_tests_oauth2redirect_spec_ts"
     },
@@ -729,7 +691,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/LeaderboardView.spec.ts",
       "source_location": "L1",
-      "community": 58,
+      "community": 60,
       "norm_label": "leaderboardview.spec.ts",
       "id": "frontend_src_views_tests_leaderboardview_spec_ts"
     },
@@ -738,7 +700,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/LoginView.spec.ts",
       "source_location": "L1",
-      "community": 56,
+      "community": 57,
       "norm_label": "loginview.spec.ts",
       "id": "frontend_src_views_tests_loginview_spec_ts"
     },
@@ -792,7 +754,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/services/__tests__/statisticsService.spec.ts",
       "source_location": "L1",
-      "community": 96,
+      "community": 100,
       "norm_label": "statisticsservice.spec.ts",
       "id": "frontend_src_services_tests_statisticsservice_spec_ts"
     },
@@ -810,7 +772,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts",
       "source_location": "L1",
-      "community": 97,
+      "community": 101,
       "norm_label": "navigationguard.spec.ts",
       "id": "frontend_src_router_tests_navigationguard_spec_ts"
     },
@@ -1854,7 +1816,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/MatchResponse.java",
       "source_location": "L1",
-      "community": 98,
+      "community": 102,
       "norm_label": "matchresponse.java",
       "id": "src_main_java_com_tictactore_dto_matchresponse_java"
     },
@@ -1863,7 +1825,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameRequest.java",
       "source_location": "L1",
-      "community": 99,
+      "community": 103,
       "norm_label": "gamerequest.java",
       "id": "src_main_java_com_tictactore_dto_gamerequest_java"
     },
@@ -1872,7 +1834,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java",
       "source_location": "L1",
-      "community": 100,
+      "community": 104,
       "norm_label": "gameresponse.java",
       "id": "src_main_java_com_tictactore_dto_gameresponse_java"
     },
@@ -1881,7 +1843,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java",
       "source_location": "L1",
-      "community": 101,
+      "community": 105,
       "norm_label": "leaderboardtype.java",
       "id": "src_main_java_com_tictactore_dto_statistics_leaderboardtype_java"
     },
@@ -1890,7 +1852,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardEntryResponse.java",
       "source_location": "L1",
-      "community": 102,
+      "community": 106,
       "norm_label": "leaderboardentryresponse.java",
       "id": "src_main_java_com_tictactore_dto_statistics_leaderboardentryresponse_java"
     },
@@ -1899,7 +1861,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/TimePeriod.java",
       "source_location": "L1",
-      "community": 103,
+      "community": 107,
       "norm_label": "timeperiod.java",
       "id": "src_main_java_com_tictactore_dto_statistics_timeperiod_java"
     },
@@ -1926,7 +1888,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java",
       "source_location": "L1",
-      "community": 104,
+      "community": 108,
       "norm_label": "positionstatsresponse.java",
       "id": "src_main_java_com_tictactore_dto_statistics_positionstatsresponse_java"
     },
@@ -1953,7 +1915,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/H2HStatsResponse.java",
       "source_location": "L1",
-      "community": 105,
+      "community": 109,
       "norm_label": "h2hstatsresponse.java",
       "id": "src_main_java_com_tictactore_dto_statistics_h2hstatsresponse_java"
     },
@@ -1962,7 +1924,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java",
       "source_location": "L1",
-      "community": 106,
+      "community": 110,
       "norm_label": "playerstatsresponse.java",
       "id": "src_main_java_com_tictactore_dto_statistics_playerstatsresponse_java"
     },
@@ -2277,7 +2239,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/config/SecurityConfig.java",
       "source_location": "L1",
-      "community": 28,
+      "community": 27,
       "norm_label": "securityconfig.java",
       "id": "src_main_java_com_tictactore_config_securityconfig_java"
     },
@@ -2286,7 +2248,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/config/SecurityConfig.java",
       "source_location": "L26",
-      "community": 28,
+      "community": 27,
       "norm_label": "securityconfig",
       "id": "securityconfig_securityconfig"
     },
@@ -2295,7 +2257,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/config/SecurityConfig.java",
       "source_location": "L34",
-      "community": 28,
+      "community": 27,
       "norm_label": ".filterchain()",
       "id": "securityconfig_securityconfig_filterchain"
     },
@@ -2304,7 +2266,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/config/SecurityConfig.java",
       "source_location": "L60",
-      "community": 28,
+      "community": 27,
       "norm_label": ".corsconfigurationsource()",
       "id": "securityconfig_securityconfig_corsconfigurationsource"
     },
@@ -2340,7 +2302,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java",
       "source_location": "L1",
-      "community": 27,
+      "community": 2,
       "norm_label": "customoauth2successhandler.java",
       "id": "src_main_java_com_tictactore_security_customoauth2successhandler_java"
     },
@@ -2349,7 +2311,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java",
       "source_location": "L18",
-      "community": 27,
+      "community": 2,
       "norm_label": "customoauth2successhandler",
       "id": "customoauth2successhandler_customoauth2successhandler"
     },
@@ -2358,7 +2320,7 @@
       "file_type": "code",
       "source_file": "",
       "source_location": "",
-      "community": 27,
+      "community": 2,
       "norm_label": "simpleurlauthenticationsuccesshandler",
       "id": "simpleurlauthenticationsuccesshandler"
     },
@@ -2367,7 +2329,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java",
       "source_location": "L25",
-      "community": 27,
+      "community": 2,
       "norm_label": ".customoauth2successhandler()",
       "id": "customoauth2successhandler_customoauth2successhandler_customoauth2successhandler"
     },
@@ -2448,7 +2410,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java",
       "source_location": "L1",
-      "community": 107,
+      "community": 111,
       "norm_label": "idempotent.java",
       "id": "src_main_java_com_tictactore_annotation_idempotent_java"
     },
@@ -2655,7 +2617,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java",
       "source_location": "L1",
-      "community": 108,
+      "community": 112,
       "norm_label": "winnerteam.java",
       "id": "src_main_java_com_tictactore_model_winnerteam_java"
     },
@@ -2781,7 +2743,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java",
       "source_location": "L1",
-      "community": 109,
+      "community": 113,
       "norm_label": "matchstatus.java",
       "id": "src_main_java_com_tictactore_model_matchstatus_java"
     },
@@ -3213,7 +3175,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/exception/ResourceNotFoundException.java",
       "source_location": "L1",
-      "community": 29,
+      "community": 28,
       "norm_label": "resourcenotfoundexception.java",
       "id": "src_main_java_com_tictactore_exception_resourcenotfoundexception_java"
     },
@@ -3222,7 +3184,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/exception/ResourceNotFoundException.java",
       "source_location": "L6",
-      "community": 29,
+      "community": 28,
       "norm_label": "resourcenotfoundexception",
       "id": "resourcenotfoundexception_resourcenotfoundexception"
     },
@@ -3231,7 +3193,7 @@
       "file_type": "code",
       "source_file": "",
       "source_location": "",
-      "community": 29,
+      "community": 28,
       "norm_label": "runtimeexception",
       "id": "runtimeexception"
     },
@@ -3240,7 +3202,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/exception/ResourceNotFoundException.java",
       "source_location": "L8",
-      "community": 29,
+      "community": 28,
       "norm_label": ".resourcenotfoundexception()",
       "id": "resourcenotfoundexception_resourcenotfoundexception_resourcenotfoundexception"
     },
@@ -3312,7 +3274,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/env.d.ts",
       "source_location": "L1",
-      "community": 110,
+      "community": 114,
       "norm_label": "env.d.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_env_d_ts"
     },
@@ -3321,7 +3283,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/eslint.config.ts",
       "source_location": "L1",
-      "community": 111,
+      "community": 115,
       "norm_label": "eslint.config.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_eslint_config_ts"
     },
@@ -3330,7 +3292,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/playwright.config.ts",
       "source_location": "L1",
-      "community": 112,
+      "community": 116,
       "norm_label": "playwright.config.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_playwright_config_ts"
     },
@@ -3339,7 +3301,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/vite.config.ts",
       "source_location": "L1",
-      "community": 113,
+      "community": 117,
       "norm_label": "vite.config.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_vite_config_ts"
     },
@@ -3348,7 +3310,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/vitest.config.ts",
       "source_location": "L1",
-      "community": 114,
+      "community": 118,
       "norm_label": "vitest.config.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_vitest_config_ts"
     },
@@ -3357,7 +3319,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/auth.spec.ts",
       "source_location": "L1",
-      "community": 115,
+      "community": 119,
       "norm_label": "auth.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_e2e_auth_spec_ts"
     },
@@ -3366,7 +3328,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts",
       "source_location": "L1",
-      "community": 116,
+      "community": 120,
       "norm_label": "vue.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_e2e_vue_spec_ts"
     },
@@ -3402,7 +3364,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/App.vue",
       "source_location": "L1",
-      "community": 59,
+      "community": 61,
       "norm_label": "app.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_app_vue"
     },
@@ -3411,7 +3373,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/main.ts",
       "source_location": "L1",
-      "community": 59,
+      "community": 61,
       "norm_label": "main.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_main_ts"
     },
@@ -3420,7 +3382,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/counter.ts",
       "source_location": "L1",
-      "community": 117,
+      "community": 121,
       "norm_label": "counter.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_stores_counter_ts"
     },
@@ -3429,7 +3391,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/auth.ts",
       "source_location": "L1",
-      "community": 118,
+      "community": 122,
       "norm_label": "auth.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_stores_auth_ts"
     },
@@ -3438,7 +3400,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts",
       "source_location": "L1",
-      "community": 119,
+      "community": 123,
       "norm_label": "auth.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_stores_tests_auth_spec_ts"
     },
@@ -3447,7 +3409,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/MatchRecordingForm.vue",
       "source_location": "L1",
-      "community": 64,
+      "community": 62,
       "norm_label": "matchrecordingform.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_matchrecordingform_vue"
     },
@@ -3456,7 +3418,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/HelloWorld.vue",
       "source_location": "L1",
-      "community": 60,
+      "community": 63,
       "norm_label": "helloworld.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_helloworld_vue"
     },
@@ -3465,7 +3427,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/H2HAnalyticsTable.vue",
       "source_location": "L1",
-      "community": 61,
+      "community": 64,
       "norm_label": "h2hanalyticstable.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_h2hanalyticstable_vue"
     },
@@ -3474,7 +3436,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/PlayerStatsSummary.vue",
       "source_location": "L1",
-      "community": 62,
+      "community": 65,
       "norm_label": "playerstatssummary.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_playerstatssummary_vue"
     },
@@ -3483,7 +3445,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/PendingApprovals.vue",
       "source_location": "L1",
-      "community": 65,
+      "community": 67,
       "norm_label": "pendingapprovals.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_pendingapprovals_vue"
     },
@@ -3492,7 +3454,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/MatchScoring.vue",
       "source_location": "L1",
-      "community": 63,
+      "community": 66,
       "norm_label": "matchscoring.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_matchscoring_vue"
     },
@@ -3501,7 +3463,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/WelcomeItem.vue",
       "source_location": "L1",
-      "community": 120,
+      "community": 124,
       "norm_label": "welcomeitem.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_welcomeitem_vue"
     },
@@ -3510,7 +3472,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheNavigation.vue",
       "source_location": "L1",
-      "community": 121,
+      "community": 125,
       "norm_label": "thenavigation.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_thenavigation_vue"
     },
@@ -3519,7 +3481,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue",
       "source_location": "L1",
-      "community": 122,
+      "community": 126,
       "norm_label": "thewelcome.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_thewelcome_vue"
     },
@@ -3528,7 +3490,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/MatchRecordingForm.spec.ts",
       "source_location": "L1",
-      "community": 64,
+      "community": 62,
       "norm_label": "matchrecordingform.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_matchrecordingform_spec_ts"
     },
@@ -3537,7 +3499,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/MatchScoring.spec.ts",
       "source_location": "L1",
-      "community": 63,
+      "community": 66,
       "norm_label": "matchscoring.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_matchscoring_spec_ts"
     },
@@ -3546,7 +3508,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/PendingApprovals.spec.ts",
       "source_location": "L1",
-      "community": 65,
+      "community": 67,
       "norm_label": "pendingapprovals.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_pendingapprovals_spec_ts"
     },
@@ -3555,7 +3517,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/HelloWorld.spec.ts",
       "source_location": "L1",
-      "community": 60,
+      "community": 63,
       "norm_label": "helloworld.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_helloworld_spec_ts"
     },
@@ -3564,7 +3526,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/H2HAnalyticsTable.spec.ts",
       "source_location": "L1",
-      "community": 61,
+      "community": 64,
       "norm_label": "h2hanalyticstable.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_h2hanalyticstable_spec_ts"
     },
@@ -3573,7 +3535,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/__tests__/PlayerStatsSummary.spec.ts",
       "source_location": "L1",
-      "community": 62,
+      "community": 65,
       "norm_label": "playerstatssummary.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_tests_playerstatssummary_spec_ts"
     },
@@ -3582,7 +3544,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconCommunity.vue",
       "source_location": "L1",
-      "community": 123,
+      "community": 127,
       "norm_label": "iconcommunity.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_icons_iconcommunity_vue"
     },
@@ -3591,7 +3553,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconSupport.vue",
       "source_location": "L1",
-      "community": 124,
+      "community": 128,
       "norm_label": "iconsupport.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_icons_iconsupport_vue"
     },
@@ -3600,7 +3562,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconTooling.vue",
       "source_location": "L1",
-      "community": 125,
+      "community": 129,
       "norm_label": "icontooling.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_icons_icontooling_vue"
     },
@@ -3609,7 +3571,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue",
       "source_location": "L1",
-      "community": 126,
+      "community": 130,
       "norm_label": "icondocumentation.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_icons_icondocumentation_vue"
     },
@@ -3618,7 +3580,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue",
       "source_location": "L1",
-      "community": 127,
+      "community": 131,
       "norm_label": "iconecosystem.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_components_icons_iconecosystem_vue"
     },
@@ -3627,7 +3589,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/__tests__/Scaffold.spec.ts",
       "source_location": "L1",
-      "community": 128,
+      "community": 132,
       "norm_label": "scaffold.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_tests_scaffold_spec_ts"
     },
@@ -3636,7 +3598,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/OAuth2Redirect.vue",
       "source_location": "L1",
-      "community": 68,
+      "community": 71,
       "norm_label": "oauth2redirect.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_oauth2redirect_vue"
     },
@@ -3645,7 +3607,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue",
       "source_location": "L1",
-      "community": 129,
+      "community": 133,
       "norm_label": "aboutview.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_aboutview_vue"
     },
@@ -3654,7 +3616,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/LeaderboardView.vue",
       "source_location": "L1",
-      "community": 66,
+      "community": 68,
       "norm_label": "leaderboardview.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_leaderboardview_vue"
     },
@@ -3672,7 +3634,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DashboardView.vue",
       "source_location": "L1",
-      "community": 67,
+      "community": 70,
       "norm_label": "dashboardview.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_dashboardview_vue"
     },
@@ -3690,7 +3652,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/DevRecordingView.vue",
       "source_location": "L1",
-      "community": 130,
+      "community": 134,
       "norm_label": "devrecordingview.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_devrecordingview_vue"
     },
@@ -3699,7 +3661,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/WelcomeView.vue",
       "source_location": "L1",
-      "community": 131,
+      "community": 135,
       "norm_label": "welcomeview.vue",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_welcomeview_vue"
     },
@@ -3708,7 +3670,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/DashboardView.spec.ts",
       "source_location": "L1",
-      "community": 67,
+      "community": 70,
       "norm_label": "dashboardview.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_tests_dashboardview_spec_ts"
     },
@@ -3717,7 +3679,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/OAuth2Redirect.spec.ts",
       "source_location": "L1",
-      "community": 68,
+      "community": 71,
       "norm_label": "oauth2redirect.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_tests_oauth2redirect_spec_ts"
     },
@@ -3735,7 +3697,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/__tests__/LeaderboardView.spec.ts",
       "source_location": "L1",
-      "community": 66,
+      "community": 68,
       "norm_label": "leaderboardview.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_views_tests_leaderboardview_spec_ts"
     },
@@ -3762,7 +3724,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/services/__tests__/statisticsService.spec.ts",
       "source_location": "L1",
-      "community": 132,
+      "community": 136,
       "norm_label": "statisticsservice.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_services_tests_statisticsservice_spec_ts"
     },
@@ -3780,7 +3742,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts",
       "source_location": "L1",
-      "community": 133,
+      "community": 137,
       "norm_label": "navigationguard.spec.ts",
       "id": "users_ppolukhin_projects_tic_tac_tore_frontend_src_router_tests_navigationguard_spec_ts"
     },
@@ -3978,7 +3940,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/MatchResponse.java",
       "source_location": "L1",
-      "community": 134,
+      "community": 138,
       "norm_label": "matchresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_matchresponse_java"
     },
@@ -3987,7 +3949,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameRequest.java",
       "source_location": "L1",
-      "community": 135,
+      "community": 139,
       "norm_label": "gamerequest.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_gamerequest_java"
     },
@@ -3996,7 +3958,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java",
       "source_location": "L1",
-      "community": 136,
+      "community": 140,
       "norm_label": "gameresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_gameresponse_java"
     },
@@ -4005,7 +3967,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java",
       "source_location": "L1",
-      "community": 137,
+      "community": 141,
       "norm_label": "leaderboardtype.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_leaderboardtype_java"
     },
@@ -4014,7 +3976,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardEntryResponse.java",
       "source_location": "L1",
-      "community": 138,
+      "community": 142,
       "norm_label": "leaderboardentryresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_leaderboardentryresponse_java"
     },
@@ -4023,7 +3985,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/TimePeriod.java",
       "source_location": "L1",
-      "community": 139,
+      "community": 143,
       "norm_label": "timeperiod.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_timeperiod_java"
     },
@@ -4041,7 +4003,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java",
       "source_location": "L1",
-      "community": 140,
+      "community": 144,
       "norm_label": "positionstatsresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_positionstatsresponse_java"
     },
@@ -4059,7 +4021,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/H2HStatsResponse.java",
       "source_location": "L1",
-      "community": 141,
+      "community": 145,
       "norm_label": "h2hstatsresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_h2hstatsresponse_java"
     },
@@ -4068,7 +4030,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java",
       "source_location": "L1",
-      "community": 142,
+      "community": 146,
       "norm_label": "playerstatsresponse.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_dto_statistics_playerstatsresponse_java"
     },
@@ -4122,7 +4084,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/config/SecurityConfig.java",
       "source_location": "L1",
-      "community": 28,
+      "community": 27,
       "norm_label": "securityconfig.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_config_securityconfig_java"
     },
@@ -4140,7 +4102,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java",
       "source_location": "L1",
-      "community": 27,
+      "community": 2,
       "norm_label": "customoauth2successhandler.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_security_customoauth2successhandler_java"
     },
@@ -4167,7 +4129,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java",
       "source_location": "L1",
-      "community": 143,
+      "community": 147,
       "norm_label": "idempotent.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_annotation_idempotent_java"
     },
@@ -4221,7 +4183,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java",
       "source_location": "L1",
-      "community": 144,
+      "community": 148,
       "norm_label": "winnerteam.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_model_winnerteam_java"
     },
@@ -4248,7 +4210,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java",
       "source_location": "L1",
-      "community": 145,
+      "community": 149,
       "norm_label": "matchstatus.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_model_matchstatus_java"
     },
@@ -4311,7 +4273,7 @@
       "file_type": "code",
       "source_file": "/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/exception/ResourceNotFoundException.java",
       "source_location": "L1",
-      "community": 29,
+      "community": 28,
       "norm_label": "resourcenotfoundexception.java",
       "id": "users_ppolukhin_projects_tic_tac_tore_src_main_java_com_tictactore_exception_resourcenotfoundexception_java"
     },
@@ -4333,7 +4295,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 146,
+      "community": 150,
       "norm_label": "graphify knowledge graph",
       "id": "gemini_graphify"
     },
@@ -4359,7 +4321,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 70,
+      "community": 72,
       "norm_label": "data integrity & immutability",
       "id": "prd_data_integrity"
     },
@@ -4372,7 +4334,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 147,
+      "community": 151,
       "norm_label": "privacy & dsgvo compliance",
       "id": "prd_privacy_gdpr"
     },
@@ -4385,7 +4347,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 71,
+      "community": 73,
       "norm_label": "ux design specification",
       "id": "uxspec_tictactore"
     },
@@ -4424,7 +4386,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 148,
+      "community": 152,
       "norm_label": "domain-driven entity design",
       "id": "architecturebackend_domaindriven_design"
     },
@@ -4450,7 +4412,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 149,
+      "community": 153,
       "norm_label": "component-based spa",
       "id": "architecturefrontend_component_based_spa"
     },
@@ -4502,7 +4464,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 150,
+      "community": 154,
       "norm_label": "statistics api",
       "id": "apicontractsbackend_statisticsapi"
     },
@@ -4528,7 +4490,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 151,
+      "community": 155,
       "norm_label": "rationale: speed over precision",
       "id": "rationale_speed_over_precision"
     },
@@ -4541,7 +4503,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 70,
+      "community": 72,
       "norm_label": "rationale: data integrity is existential",
       "id": "rationale_data_integrity_existential"
     },
@@ -4554,7 +4516,7 @@
       "captured_at": null,
       "author": "Pavel",
       "contributor": null,
-      "community": 71,
+      "community": 73,
       "norm_label": "rationale: asymmetric participation",
       "id": "rationale_asymmetric_participation"
     },
@@ -4634,7 +4596,7 @@
       "label": "Pitch Parquet Design",
       "file_type": "document",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/pitch_parquet/DESIGN.md",
-      "community": 152,
+      "community": 156,
       "norm_label": "pitch parquet design",
       "id": "doc_pitch_parquet_design"
     },
@@ -4642,7 +4604,7 @@
       "label": "Spring Boot 3 Technical Stack",
       "file_type": "document",
       "source_file": "_project-spec/context7/spring-boot-docs.md",
-      "community": 30,
+      "community": 29,
       "norm_label": "spring boot 3 technical stack",
       "id": "doc_spring_boot_docs"
     },
@@ -4658,7 +4620,7 @@
       "label": "ITSF Rules Summary (German)",
       "file_type": "document",
       "source_file": "_project-spec/table-soccer-rules/ITSF-Regelwerk_Kurzfassung.md",
-      "community": 153,
+      "community": 157,
       "norm_label": "itsf rules summary (german)",
       "id": "doc_itsf_rules_short"
     },
@@ -4682,7 +4644,7 @@
       "label": "Backend Code Conventions",
       "file_type": "document",
       "source_file": "_project-spec/rules/code-guide.md",
-      "community": 30,
+      "community": 29,
       "norm_label": "backend code conventions",
       "id": "doc_code_guide"
     },
@@ -4690,7 +4652,7 @@
       "label": "Code Reviewer Guide",
       "file_type": "document",
       "source_file": "_project-spec/rules/review-guide.md",
-      "community": 30,
+      "community": 29,
       "norm_label": "code reviewer guide",
       "id": "doc_review_guide"
     },
@@ -4698,7 +4660,7 @@
       "label": "OpenAPI Rules",
       "file_type": "document",
       "source_file": "_project-spec/rules/openapi-guide.md",
-      "community": 30,
+      "community": 29,
       "norm_label": "openapi rules",
       "id": "doc_openapi_guide"
     },
@@ -4706,7 +4668,7 @@
       "label": "Testing Conventions",
       "file_type": "document",
       "source_file": "_project-spec/rules/test-guide.md",
-      "community": 30,
+      "community": 29,
       "norm_label": "testing conventions",
       "id": "doc_test_guide"
     },
@@ -4808,7 +4770,7 @@
       "label": "Teams & Rules Screen",
       "file_type": "image",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/teams_rules_font_updated/screen.png",
-      "community": 31,
+      "community": 30,
       "norm_label": "teams & rules screen",
       "id": "teams_and_rules_screen"
     },
@@ -4816,7 +4778,7 @@
       "label": "Favorite Players Section",
       "file_type": "image_component",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/teams_rules_font_updated/screen.png",
-      "community": 31,
+      "community": 30,
       "norm_label": "favorite players section",
       "id": "favorite_players_section"
     },
@@ -4824,7 +4786,7 @@
       "label": "Saved Teams Section",
       "file_type": "image_component",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/teams_rules_font_updated/screen.png",
-      "community": 31,
+      "community": 30,
       "norm_label": "saved teams section",
       "id": "saved_teams_section"
     },
@@ -4832,7 +4794,7 @@
       "label": "Rule Templates Section",
       "file_type": "image_component",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/teams_rules_font_updated/screen.png",
-      "community": 31,
+      "community": 30,
       "norm_label": "rule templates section",
       "id": "rule_templates_section"
     },
@@ -4840,7 +4802,7 @@
       "label": "Quick Match Defaults Section",
       "file_type": "image_component",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/teams_rules_font_updated/screen.png",
-      "community": 31,
+      "community": 30,
       "norm_label": "quick match defaults section",
       "id": "quick_match_defaults_section"
     },
@@ -4925,7 +4887,7 @@
       "file_type": "image",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/home_hub_font_updated/screen.png",
       "description": "A dark-themed home hub dashboard screen for a foosball or sports game app called 'Tic-Tac-Tore'. It features a prominent green 'New Match' card with a soccer ball watermark. It includes navigation cards for 'Teams & Rules', 'Played Matches', 'Statistics', and 'Tournaments'. A quick queue button 'I Want to Play' is displayed above a 'GAME POOLS' section listing active matches like 'Lunch Break 2v2', 'Weekend Open', and 'Evening 1v1 Open' with corresponding Join/Register actions.",
-      "community": 154,
+      "community": 158,
       "norm_label": "tic-tac-tore home hub screen",
       "id": "_project-spec/DESIGN/stitch_tic_tac_tore/home_hub_font_updated/screen.png"
     },
@@ -5245,137 +5207,332 @@
       "label": "Architecture Decision Document",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_decision_document",
-      "community": 155,
-      "norm_label": "architecture decision document"
+      "community": 159,
+      "norm_label": "architecture decision document",
+      "id": "architecture_decision_document"
     },
     {
       "label": "Custom Layered Monolith (Spring Boot 4.0 + Vite 8)",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_layered_monolith",
       "community": 22,
-      "norm_label": "custom layered monolith (spring boot 4.0 + vite 8)"
+      "norm_label": "custom layered monolith (spring boot 4.0 + vite 8)",
+      "id": "architecture_layered_monolith"
     },
     {
       "label": "AD-01: Immutable RuleConfiguration",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad01",
       "community": 22,
-      "norm_label": "ad-01: immutable ruleconfiguration"
+      "norm_label": "ad-01: immutable ruleconfiguration",
+      "id": "architecture_ad01"
     },
     {
       "label": "AD-02: Isolated Verification Pipeline",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad02",
       "community": 22,
-      "norm_label": "ad-02: isolated verification pipeline"
+      "norm_label": "ad-02: isolated verification pipeline",
+      "id": "architecture_ad02"
     },
     {
       "label": "AD-03: Stateless JWT with Redis Denylist",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad03",
       "community": 22,
-      "norm_label": "ad-03: stateless jwt with redis denylist"
+      "norm_label": "ad-03: stateless jwt with redis denylist",
+      "id": "architecture_ad03"
     },
     {
       "label": "AD-04: GDPR Compliance via Pseudonymization",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad04",
       "community": 22,
-      "norm_label": "ad-04: gdpr compliance via pseudonymization"
+      "norm_label": "ad-04: gdpr compliance via pseudonymization",
+      "id": "architecture_ad04"
     },
     {
       "label": "AD-05: 3-Tier Statistics Model",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad05",
       "community": 22,
-      "norm_label": "ad-05: 3-tier statistics model"
+      "norm_label": "ad-05: 3-tier statistics model",
+      "id": "architecture_ad05"
     },
     {
       "label": "AD-06: PWA-First Infrastructure",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_ad06",
       "community": 22,
-      "norm_label": "ad-06: pwa-first infrastructure"
+      "norm_label": "ad-06: pwa-first infrastructure",
+      "id": "architecture_ad06"
     },
     {
       "label": "The 500-Line Rule (IP-04)",
       "file_type": "document",
       "source_file": "_bmad-output/planning-artifacts/architecture.md",
-      "id": "architecture_500_line_rule",
       "community": 40,
-      "norm_label": "the 500-line rule (ip-04)"
+      "norm_label": "the 500-line rule (ip-04)",
+      "id": "architecture_500_line_rule"
     },
     {
       "label": "Backend (Spring Boot 3.4.0, Java 21)",
       "file_type": "document",
       "source_file": "docs/source-tree-analysis.md",
-      "id": "source_tree_analysis_backend",
       "community": 40,
-      "norm_label": "backend (spring boot 3.4.0, java 21)"
+      "norm_label": "backend (spring boot 3.4.0, java 21)",
+      "id": "source_tree_analysis_backend"
     },
     {
       "label": "Frontend (Vue 3, TypeScript)",
       "file_type": "document",
       "source_file": "docs/source-tree-analysis.md",
-      "id": "source_tree_analysis_frontend",
       "community": 40,
-      "norm_label": "frontend (vue 3, typescript)"
+      "norm_label": "frontend (vue 3, typescript)",
+      "id": "source_tree_analysis_frontend"
     },
     {
       "label": "Match Recording Flow",
       "file_type": "document",
       "source_file": "docs/integration-architecture.md",
-      "id": "integration_architecture_match_recording_flow",
-      "community": 72,
-      "norm_label": "match recording flow"
+      "community": 74,
+      "norm_label": "match recording flow",
+      "id": "integration_architecture_match_recording_flow"
     },
     {
       "label": "OAuth2 Authentication Flow",
       "file_type": "document",
       "source_file": "docs/integration-architecture.md",
-      "id": "integration_architecture_oauth2_flow",
       "community": 40,
-      "norm_label": "oauth2 authentication flow"
+      "norm_label": "oauth2 authentication flow",
+      "id": "integration_architecture_oauth2_flow"
     },
     {
       "label": "Tic-Tac-Tore Main Hub",
       "file_type": "image",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/home_hub_font_updated/code.html",
-      "id": "home_hub_font_updated_main_hub",
-      "community": 73,
-      "norm_label": "tic-tac-tore main hub"
+      "community": 75,
+      "norm_label": "tic-tac-tore main hub",
+      "id": "home_hub_font_updated_main_hub"
     },
     {
       "label": "Live Match Interface",
       "file_type": "image",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/live_match_annotated_updates_refined/code.html",
-      "id": "live_match_annotated_updates_refined_live_match",
-      "community": 72,
-      "norm_label": "live match interface"
+      "community": 74,
+      "norm_label": "live match interface",
+      "id": "live_match_annotated_updates_refined_live_match"
     },
     {
       "label": "Pitch Parquet Design System",
       "file_type": "document",
       "source_file": "_project-spec/DESIGN/stitch_tic_tac_tore/pitch_parquet/DESIGN.md",
-      "id": "pitch_parquet_design_system",
-      "community": 73,
-      "norm_label": "pitch parquet design system"
+      "community": 75,
+      "norm_label": "pitch parquet design system",
+      "id": "pitch_parquet_design_system"
     },
     {
       "label": "Tic-Tac-Tore Logo",
       "file_type": "image",
       "source_file": "frontend/src/assets/logo.svg",
-      "id": "logo_svg_logo",
-      "community": 156,
-      "norm_label": "tic-tac-tore logo"
+      "community": 160,
+      "norm_label": "tic-tac-tore logo",
+      "id": "logo_svg_logo"
+    },
+    {
+      "label": "Tic-Tac-Tore Product",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_tic_tac_tore",
+      "community": 31,
+      "norm_label": "tic-tac-tore product"
+    },
+    {
+      "label": "Verified Data Capture Layer",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_layer_verified_data_capture",
+      "community": 48,
+      "norm_label": "verified data capture layer"
+    },
+    {
+      "label": "Multi-Rule Analytics Engine Layer",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_layer_multi_rule_analytics_engine",
+      "community": 49,
+      "norm_label": "multi-rule analytics engine layer"
+    },
+    {
+      "label": "Tournament Management Layer",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_layer_tournament_management",
+      "community": 77,
+      "norm_label": "tournament management layer"
+    },
+    {
+      "label": "Social Matchmaking Layer",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_layer_social_matchmaking",
+      "community": 76,
+      "norm_label": "social matchmaking layer"
+    },
+    {
+      "label": "KD-01: Unified Rule Model",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_kd_01_unified_rule_model",
+      "community": 49,
+      "norm_label": "kd-01: unified rule model"
+    },
+    {
+      "label": "KD-02: 3-Tier Statistics Output",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_kd_02_3_tier_statistics_output",
+      "community": 49,
+      "norm_label": "kd-02: 3-tier statistics output"
+    },
+    {
+      "label": "KD-03: Speed over Precision",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_kd_03_speed_over_precision",
+      "community": 48,
+      "norm_label": "kd-03: speed over precision"
+    },
+    {
+      "label": "FR13: 15s Undo Toast",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_fr13_undo_toast",
+      "community": 48,
+      "norm_label": "fr13: 15s undo toast"
+    },
+    {
+      "label": "Persona: Max (The Competitor)",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_persona_max",
+      "community": 31,
+      "norm_label": "persona: max (the competitor)"
+    },
+    {
+      "label": "Persona: Lisa (The Social Player)",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_persona_lisa",
+      "community": 76,
+      "norm_label": "persona: lisa (the social player)"
+    },
+    {
+      "label": "Persona: Oleg (The Organizer)",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Pavel",
+      "contributor": null,
+      "id": "prd_persona_oleg",
+      "community": 77,
+      "norm_label": "persona: oleg (the organizer)"
+    },
+    {
+      "label": "PRD Holistic Quality Rating: 4/5",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/prd-validation-report.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": null,
+      "contributor": null,
+      "id": "prd_validation_report_quality_rating",
+      "community": 31,
+      "norm_label": "prd holistic quality rating: 4/5"
+    },
+    {
+      "label": "Readiness Status: NOT READY",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/implementation-readiness-report-2026-04-28.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Gemini CLI",
+      "contributor": null,
+      "id": "implementation_readiness_report_2026_04_28_readiness_status",
+      "community": 31,
+      "norm_label": "readiness status: not ready"
+    },
+    {
+      "label": "Critical Gap: Missing Epics and Stories",
+      "file_type": "document",
+      "source_file": "_bmad-output/planning-artifacts/implementation-readiness-report-2026-04-28.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-04-28",
+      "author": "Gemini CLI",
+      "contributor": null,
+      "id": "implementation_readiness_report_2026_04_28_missing_epics_gap",
+      "community": 31,
+      "norm_label": "critical gap: missing epics and stories"
     }
   ],
   "links": [
@@ -12537,60 +12694,154 @@
       "_tgt": "pitch_parquet_design_system",
       "source": "home_hub_font_updated_main_hub",
       "target": "pitch_parquet_design_system"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_tic_tac_tore",
+      "_tgt": "prd_persona_max",
+      "source": "prd_tic_tac_tore",
+      "target": "prd_persona_max"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd-validation-report.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_tic_tac_tore",
+      "_tgt": "prd_validation_report_quality_rating",
+      "source": "prd_tic_tac_tore",
+      "target": "prd_validation_report_quality_rating"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/implementation-readiness-report-2026-04-28.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_tic_tac_tore",
+      "_tgt": "implementation_readiness_report_2026_04_28_readiness_status",
+      "source": "prd_tic_tac_tore",
+      "target": "implementation_readiness_report_2026_04_28_readiness_status"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/implementation-readiness-report-2026-04-28.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_tic_tac_tore",
+      "_tgt": "implementation_readiness_report_2026_04_28_missing_epics_gap",
+      "source": "prd_tic_tac_tore",
+      "target": "implementation_readiness_report_2026_04_28_missing_epics_gap"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_verified_data_capture",
+      "_tgt": "prd_kd_03_speed_over_precision",
+      "source": "prd_layer_verified_data_capture",
+      "target": "prd_kd_03_speed_over_precision"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_verified_data_capture",
+      "_tgt": "prd_fr13_undo_toast",
+      "source": "prd_layer_verified_data_capture",
+      "target": "prd_fr13_undo_toast"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_multi_rule_analytics_engine",
+      "_tgt": "prd_kd_01_unified_rule_model",
+      "source": "prd_layer_multi_rule_analytics_engine",
+      "target": "prd_kd_01_unified_rule_model"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_multi_rule_analytics_engine",
+      "_tgt": "prd_kd_02_3_tier_statistics_output",
+      "source": "prd_layer_multi_rule_analytics_engine",
+      "target": "prd_kd_02_3_tier_statistics_output"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_tournament_management",
+      "_tgt": "prd_persona_oleg",
+      "source": "prd_layer_tournament_management",
+      "target": "prd_persona_oleg"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_layer_social_matchmaking",
+      "_tgt": "prd_persona_lisa",
+      "source": "prd_layer_social_matchmaking",
+      "target": "prd_persona_lisa"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "_bmad-output/planning-artifacts/prd.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "prd_kd_03_speed_over_precision",
+      "_tgt": "prd_fr13_undo_toast",
+      "source": "prd_kd_03_speed_over_precision",
+      "target": "prd_fr13_undo_toast"
     }
   ],
   "hyperedges": [
     {
-      "id": "core_product_loop",
-      "label": "Record -> Confirm -> Discover Loop",
+      "id": "prd_domain_hierarchy",
+      "label": "Domain Hierarchy",
       "nodes": [
-        "integrationarchitecture_match_recording_flow",
-        "apicontractsbackend_matchapi",
-        "apicontractsbackend_statisticsapi"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "source_file": "_bmad-output/planning-artifacts/prd.md"
-    },
-    {
-      "id": "verified_data_capture",
-      "label": "Verified Data Capture System",
-      "nodes": [
-        "prd_data_integrity",
-        "apicontractsbackend_matchapi",
-        "rationale_data_integrity_existential"
-      ],
-      "relation": "form",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "_bmad-output/planning-artifacts/prd.md"
-    },
-    {
-      "id": "mobile_first_design_paradigm",
-      "label": "Mobile-First PWA Design Paradigm",
-      "nodes": [
-        "uxspec_tictactore",
-        "architecturefrontend_component_based_spa",
-        "projectdesigndescription_live_match"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "_bmad-output/planning-artifacts/ux-design-specification.md"
-    },
-    {
-      "id": "match_lifecycle_management",
-      "label": "Match Lifecycle Management",
-      "nodes": [
-        "architecture_ad02",
-        "integration_architecture_match_recording_flow",
-        "live_match_annotated_updates_refined_live_match"
+        "prd_layer_verified_data_capture",
+        "prd_layer_multi_rule_analytics_engine",
+        "prd_layer_tournament_management",
+        "prd_layer_social_matchmaking"
       ],
       "relation": "implement",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "docs/index.md"
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "_bmad-output/planning-artifacts/prd.md"
     }
   ]
 }

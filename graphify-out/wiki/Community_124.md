@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **IconEcosystem.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue`
+- **WelcomeItem.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/WelcomeItem.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/WelcomeItem.vue`
 
 ## Audit Trail
 

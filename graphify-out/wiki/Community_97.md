@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **GameResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java`
+- **AboutView.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue`
 
 ## Audit Trail
 

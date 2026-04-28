@@ -2,7 +2,7 @@
 
 > God node · 8 connections · `/Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java`
 
-**Community:** [[Community 1]]
+**Community:** [[Match Operations & Services]]
 
 ## Connections by Relation
 

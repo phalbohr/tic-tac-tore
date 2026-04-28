@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **IconDocumentation.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue`
+- **auth.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/stores/__tests__/auth.spec.ts`
 
 ## Audit Trail
 

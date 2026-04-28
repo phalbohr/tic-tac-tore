@@ -2,7 +2,7 @@
 
 > God node · 10 connections · `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/service/StatisticsService.java`
 
-**Community:** [[Community 0]]
+**Community:** [[Statistics Repository & Projections]]
 
 ## Connections by Relation
 

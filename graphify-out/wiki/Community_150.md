@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **ITSF Rules Summary (German)** (0 connections) — `_project-spec/table-soccer-rules/ITSF-Regelwerk_Kurzfassung.md`
+- **Graphify Knowledge Graph** (0 connections) — `GEMINI.md`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `_project-spec/table-soccer-rules/ITSF-Regelwerk_Kurzfassung.md`
+- `GEMINI.md`
 
 ## Audit Trail
 

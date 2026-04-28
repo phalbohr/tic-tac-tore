@@ -2,7 +2,7 @@
 
 > God node · 11 connections · `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/service/JwtService.java`
 
-**Community:** [[Community 2]]
+**Community:** [[Security & OAuth2 Authentication]]
 
 ## Connections by Relation
 

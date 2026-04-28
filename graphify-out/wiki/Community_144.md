@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Privacy & DSGVO Compliance** (0 connections) — `_bmad-output/planning-artifacts/prd.md`
+- **PositionStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `_bmad-output/planning-artifacts/prd.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
 
 ## Audit Trail
 

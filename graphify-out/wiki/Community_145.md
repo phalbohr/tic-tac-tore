@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Domain-Driven Entity Design** (0 connections) — `docs/architecture-backend.md`
+- **H2HStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/H2HStatsResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `docs/architecture-backend.md`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/H2HStatsResponse.java`
 
 ## Audit Trail
 

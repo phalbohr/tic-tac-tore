@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **vite.config.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vite.config.ts`
+- **PlayerStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/vite.config.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PlayerStatsResponse.java`
 
 ## Audit Trail
 

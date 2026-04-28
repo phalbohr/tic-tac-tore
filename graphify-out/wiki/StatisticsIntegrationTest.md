@@ -2,7 +2,7 @@
 
 > God node · 9 connections · `/Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/StatisticsIntegrationTest.java`
 
-**Community:** [[Community 12]]
+**Community:** [[Statistics Integration Tests]]
 
 ## Connections by Relation
 

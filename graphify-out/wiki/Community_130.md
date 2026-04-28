@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **navigationGuard.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts`
+- **IconDocumentation.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconDocumentation.vue`
 
 ## Audit Trail
 

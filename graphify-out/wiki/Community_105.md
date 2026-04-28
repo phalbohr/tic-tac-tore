@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **WinnerTeam.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java`
+- **LeaderboardType.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/WinnerTeam.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardType.java`
 
 ## Audit Trail
 

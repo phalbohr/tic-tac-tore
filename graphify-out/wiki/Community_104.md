@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **Idempotent.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
+- **GameResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/annotation/Idempotent.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/GameResponse.java`
 
 ## Audit Trail
 

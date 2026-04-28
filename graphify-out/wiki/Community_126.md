@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **AboutView.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue`
+- **TheWelcome.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/AboutView.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue`
 
 ## Audit Trail
 

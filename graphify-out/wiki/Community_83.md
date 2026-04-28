@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **TheWelcome.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue`
+- **auth.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/auth.spec.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/TheWelcome.vue`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/auth.spec.ts`
 
 ## Audit Trail
 

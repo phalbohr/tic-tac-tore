@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **PositionStatsResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
+- **navigationGuard.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/PositionStatsResponse.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/router/__tests__/navigationGuard.spec.ts`
 
 ## Audit Trail
 

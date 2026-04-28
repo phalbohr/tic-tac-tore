@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **MatchResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/MatchResponse.java`
+- **IconEcosystem.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/MatchResponse.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/components/icons/IconEcosystem.vue`
 
 ## Audit Trail
 

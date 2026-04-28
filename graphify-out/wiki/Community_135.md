@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **LeaderboardEntryResponse.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardEntryResponse.java`
+- **WelcomeView.vue** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/WelcomeView.vue`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/dto/statistics/LeaderboardEntryResponse.java`
+- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/src/views/WelcomeView.vue`
 
 ## Audit Trail
 

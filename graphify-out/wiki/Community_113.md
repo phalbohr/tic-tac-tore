@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **vue.spec.ts** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts`
+- **MatchStatus.java** (0 connections) — `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/vue.spec.ts`
+- `/Users/ppolukhin/Projects/tic-tac-tore/src/main/java/com/tictactore/model/MatchStatus.java`
 
 ## Audit Trail
 
