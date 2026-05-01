@@ -8,14 +8,29 @@ test.describe('Match Recording Scenario', () => {
     interceptNetworkCall 
   }) => {
     // 1. Setup Data
-    const players = playerFactory.createMany(2);
+    const players = playerFactory.createMany(3);
     const match = matchFactory.create({
       players: { team1: [players[0]], team2: [players[1]] },
       score: { team1: 10, team2: 8 }
     });
 
     // 2. Intercept API calls
-    // Note: We intercept the seed call if necessary, but here we assume local backend or mock
+    // Mock Seed data which is hardcoded to localhost:8080 in components
+    await interceptNetworkCall({
+      page,
+      url: '**/api/v1/dev/seed',
+      method: 'POST',
+      fulfill: { 
+        status: 200, 
+        json: { 
+          me: { id: 'pavel-id', name: 'Pavel', email: 'pavel@example.com', token: 'fake-pavel-token' },
+          opp1: { id: players[0].id, name: players[0].name, email: players[0].email, token: 'fake-opp-token' },
+          opp2: { id: players[1].id, name: players[1].name, email: players[1].email, token: 'fake-opp2-token' },
+          opp3: { id: players[2].id, name: players[2].name, email: players[2].email, token: 'fake-opp3-token' }
+        } 
+      }
+    });
+
     const matchSubmit = await interceptNetworkCall({
       page,
       url: '**/api/v1/matches',
@@ -28,28 +43,25 @@ test.describe('Match Recording Scenario', () => {
     
     // GIVEN I am logged in
     // Click "Pavel" button to login as dev user
-    await page.getByRole('button', { name: 'Pavel' }).click();
+    const pavelButton = page.getByRole('button', { name: 'Pavel' });
+    await expect(pavelButton).toBeVisible({ timeout: 10000 });
+    await pavelButton.click();
     await expect(page.getByText('Player')).toBeVisible();
 
     // AND I am on the match recording page
     await page.getByTestId('nav-record-match').click();
 
-    // WHEN I select two players (teammate and opponent 1)
-    // Note: MatchRecordingForm uses <select> with data-testid="player-select-X"
-    // We wait for the seed data to load the options
+    // WHEN I select players
+    // Wait for the seed data to load the options
     await page.waitForSelector('option[data-testid^="player-option-"]');
 
-    const teammateOption = page.locator('option[data-testid^="player-option-"]').first();
-    const opponent1Option = page.locator('option[data-testid^="player-option-"]').nth(1);
-    const opponent2Option = page.locator('option[data-testid^="player-option-"]').nth(2);
+    const teammateId = players[0].id;
+    const opponent1Id = players[1].id;
+    const opponent2Id = players[2].id;
 
-    const teammateId = await teammateOption.getAttribute('value');
-    const opponent1Id = await opponent1Option.getAttribute('value');
-    const opponent2Id = await opponent2Option.getAttribute('value');
-
-    await page.getByTestId('player-select-1').selectOption(teammateId!);
-    await page.getByTestId('player-select-2').selectOption(opponent1Id!);
-    await page.getByTestId('player-select-3').selectOption(opponent2Id!);
+    await page.getByTestId('player-select-1').selectOption(teammateId);
+    await page.getByTestId('player-select-2').selectOption(opponent1Id);
+    await page.getByTestId('player-select-3').selectOption(opponent2Id);
 
     // AND I continue to scoring
     await page.getByTestId('submit-match-button').click();
