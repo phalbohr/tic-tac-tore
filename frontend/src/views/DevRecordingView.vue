@@ -9,6 +9,7 @@ import type { User } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 const showToken = ref(false)
+const showSuccess = ref(false)
 const copyStatus = ref('Copy to clipboard')
 
 const step = ref(1) // 1: Player Selection, 2: Scoring

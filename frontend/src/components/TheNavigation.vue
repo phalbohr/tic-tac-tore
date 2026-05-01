@@ -47,7 +47,7 @@ onMounted(handleSeed)
             <router-link to="/" class="px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors hover:bg-gray-50 whitespace-nowrap shrink-0" :class="[route.path === '/' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500']">
               Home
             </router-link>
-            <router-link to="/dev-recording" class="px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors hover:bg-gray-50 whitespace-nowrap shrink-0" :class="[route.path === '/dev-recording' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500']">
+            <router-link to="/dev-recording" data-testid="nav-record-match" class="px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors hover:bg-gray-50 whitespace-nowrap shrink-0" :class="[route.path === '/dev-recording' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500']">
               New Match
             </router-link>
             <router-link to="/dashboard" class="px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors hover:bg-gray-50 whitespace-nowrap shrink-0" :class="[route.path === '/dashboard' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500']">
