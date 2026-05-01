@@ -75,7 +75,7 @@ class MatchOperationTest {
     void createMatch_Success() {
         // Arrange
         when(userRepository.findAllById(any())).thenReturn(List.of(creator, teammate, opponent1, opponent2));
-        when(matchRepository.save(any(Match.class))).thenAnswer(invocation -> {
+        when(matchRepository.saveAndFlush(any(Match.class))).thenAnswer(invocation -> {
             Match m = invocation.getArgument(0);
             m.setId(UUID.randomUUID());
             return m;
@@ -86,7 +86,7 @@ class MatchOperationTest {
 
         // Assert
         assertThat(response).isNotNull();
-        verify(matchRepository).save(any(Match.class));
+        verify(matchRepository).saveAndFlush(any(Match.class));
     }
 
     @Test
@@ -107,7 +107,7 @@ class MatchOperationTest {
 
         // Assert
         assertThat(match.getStatus()).isEqualTo(MatchStatus.CONFIRMED);
-        verify(matchRepository).save(match);
+        verify(matchRepository).saveAndFlush(match);
     }
 
     @Test
@@ -128,6 +128,6 @@ class MatchOperationTest {
 
         // Assert
         assertThat(match.getStatus()).isEqualTo(MatchStatus.DRAFT);
-        verify(matchRepository).save(match);
+        verify(matchRepository).saveAndFlush(match);
     }
 }
