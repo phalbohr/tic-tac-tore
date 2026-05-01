@@ -6,17 +6,17 @@ import { useAuthStore } from '@/stores/auth'
 
 // Mock users for testing
 const mockUsers = [
-  { id: 1, name: 'Alice', email: 'alice@example.com' },
-  { id: 2, name: 'Bob', email: 'bob@example.com' },
-  { id: 3, name: 'Charlie', email: 'charlie@example.com' },
-  { id: 4, name: 'David', email: 'david@example.com' }
+  { id: '1', name: 'Alice', email: 'alice@example.com' },
+  { id: '2', name: 'Bob', email: 'bob@example.com' },
+  { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+  { id: '4', name: 'David', email: 'david@example.com' }
 ]
 
 describe('MatchRecordingForm', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     const authStore = useAuthStore()
-    authStore.user = { id: 10, name: 'Current User', email: 'me@example.com' }
+    authStore.user = { id: '10', name: 'Current User', email: 'me@example.com' }
   })
 
   it('renders correctly with player selection fields', () => {
@@ -44,11 +44,11 @@ describe('MatchRecordingForm', () => {
     const selects = wrapper.findAll('select')
     
     // Select Teammate
-    await selects[0].setValue(mockUsers[1].id)
+    if (selects[0]) await selects[0].setValue(mockUsers[1]?.id)
     // Select Opponent 1
-    await selects[1].setValue(mockUsers[2].id)
+    if (selects[1]) await selects[1].setValue(mockUsers[2]?.id)
     // Select Opponent 2
-    await selects[2].setValue(mockUsers[3].id)
+    if (selects[2]) await selects[2].setValue(mockUsers[3]?.id)
 
     const submitBtn = wrapper.find('button[type="submit"]')
     expect(submitBtn.attributes('disabled')).toBeUndefined()
@@ -62,17 +62,18 @@ describe('MatchRecordingForm', () => {
     })
 
     const selects = wrapper.findAll('select')
-    await selects[0].setValue(mockUsers[1].id)
-    await selects[1].setValue(mockUsers[2].id)
-    await selects[2].setValue(mockUsers[3].id)
+    if (selects[0]) await selects[0].setValue(mockUsers[1]?.id)
+    if (selects[1]) await selects[1].setValue(mockUsers[2]?.id)
+    if (selects[2]) await selects[2].setValue(mockUsers[3]?.id)
 
     await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('submit')).toBeTruthy()
-    expect(wrapper.emitted('submit')?.[0][0]).toEqual({
-      teammateId: mockUsers[1].id,
-      opponent1Id: mockUsers[2].id,
-      opponent2Id: mockUsers[3].id
+    const submission = wrapper.emitted('submit')?.[0]?.[0]
+    expect(submission).toEqual({
+      teammateId: mockUsers[1]?.id,
+      opponent1Id: mockUsers[2]?.id,
+      opponent2Id: mockUsers[3]?.id
     })
   })
 
@@ -86,10 +87,10 @@ describe('MatchRecordingForm', () => {
     const selects = wrapper.findAll('select')
     
     // Select Alice as Teammate
-    await selects[0].setValue(mockUsers[0].id)
+    if (selects[0]) await selects[0].setValue(mockUsers[0]?.id)
     
-    const opponent1Options = selects[1].findAll('option')
-    const aliceOption = opponent1Options.find(opt => opt.attributes('value') === mockUsers[0].id.toString())
+    const opponent1Options = selects[1]?.findAll('option')
+    const aliceOption = opponent1Options?.find(opt => opt.attributes('value') === mockUsers[0]?.id.toString())
     
     expect(aliceOption).toBeUndefined()
   })

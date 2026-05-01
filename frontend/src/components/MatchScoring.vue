@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 
 interface Player {
-  id: number
+  id: string
   name: string
 }
 
@@ -37,14 +37,20 @@ const games = ref([
   { team1Score: 0, team2Score: 0, team1Pos: '' as string, team2Pos: '' as string }
 ])
 
+const currentGame = computed(() => games.value[currentGameIndex.value])
+
 // Derived mandatory positions for Game 2 based on Game 1 choices
 const game2Team1Pos = computed(() => {
-  const g1Pos = games.value[0].team1Pos
+  const g1 = games.value[0]
+  if (!g1) return ''
+  const g1Pos = g1.team1Pos
   return g1Pos === POSITIONS.T1_NORMAL ? POSITIONS.T1_SWAPPED : (g1Pos === POSITIONS.T1_SWAPPED ? POSITIONS.T1_NORMAL : '')
 })
 
 const game2Team2Pos = computed(() => {
-  const g1Pos = games.value[0].team2Pos
+  const g1 = games.value[0]
+  if (!g1) return ''
+  const g1Pos = g1.team2Pos
   return g1Pos === POSITIONS.T2_NORMAL ? POSITIONS.T2_SWAPPED : (g1Pos === POSITIONS.T2_SWAPPED ? POSITIONS.T2_NORMAL : '')
 })
 
@@ -60,7 +66,7 @@ const team2Options = [
 
 const getWinner = (gameIdx: number) => {
   const g = games.value[gameIdx]
-  if (g.team1Score === g.team2Score) return null
+  if (!g || g.team1Score === g.team2Score) return null
   return g.team1Score > g.team2Score ? 1 : 2
 }
 
@@ -86,9 +92,15 @@ const needsGame3 = computed(() => {
  */
 const getPlayerByRole = (team: number, role: 'A' | 'D', gameIdx: number) => {
   // Use derived positions for Game 2 to ensure consistency
-  const pos = gameIdx === 1 
-    ? (team === 1 ? game2Team1Pos.value : game2Team2Pos.value)
-    : (team === 1 ? games.value[gameIdx].team1Pos : games.value[gameIdx].team2Pos)
+  let pos = ''
+  if (gameIdx === 1) {
+    pos = team === 1 ? game2Team1Pos.value : game2Team2Pos.value
+  } else {
+    const g = games.value[gameIdx]
+    if (g) {
+      pos = team === 1 ? g.team1Pos : g.team2Pos
+    }
+  }
   
   const map: Record<string, Record<'A' | 'D', string>> = {
     [POSITIONS.T1_NORMAL]: { A: props.players.creator.name, D: props.players.teammate.name },
@@ -128,17 +140,17 @@ const finishMatch = () => {
     </div>
 
     <!-- Position Selection (Only for Game 1 and Game 3) -->
-    <div v-if="currentGameIndex !== 1" class="space-y-4 mb-8">
+    <div v-if="currentGameIndex !== 1 && currentGame" class="space-y-4 mb-8">
       <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
         <label :for="'t1pos-'+currentGameIndex" class="block text-xs font-bold text-indigo-700 uppercase tracking-widest mb-2">Team 1 Positions</label>
-        <select :id="'t1pos-'+currentGameIndex" v-model="games[currentGameIndex].team1Pos" class="w-full p-2 bg-white border border-indigo-200 rounded-lg text-sm text-gray-900 font-bold">
+        <select :id="'t1pos-'+currentGameIndex" v-model="currentGame.team1Pos" class="w-full p-2 bg-white border border-indigo-200 rounded-lg text-sm text-gray-900 font-bold">
           <option value="">Select positions...</option>
           <option v-for="opt in team1Options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
       <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
         <label :for="'t2pos-'+currentGameIndex" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Team 2 Positions</label>
-        <select :id="'t2pos-'+currentGameIndex" v-model="games[currentGameIndex].team2Pos" class="w-full p-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 font-bold">
+        <select :id="'t2pos-'+currentGameIndex" v-model="currentGame.team2Pos" class="w-full p-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 font-bold">
           <option value="">Select positions...</option>
           <option v-for="opt in team2Options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
@@ -147,7 +159,7 @@ const finishMatch = () => {
 
 
     <!-- Position Display (For Game 2 - Swapped) -->
-    <div v-else class="space-y-4 mb-8">
+    <div v-else-if="currentGameIndex === 1" class="space-y-4 mb-8">
       <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
         <span class="inline-block px-2 py-0.5 bg-amber-200 text-amber-800 text-[10px] font-bold rounded uppercase mb-2">Mandatory Swap</span>
         <div class="flex justify-between items-center">
@@ -172,7 +184,7 @@ const finishMatch = () => {
     </div>
 
     <!-- Scores -->
-    <div class="grid grid-cols-2 gap-8 items-center mb-8">
+    <div v-if="currentGame" class="grid grid-cols-2 gap-8 items-center mb-8">
       <div class="text-center">
         <label class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">Team 1</label>
         <input
@@ -180,7 +192,7 @@ const finishMatch = () => {
           name="team1Score"
           min="0"
           max="99"
-          v-model.number="games[currentGameIndex].team1Score"
+          v-model.number="currentGame.team1Score"
           class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all text-gray-900"
         />
         </div>
@@ -191,7 +203,7 @@ const finishMatch = () => {
           name="team2Score"
           min="0"
           max="99"
-          v-model.number="games[currentGameIndex].team2Score"
+          v-model.number="currentGame.team2Score"
           class="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none transition-all text-gray-900"
         />
         </div>    </div>

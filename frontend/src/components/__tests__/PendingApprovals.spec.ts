@@ -56,7 +56,7 @@ describe('PendingApprovals', () => {
     await approveBtn.trigger('click')
 
     expect(wrapper.emitted('approve')).toBeTruthy()
-    expect(wrapper.emitted('approve')?.[0][0]).toBe('match-1')
+    expect(wrapper.emitted('approve')?.[0]?.[0]).toBe('match-1')
   })
 
   it('emits reject event when reject button is clicked', async () => {
@@ -70,6 +70,6 @@ describe('PendingApprovals', () => {
     await rejectBtn.trigger('click')
 
     expect(wrapper.emitted('reject')).toBeTruthy()
-    expect(wrapper.emitted('reject')?.[0][0]).toBe('match-1')
+    expect(wrapper.emitted('reject')?.[0]?.[0]).toBe('match-1')
   })
 })

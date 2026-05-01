@@ -11,7 +11,7 @@ onMounted(() => {
   const token = route.query.token as string
   
   if (token) {
-    const user = { id: 0, name: 'Google User', email: '' }
+    const user = { id: '0', name: 'Google User', email: '' }
     auth.login(token, user)
     router.push('/')
   } else {

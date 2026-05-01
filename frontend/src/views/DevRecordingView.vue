@@ -28,7 +28,7 @@ const handleSeed = async () => {
     const data = await response.json()
     seedData.value = data
     availableUsers.value = Object.values(data).map((u: any) => ({
-      id: u.id,
+      id: String(u.id),
       name: u.name,
       email: u.email
     }))
@@ -41,7 +41,7 @@ const loginAs = (key: 'me' | 'opp1') => {
   if (!seedData.value) return
   const u = seedData.value[key]
   authStore.login(u.token, {
-    id: u.id,
+    id: String(u.id),
     name: u.name,
     email: u.email
   })
