@@ -76,18 +76,19 @@ const handleSubmit = () => {
     </h2>
 
     <form @submit.prevent="handleSubmit" class="space-y-6">
-      <div v-for="field in fields" :key="field.id">
+      <div v-for="(field, index) in fields" :key="field.id">
         <label :for="field.id" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
           {{ field.label }}
         </label>
         <div class="relative">
           <select
             :id="field.id"
+            :data-testid="'player-select-' + (index + 1)"
             v-model="form[field.key]"
             class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none pr-10"
           >
             <option :value="null">{{ field.placeholder }}</option>
-            <option v-for="user in getAvailableFor(form[field.key])" :key="user.id" :value="user.id">
+            <option v-for="user in getAvailableFor(form[field.key])" :key="user.id" :value="user.id" :data-testid="'player-option-' + user.id">
               {{ user.name }}
             </option>
           </select>
@@ -102,6 +103,7 @@ const handleSubmit = () => {
       <button
         type="submit"
         :disabled="!isFormValid"
+        data-testid="submit-match-button"
         class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-indigo-200 mt-4 cursor-pointer disabled:cursor-not-allowed"
       >
         Continue to Scores

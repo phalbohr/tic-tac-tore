@@ -190,6 +190,7 @@ const finishMatch = () => {
         <input
           type="number"
           name="team1Score"
+          data-testid="score-input-1"
           min="0"
           max="99"
           v-model.number="currentGame.team1Score"
@@ -201,6 +202,7 @@ const finishMatch = () => {
         <input
           type="number"
           name="team2Score"
+          data-testid="score-input-2"
           min="0"
           max="99"
           v-model.number="currentGame.team2Score"
@@ -212,6 +214,7 @@ const finishMatch = () => {
       <button 
         v-if="needsGame3 || (currentGameIndex === 0)"
         @click="nextGame"
+        data-testid="next-game-button"
         class="next-game flex-1 py-4 bg-gray-900 hover:bg-black text-white font-black rounded-xl transition-all active:scale-[0.98]"
       >
         Next Game {{ currentGameIndex + 2 }}
@@ -220,6 +223,7 @@ const finishMatch = () => {
       <button 
         v-if="canFinish"
         @click="finishMatch"
+        data-testid="submit-match-button"
         class="finish-match flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-indigo-200"
       >
         Finish Match
