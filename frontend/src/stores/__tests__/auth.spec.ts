@@ -17,7 +17,7 @@ describe('Auth Store', () => {
 
   it('login action updates state', () => {
     const auth = useAuthStore()
-    const user = { id: 1, name: 'Test User', email: 'test@example.com' }
+    const user = { id: '1', name: 'Test User', email: 'test@example.com' }
     const token = 'fake-jwt-token'
 
     auth.login(token, user)
@@ -29,7 +29,7 @@ describe('Auth Store', () => {
 
   it('logout action clears state', () => {
     const auth = useAuthStore()
-    const user = { id: 1, name: 'Test User', email: 'test@example.com' }
+    const user = { id: '1', name: 'Test User', email: 'test@example.com' }
     const token = 'fake-jwt-token'
 
     auth.login(token, user)

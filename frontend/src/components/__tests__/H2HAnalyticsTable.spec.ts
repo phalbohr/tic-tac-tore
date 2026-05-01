@@ -40,7 +40,7 @@ describe('H2HAnalyticsTable', () => {
 
     // Default order is as passed (Rival 1, Rival 2)
     let rows = wrapper.findAll('tbody tr')
-    expect(rows[0].text()).toContain('Rival 1')
+    expect(rows[0]?.text()).toContain('Rival 1')
 
     // Click on Wins header to sort (initial click might be asc, click again for desc)
     const winsHeader = wrapper.findAll('th').find(th => th.text().includes('Wins'))
@@ -49,11 +49,11 @@ describe('H2HAnalyticsTable', () => {
     // Check if sorted (Rival 2 has 1 win, Rival 1 has 7 wins)
     // Assuming first click is ASC: Rival 2, Rival 1
     rows = wrapper.findAll('tbody tr')
-    expect(rows[0].text()).toContain('Rival 2')
+    expect(rows[0]?.text()).toContain('Rival 2')
 
     await winsHeader?.trigger('click') // DESC: Rival 1, Rival 2
     rows = wrapper.findAll('tbody tr')
-    expect(rows[0].text()).toContain('Rival 1')
+    expect(rows[0]?.text()).toContain('Rival 1')
   })
 
   it('sorts by matches correctly', async () => {
@@ -62,9 +62,9 @@ describe('H2HAnalyticsTable', () => {
     })
     const header = wrapper.findAll('th').find(th => th.text().includes('Matches'))
     await header?.trigger('click') // ASC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 2') // 5 matches
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 2') // 5 matches
     await header?.trigger('click') // DESC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 1') // 10 matches
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 1') // 10 matches
   })
 
   it('sorts by losses correctly', async () => {
@@ -73,9 +73,9 @@ describe('H2HAnalyticsTable', () => {
     })
     const header = wrapper.findAll('th').find(th => th.text().includes('Losses'))
     await header?.trigger('click') // ASC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 1') // 3 losses
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 1') // 3 losses
     await header?.trigger('click') // DESC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 2') // 4 losses
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 2') // 4 losses
   })
 
   it('sorts by winRate correctly', async () => {
@@ -84,9 +84,9 @@ describe('H2HAnalyticsTable', () => {
     })
     const header = wrapper.findAll('th').find(th => th.text().includes('Win Rate'))
     await header?.trigger('click') // ASC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 2') // 20%
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 2') // 20%
     await header?.trigger('click') // DESC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 1') // 70%
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 1') // 70%
   })
 
   it('sorts by opponentName correctly', async () => {
@@ -95,9 +95,9 @@ describe('H2HAnalyticsTable', () => {
     })
     const header = wrapper.findAll('th').find(th => th.text().includes('Opponent'))
     await header?.trigger('click') // ASC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 1')
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 1')
     await header?.trigger('click') // DESC
-    expect(wrapper.findAll('tbody tr')[0].text()).toContain('Rival 2')
+    expect(wrapper.findAll('tbody tr')[0]?.text()).toContain('Rival 2')
   })
 
   it('shows empty state when no records provided', () => {

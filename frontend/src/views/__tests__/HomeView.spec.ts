@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -7,7 +7,11 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: '/', component: HomeView }, { path: '/login', component: { template: 'Login' } }]
+  routes: [
+    { path: '/', name: 'home', component: HomeView },
+    { path: '/dev-recording', name: 'dev-recording', component: { template: 'DevRecording' } },
+    { path: '/leaderboards', name: 'leaderboards', component: { template: 'Leaderboards' } }
+  ]
 })
 
 describe('HomeView', () => {
@@ -21,11 +25,11 @@ describe('HomeView', () => {
         plugins: [router]
       }
     })
-    expect(wrapper.text()).toContain('Not Authenticated')
-    expect(wrapper.find('button').text()).toBe('Go to Login')
+    expect(wrapper.text()).toContain('Please use the navigation bar to login')
+    expect(wrapper.find('router-link').exists()).toBe(false)
   })
 
-  it('renders token panel when authenticated', async () => {
+  it('renders call to action buttons when authenticated', async () => {
     const authStore = useAuthStore()
     authStore.login('test-token', { id: '1', name: 'Test User', email: 'test@example.com' })
     
@@ -35,29 +39,8 @@ describe('HomeView', () => {
       }
     })
     
-    expect(wrapper.text()).toContain('Your JWT Token')
-    expect(wrapper.find('textarea').element.value).toBe('test-token')
-  })
-
-  it('calls copyToClipboard when copy button is clicked', async () => {
-    const authStore = useAuthStore()
-    authStore.login('test-token', { id: '1', name: 'Test User', email: 'test@example.com' })
-
-    // Mock clipboard API
-    const writeTextSpy = vi.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: writeTextSpy
-      }
-    })
-
-    const wrapper = mount(HomeView, {
-      global: {
-        plugins: [router]
-      }
-    })
-
-    await wrapper.find('button.bg-gray-900').trigger('click')
-    expect(writeTextSpy).toHaveBeenCalledWith('test-token')
+    const links = wrapper.findAllComponents({ name: 'RouterLink' })
+    expect(links.some(l => l.text() === 'Record Match')).toBe(true)
+    expect(links.some(l => l.text() === 'View Rankings')).toBe(true)
   })
 })
