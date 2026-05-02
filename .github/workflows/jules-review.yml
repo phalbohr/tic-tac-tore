@@ -39,7 +39,7 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number }}"
           VERDICT=$(gh pr view "$PR_NUMBER" \
             --json comments \
-            --jq '[.comments[] | select(.author.login == "github-actions[bot]") | .body] | last | capture("VERDICT: (?P<v>\\w+)") | .v' \
+            --jq '[.comments[].body | capture("VERDICT: (?P<v>\\w+)") | .v] | last // ""' \
             2>/dev/null || echo "")
           echo "Jules verdict: $VERDICT"
           if [ "$VERDICT" = "approve" ]; then
