@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Jules Code Review
-        uses: sanjay3290/jules-pr-reviewer@main
+        uses: sanjay3290/jules-pr-reviewer@432e901b3bc32353e7c75503421c64df4ffccc8b
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           jules_api_key: ${{ secrets.JULES_API_KEY }}
