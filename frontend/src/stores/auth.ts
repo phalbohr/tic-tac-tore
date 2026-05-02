@@ -2,19 +2,19 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem('auth_token'))
+  // Security: XSS Exposure via LocalStorage - Removed token from localStorage.
+  // The token is now stored in an HttpOnly cookie managed by the browser.
+  const isMaybeAuthenticated = ref(false)
 
-  const isAuthenticated = computed(() => token.value !== null)
+  const isAuthenticated = computed(() => isMaybeAuthenticated.value)
 
-  function setToken(jwt: string) {
-    token.value = jwt
-    localStorage.setItem('auth_token', jwt)
+  function setAuthenticated(status: boolean) {
+    isMaybeAuthenticated.value = status
   }
 
   function clearToken() {
-    token.value = null
-    try { localStorage.removeItem('auth_token') } catch { console.warn('localStorage disabled') }
+    isMaybeAuthenticated.value = false
   }
 
-  return { token, isAuthenticated, setToken, clearToken }
+  return { isAuthenticated, setAuthenticated, clearToken }
 })
