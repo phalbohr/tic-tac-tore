@@ -20,13 +20,13 @@ class JwtServiceTest {
 
     @Test
     void generateToken_returnsNonBlankToken() {
-        User user = User.builder()
+        var user = User.builder()
                 .id(UUID.randomUUID())
                 .email("test@example.com")
                 .name("Test User")
                 .build();
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
 
         assertThat(token).isNotBlank();
         assertThat(token.split("\\.")).hasSize(3); // JWT has 3 parts
@@ -34,13 +34,13 @@ class JwtServiceTest {
 
     @Test
     void isTokenValid_returnsTrueForValidToken() {
-        User user = User.builder()
+        var user = User.builder()
                 .id(UUID.randomUUID())
                 .email("test@example.com")
                 .name("Test User")
                 .build();
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
 
         assertThat(jwtService.isTokenValid(token)).isTrue();
     }
@@ -52,14 +52,14 @@ class JwtServiceTest {
 
     @Test
     void extractUserId_returnsCorrectId() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
+        var userId = UUID.randomUUID();
+        var user = User.builder()
                 .id(userId)
                 .email("test@example.com")
                 .name("Test User")
                 .build();
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
 
         assertThat(jwtService.extractUserId(token)).isEqualTo(userId.toString());
     }

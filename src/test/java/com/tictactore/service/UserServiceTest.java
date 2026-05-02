@@ -28,7 +28,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User result = userService.findOrCreate("new@example.com", "New User", "google-sub-123");
+        var result = userService.findOrCreate("new@example.com", "New User", "google-sub-123");
 
         assertThat(result.getEmail()).isEqualTo("new@example.com");
         assertThat(result.getName()).isEqualTo("New User");
@@ -38,14 +38,14 @@ class UserServiceTest {
 
     @Test
     void findOrCreate_returnsExistingUser_whenEmailFound() {
-        User existing = User.builder()
+        var existing = User.builder()
                 .email("existing@example.com")
                 .name("Existing User")
                 .providerId("google-sub-456")
                 .build();
         when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(existing));
 
-        User result = userService.findOrCreate("existing@example.com", "Existing User", "google-sub-456");
+        var result = userService.findOrCreate("existing@example.com", "Existing User", "google-sub-456");
 
         assertThat(result).isSameAs(existing);
         verify(userRepository, never()).save(any());
