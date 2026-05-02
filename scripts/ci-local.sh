@@ -14,6 +14,9 @@ npm ci || { echo "❌ Frontend install failed"; exit 1; }
 echo "🔍 Frontend: Type-checking..."
 npm run type-check || { echo "❌ Frontend type-check failed"; exit 1; }
 
+echo "🔨 Frontend: Building production bundle..."
+npm run build || { echo "❌ Frontend build failed"; exit 1; }
+
 echo "🧪 Frontend: Unit testing..."
 npm run test:unit -- --run || { echo "❌ Frontend unit tests failed"; exit 1; }
 
