@@ -224,6 +224,15 @@ As a new player, I want to log in to the application via Google, So that I don't
 - **And** the "Sign in with Google" button is functional (UX-DR7)
 - **And** successful auth creates a player record and redirects to Home Hub
 
+### Story 1.1a: Stateless JWT with Redis Denylist & Bloom Filters
+As a security-conscious system, I want to immediately revoke compromised or deleted account tokens, so that user sessions are truly terminated.
+**Acceptance Criteria:**
+- **Given** a valid JWT token
+- **When** the account is deleted or token is revoked
+- **Then** the token is added to a Redis-based denylist
+- **And** a Bloom filter is used for fast-path revocation checks before querying Redis
+- **And** the `JwtAuthenticationFilter` rejects any token found in the denylist (AD-03)
+
 ### Story 1.2: Localization and Translation Architecture
 As a user, I want the app to be localized, so that I can use it in my language.
 **Acceptance Criteria:**

@@ -1,0 +1,49 @@
+name: Jules PR Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  review:
+    name: Jules Code Review
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Jules Code Review
+        id: jules
+        uses: ./.github/actions/jules-review
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+
+      - name: Approve PR if Jules verdict is approve
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          VERDICT=$(gh pr view "$PR_NUMBER" \
+            --json comments \
+            --jq '[.comments[].body | capture("VERDICT: (?P<v>\\w+)") | .v] | last // ""' \
+            2>/dev/null || echo "")
+          echo "Jules verdict: $VERDICT"
+          if [ "$VERDICT" = "approve" ]; then
+            gh pr review "$PR_NUMBER" \
+              --approve \
+              --body "✅ Approved by Jules AI code review"
+          fi
