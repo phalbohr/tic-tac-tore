@@ -233,6 +233,15 @@ As a security-conscious system, I want to immediately revoke compromised or dele
 - **And** a Bloom filter is used for fast-path revocation checks before querying Redis
 - **And** the `JwtAuthenticationFilter` rejects any token found in the denylist (AD-03)
 
+### Story 1.1b: E2E Test for OAuth2 Login Flow
+As a Quality Engineer, I want an E2E Playwright test for the Google OAuth2 login flow, so that regressions in routing, asset loading, or proxying are caught automatically before merging.
+**Acceptance Criteria:**
+- **Given** the local development environment is running
+- **When** Playwright executes the login test suite
+- **Then** it navigates to the home page and verifies that the `main.css` styles are loaded correctly
+- **And** it clicks the "Sign in with Google" button and verifies that the Vite proxy successfully redirects to the backend `/oauth2/authorization/google` endpoint
+- **And** the CI pipeline executes this test successfully during the `frontend-e2e` stage
+
 ### Story 1.2: Localization and Translation Architecture
 As a user, I want the app to be localized, so that I can use it in my language.
 **Acceptance Criteria:**
