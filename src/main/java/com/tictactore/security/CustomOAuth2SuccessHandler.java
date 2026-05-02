@@ -7,12 +7,15 @@ import com.tictactore.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 
 @Component
@@ -37,7 +40,16 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         User user = userService.findOrCreate(email, name, providerId);
         String jwt = jwtService.generateToken(user);
 
-        String redirectUri = properties.getOauth2().getRedirectUri() + "?token=" + jwt;
-        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        // Security: JWT Leaked in URL - Use HttpOnly cookies instead of URL parameters.
+        ResponseCookie responseCookie = ResponseCookie.from("TTT_TOKEN", jwt)
+                .httpOnly(true)
+                .secure(request.isSecure())
+                .path("/")
+                .maxAge(Duration.ofHours(24))
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+        getRedirectStrategy().sendRedirect(request, response, properties.getOauth2().getRedirectUri());
     }
 }

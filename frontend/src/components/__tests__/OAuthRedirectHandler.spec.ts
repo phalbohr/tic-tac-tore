@@ -2,6 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import OAuthRedirectHandler from '@/components/OAuthRedirectHandler.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const mockPush = vi.fn()
 
@@ -10,7 +11,7 @@ vi.mock('vue-router', async () => {
   return {
     ...actual,
     useRoute: () => ({
-      query: { token: 'mock.jwt.token' },
+      query: { }, // Security: JWT Leaked in URL - Token removed from query
     }),
     useRouter: () => ({ push: mockPush }),
   }
@@ -19,19 +20,19 @@ vi.mock('vue-router', async () => {
 describe('OAuthRedirectHandler', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    localStorage.clear()
     sessionStorage.clear()
     mockPush.mockReset()
   })
 
-  it('stores JWT token from query param in localStorage', async () => {
+  it('marks user as authenticated in auth store', async () => {
+    const authStore = useAuthStore()
     mount(OAuthRedirectHandler)
     await flushPromises()
 
-    expect(localStorage.getItem('auth_token')).toBe('mock.jwt.token')
+    expect(authStore.isAuthenticated).toBe(true)
   })
 
-  it('redirects to Home Hub after storing token', async () => {
+  it('redirects to Home Hub', async () => {
     mount(OAuthRedirectHandler)
     await flushPromises()
 
