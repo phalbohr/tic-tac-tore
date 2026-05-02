@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearToken() {
     token.value = null
-    try { localStorage.removeItem('auth_token') } catch(e) { console.warn('localStorage disabled') }
+    try { localStorage.removeItem('auth_token') } catch { console.warn('localStorage disabled') }
   }
 
   return { token, isAuthenticated, setToken, clearToken }
