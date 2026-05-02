@@ -34,6 +34,3 @@ build/
 
 ### Graphify ###
 graphify-out/
-
-### Other ###
-filesystem_mcp.log
