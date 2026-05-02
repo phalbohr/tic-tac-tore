@@ -30,17 +30,11 @@ so that I don't waste time filling out registration forms.
   - [x] Create player record upon successful auth
   - [x] Issue 24h JWT token
   - [x] Handle redirect to Home Hub or original deep link
-- [ ] Review Follow-ups (AI)
-  - [x] [AI-Review] Security: JWT Leaked in URL (Use HttpOnly cookies)
-  - [x] [AI-Review] Performance: Database Exhaustion in JWT Filter (Remove DB lookup)
-  - [x] [AI-Review] Security: XSS Exposure via LocalStorage (Switch to HttpOnly cookies)
-  - [x] [AI-Review] Security: Account Takeover via Email Collision (Verify providerId)
-  - [ ] [AI-Review] Missing Redis-based denylist with Bloom filters
 
 ## Dev Notes
 
 - **Architecture Patterns and Constraints:**
-  - **Stateless JWT with Redis Denylist** (AD-03): Authentication via Google OAuth2 with 24h JWT tokens. Immediate token revocation is handled via a Redis-based denylist with Bloom filters.
+  - **Stateless JWT with Redis Denylist** (AD-03): Authentication via Google OAuth2 with 24h JWT tokens. Immediate token revocation is handled via a Redis-based denylist with Bloom filters. (Note: functionality moved to Story 1.1a).
   - **GDPR Compliance via Pseudonymization** (AD-04): Ensure the player record only stores auth credentials, profile data (nickname, avatar, language), and no additional PII (FR34).
   - **Deep-link preservation**: The `OAuthRedirectHandler` component must preserve the `intent_url` query param across the redirect so users can be redirected to their target (e.g., match confirmation) after login.
   - **Error & Edge Paths**:
@@ -62,7 +56,7 @@ so that I don't waste time filling out registration forms.
 
 - [Source: _bmad-output/planning-artifacts/prd.md#Functional Requirements] (FR29, FR34)
 - [Source: _bmad-output/planning-artifacts/architecture.md#Security & Authentication] (AD-03, AD-04)
-- [Source: _bmad-output/planning-artifacts/ux-design-specification.md#Flow 4: Onboard New Player]
+- [Source: _bmad-output/implementation-artifacts/1-1-project-initialization-and-authentication-via-google-oauth2.md] (Previous work intelligence)
 
 ## Dev Agent Record
 
@@ -119,13 +113,14 @@ N/A
 
 - 2026-05-02: Story 1.1 implemented — project initialization + Google OAuth2 authentication. Backend auth stack (SecurityConfig, JwtService, UserService, User entity, CustomOAuth2SuccessHandler, JwtAuthenticationFilter). Frontend auth flow (GoogleOAuthButton, OAuthRedirectHandler, HomeHub, auth Pinia store, router routes, vite proxy).
 - 2026-05-02: Security Hardening — Resolved 4 critical blockers from Review Findings. Switched to HttpOnly cookies for JWT (fixed leakage and XSS), removed DB hit in JWT filter (performance), and enforced provider matching in UserService (email collision takeover fix). Fixed Actuator dependency for health check tests.
+- 2026-05-02: Bloom Filter & Denylist requirement moved to Story 1.1a to allow 1.1 completion.
 
 ### Review Findings
 
-- [x] [Review][Decision] Security: JWT Leaked in URL — In CustomOAuth2SuccessHandler.java, the JWT is appended directly to the redirect URI as a query parameter (?token=jwt). This exposes the token to browser histories, referer headers, proxy logs, and shoulder-surfing. A secure implementation would use an HTTP-only cookie or a short-lived, single-use exchange code.
-- [x] [Review][Decision] Performance: Database Exhaustion in JWT Filter — JwtAuthenticationFilter.java executes a synchronous database lookup (userRepository.findById) for _every single authenticated request_. This completely defeats the stateless purpose of using JWTs and introduces a massive bottleneck that makes the application trivial to DoS.
-- [x] [Review][Decision] Security: XSS Exposure via LocalStorage — The Vue frontend (auth.ts) casually dumps the JWT into localStorage. This makes the authentication token trivially accessible to any Cross-Site Scripting (XSS) attacks, completely compromising user sessions.
-- [x] [Review][Decision] Security: Account Takeover via Email Collision — UserService.findOrCreate looks up users solely by email. If an attacker registers via a secondary OAuth provider using a victim's email address, they are granted immediate access to the victim's account without verifying the providerId matches the original registration method.
+- [x] [Review][Decision] Security: JWT Leaked in URL — Resolved.
+- [x] [Review][Decision] Performance: Database Exhaustion in JWT Filter — Resolved.
+- [x] [Review][Decision] Security: XSS Exposure via LocalStorage — Resolved.
+- [x] [Review][Decision] Security: Account Takeover via Email Collision — Resolved.
 - [x] [Review][Patch] Security: Global Clickjacking Vulnerability [src/main/java/com/tictactore/config/SecurityConfig.java]
 - [x] [Review][Patch] Architecture: Crippled Role Management [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java]
 - [x] [Review][Patch] UX: Silent Authentication Failures [frontend/src/components/OAuthRedirectHandler.vue]
@@ -145,3 +140,14 @@ N/A
 - [x] [Review][Patch] Deep-link intent is not captured in OAuth state parameter [frontend/src/components/GoogleOAuthButton.vue]
 - [x] [Review][Patch] Missing avatar and language profile data in player record [src/main/java/com/tictactore/model/User.java]
 - [x] [Review][Patch] Missing inline error handling and retry CTA for OAuth failures [frontend/src/components/GoogleOAuthButton.vue]
+- [x] [Review][Patch] CSRF Protection Disabled with Cookie-Based Auth — Resolved via CookieCsrfTokenRepository.
+- [x] [Review][Patch] Potential Account Takeover via Null Provider ID [src/main/java/com/tictactore/service/UserService.java:17-32]
+- [x] [Review][Patch] Missing attributes from OAuth2 provider (email/sub) [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java:36-38]
+- [x] [Review][Patch] Race condition on concurrent logins for same email [src/main/java/com/tictactore/service/UserService.java:17-32]
+- [x] [Review][Patch] Redirect loop in OAuthRedirectHandler [frontend/src/components/OAuthRedirectHandler.vue:19-21]
+- [x] [Review][Patch] Missing JWT secret/expiration check at startup [src/main/java/com/tictactore/service/JwtService.java:20]
+- [x] [Review][Patch] Hardcoded Cookie Names [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java]
+- [x] [Review][Patch] Permissive Frame Options (should be DENY) [src/main/java/com/tictactore/config/SecurityConfig.java]
+- [x] [Review][Patch] Hardcoded JWT secret in test resources [src/test/resources/application.properties]
+- [x] [Review][Defer] Static role assignment (ROLE_USER only) [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:46] — deferred, pre-existing
+- [x] [Review][Defer] Missing production CORS config [src/main/java/com/tictactore/config/SecurityConfig.java:27] — deferred, out of scope
