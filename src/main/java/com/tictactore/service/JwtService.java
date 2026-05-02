@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -17,6 +18,7 @@ public class JwtService {
     private final long expiration;
 
     public JwtService(ApplicationProperties properties) {
+        Assert.hasText(properties.getJwt().getSecretKey(), "JWT secret must be configured");
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.getJwt().getSecretKey()));
         this.expiration = properties.getJwt().getExpiration();
     }

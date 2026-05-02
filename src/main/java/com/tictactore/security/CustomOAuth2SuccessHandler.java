@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,8 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    public static final String AUTH_COOKIE_NAME = "TTT_TOKEN";
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -37,11 +40,15 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String name = (String) attributes.get("name");
         String providerId = (String) attributes.get("sub");
 
+        if (email == null || providerId == null) {
+            throw new OAuth2AuthenticationException("Required attributes missing from OAuth2 provider");
+        }
+
         User user = userService.findOrCreate(email, name, providerId);
         String jwt = jwtService.generateToken(user);
 
         // Security: JWT Leaked in URL - Use HttpOnly cookies instead of URL parameters.
-        ResponseCookie responseCookie = ResponseCookie.from("TTT_TOKEN", jwt)
+        ResponseCookie responseCookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwt)
                 .httpOnly(true)
                 .secure(request.isSecure())
                 .path("/")
