@@ -1,0 +1,28 @@
+name: Jules PR Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: Jules Code Review
+    runs-on: ubuntu-latest
+
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Jules Code Review
+        uses: sanjay3290/jules-pr-reviewer@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
