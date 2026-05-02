@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if ("TTT_TOKEN".equals(cookie.getName())) {
+                if (CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

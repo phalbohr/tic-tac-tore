@@ -17,6 +17,7 @@ onMounted(() => {
   try {
     intentUrl = sessionStorage.getItem('intent_url') || '/'
     if (!intentUrl.startsWith('/')) intentUrl = '/'
+    if (intentUrl === router.currentRoute.value.path) intentUrl = '/'
     sessionStorage.removeItem('intent_url')
   } catch { console.warn('sessionStorage disabled') }
 

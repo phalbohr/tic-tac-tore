@@ -11,3 +11,5 @@ Rules:
 ## BMAD Workflow Rules
 - Process every new BMAD user story in a dedicated feature branch.
 - Merge changes into the `develop` branch exclusively via Pull Requests (PRs). Do not commit directly to `develop`.
+- **GitHub Synchronization**: Any operation on a User Story (creation, modification, or deletion) must be automatically mirrored to its corresponding GitHub Issue.
+- **Jules Integration**: Upon completion of a local `bmad-code-review`, the Story's GitHub Issue must be updated with the `review` label to trigger further verification by Google Jules.
