@@ -95,6 +95,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Build Backend
+        run: ./mvnw clean package -DskipTests
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
