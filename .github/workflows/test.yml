@@ -55,22 +55,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine Node version
-        id: node-version
-        run: |
-          if [ -f frontend/.nvmrc ]; then
-            NODE_VER=$(cat frontend/.nvmrc | sed 's/v//')
-            echo "value=$NODE_VER" >> "$GITHUB_OUTPUT"
-            echo "Using Node from .nvmrc: $NODE_VER"
-          else
-            echo "value=22.12.0" >> "$GITHUB_OUTPUT"
-            echo "Using default Node 22.12.0"
-          fi
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ steps.node-version.outputs.value }}
+          node-version-file: 'frontend/.nvmrc'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -110,7 +98,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.12.0'
+          node-version-file: 'frontend/.nvmrc'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 

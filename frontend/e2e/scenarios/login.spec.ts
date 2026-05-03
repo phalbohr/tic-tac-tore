@@ -1,4 +1,4 @@
-import { test, expect } from '../support/fixtures';
+import { test, expect } from '@playwright/test';
 
 test.describe('Login Flow', () => {
   test('should load the home page and verify main.css styles', async ({ page }) => {
