@@ -118,7 +118,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'cd .. && ./mvnw spring-boot:run -Dspring-boot.run.arguments="--TTT_GOOGLE_CLIENT_ID=dummy --TTT_GOOGLE_CLIENT_SECRET=dummy"',
+      command: 'cd .. && TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy ./mvnw spring-boot:run',
       port: 8080,
       reuseExistingServer: !process.env.CI,
     },
