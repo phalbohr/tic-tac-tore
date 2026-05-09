@@ -32,7 +32,10 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     private RBloomFilter<String> getBloomFilterForDay(long epochDay) {
         String filterName = BLOOM_FILTER_PREFIX + epochDay;
         RBloomFilter<String> bloomFilter = redissonClient.getBloomFilter(filterName);
-        bloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+        boolean initialized = bloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+        if (initialized) {
+            log.info("Created new Bloom Filter: {}", filterName);
+        }
         return bloomFilter;
     }
 
@@ -56,6 +59,11 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
             todayFilter.add(token);
             todayFilter.expire(filterTtl);
+            
+            long count = todayFilter.count();
+            if (count > EXPECTED_ELEMENTS * 0.8) {
+                log.warn("Bloom Filter {} is at {}% capacity", todayFilter.getName(), count * 100 / EXPECTED_ELEMENTS);
+            }
 
             // 2. Add to TOMORROW'S bloom filter (in case the token's 24h lifespan crosses midnight)
             RBloomFilter<String> tomorrowFilter = getBloomFilterForDay(currentDay + 1);
@@ -83,9 +91,10 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
         try {
             RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
+            RBloomFilter<String> yesterdayFilter = getBloomFilterForDay(currentDay - 1);
 
-            // Fast path: Rolling Bloom filter for current day
-            if (!todayFilter.contains(token)) {
+            // Fast path: Rolling Bloom filter for current day and yesterday
+            if (!todayFilter.contains(token) && !yesterdayFilter.contains(token)) {
                 return false; // Definitely not in the denylist
             }
 
