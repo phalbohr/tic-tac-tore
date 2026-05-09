@@ -17,6 +17,7 @@ Rules:
 - **Strict Verification**: NEVER present a bug fix or feature completion to the user without first running the full local verification script (`./scripts/ci-local.sh`). You must empirically prove your fix works.
 - **Test Environment Parity**: Backend tests must not blindly mock critical startup configuration (e.g., via `application.properties` in `src/test/resources`). If an environment variable is required for production startup, the application must handle its absence gracefully (defaults), or the test must accurately simulate its absence.
 - **Boundary Testing**: Features involving frontend-to-backend proxies, static asset bundling, or OAuth redirects cannot be validated by unit tests alone. You must either write an E2E test (Playwright) or manually verify the integration using `curl`/shell scripts before marking the task complete.
+- **No Premature Completion**: Task checkboxes in stories or plans MUST ONLY be marked as complete AFTER a corresponding test verifying the functionality has been written and successfully passed.
 
 ## BMAD Workflow Rules
 

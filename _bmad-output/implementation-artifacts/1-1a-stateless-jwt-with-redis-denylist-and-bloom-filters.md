@@ -1,6 +1,6 @@
 # Story 1.1a: Stateless JWT with Redis Denylist & Bloom Filters
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation completed. Recommendations from 1-1a-validation-report.md applied. -->
 
@@ -22,29 +22,29 @@ so that user sessions are truly terminated.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Infrastructure Setup
-  - [ ] Add `spring-boot-starter-data-redis` to `pom.xml`
-  - [ ] Add Redisson dependency for distributed Bloom filter support (`RBloomFilter`)
-  - [ ] Add `spring-boot-docker-compose` dependency for automatic service management
-  - [ ] Create `docker-compose.yaml` in the project root (Redis with Bloom Filter, PostgreSQL)
-  - [ ] Configure Redis connection in `application.yml`
-- [ ] Task 2: Implement Token Revocation Service
-  - [ ] Create `TokenRevocationService` interface and Redis implementation
-  - [ ] Implement `revoke(String token)` method (adds to `RBloomFilter` and Redis with TTL)
-  - [ ] Implement `isRevoked(String token)` method (Bloom filter check -> Redis check)
-  - [ ] Ensure TTL for both Redis keys and Bloom filter entries is synchronized with JWT expiration (24h)
-- [ ] Task 3: Security Filter Integration
-  - [ ] Update `JwtAuthenticationFilter` to inject `TokenRevocationService`
-  - [ ] Perform revocation check after JWT signature verification but before setting security context
-  - [ ] **Error Handling:** Implement **fail-closed** logic — if Redis is down, reject the request as unauthorized
-- [ ] Task 4: API Endpoints
-  - [ ] Create `AuthController` (if not exists) or update existing
-  - [ ] Implement `/api/auth/logout` endpoint that extracts the token from cookie and revokes it
-- [ ] Task 5: Verification & Testing
-  - [ ] Unit tests for `TokenRevocationService` with mocked Redis/Bloom filter
-  - [ ] Integration test for `JwtAuthenticationFilter` verifying access is denied for revoked tokens
-  - [ ] Simulation test: Verify authentication is rejected when Redis connection is lost (fail-closed)
-  - [ ] Update frontend to call logout endpoint when user chooses to log out
+- [x] Task 1: Infrastructure Setup
+  - [x] Add `spring-boot-starter-data-redis` to `pom.xml`
+  - [x] Add Redisson dependency for distributed Bloom filter support (`RBloomFilter`)
+  - [x] Add `spring-boot-docker-compose` dependency for automatic service management
+  - [x] Create `docker-compose.yaml` in the project root (Redis with Bloom Filter, PostgreSQL)
+  - [x] Configure Redis connection in `application.yml`
+- [x] Task 2: Implement Token Revocation Service
+  - [x] Create `TokenRevocationService` interface and Redis implementation
+  - [x] Implement `revoke(String token)` method (adds to `RBloomFilter` and Redis with TTL)
+  - [x] Implement `isRevoked(String token)` method (Bloom filter check -> Redis check)
+  - [x] Ensure TTL for both Redis keys and Bloom filter entries is synchronized with JWT expiration (24h)
+- [x] Task 3: Security Filter Integration
+  - [x] Update `JwtAuthenticationFilter` to inject `TokenRevocationService`
+  - [x] Perform revocation check after JWT signature verification but before setting security context
+  - [x] **Error Handling:** Implement **fail-closed** logic — if Redis is down, reject the request as unauthorized
+- [x] Task 4: API Endpoints
+  - [x] Create `AuthController` (if not exists) or update existing
+  - [x] Implement `/api/auth/logout` endpoint that extracts the token from cookie and revokes it
+- [x] Task 5: Verification & Testing
+  - [x] Unit tests for `TokenRevocationService` with mocked Redis/Bloom filter
+  - [x] Integration test for `JwtAuthenticationFilter` verifying access is denied for revoked tokens
+  - [x] Simulation test: Verify authentication is rejected when Redis connection is lost (fail-closed)
+  - [x] Update frontend to call logout endpoint when user chooses to log out
 
 ## Dev Notes
 
@@ -75,6 +75,7 @@ so that user sessions are truly terminated.
 ### Agent Model Used
 
 Bob (bmad-agent-sm) context engine
+Gemini CLI Developer Agent
 
 ### Debug Log References
 
@@ -84,7 +85,29 @@ N/A
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
 - Applied validation recommendations: added fail-closed logic, RBloomFilter specifics, and TTL sync requirements.
+- Completed Task 1: Configured redis, redisson, and docker-compose in pom.xml and application.yml.
+- Completed Task 2: Implemented RedisTokenRevocationService using RBloomFilter and bucket TTL syncing.
+- Completed Task 3: Modified JwtAuthenticationFilter to check token revocation and fail closed.
+
+### Change Log
+
+- Added Redis, Redisson, docker-compose dependencies.
+- Created `docker-compose.yaml` with postgres and redis-stack.
+- Created `TokenRevocationService` and `RedisTokenRevocationService`.
+- Modified `JwtAuthenticationFilter` to return 401 for revoked tokens.
 
 ### File List
 
-- _bmad-output/implementation-artifacts/1-1a-stateless-jwt-with-redis-denylist-and-bloom-filters.md (modified)
+- `pom.xml` (modified)
+- `docker-compose.yaml` (new)
+- `src/main/resources/application.yml` (modified)
+- `src/main/java/com/tictactore/service/TokenRevocationService.java` (new)
+- `src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java` (new)
+- `src/main/java/com/tictactore/security/JwtAuthenticationFilter.java` (modified)
+- `src/main/java/com/tictactore/controller/AuthController.java` (new)
+- `frontend/src/stores/auth.ts` (modified)
+- `src/test/java/com/tictactore/service/impl/RedisTokenRevocationServiceTest.java` (new)
+- `src/test/java/com/tictactore/security/JwtAuthenticationFilterTest.java` (new)
+- `src/test/java/com/tictactore/TicTacToreApplicationTests.java` (modified)
+- `src/test/java/com/tictactore/security/JwtServiceTest.java` (modified)
+- `_bmad-output/implementation-artifacts/1-1a-stateless-jwt-with-redis-denylist-and-bloom-filters.md` (modified)
