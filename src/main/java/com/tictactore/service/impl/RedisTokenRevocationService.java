@@ -2,7 +2,6 @@ package com.tictactore.service.impl;
 
 import com.tictactore.config.ApplicationProperties;
 import com.tictactore.service.TokenRevocationService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
@@ -17,20 +16,24 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RedisTokenRevocationService implements TokenRevocationService {
 
-    private static final String BLOOM_FILTER_NAME = "jwt_denylist_bloom";
+    private static final String BLOOM_FILTER_PREFIX = "jwt_denylist_bloom:";
     private static final String KEY_PREFIX = "jwt:revoked:";
+    
+    // We expect max 100_000 revoked tokens per day. This prevents saturation.
+    private static final long EXPECTED_ELEMENTS = 100000L; 
+    private static final double FALSE_POSITIVE_RATE = 0.01;
 
     private final RedissonClient redissonClient;
     private final ApplicationProperties properties;
-    
-    private RBloomFilter<String> bloomFilter;
 
-    @PostConstruct
-    public void init() {
-        bloomFilter = redissonClient.getBloomFilter(BLOOM_FILTER_NAME);
-        // Initialize Bloom filter with expected elements and false positive probability
-        bloomFilter.tryInit(100000L, 0.01);
-        log.info("Initialized Bloom Filter: {}", BLOOM_FILTER_NAME);
+    /**
+     * Gets or initializes a bloom filter for a specific epoch day.
+     */
+    private RBloomFilter<String> getBloomFilterForDay(long epochDay) {
+        String filterName = BLOOM_FILTER_PREFIX + epochDay;
+        RBloomFilter<String> bloomFilter = redissonClient.getBloomFilter(filterName);
+        bloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+        return bloomFilter;
     }
 
     @Override
@@ -38,20 +41,31 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         if (token == null || token.isBlank()) {
             return;
         }
-        
+
         long expirationMs = properties.getJwt().getExpiration();
-        Duration ttl = Duration.ofMillis(expirationMs);
+        Duration tokenTtl = Duration.ofMillis(expirationMs);
         
+        // Since token lives for max 24 hours, it can only affect today and tomorrow.
+        // Bloom filters will live for 48 hours to ensure they span the entire possible TTL of the token.
+        Duration filterTtl = Duration.ofHours(48);
+
+        long currentDay = getCurrentEpochDay();
+
         try {
-            // Add to bloom filter
-            bloomFilter.add(token);
-            // Ensure TTL for bloom filter
-            bloomFilter.expire(ttl);
-            
-            // Add to redis as key
+            // 1. Add to TODAY'S bloom filter
+            RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
+            todayFilter.add(token);
+            todayFilter.expire(filterTtl);
+
+            // 2. Add to TOMORROW'S bloom filter (in case the token's 24h lifespan crosses midnight)
+            RBloomFilter<String> tomorrowFilter = getBloomFilterForDay(currentDay + 1);
+            tomorrowFilter.add(token);
+            tomorrowFilter.expire(filterTtl);
+
+            // 3. Add exact record to Redis as a bucket key
             RBucket<String> bucket = redissonClient.getBucket(KEY_PREFIX + token);
-            bucket.set("revoked", ttl);
-            
+            bucket.set("revoked", tokenTtl);
+
             log.debug("Token revoked successfully");
         } catch (Exception e) {
             log.error("Failed to revoke token due to Redis error", e);
@@ -65,9 +79,13 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             return false;
         }
 
+        long currentDay = getCurrentEpochDay();
+
         try {
-            // Fast path: Bloom filter
-            if (!bloomFilter.contains(token)) {
+            RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
+
+            // Fast path: Rolling Bloom filter for current day
+            if (!todayFilter.contains(token)) {
                 return false; // Definitely not in the denylist
             }
 
@@ -77,7 +95,11 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         } catch (Exception e) {
             log.error("Redis error checking token revocation status: fail-closed", e);
             // AD-03: Fail-closed logic. If Redis is down, we must reject the request
-            return true; 
+            return true;
         }
+    }
+
+    protected long getCurrentEpochDay() {
+        return System.currentTimeMillis() / 86400000L; // Milliseconds in a day
     }
 }
