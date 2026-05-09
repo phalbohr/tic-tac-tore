@@ -34,6 +34,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         RBloomFilter<String> bloomFilter = redissonClient.getBloomFilter(filterName);
         boolean initialized = bloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
         if (initialized) {
+            bloomFilter.expire(Duration.ofHours(48));
             log.info("Created new Bloom Filter: {}", filterName);
         }
         return bloomFilter;
@@ -47,10 +48,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
         long expirationMs = properties.getJwt().getExpiration();
         Duration tokenTtl = Duration.ofMillis(expirationMs);
-        
-        // Since token lives for max 24 hours, it can only affect today and tomorrow.
-        // Bloom filters will live for 48 hours to ensure they span the entire possible TTL of the token.
-        Duration filterTtl = Duration.ofHours(48);
 
         long currentDay = getCurrentEpochDay();
 
@@ -58,7 +55,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             // 1. Add to TODAY'S bloom filter
             RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
             todayFilter.add(token);
-            todayFilter.expire(filterTtl);
             
             long count = todayFilter.count();
             if (count > EXPECTED_ELEMENTS * 0.8) {
@@ -68,7 +64,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             // 2. Add to TOMORROW'S bloom filter (in case the token's 24h lifespan crosses midnight)
             RBloomFilter<String> tomorrowFilter = getBloomFilterForDay(currentDay + 1);
             tomorrowFilter.add(token);
-            tomorrowFilter.expire(filterTtl);
 
             // 3. Add exact record to Redis as a bucket key
             RBucket<String> bucket = redissonClient.getBucket(KEY_PREFIX + token);
