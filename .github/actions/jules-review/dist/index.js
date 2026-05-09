@@ -40653,11 +40653,12 @@ ${extraInstructions}
 # What to review
 Focus ONLY on lines changed in this diff. Evaluate for:
 
-- **Correctness**: logic errors, null/undefined handling, race conditions, off-by-ones, broken APIs, edge cases.
-- **Security**: injection risks (SQL/command/XSS), hardcoded secrets, insecure crypto, auth/authz flaws, sensitive data in logs or URLs.
-- **Reliability**: missing error handling where it matters, unhandled promise rejections, resource leaks.
-- **Maintainability**: duplication, unclear naming, dead code, violated project rules above.
-- **Tests**: new non-trivial logic without any test, or tests that assert nothing meaningful.
+- **Hitting the target**: PR solves the stated problem, all acceptance criteria are met, both positive and negative scenarios are covered.
+- **Correctness**: logic errors, null/undefined handling, race conditions, off-by-ones, broken APIs, edge cases, deadlocks.
+- **Performance**: N+1 query problems, memory leaks, load degradation.
+- **Security**: injection risks (SQLi/command/XSS), hardcoded secrets, insecure crypto, auth/authz flaws, sensitive/personal data leaks (logs, URLs etc.), validate inputs, verify authentication, CSRF protection, file uploads validation (type, size, content), passwords hashed, sessions managed securely, PII, insecure dependencies.
+- **Reliability**: missing error handling where it matters, unhandled promise rejections, resource leaks, transaction integrity(rollbacks).
+- **Tests**: new non-trivial logic without any test, or tests that assert nothing meaningful, edge cases covered, tests must fail on broken code.
 
 # What NOT to flag (false-positive filter)
 Skip these — they add noise and erode trust:
