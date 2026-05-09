@@ -36,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.isTokenValid(token)) {
             if (tokenRevocationService.isRevoked(token)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                // Не устанавливаем SecurityContext — запрос уходит дальше как анонимный
+                filterChain.doFilter(request, response);
                 return;
             }
 
