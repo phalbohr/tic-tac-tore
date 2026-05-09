@@ -17,12 +17,16 @@ so that user sessions are truly terminated.
 3. **And** the `JwtAuthenticationFilter` rejects any token found in the denylist with a 401 Unauthorized response (AD-03).
 4. **And** a logout endpoint `/api/auth/logout` is provided that revokes the current session's token.
 5. **And** the system fails closed (rejects authentication) if the Redis/Denylist service is unavailable, ensuring maximum security.
+6. **And** a `docker-compose.yaml` file is provided in the project root to orchestrate the infrastructure (Redis with Bloom Filter, PostgreSQL).
+7. **And** Spring Boot is configured to use the `spring-boot-docker-compose` module for automatic service management during development.
 
 ## Tasks / Subtasks
 
 - [ ] Task 1: Infrastructure Setup
   - [ ] Add `spring-boot-starter-data-redis` to `pom.xml`
   - [ ] Add Redisson dependency for distributed Bloom filter support (`RBloomFilter`)
+  - [ ] Add `spring-boot-docker-compose` dependency for automatic service management
+  - [ ] Create `docker-compose.yaml` in the project root (Redis with Bloom Filter, PostgreSQL)
   - [ ] Configure Redis connection in `application.yml`
 - [ ] Task 2: Implement Token Revocation Service
   - [ ] Create `TokenRevocationService` interface and Redis implementation

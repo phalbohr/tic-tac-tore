@@ -8,6 +8,11 @@ Rules:
 - For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
 - After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
 
+## Coding Standards
+
+- **Writing code**: Follow rules in `_project-spec/rules/1-write.md`. Read this file before writing any production code.
+- **Writing tests**: Follow rules in `_project-spec/rules/2-test.md`. Read this file before writing any tests.
+
 ## Agent Execution & Validation Rules
 - **Strict Verification**: NEVER present a bug fix or feature completion to the user without first running the full local verification script (`./scripts/ci-local.sh`). You must empirically prove your fix works.
 - **Test Environment Parity**: Backend tests must not blindly mock critical startup configuration (e.g., via `application.properties` in `src/test/resources`). If an environment variable is required for production startup, the application must handle its absence gracefully (defaults), or the test must accurately simulate its absence.
