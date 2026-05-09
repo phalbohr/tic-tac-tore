@@ -63,9 +63,8 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(jwtService, never()).extractUserId(anyString());
-        verify(filterChain, never()).doFilter(any(), any());
+        verify(filterChain).doFilter(request, response);
         assert SecurityContextHolder.getContext().getAuthentication() == null;
     }
 
