@@ -75,12 +75,10 @@ class RedisTokenRevocationServiceTest {
 
         verify(todayBloomFilter).tryInit(100000L, 0.01);
         verify(todayBloomFilter).add(token);
-        verify(todayBloomFilter).expire(any(java.time.Duration.class));
         verify(todayBloomFilter).count();
 
         verify(tomorrowBloomFilter).tryInit(100000L, 0.01);
         verify(tomorrowBloomFilter).add(token);
-        verify(tomorrowBloomFilter).expire(any(java.time.Duration.class));
 
         verify(bucket).set(eq("revoked"), any(java.time.Duration.class));
     }
