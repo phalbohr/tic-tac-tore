@@ -15,28 +15,33 @@ test.describe('Login Flow', () => {
   });
 
   test('should redirect to Google OAuth2 endpoint when clicking sign in', async ({ page }) => {
+    // Перехватываем запрос к серверам Google, чтобы избежать ошибки 
+    // "This browser or app may not be secure" (защита от ботов)
+    await page.route('**/*accounts.google.com/**', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: '<html><body>Mocked Google Login Page</body></html>'
+      });
+    });
+
     await page.goto('/');
 
     const signInButton = page.getByRole('button', { name: /Sign in with Google/i });
     await expect(signInButton).toBeVisible();
 
-    // We expect the click to trigger a redirect to the backend
-    // Since we are not mocking the backend completely, we just check if it tries to go to the right URL
-    // We can use page.waitForURL or check if the request is made.
-    // However, clicking it will change window.location.href.
+    // Chromium может "зависать" на навигации, если мы ее мокаем.
+    // Поэтому просто дождемся, пока браузер попытается сделать запрос на нужный URL.
+    const redirectPromise = page.waitForRequest(req => 
+      req.url().includes('oauth2/authorization/google') || 
+      req.url().includes('accounts.google.com')
+    );
 
-    // In Playwright, if it redirects to an external site (or another port not covered by the current test)
-    // we might need to handle it.
+    // Кликаем без ожидания полного завершения навигации
+    await signInButton.click({ noWaitAfter: true });
 
-    // Let's verify it redirects to the backend oauth2 endpoint
-    await signInButton.click();
-
-    // The backend should redirect to Google, but first it hits our backend.
-    // Vite proxy should handle /oauth2/authorization/google -> http://localhost:8080/oauth2/authorization/google
-
-    // We expect to be redirected to a URL containing /oauth2/authorization/google
-    // or to the google accounts login page if the backend redirect works.
-
-    await expect(page).toHaveURL(/.*(oauth2\/authorization\/google|accounts\.google\.com).*/);
+    // Дожидаемся запроса. Если он ушел — значит кнопка отработала корректно.
+    await redirectPromise;
   });
 });
+

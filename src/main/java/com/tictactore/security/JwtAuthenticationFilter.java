@@ -2,6 +2,7 @@ package com.tictactore.security;
 
 import com.tictactore.model.User;
 import com.tictactore.service.JwtService;
+import com.tictactore.service.TokenRevocationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final TokenRevocationService tokenRevocationService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -33,6 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         if (token != null && jwtService.isTokenValid(token)) {
+            if (tokenRevocationService.isRevoked(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
             // Performance: Database Exhaustion in JWT Filter - Rely on JWT claims instead of DB lookup.
             String userId = jwtService.extractUserId(token);
             // We reconstruct a minimal User object from JWT claims to avoid DB hit.
