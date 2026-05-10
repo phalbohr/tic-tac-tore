@@ -21,14 +21,23 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/oauth2/**",
+            "/login/**",
+            "/actuator/health",
+            "/h2-console/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
+    };
+    private static final String ERR_UNAUTHORIZED = "Unauthorized";
+
     private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CsrfCookieFilter csrfCookieFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-        // set the name of the attribute the CsrfToken will be populated on
+        var requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName(null);
 
         http
@@ -36,17 +45,9 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(requestHandler)
                 )
-                // Note: IF_REQUIRED is necessary for OAuth2 flow and CSRF handlers. Using STATELESS would break them.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/oauth2/**",
-                                "/login/**",
-                                "/actuator/health",
-                                "/h2-console/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**"
-                        ).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -54,7 +55,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ERR_UNAUTHORIZED))
                 )
                 .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
