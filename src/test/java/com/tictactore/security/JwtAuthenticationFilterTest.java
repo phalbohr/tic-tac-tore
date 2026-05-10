@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -45,11 +49,13 @@ class JwtAuthenticationFilterTest {
         when(jwtService.extractToken(request)).thenReturn(token);
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(tokenRevocationService.isRevoked(token)).thenReturn(false);
-        when(jwtService.extractUserId(token)).thenReturn("123e4567-e89b-12d3-a456-426614174000");
+
+        Claims mockClaims = new DefaultClaims(Map.of("email", "test@example.com", "name", "Test User", Claims.SUBJECT, "123e4567-e89b-12d3-a456-426614174000"));
+        when(jwtService.extractAllClaims(token)).thenReturn(mockClaims);
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(jwtService).extractUserId(token);
+        verify(jwtService).extractAllClaims(token);
         verify(filterChain).doFilter(request, response);
         assert SecurityContextHolder.getContext().getAuthentication() != null;
     }
@@ -74,11 +80,13 @@ class JwtAuthenticationFilterTest {
         when(jwtService.extractToken(request)).thenReturn(token);
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(tokenRevocationService.isRevoked(token)).thenReturn(false);
-        when(jwtService.extractUserId(token)).thenReturn("123e4567-e89b-12d3-a456-426614174000");
+
+        Claims mockClaims = new DefaultClaims(Map.of("email", "cookie@example.com", "name", "Cookie User", Claims.SUBJECT, "123e4567-e89b-12d3-a456-426614174000"));
+        when(jwtService.extractAllClaims(token)).thenReturn(mockClaims);
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(jwtService).extractUserId(token);
+        verify(jwtService).extractAllClaims(token);
         verify(filterChain).doFilter(request, response);
         assert SecurityContextHolder.getContext().getAuthentication() != null;
     }

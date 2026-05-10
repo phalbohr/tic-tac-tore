@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -24,6 +26,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     // We expect max 100_000 revoked tokens per day. This prevents saturation.
     private static final long EXPECTED_ELEMENTS = 100000L; 
     private static final double FALSE_POSITIVE_RATE = 0.01;
+    private static final long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
 
     private final RedissonClient redissonClient;
     private final ApplicationProperties properties;
@@ -50,23 +53,27 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
         Duration tokenTtl = Duration.ofMillis(remainingTtlMs);
         long currentDay = getCurrentEpochDay();
-        long expirationDay = expirationDate.getTime() / 86400000L;
+        long expirationDay = expirationDate.getTime() / MILLIS_PER_DAY;
 
         try {
             for (long day = currentDay; day <= expirationDay; day++) {
                 String filterName = BLOOM_FILTER_PREFIX + day;
                 RBloomFilter<String> filter = redissonClient.getBloomFilter(filterName);
+
                 boolean initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
                 if (initialized) {
                     filter.expire(Duration.ofDays((day - currentDay) + 2));
                     log.info("Created new Bloom Filter: {}", filterName);
                 }
+
                 filter.add(token);
 
                 if (day == currentDay) {
-                    long count = filter.count();
-                    if (count > EXPECTED_ELEMENTS * 0.8) {
-                        log.warn("Bloom Filter {} is at {}% capacity", filterName, count * 100 / EXPECTED_ELEMENTS);
+                    if (ThreadLocalRandom.current().nextInt(10) == 0) {
+                        long count = filter.count();
+                        if (count > EXPECTED_ELEMENTS * 0.8) {
+                            log.warn("Bloom Filter {} is at {}% capacity", filterName, count * 100 / EXPECTED_ELEMENTS);
+                        }
                     }
                 }
             }
@@ -113,6 +120,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     }
 
     protected long getCurrentEpochDay() {
-        return System.currentTimeMillis() / 86400000L; // Milliseconds in a day
+        return System.currentTimeMillis() / MILLIS_PER_DAY; // Milliseconds in a day
     }
 }
