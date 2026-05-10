@@ -73,10 +73,12 @@ class RedisTokenRevocationServiceTest {
 
         when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
+        when(todayBloomFilter.tryInit(100000L, 0.01)).thenReturn(true);
 
         service.revoke(token);
 
         verify(todayBloomFilter, atLeastOnce()).tryInit(100000L, 0.01);
+        verify(todayBloomFilter, atLeastOnce()).expire(any(java.time.Duration.class));
         verify(todayBloomFilter, atLeastOnce()).add(token);
 
         verify(bucket).set(eq("revoked"), any(java.time.Duration.class));

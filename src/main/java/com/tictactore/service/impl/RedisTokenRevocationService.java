@@ -58,6 +58,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 RBloomFilter<String> filter = redissonClient.getBloomFilter(filterName);
                 boolean initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
                 if (initialized) {
+                    filter.expire(Duration.ofDays((day - currentDay) + 2));
                     log.info("Created new Bloom Filter: {}", filterName);
                 }
                 filter.add(token);
