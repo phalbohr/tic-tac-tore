@@ -133,3 +133,12 @@ N/A
 - [x] [Review][Patch] Infrastructure: `redis/redis-stack-server:latest` in docker-compose — pin to a specific version for reproducible builds [`docker-compose.yaml`]
 - [x] [Review][Patch] Code style: `RedisTokenRevocationServiceTest` — `@BeforeEach` block and first `@Test` method lack indentation inside the class body, violating code style and risking future parsing issues [`RedisTokenRevocationServiceTest.java:54-79`]
 - [x] [Review][Decision] Scalability: Bloom Filter capacity made configurable via `application.yml` (`app.bloom-filter.expected-elements`)
+
+**Round 2 patch (6) — all resolved**
+
+- [x] [Review][Patch] Security Regression: inner try/catch in `isRevoked()` caused fail-closed to return `false` when both Bloom filters threw exceptions — added `bloomError` flag to propagate fail-closed correctly [`RedisTokenRevocationService.java:isRevoked`]
+- [x] [Review][Patch] Security: `response.setStatus(SC_UNAUTHORIZED)` replaced with `response.sendError(SC_UNAUTHORIZED)` — sendError commits the response and prevents Spring Security redirect-to-login interception [`JwtAuthenticationFilter.java`]
+- [x] [Review][Patch] Observability: `catch (Exception e)` in `AuthController.logout()` was silent — added `log.warn(...)` and `@Slf4j` annotation for Redis-error diagnostics [`AuthController.java`]
+- [x] [Review][Patch] DRY: loop cap used literal `2` instead of existing constant `DAYS_TO_KEEP` [`RedisTokenRevocationService.java:revoke`]
+- [x] [Review][Patch] Config: `false-positive-rate` added to `application.yml` bloom-filter block for environment-level configurability [`application.yml`]
+- [x] [Review][Patch] Documentation: added header comment to `application-dev.yml` explaining its dev-only purpose [`application-dev.yml`]
