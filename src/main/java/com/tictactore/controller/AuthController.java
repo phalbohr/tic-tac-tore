@@ -34,15 +34,26 @@ public class AuthController implements AuthApi {
             tokenRevocationService.revoke(token);
         }
 
-        var responseCookie = ResponseCookie.from(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, COOKIE_EMPTY_VALUE)
+        var isSecure = request.isSecure();
+
+        var authCookie = ResponseCookie.from(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, COOKIE_EMPTY_VALUE)
                 .httpOnly(true)
-                .secure(request.isSecure())
+                .secure(isSecure)
                 .path(COOKIE_PATH)
                 .maxAge(COOKIE_MAX_AGE_ZERO)
                 .sameSite(COOKIE_SAME_SITE)
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+        var sessionCookie = ResponseCookie.from(CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, COOKIE_EMPTY_VALUE)
+                .httpOnly(false)
+                .secure(isSecure)
+                .path(COOKIE_PATH)
+                .maxAge(COOKIE_MAX_AGE_ZERO)
+                .sameSite(COOKIE_SAME_SITE)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
 
         return ResponseEntity.ok().build();
     }
