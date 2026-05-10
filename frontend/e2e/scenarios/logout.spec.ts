@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Logout Flow', () => {
   test('should send POST request with CSRF token when logging out', async ({ page }) => {
-    // Перехватываем запрос на logout, чтобы проверить, что он отправлен с правильными заголовками
     let logoutRequestHeaders: { [key: string]: string } = {};
     
     await page.route('**/api/auth/logout', route => {
@@ -16,15 +15,11 @@ test.describe('Logout Flow', () => {
 
     await page.goto('/');
 
-    // Мокаем куки, как будто пользователь залогинен (XSRF-TOKEN устанавливается бекендом)
     await page.context().addCookies([
       { name: 'XSRF-TOKEN', value: 'mock-csrf-token-12345', domain: 'localhost', path: '/' },
       { name: 'TTT_TOKEN', value: 'mock-jwt-token', domain: 'localhost', path: '/' }
     ]);
 
-    // Поскольку у нас пока нет кнопки UI для логаута, мы искусственно вызываем метод стора
-    // У нас Vite и Pinia, глобально не всегда доступны, поэтому проверим логику CSRF токена:
-    
     await page.evaluate(async () => {
       const csrfToken = document.cookie
         .split('; ')
@@ -42,7 +37,6 @@ test.describe('Logout Flow', () => {
       });
     });
 
-    // Проверяем, что запрос был отправлен
     expect(logoutRequestHeaders['x-xsrf-token']).toBe('mock-csrf-token-12345');
   });
 });

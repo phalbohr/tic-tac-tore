@@ -2,13 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getCookie } from '../utils/cookieUtils'
 
-const AUTH_COOKIE_NAME = 'TTT_TOKEN'
+const AUTH_COOKIE_NAME = 'TTT_SESSION'
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 const LOGOUT_ENDPOINT = '/api/auth/logout'
 const METHOD_POST = 'POST'
 
 export const useAuthStore = defineStore('auth', () => {
+  // Security: TTT_SESSION is a non-HttpOnly signal cookie used to track UI state.
+  // The actual JWT is in the HttpOnly TTT_TOKEN cookie, secure from XSS.
   const isMaybeAuthenticated = ref(!!getCookie(AUTH_COOKIE_NAME))
 
   const isAuthenticated = computed(() => isMaybeAuthenticated.value)
