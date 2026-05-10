@@ -15,8 +15,8 @@ test.describe('Login Flow', () => {
   });
 
   test('should redirect to Google OAuth2 endpoint when clicking sign in', async ({ page }) => {
-    // Перехватываем запрос к серверам Google, чтобы избежать ошибки 
-    // "This browser or app may not be secure" (защита от ботов)
+    // Intercept requests to Google servers to avoid the error
+    // "This browser or app may not be secure" (bot protection)
     await page.route('**/*accounts.google.com/**', route => {
       route.fulfill({
         status: 200,
@@ -30,17 +30,17 @@ test.describe('Login Flow', () => {
     const signInButton = page.getByRole('button', { name: /Sign in with Google/i });
     await expect(signInButton).toBeVisible();
 
-    // Chromium может "зависать" на навигации, если мы ее мокаем.
-    // Поэтому просто дождемся, пока браузер попытается сделать запрос на нужный URL.
+    // Chromium might "hang" on navigation if we mock it.
+    // So we just wait until the browser attempts to make a request to the needed URL.
     const redirectPromise = page.waitForRequest(req => 
       req.url().includes('oauth2/authorization/google') || 
       req.url().includes('accounts.google.com')
     );
 
-    // Кликаем без ожидания полного завершения навигации
+    // Click without waiting for full navigation to complete
     await signInButton.click({ noWaitAfter: true });
 
-    // Дожидаемся запроса. Если он ушел — значит кнопка отработала корректно.
+    // Wait for the request. If it was sent, the button works correctly.
     await redirectPromise;
   });
 });

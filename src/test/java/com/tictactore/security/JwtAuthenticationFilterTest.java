@@ -42,7 +42,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_validToken_notRevoked() throws Exception {
         String token = "valid.token";
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(jwtService.extractToken(request)).thenReturn(token);
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(tokenRevocationService.isRevoked(token)).thenReturn(false);
         when(jwtService.extractUserId(token)).thenReturn("123e4567-e89b-12d3-a456-426614174000");
@@ -57,7 +57,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_validToken_isRevoked() throws Exception {
         String token = "revoked.token";
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(jwtService.extractToken(request)).thenReturn(token);
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(tokenRevocationService.isRevoked(token)).thenReturn(true);
 
@@ -71,9 +71,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void doFilterInternal_cookieToken_notRevoked() throws Exception {
         String token = "valid.token.from.cookie";
-        Cookie cookie = new Cookie(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, token);
-        when(request.getHeader("Authorization")).thenReturn(null);
-        when(request.getCookies()).thenReturn(new Cookie[]{cookie});
+        when(jwtService.extractToken(request)).thenReturn(token);
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(tokenRevocationService.isRevoked(token)).thenReturn(false);
         when(jwtService.extractUserId(token)).thenReturn("123e4567-e89b-12d3-a456-426614174000");
