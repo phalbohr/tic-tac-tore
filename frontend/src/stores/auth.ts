@@ -9,8 +9,6 @@ const LOGOUT_ENDPOINT = '/api/auth/logout'
 const METHOD_POST = 'POST'
 
 export const useAuthStore = defineStore('auth', () => {
-  // Security: TTT_SESSION is a non-HttpOnly signal cookie used to track UI state.
-  // The actual JWT is in the HttpOnly TTT_TOKEN cookie, secure from XSS.
   const isMaybeAuthenticated = ref(!!getCookie(SESSION_COOKIE_NAME))
 
   const isAuthenticated = computed(() => isMaybeAuthenticated.value)
@@ -21,7 +19,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      // Извлекаем XSRF-TOKEN из куки, чтобы отправить его в заголовке
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
 
       const headers: HeadersInit = {}

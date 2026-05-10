@@ -38,8 +38,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     private static final int RANDOM_LOG_CHANCE = 10;
     private static final int DAYS_TO_KEEP = 2;
 
-    private static final String LUA_INIT_AND_EXPIRE = 
-            "if redis.call('EXISTS', KEYS[1]) == 0 then " +
+    private static final String LUA_INIT_AND_EXPIRE = "if redis.call('EXISTS', KEYS[1]) == 0 then " +
             "  redis.call('BF.RESERVE', KEYS[1], ARGV[1], ARGV[2]); " +
             "  redis.call('EXPIRE', KEYS[1], ARGV[3]); " +
             "  return 1; " +
@@ -74,16 +73,16 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         var tokenTtl = Duration.ofMillis(remainingTtlMs);
         var currentDay = getCurrentEpochDay();
         var expirationDay = expirationDate.getTime() / MILLIS_PER_DAY;
-        var maxDay = Math.min(expirationDay, currentDay + DAYS_TO_KEEP); // Cap at DAYS_TO_KEEP days ahead
+        var maxDay = Math.min(expirationDay, currentDay + DAYS_TO_KEEP);
 
         try {
             var bfConfig = properties.getBloomFilter();
             for (var day = currentDay; day <= maxDay; day++) {
                 var filterName = BLOOM_FILTER_PREFIX + day;
-                
+
                 var script = redissonClient.getScript();
                 var ttlSeconds = TimeUnit.DAYS.toSeconds((day - currentDay) + DAYS_TO_KEEP);
-                
+
                 var result = script.eval(
                         RScript.Mode.READ_WRITE,
                         LUA_INIT_AND_EXPIRE,
@@ -91,8 +90,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                         List.of(filterName),
                         bfConfig.getFalsePositiveRate(),
                         bfConfig.getExpectedElements(),
-                        ttlSeconds
-                );
+                        ttlSeconds);
 
                 if (Long.valueOf(1).equals(result)) {
                     log.info(LOG_CREATED_FILTER, filterName);
@@ -150,7 +148,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 bloomError = true;
             }
 
-            // Fail-closed: if both Bloom filters failed we cannot trust a negative result
             if (bloomError && !inToday && !inYesterday) {
                 log.error(LOG_IS_REVOKED_ERROR);
                 return true;
