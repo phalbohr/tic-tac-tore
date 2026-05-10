@@ -2,10 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getCookie } from '../utils/cookieUtils'
 
+const AUTH_COOKIE_NAME = 'TTT_TOKEN'
+const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
+const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
+const LOGOUT_ENDPOINT = '/api/auth/logout'
+const METHOD_POST = 'POST'
+
 export const useAuthStore = defineStore('auth', () => {
-  // Security: XSS Exposure via LocalStorage - Removed token from localStorage.
-  // The token is now stored in an HttpOnly cookie managed by the browser.
-  const isMaybeAuthenticated = ref(false)
+  const isMaybeAuthenticated = ref(!!getCookie(AUTH_COOKIE_NAME))
 
   const isAuthenticated = computed(() => isMaybeAuthenticated.value)
 
@@ -16,17 +20,21 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       // Извлекаем XSRF-TOKEN из куки, чтобы отправить его в заголовке
-      const csrfToken = getCookie('XSRF-TOKEN')
+      const csrfToken = getCookie(CSRF_COOKIE_NAME)
 
       const headers: HeadersInit = {}
       if (csrfToken) {
-        headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+        headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
       }
 
-      await fetch('/api/auth/logout', { 
-        method: 'POST',
+      const response = await fetch(LOGOUT_ENDPOINT, { 
+        method: METHOD_POST,
         headers 
       })
+
+      if (!response.ok && response.status === 0) {
+        console.warn('Offline logout — local state cleared, but server session may persist')
+      }
     } catch (e) {
       console.error('Logout failed', e)
     } finally {

@@ -40,6 +40,8 @@ class RedisTokenRevocationServiceTest {
     @Mock
     private ApplicationProperties properties;
     @Mock
+    private ApplicationProperties.BloomFilter bloomFilterConfig;
+    @Mock
     private ApplicationProperties.Jwt jwtProperties;
     @Mock
     private JwtService jwtService;
@@ -77,6 +79,9 @@ class RedisTokenRevocationServiceTest {
     void testRevoke() {
         var expirationDate = new Date(System.currentTimeMillis() + ONE_DAY_MS);
         when(jwtService.extractExpirationDate(TOKEN_TEST)).thenReturn(expirationDate);
+        when(properties.getBloomFilter()).thenReturn(bloomFilterConfig);
+        when(bloomFilterConfig.getExpectedElements()).thenReturn(EXPECTED_ELEMENTS);
+        when(bloomFilterConfig.getFalsePositiveRate()).thenReturn(FALSE_POSITIVE_RATE);
         
         when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);

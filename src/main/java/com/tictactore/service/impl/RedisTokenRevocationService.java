@@ -28,9 +28,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     private static final String LOG_TOKEN_REVOKED = "Token revoked successfully";
     private static final String LOG_REVOKE_ERROR = "Failed to revoke token due to Redis error";
     private static final String LOG_IS_REVOKED_ERROR = "Redis error checking token revocation status: fail-closed";
-    
-    private static final long EXPECTED_ELEMENTS = 100000L; 
-    private static final double FALSE_POSITIVE_RATE = 0.01;
+
     private static final long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
     private static final int WARNING_CAPACITY_PERCENTAGE = 80;
     private static final int RANDOM_LOG_CHANCE = 10;
@@ -54,7 +52,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             return;
         }
 
-        var remainingTtlMs = expirationDate.getTime() - System.currentTimeMillis();
+        var now = System.currentTimeMillis();
+        var remainingTtlMs = expirationDate.getTime() - now;
         if (remainingTtlMs <= 0) {
             return;
         }
@@ -64,12 +63,14 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         var expirationDay = expirationDate.getTime() / MILLIS_PER_DAY;
 
         try {
+            var bfConfig = properties.getBloomFilter();
             for (var day = currentDay; day <= expirationDay; day++) {
                 var filterName = BLOOM_FILTER_PREFIX + day;
                 var filter = redissonClient.<String>getBloomFilter(filterName);
 
-                var initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
-                if (initialized) {
+                // Initialize if not exists. tryInit is atomic in Redisson.
+                // We always try to set expiration if we suspect it might be new.
+                if (filter.tryInit(bfConfig.getExpectedElements(), bfConfig.getFalsePositiveRate())) {
                     filter.expire(Duration.ofDays((day - currentDay) + DAYS_TO_KEEP));
                     log.info(LOG_CREATED_FILTER, filterName);
                 }
@@ -79,8 +80,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 if (day == currentDay) {
                     if (ThreadLocalRandom.current().nextInt(RANDOM_LOG_CHANCE) == 0) {
                         var count = filter.count();
-                        if (count > EXPECTED_ELEMENTS * (WARNING_CAPACITY_PERCENTAGE / 100.0)) {
-                            log.warn(LOG_FILTER_CAPACITY, filterName, count * 100 / EXPECTED_ELEMENTS);
+                        if (count > bfConfig.getExpectedElements() * (WARNING_CAPACITY_PERCENTAGE / 100.0)) {
+                            log.warn(LOG_FILTER_CAPACITY, filterName, count * 100 / bfConfig.getExpectedElements());
                         }
                     }
                 }
@@ -124,6 +125,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     }
 
     protected long getCurrentEpochDay() {
-        return System.currentTimeMillis() / MILLIS_PER_DAY;
+        return java.time.Instant.now().atZone(java.time.ZoneOffset.UTC).toLocalDate().toEpochDay();
     }
 }

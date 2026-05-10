@@ -11,6 +11,7 @@ public class ApplicationProperties {
 
     private final Jwt jwt = new Jwt();
     private final OAuth2 oauth2 = new OAuth2();
+    private final BloomFilter bloomFilter = new BloomFilter();
 
     @Getter
     @Setter
@@ -23,5 +24,12 @@ public class ApplicationProperties {
     @Setter
     public static class OAuth2 {
         private String redirectUri;
+    }
+
+    @Getter
+    @Setter
+    public static class BloomFilter {
+        private long expectedElements = 100000L;
+        private double falsePositiveRate = 0.01;
     }
 }
