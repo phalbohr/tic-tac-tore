@@ -39,8 +39,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         try {
             expirationDate = jwtService.extractExpirationDate(token);
         } catch (Exception e) {
-            log.warn("Failed to extract expiration from token during revocation, using default");
-            expirationDate = new Date(System.currentTimeMillis() + properties.getJwt().getExpiration());
+            log.warn("Unparseable token submitted to revoke endpoint — aborting revocation");
+            return;
         }
 
         long remainingTtlMs = expirationDate.getTime() - System.currentTimeMillis();
