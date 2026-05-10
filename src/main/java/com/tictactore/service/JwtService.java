@@ -45,14 +45,6 @@ public class JwtService {
         return parseClaims(token).getSubject();
     }
 
-    public String extractEmail(String token) {
-        return parseClaims(token).get("email", String.class);
-    }
-
-    public String extractName(String token) {
-        return parseClaims(token).get("name", String.class);
-    }
-
     public boolean isTokenValid(String token) {
         try {
             parseClaims(token);
