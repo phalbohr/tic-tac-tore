@@ -51,6 +51,7 @@ class AuthControllerTest {
     @WithMockUser
     void logout_withCsrf_revokesTokenAndClearsCookie() throws Exception {
         String token = "test-token";
+        org.mockito.Mockito.when(jwtService.extractToken(org.mockito.ArgumentMatchers.any())).thenReturn(token);
         
         mockMvc.perform(post("/api/auth/logout")
                 .cookie(new Cookie(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, token))
