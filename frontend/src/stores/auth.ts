@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { getCookie } from '../utils/cookieUtils'
 
 export const useAuthStore = defineStore('auth', () => {
   // Security: XSS Exposure via LocalStorage - Removed token from localStorage.
@@ -15,10 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       // Извлекаем XSRF-TOKEN из куки, чтобы отправить его в заголовке
-      const csrfToken = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1]
+      const csrfToken = getCookie('XSRF-TOKEN')
 
       const headers: HeadersInit = {}
       if (csrfToken) {
