@@ -6,8 +6,8 @@ services:
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
     ports:
-      - '5433:5432' # Хост-порт изменен на 5433 во избежание конфликта
+      - '5433:5432' # Host port changed to 5433 to avoid conflict
   redis:
-    image: 'redis/redis-stack:latest'
+    image: 'redis:7-alpine'
     ports:
       - '6379:6379'

@@ -32,48 +32,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = extractToken(request);
+        String token = jwtService.extractToken(request);
 
         if (token != null && jwtService.isTokenValid(token)) {
-            if (tokenRevocationService.isRevoked(token)) {
-                // Не устанавливаем SecurityContext — запрос уходит дальше как анонимный
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            // Performance: Database Exhaustion in JWT Filter - Rely on JWT claims instead of DB lookup.
-            String userId = jwtService.extractUserId(token);
+            if (!tokenRevocationService.isRevoked(token)) {
+                // Performance: Database Exhaustion in JWT Filter - Rely on JWT claims instead of DB lookup.
+                String userId = jwtService.extractUserId(token);
             // We reconstruct a minimal User object from JWT claims to avoid DB hit.
             // If the application logic needs more user details, it can load them when needed.
             User user = User.builder()
                     .id(UUID.fromString(userId))
                     .build();
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    user, 
-                    null, 
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            );
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
     }
 }

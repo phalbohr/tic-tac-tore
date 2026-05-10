@@ -2,6 +2,7 @@ package com.tictactore.service.impl;
 
 import com.tictactore.config.ApplicationProperties;
 import com.tictactore.service.TokenRevocationService;
+import com.tictactore.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
@@ -10,6 +11,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -25,20 +27,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
     private final RedissonClient redissonClient;
     private final ApplicationProperties properties;
-
-    /**
-     * Gets or initializes a bloom filter for a specific epoch day.
-     */
-    private RBloomFilter<String> getBloomFilterForDay(long epochDay) {
-        String filterName = BLOOM_FILTER_PREFIX + epochDay;
-        RBloomFilter<String> bloomFilter = redissonClient.getBloomFilter(filterName);
-        boolean initialized = bloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
-        if (initialized) {
-            bloomFilter.expire(Duration.ofHours(48));
-            log.info("Created new Bloom Filter: {}", filterName);
-        }
-        return bloomFilter;
-    }
+    private final JwtService jwtService;
 
     @Override
     public void revoke(String token) {
@@ -46,26 +35,42 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             return;
         }
 
-        long expirationMs = properties.getJwt().getExpiration();
-        Duration tokenTtl = Duration.ofMillis(expirationMs);
+        Date expirationDate;
+        try {
+            expirationDate = jwtService.extractExpirationDate(token);
+        } catch (Exception e) {
+            log.warn("Failed to extract expiration from token during revocation, using default");
+            expirationDate = new Date(System.currentTimeMillis() + properties.getJwt().getExpiration());
+        }
 
+        long remainingTtlMs = expirationDate.getTime() - System.currentTimeMillis();
+        if (remainingTtlMs <= 0) {
+            return;
+        }
+
+        Duration tokenTtl = Duration.ofMillis(remainingTtlMs);
         long currentDay = getCurrentEpochDay();
+        long expirationDay = expirationDate.getTime() / 86400000L;
 
         try {
-            // 1. Add to TODAY'S bloom filter
-            RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
-            todayFilter.add(token);
-            
-            long count = todayFilter.count();
-            if (count > EXPECTED_ELEMENTS * 0.8) {
-                log.warn("Bloom Filter {} is at {}% capacity", todayFilter.getName(), count * 100 / EXPECTED_ELEMENTS);
+            for (long day = currentDay; day <= expirationDay; day++) {
+                String filterName = BLOOM_FILTER_PREFIX + day;
+                RBloomFilter<String> filter = redissonClient.getBloomFilter(filterName);
+                boolean initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+                if (initialized) {
+                    log.info("Created new Bloom Filter: {}", filterName);
+                }
+                filter.add(token);
+
+                if (day == currentDay) {
+                    long count = filter.count();
+                    if (count > EXPECTED_ELEMENTS * 0.8) {
+                        log.warn("Bloom Filter {} is at {}% capacity", filterName, count * 100 / EXPECTED_ELEMENTS);
+                    }
+                }
             }
 
-            // 2. Add to TOMORROW'S bloom filter (in case the token's 24h lifespan crosses midnight)
-            RBloomFilter<String> tomorrowFilter = getBloomFilterForDay(currentDay + 1);
-            tomorrowFilter.add(token);
-
-            // 3. Add exact record to Redis as a bucket key
+            // Add exact record to Redis as a bucket key with precise TTL
             RBucket<String> bucket = redissonClient.getBucket(KEY_PREFIX + token);
             bucket.set("revoked", tokenTtl);
 
@@ -85,11 +90,14 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         long currentDay = getCurrentEpochDay();
 
         try {
-            RBloomFilter<String> todayFilter = getBloomFilterForDay(currentDay);
-            RBloomFilter<String> yesterdayFilter = getBloomFilterForDay(currentDay - 1);
+            RBloomFilter<String> todayFilter = redissonClient.getBloomFilter(BLOOM_FILTER_PREFIX + currentDay);
+            RBloomFilter<String> yesterdayFilter = redissonClient.getBloomFilter(BLOOM_FILTER_PREFIX + (currentDay - 1));
 
             // Fast path: Rolling Bloom filter for current day and yesterday
-            if (!todayFilter.contains(token) && !yesterdayFilter.contains(token)) {
+            boolean inToday = todayFilter.isExists() && todayFilter.contains(token);
+            boolean inYesterday = yesterdayFilter.isExists() && yesterdayFilter.contains(token);
+
+            if (!inToday && !inYesterday) {
                 return false; // Definitely not in the denylist
             }
 
