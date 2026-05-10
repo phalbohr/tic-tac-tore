@@ -20,6 +20,7 @@ const authStore = useAuthStore()
     <div v-else class="flex flex-col items-center gap-4">
       <p class="text-gray-700 text-xl">Welcome back! 👋</p>
       <p class="text-gray-500">Your foosball dashboard is coming soon.</p>
+      <button @click="authStore.logout()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Sign Out</button>
     </div>
   </main>
 </template>

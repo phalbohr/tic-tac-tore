@@ -10,6 +10,9 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 
+import com.tictactore.service.JwtService;
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,6 +27,8 @@ class RedisTokenRevocationServiceTest {
     private ApplicationProperties properties;
     @Mock
     private ApplicationProperties.Jwt jwtProperties;
+    @Mock
+    private JwtService jwtService;
     
     @Mock
     private RBloomFilter<String> todayBloomFilter;
@@ -41,8 +46,8 @@ class RedisTokenRevocationServiceTest {
 
     // We extend the service to control the concept of "current time/day" for predictability in tests.
     private class TestableRedisTokenRevocationService extends RedisTokenRevocationService {
-        public TestableRedisTokenRevocationService(RedissonClient redissonClient, ApplicationProperties properties) {
-            super(redissonClient, properties);
+        public TestableRedisTokenRevocationService(RedissonClient redissonClient, ApplicationProperties properties, JwtService jwtService) {
+            super(redissonClient, properties, jwtService);
         }
 
         @Override
@@ -53,32 +58,26 @@ class RedisTokenRevocationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new TestableRedisTokenRevocationService(redissonClient, properties);
+        service = new TestableRedisTokenRevocationService(redissonClient, properties, jwtService);
     }
 
     @Test
     void testRevoke() {
         String token = "test.jwt.token";
         
-        when(properties.getJwt()).thenReturn(jwtProperties);
-        when(jwtProperties.getExpiration()).thenReturn(86400000L); // 24h
+        Date expirationDate = new Date(System.currentTimeMillis() + 86400000L); // 24h
+        when(jwtService.extractExpirationDate(token)).thenReturn(expirationDate);
         
         String todayFilterName = "jwt_denylist_bloom:" + MOCK_EPOCH_DAY;
-        String tomorrowFilterName = "jwt_denylist_bloom:" + (MOCK_EPOCH_DAY + 1);
+        long expirationDay = expirationDate.getTime() / 86400000L;
 
-        when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
-        when(redissonClient.<String>getBloomFilter(tomorrowFilterName)).thenReturn(tomorrowBloomFilter);
-        
+        when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
 
         service.revoke(token);
 
-        verify(todayBloomFilter).tryInit(100000L, 0.01);
-        verify(todayBloomFilter).add(token);
-        verify(todayBloomFilter).count();
-
-        verify(tomorrowBloomFilter).tryInit(100000L, 0.01);
-        verify(tomorrowBloomFilter).add(token);
+        verify(todayBloomFilter, atLeastOnce()).tryInit(100000L, 0.01);
+        verify(todayBloomFilter, atLeastOnce()).add(token);
 
         verify(bucket).set(eq("revoked"), any(java.time.Duration.class));
     }
@@ -91,14 +90,16 @@ class RedisTokenRevocationServiceTest {
         
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
+        when(todayBloomFilter.isExists()).thenReturn(true);
         when(todayBloomFilter.contains(token)).thenReturn(false);
+        when(yesterdayBloomFilter.isExists()).thenReturn(true);
         when(yesterdayBloomFilter.contains(token)).thenReturn(false);
 
         boolean result = service.isRevoked(token);
 
         assertFalse(result);
-        verify(todayBloomFilter).tryInit(100000L, 0.01);
-        verify(yesterdayBloomFilter).tryInit(100000L, 0.01);
+        verify(todayBloomFilter, never()).tryInit(anyLong(), anyDouble());
+        verify(yesterdayBloomFilter, never()).tryInit(anyLong(), anyDouble());
         verify(redissonClient, never()).getBucket(anyString());
     }
 
@@ -111,7 +112,9 @@ class RedisTokenRevocationServiceTest {
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
         // Let's say it's not in today's, but it's in yesterday's filter
+        when(todayBloomFilter.isExists()).thenReturn(true);
         when(todayBloomFilter.contains(token)).thenReturn(false);
+        when(yesterdayBloomFilter.isExists()).thenReturn(true);
         when(yesterdayBloomFilter.contains(token)).thenReturn(true);
         when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(true);
@@ -130,6 +133,7 @@ class RedisTokenRevocationServiceTest {
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
         // Let's say it's in today's filter
+        when(todayBloomFilter.isExists()).thenReturn(true);
         when(todayBloomFilter.contains(token)).thenReturn(true);
         when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(false);

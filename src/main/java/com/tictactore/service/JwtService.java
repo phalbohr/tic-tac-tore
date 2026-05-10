@@ -5,6 +5,9 @@ import com.tictactore.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import com.tictactore.security.CustomOAuth2SuccessHandler;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -45,6 +48,26 @@ public class JwtService {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public Date extractExpirationDate(String token) {
+        return parseClaims(token).getExpiration();
+    }
+
+    public String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     private Claims parseClaims(String token) {
