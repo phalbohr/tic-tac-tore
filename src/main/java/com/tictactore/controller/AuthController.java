@@ -6,6 +6,7 @@ import com.tictactore.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -34,8 +36,7 @@ public class AuthController implements AuthApi {
             try {
                 tokenRevocationService.revoke(token);
             } catch (Exception e) {
-                // Log and continue to clear local cookies even if Redis is down
-                // The frontend should still drop the session
+                log.warn("Failed to revoke token in Redis during logout; session cookies will still be cleared", e);
             }
         }
 

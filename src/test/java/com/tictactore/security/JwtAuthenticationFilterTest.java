@@ -73,7 +73,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Revoked Token - should not authenticate user")
+    @DisplayName("Revoked Token - should not authenticate user and should return 401")
     void doFilterInternal_validToken_isRevoked() throws Exception {
         when(jwtService.extractToken(request)).thenReturn(TOKEN_REVOKED);
         when(jwtService.isTokenValid(TOKEN_REVOKED)).thenReturn(true);
@@ -81,8 +81,9 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(jwtService, never()).extractUserId(anyString());
-        verify(filterChain).doFilter(request, response);
+        verify(jwtService, never()).extractAllClaims(anyString());
+        verify(filterChain, never()).doFilter(request, response);
+        verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
         assert SecurityContextHolder.getContext().getAuthentication() == null;
     }
 

@@ -74,7 +74,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         var tokenTtl = Duration.ofMillis(remainingTtlMs);
         var currentDay = getCurrentEpochDay();
         var expirationDay = expirationDate.getTime() / MILLIS_PER_DAY;
-        var maxDay = Math.min(expirationDay, currentDay + 2); // Cap at 3 days max
+        var maxDay = Math.min(expirationDay, currentDay + DAYS_TO_KEEP); // Cap at DAYS_TO_KEEP days ahead
 
         try {
             var bfConfig = properties.getBloomFilter();
@@ -134,10 +134,12 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             var yesterdayFilter = redissonClient.<String>getBloomFilter(BLOOM_FILTER_PREFIX + (currentDay - 1));
 
             var inToday = false;
+            var bloomError = false;
             try {
                 inToday = todayFilter.isExists() && todayFilter.contains(token);
             } catch (Exception e) {
                 log.debug("Ignored error checking today Bloom filter", e);
+                bloomError = true;
             }
 
             var inYesterday = false;
@@ -145,6 +147,13 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 inYesterday = yesterdayFilter.isExists() && yesterdayFilter.contains(token);
             } catch (Exception e) {
                 log.debug("Ignored error checking yesterday Bloom filter", e);
+                bloomError = true;
+            }
+
+            // Fail-closed: if both Bloom filters failed we cannot trust a negative result
+            if (bloomError && !inToday && !inYesterday) {
+                log.error(LOG_IS_REVOKED_ERROR);
+                return true;
             }
 
             if (!inToday && !inYesterday) {
