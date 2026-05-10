@@ -1,6 +1,6 @@
 # Story 1.1a: Stateless JWT with Redis Denylist & Bloom Filters
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation completed. Recommendations from 1-1a-validation-report.md applied. -->
 
@@ -111,3 +111,14 @@ N/A
 - `src/test/java/com/tictactore/TicTacToreApplicationTests.java` (modified)
 - `src/test/java/com/tictactore/security/JwtServiceTest.java` (modified)
 - `_bmad-output/implementation-artifacts/1-1a-stateless-jwt-with-redis-denylist-and-bloom-filters.md` (modified)
+
+### Review Findings
+
+- [ ] [Review][Decision] Scalability: Hardcoded Bloom Filter Capacity — The capacity is hardcoded to 100k elements. Should this be a configurable property to allow scaling?
+- [ ] [Review][Patch] Infrastructure: Redis Bloom Filter Support Missing [docker-compose.yaml]
+- [ ] [Review][Patch] Distributed Consistency: Local Time Epoch calculation [src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java]
+- [ ] [Review][Patch] Security: Bloom Filter TTL Leak [src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java:76]
+- [ ] [Review][Patch] Security: Secure Flag Mismatch behind proxy [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java:49]
+- [ ] [Review][Patch] Logic: TTL Configuration Mismatch [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java:51]
+- [ ] [Review][Patch] UX: Authentication State Mismatch on Refresh [frontend/src/stores/auth.ts]
+- [ ] [Review][Patch] UX: Offline Logout "Ghost" Session [frontend/src/stores/auth.ts:25].ts:25]

@@ -36,8 +36,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+            HttpServletResponse response,
+            Authentication authentication) throws IOException {
         var token = (OAuth2AuthenticationToken) authentication;
         var attributes = token.getPrincipal().getAttributes();
 
@@ -54,9 +54,9 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         var responseCookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwt)
                 .httpOnly(true)
-                .secure(request.isSecure())
+                .secure(true)
                 .path(COOKIE_PATH)
-                .maxAge(Duration.ofHours(COOKIE_MAX_AGE_HOURS))
+                .maxAge(Duration.ofMillis(properties.getJwt().getExpiration()))
                 .sameSite(COOKIE_SAME_SITE)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
