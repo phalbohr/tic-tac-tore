@@ -37,9 +37,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && jwtService.isTokenValid(token)) {
             if (!tokenRevocationService.isRevoked(token)) {
                 // Performance: Database Exhaustion in JWT Filter - Rely on JWT claims instead of DB lookup.
-                String userId = jwtService.extractUserId(token);
-                String email = jwtService.extractEmail(token);
-                String name = jwtService.extractName(token);
+                io.jsonwebtoken.Claims claims = jwtService.extractAllClaims(token);
+                String userId = claims.getSubject();
+                String email = claims.get("email", String.class);
+                String name = claims.get("name", String.class);
                 // We reconstruct a User object from JWT claims to avoid DB hit.
                 // Providing email and name prevents "hidden" failures where downstream services expect a full Principal.
                 User user = User.builder()
