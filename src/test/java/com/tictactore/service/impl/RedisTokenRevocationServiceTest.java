@@ -2,6 +2,7 @@ package com.tictactore.service.impl;
 
 import com.tictactore.config.ApplicationProperties;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,6 +12,8 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 
 import com.tictactore.service.JwtService;
+
+import java.time.Duration;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +22,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("RedisTokenRevocationService Tests")
 class RedisTokenRevocationServiceTest {
+
+    private static final String TOKEN_TEST = "test.jwt.token";
+    private static final String BLOOM_PREFIX = "jwt_denylist_bloom:";
+    private static final String KEY_PREFIX = "jwt:revoked:";
+    private static final String VALUE_REVOKED = "revoked";
+    private static final String ERR_REDIS = "Redis connection failed";
+    private static final long MOCK_EPOCH_DAY = 20000L;
+    private static final long EXPECTED_ELEMENTS = 100000L;
+    private static final double FALSE_POSITIVE_RATE = 0.01;
+    private static final long ONE_DAY_MS = 86400000L;
 
     @Mock
     private RedissonClient redissonClient;
@@ -42,9 +56,6 @@ class RedisTokenRevocationServiceTest {
 
     private TestableRedisTokenRevocationService service;
 
-    private static final long MOCK_EPOCH_DAY = 20000L;
-
-    // We extend the service to control the concept of "current time/day" for predictability in tests.
     private class TestableRedisTokenRevocationService extends RedisTokenRevocationService {
         public TestableRedisTokenRevocationService(RedissonClient redissonClient, ApplicationProperties properties, JwtService jwtService) {
             super(redissonClient, properties, jwtService);
@@ -62,42 +73,38 @@ class RedisTokenRevocationServiceTest {
     }
 
     @Test
+    @DisplayName("Revoke Token - should add token to bloom filter and redis bucket")
     void testRevoke() {
-        String token = "test.jwt.token";
+        var expirationDate = new Date(System.currentTimeMillis() + ONE_DAY_MS);
+        when(jwtService.extractExpirationDate(TOKEN_TEST)).thenReturn(expirationDate);
         
-        Date expirationDate = new Date(System.currentTimeMillis() + 86400000L); // 24h
-        when(jwtService.extractExpirationDate(token)).thenReturn(expirationDate);
-        
-        String todayFilterName = "jwt_denylist_bloom:" + MOCK_EPOCH_DAY;
-        long expirationDay = expirationDate.getTime() / 86400000L;
-
         when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
-        when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
-        when(todayBloomFilter.tryInit(100000L, 0.01)).thenReturn(true);
+        when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
+        when(todayBloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE)).thenReturn(true);
 
-        service.revoke(token);
+        service.revoke(TOKEN_TEST);
 
-        verify(todayBloomFilter, atLeastOnce()).tryInit(100000L, 0.01);
-        verify(todayBloomFilter, atLeastOnce()).expire(any(java.time.Duration.class));
-        verify(todayBloomFilter, atLeastOnce()).add(token);
+        verify(todayBloomFilter, atLeastOnce()).tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+        verify(todayBloomFilter, atLeastOnce()).expire(any(Duration.class));
+        verify(todayBloomFilter, atLeastOnce()).add(TOKEN_TEST);
 
-        verify(bucket).set(eq("revoked"), any(java.time.Duration.class));
+        verify(bucket).set(eq(VALUE_REVOKED), any(Duration.class));
     }
 
     @Test
+    @DisplayName("Is Revoked - should return false when token not in bloom filter")
     void testIsRevoked_whenNotInBloomFilter() {
-        String token = "test.jwt.token";
-        String todayFilterName = "jwt_denylist_bloom:" + MOCK_EPOCH_DAY;
-        String yesterdayFilterName = "jwt_denylist_bloom:" + (MOCK_EPOCH_DAY - 1);
+        var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
+        var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - 1);
         
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
         when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(token)).thenReturn(false);
+        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
         when(yesterdayBloomFilter.isExists()).thenReturn(true);
-        when(yesterdayBloomFilter.contains(token)).thenReturn(false);
+        when(yesterdayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
 
-        boolean result = service.isRevoked(token);
+        var result = service.isRevoked(TOKEN_TEST);
 
         assertFalse(result);
         verify(todayBloomFilter, never()).tryInit(anyLong(), anyDouble());
@@ -106,53 +113,50 @@ class RedisTokenRevocationServiceTest {
     }
 
     @Test
+    @DisplayName("Is Revoked - should return true when token in bloom filter and redis")
     void testIsRevoked_whenInBloomFilterAndInRedis() {
-        String token = "test.jwt.token";
-        String todayFilterName = "jwt_denylist_bloom:" + MOCK_EPOCH_DAY;
-        String yesterdayFilterName = "jwt_denylist_bloom:" + (MOCK_EPOCH_DAY - 1);
+        var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
+        var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - 1);
 
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
-        // Let's say it's not in today's, but it's in yesterday's filter
         when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(token)).thenReturn(false);
+        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
         when(yesterdayBloomFilter.isExists()).thenReturn(true);
-        when(yesterdayBloomFilter.contains(token)).thenReturn(true);
-        when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
+        when(yesterdayBloomFilter.contains(TOKEN_TEST)).thenReturn(true);
+        when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(true);
 
-        boolean result = service.isRevoked(token);
+        var result = service.isRevoked(TOKEN_TEST);
 
         assertTrue(result);
     }
 
     @Test
+    @DisplayName("Is Revoked - should return false on false positive (in bloom but not redis)")
     void testIsRevoked_whenInBloomFilterButNotInRedis() {
-        String token = "test.jwt.token";
-        String todayFilterName = "jwt_denylist_bloom:" + MOCK_EPOCH_DAY;
-        String yesterdayFilterName = "jwt_denylist_bloom:" + (MOCK_EPOCH_DAY - 1);
+        var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
+        var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - 1);
 
         when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
-        // Let's say it's in today's filter
         when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(token)).thenReturn(true);
-        when(redissonClient.<String>getBucket("jwt:revoked:" + token)).thenReturn(bucket);
+        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(true);
+        when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(false);
 
-        boolean result = service.isRevoked(token);
+        var result = service.isRevoked(TOKEN_TEST);
 
-        assertFalse(result); // False positive scenario
+        assertFalse(result);
     }
 
     @Test
+    @DisplayName("Is Revoked - should fail closed (return true) when Redis is down")
     void testIsRevoked_failClosed_whenRedisDown() {
-        String token = "test.jwt.token";
+        when(redissonClient.<String>getBloomFilter(anyString())).thenThrow(new RuntimeException(ERR_REDIS));
 
-        when(redissonClient.<String>getBloomFilter(anyString())).thenThrow(new RuntimeException("Redis connection failed"));
+        var result = service.isRevoked(TOKEN_TEST);
 
-        boolean result = service.isRevoked(token);
-
-        assertTrue(result); // System fails closed securely
+        assertTrue(result);
     }
 }

@@ -5,7 +5,6 @@ import com.tictactore.service.JwtService;
 import com.tictactore.service.TokenRevocationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String CLAIM_EMAIL = "email";
+    private static final String CLAIM_NAME = "name";
+    private static final String ROLE_USER = "ROLE_USER";
+
     private final JwtService jwtService;
     private final TokenRevocationService tokenRevocationService;
 
@@ -32,27 +35,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = jwtService.extractToken(request);
+        var token = jwtService.extractToken(request);
 
         if (token != null && jwtService.isTokenValid(token)) {
             if (!tokenRevocationService.isRevoked(token)) {
-                // Performance: Database Exhaustion in JWT Filter - Rely on JWT claims instead of DB lookup.
-                io.jsonwebtoken.Claims claims = jwtService.extractAllClaims(token);
-                String userId = claims.getSubject();
-                String email = claims.get("email", String.class);
-                String name = claims.get("name", String.class);
-                // We reconstruct a User object from JWT claims to avoid DB hit.
-                // Providing email and name prevents "hidden" failures where downstream services expect a full Principal.
-                User user = User.builder()
+                var claims = jwtService.extractAllClaims(token);
+                var userId = claims.getSubject();
+                var email = claims.get(CLAIM_EMAIL, String.class);
+                var name = claims.get(CLAIM_NAME, String.class);
+
+                var user = User.builder()
                         .id(UUID.fromString(userId))
                         .email(email)
                         .name(name)
                         .build();
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                var authentication = new UsernamePasswordAuthenticationToken(
                         user,
                         null,
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                        Collections.singletonList(new SimpleGrantedAuthority(ROLE_USER))
                 );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);

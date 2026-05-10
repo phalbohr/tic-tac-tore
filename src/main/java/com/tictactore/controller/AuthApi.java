@@ -11,11 +11,6 @@ import org.springframework.http.ResponseEntity;
 @Tag(name = "Authentication", description = "Authentication and Authorization operations")
 public interface AuthApi {
 
-    /**
-     * Logout user
-     * <p>
-     * Revokes the current JWT token, adds it to the denylist, and clears the authentication cookie.
-     */
     @Operation(summary = "Logout user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully logged out")
