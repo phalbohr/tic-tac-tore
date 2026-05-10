@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -32,8 +31,6 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     private final RedissonClient redissonClient;
     private final ApplicationProperties properties;
     private final JwtService jwtService;
-
-    private final ConcurrentHashMap<String, Boolean> initializedFilters = new ConcurrentHashMap<>();
 
     @Override
     public void revoke(String token) {
@@ -63,15 +60,11 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 String filterName = BLOOM_FILTER_PREFIX + day;
                 RBloomFilter<String> filter = redissonClient.getBloomFilter(filterName);
 
-                long currentIterationDay = day;
-                initializedFilters.computeIfAbsent(filterName, k -> {
-                    boolean initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
-                    if (initialized) {
-                        filter.expire(Duration.ofDays((currentIterationDay - currentDay) + 2));
-                        log.info("Created new Bloom Filter: {}", filterName);
-                    }
-                    return true;
-                });
+                boolean initialized = filter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
+                if (initialized) {
+                    filter.expire(Duration.ofDays((day - currentDay) + 2));
+                    log.info("Created new Bloom Filter: {}", filterName);
+                }
 
                 filter.add(token);
 
