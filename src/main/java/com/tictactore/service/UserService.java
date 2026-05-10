@@ -12,21 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String ERR_EMAIL_COLLISION = "Email already registered with a different identity provider";
+
     private final UserRepository userRepository;
 
     @Transactional
     public User findOrCreate(String email, String name, String providerId) {
-        // Security: Account Takeover via Email Collision - Verify providerId matches existing registration.
         return userRepository.findByEmail(email)
                 .map(user -> {
                     if (user.getProviderId() == null || !user.getProviderId().equals(providerId)) {
-                        throw new BadCredentialsException("Email already registered with a different identity provider");
+                        throw new BadCredentialsException(ERR_EMAIL_COLLISION);
                     }
                     return user;
                 })
                 .orElseGet(() -> {
                     try {
-                        User newUser = new User();
+                        var newUser = new User();
                         newUser.setEmail(email);
                         newUser.setName(name);
                         newUser.setProviderId(providerId);
