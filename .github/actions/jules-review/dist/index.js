@@ -40676,7 +40676,7 @@ Tag each finding EXACTLY one of:
 
 - **[BLOCKING]** — high-confidence correctness/security flaws, data loss risks, broken auth, obvious bugs. Only use if you're >80% sure it's a real problem that will hit in practice.
 - **[WARN]** — meaningful concerns worth addressing but not blocking: missing error handling in a non-critical path, poor choice that will cause pain later.
-- **[NIT]** — small readability or consistency notes. Use sparingly; max 3 per review.
+- **[NIT]** — small readability or consistency notes. Use sparingly.
 
 If uncertain whether something is a real problem, DO NOT flag it.
 
