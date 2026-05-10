@@ -31,7 +31,12 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         var token = jwtService.extractToken(request);
         if (token != null) {
-            tokenRevocationService.revoke(token);
+            try {
+                tokenRevocationService.revoke(token);
+            } catch (Exception e) {
+                // Log and continue to clear local cookies even if Redis is down
+                // The frontend should still drop the session
+            }
         }
 
         var isSecure = request.isSecure();

@@ -114,11 +114,22 @@ N/A
 
 ### Review Findings
 
-- [ ] [Review][Decision] Scalability: Hardcoded Bloom Filter Capacity — The capacity is hardcoded to 100k elements. Should this be a configurable property to allow scaling?
-- [ ] [Review][Patch] Infrastructure: Redis Bloom Filter Support Missing [docker-compose.yaml]
-- [ ] [Review][Patch] Distributed Consistency: Local Time Epoch calculation [src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java]
-- [ ] [Review][Patch] Security: Bloom Filter TTL Leak [src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java:76]
-- [ ] [Review][Patch] Security: Secure Flag Mismatch behind proxy [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java:49]
-- [ ] [Review][Patch] Logic: TTL Configuration Mismatch [src/main/java/com/tictactore/security/CustomOAuth2SuccessHandler.java:51]
-- [ ] [Review][Patch] UX: Authentication State Mismatch on Refresh [frontend/src/stores/auth.ts]
-- [ ] [Review][Patch] UX: Offline Logout "Ghost" Session [frontend/src/stores/auth.ts:25].ts:25]
+**decision-needed (0)**
+
+**deferred (1)**
+
+- [x] [Review][Defer] Consistency: `isRevoked()` checks only today/yesterday Bloom Filters, but `revoke()` writes to all filters until token expiration — tokens revoked >2 days ago will pass as valid if Redis bucket expired. Is a rolling 2-day window acceptable, or must coverage match JWT TTL exactly? [`RedisTokenRevocationService.java`] — deferred, pre-existing
+
+**patch (10)**
+
+- [x] [Review][Patch] Security: `JwtAuthenticationFilter` does not return explicit 401 for revoked tokens — sets no SecurityContext but calls `filterChain.doFilter()`, allowing request to proceed unauthenticated rather than rejecting it [`JwtAuthenticationFilter.java`]
+- [x] [Review][Patch] Config: `spring.docker.compose.enabled: true` in production `application.yml` — Spring Boot will try to start docker-compose in any environment; should be scoped to a dev profile [`application.yml`]
+- [x] [Review][Patch] Security: `secure(request.isSecure())` fails behind a reverse proxy (always `false`) — use `X-Forwarded-Proto` header or set `server.forward-headers-strategy=native` [`CustomOAuth2SuccessHandler.java:49`]
+- [x] [Review][Patch] Logic: Cookie `maxAge` uses `Duration.ofMillis(properties.getJwt().getExpiration())` — if `expiration` is already in seconds this sets a millisecond-level max-age, expiring instantly [`CustomOAuth2SuccessHandler.java:51`]
+- [x] [Review][Patch] Frontend/Backend: Cookie name mismatch — frontend reads `TTT_SESSION` as `AUTH_COOKIE_NAME` but backend's `AUTH_COOKIE_NAME` is `TTT_TOKEN`; initial auth state detection may always be `false` [`auth.ts:4`]
+- [x] [Review][Patch] Race condition: `isRevoked()` calls `isExists()` then `contains()` on Bloom Filter — filter may be deleted between calls at midnight rotation, triggering fail-closed (false 401) [`RedisTokenRevocationService.java:isRevoked`]
+- [x] [Review][Patch] Performance: `revoke()` loop over days has no cap — a 30-day JWT creates 30 Redis round-trips synchronously per logout; add a max-days guard [`RedisTokenRevocationService.java:revoke`]
+- [x] [Review][Patch] Reliability: `AuthController.logout()` does not catch `RuntimeException` from `tokenRevocationService.revoke()` — Redis unavailability returns HTTP 500 instead of graceful 200 [`AuthController.java`]
+- [x] [Review][Patch] Infrastructure: `redis/redis-stack-server:latest` in docker-compose — pin to a specific version for reproducible builds [`docker-compose.yaml`]
+- [x] [Review][Patch] Code style: `RedisTokenRevocationServiceTest` — `@BeforeEach` block and first `@Test` method lack indentation inside the class body, violating code style and risking future parsing issues [`RedisTokenRevocationServiceTest.java:54-79`]
+- [x] [Review][Decision] Scalability: Bloom Filter capacity made configurable via `application.yml` (`app.bloom-filter.expected-elements`)

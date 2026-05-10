@@ -1,7 +1,4 @@
 spring:
-  docker:
-    compose:
-      enabled: true
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driverClassName: org.h2.Driver
@@ -33,3 +30,8 @@ application:
       expiration: 86400000 # 1 day
     oauth2:
       redirect-uri: ${TTT_OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
+    bloom-filter:
+      expected-elements: ${TTT_BLOOM_FILTER_EXPECTED_ELEMENTS:100000}
+
+server:
+  forward-headers-strategy: native
