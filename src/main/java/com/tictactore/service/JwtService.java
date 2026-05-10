@@ -37,6 +37,10 @@ public class JwtService {
                 .compact();
     }
 
+    public Claims extractAllClaims(String token) {
+        return parseClaims(token);
+    }
+
     public String extractUserId(String token) {
         return parseClaims(token).getSubject();
     }

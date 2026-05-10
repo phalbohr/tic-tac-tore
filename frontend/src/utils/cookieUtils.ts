@@ -1,6 +1,9 @@
 export function getCookie(name: string): string | undefined {
-  return document.cookie
+  const row = document.cookie
     .split('; ')
     .find((row) => row.startsWith(`${name}=`))
-    ?.split('=')[1]
+
+  if (!row) return undefined
+
+  return row.substring(row.indexOf('=') + 1)
 }
