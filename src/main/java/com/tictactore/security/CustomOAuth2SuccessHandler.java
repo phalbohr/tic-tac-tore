@@ -1,7 +1,6 @@
 package com.tictactore.security;
 
 import com.tictactore.config.ApplicationProperties;
-import com.tictactore.model.User;
 import com.tictactore.service.JwtService;
 import com.tictactore.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,13 +16,20 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     public static final String AUTH_COOKIE_NAME = "TTT_TOKEN";
+    public static final String SESSION_COOKIE_NAME = "TTT_SESSION";
+    private static final String SESSION_COOKIE_VALUE = "true";
+    private static final String ATTR_EMAIL = "email";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_SUB = "sub";
+    private static final String ERROR_MISSING_ATTRIBUTES = "Required attributes missing from OAuth2 provider";
+    private static final String COOKIE_PATH = "/";
+    private static final String COOKIE_SAME_SITE = "Lax";
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -33,29 +39,40 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-        Map<String, Object> attributes = token.getPrincipal().getAttributes();
+        var token = (OAuth2AuthenticationToken) authentication;
+        var attributes = token.getPrincipal().getAttributes();
 
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
-        String providerId = (String) attributes.get("sub");
+        var email = (String) attributes.get(ATTR_EMAIL);
+        var name = (String) attributes.get(ATTR_NAME);
+        var providerId = (String) attributes.get(ATTR_SUB);
 
         if (email == null || providerId == null) {
-            throw new OAuth2AuthenticationException("Required attributes missing from OAuth2 provider");
+            throw new OAuth2AuthenticationException(ERROR_MISSING_ATTRIBUTES);
         }
 
-        User user = userService.findOrCreate(email, name, providerId);
-        String jwt = jwtService.generateToken(user);
+        var user = userService.findOrCreate(email, name, providerId);
+        var jwt = jwtService.generateToken(user);
+        var isSecure = request.isSecure();
+        var maxAge = Duration.ofMillis(properties.getJwt().getExpiration());
 
-        // Security: JWT Leaked in URL - Use HttpOnly cookies instead of URL parameters.
-        ResponseCookie responseCookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwt)
+        var authCookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwt)
                 .httpOnly(true)
-                .secure(request.isSecure())
-                .path("/")
-                .maxAge(Duration.ofHours(24))
-                .sameSite("Lax")
+                .secure(isSecure)
+                .path(COOKIE_PATH)
+                .maxAge(maxAge)
+                .sameSite(COOKIE_SAME_SITE)
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+        var sessionCookie = ResponseCookie.from(SESSION_COOKIE_NAME, SESSION_COOKIE_VALUE)
+                .httpOnly(false)
+                .secure(isSecure)
+                .path(COOKIE_PATH)
+                .maxAge(maxAge)
+                .sameSite(COOKIE_SAME_SITE)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
 
         getRedirectStrategy().sendRedirect(request, response, properties.getOauth2().getRedirectUri());
     }
