@@ -126,4 +126,16 @@ describe('statisticsService', () => {
 
     await expect(getLeaderboard({})).rejects.toThrow('Invalid parameters')
   })
+
+  it('handles fetch failure with invalid JSON body', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => {
+        throw new Error('Invalid JSON')
+      }
+    } as unknown as Response)
+
+    await expect(getLeaderboard({})).rejects.toThrow('API error: 400')
+  })
 })
