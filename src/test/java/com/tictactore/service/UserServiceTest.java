@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import java.util.Optional;
@@ -85,5 +86,27 @@ class UserServiceTest {
                 .hasMessageContaining(ERR_PROVIDER_MISMATCH);
         
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Race Condition - should recover via secondary lookup when save throws DataIntegrityViolationException")
+    void findOrCreate_retriesFind_whenSaveThrowsDataIntegrityViolation() {
+        var existing = User.builder()
+                .email(EMAIL_NEW)
+                .name(NAME_NEW)
+                .providerId(SUB_NEW)
+                .build();
+
+        when(userRepository.findByEmail(EMAIL_NEW))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(existing));
+        when(userRepository.save(any(User.class)))
+                .thenThrow(new DataIntegrityViolationException("Duplicate key"));
+
+        var result = userService.findOrCreate(EMAIL_NEW, NAME_NEW, SUB_NEW);
+
+        assertThat(result).isSameAs(existing);
+        verify(userRepository, times(2)).findByEmail(EMAIL_NEW);
+        verify(userRepository).save(any(User.class));
     }
 }
