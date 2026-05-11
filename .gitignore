@@ -34,3 +34,4 @@ build/
 
 ### Graphify ###
 graphify-out/
+.env
