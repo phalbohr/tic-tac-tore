@@ -1,17 +1,17 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
+    url: ${TTT_DB_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1}
+    driverClassName: ${TTT_DB_DRIVER:org.h2.Driver}
+    username: ${TTT_DB_USERNAME:sa}
+    password: ${TTT_DB_PASSWORD:password}
   h2:
     console:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: ${TTT_JPA_DIALECT:org.hibernate.dialect.H2Dialect}
   security:
     oauth2:
       client:

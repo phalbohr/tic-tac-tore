@@ -34,3 +34,7 @@ build/
 
 ### Graphify ###
 graphify-out/
+
+# Environment variables
+.env
+.env.local

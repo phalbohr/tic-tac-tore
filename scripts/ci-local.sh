@@ -5,7 +5,7 @@
 echo "🚀 Simulating CI environment locally..."
 
 echo "📦 Backend: Compiling and running tests..."
-mvn clean verify || { echo "❌ Backend failed"; exit 1; }
+./mvnw clean verify || { echo "❌ Backend failed"; exit 1; }
 
 echo "📦 Frontend: Installing dependencies..."
 cd frontend
