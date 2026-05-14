@@ -1,18 +1,25 @@
-# OpenAPI Rules
+# Code Documentation Guide
 
-Keep controllers clean. Routing, validation, and delegation to Service only. NO business logic.
+## Table of Contents
+
+1. [Interface-Driven Documentation (Hybrid Split)](#1-interface-driven-documentation-hybrid-split)
+2. [Global Errors](#2-global-errors)
+3. [@ParameterObject](#3-parameterobject)
+4. [JSR-303 Validation](#4-jsr-303-validation)
+5. [OpenAPI Documentation Constants](#5-openapi-documentation-constants)
+6. [External YAML ($ref)](#6-external-yaml-ref)
+7. [Generic Response Schemas (e.g. PageResponse<T>)](#7-generic-response-schemas-eg-pageresponset)
 
 ## 1. Interface-Driven Documentation (Hybrid Split)
 
-**Rule:** No `@Operation`, `@Tag` or `@ApiResponses` in controllers.
-Put them in an API interface (e.g., `MassStockApi`). The Controller implements this interface. 
-Use `therapi-runtime-javadoc` to automatically pull descriptions from JavaDoc, reducing annotation noise.
+Keep controllers clean. Use Hybrid Split Interface-Driven Documentation:
 
-**Critical Exception (Routing):**
-All Spring MVC routing and security annotations **MUST** remain in the Controller class. This ensures reliable request mapping and compatibility with `@WebMvcTest`/`MockMvc`.
+Extract all OpenAPI annotations to an `XxxxApi` interface. Controller implements the interface. Use `therapi-runtime-javadoc` to pull descriptions from JavaDoc — minimizes annotation noise.
 
-- Keep in **Controller**: `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping`, `@RequestParam`, `@RequestBody`, `@PathVariable`, `@Valid`, `@PreAuthorize`.
-- Keep in **Interface**: `@Operation`, `@ApiResponses`, `@ApiResponse`, `@Parameter`, `@Tag`.
+- **Interface:** `@Operation`, `@ApiResponses`, `@ApiResponse`, `@Parameter`, `@Tag`.
+- **Controller:** `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping`, `@RequestParam`, `@RequestBody`, `@PathVariable`, `@Valid`, `@PreAuthorize`.
+
+**CRITICAL — Routing:** ALL Spring MVC routing and security annotations MUST remain in the Controller. Required for reliable request mapping and `@WebMvcTest`/`MockMvc` compatibility.
 
 ## 2. Global Errors
 
