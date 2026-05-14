@@ -1,0 +1,6 @@
+# Development profile: activated with --spring.profiles.active=dev
+# Enables spring-boot-docker-compose automatic infrastructure management.
+spring:
+  docker:
+    compose:
+      enabled: true

@@ -55,21 +55,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine Node version
-        id: node-version
-        run: |
-          if [ -f frontend/.nvmrc ]; then
-            echo "value=$(cat frontend/.nvmrc)" >> "$GITHUB_OUTPUT"
-            echo "Using Node from .nvmrc"
-          else
-            echo "value=24.6.0" >> "$GITHUB_OUTPUT"
-            echo "Using default Node 24.6.0"
-          fi
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ steps.node-version.outputs.value }}
+          node-version-file: 'frontend/.nvmrc'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -81,62 +70,99 @@ jobs:
         working-directory: frontend
         run: npm run type-check
 
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
       - name: Run Unit Tests
         working-directory: frontend
         run: npm run test:unit -- --run
 
-  # E2E Stage: Disabled until Epic 1 implementation begins
-  # frontend-e2e:
-  #   name: E2E Tests
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 20
-  #   needs: [backend, frontend-unit]
-  #
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '24.6.0'
-  #         cache: 'npm'
-  #         cache-dependency-path: frontend/package-lock.json
-  #
-  #     - name: Cache Playwright browsers
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.cache/ms-playwright
-  #         key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-playwright-
-  #
-  #     - name: Install dependencies
-  #       working-directory: frontend
-  #       run: npm ci
-  #
-  #     - name: Build Frontend
-  #       working-directory: frontend
-  #       run: npm run build
-  #
-  #     - name: Install Playwright browsers
-  #       working-directory: frontend
-  #       run: npx playwright install --with-deps
-  #
-  #     - name: Run E2E tests
-  #       working-directory: frontend
-  #       run: npm run test:e2e
-  #
-  #     - name: Upload test results
-  #       if: failure()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: e2e-results
-  #         path: |
-  #           frontend/test-results/
-  #           frontend/playwright-report/
-  #         retention-days: 30
-  #
-  # # Burn-in stage - Disabled until Epic 1 implementation begins
+  # E2E Stage: Enabled in Story 1.1b
+  frontend-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [backend, frontend-unit]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: tictactore
+          POSTGRES_PASSWORD: secret
+          POSTGRES_USER: myuser
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis/redis-stack-server:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Backend
+        run: ./mvnw clean package -DskipTests
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'frontend/.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: frontend
+        run: npm run test:e2e
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 30
+
+  # Burn-in stage - Disabled until Epic 1 implementation begins
   # burn-in:
   #   name: Burn-In (Flaky Detection)
   #   runs-on: ubuntu-latest

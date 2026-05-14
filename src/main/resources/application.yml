@@ -1,12 +1,17 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
+    url: ${TTT_DB_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1}
+    driverClassName: ${TTT_DB_DRIVER:org.h2.Driver}
+    username: ${TTT_DB_USERNAME}
+    password: ${TTT_DB_PASSWORD}
   h2:
     console:
       enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: ${TTT_JPA_DIALECT:org.hibernate.dialect.H2Dialect}
   security:
     oauth2:
       client:
@@ -25,3 +30,9 @@ application:
       expiration: 86400000 # 1 day
     oauth2:
       redirect-uri: ${TTT_OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
+    bloom-filter:
+      expected-elements: ${TTT_BLOOM_FILTER_EXPECTED_ELEMENTS:100000}
+      false-positive-rate: ${TTT_BLOOM_FILTER_FALSE_POSITIVE_RATE:0.01}
+
+server:
+  forward-headers-strategy: native
