@@ -11,13 +11,13 @@ export const test = base.extend<{
   matchFactory: MatchFactory;
   interceptNetworkCall: typeof interceptNetworkCall;
 }>({
-  playerFactory: async ({}, use) => {
+  playerFactory: async ({ page: _page }, use) => {
     await use(new PlayerFactory());
   },
-  matchFactory: async ({}, use) => {
+  matchFactory: async ({ page: _page }, use) => {
     await use(new MatchFactory());
   },
-  interceptNetworkCall: async ({}, use) => {
+  interceptNetworkCall: async ({ page: _page }, use) => {
     await use(interceptNetworkCall);
   },
 });

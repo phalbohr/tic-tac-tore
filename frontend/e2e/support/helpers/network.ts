@@ -1,4 +1,4 @@
-import type { Page, Request, Route } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 
 interface InterceptOptions {
   page: Page;
@@ -8,7 +8,7 @@ interface InterceptOptions {
     status?: number;
     contentType?: string;
     body?: string | Buffer;
-    json?: any;
+    json?: unknown;
     headers?: Record<string, string>;
   };
 }
@@ -20,8 +20,8 @@ interface InterceptOptions {
 export async function interceptNetworkCall(options: InterceptOptions) {
   const { page, url, method, fulfill } = options;
 
-  let requestBody: any = null;
-  let responseJson: any = null;
+  let requestBody: unknown = null;
+  let responseJson: unknown = null;
   let status: number = 0;
 
   // Setup route BEFORE waiting for response

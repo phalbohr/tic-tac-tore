@@ -45,6 +45,53 @@ describe('statisticsService', () => {
     expect(result).toEqual(mockH2H)
   })
 
+  it('handles fallback for non-paged H2H stats response', async () => {
+    const mockH2HArray = [
+      {
+        opponentId: 'opp-1',
+        opponentName: 'Rival 1',
+        matches: 5,
+        wins: 3,
+        losses: 2,
+        winRate: 60.0
+      },
+      {
+        opponentId: 'opp-2',
+        opponentName: 'Rival 2',
+        matches: 10,
+        wins: 5,
+        losses: 5,
+        winRate: 50.0
+      }
+    ]
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockH2HArray
+    } as Response)
+
+    const result = await getH2HStats({
+      period: 'ALL_TIME',
+      token: 'test-token'
+    })
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/statistics/h2h?period=ALL_TIME'),
+      expect.objectContaining({
+        headers: {
+          'Authorization': 'Bearer test-token'
+        }
+      })
+    )
+    expect(result).toEqual({
+      content: mockH2HArray,
+      totalPages: 1,
+      totalElements: 2,
+      size: 2,
+      number: 0
+    })
+  })
+
   it('fetches personal stats correctly', async () => {
     const mockStats: PlayerStats = {
       playerId: 'user-uuid',
@@ -125,5 +172,17 @@ describe('statisticsService', () => {
     } as Response)
 
     await expect(getLeaderboard({})).rejects.toThrow('Invalid parameters')
+  })
+
+  it('handles fetch failure with invalid JSON body', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => {
+        throw new Error('Invalid JSON')
+      }
+    } as unknown as Response)
+
+    await expect(getLeaderboard({})).rejects.toThrow('API error: 400')
   })
 })

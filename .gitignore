@@ -35,6 +35,6 @@ build/
 ### Graphify ###
 graphify-out/
 
-### Secrets ###
+# Environment variables
 .env
 .env.local

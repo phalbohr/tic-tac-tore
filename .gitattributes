@@ -1,2 +1,6 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Vendored GitHub Action dist — treat as generated, exclude from diffs
+.github/actions/jules-review/dist/** linguist-generated=true
+.github/actions/jules-review/dist/** -diff
