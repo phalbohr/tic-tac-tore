@@ -1,366 +1,340 @@
 # Story 1.2: Localization and Translation Architecture
 
-**Status:** Ready for Dev
-**Epic:** 1 — Quick Start (Auth & Basic Profile)
-**Story Key:** 1-2-localization-and-translation-architecture
+Status: ready-for-dev
+
+<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
 ## Story
 
-As a user, I want the app to be localized, so that I can use it in my language.
+As a user,
+I want the application to support my preferred language (English or German),
+so that I can interact with the app comfortably without language barriers.
 
 ## Acceptance Criteria
 
-1. **Given** the application is deployed
-   **When** the active locale is switched programmatically (e.g., from `'en'` to `'de'`)
-   **Then** all UI strings bound via `$t()` / `t()` update immediately — no page reload required (FR59)
+1. **AC1 (FR59 — live switch):** Given the application is running, When `useLocaleStore().setLocale('de')` is called programmatically, Then all `t()` translation keys in the UI update reactively — no page reload, no build step required.
 
-2. **Given** any Vue component uses `$t('key')` or `const { t } = useI18n()` / `t('key')`
-   **When** the locale is `'en'` or `'de'`
-   **Then** the correct translated string is returned for the active locale
+2. **AC2 (FR59 — extensibility):** Given a developer adds `src/locales/xx.json` and registers it in the i18n plugin messages map, Then no Vue component code changes are required to render the new language.
 
-3. **Given** a user had previously selected German
-   **When** the browser tab is closed and reopened
-   **Then** the German locale is restored from `localStorage`
+3. **AC3 (persistence):** Given a user has previously selected German, When they close and reopen the browser, Then the app restores German from `localStorage` key `ttt_locale`.
 
-4. **Given** the i18n plugin is installed and configured
-   **When** a developer creates a new `frontend/src/locales/xx.json` file and registers it in `i18n.ts`
-   **Then** no other code changes are required to support the new language (FR59)
+4. **AC4 (auto-detection):** Given no `ttt_locale` key exists in `localStorage`, When the app loads, Then the locale defaults to the browser's primary language if it is `en` or `de`; otherwise it falls back to `en`.
 
-5. **Given** the i18n architecture is in place
-   **When** all existing UI components are reviewed
-   **Then** no user-facing hardcoded strings remain — all use translation keys
+5. **AC5 (string externalization):** Given all currently-existing Vue components, When this story is complete, Then every user-facing string uses `t()` and has a matching key in both `en.json` and `de.json` — no hardcoded UI text remains.
+
+6. **AC6 (date/number formatting):** Given a date or number is rendered in a component, When displayed in English, Then it uses `MM/DD/YYYY` and `.` as decimal separator; in German it uses `DD.MM.YYYY` and `,` as decimal separator — implemented via vue-i18n `d()` and `n()`.
+
+7. **AC7 (RTL-neutral CSS):** Given the NFR that CSS must not preclude future RTL support, When new CSS is written in this story, Then it uses Tailwind v4 logical utilities (`ms-*`, `me-*`, `ps-*`, `pe-*`) or logical CSS properties — never physical `margin-left`/`padding-right`.
 
 ## Tasks / Subtasks
 
-- [ ] **Install vue-i18n**
-  - [ ] In `frontend/`, run: `npm install vue-i18n@9`
-  - [ ] Verify installed version is `9.x` via `npm list vue-i18n`
+- [ ] Task 1: Install dependencies (AC: #1, #2, #6)
+  - [ ] 1.1 In `frontend/`: run `npm install vue-i18n@10`
+  - [ ] 1.2 In `frontend/`: run `npm install -D @intlify/unplugin-vue-i18n`
+  - [ ] 1.3 Add `@intlify/unplugin-vue-i18n` Vite plugin to `frontend/vite.config.ts` (see Dev Notes for exact config)
 
-- [ ] **Create translation files**
-  - [ ] Create `frontend/src/locales/en.json` — seed with all existing UI strings (see inventory table in Dev Notes)
-  - [ ] Create `frontend/src/locales/de.json` — German translations for every key in `en.json`
+- [ ] Task 2: Create locale files (AC: #1, #2, #5)
+  - [ ] 2.1 Create `frontend/src/locales/en.json` — English strings (audit ALL components/views first)
+  - [ ] 2.2 Create `frontend/src/locales/de.json` — German strings (keys must be 1:1 with en.json)
+  - [ ] 2.3 Follow dot-notation namespace convention: `nav.*`, `common.*`, `match.*`, `auth.*`, `error.*`, `leaderboard.*`
 
-- [ ] **Create i18n plugin**
-  - [ ] Create `frontend/src/plugins/i18n.ts` — `createI18n()` with `legacy: false`, locale restored from `localStorage`, `fallbackLocale: 'en'`
+- [ ] Task 3: Create i18n plugin (AC: #1, #2, #4, #6)
+  - [ ] 3.1 Create `frontend/src/plugins/i18n.ts`
+  - [ ] 3.2 Use `legacy: false` (Composition API mode — mandatory for Vue 3)
+  - [ ] 3.3 Implement `detectLocale()`: check `localStorage` → browser language → fallback `en`
+  - [ ] 3.4 Register `datetimeFormats` and `numberFormats` for `en` and `de` (see Dev Notes)
+  - [ ] 3.5 Export the `i18n` instance (needed by `locale.ts` store to set `i18n.global.locale.value`)
 
-- [ ] **Register plugin in app entry point**
-  - [ ] Update `frontend/src/main.ts` — add `app.use(i18n)` (preserve existing Pinia + Router registrations)
+- [ ] Task 4: Create Pinia locale store (AC: #3, #4)
+  - [ ] 4.1 Create `frontend/src/stores/locale.ts` using `defineStore` Setup syntax (same pattern as `stores/auth.ts`)
+  - [ ] 4.2 Expose reactive `locale` ref and `setLocale(locale: SupportedLocale)` action
+  - [ ] 4.3 `setLocale` must write to `localStorage` AND update `i18n.global.locale.value` atomically
 
-- [ ] **Externalize all hardcoded strings in existing components**
-  - [ ] Update `frontend/src/views/HomeView.vue` — replace the 6 module-level `const` string declarations with `useI18n()` + `t()` calls inside `<script setup>`
-  - [ ] Update `frontend/src/components/GoogleOAuthButton.vue` — replace `'Sign in with Google'` button text and `alert()` message with `$t()`
-  - [ ] Update `frontend/src/components/OAuthRedirectHandler.vue` — replace `'Completing secure sign-in…'` with `$t()`
+- [ ] Task 5: Register plugin in app entry (AC: #1)
+  - [ ] 5.1 Update `frontend/src/main.ts`: add `app.use(i18n)` — order: pinia → i18n → router → mount
 
-- [ ] **Create locale management composable**
-  - [ ] Create `frontend/src/composables/useLocale.ts` — exposes `locale`, `setLocale(lang)` (persists to `localStorage`), `supportedLocales`
+- [ ] Task 6: Migrate hardcoded strings in existing components (AC: #5)
+  <!-- IMPORTANT: As of Story 1.2, these are the ONLY Vue files that exist in frontend/src.
+       Future components (MatchRecordingForm, Leaderboard, etc.) will be i18n-ready from creation. -->
+  - [ ] 6.1 Migrate `src/views/HomeHub.vue` — 6 hardcoded constants: TITLE ("Tic-Tac-Tore"), SUBTITLE ("Foosball statistics platform"), SIGN_IN_MESSAGE ("Sign in to track your matches"), WELCOME_MESSAGE ("Welcome back! 👋"), COMING_SOON_MESSAGE ("Your foosball dashboard is coming soon."), SIGN_OUT_LABEL ("Sign Out") → keys: `home.title`, `home.subtitle`, `home.signInMessage`, `home.welcomeBack`, `home.comingSoon`, `auth.signOut`
+  - [ ] 6.2 Migrate `src/components/GoogleOAuthButton.vue` — template string "Sign in with Google" → `auth.signInWithGoogle`; the `alert('Login redirect failed...')` call CANNOT use `t()` (called outside component setup) — replace with a reactive `errorMessage` ref bound to `t('auth.redirectFailed')` displayed in the template
+  - [ ] 6.3 Migrate `src/components/OAuthRedirectHandler.vue` — "Completing secure sign-in…" → `auth.completingSignIn`
+  - [ ] 6.4 `src/App.vue` — no user-facing strings, skip
+  - [ ] 6.5 Verify every translation key exists in BOTH `en.json` and `de.json`
 
-- [ ] **Update existing component tests to mount with i18n** ← CRITICAL, see Dev Notes
-  - [ ] Update `GoogleOAuthButton` tests — provide i18n plugin via `global.plugins` when mounting
-  - [ ] Update `OAuthRedirectHandler` tests — same fix
-
-- [ ] **Write unit tests for i18n composable**
-  - [ ] Create `frontend/src/composables/__tests__/useLocale.test.ts`
-    - [ ] Test: `setLocale('de')` sets `locale.value === 'de'` and persists `'de'` to `localStorage`
-    - [ ] Test: locale is initialized from `localStorage` when a prior value exists
-    - [ ] Test: `t('home.title')` returns `'Tic-Tac-Tore'` in `'en'` locale
-    - [ ] Test: `t('home.title')` returns the German equivalent in `'de'` locale
-
-- [ ] **Run `./scripts/ci-local.sh` and confirm all checks pass**
+- [ ] Task 7: Write unit tests (AC: #1, #3, #4)
+  - [ ] 7.1 Test: `detectLocale()` returns `'de'` when `navigator.language = 'de-AT'`
+  - [ ] 7.2 Test: `detectLocale()` returns `'en'` for unsupported locale (e.g., `'fr'`)
+  - [ ] 7.3 Test: `detectLocale()` returns stored value from `localStorage` when present
+  - [ ] 7.4 Test: `useLocaleStore().setLocale('de')` persists `'de'` to `localStorage`
+  - [ ] 7.5 Test: `useLocaleStore().setLocale('de')` updates `i18n.global.locale.value` to `'de'`
+  - [ ] 7.6 Test (required for AC5): all keys in `en.json` have corresponding keys in `de.json` — no missing translations in either direction
+  - [ ] 7.7 Test: `detectLocale()` returns `'en'` when `localStorage.getItem` throws (fail-closed pattern — SSR / restricted browser context)
 
 ## Dev Notes
 
-### Technical Stack
+### Architecture Guardrails — Read Before Writing Any Code
 
-| Layer | Technology |
-|-------|-----------|
-| i18n library | `vue-i18n@9` — Vue 3 compatible (NOT v8 — that is Vue 2 only) |
-| Translation format | JSON files, one per locale |
-| Supported locales | `en` (primary), `de` (secondary) |
-| Locale persistence | `localStorage` key: `app_locale` |
-| Unit testing | Vitest + `@vue/test-utils` (already configured) |
+**i18n is frontend-only in this story.**
+Per `_project-spec/rules/1-write.md` §13: "Frontend = UI, formatting (dates/i18n), presentation." Spring Boot `MessageSource` is NOT needed here. Backend push notification localization is deferred to Story 3.1 (Confirmation Requests & Push Notifications).
 
-### CRITICAL: vue-i18n Version
+**vue-i18n MUST use `legacy: false`.**
+`legacy: true` enables Options API (`this.$t()`), which conflicts with Vue 3 Composition API patterns used throughout this codebase. Always `legacy: false`.
 
-```bash
-npm install vue-i18n@9
+**Actual runtime versions (from `package.json` — architecture doc had aspirational numbers):**
+- Vue: 3.5.27
+- TypeScript: ~5.9.3
+- Vite: ^7.3.1 (NOT Vite 8 as architecture doc states)
+- Pinia: ^3.0.4
+
+### Implementation Reference
+
+**`frontend/vite.config.ts` update — add imports and update plugins array:**
+```typescript
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import { resolve } from 'node:path'
+
+// plugins array — ORDER MATTERS: VueI18nPlugin must come after vue()
+plugins: [
+  vue(),
+  VueI18nPlugin({
+    include: resolve(__dirname, './src/locales/**'),
+  }),
+  vueDevTools(),
+  tailwindcss(),
+],
 ```
+This pre-compiles `.json` locale files at build time — eliminates runtime JIT compilation, reduces bundle size. `VueI18nPlugin` after `vue()` is required; placing it before causes build errors.
 
-vue-i18n has two major lines:
-- `vue-i18n@8.x` → Vue 2 ONLY — will break at runtime with Vue 3
-- `vue-i18n@9.x` → Vue 3 (this project uses Vue `^3.5.27`)
-
-After install, verify: `npm list vue-i18n` must show `9.x.x`.
-vue-i18n is NOT in `package.json` — it must be installed fresh.
-
-### New Directory/File Structure
-
-The `plugins/` and `composables/` directories do not yet exist in `frontend/src/` — create them.
-
-```
-frontend/src/
-├── locales/                         # NEW directory
-│   ├── en.json                      # NEW — English translations
-│   └── de.json                      # NEW — German translations
-├── plugins/                         # NEW directory
-│   └── i18n.ts                      # NEW — createI18n() setup
-└── composables/                     # NEW directory
-    └── useLocale.ts                 # NEW — locale management composable
-```
-
-> **Note on architecture spec vs. existing code:** The architecture document describes a `features/` + `core/` directory structure, but the existing codebase (established by stories 1.1–1.1b) uses a flat structure: `components/`, `views/`, `stores/`, `utils/`, `services/`. Follow the **existing** flat structure. Place new directories at `frontend/src/` root level.
-
-### Files to Update
-
-```
-frontend/src/main.ts                              # ADD app.use(i18n)
-frontend/src/views/HomeView.vue                   # REPLACE 6 hardcoded constants
-frontend/src/components/GoogleOAuthButton.vue     # REPLACE button text + alert text
-frontend/src/components/OAuthRedirectHandler.vue  # REPLACE loading text
-```
-
-### Implementation: `frontend/src/plugins/i18n.ts`
-
+**`frontend/src/plugins/i18n.ts`:**
 ```typescript
 import { createI18n } from 'vue-i18n'
-import en from '../locales/en.json'
-import de from '../locales/de.json'
+import en from '@/locales/en.json'
+import de from '@/locales/de.json'
 
-const LOCALE_STORAGE_KEY = 'app_locale'
-type SupportedLocale = 'en' | 'de'
+export type SupportedLocale = 'en' | 'de'
+export const SUPPORTED_LOCALES: SupportedLocale[] = ['en', 'de']
+const LOCALE_KEY = 'ttt_locale'
 
-const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as SupportedLocale | null
+function detectLocale(): SupportedLocale {
+  try {
+    const stored = localStorage.getItem(LOCALE_KEY) as SupportedLocale | null
+    if (stored && SUPPORTED_LOCALES.includes(stored)) return stored
+    const browser = navigator.language.split('-')[0] as SupportedLocale
+    return SUPPORTED_LOCALES.includes(browser) ? browser : 'en'
+  } catch {
+    return 'en'
+  }
+}
 
 export const i18n = createI18n({
-  legacy: false,        // REQUIRED: enables Composition API mode (useI18n() composable)
-  locale: savedLocale ?? 'en',
+  legacy: false,
+  locale: detectLocale(),
   fallbackLocale: 'en',
   messages: { en, de },
+  datetimeFormats: {
+    en: {
+      short: { year: 'numeric', month: '2-digit', day: '2-digit' },     // 12/31/2025
+      long:  { year: 'numeric', month: 'long',    day: 'numeric' },      // December 31, 2025
+    },
+    de: {
+      short: { year: 'numeric', month: '2-digit', day: '2-digit' },     // 31.12.2025
+      long:  { year: 'numeric', month: 'long',    day: 'numeric' },      // 31. Dezember 2025
+    },
+  },
+  numberFormats: {
+    en: {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      percent: { style: 'percent', minimumFractionDigits: 0 },
+    },
+    de: {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      percent: { style: 'percent', minimumFractionDigits: 0 },
+    },
+  },
 })
 ```
 
-### Implementation: `frontend/src/main.ts` (UPDATE)
-
+**`frontend/src/stores/locale.ts`:**
 ```typescript
-import './assets/main.css'
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import router from './router'
-import { i18n } from './plugins/i18n'   // ADD
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { i18n, type SupportedLocale, SUPPORTED_LOCALES } from '@/plugins/i18n'
 
-const app = createApp(App)
+const LOCALE_KEY = 'ttt_locale'
+
+export const useLocaleStore = defineStore('locale', () => {
+  const locale = ref<SupportedLocale>(i18n.global.locale.value as SupportedLocale)
+
+  function setLocale(newLocale: SupportedLocale) {
+    if (!SUPPORTED_LOCALES.includes(newLocale)) return
+    locale.value = newLocale
+    ;(i18n.global.locale as { value: SupportedLocale }).value = newLocale
+    localStorage.setItem(LOCALE_KEY, newLocale)
+  }
+
+  return { locale, setLocale }
+})
+```
+
+**`frontend/src/main.ts` update:**
+```typescript
+import { i18n } from './plugins/i18n'
+// ...
 app.use(createPinia())
+app.use(i18n)        // ← add after pinia, before router
 app.use(router)
-app.use(i18n)                            // ADD — after router, before mount
 app.mount('#app')
 ```
 
-### Implementation: `frontend/src/composables/useLocale.ts`
-
-```typescript
-import { useI18n } from 'vue-i18n'
-
-const LOCALE_STORAGE_KEY = 'app_locale'
-export const SUPPORTED_LOCALES = ['en', 'de'] as const
-export type SupportedLocale = typeof SUPPORTED_LOCALES[number]
-
-export function useLocale() {
-  const { locale } = useI18n()
-
-  function setLocale(lang: SupportedLocale): void {
-    locale.value = lang
-    localStorage.setItem(LOCALE_STORAGE_KEY, lang)
-  }
-
-  return { locale, setLocale, supportedLocales: SUPPORTED_LOCALES }
-}
-```
-
-### Translation Key Naming Convention
-
-Use dot-notation namespaced by feature area:
-
+**Translation key convention — use semantic dot-notation:**
 ```json
 {
   "home": {
     "title": "Tic-Tac-Tore",
     "subtitle": "Foosball statistics platform",
     "signInMessage": "Sign in to track your matches",
-    "welcomeMessage": "Welcome back! 👋",
-    "comingSoon": "Your foosball dashboard is coming soon.",
-    "signOut": "Sign Out"
+    "welcomeBack": "Welcome back!",
+    "comingSoon": "Your foosball dashboard is coming soon."
   },
   "auth": {
     "signInWithGoogle": "Sign in with Google",
+    "signOut": "Sign Out",
     "completingSignIn": "Completing secure sign-in…",
     "redirectFailed": "Login redirect failed. Please try again."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Something went wrong"
+  },
+  "match": {
+    "submit": "Submit Match",
+    "pending": "Pending Confirmation",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "rank": "Rank",
+    "player": "Player",
+    "wins": "Wins",
+    "losses": "Losses"
+  },
+  "stats": {
+    "winRate": "Win Rate",
+    "matchesPlayed": "Matches Played"
   }
 }
 ```
+German `de.json` must have 1:1 matching keys.
 
-Every key in `en.json` must exist in `de.json`. Missing key → runtime warning + fallback to English.
-
-### Inventory of ALL Hardcoded Strings to Externalize
-
-| File | Current hardcoded value | Translation key |
-|------|------------------------|-----------------|
-| `views/HomeView.vue` | `'Tic-Tac-Tore'` | `home.title` |
-| `views/HomeView.vue` | `'Foosball statistics platform'` | `home.subtitle` |
-| `views/HomeView.vue` | `'Sign in to track your matches'` | `home.signInMessage` |
-| `views/HomeView.vue` | `'Welcome back! 👋'` | `home.welcomeMessage` |
-| `views/HomeView.vue` | `'Your foosball dashboard is coming soon.'` | `home.comingSoon` |
-| `views/HomeView.vue` | `'Sign Out'` | `home.signOut` |
-| `components/GoogleOAuthButton.vue` | `'Sign in with Google'` (template text) | `auth.signInWithGoogle` |
-| `components/GoogleOAuthButton.vue` | `'Login redirect failed. Please try again.'` (alert) | `auth.redirectFailed` |
-| `components/OAuthRedirectHandler.vue` | `'Completing secure sign-in…'` | `auth.completingSignIn` |
-
-> `HomeView.vue` currently uses module-level `const` declarations (e.g., `const TITLE = 'Tic-Tac-Tore'`) before `<script setup>`. These are not reactive. Replace the entire block with `const { t } = useI18n()` inside `<script setup>`, then use `t('home.title')` in the template.
-
-### CRITICAL: Existing Tests Will Break After i18n Migration
-
-**`GoogleOAuthButton.spec.ts`** currently asserts:
-
+**Vitest mock patterns for tests 7.1–7.3:**
 ```typescript
-it('renders a sign in with Google button', () => {
-  const wrapper = mount(GoogleOAuthButton)
-  expect(wrapper.text()).toContain('Sign in with Google')
-})
+// Mock navigator.language
+vi.stubGlobal('navigator', { language: 'de-AT' })
+
+// Mock localStorage
+const localStorageMock = { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() }
+vi.stubGlobal('localStorage', localStorageMock)
+localStorageMock.getItem.mockReturnValue('de')  // simulate stored value
+
+// Restore after each test
+afterEach(() => vi.unstubAllGlobals())
 ```
 
-After migrating the template to `$t('auth.signInWithGoogle')`, mounting without i18n plugin renders the raw key string, not the translation. **This test will fail.**
-
-**Fix: provide a fresh i18n instance per test via `global.plugins`:**
-
+**Using translations in components (Vue SFC):**
 ```typescript
-import { createI18n } from 'vue-i18n'
-import en from '@/locales/en.json'
-import de from '@/locales/de.json'
+// script setup
+import { useI18n } from 'vue-i18n'
+const { t, d, n } = useI18n()
 
-function createTestI18n(locale = 'en') {
-  return createI18n({ legacy: false, locale, messages: { en, de } })
-}
-
-it('renders a sign in with Google button', () => {
-  const wrapper = mount(GoogleOAuthButton, {
-    global: { plugins: [createTestI18n()] },
-  })
-  expect(wrapper.text()).toContain('Sign in with Google')
-})
+// In template
+// {{ t('nav.home') }}
+// {{ d(someDate, 'short') }}
+// {{ n(someNumber, 'decimal') }}
 ```
 
-Apply the same fix to all `OAuthRedirectHandler` tests that assert on rendered text.
+**RTL-neutral Tailwind v4 logical utilities:**
+| Physical (forbidden in new code) | Logical (use instead) |
+|---|---|
+| `ml-*` / `mr-*` | `ms-*` / `me-*` |
+| `pl-*` / `pr-*` | `ps-*` / `pe-*` |
+| `border-l-*` | `border-s-*` |
+| `rounded-l-*` | `rounded-s-*` |
 
-**Do NOT use the singleton `i18n` from `plugins/i18n.ts` in tests** — it reads `localStorage` at module init time and carries state between tests. Always create a fresh instance via `createI18n()` per test.
+### Project Structure Notes
 
-### Scope Boundaries
-
-**IN SCOPE — Story 1.2 (architecture foundation):**
-- `vue-i18n@9` install and plugin configuration
-- Translation JSON files (`en.json`, `de.json`) with all current UI strings
-- `useLocale` composable (locale switching + `localStorage` persistence)
-- `main.ts` plugin registration
-- Externalize all existing hardcoded strings from existing components
-- Fix existing tests broken by i18n migration
-- Unit tests for `useLocale` composable
-
-**OUT OF SCOPE → Story 1.4 (Profile Management):**
-- Language selector UI in profile/personal cabinet
-- Backend API for persisting language preference to user profile
-- Loading server-stored language preference after login
-
-### Architecture Compliance
-
-- **Rule 13 (Backend vs Frontend Boundary):** i18n is FRONTEND concern only. Backend API responses use raw data. Do NOT add language parameters to any backend API calls.
-- **Rule 1 (Technical Text Language):** Code comments, log messages, exception text stay in English. Only user-facing UI strings go in translation files.
-- **500-line rule:** No single file exceeds 500 lines. The plugin and composable are small — no risk. Keep translation JSON files organized.
-
-### Testing Requirements
-
-Framework: **Vitest** + `@vue/test-utils`. Pattern: Arrange-Act-Assert (AAA).
-
-Test file location: `frontend/src/composables/__tests__/useLocale.test.ts`
-
-Key test structure:
-
-```typescript
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createI18n } from 'vue-i18n'
-import { mount } from '@vue/test-utils'
-import { defineComponent } from 'vue'
-import en from '@/locales/en.json'
-import de from '@/locales/de.json'
-import { useLocale } from '../useLocale'
-
-function createTestI18n(locale = 'en') {
-  return createI18n({ legacy: false, locale, messages: { en, de } })
-}
-
-describe('useLocale', () => {
-  beforeEach(() => localStorage.clear())
-  afterEach(() => localStorage.clear())
-
-  it('setLocale updates locale and persists to localStorage', () => {
-    // Arrange
-    const TestComponent = defineComponent({
-      setup() { return useLocale() },
-      template: '<div />',
-    })
-    const wrapper = mount(TestComponent, { global: { plugins: [createTestI18n()] } })
-    // Act
-    wrapper.vm.setLocale('de')
-    // Assert
-    expect(wrapper.vm.locale).toBe('de')
-    expect(localStorage.getItem('app_locale')).toBe('de')
-  })
-})
+**Files to CREATE:**
+```
+frontend/src/
+  locales/
+    en.json          ← all English UI strings
+    de.json          ← all German UI strings (keys 1:1 with en.json)
+  plugins/
+    i18n.ts          ← createI18n() config + detectLocale()
+  stores/
+    locale.ts        ← Pinia store: reactive locale + setLocale()
 ```
 
-No backend tests required — this story is frontend-only.
-
-### Previous Story Intelligence (from 1-1b)
-
-- E2E tests: `frontend/e2e/` (Playwright)
-- Unit tests: co-located in `__tests__/` subdirectories alongside source files
-- `@vue/test-utils`, Vitest, `@faker-js/faker` already in `devDependencies` — no additional test tooling needed
-
-### What Must Be Preserved
-
-1. **`main.ts`:** Existing Pinia and Router registrations must not be removed. Only ADD `app.use(i18n)`.
-2. **`App.vue`:** No changes needed — it only has `<RouterView />`, no user-facing strings.
-3. **`GoogleOAuthButton.vue` redirect logic:** Do NOT modify the `signInWithGoogle()` function behavior. Only externalize the string literals (`'Sign in with Google'` and the `alert()` message).
-4. **Playwright E2E tests:** After migration, rendered English text is identical to the current hardcoded text. E2E tests should pass without modification — verify with `npm run test:e2e`.
-
-### Verification
-
-Run mandatory local CI before marking complete:
-
-```bash
-./scripts/ci-local.sh
+**Files to UPDATE:**
+```
+frontend/
+  package.json              ← vue-i18n@10, @intlify/unplugin-vue-i18n (via npm install)
+  vite.config.ts            ← add VueI18nPlugin (after vue(), before vueDevTools)
+  src/main.ts               ← app.use(i18n)
+  src/views/
+    HomeHub.vue             ← 6 hardcoded strings → t() keys
+  src/components/
+    GoogleOAuthButton.vue   ← "Sign in with Google" + alert → t() + reactive error
+    OAuthRedirectHandler.vue ← "Completing secure sign-in…" → t()
 ```
 
-This runs: `mvn clean verify`, frontend `type-check`, `build`, `test:unit`, `test:e2e`.
+**NOTE:** `HelloWorld.vue`, `MatchRecordingForm.vue`, `MatchScoring.vue`, etc. do NOT exist yet — they are planned future components. They will be created i18n-ready in their respective stories.
 
-Story is **frontend-only** — no backend changes. Verify:
+**Existing store pattern to follow:** `src/stores/auth.ts` — uses `defineStore` with Setup syntax (arrow function with `ref`/`computed`/functions returned). Locale store must follow the same pattern.
 
-- [ ] `npm run type-check` passes — TypeScript resolves vue-i18n types correctly
-- [ ] `npm run build` passes — no broken imports from locales JSON
-- [ ] `npm run test:unit -- --run` passes — composable tests + updated component tests
-- [ ] `npm run test:e2e` passes — Playwright: rendered English text unchanged
+### Previous Story Intelligence (1-1a)
+
+- Package namespace for backend: `com.tictactore` — not relevant (this story is frontend-only)
+- Vitest is the test runner for frontend unit tests (`npm run test:unit`)
+- No Playwright E2E needed — locale switching has no async backend calls; Vitest unit tests sufficient
+- The `stores/auth.ts` already exists and works — do NOT modify it in this story
+- Fail-closed pattern from 1-1a: if `detectLocale()` throws (e.g., `localStorage` unavailable in SSR context), it must return `'en'` as fallback — wrap in try/catch
+
+### Story Context: What This Story Does NOT Cover
+
+- **Language switcher UI**: The UI toggle in the user cabinet is Story 1.4. This story only provides the programmatic API (`useLocaleStore().setLocale()`).
+- **Backend notification localization**: Deferred to Story 3.1.
+- **RTL layout implementation**: NFR says "no RTL implementation required now" — only CSS directionality-neutrality is required here.
+- **User preference persistence to server**: Language preference is stored in `localStorage` only in this story. Server-side sync is Story 1.4 (Profile Management).
+
+### References
+
+- [Source: `_bmad-output/planning-artifacts/epics.md` §Story 1.2]
+- [Source: `_bmad-output/planning-artifacts/prd.md` §Non-Functional Requirements > Internationalization]
+- [Source: `_bmad-output/planning-artifacts/prd.md` §MVP Feature Set > FR59]
+- [Source: `_bmad-output/planning-artifacts/architecture.md` §Selected Starter]
+- [Source: `_project-spec/rules/1-write.md` §13. Backend vs Frontend Boundary]
+- [Source: `_project-spec/rules/2-test.md`]
+- [Dependency: Story 1.4 — Profile Management will add the UI language switcher that calls `useLocaleStore().setLocale()`]
+- [Dependency: Story 3.1 — Push notification localization will need backend `MessageSource`]
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
-_TBD_
+claude-sonnet-4-6
 
 ### Debug Log References
 
-_TBD_
+_None_
 
 ### Completion Notes List
 
-_TBD_
+_Not started_
 
 ### File List
 
-_TBD_
+_Not started_
