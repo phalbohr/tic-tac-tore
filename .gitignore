@@ -34,3 +34,7 @@ build/
 
 ### Graphify ###
 graphify-out/
+
+### Secrets ###
+.env
+.env.local
