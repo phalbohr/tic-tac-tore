@@ -41,6 +41,6 @@ __screenshots__/
 test-results/
 playwright-report/
 
-### Secrets ###
+# Environment variables
 .env
 .env.local
