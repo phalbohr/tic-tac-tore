@@ -40,7 +40,7 @@ const FORBIDDEN: Array<{ pattern: RegExp; label: string }> = [
 describe('RTL-neutral CSS — AC7', () => {
   const frontendRoot = resolve(__dirname, '..')
 
-  it.each(STORY_FILES)('%s uses no physical CSS direction utilities', (relativePath) => {
+  it.each(STORY_FILES)('[P1] %s uses no physical CSS direction utilities', (relativePath) => {
     let content: string
     try {
       content = readFileSync(join(frontendRoot, relativePath), 'utf-8')

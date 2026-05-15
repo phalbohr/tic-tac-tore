@@ -21,7 +21,7 @@ describe('useLocaleStore — AC1, AC3', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   // Task 7.4 — AC3: setLocale writes to localStorage
-  it('setLocale("de") persists "de" to localStorage key ttt_locale', () => {
+  it('[P1]setLocale("de") persists "de" to localStorage key ttt_locale', () => {
     const store = useLocaleStore()
 
     store.setLocale('de')
@@ -30,7 +30,7 @@ describe('useLocaleStore — AC1, AC3', () => {
   })
 
   // Task 7.5 — AC1: setLocale updates i18n.global.locale.value reactively
-  it('setLocale("de") updates i18n.global.locale.value to "de"', () => {
+  it('[P1]setLocale("de") updates i18n.global.locale.value to "de"', () => {
     const store = useLocaleStore()
 
     store.setLocale('de')
@@ -39,7 +39,7 @@ describe('useLocaleStore — AC1, AC3', () => {
   })
 
   // AC1: locale ref on store reflects the current language
-  it('store.locale ref reflects the locale set via setLocale()', () => {
+  it('[P1]store.locale ref reflects the locale set via setLocale()', () => {
     const store = useLocaleStore()
 
     store.setLocale('de')
@@ -48,7 +48,7 @@ describe('useLocaleStore — AC1, AC3', () => {
   })
 
   // AC1: switch back to 'en'
-  it('setLocale("en") switches locale back to "en" and persists it', () => {
+  it('[P1]setLocale("en") switches locale back to "en" and persists it', () => {
     const store = useLocaleStore()
     store.setLocale('de')
 
@@ -60,7 +60,7 @@ describe('useLocaleStore — AC1, AC3', () => {
   })
 
   // Guard: unsupported locale is ignored — no store mutation
-  it('setLocale() with unsupported locale is a no-op', () => {
+  it('[P1]setLocale() with unsupported locale is a no-op', () => {
     const store = useLocaleStore()
 
     // @ts-expect-error — intentional invalid value for test
