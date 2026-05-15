@@ -34,7 +34,7 @@ describe('date formatting via d() — AC6', () => {
     const result = i18n.global.d(testDate, 'short', 'en')
 
     // Must contain 12/31/2025 — month-first
-    expect(result).toMatch(/12.31.2025/)
+    expect(result).toMatch(/12\/31\/2025/)
   })
 
   it('[P1]German "short" format uses DD.MM.YYYY pattern', () => {
