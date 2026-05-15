@@ -1,20 +1,18 @@
-// RED PHASE — imports will fail until locale files are created:
-//   frontend/src/locales/en.json
-//   frontend/src/locales/de.json
-// Run: npm run test:unit
-// Expected: all tests FAIL with "Cannot find module '@/locales/en.json'"
-// After implementation: all tests must PASS (green phase).
-
 import { describe, it, expect } from 'vitest'
-import en from '@/locales/en.json'
-import de from '@/locales/de.json'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+// Read raw JSON from disk to bypass Vite's VueI18nPlugin transform (which compiles
+// values to message functions, making Object.entries traversal incorrect).
+const en = JSON.parse(readFileSync(resolve(__dirname, '../en.json'), 'utf-8'))
+const de = JSON.parse(readFileSync(resolve(__dirname, '../de.json'), 'utf-8'))
 
 type JsonNode = Record<string, unknown>
 
 function collectLeafKeys(obj: JsonNode, prefix = ''): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {
     const path = prefix ? `${prefix}.${key}` : key
-    return typeof value === 'object' && value !== null
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
       ? collectLeafKeys(value as JsonNode, path)
       : [path]
   })

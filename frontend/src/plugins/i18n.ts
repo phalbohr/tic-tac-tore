@@ -10,7 +10,7 @@ export function detectLocale(): SupportedLocale {
   try {
     const stored = localStorage.getItem(LOCALE_KEY) as SupportedLocale | null
     if (stored && SUPPORTED_LOCALES.includes(stored)) return stored
-    const browser = navigator.language.split('-')[0] as SupportedLocale
+    const browser = ((navigator?.language ?? '').split('-')[0] ?? '').toLowerCase() as SupportedLocale
     return SUPPORTED_LOCALES.includes(browser) ? browser : 'en'
   } catch {
     return 'en'
@@ -34,11 +34,11 @@ export const i18n = createI18n({
   },
   numberFormats: {
     en: {
-      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2, useGrouping: false },
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
       percent: { style: 'percent', minimumFractionDigits: 0 },
     },
     de: {
-      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2, useGrouping: false },
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
       percent: { style: 'percent', minimumFractionDigits: 0 },
     },
   },
