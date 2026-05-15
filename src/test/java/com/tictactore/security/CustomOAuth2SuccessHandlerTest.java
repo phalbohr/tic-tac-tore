@@ -36,10 +36,9 @@ import static org.mockito.Mockito.when;
 class CustomOAuth2SuccessHandlerTest {
 
     private static final String ATTR_EMAIL = "email";
-    private static final String ATTR_NAME = "name";
     private static final String ATTR_SUB = "sub";
     private static final String TEST_EMAIL = "test@example.com";
-    private static final String TEST_NAME = "Test User";
+    private static final String TEST_NICKNAME = "test";
     private static final String TEST_PROVIDER_ID = "provider-123";
     private static final String TEST_JWT = "test-jwt-token";
     private static final String TEST_REDIRECT_URI = "http://localhost:3000/oauth2/redirect";
@@ -77,16 +76,15 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_validAttributes_secureRequest() throws IOException {
         var user = new User();
         user.setEmail(TEST_EMAIL);
-        user.setName(TEST_NAME);
+        user.setNickname(TEST_NICKNAME);
         user.setProviderId(TEST_PROVIDER_ID);
 
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
                 ATTR_EMAIL, TEST_EMAIL,
-                ATTR_NAME, TEST_NAME,
                 ATTR_SUB, TEST_PROVIDER_ID
         ));
-        when(userService.findOrCreate(TEST_EMAIL, TEST_NAME, TEST_PROVIDER_ID)).thenReturn(user);
+        when(userService.findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID)).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn(TEST_JWT);
         when(request.isSecure()).thenReturn(true);
         when(properties.getJwt()).thenReturn(jwtProperties);
@@ -107,16 +105,15 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_validAttributes_insecureRequest() throws IOException {
         var user = new User();
         user.setEmail(TEST_EMAIL);
-        user.setName(TEST_NAME);
+        user.setNickname(TEST_NICKNAME);
         user.setProviderId(TEST_PROVIDER_ID);
 
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
                 ATTR_EMAIL, TEST_EMAIL,
-                ATTR_NAME, TEST_NAME,
                 ATTR_SUB, TEST_PROVIDER_ID
         ));
-        when(userService.findOrCreate(TEST_EMAIL, TEST_NAME, TEST_PROVIDER_ID)).thenReturn(user);
+        when(userService.findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID)).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn(TEST_JWT);
         when(request.isSecure()).thenReturn(false);
         when(properties.getJwt()).thenReturn(jwtProperties);
@@ -137,13 +134,12 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_missingEmail_shouldThrowException() {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
-                ATTR_NAME, TEST_NAME,
                 ATTR_SUB, TEST_PROVIDER_ID
         ));
 
         assertThrows(OAuth2AuthenticationException.class, () -> handler.onAuthenticationSuccess(request, response, token));
 
-        verify(userService, never()).findOrCreate(anyString(), anyString(), anyString());
+        verify(userService, never()).findOrCreate(anyString(), anyString());
     }
 
     @Test
@@ -151,12 +147,11 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_missingProviderId_shouldThrowException() {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
-                ATTR_EMAIL, TEST_EMAIL,
-                ATTR_NAME, TEST_NAME
+                ATTR_EMAIL, TEST_EMAIL
         ));
 
         assertThrows(OAuth2AuthenticationException.class, () -> handler.onAuthenticationSuccess(request, response, token));
 
-        verify(userService, never()).findOrCreate(anyString(), anyString(), anyString());
+        verify(userService, never()).findOrCreate(anyString(), anyString());
     }
 }
