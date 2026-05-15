@@ -9,7 +9,7 @@ import { i18n } from '@/plugins/i18n'
 // ─── AC2: Extensibility — new locale requires no component code changes ────────
 
 describe('i18n extensibility — AC2', () => {
-  it('registering a new locale via setLocaleMessage() makes t() return its translations without component changes', () => {
+  it('[P1]registering a new locale via setLocaleMessage() makes t() return its translations without component changes', () => {
     const testMessages = { home: { title: 'Тест-заголовок' } }
 
     // @ts-expect-error — partial messages: verifies extensibility without full schema
@@ -30,21 +30,21 @@ describe('date formatting via d() — AC6', () => {
   // Dec 31, 2025 — unambiguous test date
   const testDate = new Date(2025, 11, 31)
 
-  it('English "short" format uses MM/DD/YYYY pattern', () => {
+  it('[P1]English "short" format uses MM/DD/YYYY pattern', () => {
     const result = i18n.global.d(testDate, 'short', 'en')
 
     // Must contain 12/31/2025 — month-first
     expect(result).toMatch(/12.31.2025/)
   })
 
-  it('German "short" format uses DD.MM.YYYY pattern', () => {
+  it('[P1]German "short" format uses DD.MM.YYYY pattern', () => {
     const result = i18n.global.d(testDate, 'short', 'de')
 
     // Must contain 31.12.2025 — day-first
     expect(result).toMatch(/31\.12\.2025/)
   })
 
-  it('both locales have "short" and "long" datetime formats registered', () => {
+  it('[P1]both locales have "short" and "long" datetime formats registered', () => {
     // If format is not registered, d() throws or returns raw value
     expect(() => i18n.global.d(testDate, 'short', 'en')).not.toThrow()
     expect(() => i18n.global.d(testDate, 'long', 'en')).not.toThrow()
@@ -59,20 +59,20 @@ describe('number formatting via n() — AC6', () => {
   // Use a number < 1000 to avoid thousands-separator ambiguity when testing decimal separator
   const testNumber = 1.56
 
-  it('English "decimal" format uses "." as decimal separator', () => {
+  it('[P1]English "decimal" format uses "." as decimal separator', () => {
     const result = i18n.global.n(testNumber, 'decimal', 'en')
 
     expect(result).toContain('.')
     expect(result).not.toContain(',')
   })
 
-  it('German "decimal" format uses "," as decimal separator', () => {
+  it('[P1]German "decimal" format uses "," as decimal separator', () => {
     const result = i18n.global.n(testNumber, 'decimal', 'de')
 
     expect(result).toContain(',')
   })
 
-  it('both locales have "decimal" and "percent" number formats registered', () => {
+  it('[P1]both locales have "decimal" and "percent" number formats registered', () => {
     expect(() => i18n.global.n(testNumber, 'decimal', 'en')).not.toThrow()
     expect(() => i18n.global.n(0.42, 'percent', 'en')).not.toThrow()
     expect(() => i18n.global.n(testNumber, 'decimal', 'de')).not.toThrow()

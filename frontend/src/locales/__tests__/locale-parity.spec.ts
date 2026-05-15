@@ -25,19 +25,19 @@ describe('Locale file parity — AC5 (Task 7.6)', () => {
   const deKeySet = new Set(deKeys)
 
   // Every English key must exist in German
-  it('all keys in en.json have a corresponding key in de.json', () => {
+  it('[P1]all keys in en.json have a corresponding key in de.json', () => {
     const missing = enKeys.filter(k => !deKeySet.has(k))
     expect(missing).toEqual([])
   })
 
   // Every German key must exist in English (no orphaned translations)
-  it('all keys in de.json have a corresponding key in en.json (no orphans)', () => {
+  it('[P1]all keys in de.json have a corresponding key in en.json (no orphans)', () => {
     const orphans = deKeys.filter(k => !enKeySet.has(k))
     expect(orphans).toEqual([])
   })
 
   // Both files must have at least the required namespaces
-  it('en.json contains required top-level namespaces: home, auth, common', () => {
+  it('[P1]en.json contains required top-level namespaces: home, auth, common', () => {
     const topLevel = Object.keys(en as JsonNode)
     expect(topLevel).toContain('home')
     expect(topLevel).toContain('auth')
@@ -45,7 +45,7 @@ describe('Locale file parity — AC5 (Task 7.6)', () => {
   })
 
   // Spot-check: required keys from AC5 components are present in both
-  it('en.json contains all keys required by existing components', () => {
+  it('[P1]en.json contains all keys required by existing components', () => {
     expect(enKeySet.has('home.title')).toBe(true)
     expect(enKeySet.has('home.subtitle')).toBe(true)
     expect(enKeySet.has('home.signInMessage')).toBe(true)
