@@ -12,6 +12,7 @@ describe('i18n extensibility — AC2', () => {
   it('registering a new locale via setLocaleMessage() makes t() return its translations without component changes', () => {
     const testMessages = { home: { title: 'Тест-заголовок' } }
 
+    // @ts-expect-error — partial messages: verifies extensibility without full schema
     i18n.global.setLocaleMessage('test-locale', testMessages)
     // @ts-expect-error — 'test-locale' not in SupportedLocale union, intentional for test
     i18n.global.locale.value = 'test-locale'

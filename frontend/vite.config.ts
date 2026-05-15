@@ -1,14 +1,22 @@
 import { fileURLToPath, URL } from 'node:url'
+import { resolve } from 'node:path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
+
+const isTest = !!process.env.VITEST
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    // Disabled in tests: plugin compiles JSON to message functions, breaking direct JSON imports in parity tests
+    ...(isTest ? [] : [VueI18nPlugin({
+      include: resolve(__dirname, './src/locales/**/*.json'),
+    })]),
     vueDevTools(),
     tailwindcss(),
   ],
