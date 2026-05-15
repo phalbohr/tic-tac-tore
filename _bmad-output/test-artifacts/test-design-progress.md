@@ -1,11 +1,15 @@
 ---
+workflowStatus: 'complete'
+totalSteps: 5
 stepsCompleted:
-  - step-04-coverage-plan
   - step-01-detect-mode
   - step-02-load-context
   - step-03-risk-and-testability
-lastStep: 'step-04-coverage-plan'
-lastSaved: '2026-05-01'
+  - step-04-coverage-plan
+  - step-05-generate-output
+lastStep: 'step-05-generate-output'
+nextStep: null
+lastSaved: '2026-05-15'
 mode: 'System-Level'
 ---
 
@@ -80,3 +84,16 @@ The primary risks involve data integrity (concurrent submissions), legal complia
 - **P1 Pass Rate:** ≥ 95% required for merge.
 - **High-Risk Mitigations:** Must be completed and verified before release.
 - **Code Coverage Target:** ≥ 80% overall lines covered (adjusted for purely visual components if necessary).
+
+## Step 05: Generate Outputs & Validate
+
+- **Execution Mode:** Sequential
+- **Documents Generated:**
+  - `_bmad-output/test-artifacts/test-design-architecture.md` — System-Level architecture testability & risk document
+  - `_bmad-output/test-artifacts/test-design-qa.md` — QA execution recipe with coverage plan
+  - `_bmad-output/test-artifacts/test-design/tic-tac-tore-handoff.md` — BMAD integration handoff document
+- **Validation Status:** All critical failures from validation report (2026-05-15) resolved before final step completion
+  - Architecture doc: Purpose ✅, Risk table with P×I×Score ✅, Mitigation plans with Owner/Timeline/Status/Verification ✅, R-001 ID format ✅
+  - QA doc: Purpose ✅, playwright-utils example ✅, QA Test Coverage column ✅, structured tables ✅, P0/P1/P2/P3 priority note ✅
+  - Handoff doc: ✅ PASS (validated independently)
+- **Workflow Status:** COMPLETE

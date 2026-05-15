@@ -11,9 +11,9 @@ This document provides structured handoff guidance from the Test Architect (TEA)
 ## Epic-Level Integration Guidance
 ### Risk References
 When creating Epics, explicitly reference these high risks:
-- **R-01 (SEC):** GDPR Anonymization Failure. Ensure Account Deletion stories detail verification steps.
-- **R-02 (DATA):** Concurrent Match Submission. Ensure Match Entry stories detail optimistic locking constraints.
-- **R-03 (TECH):** Optimistic UI Desync. Ensure UI interactions define rollback states.
+- **R-001 (SEC):** GDPR Anonymization Failure. Ensure Account Deletion stories detail verification steps.
+- **R-002 (DATA):** Concurrent Match Submission. Ensure Match Entry stories detail optimistic locking constraints.
+- **R-003 (TECH):** Optimistic UI Desync. Ensure UI interactions define rollback states.
 
 ### Quality Gates
 - Epics must mandate 100% automated coverage for P0 scenarios and >=95% for P1 before being marked as Done.
@@ -30,9 +30,9 @@ When creating Epics, explicitly reference these high risks:
 ## Risk-to-Story Mapping
 | Risk ID | Description | Target Epic/Story Area |
 |---------|-------------|-------------------------|
-| R-01 | GDPR Anonymization Failure | Epic 1: Quick Start -> Story 1.5 Account Deletion |
-| R-02 | Concurrent Match Submission | Epic 2: Retrospective Match Entry -> Story 2.4 Match Submission |
-| R-03 | Optimistic UI Desync | Epic 2 & Epic 5 -> Any Match Entry / Live scoring component |
+| R-001 | GDPR Anonymization Failure | Epic 1: Quick Start -> Story 1.5 Account Deletion |
+| R-002 | Concurrent Match Submission | Epic 2: Retrospective Match Entry -> Story 2.4 Match Submission |
+| R-003 | Optimistic UI Desync | Epic 2 & Epic 5 -> Any Match Entry / Live scoring component |
 
 ## Recommended BMAD → TEA Workflow Sequence
 1. Implement Epics based on this handoff.

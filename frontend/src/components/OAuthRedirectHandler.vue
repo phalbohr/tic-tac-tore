@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -28,7 +30,7 @@ onMounted(() => {
 <template>
   <div class="flex items-center justify-center min-h-screen">
     <div class="text-center">
-      <p class="text-gray-500 animate-pulse">Completing secure sign-in…</p>
+      <p class="text-gray-500 animate-pulse">{{ t('auth.completingSignIn') }}</p>
     </div>
   </div>
 </template>
