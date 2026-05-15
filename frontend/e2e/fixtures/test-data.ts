@@ -1,0 +1,1 @@
+export const testUserData = { email: 'test@example.com', password: 'SecurePass123!' };
