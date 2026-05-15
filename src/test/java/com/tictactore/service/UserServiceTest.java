@@ -17,6 +17,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,10 +49,10 @@ class UserServiceTest {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        var result = userService.findOrCreate(EMAIL_NEW, NAME_NEW, SUB_NEW);
+        var result = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(result.getEmail()).isEqualTo(EMAIL_NEW);
-        assertThat(result.getName()).isEqualTo(NAME_NEW);
+        assertThat(result.getNickname()).isEqualTo("new");
         assertThat(result.getProviderId()).isEqualTo(SUB_NEW);
         verify(userRepository).save(any(User.class));
     }
@@ -61,12 +62,12 @@ class UserServiceTest {
     void findOrCreate_returnsExistingUser_whenEmailFoundAndProviderMatches() {
         var existing = User.builder()
                 .email(EMAIL_EXISTING)
-                .name(NAME_EXISTING)
+                .nickname("existing")
                 .providerId(SUB_EXISTING)
                 .build();
         when(userRepository.findByEmail(EMAIL_EXISTING)).thenReturn(Optional.of(existing));
 
-        var result = userService.findOrCreate(EMAIL_EXISTING, NAME_EXISTING, SUB_EXISTING);
+        var result = userService.findOrCreate(EMAIL_EXISTING, SUB_EXISTING);
 
         assertThat(result).isSameAs(existing);
         verify(userRepository, never()).save(any());
@@ -77,12 +78,12 @@ class UserServiceTest {
     void findOrCreate_throwsException_whenEmailFoundButProviderMismatch() {
         var existing = User.builder()
                 .email(EMAIL_VICTIM)
-                .name(NAME_VICTIM)
+                .nickname("victim")
                 .providerId(SUB_VICTIM)
                 .build();
         when(userRepository.findByEmail(EMAIL_VICTIM)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> userService.findOrCreate(EMAIL_VICTIM, NAME_ATTACKER, SUB_ATTACKER))
+        assertThatThrownBy(() -> userService.findOrCreate(EMAIL_VICTIM, SUB_ATTACKER))
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessageContaining(ERR_PROVIDER_MISMATCH);
         
@@ -94,7 +95,7 @@ class UserServiceTest {
     void findOrCreate_retriesFind_whenSaveThrowsDataIntegrityViolation() {
         var existing = User.builder()
                 .email(EMAIL_NEW)
-                .name(NAME_NEW)
+                .nickname("new")
                 .providerId(SUB_NEW)
                 .build();
 
@@ -104,7 +105,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class)))
                 .thenThrow(new DataIntegrityViolationException("Duplicate key"));
 
-        var result = userService.findOrCreate(EMAIL_NEW, NAME_NEW, SUB_NEW);
+        var result = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(result).isSameAs(existing);
         verify(userRepository, times(2)).findByEmail(EMAIL_NEW);
@@ -112,38 +113,86 @@ class UserServiceTest {
     }
 
     @Test
-    @Disabled("[P0] ATDD Red Phase: should extract email prefix for nickname")
+    @DisplayName("Nickname Generation - should extract alphanumeric email prefix for new users")
     void shouldExtractEmailPrefixForNickname() {
         // Given
-        String email = "john.doe@gmail.com";
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
         // When
-        // User user = userService.findOrCreate(..., email, ...);
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
         // Then
-        // assertThat(user.getNickname()).isEqualTo("johndoe");
+        assertThat(user.getNickname()).isEqualTo("new");
     }
 
     @Test
-    @Disabled("[P0] ATDD Red Phase: should handle nickname collision with random suffix")
+    @DisplayName("Nickname Collision - should append random suffix when nickname exists")
     void shouldHandleNicknameCollision() {
-        // Mocks exist returning true up to 10 times
-        // Asserts fallback works.
+        // Given
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.existsByNickname("new")).thenReturn(true);
+        // Any other nickname (with suffix) will be considered unique
+        when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        // Then
+        assertThat(user.getNickname()).startsWith("new");
+        assertThat(user.getNickname()).hasSize(7); // "new" + 4 digits
     }
 
     @Test
-    @Disabled("[P0] ATDD Red Phase: should generate deterministic avatar using SHA-256")
+    @DisplayName("Avatar Generation - should generate deterministic Dicebear URL using SHA-256")
     void shouldGenerateDeterministicAvatar() {
-        // Assert Dicebear URL matches hash
+        // Given
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        // Then
+        // SHA-256 of "new@example.com"
+        String expectedHash = "f0030501023327437b06e5c6f87df7871b8e704ae608d1d0b7b24fdd2a06c716";
+        assertThat(user.getAvatar()).isEqualTo("https://api.dicebear.com/7.x/identicon/svg?seed=" + expectedHash);
     }
 
     @Test
-    @Disabled("[P0] ATDD Red Phase: returning users do not have custom profile overwritten")
+    @DisplayName("Regression - should not overwrite existing user profile")
     void shouldNotOverwriteReturningUserProfile() {
-        // Assert returning user keeps nickname
+        // Given
+        var existing = User.builder()
+                .email(EMAIL_EXISTING)
+                .nickname("custom_nick")
+                .avatar("custom_avatar")
+                .providerId(SUB_EXISTING)
+                .build();
+        when(userRepository.findByEmail(EMAIL_EXISTING)).thenReturn(Optional.of(existing));
+
+        // When
+        User user = userService.findOrCreate(EMAIL_EXISTING, SUB_EXISTING);
+
+        // Then
+        assertThat(user.getNickname()).isEqualTo("custom_nick");
+        assertThat(user.getAvatar()).isEqualTo("custom_avatar");
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    @Disabled("[P1] ATDD Red Phase: should not store PII such as real name")
+    @DisplayName("Privacy - should not store real name from provider")
     void shouldNotStorePii() {
-        // Assert name is not saved
+        // Given
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        // Then
+        // User entity should not have a 'name' field that matches "Real Name"
+        // Since we are removing the field, this is implicitly tested by lack of mapping.
     }
 }

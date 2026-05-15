@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JwtServiceTest {
 
     private static final String EMAIL_TEST = "test@example.com";
-    private static final String NAME_TEST = "Test User";
+    private static final String NICKNAME_TEST = "test";
     private static final String INVALID_TOKEN = "invalid.token.value";
     private static final String JWT_PARTS_REGEX = "\\.";
     private static final int JWT_PARTS_COUNT = 3;
@@ -41,7 +41,7 @@ class JwtServiceTest {
         var user = User.builder()
                 .id(UUID.randomUUID())
                 .email(EMAIL_TEST)
-                .name(NAME_TEST)
+                .nickname(NICKNAME_TEST)
                 .build();
 
         var token = jwtService.generateToken(user);
@@ -56,7 +56,7 @@ class JwtServiceTest {
         var user = User.builder()
                 .id(UUID.randomUUID())
                 .email(EMAIL_TEST)
-                .name(NAME_TEST)
+                .nickname(NICKNAME_TEST)
                 .build();
 
         var token = jwtService.generateToken(user);
@@ -77,7 +77,7 @@ class JwtServiceTest {
         var user = User.builder()
                 .id(userId)
                 .email(EMAIL_TEST)
-                .name(NAME_TEST)
+                .nickname(NICKNAME_TEST)
                 .build();
 
         var token = jwtService.generateToken(user);

@@ -21,11 +21,15 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(unique = true, nullable = false)
+    private String nickname;
 
     @Column(name = "provider_id")
     private String providerId;
+
     private String avatar;
     private String language;
+
+    @Version
+    private Long version;
 }

@@ -42,12 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var claims = jwtService.extractAllClaims(token);
                 var userId = claims.getSubject();
                 var email = claims.get(CLAIM_EMAIL, String.class);
-                var name = claims.get(CLAIM_NAME, String.class);
+                var nickname = claims.get(CLAIM_NAME, String.class);
 
                 var user = User.builder()
                         .id(UUID.fromString(userId))
                         .email(email)
-                        .name(name)
+                        .nickname(nickname)
                         .build();
 
                 var authentication = new UsernamePasswordAuthenticationToken(
