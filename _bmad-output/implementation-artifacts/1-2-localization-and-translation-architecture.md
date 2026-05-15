@@ -378,6 +378,7 @@ claude-sonnet-4-6
 
 - 2026-05-15: Implemented Story 1.2 — vue-i18n@10 localization architecture. Created i18n plugin, locale Pinia store, en/de locale files. Migrated HomeHub, GoogleOAuthButton, OAuthRedirectHandler to use `t()`. All 38 unit tests green, CI clean.
 - 2026-05-15: Addressed code review findings — 10 items resolved. Key fixes: VueI18nPlugin re-enabled in tests (locale-parity now reads JSON via fs.readFileSync); locale store switched to computed; detectLocale null-safe; useGrouping restored; inheritAttrs:false on GoogleOAuthButton; .env.*.local restored in .gitignore; RTL regex broadened; test isolation via local createI18n instances; collectLeafKeys array guard added.
+- 2026-05-15: Fixed PR #88 reviewer issues — rtl-css.spec.ts path corrected (resolve '../..' instead of '..') so test now actually reads files; regex /12.31.2025/ escaped to /12\/31\/2025/; removed _bmad/custom/config.user.toml from git tracking (was committed, should be gitignored per *.user.toml rule).
 
 ### Review Findings
 

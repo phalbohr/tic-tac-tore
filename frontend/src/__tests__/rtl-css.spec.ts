@@ -38,7 +38,7 @@ const FORBIDDEN: Array<{ pattern: RegExp; label: string }> = [
 ]
 
 describe('RTL-neutral CSS — AC7', () => {
-  const frontendRoot = resolve(__dirname, '..')
+  const frontendRoot = resolve(__dirname, '../..')
 
   it.each(STORY_FILES)('[P1] %s uses no physical CSS direction utilities', (relativePath) => {
     let content: string
