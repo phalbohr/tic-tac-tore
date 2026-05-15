@@ -1,0 +1,38 @@
+{
+  "home": {
+    "title": "Tic-Tac-Tore",
+    "subtitle": "Tischkicker-Statistikplattform",
+    "signInMessage": "Melde dich an, um deine Spiele zu verfolgen",
+    "welcomeBack": "Willkommen zurück!",
+    "comingSoon": "Dein Tischkicker-Dashboard kommt bald."
+  },
+  "auth": {
+    "signInWithGoogle": "Mit Google anmelden",
+    "signOut": "Abmelden",
+    "completingSignIn": "Sicheres Anmelden wird abgeschlossen…",
+    "redirectFailed": "Anmeldung fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Lädt...",
+    "error": "Etwas ist schiefgelaufen"
+  },
+  "match": {
+    "submit": "Spiel einreichen",
+    "pending": "Ausstehende Bestätigung",
+    "approved": "Bestätigt",
+    "rejected": "Abgelehnt"
+  },
+  "leaderboard": {
+    "title": "Rangliste",
+    "rank": "Rang",
+    "player": "Spieler",
+    "wins": "Siege",
+    "losses": "Niederlagen"
+  },
+  "stats": {
+    "winRate": "Gewinnrate",
+    "matchesPlayed": "Gespielte Spiele"
+  }
+}
