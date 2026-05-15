@@ -44,3 +44,4 @@ playwright-report/
 # Environment variables
 .env
 .env.local
+.env.*.local

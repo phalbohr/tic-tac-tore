@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+defineOptions({ inheritAttrs: false })
+
 const props = withDefaults(
   defineProps<{
     intentUrl?: string
@@ -20,6 +22,7 @@ function signInWithGoogle() {
   try {
     window.location.href = '/oauth2/authorization/google'
   } catch (e) {
+    // TODO: report to monitoring service when available (e.g. Sentry)
     console.error('Redirect failed', e)
     errorMessage.value = t('auth.redirectFailed')
   }
@@ -29,6 +32,7 @@ function signInWithGoogle() {
 <template>
   <div class="flex flex-col items-center gap-2">
     <button
+      v-bind="$attrs"
       class="flex items-center gap-3 px-6 py-3 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200"
       @click="signInWithGoogle"
     >

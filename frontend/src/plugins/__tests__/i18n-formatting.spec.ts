@@ -56,7 +56,8 @@ describe('date formatting via d() — AC6', () => {
 // ─── AC6: Number formatting — '.' decimal (en) vs ',' decimal (de) ───────────
 
 describe('number formatting via n() — AC6', () => {
-  const testNumber = 1234.56
+  // Use a number < 1000 to avoid thousands-separator ambiguity when testing decimal separator
+  const testNumber = 1.56
 
   it('English "decimal" format uses "." as decimal separator', () => {
     const result = i18n.global.n(testNumber, 'decimal', 'en')
