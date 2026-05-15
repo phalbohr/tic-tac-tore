@@ -1,0 +1,38 @@
+{
+  "home": {
+    "title": "Tic-Tac-Tore",
+    "subtitle": "Foosball statistics platform",
+    "signInMessage": "Sign in to track your matches",
+    "welcomeBack": "Welcome back!",
+    "comingSoon": "Your foosball dashboard is coming soon."
+  },
+  "auth": {
+    "signInWithGoogle": "Sign in with Google",
+    "signOut": "Sign Out",
+    "completingSignIn": "Completing secure sign-in…",
+    "redirectFailed": "Login redirect failed. Please try again."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Something went wrong"
+  },
+  "match": {
+    "submit": "Submit Match",
+    "pending": "Pending Confirmation",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "rank": "Rank",
+    "player": "Player",
+    "wins": "Wins",
+    "losses": "Losses"
+  },
+  "stats": {
+    "winRate": "Win Rate",
+    "matchesPlayed": "Matches Played"
+  }
+}

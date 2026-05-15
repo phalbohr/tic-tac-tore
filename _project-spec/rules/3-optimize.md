@@ -18,6 +18,7 @@
 - No magic numbers — replace with named constants
 - Comments explain **why**, not what — if "what" is needed, simplify the code instead
 - Complex algorithms or non-obvious business rules have a short explanation
+- HTTP method semantics match standards — deviations changed or documented
 
 ## 3. Maintainability
 
