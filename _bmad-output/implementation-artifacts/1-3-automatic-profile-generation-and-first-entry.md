@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -84,7 +84,7 @@ So that I can start recording matches immediately.
 
 ## Status
 
-Status: review
+Status: in-progress
 
 ## Dev Agent Record
 ### Implementation Plan
@@ -106,3 +106,20 @@ Status: review
 - Checklist: _bmad-output/test-artifacts/atdd-checklist-1-3-automatic-profile-generation-and-first-entry.md
 - API tests: src/test/java/com/tictactore/service/UserServiceTest.java
 - E2E tests: frontend/e2e/profile-generation.spec.ts
+
+### Review Findings
+
+- [ ] [Review][Patch] Unhandled Nickname Collision in Concurrent User Creation [src/main/java/com/tictactore/service/UserService.java:853-855]
+- [ ] [Review][Patch] Empty Nickname from Non-Alphanumeric Email Prefix [src/main/java/com/tictactore/service/UserService.java:859-860]
+- [ ] [Review][Patch] 500 Error instead of 401 if User is Deleted from DB [src/main/java/com/tictactore/controller/UserController.java:630]
+- [ ] [Review][Patch] Infinite Pulse Loading on Fetch Failures and Stale State [frontend/src/stores/auth.ts:460-466]
+- [ ] [Review][Patch] Missing language field in ProfileDto and UserController mapping [src/main/java/com/tictactore/dto/ProfileDto.java:640-662]
+- [ ] [Review][Patch] Lack of Email Normalization before Hashing [src/main/java/com/tictactore/service/UserService.java:875-884]
+- [ ] [Review][Patch] No Uniqueness Check for Fallback UUID Nickname [src/main/java/com/tictactore/service/UserService.java:868-870]
+- [ ] [Review][Patch] Weak Hardcoded Default Salt in Production Configuration [src/main/java/com/tictactore/config/ApplicationProperties.java:565-570]
+- [ ] [Review][Patch] Race Condition in Profile Fetch during Logout [frontend/src/stores/auth.ts:458-470]
+- [ ] [Review][Patch] Profile Fetch lacks Watcher on Authentication Status [frontend/src/views/HomeHub.vue:505-509]
+- [ ] [Review][Patch] Hardcoded Translated Strings in E2E Tests [frontend/e2e/profile-generation.spec.ts:425]
+- [x] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — deferred, pre-existing
+- [x] [Review][Defer] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — deferred, pre-existing
+

@@ -14,3 +14,8 @@
 
 ## Deferred from: code review of 1-2-localization-and-translation-architecture.md (2026-05-15)
 - Anonymization verification test logic flaw: TC-P0-004 plans to assert that an anonymized record has no PII via an API call after account deletion. However, account deletion revokes authentication (401), so a client-side E2E test cannot assert state without elevated endpoints.
+
+## Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)
+- [ ] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — Nickname column is added as non-nullable, unique, but no DB migration script exists to backfill existing users.
+- [ ] [Review][Defer] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — Playwright E2E tests mock the profile API entirely, reducing integration validation quality.
+
