@@ -10,6 +10,7 @@ So that I can start recording matches immediately.
 
 ## Acceptance Criteria
 
+### Functional Requirements
 - **Given** first-time authentication
 - **When** profile is created
 - **Then** nickname is generated from email prefix (alphanumeric only)
@@ -17,28 +18,45 @@ So that I can start recording matches immediately.
 - **And** deterministic default placeholder avatar is assigned
 - **And** no PII (e.g., real name) is extracted or stored from the provider
 
+### Technical Requirements & Guardrails
+- **Database Transaction Integrity**: User creation (`findOrCreate`) must handle database uniqueness collisions gracefully. Any database collision exception (e.g. `DataIntegrityViolationException`) caught inside a `@Transactional` block marks the transaction as rollback-only. The creation flow must isolate the transaction boundary (e.g., using `Propagation.REQUIRES_NEW` or a non-transactional retry/catch wrapper) to prevent `UnexpectedRollbackException` on commit.
+- **Strict Layering & Object Retrieval**: `UserController.getMyProfile` must not read fields directly from `@AuthenticationPrincipal User`, as the principal instantiated by `JwtAuthenticationFilter` only contains fields populated from the JWT token claims (ID, email, nickname) and lacks fields like `avatar` or `language`. The controller must delegate to the Service layer (e.g., `userService.getProfile(userId)`) to fetch the full database record.
+- **Externalized Settings**: The Dicebear avatar API URL prefix (`https://api.dicebear.com/7.x/identicon/svg?seed=`) must be externalized via `ApplicationProperties` rather than hardcoded in the service.
+- **Optimistic Locking**: The `User` entity must use `@Version Long version` for concurrency control.
+- **AAA Testing Standards**: All unit and integration tests must strictly follow the Arrange-Act-Assert (AAA) pattern separated by a single blank line, with absolutely zero structural comments (no `// Given`, `// When`, or `// Then`).
+- **Real Assertions**: All tests must verify real behavior and assert a meaningful outcome (no assert-less tests like `shouldNotStorePii`).
+
 ## Tasks/Subtasks
 
 - [x] **Backend: Profile Data Extraction & Privacy**
     - [x] Update `UserService.findOrCreate` to extract email prefix.
     - [x] Strip non-alphanumeric characters using `[^a-zA-Z0-9]`.
     - [x] Ensure real name is NOT stored in the `User` entity.
+- [x] **Backend: Transaction & Collision Integrity**
+    - [x] Restructure `findOrCreate` transaction boundary to prevent rollback-only failures.
+    - [x] Implement retry or transaction propagation (`Propagation.REQUIRES_NEW`) for user creation.
 - [x] **Backend: Unique Nickname Generation**
     - [x] Implement collision resolution loop (max 10 iterations).
     - [x] Append 4-digit random number on collision.
     - [x] Verify `userRepository.existsByNickname` usage.
 - [x] **Backend: Deterministic Avatar**
     - [x] Implement SHA-256 hashing of user email.
-    - [x] Set Dicebear v7 identicon URL with hashed seed.
+    - [x] Configure Dicebear URL prefix via `ApplicationProperties`.
+    - [x] Add salt to the email hashing to protect user email privacy.
 - [x] **Backend: Regression Guard**
     - [x] Ensure `findOrCreate` only updates profile for NEW users.
+- [x] **Backend: API & Controller Refactoring**
+    - [x] Update `UserController.getMyProfile` to delegate to service layer and fetch full profile data.
+    - [x] Map fully populated database fields (including `avatar` and `language`) to `ProfileDto`.
 - [x] **Frontend: Profile Display**
-    - [x] Update `HomeHub.vue` (or equivalent) to reactive state for nickname/avatar.
+    - [x] Update `HomeHub.vue` to reactive state for nickname/avatar.
     - [x] Verify display after first login without reload.
-- [x] **Validation**
-    - [x] Run `UserServiceTest.java` and confirm all 5 new scenarios pass.
-    - [x] Run \`profile-generation.spec.ts\` and confirm E2E success.
-    - [x] Run \`./scripts/ci-local.sh\`.
+- [x] **Validation & Testing**
+    - [x] Update `UserServiceTest.java` to remove all structural comments (`// Given`, `// When`, `// Then`).
+    - [x] Implement concrete assertions in all tests, including a proper check that PII name is not mapped or stored.
+    - [x] Run `UserServiceTest.java` and confirm all scenarios pass.
+    - [x] Run `profile-generation.spec.ts` and confirm E2E success.
+    - [x] Run `./scripts/ci-local.sh`.
 
 ## File List
 
