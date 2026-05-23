@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: in-progress
+Status: review
 
 ## Story
 
