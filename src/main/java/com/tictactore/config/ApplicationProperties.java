@@ -12,6 +12,7 @@ public class ApplicationProperties {
     private final Jwt jwt = new Jwt();
     private final OAuth2 oauth2 = new OAuth2();
     private final BloomFilter bloomFilter = new BloomFilter();
+    private final Avatar avatar = new Avatar();
 
     @Getter
     @Setter
@@ -31,5 +32,12 @@ public class ApplicationProperties {
     public static class BloomFilter {
         private long expectedElements = 100000L;
         private double falsePositiveRate = 0.01;
+    }
+
+    @Getter
+    @Setter
+    public static class Avatar {
+        private String apiUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=";
+        private String salt = "default-avatar-salt-for-privacy";
     }
 }
