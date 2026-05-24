@@ -29,16 +29,20 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT)
       if (response.ok) {
         profile.value = await response.json()
-      } else if (response.status === 401) {
+      } else {
         isMaybeAuthenticated.value = false
         profile.value = null
       }
     } catch (e) {
       console.error('Failed to fetch profile', e)
+      isMaybeAuthenticated.value = false
+      profile.value = null
     }
   }
 
   async function logout() {
+    isMaybeAuthenticated.value = false
+    profile.value = null
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
 

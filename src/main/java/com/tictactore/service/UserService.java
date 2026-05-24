@@ -46,20 +46,31 @@ public class UserService {
     }
 
     private User createNewUser(String email, String providerId) {
-        try {
-            var newUser = new User();
-            newUser.setEmail(email);
-            newUser.setProviderId(providerId);
-            newUser.setNickname(generateUniqueNickname(email));
-            newUser.setAvatar(generateDeterministicAvatar(email));
-            return userCreator.createUser(newUser);
-        } catch (DataIntegrityViolationException e) {
-            return userRepository.findByEmail(email).orElseThrow();
+        int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                var newUser = new User();
+                newUser.setEmail(email);
+                newUser.setProviderId(providerId);
+                newUser.setNickname(generateUniqueNickname(email));
+                newUser.setAvatar(generateDeterministicAvatar(email));
+                return userCreator.createUser(newUser);
+            } catch (DataIntegrityViolationException e) {
+                var existingUser = userRepository.findByEmail(email);
+                if (existingUser.isPresent()) {
+                    return existingUser.get();
+                }
+                // If findByEmail is empty, it's a nickname collision. Retry to generate a new nickname.
+            }
         }
+        throw new IllegalStateException("Failed to create user after retries due to nickname collision");
     }
 
     private String generateUniqueNickname(String email) {
         String baseNickname = email.split("@")[0].replaceAll("[^a-zA-Z0-9]", "");
+        if (baseNickname.isEmpty()) {
+            baseNickname = "user";
+        }
         String nickname = baseNickname;
 
         int attempts = 0;
@@ -69,7 +80,9 @@ public class UserService {
         }
 
         if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + "-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+            do {
+                nickname = baseNickname + "-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+            } while (userRepository.existsByNickname(nickname));
         }
 
         return nickname;
@@ -78,7 +91,7 @@ public class UserService {
     private String generateDeterministicAvatar(String email) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String input = email + properties.getAvatar().getSalt();
+            String input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {

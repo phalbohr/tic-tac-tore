@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
@@ -9,6 +9,12 @@ const authStore = useAuthStore()
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
+    await authStore.fetchProfile()
+  }
+})
+
+watch(() => authStore.isAuthenticated, async (newVal) => {
+  if (newVal && !authStore.profile) {
     await authStore.fetchProfile()
   }
 })

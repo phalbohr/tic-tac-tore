@@ -24,12 +24,17 @@ public class UserController implements ProfileApi {
             return ResponseEntity.status(401).build();
         }
         
-        var user = userService.getProfile(principal.getId());
-        var profile = ProfileDto.builder()
-                .nickname(user.getNickname())
-                .avatar(user.getAvatar())
-                .build();
-                
-        return ResponseEntity.ok(profile);
+        try {
+            var user = userService.getProfile(principal.getId());
+            var profile = ProfileDto.builder()
+                    .nickname(user.getNickname())
+                    .avatar(user.getAvatar())
+                    .language(user.getLanguage())
+                    .build();
+                    
+            return ResponseEntity.ok(profile);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
     }
 }
