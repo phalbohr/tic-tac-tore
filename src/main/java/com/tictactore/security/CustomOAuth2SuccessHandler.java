@@ -25,7 +25,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     public static final String SESSION_COOKIE_NAME = "TTT_SESSION";
     private static final String SESSION_COOKIE_VALUE = "true";
     private static final String ATTR_EMAIL = "email";
-    private static final String ATTR_NAME = "name";
     private static final String ATTR_SUB = "sub";
     private static final String ERROR_MISSING_ATTRIBUTES = "Required attributes missing from OAuth2 provider";
     private static final String COOKIE_PATH = "/";
@@ -43,14 +42,13 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         var attributes = token.getPrincipal().getAttributes();
 
         var email = (String) attributes.get(ATTR_EMAIL);
-        var name = (String) attributes.get(ATTR_NAME);
         var providerId = (String) attributes.get(ATTR_SUB);
 
         if (email == null || providerId == null) {
             throw new OAuth2AuthenticationException(ERROR_MISSING_ATTRIBUTES);
         }
 
-        var user = userService.findOrCreate(email, name, providerId);
+        var user = userService.findOrCreate(email, providerId);
         var jwt = jwtService.generateToken(user);
         var isSecure = request.isSecure();
         var maxAge = Duration.ofMillis(properties.getJwt().getExpiration());

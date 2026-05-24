@@ -42,13 +42,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var claims = jwtService.extractAllClaims(token);
                 var userId = claims.getSubject();
                 var email = claims.get(CLAIM_EMAIL, String.class);
-                var name = claims.get(CLAIM_NAME, String.class);
+                var nickname = claims.get(CLAIM_NAME, String.class);
 
-                var user = User.builder()
-                        .id(UUID.fromString(userId))
-                        .email(email)
-                        .name(name)
-                        .build();
+                if (userId == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing user ID");
+                    return;
+                }
+
+                User user;
+                try {
+                    user = User.builder()
+                            .id(UUID.fromString(userId))
+                            .email(email)
+                            .nickname(nickname)
+                            .build();
+                } catch (IllegalArgumentException e) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid user ID format");
+                    return;
+                }
 
                 var authentication = new UsernamePasswordAuthenticationToken(
                         user,

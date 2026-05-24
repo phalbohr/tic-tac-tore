@@ -35,6 +35,9 @@ application:
     bloom-filter:
       expected-elements: ${TTT_BLOOM_FILTER_EXPECTED_ELEMENTS:100000}
       false-positive-rate: ${TTT_BLOOM_FILTER_FALSE_POSITIVE_RATE:0.01}
+    avatar:
+      api-url: ${TTT_AVATAR_API_URL:https://api.dicebear.com/7.x/identicon/svg?seed=}
+      salt: ${TTT_AVATAR_SALT:default-avatar-salt-for-privacy}
 
 server:
   forward-headers-strategy: native

@@ -1,15 +1,22 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getCookie } from '../utils/cookieUtils'
+import { getCookie, deleteCookie } from '../utils/cookieUtils'
 
 const SESSION_COOKIE_NAME = 'TTT_SESSION'
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 const LOGOUT_ENDPOINT = '/api/auth/logout'
+const PROFILE_ENDPOINT = '/api/v1/profile/me'
 const METHOD_POST = 'POST'
+
+interface UserProfile {
+  nickname: string
+  avatar: string
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const isMaybeAuthenticated = ref(!!getCookie(SESSION_COOKIE_NAME))
+  const profile = ref<UserProfile | null>(null)
 
   const isAuthenticated = computed(() => isMaybeAuthenticated.value)
 
@@ -17,7 +24,28 @@ export const useAuthStore = defineStore('auth', () => {
     isMaybeAuthenticated.value = status
   }
 
+  async function fetchProfile() {
+    if (!isMaybeAuthenticated.value) return
+    try {
+      const response = await fetch(PROFILE_ENDPOINT)
+      if (response.ok) {
+        profile.value = await response.json()
+      } else {
+        isMaybeAuthenticated.value = false
+        profile.value = null
+        deleteCookie(SESSION_COOKIE_NAME)
+      }
+    } catch (e) {
+      console.error('Failed to fetch profile', e)
+      isMaybeAuthenticated.value = false
+      profile.value = null
+      deleteCookie(SESSION_COOKIE_NAME)
+    }
+  }
+
   async function logout() {
+    isMaybeAuthenticated.value = false
+    profile.value = null
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
 
@@ -38,12 +66,14 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Logout failed', e)
     } finally {
       isMaybeAuthenticated.value = false
+      profile.value = null
     }
   }
 
   function clearToken() {
     isMaybeAuthenticated.value = false
+    profile.value = null
   }
 
-  return { isAuthenticated, setAuthenticated, clearToken, logout }
+  return { isAuthenticated, profile, setAuthenticated, fetchProfile, clearToken, logout }
 })
