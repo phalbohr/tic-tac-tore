@@ -31,10 +31,10 @@ class JwtAuthenticationFilterTest {
     private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_NAME = "name";
     private static final String EMAIL_TEST = "test@example.com";
-    private static final String NAME_TEST = "Test User";
+    private static final String NICKNAME_TEST = "test";
     private static final String ID_TEST = "123e4567-e89b-12d3-a456-426614174000";
     private static final String EMAIL_COOKIE = "cookie@example.com";
-    private static final String NAME_COOKIE = "Cookie User";
+    private static final String NICKNAME_COOKIE = "cookie";
 
     @Mock
     private JwtService jwtService;
@@ -62,7 +62,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.isTokenValid(TOKEN_VALID)).thenReturn(true);
         when(tokenRevocationService.isRevoked(TOKEN_VALID)).thenReturn(false);
 
-        var mockClaims = new DefaultClaims(Map.of(CLAIM_EMAIL, EMAIL_TEST, CLAIM_NAME, NAME_TEST, Claims.SUBJECT, ID_TEST));
+        var mockClaims = new DefaultClaims(Map.of(CLAIM_EMAIL, EMAIL_TEST, CLAIM_NAME, NICKNAME_TEST, Claims.SUBJECT, ID_TEST));
         when(jwtService.extractAllClaims(TOKEN_VALID)).thenReturn(mockClaims);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -94,7 +94,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.isTokenValid(TOKEN_COOKIE)).thenReturn(true);
         when(tokenRevocationService.isRevoked(TOKEN_COOKIE)).thenReturn(false);
 
-        var mockClaims = new DefaultClaims(Map.of(CLAIM_EMAIL, EMAIL_COOKIE, CLAIM_NAME, NAME_COOKIE, Claims.SUBJECT, ID_TEST));
+        var mockClaims = new DefaultClaims(Map.of(CLAIM_EMAIL, EMAIL_COOKIE, CLAIM_NAME, NICKNAME_COOKIE, Claims.SUBJECT, ID_TEST));
         when(jwtService.extractAllClaims(TOKEN_COOKIE)).thenReturn(mockClaims);
 
         filter.doFilterInternal(request, response, filterChain);
