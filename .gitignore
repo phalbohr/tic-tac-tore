@@ -41,3 +41,6 @@ graphify-out/
 
 ### Antigravity ###
 .antigravitycli
+
+### BMAD ###
+_bmad-output/implementation-artifacts/current_diff.diff
