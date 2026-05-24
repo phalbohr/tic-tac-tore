@@ -35,6 +35,9 @@ build/
 ### Graphify ###
 graphify-out/
 
-# Environment variables
+### Environment variables ###
 .env
 .env.local
+
+### Antigravity ###
+.antigravitycli

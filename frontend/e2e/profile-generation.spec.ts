@@ -26,8 +26,7 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
     await page.goto('/');
 
     // 4. Verify nickname and avatar are displayed
-    // "Welcome back!, johndoe" because of my template: {{ t('home.welcomeBack') }}, {{ authStore.profile.nickname }}
-    await expect(page.getByText('Welcome back!, johndoe')).toBeVisible();
+    await expect(page.getByText(/johndoe/)).toBeVisible();
     
     const avatarImg = page.locator('img[alt="User Avatar"]');
     await expect(avatarImg).toBeVisible();

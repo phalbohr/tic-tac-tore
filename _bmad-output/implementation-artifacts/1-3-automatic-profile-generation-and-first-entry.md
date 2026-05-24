@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -81,10 +81,11 @@ So that I can start recording matches immediately.
 ## Change Log
 
 - 2026-05-15: Completed implementation of story 1.3.
+- 2026-05-24: Addressed code review findings - 11 items resolved
 
 ## Status
 
-Status: in-progress
+Status: review
 
 ## Dev Agent Record
 ### Implementation Plan
@@ -100,6 +101,7 @@ Status: in-progress
 - E2E tests confirmed that nickname and avatar are displayed correctly upon first login.
 - Project-wide verification (`ci-local.sh`) passed successfully.
 - False positive in RTL-neutral CSS test resolved by changing button colors from red to orange.
+- ✅ Resolved 11 review findings including handling concurrent nickname collisions, fixing empty nickname generation, fixing race conditions in auth fetching, and standardizing hardcoded parameters and UI testing criteria.
 
 ## Dev Notes
 ### ATDD Artifacts
@@ -109,17 +111,17 @@ Status: in-progress
 
 ### Review Findings
 
-- [ ] [Review][Patch] Unhandled Nickname Collision in Concurrent User Creation [src/main/java/com/tictactore/service/UserService.java:853-855]
-- [ ] [Review][Patch] Empty Nickname from Non-Alphanumeric Email Prefix [src/main/java/com/tictactore/service/UserService.java:859-860]
-- [ ] [Review][Patch] 500 Error instead of 401 if User is Deleted from DB [src/main/java/com/tictactore/controller/UserController.java:630]
-- [ ] [Review][Patch] Infinite Pulse Loading on Fetch Failures and Stale State [frontend/src/stores/auth.ts:460-466]
-- [ ] [Review][Patch] Missing language field in ProfileDto and UserController mapping [src/main/java/com/tictactore/dto/ProfileDto.java:640-662]
-- [ ] [Review][Patch] Lack of Email Normalization before Hashing [src/main/java/com/tictactore/service/UserService.java:875-884]
-- [ ] [Review][Patch] No Uniqueness Check for Fallback UUID Nickname [src/main/java/com/tictactore/service/UserService.java:868-870]
-- [ ] [Review][Patch] Weak Hardcoded Default Salt in Production Configuration [src/main/java/com/tictactore/config/ApplicationProperties.java:565-570]
-- [ ] [Review][Patch] Race Condition in Profile Fetch during Logout [frontend/src/stores/auth.ts:458-470]
-- [ ] [Review][Patch] Profile Fetch lacks Watcher on Authentication Status [frontend/src/views/HomeHub.vue:505-509]
-- [ ] [Review][Patch] Hardcoded Translated Strings in E2E Tests [frontend/e2e/profile-generation.spec.ts:425]
+- [x] [Review][Patch] Unhandled Nickname Collision in Concurrent User Creation [src/main/java/com/tictactore/service/UserService.java:853-855]
+- [x] [Review][Patch] Empty Nickname from Non-Alphanumeric Email Prefix [src/main/java/com/tictactore/service/UserService.java:859-860]
+- [x] [Review][Patch] 500 Error instead of 401 if User is Deleted from DB [src/main/java/com/tictactore/controller/UserController.java:630]
+- [x] [Review][Patch] Infinite Pulse Loading on Fetch Failures and Stale State [frontend/src/stores/auth.ts:460-466]
+- [x] [Review][Patch] Missing language field in ProfileDto and UserController mapping [src/main/java/com/tictactore/dto/ProfileDto.java:640-662]
+- [x] [Review][Patch] Lack of Email Normalization before Hashing [src/main/java/com/tictactore/service/UserService.java:875-884]
+- [x] [Review][Patch] No Uniqueness Check for Fallback UUID Nickname [src/main/java/com/tictactore/service/UserService.java:868-870]
+- [x] [Review][Patch] Weak Hardcoded Default Salt in Production Configuration [src/main/java/com/tictactore/config/ApplicationProperties.java:565-570]
+- [x] [Review][Patch] Race Condition in Profile Fetch during Logout [frontend/src/stores/auth.ts:458-470]
+- [x] [Review][Patch] Profile Fetch lacks Watcher on Authentication Status [frontend/src/views/HomeHub.vue:505-509]
+- [x] [Review][Patch] Hardcoded Translated Strings in E2E Tests [frontend/e2e/profile-generation.spec.ts:425]
 - [x] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — deferred, pre-existing
 - [x] [Review][Defer] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — deferred, pre-existing
 
