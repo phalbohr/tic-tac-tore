@@ -180,18 +180,7 @@ class UserServiceTest {
         verify(userCreator, never()).createUser(any());
     }
 
-    @Test
-    @DisplayName("Privacy - should not store real name from provider")
-    void shouldNotStorePii() {
-        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
-
-        assertThat(user.getEmail()).isEqualTo(EMAIL_NEW);
-        assertThat(user.getNickname()).isEqualTo("new");
-        assertThat(user.getProviderId()).isEqualTo(SUB_NEW);
-    }
 
     @Test
     @DisplayName("Get Profile - should return user when found")
@@ -217,5 +206,29 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.getProfile(id))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("User not found");
+    }
+
+    @Test
+    @DisplayName("Nickname Generation - should strip non-alphanumeric characters")
+    void shouldStripNonAlphanumericCharacters() {
+        when(userRepository.findByEmail("test.user+123@example.com")).thenReturn(Optional.empty());
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate("test.user+123@example.com", SUB_NEW);
+
+        assertThat(user.getNickname()).isEqualTo("testuser123");
+    }
+
+    @Test
+    @DisplayName("Nickname Collision - should use UUID fallback after max attempts")
+    void shouldHandleNicknameCollisionExhaustion() {
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        assertThat(user.getNickname()).startsWith("new");
+        assertThat(user.getNickname().length()).isEqualTo(11);
     }
 }

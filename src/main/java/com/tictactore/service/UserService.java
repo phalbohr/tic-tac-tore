@@ -47,6 +47,7 @@ public class UserService {
 
     private User createNewUser(String email, String providerId) {
         int maxRetries = 3;
+        DataIntegrityViolationException lastException = null;
         for (int i = 0; i < maxRetries; i++) {
             try {
                 var newUser = new User();
@@ -56,14 +57,19 @@ public class UserService {
                 newUser.setAvatar(generateDeterministicAvatar(email));
                 return userCreator.createUser(newUser);
             } catch (DataIntegrityViolationException e) {
+                lastException = e;
                 var existingUser = userRepository.findByEmail(email);
                 if (existingUser.isPresent()) {
-                    return existingUser.get();
+                    User u = existingUser.get();
+                    if (u.getProviderId() == null || !u.getProviderId().equals(providerId)) {
+                        throw new BadCredentialsException(ERR_EMAIL_COLLISION);
+                    }
+                    return u;
                 }
                 // If findByEmail is empty, it's a nickname collision. Retry to generate a new nickname.
             }
         }
-        throw new IllegalStateException("Failed to create user after retries due to nickname collision");
+        throw new IllegalStateException("Failed to create user after retries due to database constraints", lastException);
     }
 
     private String generateUniqueNickname(String email) {
@@ -80,9 +86,15 @@ public class UserService {
         }
 
         if (attempts >= MAX_NICKNAME_ATTEMPTS) {
+            int fallbackAttempts = 0;
             do {
-                nickname = baseNickname + "-" + java.util.UUID.randomUUID().toString().substring(0, 8);
-            } while (userRepository.existsByNickname(nickname));
+                nickname = baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+                fallbackAttempts++;
+            } while (userRepository.existsByNickname(nickname) && fallbackAttempts < MAX_NICKNAME_ATTEMPTS);
+            
+            if (fallbackAttempts >= MAX_NICKNAME_ATTEMPTS) {
+                throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
+            }
         }
 
         return nickname;

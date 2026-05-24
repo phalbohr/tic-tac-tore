@@ -38,6 +38,6 @@ public class ApplicationProperties {
     @Setter
     public static class Avatar {
         private String apiUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=";
-        private String salt;
+        private String salt = "default-avatar-salt-for-privacy";
     }
 }

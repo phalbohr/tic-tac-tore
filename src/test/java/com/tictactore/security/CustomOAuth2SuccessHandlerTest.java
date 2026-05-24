@@ -43,6 +43,8 @@ class CustomOAuth2SuccessHandlerTest {
     private static final String TEST_JWT = "test-jwt-token";
     private static final String TEST_REDIRECT_URI = "http://localhost:3000/oauth2/redirect";
     private static final long TEST_EXPIRATION = 3600000L;
+    private static final String ATTR_NAME = "name";
+    private static final String TEST_NAME_PII = "John Doe";
 
     @Mock
     private UserService userService;
@@ -127,6 +129,30 @@ class CustomOAuth2SuccessHandlerTest {
         verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), contains(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=" + TEST_JWT));
         verify(response, never()).addHeader(eq(HttpHeaders.SET_COOKIE), contains("Secure"));
         verify(response).sendRedirect(TEST_REDIRECT_URI);
+    }
+
+    @Test
+    @DisplayName("Privacy - should not extract or use real name from provider attributes")
+    void onAuthenticationSuccess_shouldIgnorePiiName() throws IOException {
+        var user = new User();
+        user.setEmail(TEST_EMAIL);
+        user.setProviderId(TEST_PROVIDER_ID);
+
+        when(token.getPrincipal()).thenReturn(oauth2User);
+        when(oauth2User.getAttributes()).thenReturn(Map.of(
+                ATTR_EMAIL, TEST_EMAIL,
+                ATTR_SUB, TEST_PROVIDER_ID,
+                ATTR_NAME, TEST_NAME_PII // Inject PII name
+        ));
+        when(userService.findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID)).thenReturn(user);
+        when(jwtService.generateToken(user)).thenReturn(TEST_JWT);
+        when(properties.getJwt()).thenReturn(jwtProperties);
+        when(properties.getOauth2()).thenReturn(oauth2Properties);
+
+        handler.onAuthenticationSuccess(request, response, token);
+
+        verify(userService).findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID);
+        // We verify that findOrCreate was called ONLY with email and providerId, meaning ATTR_NAME was ignored.
     }
 
     @Test

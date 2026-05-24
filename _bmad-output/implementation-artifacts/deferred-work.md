@@ -24,3 +24,9 @@
 - Semantic Mismatch in JWT Claims: old 'name' claim might inject spaces into nickname.
 - Unused and Unnecessary Versioning: @Version added to User but not utilized.
 - Over-engineered Transaction Boundaries: REQUIRES_NEW used without active parent transaction.
+
+## Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)
+- [ ] [Review][Defer] Improper Exception Type for Missing User [src/main/java/com/tictactore/service/UserService.java]
+- [ ] [Review][Defer] Missing Null Check in generateUniqueNickname [src/main/java/com/tictactore/service/UserService.java]
+- [ ] [Review][Defer] High Collision Probability in Nickname Suffix [src/main/java/com/tictactore/service/UserService.java]
+- [ ] [Review][Defer] E2E Test Bypasses Backend with Complete API Mocking [frontend/e2e/profile-generation.spec.ts]

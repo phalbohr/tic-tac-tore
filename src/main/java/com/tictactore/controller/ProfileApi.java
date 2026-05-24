@@ -15,7 +15,8 @@ public interface ProfileApi {
     @Operation(summary = "Get current user profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved profile"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
     ResponseEntity<ProfileDto> getMyProfile(@AuthenticationPrincipal User user);
 }
