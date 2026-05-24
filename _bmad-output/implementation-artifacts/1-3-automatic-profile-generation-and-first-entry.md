@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: review
+Status: done
 
 ## Story
 
@@ -86,7 +86,7 @@ So that I can start recording matches immediately.
 
 ## Status
 
-Status: review
+Status: done
 
 ## Dev Agent Record
 ### Implementation Plan
