@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Automatic Profile Generation E2E (ATDD)', () => {
-  test('should display generated nickname and avatar on first login', async ({ page, context }) => {
+  test('[P0] should display generated nickname and avatar on first login', async ({ page, context }) => {
     await context.addCookies([{
       name: 'TTT_SESSION',
       value: 'true',
