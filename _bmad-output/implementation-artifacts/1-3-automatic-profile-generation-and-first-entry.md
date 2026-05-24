@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -82,10 +82,11 @@ So that I can start recording matches immediately.
 
 - 2026-05-15: Completed implementation of story 1.3.
 - 2026-05-24: Addressed code review findings - 11 items resolved
+- 2026-05-24: Addressed adversarial edge case review findings - 10 additional items resolved
 
 ## Status
 
-Status: in-progress
+Status: review
 
 ## Dev Agent Record
 ### Implementation Plan
@@ -102,6 +103,7 @@ Status: in-progress
 - Project-wide verification (`ci-local.sh`) passed successfully.
 - False positive in RTL-neutral CSS test resolved by changing button colors from red to orange.
 - ✅ Resolved 11 review findings including handling concurrent nickname collisions, fixing empty nickname generation, fixing race conditions in auth fetching, and standardizing hardcoded parameters and UI testing criteria.
+- ✅ Resolved 10 additional adversarial edge case findings including avatar salt fallback, data integrity masking, JWT error handling, frontend auth brittleness, and adding proper tests.
 
 ## Dev Notes
 ### ATDD Artifacts
@@ -127,19 +129,33 @@ Status: in-progress
 
 
 ### Review Findings (Adversarial & Edge Case)
-- [ ] [Review][Patch] Missing Fallback for Avatar Salt (Null Config Bug) [src/main/java/com/tictactore/config/ApplicationProperties.java]
-- [ ] [Review][Patch] DataIntegrityViolationException Masking [src/main/java/com/tictactore/service/UserService.java]
-- [ ] [Review][Patch] Brittle Frontend Authentication [frontend/src/stores/auth.ts]
-- [ ] [Review][Patch] Unhandled Exception on Invalid JWT Subject [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:42]
-- [ ] [Review][Patch] Violation of Alphanumeric Constraint for Nickname [src/main/java/com/tictactore/service/UserService.java]
-- [ ] [Review][Patch] Missing Test for Alphanumeric Stripping [src/test/java/com/tictactore/service/UserServiceTest.java]
-- [ ] [Review][Patch] Missing Test for Nickname Fallback Exhaustion [src/test/java/com/tictactore/service/UserServiceTest.java]
-- [ ] [Review][Patch] Testing Standards Violation (Structural Comments) [frontend/e2e/profile-generation.spec.ts]
-- [ ] [Review][Patch] Incomplete E2E Mocking for Profile Language [frontend/e2e/profile-generation.spec.ts]
-- [ ] [Review][Patch] Improper HTTP Status Mapping for IllegalArgumentException [src/main/java/com/tictactore/controller/UserController.java]
+- [x] [Review][Patch] Missing Fallback for Avatar Salt (Null Config Bug) [src/main/java/com/tictactore/config/ApplicationProperties.java]
+- [x] [Review][Patch] DataIntegrityViolationException Masking [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] Brittle Frontend Authentication [frontend/src/stores/auth.ts]
+- [x] [Review][Patch] Unhandled Exception on Invalid JWT Subject [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:42]
+- [x] [Review][Patch] Violation of Alphanumeric Constraint for Nickname [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] Missing Test for Alphanumeric Stripping [src/test/java/com/tictactore/service/UserServiceTest.java]
+- [x] [Review][Patch] Missing Test for Nickname Fallback Exhaustion [src/test/java/com/tictactore/service/UserServiceTest.java]
+- [x] [Review][Patch] Testing Standards Violation (Structural Comments) [frontend/e2e/profile-generation.spec.ts]
+- [x] [Review][Patch] Incomplete E2E Mocking for Profile Language [frontend/e2e/profile-generation.spec.ts]
+- [x] [Review][Patch] Improper HTTP Status Mapping for IllegalArgumentException [src/main/java/com/tictactore/controller/UserController.java]
 - [x] [Review][Defer] Potential Nickname Length Overflow [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
 - [x] [Review][Defer] Inefficient Nickname Collision Resolution [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
 - [x] [Review][Defer] Redundant Database Query on Profile Fetch [src/main/java/com/tictactore/controller/UserController.java] — deferred, pre-existing
 - [x] [Review][Defer] Semantic Mismatch in JWT Claims [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java] — deferred, pre-existing
 - [x] [Review][Defer] Unused and Unnecessary Versioning [src/main/java/com/tictactore/model/User.java] — deferred, pre-existing
 - [x] [Review][Defer] Over-engineered Transaction Boundaries [src/main/java/com/tictactore/service/UserCreator.java] — deferred, pre-existing
+
+### Review Findings (Round 2)
+- [x] [Review][Patch] Unhandled Provider ID Mismatch in Concurrent User Creation Fallback [src/main/java/com/tictactore/service/UserCreator.java]
+- [x] [Review][Patch] Infinite Pulse Loading/Authentication Loop on Profile Fetch Failure [frontend/src/stores/auth.ts]
+- [x] [Review][Patch] Unhandled NullPointerException for Null JWT Subject [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:42-45]
+- [x] [Review][Patch] Insecure Redis Configuration in Docker Compose [docker-compose.yaml]
+- [x] [Review][Patch] Unbounded Loop in Nickname Generation Fallback [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] Missing 404 Response in OpenAPI Documentation [src/main/java/com/tictactore/controller/ProfileApi.java]
+- [x] [Review][Patch] Inconsistent Avatar Salt Configuration Defaults [src/main/java/com/tictactore/config/ApplicationProperties.java]
+- [x] [Review][Patch] PII Exclusion Test Asserts Against Wrong Layer [src/test/java/com/tictactore/service/UserServiceTest.java]
+- [x] [Review][Defer] Improper Exception Type for Missing User [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
+- [x] [Review][Defer] Missing Null Check in generateUniqueNickname [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
+- [x] [Review][Defer] High Collision Probability in Nickname Suffix [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
+- [x] [Review][Defer] E2E Test Bypasses Backend with Complete API Mocking [frontend/e2e/profile-generation.spec.ts] — deferred, pre-existing

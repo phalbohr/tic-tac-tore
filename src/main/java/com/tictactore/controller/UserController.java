@@ -34,7 +34,7 @@ public class UserController implements ProfileApi {
                     
             return ResponseEntity.ok(profile);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.notFound().build();
         }
     }
 }

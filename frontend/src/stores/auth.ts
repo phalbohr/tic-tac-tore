@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getCookie } from '../utils/cookieUtils'
+import { getCookie, deleteCookie } from '../utils/cookieUtils'
 
 const SESSION_COOKIE_NAME = 'TTT_SESSION'
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchProfile() {
+    if (!isMaybeAuthenticated.value) return
     try {
       const response = await fetch(PROFILE_ENDPOINT)
       if (response.ok) {
@@ -32,11 +33,13 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         isMaybeAuthenticated.value = false
         profile.value = null
+        deleteCookie(SESSION_COOKIE_NAME)
       }
     } catch (e) {
       console.error('Failed to fetch profile', e)
       isMaybeAuthenticated.value = false
       profile.value = null
+      deleteCookie(SESSION_COOKIE_NAME)
     }
   }
 
