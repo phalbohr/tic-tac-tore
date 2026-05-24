@@ -17,5 +17,10 @@
 
 ## Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)
 - [ ] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — Nickname column is added as non-nullable, unique, but no DB migration script exists to backfill existing users.
-- [ ] [Review][Defer] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — Playwright E2E tests mock the profile API entirely, reducing integration validation quality.
-
+- [ ] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — Playwright E2E tests mock the profile API entirely, reducing integration validation quality.
+- Potential Nickname Length Overflow: 64-char email prefix plus UUID can exceed 73 chars.
+- Inefficient Nickname Collision Resolution: loop does 10 sync queries on creation.
+- Redundant Database Query on Profile Fetch: hits DB to fetch avatar/language when they could be deterministic/client-side.
+- Semantic Mismatch in JWT Claims: old 'name' claim might inject spaces into nickname.
+- Unused and Unnecessary Versioning: @Version added to User but not utilized.
+- Over-engineered Transaction Boundaries: REQUIRES_NEW used without active parent transaction.

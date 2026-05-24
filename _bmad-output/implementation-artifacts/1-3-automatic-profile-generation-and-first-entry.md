@@ -1,6 +1,6 @@
 # Story 1.3: Automatic Profile Generation & First Entry
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -85,7 +85,7 @@ So that I can start recording matches immediately.
 
 ## Status
 
-Status: review
+Status: in-progress
 
 ## Dev Agent Record
 ### Implementation Plan
@@ -125,3 +125,21 @@ Status: review
 - [x] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — deferred, pre-existing
 - [x] [Review][Defer] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — deferred, pre-existing
 
+
+### Review Findings (Adversarial & Edge Case)
+- [ ] [Review][Patch] Missing Fallback for Avatar Salt (Null Config Bug) [src/main/java/com/tictactore/config/ApplicationProperties.java]
+- [ ] [Review][Patch] DataIntegrityViolationException Masking [src/main/java/com/tictactore/service/UserService.java]
+- [ ] [Review][Patch] Brittle Frontend Authentication [frontend/src/stores/auth.ts]
+- [ ] [Review][Patch] Unhandled Exception on Invalid JWT Subject [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:42]
+- [ ] [Review][Patch] Violation of Alphanumeric Constraint for Nickname [src/main/java/com/tictactore/service/UserService.java]
+- [ ] [Review][Patch] Missing Test for Alphanumeric Stripping [src/test/java/com/tictactore/service/UserServiceTest.java]
+- [ ] [Review][Patch] Missing Test for Nickname Fallback Exhaustion [src/test/java/com/tictactore/service/UserServiceTest.java]
+- [ ] [Review][Patch] Testing Standards Violation (Structural Comments) [frontend/e2e/profile-generation.spec.ts]
+- [ ] [Review][Patch] Incomplete E2E Mocking for Profile Language [frontend/e2e/profile-generation.spec.ts]
+- [ ] [Review][Patch] Improper HTTP Status Mapping for IllegalArgumentException [src/main/java/com/tictactore/controller/UserController.java]
+- [x] [Review][Defer] Potential Nickname Length Overflow [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
+- [x] [Review][Defer] Inefficient Nickname Collision Resolution [src/main/java/com/tictactore/service/UserService.java] — deferred, pre-existing
+- [x] [Review][Defer] Redundant Database Query on Profile Fetch [src/main/java/com/tictactore/controller/UserController.java] — deferred, pre-existing
+- [x] [Review][Defer] Semantic Mismatch in JWT Claims [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java] — deferred, pre-existing
+- [x] [Review][Defer] Unused and Unnecessary Versioning [src/main/java/com/tictactore/model/User.java] — deferred, pre-existing
+- [x] [Review][Defer] Over-engineered Transaction Boundaries [src/main/java/com/tictactore/service/UserCreator.java] — deferred, pre-existing
