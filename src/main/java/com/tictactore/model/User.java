@@ -30,6 +30,9 @@ public class User {
     private String avatar;
     private String language;
 
+    @Column(name = "last_nickname_update", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private java.time.Instant lastNicknameUpdate;
+
     @Version
     private Long version;
 }

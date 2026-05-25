@@ -19,4 +19,16 @@ public interface ProfileApi {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     ResponseEntity<ProfileDto> getMyProfile(@AuthenticationPrincipal User user);
+
+    @Operation(summary = "Update current user profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated profile"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or nickname cooldown active"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    ResponseEntity<ProfileDto> updateProfile(
+            @AuthenticationPrincipal User user,
+            com.tictactore.dto.UpdateProfileRequest request
+    );
 }

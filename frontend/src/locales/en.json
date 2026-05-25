@@ -34,5 +34,14 @@
   "stats": {
     "winRate": "Win Rate",
     "matchesPlayed": "Matches Played"
+  },
+  "cabinet": {
+    "title": "Personal Cabinet",
+    "nickname": "Nickname",
+    "language": "Language",
+    "successMessage": "Profile updated successfully",
+    "cooldownMessage": "Nickname can only be changed once every 30 days",
+    "english": "English",
+    "german": "Deutsch"
   }
 }

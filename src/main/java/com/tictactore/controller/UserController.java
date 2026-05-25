@@ -37,4 +37,31 @@ public class UserController implements ProfileApi {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @Override
+    @org.springframework.web.bind.annotation.PatchMapping("/me")
+    public ResponseEntity<ProfileDto> updateProfile(
+            @AuthenticationPrincipal User principal,
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.tictactore.dto.UpdateProfileRequest request
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            var user = userService.updateProfile(principal.getId(), request);
+            var profile = ProfileDto.builder()
+                    .nickname(user.getNickname())
+                    .avatar(user.getAvatar())
+                    .language(user.getLanguage())
+                    .build();
+                    
+            return ResponseEntity.ok(profile);
+        } catch (IllegalArgumentException e) {
+            if ("User not found".equals(e.getMessage())) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

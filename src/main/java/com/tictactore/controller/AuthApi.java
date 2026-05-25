@@ -16,4 +16,15 @@ public interface AuthApi {
             @ApiResponse(responseCode = "200", description = "Successfully logged out")
     })
     ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response);
+
+    @Operation(summary = "Test login for E2E testing")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully logged in test user")
+    })
+    ResponseEntity<Void> testLogin(
+            String email,
+            String nickname,
+            HttpServletRequest request,
+            HttpServletResponse response
+    );
 }
