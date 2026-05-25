@@ -231,4 +231,52 @@ class UserServiceTest {
         assertThat(user.getNickname()).startsWith("new");
         assertThat(user.getNickname().length()).isEqualTo(11);
     }
+
+    @Test
+    @org.junit.jupiter.api.Disabled("TDD RED PHASE - Story 1.4 Profile Management")
+    @DisplayName("Update Profile - should update nickname when cooldown passed")
+    void updateProfile_shouldUpdateNickname_whenCooldownPassed() {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+        
+    }
+
+    @Test
+    @org.junit.jupiter.api.Disabled("TDD RED PHASE - Story 1.4 Profile Management")
+    @DisplayName("Update Profile - should throw exception when cooldown not passed")
+    void updateProfile_shouldThrowException_whenCooldownNotPassed() {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+        
+    }
+
+    @Test
+    @org.junit.jupiter.api.Disabled("TDD RED PHASE - Story 1.4 Profile Management")
+    @DisplayName("Update Profile - should sanitize nickname")
+    void updateProfile_shouldSanitizeNickname() {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+        
+    }
+
+    @Test
+    @org.junit.jupiter.api.Disabled("TDD RED PHASE - Story 1.4 Profile Management")
+    @DisplayName("Update Profile - should throw exception when nickname not unique")
+    void updateProfile_shouldThrowException_whenNicknameNotUnique() {
+        // Arrange
+        
+        // Act
+        
+        // Assert
+        
+    }
 }
