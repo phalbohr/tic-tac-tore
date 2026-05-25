@@ -46,6 +46,12 @@ class AuthControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    @MockBean
+    private com.tictactore.repository.UserRepository userRepository;
+
+    @MockBean
+    private com.tictactore.config.ApplicationProperties properties;
+
     @Test
     @WithMockUser
     @DisplayName("Logout Without CSRF - should return Forbidden status")

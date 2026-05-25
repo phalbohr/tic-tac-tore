@@ -27,7 +27,8 @@ public class SecurityConfig {
             "/actuator/health",
             "/h2-console/**",
             "/v3/api-docs/**",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+            "/api/auth/test-login"
     };
     private static final String ERR_UNAUTHORIZED = "Unauthorized";
 

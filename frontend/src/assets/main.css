@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+@theme {
+  --color-background: #171211;
+  --color-on-surface: #ebe0dd;
+  --color-surface-container-highest: #393431;
+  --color-surface-container-low: #1f1b19;
+  --color-primary: #a1d494;
+  --color-secondary: #ffb59f;
+  --color-primary-container: #2d5a27;
+  --color-on-surface-variant: #c2c9bb;
+  
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
