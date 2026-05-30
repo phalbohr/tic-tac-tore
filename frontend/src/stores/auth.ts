@@ -31,11 +31,18 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await fetch(PROFILE_ENDPOINT)
       if (response.ok) {
+        const contentType = response.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid server response format')
+        }
         const data = await response.json()
         profile.value = data
         if (data.language) {
           const localeStore = useLocaleStore()
-          localeStore.setLocale(data.language.toLowerCase() as any)
+          const lang = data.language.toLowerCase()
+          if (lang === 'en' || lang === 'de') {
+            localeStore.setLocale(lang)
+          }
         }
       } else {
         isMaybeAuthenticated.value = false
@@ -56,11 +63,19 @@ export const useAuthStore = defineStore('auth', () => {
     const previousProfile = { ...profile.value }
 
     // Optimistic UI updates
-    if (nickname !== undefined) profile.value.nickname = nickname
+    if (nickname !== undefined) {
+      const sanitized = nickname.replace(/[^a-zA-Z0-9]/g, '')
+      if (sanitized.length > 0) {
+        profile.value.nickname = sanitized
+      }
+    }
     if (language !== undefined) {
       profile.value.language = language
       const localeStore = useLocaleStore()
-      localeStore.setLocale(language.toLowerCase() as any)
+      const lang = language.toLowerCase()
+      if (lang === 'en' || lang === 'de') {
+        localeStore.setLocale(lang)
+      }
     }
 
     try {
@@ -80,32 +95,43 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (!response.ok) {
         profile.value = previousProfile
-        if (previousProfile.language) {
-          const localeStore = useLocaleStore()
-          localeStore.setLocale(previousProfile.language.toLowerCase() as any)
+        const localeStore = useLocaleStore()
+        const prevLang = (previousProfile.language || 'EN').toLowerCase()
+        if (prevLang === 'en' || prevLang === 'de') {
+          localeStore.setLocale(prevLang)
         }
-        const errorText = await response.text()
         let errorMessage = 'Failed to update profile'
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMessage = errorData.message || errorMessage
-        } catch {
-          // ignore
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.message || errorMessage
+          } catch {
+            // ignore
+          }
         }
         throw new Error(errorMessage)
       }
 
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid server response format')
+      }
       const data = await response.json()
       profile.value = data
       if (data.language) {
         const localeStore = useLocaleStore()
-        localeStore.setLocale(data.language.toLowerCase() as any)
+        const lang = data.language.toLowerCase()
+        if (lang === 'en' || lang === 'de') {
+          localeStore.setLocale(lang)
+        }
       }
     } catch (e) {
       profile.value = previousProfile
-      if (previousProfile.language) {
-        const localeStore = useLocaleStore()
-        localeStore.setLocale(previousProfile.language.toLowerCase() as any)
+      const localeStore = useLocaleStore()
+      const prevLang = (previousProfile.language || 'EN').toLowerCase()
+      if (prevLang === 'en' || prevLang === 'de') {
+        localeStore.setLocale(prevLang)
       }
       throw e
     }

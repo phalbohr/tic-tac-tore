@@ -13,6 +13,7 @@ const selectedLanguage = ref('EN')
 const isDropdownOpen = ref(false)
 const message = ref('')
 const error = ref('')
+const isUpdating = ref(false)
 
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
@@ -33,25 +34,35 @@ function toggleDropdown() {
 }
 
 async function selectLanguage(lang: 'EN' | 'DE') {
+  if (isUpdating.value) return
+  isUpdating.value = true
+  const previousLang = selectedLanguage.value
   selectedLanguage.value = lang
   isDropdownOpen.value = false
   error.value = ''
   message.value = ''
   try {
     await authStore.updateProfile(undefined, lang)
-  } catch (err: any) {
-    error.value = err.message || t('common.error')
+  } catch (err) {
+    selectedLanguage.value = previousLang
+    error.value = err instanceof Error ? err.message : t('common.error')
+  } finally {
+    isUpdating.value = false
   }
 }
 
 async function handleSave() {
+  if (isUpdating.value) return
+  isUpdating.value = true
   message.value = ''
   error.value = ''
   try {
     await authStore.updateProfile(nickname.value, selectedLanguage.value)
     message.value = t('cabinet.successMessage')
-  } catch (err: any) {
-    error.value = err.message || t('common.error')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('common.error')
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -77,7 +88,7 @@ function goBack() {
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
         <div class="relative group">
-          <div class="w-24 h-24 rounded-xl overflow-hidden border-4 border-surface-container-highest shadow-2xl bg-surface-container-low">
+          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
             <img 
               v-if="authStore.profile" 
               :src="authStore.profile.avatar" 
@@ -93,10 +104,10 @@ function goBack() {
       </section>
 
       <!-- Feedback Messages -->
-      <div v-if="message" class="p-3 bg-primary-container/20 text-primary border border-primary/20 rounded-xl text-xs font-semibold text-center">
+      <div v-if="message" data-testid="success-message" class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center">
         {{ message }}
       </div>
-      <div v-if="error" class="p-3 bg-red-950/40 text-red-400 border border-red-900/30 rounded-xl text-xs font-semibold text-center">
+      <div v-if="error" data-testid="error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
         {{ error }}
       </div>
 
@@ -111,7 +122,7 @@ function goBack() {
             id="nickname"
             v-model="nickname"
             type="text"
-            class="w-full bg-surface-container-highest border-b-2 border-primary text-on-surface px-4 py-2.5 rounded-t-lg focus:outline-none focus:ring-0 font-headline text-base transition-all"
+            class="w-full bg-surface-container-highest text-on-surface px-4 py-2.5 rounded-lg focus:outline-none focus:ring-0 font-headline text-base transition-all"
             placeholder="Enter nickname"
           />
           <p class="text-[9px] text-on-surface-variant font-headline italic flex items-center gap-2 px-1">
@@ -133,7 +144,8 @@ function goBack() {
               aria-label="Language"
               :aria-expanded="isDropdownOpen"
               @click="toggleDropdown"
-              class="w-full flex justify-between items-center bg-surface-container-low text-on-surface px-4 py-2.5 rounded-lg border border-surface-container-highest font-headline text-sm hover:bg-surface-container-highest/50 transition-colors"
+              data-testid="language-select"
+              class="w-full flex justify-between items-center bg-surface-container-low text-on-surface px-4 py-2.5 rounded-lg font-headline text-sm hover:bg-surface-container-highest/50 transition-colors"
             >
               <span>{{ selectedLanguage === 'EN' ? t('cabinet.english') : t('cabinet.german') }}</span>
               <span class="material-symbols-outlined text-sm">expand_more</span>
@@ -143,10 +155,11 @@ function goBack() {
             <div 
               v-if="isDropdownOpen"
               role="listbox"
-              class="absolute z-10 w-full mt-1 bg-surface-container-highest border border-surface-container-highest rounded-lg shadow-xl py-1 overflow-hidden"
+              class="absolute z-10 w-full mt-1 bg-surface-container-highest rounded-lg shadow-xl py-1 overflow-hidden"
             >
               <div 
                 role="option"
+                data-testid="lang-en"
                 :aria-selected="selectedLanguage === 'EN'"
                 @click="selectLanguage('EN')"
                 class="px-4 py-2 text-sm font-headline cursor-pointer hover:bg-primary-container/20 hover:text-primary transition-colors flex items-center gap-2"
@@ -155,6 +168,7 @@ function goBack() {
               </div>
               <div 
                 role="option"
+                data-testid="lang-de"
                 :aria-selected="selectedLanguage === 'DE'"
                 @click="selectLanguage('DE')"
                 class="px-4 py-2 text-sm font-headline cursor-pointer hover:bg-primary-container/20 hover:text-primary transition-colors flex items-center gap-2"
@@ -171,6 +185,7 @@ function goBack() {
     <footer class="w-full max-w-md px-6 pb-6 pt-2">
       <button 
         @click="handleSave"
+        data-testid="save-button"
         class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-background font-headline font-extrabold uppercase tracking-[0.2em] shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3"
       >
         {{ t('common.save') }}

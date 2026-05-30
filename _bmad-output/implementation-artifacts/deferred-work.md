@@ -30,3 +30,6 @@
 - [ ] [Review][Defer] Missing Null Check in generateUniqueNickname [src/main/java/com/tictactore/service/UserService.java]
 - [ ] [Review][Defer] High Collision Probability in Nickname Suffix [src/main/java/com/tictactore/service/UserService.java]
 - [ ] [Review][Defer] E2E Test Bypasses Backend with Complete API Mocking [frontend/e2e/profile-generation.spec.ts]
+
+## Deferred from: code review of 1-4-profile-management-in-personal-cabinet (2026-05-30)
+- [x] [Review][Defer] Unhandled OptimisticLockingFailureException on concurrent updates [UserService.java] — deferred, pre-existing

@@ -44,6 +44,20 @@ public class UserService {
                 .orElseGet(() -> createNewUser(email, providerId));
     }
 
+    @Transactional
+    public User findOrCreateTestUser(String email, String nickname) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .email(email)
+                            .nickname(nickname)
+                            .avatar(generateDeterministicAvatar(email))
+                            .language("EN")
+                            .build();
+                    return userRepository.save(newUser);
+                });
+    }
+
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
@@ -129,7 +143,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (request.getNickname() != null) {
+        if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
             String sanitized = sanitizeNickname(request.getNickname());
             if (sanitized.isEmpty()) {
                 throw new IllegalArgumentException("Nickname cannot be empty");
