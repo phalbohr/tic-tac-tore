@@ -1,6 +1,6 @@
 # Story 1.4: Profile Management in Personal Cabinet
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -90,6 +90,35 @@ So that I can personalize my experience.
   - [x] Implement E2E tests in `frontend/e2e/profile-management.spec.ts`
   - [x] Run `./scripts/ci-local.sh` and ensure everything passes
 
+### Review Findings
+
+- [x] [Review][Patch] Exception message swallowed in UserController resulting in an empty 400 response body [UserController.java]
+- [x] [Review][Patch] Migration script fails if existing rows have NULL nickname [V2__add_profile_fields.sql]
+- [x] [Review][Patch] Migration script alters incorrect table name ("users" instead of "user") [V2__add_profile_fields.sql]
+- [x] [Review][Patch] Critical Security Backdoor in AuthController test-login endpoint [AuthController.java]
+- [x] [Review][Patch] UI State Desync on Language Change Failure [Cabinet.vue / auth.ts]
+- [x] [Review][Patch] Optimistic UI Data Mismatch for Nickname [auth.ts]
+- [x] [Review][Patch] Violation of the "No-Line" architectural style rule in Cabinet and HomeHub [Cabinet.vue, HomeHub.vue]
+- [x] [Review][Patch] Missing Input Validation Limits on Nickname (ReDoS/Truncation risk) [UpdateProfileRequest.java, UserService.java]
+- [x] [Review][Patch] Brittle E2E Test State due to Shared DB [profile-management.spec.ts]
+- [x] [Review][Patch] Hardcoded translated strings used in E2E tests [profile-management.spec.ts]
+- [x] [Review][Patch] Mixed Arrange/Act/Assert blocks violating strict AAA formatting pattern [profile-management.spec.ts, UserControllerTest.java]
+- [x] [Review][Defer] Unhandled OptimisticLockingFailureException on concurrent updates [UserService.java] — deferred, pre-existing
+- [x] [Review][Patch] AuthController uses fragile runtime profile check instead of @Profile for test-login [AuthController.java]
+- [x] [Review][Patch] ProfileApi and UserController degrade API contract by returning ResponseEntity<?> [ProfileApi.java, UserController.java]
+- [x] [Review][Patch] UserController inline exception handling causes NPE risk and violates @RestControllerAdvice pattern [UserController.java]
+- [x] [Review][Patch] Optimistic UI silently strips characters and shows empty state if only special chars are typed [auth.ts]
+- [x] [Review][Patch] E2E test data generation uses Date.now() risking collisions in parallel runs [profile-management.spec.ts]
+- [x] [Review][Patch] E2E assertions for language switch check dropdown label instead of actual UI translation [profile-management.spec.ts]
+- [x] [Review][Patch] TypeScript safety degraded with explicit any casts [auth.ts, Cabinet.vue]
+- [x] [Review][Patch] Redundant nickname length validation in both DTO and Service [UserService.java, UpdateProfileRequest.java]
+- [x] [Review][Patch] UI vulnerable to raw HTML bleed if API proxy fails with non-JSON response [auth.ts, Cabinet.vue]
+- [x] [Review][Patch] SQL migration acquires exclusive table lock on production data [V2__add_profile_fields.sql]
+- [x] [Review][Patch] Valid partial language-only updates are incorrectly rejected [UserService.java]
+- [x] [Review][Patch] Cabinet UI vulnerable to race condition on rapid language selection [Cabinet.vue]
+- [x] [Review][Patch] SQL migration uses comment to bypass required table name constraint [V2__add_profile_fields.sql]
+- [x] [Review][Patch] Persistent violations of strict AAA formatting pattern [profile-management.spec.ts, UserControllerTest.java]
+
 ## File List
 
 - `src/main/resources/db/migration/V2__add_profile_fields.sql`: New Flyway migration script
@@ -119,7 +148,7 @@ So that I can personalize my experience.
 
 ## Status
 
-Status: review
+Status: in-progress
 
 ## Dev Agent Record
 
@@ -136,3 +165,21 @@ Status: review
 
 All tasks completed successfully. Real database authentication added for E2E tests by using a public GET `/api/auth/test-login` endpoint. DB migration script added fields `last_nickname_update` and `language` to User entity. The nickname cooldown logic verified in unit tests via mock `Clock`. Instant language toggling EN/DE verified in E2E tests using isolated test users to prevent DB state pollution. All local CI validation checks (`./scripts/ci-local.sh`) passed 100% green.
 
+- [ ] [Review][Patch] Reckless Environment Scoping for Backdoor [TestAuthController.java]
+- [ ] [Review][Patch] Catastrophic SQL Migration Risk [V2__add_profile_fields.sql]
+- [ ] [Review][Patch] Table Lock Risk on Large Datasets [V2__add_profile_fields.sql]
+- [ ] [Review][Patch] Double Execution of Rollback Logic [auth.ts]
+- [ ] [Review][Patch] Local UI State Desync on API Failure [Cabinet.vue]
+- [ ] [Review][Patch] Ghosting Blank Inputs / Nickname whitespace [UserService.java]
+- [ ] [Review][Patch] Cosmetic-Only DTO Validation / Missing @Valid [UpdateProfileRequest.java, UserController.java]
+- [ ] [Review][Patch] Missing Visual Feedback for Async Operations [Cabinet.vue]
+- [ ] [Review][Patch] Frontend and Backend Validation Schism [auth.ts]
+- [ ] [Review][Patch] Information Leakage via Generic Exception Handling [GlobalExceptionHandler.java]
+- [ ] [Review][Patch] Deceptive Test Data Seeding [UserService.java]
+- [ ] [Review][Patch] Hollow E2E Test Assertions [profile-management.spec.ts]
+- [ ] [Review][Patch] Inefficient Redundant API Calls [Cabinet.vue]
+- [ ] [Review][Patch] Content-Type header has different casing [auth.ts]
+- [ ] [Review][Patch] Concurrent testLogin calls with same email [UserService.java]
+- [ ] [Review][Patch] E2E Test violates strict AAA formatting pattern [profile-management.spec.ts]
+- [ ] [Review][Patch] API mapping annotation placed in Controller instead of API interface [ProfileApi.java, UserController.java]
+- [ ] [Review][Patch] Cabinet input field state desynchronizes after nickname sanitization [Cabinet.vue]

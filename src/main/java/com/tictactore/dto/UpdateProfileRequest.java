@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class UpdateProfileRequest {
 
     @Schema(description = "New nickname to set", example = "newnickname")
+    @jakarta.validation.constraints.Size(max = 255, message = "Nickname must be at most 255 characters")
     private String nickname;
 
     @Schema(description = "New interface language (EN/DE)", example = "EN")

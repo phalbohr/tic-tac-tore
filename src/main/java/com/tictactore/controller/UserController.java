@@ -24,18 +24,14 @@ public class UserController implements ProfileApi {
             return ResponseEntity.status(401).build();
         }
         
-        try {
-            var user = userService.getProfile(principal.getId());
-            var profile = ProfileDto.builder()
-                    .nickname(user.getNickname())
-                    .avatar(user.getAvatar())
-                    .language(user.getLanguage())
-                    .build();
-                    
-            return ResponseEntity.ok(profile);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        var user = userService.getProfile(principal.getId());
+        var profile = ProfileDto.builder()
+                .nickname(user.getNickname())
+                .avatar(user.getAvatar())
+                .language(user.getLanguage())
+                .build();
+                
+        return ResponseEntity.ok(profile);
     }
 
     @Override
@@ -48,20 +44,13 @@ public class UserController implements ProfileApi {
             return ResponseEntity.status(401).build();
         }
 
-        try {
-            var user = userService.updateProfile(principal.getId(), request);
-            var profile = ProfileDto.builder()
-                    .nickname(user.getNickname())
-                    .avatar(user.getAvatar())
-                    .language(user.getLanguage())
-                    .build();
-                    
-            return ResponseEntity.ok(profile);
-        } catch (IllegalArgumentException e) {
-            if ("User not found".equals(e.getMessage())) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.badRequest().build();
-        }
+        var user = userService.updateProfile(principal.getId(), request);
+        var profile = ProfileDto.builder()
+                .nickname(user.getNickname())
+                .avatar(user.getAvatar())
+                .language(user.getLanguage())
+                .build();
+                
+        return ResponseEntity.ok(profile);
     }
 }

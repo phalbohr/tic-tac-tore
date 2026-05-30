@@ -73,12 +73,13 @@ class UserControllerTest {
                 .build();
         when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
 
-        mockMvc.perform(patch("/api/v1/profile/me")
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nickname\":\"newNickname\",\"language\":\"DE\"}"))
-                .andExpect(status().isOk())
+                        .content("{\"nickname\":\"newNickname\",\"language\":\"DE\"}"));
+
+        result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname").value("newNickname"))
                 .andExpect(jsonPath("$.language").value("DE"))
                 .andExpect(jsonPath("$.avatar").value("avatar-url"));
@@ -101,11 +102,13 @@ class UserControllerTest {
         when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class)))
                 .thenThrow(new IllegalArgumentException("Nickname can only be changed once every 30 days"));
 
-        mockMvc.perform(patch("/api/v1/profile/me")
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nickname\":\"newNickname\"}"))
-                .andExpect(status().isBadRequest());
+                        .content("{\"nickname\":\"newNickname\"}"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Nickname can only be changed once every 30 days"));
     }
 }

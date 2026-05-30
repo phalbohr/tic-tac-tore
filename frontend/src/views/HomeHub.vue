@@ -24,13 +24,13 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
     <!-- Header -->
-    <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50 border-b border-surface-container-highest/20">
+    <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50">
       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
       <RouterLink to="/cabinet" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <img 
           :src="authStore.profile.avatar" 
           alt="Avatar" 
-          class="w-8 h-8 rounded-lg border border-surface-container-highest bg-white"
+          class="w-8 h-8 rounded-lg bg-white"
         />
       </RouterLink>
     </header>
@@ -50,7 +50,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <img 
             :src="authStore.profile.avatar" 
             alt="User Avatar" 
-            class="w-24 h-24 rounded-xl border-4 border-surface-container-highest shadow-2xl bg-surface-container-low"
+            class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low"
           />
           <p class="text-on-surface text-2xl font-bold font-headline mt-2">
             {{ t('home.welcomeBack') }}, {{ authStore.profile.nickname }}
@@ -65,7 +65,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         
         <button 
           @click="authStore.logout()" 
-          class="px-6 py-2.5 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors font-medium"
+          class="px-6 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium"
         >
           {{ t('auth.signOut') }}
         </button>
