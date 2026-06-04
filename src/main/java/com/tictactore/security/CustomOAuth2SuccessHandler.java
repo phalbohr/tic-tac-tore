@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -27,8 +27,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private static final String ATTR_EMAIL = "email";
     private static final String ATTR_SUB = "sub";
     private static final String ERROR_MISSING_ATTRIBUTES = "Required attributes missing from OAuth2 provider";
-    private static final String COOKIE_PATH = "/";
-    private static final String COOKIE_SAME_SITE = "Lax";
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -53,21 +51,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         var isSecure = request.isSecure();
         var maxAge = Duration.ofMillis(properties.getJwt().getExpiration());
 
-        var authCookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwt)
-                .httpOnly(true)
-                .secure(isSecure)
-                .path(COOKIE_PATH)
-                .maxAge(maxAge)
-                .sameSite(COOKIE_SAME_SITE)
-                .build();
-
-        var sessionCookie = ResponseCookie.from(SESSION_COOKIE_NAME, SESSION_COOKIE_VALUE)
-                .httpOnly(false)
-                .secure(isSecure)
-                .path(COOKIE_PATH)
-                .maxAge(maxAge)
-                .sameSite(COOKIE_SAME_SITE)
-                .build();
+        var authCookie = com.tictactore.util.CookieUtils.buildCookie(AUTH_COOKIE_NAME, jwt, isSecure, true, maxAge);
+        var sessionCookie = com.tictactore.util.CookieUtils.buildCookie(SESSION_COOKIE_NAME, SESSION_COOKIE_VALUE, isSecure, false, maxAge);
 
         response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());

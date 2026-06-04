@@ -18,6 +18,7 @@ public interface ProfileApi {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @org.springframework.web.bind.annotation.GetMapping("/me")
     ResponseEntity<ProfileDto> getMyProfile(@AuthenticationPrincipal User user);
 
     @Operation(summary = "Update current user profile")
@@ -27,8 +28,9 @@ public interface ProfileApi {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @org.springframework.web.bind.annotation.PatchMapping("/me")
     ResponseEntity<ProfileDto> updateProfile(
             @AuthenticationPrincipal User user,
-            com.tictactore.dto.UpdateProfileRequest request
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.tictactore.dto.UpdateProfileRequest request
     );
 }

@@ -100,7 +100,7 @@ class UserControllerTest {
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
         when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class)))
-                .thenThrow(new IllegalArgumentException("Nickname can only be changed once every 30 days"));
+                .thenThrow(new com.tictactore.exception.ValidationException("Nickname can only be changed once every 30 days"));
 
         var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))

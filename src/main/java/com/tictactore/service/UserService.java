@@ -61,7 +61,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
@@ -141,22 +141,22 @@ public class UserService {
     @Transactional
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
 
         if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
             String sanitized = sanitizeNickname(request.getNickname());
             if (sanitized.isEmpty()) {
-                throw new IllegalArgumentException("Nickname cannot be empty");
+                throw new com.tictactore.exception.ValidationException("Nickname cannot be empty");
             }
             if (!sanitized.equals(user.getNickname())) {
                 if (user.getLastNicknameUpdate() != null) {
                     Instant nextAllowedUpdate = user.getLastNicknameUpdate().plus(30, ChronoUnit.DAYS);
                     if (Instant.now(clock).isBefore(nextAllowedUpdate)) {
-                        throw new IllegalArgumentException("Nickname can only be changed once every 30 days");
+                        throw new com.tictactore.exception.ValidationException("Nickname can only be changed once every 30 days");
                     }
                 }
                 if (userRepository.existsByNickname(sanitized)) {
-                    throw new IllegalArgumentException("Nickname already taken");
+                    throw new com.tictactore.exception.ValidationException("Nickname already taken");
                 }
                 user.setNickname(sanitized);
                 user.setLastNicknameUpdate(Instant.now(clock));
@@ -166,7 +166,7 @@ public class UserService {
         if (request.getLanguage() != null) {
             String lang = request.getLanguage().toUpperCase();
             if (!lang.equals("EN") && !lang.equals("DE")) {
-                throw new IllegalArgumentException("Language must be EN or DE");
+                throw new com.tictactore.exception.ValidationException("Language must be EN or DE");
             }
             user.setLanguage(lang);
         }
@@ -174,7 +174,7 @@ public class UserService {
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Nickname already taken", e);
+            throw new com.tictactore.exception.ValidationException("Nickname already taken");
         }
     }
 }

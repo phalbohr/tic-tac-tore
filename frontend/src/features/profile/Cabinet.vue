@@ -58,6 +58,9 @@ async function handleSave() {
   error.value = ''
   try {
     await authStore.updateProfile(nickname.value, selectedLanguage.value)
+    if (authStore.profile) {
+      nickname.value = authStore.profile.nickname
+    }
     message.value = t('cabinet.successMessage')
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('common.error')

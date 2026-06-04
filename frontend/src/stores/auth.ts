@@ -94,12 +94,6 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       if (!response.ok) {
-        profile.value = previousProfile
-        const localeStore = useLocaleStore()
-        const prevLang = (previousProfile.language || 'EN').toLowerCase()
-        if (prevLang === 'en' || prevLang === 'de') {
-          localeStore.setLocale(prevLang)
-        }
         let errorMessage = 'Failed to update profile'
         const contentType = response.headers.get('content-type')
         if (contentType && contentType.includes('application/json')) {

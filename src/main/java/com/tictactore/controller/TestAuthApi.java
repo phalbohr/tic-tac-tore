@@ -15,9 +15,10 @@ public interface TestAuthApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully logged in test user")
     })
+    @org.springframework.web.bind.annotation.GetMapping("/test-login")
     ResponseEntity<Void> testLogin(
-            String email,
-            String nickname,
+            @org.springframework.web.bind.annotation.RequestParam String email,
+            @org.springframework.web.bind.annotation.RequestParam String nickname,
             HttpServletRequest request,
             HttpServletResponse response
     );

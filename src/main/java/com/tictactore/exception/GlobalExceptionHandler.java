@@ -10,11 +10,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
-        if ("User not found".equals(e.getMessage())) {
-            return ResponseEntity.notFound().build();
-        }
+    @ExceptionHandler(com.tictactore.exception.ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(com.tictactore.exception.ResourceNotFoundException e) {
+        return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(com.tictactore.exception.ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(com.tictactore.exception.ValidationException e) {
         String msg = e.getMessage() != null ? e.getMessage() : "Invalid input";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
     }

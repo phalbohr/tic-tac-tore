@@ -17,24 +17,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Profile("!prod")
+@Profile({"test", "e2e"})
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class TestAuthController implements TestAuthApi {
 
-    private static final String COOKIE_PATH = "/";
-    private static final String COOKIE_SAME_SITE = "Lax";
 
     private final UserService userService;
     private final JwtService jwtService;
     private final ApplicationProperties properties;
 
     @Override
-    @GetMapping("/test-login")
     public ResponseEntity<Void> testLogin(
-            @RequestParam String email,
-            @RequestParam String nickname,
+            String email,
+            String nickname,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
@@ -44,21 +41,11 @@ public class TestAuthController implements TestAuthApi {
         boolean isSecure = request.isSecure();
         java.time.Duration maxAge = java.time.Duration.ofMillis(properties.getJwt().getExpiration());
 
-        ResponseCookie authCookie = ResponseCookie.from(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, jwt)
-                .httpOnly(true)
-                .secure(isSecure)
-                .path(COOKIE_PATH)
-                .maxAge(maxAge)
-                .sameSite(COOKIE_SAME_SITE)
-                .build();
+        ResponseCookie authCookie = com.tictactore.util.CookieUtils.buildCookie(
+                CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, jwt, isSecure, true, maxAge);
 
-        ResponseCookie sessionCookie = ResponseCookie.from(CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, "true")
-                .httpOnly(false)
-                .secure(isSecure)
-                .path(COOKIE_PATH)
-                .maxAge(maxAge)
-                .sameSite(COOKIE_SAME_SITE)
-                .build();
+        ResponseCookie sessionCookie = com.tictactore.util.CookieUtils.buildCookie(
+                CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, "true", isSecure, false, maxAge);
 
         response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
