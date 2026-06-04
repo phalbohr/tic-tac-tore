@@ -16,4 +16,5 @@ public interface AuthApi {
             @ApiResponse(responseCode = "200", description = "Successfully logged out")
     })
     ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response);
+
 }

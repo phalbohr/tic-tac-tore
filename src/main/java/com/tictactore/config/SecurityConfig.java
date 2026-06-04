@@ -34,11 +34,17 @@ public class SecurityConfig {
     private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CsrfCookieFilter csrfCookieFilter;
+    private final org.springframework.core.env.Environment env;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         var requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName(null);
+
+        java.util.List<String> publicEndpoints = new java.util.ArrayList<>(java.util.Arrays.asList(PUBLIC_ENDPOINTS));
+        if (env.acceptsProfiles(org.springframework.core.env.Profiles.of("test", "e2e"))) {
+            publicEndpoints.add("/api/auth/test-login");
+        }
 
         http
                 .csrf(csrf -> csrf
@@ -47,7 +53,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(publicEndpoints.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
