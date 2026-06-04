@@ -63,10 +63,12 @@ export const useAuthStore = defineStore('auth', () => {
     const previousProfile = { ...profile.value }
 
     // Optimistic UI updates
+    let finalNickname = nickname
     if (nickname !== undefined) {
       const sanitized = nickname.replace(/[^a-zA-Z0-9]/g, '')
       if (sanitized.length > 0) {
         profile.value.nickname = sanitized
+        finalNickname = sanitized
       }
     }
     if (language !== undefined) {
@@ -90,7 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ nickname, language })
+        body: JSON.stringify({ nickname: finalNickname, language })
       })
 
       if (!response.ok) {
