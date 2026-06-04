@@ -118,7 +118,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'cd .. && SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy ./mvnw spring-boot:run',
+      command: 'cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy ./mvnw spring-boot:run',
       port: 8080,
       reuseExistingServer: !process.env.CI,
     },

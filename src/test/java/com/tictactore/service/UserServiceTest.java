@@ -213,7 +213,7 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(id))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -272,7 +272,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
                 .hasMessage("Nickname can only be changed once every 30 days");
     }
 
@@ -305,7 +305,7 @@ class UserServiceTest {
         when(userRepository.existsByNickname("takenNickname")).thenReturn(true);
 
         assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
                 .hasMessage("Nickname already taken");
     }
 }
