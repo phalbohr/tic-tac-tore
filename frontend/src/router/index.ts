@@ -15,6 +15,11 @@ const router = createRouter({
       name: 'oauth2-redirect',
       component: OAuthRedirectHandler,
     },
+    {
+      path: '/cabinet',
+      name: 'cabinet',
+      component: () => import('@/features/profile/Cabinet.vue'),
+    },
   ],
 })
 

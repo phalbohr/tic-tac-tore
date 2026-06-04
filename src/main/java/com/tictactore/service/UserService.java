@@ -9,10 +9,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tictactore.dto.UpdateProfileRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -26,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserCreator userCreator;
     private final ApplicationProperties properties;
+    private final Clock clock;
     private final SecureRandom random = new SecureRandom();
 
     public User findOrCreate(String email, String providerId) {
@@ -39,10 +44,24 @@ public class UserService {
                 .orElseGet(() -> createNewUser(email, providerId));
     }
 
+    @Transactional
+    public User findOrCreateTestUser(String email, String nickname) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .email(email)
+                            .nickname(nickname)
+                            .avatar(generateDeterministicAvatar(email))
+                            .language("EN")
+                            .build();
+                    return userRepository.save(newUser);
+                });
+    }
+
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
@@ -72,8 +91,16 @@ public class UserService {
         throw new IllegalStateException("Failed to create user after retries due to database constraints", lastException);
     }
 
+    public String sanitizeNickname(String nickname) {
+        if (nickname == null) {
+            return "";
+        }
+        return nickname.replaceAll("[^a-zA-Z0-9]", "");
+    }
+
     private String generateUniqueNickname(String email) {
-        String baseNickname = email.split("@")[0].replaceAll("[^a-zA-Z0-9]", "");
+        String prefix = email.split("@")[0];
+        String baseNickname = sanitizeNickname(prefix);
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
@@ -108,6 +135,46 @@ public class UserService {
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    @Transactional
+    public User updateProfile(UUID userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+
+        if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
+            String sanitized = sanitizeNickname(request.getNickname());
+            if (sanitized.isEmpty()) {
+                throw new com.tictactore.exception.ValidationException("Nickname cannot be empty");
+            }
+            if (!sanitized.equals(user.getNickname())) {
+                if (user.getLastNicknameUpdate() != null) {
+                    Instant nextAllowedUpdate = user.getLastNicknameUpdate().plus(30, ChronoUnit.DAYS);
+                    if (Instant.now(clock).isBefore(nextAllowedUpdate)) {
+                        throw new com.tictactore.exception.ValidationException("Nickname can only be changed once every 30 days");
+                    }
+                }
+                if (userRepository.existsByNickname(sanitized)) {
+                    throw new com.tictactore.exception.ValidationException("Nickname already taken");
+                }
+                user.setNickname(sanitized);
+                user.setLastNicknameUpdate(Instant.now(clock));
+            }
+        }
+
+        if (request.getLanguage() != null) {
+            String lang = request.getLanguage().toUpperCase();
+            if (!lang.equals("EN") && !lang.equals("DE")) {
+                throw new com.tictactore.exception.ValidationException("Language must be EN or DE");
+            }
+            user.setLanguage(lang);
+        }
+
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new com.tictactore.exception.ValidationException("Nickname already taken");
         }
     }
 }

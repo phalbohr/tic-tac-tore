@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getCookie, deleteCookie } from '../utils/cookieUtils'
+import { useLocaleStore } from './locale'
 
 const SESSION_COOKIE_NAME = 'TTT_SESSION'
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
@@ -12,6 +13,7 @@ const METHOD_POST = 'POST'
 interface UserProfile {
   nickname: string
   avatar: string
+  language?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -29,7 +31,19 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await fetch(PROFILE_ENDPOINT)
       if (response.ok) {
-        profile.value = await response.json()
+        const contentType = response.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid server response format')
+        }
+        const data = await response.json()
+        profile.value = data
+        if (data.language) {
+          const localeStore = useLocaleStore()
+          const lang = data.language.toLowerCase()
+          if (lang === 'en' || lang === 'de') {
+            localeStore.setLocale(lang)
+          }
+        }
       } else {
         isMaybeAuthenticated.value = false
         profile.value = null
@@ -40,6 +54,82 @@ export const useAuthStore = defineStore('auth', () => {
       isMaybeAuthenticated.value = false
       profile.value = null
       deleteCookie(SESSION_COOKIE_NAME)
+    }
+  }
+
+  async function updateProfile(nickname?: string, language?: string) {
+    if (!profile.value) return
+
+    const previousProfile = { ...profile.value }
+
+    // Optimistic UI updates
+    let finalNickname = nickname
+    if (nickname !== undefined) {
+      const sanitized = nickname.replace(/[^a-zA-Z0-9]/g, '')
+      if (sanitized.length > 0) {
+        profile.value.nickname = sanitized
+        finalNickname = sanitized
+      }
+    }
+    if (language !== undefined) {
+      profile.value.language = language
+      const localeStore = useLocaleStore()
+      const lang = language.toLowerCase()
+      if (lang === 'en' || lang === 'de') {
+        localeStore.setLocale(lang)
+      }
+    }
+
+    try {
+      const csrfToken = getCookie(CSRF_COOKIE_NAME)
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      }
+      if (csrfToken) {
+        headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
+      }
+
+      const response = await fetch(PROFILE_ENDPOINT, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ nickname: finalNickname, language })
+      })
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to update profile'
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.message || errorMessage
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errorMessage)
+      }
+
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid server response format')
+      }
+      const data = await response.json()
+      profile.value = data
+      if (data.language) {
+        const localeStore = useLocaleStore()
+        const lang = data.language.toLowerCase()
+        if (lang === 'en' || lang === 'de') {
+          localeStore.setLocale(lang)
+        }
+      }
+    } catch (e) {
+      profile.value = previousProfile
+      const localeStore = useLocaleStore()
+      const prevLang = (previousProfile.language || 'EN').toLowerCase()
+      if (prevLang === 'en' || prevLang === 'de') {
+        localeStore.setLocale(prevLang)
+      }
+      throw e
     }
   }
 
@@ -75,5 +165,5 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
-  return { isAuthenticated, profile, setAuthenticated, fetchProfile, clearToken, logout }
+  return { isAuthenticated, profile, setAuthenticated, fetchProfile, updateProfile, clearToken, logout }
 })

@@ -46,13 +46,20 @@ class AuthControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    @MockBean
+    private com.tictactore.repository.UserRepository userRepository;
+
+    @MockBean
+    private com.tictactore.config.ApplicationProperties properties;
+
     @Test
     @WithMockUser
     @DisplayName("Logout Without CSRF - should return Forbidden status")
     void logout_withoutCsrf_returnsForbidden() throws Exception {
-        mockMvc.perform(post(ENDPOINT_LOGOUT)
-                .cookie(new Cookie(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, TOKEN_TEST)))
-                .andExpect(status().isForbidden());
+        var result = mockMvc.perform(post(ENDPOINT_LOGOUT)
+                .cookie(new Cookie(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, TOKEN_TEST)));
+
+        result.andExpect(status().isForbidden());
     }
 
     @Test
@@ -60,14 +67,14 @@ class AuthControllerTest {
     @DisplayName("Logout With CSRF - should revoke token and clear auth cookie")
     void logout_withCsrf_revokesTokenAndClearsCookie() throws Exception {
         when(jwtService.extractToken(any())).thenReturn(TOKEN_TEST);
-        
-        mockMvc.perform(post(ENDPOINT_LOGOUT)
+
+        var result = mockMvc.perform(post(ENDPOINT_LOGOUT)
                 .cookie(new Cookie(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, TOKEN_TEST))
-                .with(csrf()))
-                .andExpect(status().isOk())
+                .with(csrf()));
+
+        result.andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(MAX_AGE_ZERO)));
-
         verify(tokenRevocationService).revoke(TOKEN_TEST);
     }
 }

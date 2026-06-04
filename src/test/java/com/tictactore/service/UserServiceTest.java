@@ -13,6 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 
+import com.tictactore.dto.UpdateProfileRequest;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,6 +51,9 @@ class UserServiceTest {
     @Mock
     private ApplicationProperties.Avatar avatarConfig;
 
+    @Mock
+    private Clock clock;
+
     @InjectMocks
     private UserService userService;
 
@@ -55,6 +62,8 @@ class UserServiceTest {
         lenient().when(properties.getAvatar()).thenReturn(avatarConfig);
         lenient().when(avatarConfig.getApiUrl()).thenReturn("https://api.dicebear.com/7.x/identicon/svg?seed=");
         lenient().when(avatarConfig.getSalt()).thenReturn("default-avatar-salt-for-privacy");
+        lenient().when(clock.instant()).thenReturn(Instant.parse("2026-05-25T12:00:00Z"));
+        lenient().when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
     }
 
     @Test
@@ -204,7 +213,7 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(id))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -230,5 +239,73 @@ class UserServiceTest {
 
         assertThat(user.getNickname()).startsWith("new");
         assertThat(user.getNickname().length()).isEqualTo(11);
+    }
+
+    @Test
+    @DisplayName("Update Profile - should update nickname when cooldown passed")
+    void updateProfile_shouldUpdateNickname_whenCooldownPassed() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("oldNickname");
+        user.setLastNicknameUpdate(Instant.parse("2026-05-25T12:00:00Z").minus(31, java.time.temporal.ChronoUnit.DAYS));
+        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("newNickname").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.existsByNickname("newNickname")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.getNickname()).isEqualTo("newNickname");
+        assertThat(updatedUser.getLastNicknameUpdate()).isEqualTo(Instant.parse("2026-05-25T12:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw exception when cooldown not passed")
+    void updateProfile_shouldThrowException_whenCooldownNotPassed() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("oldNickname");
+        user.setLastNicknameUpdate(Instant.parse("2026-05-25T12:00:00Z").minus(15, java.time.temporal.ChronoUnit.DAYS));
+        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("newNickname").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Nickname can only be changed once every 30 days");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should sanitize nickname")
+    void updateProfile_shouldSanitizeNickname() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("oldNickname");
+        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("new_Nick-123!").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.existsByNickname("newNick123")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.getNickname()).isEqualTo("newNick123");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw exception when nickname not unique")
+    void updateProfile_shouldThrowException_whenNicknameNotUnique() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("oldNickname");
+        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("takenNickname").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.existsByNickname("takenNickname")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Nickname already taken");
     }
 }
