@@ -42,6 +42,11 @@
     "successMessage": "Profile updated successfully",
     "cooldownMessage": "Nickname can only be changed once every 30 days",
     "english": "Englisch",
-    "german": "Deutsch"
+    "german": "Deutsch",
+    "dangerZone": "Gefahrenzone",
+    "deleteAccount": "Konto löschen",
+    "deleteTitle": "Konto löschen",
+    "deleteConfirmMessage": "Diese Aktion ist unumkehrbar. Alle Ihre persönlichen Daten werden dauerhaft entfernt und Ihr Konto wird anonymisiert. Ihr Spielverlauf bleibt erhalten.",
+    "confirmDelete": "Löschen bestätigen"
   }
 }

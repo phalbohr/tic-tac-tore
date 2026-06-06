@@ -4,6 +4,7 @@ import com.tictactore.config.ApplicationProperties;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -307,5 +308,46 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updateProfile(userId, request))
                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
                 .hasMessage("Nickname already taken");
+    }
+
+    @Test
+    @DisplayName("Delete Account - should anonymize user data")
+    void deleteAccount_shouldAnonymizeUserData() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .language("RU")
+                .lastNicknameUpdate(Instant.now())
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.deleteAccount(userId);
+
+        verify(userRepository).save(argThat(savedUser -> 
+                savedUser.getId().equals(userId) &&
+                savedUser.getEmail().startsWith("deleted-") &&
+                savedUser.getEmail().endsWith("@tic-tac-tore.invalid") &&
+                savedUser.getNickname().startsWith("ex-player-") &&
+                "anonymous".equals(savedUser.getAvatar()) &&
+                savedUser.getProviderId() == null &&
+                savedUser.getLanguage() == null &&
+                savedUser.getLastNicknameUpdate() == null
+        ));
+    }
+
+    @Test
+    @DisplayName("Delete Account - should throw exception when user not found")
+    void deleteAccount_shouldThrowException_whenUserNotFound() {
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.deleteAccount(userId))
+                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("User not found");
     }
 }

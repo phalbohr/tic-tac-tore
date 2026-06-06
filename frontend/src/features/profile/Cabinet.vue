@@ -72,6 +72,26 @@ async function handleSave() {
 function goBack() {
   router.push('/')
 }
+
+const showDeleteModal = ref(false)
+const isDeleting = ref(false)
+
+async function confirmDelete() {
+  if (isDeleting.value) return
+  isDeleting.value = true
+  error.value = ''
+  message.value = ''
+  try {
+    await authStore.deleteAccount()
+    showDeleteModal.value = false
+    router.push('/')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('common.error')
+    showDeleteModal.value = false
+  } finally {
+    isDeleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -182,6 +202,21 @@ function goBack() {
           </div>
         </div>
       </div>
+
+      <!-- Danger Zone -->
+      <section class="pt-6 space-y-3">
+        <h3 class="font-headline text-[10px] font-bold uppercase tracking-widest text-red-400 ml-1">
+          {{ t('cabinet.dangerZone') }}
+        </h3>
+        <button 
+          @click="showDeleteModal = true"
+          data-testid="delete-account-button"
+          class="w-full py-3 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
+        >
+          <span class="material-symbols-outlined text-sm">delete_forever</span>
+          {{ t('cabinet.deleteAccount') }}
+        </button>
+      </section>
     </main>
 
     <!-- Footer Action -->
@@ -198,5 +233,61 @@ function goBack() {
         Tic-Tac-Tore • Clubhouse Edition
       </p>
     </footer>
+
+    <!-- Delete Confirmation Modal -->
+    <Transition name="fade">
+      <div 
+        v-if="showDeleteModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl">
+          <div class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2">
+              <span class="material-symbols-outlined text-2xl">warning</span>
+            </div>
+            <h2 class="font-headline text-lg font-bold text-on-surface">
+              {{ t('cabinet.deleteTitle') }}
+            </h2>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              {{ t('cabinet.deleteConfirmMessage') }}
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <button 
+              @click="confirmDelete"
+              data-testid="confirm-delete-button"
+              :disabled="isDeleting"
+              class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-headline font-extrabold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <span v-if="isDeleting" class="animate-spin material-symbols-outlined text-sm">sync</span>
+              <span v-else>{{ t('cabinet.confirmDelete') }}</span>
+            </button>
+            
+            <button 
+              @click="showDeleteModal = false"
+              :disabled="isDeleting"
+              class="w-full py-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface font-headline font-bold text-xs transition-colors"
+            >
+              {{ t('common.cancel') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
