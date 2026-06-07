@@ -13,6 +13,7 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RBucket;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
 
 import com.tictactore.service.JwtService;
 
@@ -155,7 +156,7 @@ class RedisTokenRevocationServiceTest {
     @Test
     @DisplayName("Is Revoked - should fail closed (return true) when Redis is down")
     void testIsRevoked_failClosed_whenRedisDown() {
-        when(script.eval(any(), anyString(), any(), anyList(), any())).thenThrow(new RuntimeException(ERR_REDIS));
+        when(script.eval(any(), anyString(), any(), anyList(), any())).thenThrow(new RedisException(ERR_REDIS));
 
         var result = service.isRevoked(TOKEN_TEST);
 
