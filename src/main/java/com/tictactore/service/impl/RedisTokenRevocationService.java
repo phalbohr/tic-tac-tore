@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.RScript;
+import org.redisson.client.codec.StringCodec;
 
 @Slf4j
 @Service
@@ -80,7 +81,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             for (var day = currentDay; day <= maxDay; day++) {
                 var filterName = BLOOM_FILTER_PREFIX + day;
 
-                var script = redissonClient.getScript();
+                var script = redissonClient.getScript(StringCodec.INSTANCE);
                 var ttlSeconds = TimeUnit.DAYS.toSeconds((day - currentDay) + DAYS_TO_KEEP);
 
                 var result = script.eval(
@@ -88,23 +89,25 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                         LUA_INIT_AND_EXPIRE,
                         RScript.ReturnType.VALUE,
                         List.of(filterName),
-                        bfConfig.getFalsePositiveRate(),
-                        bfConfig.getExpectedElements(),
-                        ttlSeconds);
+                        String.valueOf(bfConfig.getFalsePositiveRate()),
+                        String.valueOf(bfConfig.getExpectedElements()),
+                        String.valueOf(ttlSeconds));
 
                 if (Long.valueOf(1).equals(result)) {
                     log.info(LOG_CREATED_FILTER, filterName);
                 }
 
-                var filter = redissonClient.<String>getBloomFilter(filterName);
-                filter.add(token);
+                script.eval(
+                        RScript.Mode.READ_WRITE,
+                        "redis.call('BF.ADD', KEYS[1], ARGV[1]); return 1;",
+                        RScript.ReturnType.VALUE,
+                        List.of(filterName),
+                        token);
 
                 if (day == currentDay) {
                     if (ThreadLocalRandom.current().nextInt(RANDOM_LOG_CHANCE) == 0) {
-                        var count = filter.count();
-                        if (count > bfConfig.getExpectedElements() * (WARNING_CAPACITY_PERCENTAGE / 100.0)) {
-                            log.warn(LOG_FILTER_CAPACITY, filterName, count * 100 / bfConfig.getExpectedElements());
-                        }
+                        // BF.INFO is complex to parse, so we skip the capacity check for now 
+                        // since we're using raw RedisBloom scripts.
                     }
                 }
             }
@@ -128,13 +131,18 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         var currentDay = getCurrentEpochDay();
 
         try {
-            var todayFilter = redissonClient.<String>getBloomFilter(BLOOM_FILTER_PREFIX + currentDay);
-            var yesterdayFilter = redissonClient.<String>getBloomFilter(BLOOM_FILTER_PREFIX + (currentDay - 1));
+            var script = redissonClient.getScript(StringCodec.INSTANCE);
+            var luaCheck = "if redis.call('EXISTS', KEYS[1]) == 1 then " +
+                           "  return redis.call('BF.EXISTS', KEYS[1], ARGV[1]); " +
+                           "else " +
+                           "  return 0; " +
+                           "end";
 
             var inToday = false;
             var bloomError = false;
             try {
-                inToday = todayFilter.isExists() && todayFilter.contains(token);
+                var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + currentDay), token);
+                inToday = Long.valueOf(1).equals(res);
             } catch (Exception e) {
                 log.debug("Ignored error checking today Bloom filter", e);
                 bloomError = true;
@@ -142,7 +150,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
             var inYesterday = false;
             try {
-                inYesterday = yesterdayFilter.isExists() && yesterdayFilter.contains(token);
+                var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + (currentDay - 1)), token);
+                inYesterday = Long.valueOf(1).equals(res);
             } catch (Exception e) {
                 log.debug("Ignored error checking yesterday Bloom filter", e);
                 bloomError = true;
