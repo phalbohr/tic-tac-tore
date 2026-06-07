@@ -120,3 +120,18 @@ Gemini 3.5 Flash
 - `frontend/src/locales/en.json`
 - `frontend/src/stores/auth.ts`
 - `frontend/e2e/account-deletion.spec.ts`
+
+### Review Findings
+
+- [x] [Review][Patch] Unconditional Local Logout on API Failure — In `auth.ts`, local auth state and cookies are cleared inside a `finally` block, causing the frontend session to be wiped even if the API request throws an error.
+- [x] [Review][Patch] Hidden Error State in UI — In `Cabinet.vue`, if `confirmDelete()` encounters an error, it populates `error.value` but immediately closes the modal (`showDeleteModal.value = false`), hiding the error message.
+- [x] [Review][Patch] Undefined Constant Reference — `UserController.java` references `CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME` which is not defined, leading to compilation failure.
+- [x] [Review][Patch] Brittle Servlet Context Extraction — `UserController.deleteAccount` manually retrieves `HttpServletRequest` and `HttpServletResponse` instead of using method parameters.
+- [x] [Review][Patch] Unhandled Optimistic Locking Failure — `UserService.deleteAccount` modifies a versioned `User` entity but does not handle `ObjectOptimisticLockingFailureException`.
+- [x] [Review][Patch] Redundant Database Save — `UserService.deleteAccount` explicitly calls `userRepository.save(user)` on an attached entity inside a `@Transactional` block.
+- [x] [Review][Patch] Docker Compose Security and Portability Flaws — The `docker-compose.yaml` changes introduce `--protected-mode no` and hardcode `--loadmodule /opt/redis-stack/lib/redisbloom.so`.
+- [x] [Review][Patch] Out-of-Scope Refactoring / Inefficient Bloom Filter — The diff completely rewrites the Redis initialization logic in `RedisTokenRevocationService` to native Redisson methods which is inefficient and unrequested.
+- [x] [Review][Patch] Violation of Strict AAA Test Structure — The generated E2E test `account-deletion.spec.ts` violates the project's strict AAA testing standards by mixing assertions and setup steps.
+- [x] [Review][Patch] Re-anonymization of Already Deleted Accounts — `deleteAccount` has no check to see if the user is already anonymized, leading to re-anonymization on retries.
+- [x] [Review][Patch] Missing Frontend Avatar Anonymization Mapping — While backend avatar is updated to `"anonymous"`, there are no frontend changes to map this to an actual image asset.
+- [x] [Review][Patch] Incomplete E2E Validation of Protected Data Access — The E2E test only relies on frontend route guards and fails to actually fire a request to a protected API endpoint.

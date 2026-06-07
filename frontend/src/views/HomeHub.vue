@@ -28,10 +28,14 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
       <RouterLink to="/cabinet" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <img 
+          v-if="authStore.profile.avatar !== 'anonymous'"
           :src="authStore.profile.avatar" 
           alt="Avatar" 
           class="w-8 h-8 rounded-lg bg-white"
         />
+        <div v-else class="w-8 h-8 flex items-center justify-center bg-surface-container-highest text-on-surface-variant rounded-lg">
+          <span class="material-symbols-outlined text-sm">person_off</span>
+        </div>
       </RouterLink>
     </header>
 
@@ -48,10 +52,14 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <div v-else class="flex flex-col items-center gap-6 mt-12 w-full">
         <div v-if="authStore.profile" class="flex flex-col items-center gap-3">
           <img 
+            v-if="authStore.profile.avatar !== 'anonymous'"
             :src="authStore.profile.avatar" 
             alt="User Avatar" 
             class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low"
           />
+          <div v-else class="w-24 h-24 flex items-center justify-center bg-surface-container-highest text-on-surface-variant rounded-xl shadow-2xl">
+            <span class="material-symbols-outlined text-4xl">person_off</span>
+          </div>
           <p class="text-on-surface text-2xl font-bold font-headline mt-2">
             {{ t('home.welcomeBack') }}, {{ authStore.profile.nickname }}
           </p>

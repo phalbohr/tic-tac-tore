@@ -38,7 +38,13 @@ public class RedisTokenRevocationService implements TokenRevocationService {
     private static final int RANDOM_LOG_CHANCE = 10;
     private static final int DAYS_TO_KEEP = 2;
 
-
+    private static final String LUA_INIT_AND_EXPIRE = "if redis.call('EXISTS', KEYS[1]) == 0 then " +
+            "  redis.call('BF.RESERVE', KEYS[1], ARGV[1], ARGV[2]); " +
+            "  redis.call('EXPIRE', KEYS[1], ARGV[3]); " +
+            "  return 1; " +
+            "else " +
+            "  return 0; " +
+            "end";
 
     private final RedissonClient redissonClient;
     private final ApplicationProperties properties;
@@ -74,13 +80,24 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             for (var day = currentDay; day <= maxDay; day++) {
                 var filterName = BLOOM_FILTER_PREFIX + day;
 
-                var filter = redissonClient.<String>getBloomFilter(filterName);
-                if (filter.tryInit(bfConfig.getExpectedElements(), bfConfig.getFalsePositiveRate())) {
+                var script = redissonClient.getScript();
+                var ttlSeconds = TimeUnit.DAYS.toSeconds((day - currentDay) + DAYS_TO_KEEP);
+
+                var result = script.eval(
+                        RScript.Mode.READ_WRITE,
+                        LUA_INIT_AND_EXPIRE,
+                        RScript.ReturnType.VALUE,
+                        List.of(filterName),
+                        bfConfig.getFalsePositiveRate(),
+                        bfConfig.getExpectedElements(),
+                        ttlSeconds);
+
+                if (Long.valueOf(1).equals(result)) {
                     log.info(LOG_CREATED_FILTER, filterName);
                 }
+
+                var filter = redissonClient.<String>getBloomFilter(filterName);
                 filter.add(token);
-                var ttlSeconds = TimeUnit.DAYS.toSeconds((day - currentDay) + DAYS_TO_KEEP);
-                filter.expire(Duration.ofSeconds(ttlSeconds));
 
                 if (day == currentDay) {
                     if (ThreadLocalRandom.current().nextInt(RANDOM_LOG_CHANCE) == 0) {
