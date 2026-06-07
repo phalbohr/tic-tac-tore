@@ -14,8 +14,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+
+import io.jsonwebtoken.JwtException;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.RScript;
+import org.redisson.client.RedisException;
 import org.redisson.client.codec.StringCodec;
 
 @Slf4j
@@ -60,7 +63,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
         Date expirationDate;
         try {
             expirationDate = jwtService.extractExpirationDate(token);
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
             log.warn(ERR_UNPARSEABLE_TOKEN);
             return;
         }
@@ -116,7 +119,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             bucket.set(VALUE_REVOKED, tokenTtl);
 
             log.debug(LOG_TOKEN_REVOKED);
-        } catch (Exception e) {
+        } catch (RedisException e) {
             log.error(LOG_REVOKE_ERROR, e);
             throw new RuntimeException(ERR_REDIS_UNAVAILABLE, e);
         }
@@ -143,7 +146,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             try {
                 var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + currentDay), token);
                 inToday = Long.valueOf(1).equals(res);
-            } catch (Exception e) {
+            } catch (RedisException e) {
                 log.debug("Ignored error checking today Bloom filter", e);
                 bloomError = true;
             }
@@ -152,7 +155,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
             try {
                 var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + (currentDay - 1)), token);
                 inYesterday = Long.valueOf(1).equals(res);
-            } catch (Exception e) {
+            } catch (RedisException e) {
                 log.debug("Ignored error checking yesterday Bloom filter", e);
                 bloomError = true;
             }
@@ -168,7 +171,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
 
             var bucket = redissonClient.<String>getBucket(KEY_PREFIX + token);
             return bucket.isExists();
-        } catch (Exception e) {
+        } catch (RedisException e) {
             log.error(LOG_IS_REVOKED_ERROR, e);
             return true;
         }
