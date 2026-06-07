@@ -134,7 +134,7 @@ public class UserService {
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new IllegalStateException("SHA-256 algorithm not found", e);
         }
     }
 
