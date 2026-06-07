@@ -33,4 +33,18 @@ public interface ProfileApi {
             @AuthenticationPrincipal User user,
             @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.tictactore.dto.UpdateProfileRequest request
     );
+
+    @Operation(summary = "Delete current user account")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted account"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @org.springframework.web.bind.annotation.DeleteMapping("/me")
+    ResponseEntity<Void> deleteAccount(
+            @AuthenticationPrincipal User user,
+            @org.springframework.web.bind.annotation.RequestHeader(value = org.springframework.http.HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response
+    );
 }
+

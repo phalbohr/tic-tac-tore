@@ -1,0 +1,49 @@
+{
+  "success": true,
+  "subagent": "atdd-api-tests",
+  "tests": [
+    {
+      "file": "src/test/java/com/tictactore/service/UserServiceTest.java",
+      "content": "    @Test\n    @Disabled(\"ATDD Red Phase\")\n    @DisplayName(\"Delete Account - should anonymize user data\")\n    void deleteAccount_shouldAnonymizeUserData() {\n        UUID userId = UUID.randomUUID();\n        User user = User.builder()\n                .id(userId)\n                .email(\"test@example.com\")\n                .nickname(\"player1\")\n                .avatar(\"https://avatar.url\")\n                .providerId(\"google-123\")\n                .language(\"RU\")\n                .lastNicknameUpdate(Instant.now())\n                .build();\n        when(userRepository.findById(userId)).thenReturn(Optional.of(user));\n        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));\n\n        userService.deleteAccount(userId);\n\n        verify(userRepository).save(argThat(savedUser -> \n                savedUser.getId().equals(userId) &&\n                savedUser.getEmail().startsWith(\"deleted-\") &&\n                savedUser.getEmail().endsWith(\"@tic-tac-tore.invalid\") &&\n                savedUser.getNickname().startsWith(\"ex-player-\") &&\n                \"anonymous\".equals(savedUser.getAvatar()) &&\n                savedUser.getProviderId() == null &&\n                savedUser.getLanguage() == null &&\n                savedUser.getLastNicknameUpdate() == null\n        ));\n    }\n\n    @Test\n    @Disabled(\"ATDD Red Phase\")\n    @DisplayName(\"Delete Account - should throw exception when user not found\")\n    void deleteAccount_shouldThrowException_whenUserNotFound() {\n        UUID userId = UUID.randomUUID();\n        when(userRepository.findById(userId)).thenReturn(Optional.empty());\n\n        assertThatThrownBy(() -> userService.deleteAccount(userId))\n                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)\n                .hasMessageContaining(\"User not found\");\n    }",
+      "description": "Adds unit tests for user deletion: deleteAccount_shouldAnonymizeUserData (P0) ensures user data is successfully anonymized in line with GDPR requirements, and deleteAccount_shouldThrowException_whenUserNotFound (P1) ensures a ResourceNotFoundException is thrown if the user is missing. Requires import org.junit.jupiter.api.Disabled;.",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AD-04"
+      ],
+      "priority_coverage": {
+        "P0": 1,
+        "P1": 1,
+        "P2": 0,
+        "P3": 0
+      }
+    },
+    {
+      "file": "src/test/java/com/tictactore/controller/UserControllerTest.java",
+      "content": "    @Test\n    @Disabled(\"ATDD Red Phase\")\n    @DisplayName(\"DELETE /me - should return 204 and revoke token when authenticated\")\n    void deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated() throws Exception {\n        UUID userId = UUID.randomUUID();\n        User principal = User.builder()\n                .id(userId)\n                .email(\"test@example.com\")\n                .nickname(\"oldNickname\")\n                .build();\n        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(\n                principal,\n                null,\n                Collections.singletonList(new SimpleGrantedAuthority(\"ROLE_USER\"))\n        );\n        String token = \"test-jwt-token\";\n        when(jwtService.extractToken(any())).thenReturn(token);\n\n        var result = mockMvc.perform(delete(\"/api/v1/profile/me\")\n                        .with(authentication(auth))\n                        .with(csrf()));\n\n        result.andExpect(status().isNoContent());\n        verify(userService).deleteAccount(userId);\n        verify(tokenRevocationService).revoke(token);\n    }\n\n    @Test\n    @Disabled(\"ATDD Red Phase\")\n    @DisplayName(\"DELETE /me - should return 401 when unauthenticated\")\n    void deleteAccount_shouldReturn401_whenUnauthenticated() throws Exception {\n        var result = mockMvc.perform(delete(\"/api/v1/profile/me\")\n                        .with(csrf()));\n\n        result.andExpect(status().isUnauthorized());\n    }",
+      "description": "Adds API integration tests for user deletion endpoint: deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated (P0) verifies DELETE /api/v1/profile/me returns 204 and revokes the active token, and deleteAccount_shouldReturn401_whenUnauthenticated (P1) ensures access is denied without a valid token. Requires import org.junit.jupiter.api.Disabled; and import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;.",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AD-04"
+      ],
+      "priority_coverage": {
+        "P0": 1,
+        "P1": 1,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "import org.junit.jupiter.api.Disabled;",
+    "import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;"
+  ],
+  "knowledge_fragments_used": [
+    "data-factories",
+    "test-quality",
+    "test-levels-framework",
+    "test-priorities-matrix"
+  ],
+  "test_count": 4,
+  "tdd_phase": "RED",
+  "summary": "Generated 4 red-phase backend JUnit tests"
+}

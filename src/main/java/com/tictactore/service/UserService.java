@@ -177,4 +177,32 @@ public class UserService {
             throw new com.tictactore.exception.ValidationException("Nickname already taken");
         }
     }
+
+    @Transactional
+    public void deleteAccount(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+
+        if (user.getProviderId() == null && "anonymous".equals(user.getAvatar())) {
+            return;
+        }
+
+        UUID uuid = java.util.UUID.randomUUID();
+        user.setEmail("deleted-" + uuid + "@tic-tac-tore.invalid");
+        user.setNickname("ex-player-" + uuid);
+        user.setAvatar("anonymous");
+        user.setProviderId(null);
+        user.setLanguage(null);
+        user.setLastNicknameUpdate(null);
+
+        try {
+            userRepository.flush();
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            throw new IllegalStateException("Account was concurrently modified during deletion. Please try again.", e);
+        }
+    }
 }
+

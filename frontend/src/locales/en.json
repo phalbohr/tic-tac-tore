@@ -42,6 +42,11 @@
     "successMessage": "Profile updated successfully",
     "cooldownMessage": "Nickname can only be changed once every 30 days",
     "english": "English",
-    "german": "Deutsch"
+    "german": "Deutsch",
+    "dangerZone": "Danger Zone",
+    "deleteAccount": "Delete Account",
+    "deleteTitle": "Delete Account",
+    "deleteConfirmMessage": "This action is irreversible. All your personal data will be permanently removed, and your account will be anonymized. Your match history will be preserved.",
+    "confirmDelete": "Confirm Deletion"
   }
 }
