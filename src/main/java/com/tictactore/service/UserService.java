@@ -17,6 +17,8 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -116,15 +118,25 @@ public class UserService {
         }
 
         if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            int fallbackAttempts = 0;
-            do {
-                nickname = baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-                fallbackAttempts++;
-            } while (userRepository.existsByNickname(nickname) && fallbackAttempts < MAX_NICKNAME_ATTEMPTS);
+            List<String> candidates = new ArrayList<>();
+            for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+                candidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+            }
+
+            List<String> existing = userRepository.findExistingNicknames(candidates);
+
+            String selectedFallback = null;
+            for (String candidate : candidates) {
+                if (!existing.contains(candidate)) {
+                    selectedFallback = candidate;
+                    break;
+                }
+            }
             
-            if (fallbackAttempts >= MAX_NICKNAME_ATTEMPTS) {
+            if (selectedFallback == null) {
                 throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
             }
+            nickname = selectedFallback;
         }
 
         return nickname;
