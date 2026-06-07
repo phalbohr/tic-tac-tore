@@ -86,7 +86,7 @@ class RedisTokenRevocationServiceTest {
         when(bloomFilterConfig.getExpectedElements()).thenReturn(EXPECTED_ELEMENTS);
         when(bloomFilterConfig.getFalsePositiveRate()).thenReturn(FALSE_POSITIVE_RATE);
 
-        doReturn(script).when(redissonClient).getScript();
+        doReturn(script).when(redissonClient).getScript(org.redisson.client.codec.StringCodec.INSTANCE);
     }
 
     @Test
@@ -96,30 +96,22 @@ class RedisTokenRevocationServiceTest {
         when(jwtService.extractExpirationDate(TOKEN_TEST)).thenReturn(expirationDate);
 
         when(script.eval(any(), anyString(), any(), anyList(), any(), any(), any())).thenReturn(SCRIPT_RESULT_SUCCESS);
+        when(script.eval(eq(RScript.Mode.READ_WRITE), startsWith("redis.call('BF.ADD'"), any(), anyList(), eq(TOKEN_TEST))).thenReturn(SCRIPT_RESULT_SUCCESS);
 
-        when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
         when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
 
         service.revoke(TOKEN_TEST);
 
-        verify(redissonClient, atLeastOnce()).getScript();
+        verify(redissonClient, atLeastOnce()).getScript(org.redisson.client.codec.StringCodec.INSTANCE);
         verify(script, atLeastOnce()).eval(any(), anyString(), any(), anyList(), any(), any(), any());
-        verify(todayBloomFilter, atLeastOnce()).add(TOKEN_TEST);
+        verify(script, atLeastOnce()).eval(eq(RScript.Mode.READ_WRITE), startsWith("redis.call('BF.ADD'"), any(), anyList(), eq(TOKEN_TEST));
         verify(bucket).set(eq(VALUE_REVOKED), any(Duration.class));
     }
 
     @Test
     @DisplayName("Is Revoked - should return false when token not in bloom filter")
     void testIsRevoked_whenNotInBloomFilter() {
-        var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
-        var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - DAY_OFFSET);
-        
-        when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
-        when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
-        when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
-        when(yesterdayBloomFilter.isExists()).thenReturn(true);
-        when(yesterdayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
+        when(script.eval(eq(RScript.Mode.READ_ONLY), startsWith("if redis.call('EXISTS'"), any(), anyList(), any())).thenReturn(0L);
 
         var result = service.isRevoked(TOKEN_TEST);
 
@@ -133,12 +125,10 @@ class RedisTokenRevocationServiceTest {
         var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
         var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - DAY_OFFSET);
 
-        when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
-        when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
-        when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(false);
-        when(yesterdayBloomFilter.isExists()).thenReturn(true);
-        when(yesterdayBloomFilter.contains(TOKEN_TEST)).thenReturn(true);
+        // Not in today, but in yesterday
+        when(script.eval(eq(RScript.Mode.READ_ONLY), startsWith("if redis.call('EXISTS'"), any(), eq(java.util.List.of(todayFilterName)), any())).thenReturn(0L);
+        when(script.eval(eq(RScript.Mode.READ_ONLY), startsWith("if redis.call('EXISTS'"), any(), eq(java.util.List.of(yesterdayFilterName)), any())).thenReturn(1L);
+
         when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(true);
 
@@ -151,12 +141,9 @@ class RedisTokenRevocationServiceTest {
     @DisplayName("Is Revoked - should return false on false positive (in bloom but not redis)")
     void testIsRevoked_whenInBloomFilterButNotInRedis() {
         var todayFilterName = BLOOM_PREFIX + MOCK_EPOCH_DAY;
-        var yesterdayFilterName = BLOOM_PREFIX + (MOCK_EPOCH_DAY - DAY_OFFSET);
 
-        when(redissonClient.<String>getBloomFilter(todayFilterName)).thenReturn(todayBloomFilter);
-        when(redissonClient.<String>getBloomFilter(yesterdayFilterName)).thenReturn(yesterdayBloomFilter);
-        when(todayBloomFilter.isExists()).thenReturn(true);
-        when(todayBloomFilter.contains(TOKEN_TEST)).thenReturn(true);
+        when(script.eval(eq(RScript.Mode.READ_ONLY), startsWith("if redis.call('EXISTS'"), any(), eq(java.util.List.of(todayFilterName)), any())).thenReturn(1L);
+
         when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
         when(bucket.isExists()).thenReturn(false);
 
@@ -168,7 +155,7 @@ class RedisTokenRevocationServiceTest {
     @Test
     @DisplayName("Is Revoked - should fail closed (return true) when Redis is down")
     void testIsRevoked_failClosed_whenRedisDown() {
-        when(redissonClient.<String>getBloomFilter(anyString())).thenThrow(new RuntimeException(ERR_REDIS));
+        when(script.eval(any(), anyString(), any(), anyList(), any())).thenThrow(new RuntimeException(ERR_REDIS));
 
         var result = service.isRevoked(TOKEN_TEST);
 
