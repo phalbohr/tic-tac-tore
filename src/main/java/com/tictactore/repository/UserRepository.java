@@ -2,7 +2,10 @@ package com.tictactore.repository;
 
 import com.tictactore.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,4 +14,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
     boolean existsByNickname(String nickname);
+
+    @Query("SELECT u.nickname FROM User u WHERE u.nickname IN :nicknames")
+    List<String> findExistingNicknames(@Param("nicknames") List<String> nicknames);
 }
