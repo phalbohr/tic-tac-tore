@@ -165,5 +165,41 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
-  return { isAuthenticated, profile, setAuthenticated, fetchProfile, updateProfile, clearToken, logout }
+  async function deleteAccount() {
+    try {
+      const csrfToken = getCookie(CSRF_COOKIE_NAME)
+      const headers: HeadersInit = {}
+      if (csrfToken) {
+        headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
+      }
+
+      const response = await fetch(PROFILE_ENDPOINT, {
+        method: 'DELETE',
+        headers
+      })
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to delete account'
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.message || errorMessage
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errorMessage)
+      }
+      
+      isMaybeAuthenticated.value = false
+      profile.value = null
+      deleteCookie(SESSION_COOKIE_NAME)
+    } catch (e) {
+      throw e
+    }
+  }
+
+  return { isAuthenticated, profile, setAuthenticated, fetchProfile, updateProfile, clearToken, logout, deleteAccount }
 })
+

@@ -4,6 +4,7 @@ import com.tictactore.config.ApplicationProperties;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -308,4 +309,84 @@ class UserServiceTest {
                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
                 .hasMessage("Nickname already taken");
     }
+
+    @Test
+    @DisplayName("Delete Account - should anonymize user data")
+    void deleteAccount_shouldAnonymizeUserData() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .language("RU")
+                .lastNicknameUpdate(Instant.now())
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.deleteAccount(userId);
+
+        assertThat(user.getId()).isEqualTo(userId);
+        assertThat(user.getEmail()).startsWith("deleted-").endsWith("@tic-tac-tore.invalid");
+        assertThat(user.getNickname()).startsWith("ex-player-");
+        assertThat(user.getAvatar()).isEqualTo("anonymous");
+        assertThat(user.getProviderId()).isNull();
+        assertThat(user.getLanguage()).isNull();
+        assertThat(user.getLastNicknameUpdate()).isNull();
+        
+        verify(userRepository).flush();
+    }
+
+    @Test
+    @DisplayName("Delete Account - should throw exception when user not found")
+    void deleteAccount_shouldThrowException_whenUserNotFound() {
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.deleteAccount(userId))
+                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("User not found");
+    }
+
+    @Test
+    @DisplayName("Delete Account - should keep user ID intact and never call delete on repository to preserve references")
+    void deleteAccount_shouldKeepUserIdIntactAndNeverCallDelete() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.deleteAccount(userId);
+
+        assertThat(user.getId()).isEqualTo(userId);
+        verify(userRepository, never()).delete(any());
+        verify(userRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("Delete Account - should throw IllegalStateException when optimistic locking failure occurs")
+    void deleteAccount_shouldThrowIllegalStateException_onOptimisticLockingFailure() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(User.class, userId))
+                .when(userRepository).flush();
+
+        assertThatThrownBy(() -> userService.deleteAccount(userId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Account was concurrently modified during deletion. Please try again.");
+    }
 }
+

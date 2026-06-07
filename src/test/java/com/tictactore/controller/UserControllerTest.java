@@ -7,6 +7,7 @@ import com.tictactore.security.JwtAuthenticationFilter;
 import com.tictactore.service.JwtService;
 import com.tictactore.service.TokenRevocationService;
 import com.tictactore.service.UserService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,11 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -110,5 +113,41 @@ class UserControllerTest {
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Nickname can only be changed once every 30 days"));
+    }
+
+    @Test
+    @DisplayName("DELETE /me - should return 204 and revoke token when authenticated")
+    void deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        String token = "test-jwt-token";
+        when(jwtService.extractToken(any())).thenReturn(token);
+
+        var result = mockMvc.perform(delete("/api/v1/profile/me")
+                        .header("Authorization", "Bearer " + token)
+                        .with(authentication(auth))
+                        .with(csrf()));
+
+        result.andExpect(status().isNoContent());
+        verify(userService).deleteAccount(userId);
+        verify(tokenRevocationService).revoke(token);
+    }
+
+    @Test
+    @DisplayName("DELETE /me - should return 401 when unauthenticated")
+    void deleteAccount_shouldReturn401_whenUnauthenticated() throws Exception {
+        var result = mockMvc.perform(delete("/api/v1/profile/me")
+                        .with(csrf()));
+
+        result.andExpect(status().isUnauthorized());
     }
 }
