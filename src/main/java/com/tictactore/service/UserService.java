@@ -77,13 +77,16 @@ public class UserService {
                 return userCreator.createUser(newUser);
             } catch (DataIntegrityViolationException e) {
                 lastException = e;
-                var existingUser = userRepository.findByEmail(email);
-                if (existingUser.isPresent()) {
-                    User u = existingUser.get();
-                    if (u.getProviderId() == null || !u.getProviderId().equals(providerId)) {
-                        throw new BadCredentialsException(ERR_EMAIL_COLLISION);
-                    }
-                    return u;
+                var existingUser = userRepository.findByEmail(email)
+                        .map(u -> {
+                            if (u.getProviderId() == null || !u.getProviderId().equals(providerId)) {
+                                throw new BadCredentialsException(ERR_EMAIL_COLLISION);
+                            }
+                            return u;
+                        })
+                        .orElse(null);
+                if (existingUser != null) {
+                    return existingUser;
                 }
                 // If findByEmail is empty, it's a nickname collision. Retry to generate a new nickname.
             }
@@ -205,4 +208,3 @@ public class UserService {
         }
     }
 }
-
