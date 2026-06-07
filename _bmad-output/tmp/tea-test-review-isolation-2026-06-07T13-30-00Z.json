@@ -1,0 +1,17 @@
+{
+  "dimension": "isolation",
+  "score": 100,
+  "max_score": 100,
+  "grade": "A+",
+  "violations": [],
+  "passed_checks": 4,
+  "failed_checks": 0,
+  "total_checks": 4,
+  "violation_summary": {
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "recommendations": [],
+  "summary": "All tests are fully isolated with zero violations."
+}
