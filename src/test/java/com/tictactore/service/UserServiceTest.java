@@ -348,4 +348,45 @@ class UserServiceTest {
                 .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
+
+    @Test
+    @DisplayName("Delete Account - should keep user ID intact and never call delete on repository to preserve references")
+    void deleteAccount_shouldKeepUserIdIntactAndNeverCallDelete() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.deleteAccount(userId);
+
+        assertThat(user.getId()).isEqualTo(userId);
+        verify(userRepository, never()).delete(any());
+        verify(userRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("Delete Account - should throw IllegalStateException when optimistic locking failure occurs")
+    void deleteAccount_shouldThrowIllegalStateException_onOptimisticLockingFailure() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("player1")
+                .avatar("https://avatar.url")
+                .providerId("google-123")
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(User.class, userId))
+                .when(userRepository).flush();
+
+        assertThatThrownBy(() -> userService.deleteAccount(userId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Account was concurrently modified during deletion. Please try again.");
+    }
 }
+

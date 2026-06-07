@@ -1,0 +1,23 @@
+{
+  "dimension": "performance",
+  "score": 100,
+  "max_score": 100,
+  "grade": "A+",
+  "violations": [],
+  "passed_checks": 4,
+  "failed_checks": 0,
+  "total_checks": 4,
+  "violation_summary": {
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "performance_metrics": {
+    "parallelizable_tests": 100,
+    "serial_tests": 0,
+    "avg_test_duration_estimate": "~50ms (unit) / ~1s (E2E)",
+    "slow_tests": []
+  },
+  "recommendations": [],
+  "summary": "All tests demonstrate high execution efficiency and parallelizability."
+}

@@ -76,6 +76,11 @@ function goBack() {
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 
+function openDeleteModal() {
+  error.value = ''
+  showDeleteModal.value = true
+}
+
 async function confirmDelete() {
   if (isDeleting.value) return
   isDeleting.value = true
@@ -211,7 +216,7 @@ async function confirmDelete() {
           {{ t('cabinet.dangerZone') }}
         </h3>
         <button 
-          @click="showDeleteModal = true"
+          @click="openDeleteModal"
           data-testid="delete-account-button"
           class="w-full py-3 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
         >
@@ -255,6 +260,10 @@ async function confirmDelete() {
             <p class="text-xs text-on-surface-variant leading-relaxed">
               {{ t('cabinet.deleteConfirmMessage') }}
             </p>
+          </div>
+
+          <div v-if="error" data-testid="modal-error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
+            {{ error }}
           </div>
 
           <div class="flex flex-col gap-2">
