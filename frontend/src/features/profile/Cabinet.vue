@@ -87,7 +87,6 @@ async function confirmDelete() {
     router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('common.error')
-    showDeleteModal.value = false
   } finally {
     isDeleting.value = false
   }
@@ -113,11 +112,14 @@ async function confirmDelete() {
         <div class="relative group">
           <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
             <img 
-              v-if="authStore.profile" 
+              v-if="authStore.profile && authStore.profile.avatar !== 'anonymous'" 
               :src="authStore.profile.avatar" 
               alt="Avatar" 
               class="w-full h-full object-cover"
             />
+            <div v-else-if="authStore.profile && authStore.profile.avatar === 'anonymous'" class="w-full h-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant">
+              <span class="material-symbols-outlined text-4xl">person_off</span>
+            </div>
           </div>
         </div>
         <div class="mt-3 text-center" v-if="authStore.profile">

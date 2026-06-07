@@ -186,6 +186,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
 
+        if (user.getProviderId() == null && "anonymous".equals(user.getAvatar())) {
+            return;
+        }
+
         UUID uuid = java.util.UUID.randomUUID();
         user.setEmail("deleted-" + uuid + "@tic-tac-tore.invalid");
         user.setNickname("ex-player-" + uuid);
@@ -194,7 +198,11 @@ public class UserService {
         user.setLanguage(null);
         user.setLastNicknameUpdate(null);
 
-        userRepository.save(user);
+        try {
+            userRepository.flush();
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            throw new IllegalStateException("Account was concurrently modified during deletion. Please try again.", e);
+        }
     }
 }
 

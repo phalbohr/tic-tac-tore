@@ -42,7 +42,9 @@ public interface ProfileApi {
     @org.springframework.web.bind.annotation.DeleteMapping("/me")
     ResponseEntity<Void> deleteAccount(
             @AuthenticationPrincipal User user,
-            @org.springframework.web.bind.annotation.RequestHeader(value = org.springframework.http.HttpHeaders.AUTHORIZATION, required = false) String authHeader
+            @org.springframework.web.bind.annotation.RequestHeader(value = org.springframework.http.HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response
     );
 }
 

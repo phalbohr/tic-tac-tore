@@ -324,20 +324,18 @@ class UserServiceTest {
                 .lastNicknameUpdate(Instant.now())
                 .build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         userService.deleteAccount(userId);
 
-        verify(userRepository).save(argThat(savedUser -> 
-                savedUser.getId().equals(userId) &&
-                savedUser.getEmail().startsWith("deleted-") &&
-                savedUser.getEmail().endsWith("@tic-tac-tore.invalid") &&
-                savedUser.getNickname().startsWith("ex-player-") &&
-                "anonymous".equals(savedUser.getAvatar()) &&
-                savedUser.getProviderId() == null &&
-                savedUser.getLanguage() == null &&
-                savedUser.getLastNicknameUpdate() == null
-        ));
+        assertThat(user.getId()).isEqualTo(userId);
+        assertThat(user.getEmail()).startsWith("deleted-").endsWith("@tic-tac-tore.invalid");
+        assertThat(user.getNickname()).startsWith("ex-player-");
+        assertThat(user.getAvatar()).isEqualTo("anonymous");
+        assertThat(user.getProviderId()).isNull();
+        assertThat(user.getLanguage()).isNull();
+        assertThat(user.getLastNicknameUpdate()).isNull();
+        
+        verify(userRepository).flush();
     }
 
     @Test

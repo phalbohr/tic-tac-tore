@@ -191,10 +191,12 @@ export const useAuthStore = defineStore('auth', () => {
         }
         throw new Error(errorMessage)
       }
-    } finally {
+      
       isMaybeAuthenticated.value = false
       profile.value = null
       deleteCookie(SESSION_COOKIE_NAME)
+    } catch (e) {
+      throw e
     }
   }
 

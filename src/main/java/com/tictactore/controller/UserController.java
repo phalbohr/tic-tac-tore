@@ -59,7 +59,9 @@ public class UserController implements ProfileApi {
     @Override
     public ResponseEntity<Void> deleteAccount(
             @AuthenticationPrincipal User principal,
-            String authHeader
+            String authHeader,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response
     ) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
@@ -68,47 +70,43 @@ public class UserController implements ProfileApi {
         userService.deleteAccount(principal.getId());
 
         String token = null;
-        var requestAttributes = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
-        if (requestAttributes instanceof org.springframework.web.context.request.ServletRequestAttributes servletRequestAttributes) {
-            var request = servletRequestAttributes.getRequest();
-            var response = servletRequestAttributes.getResponse();
-            
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7);
-            } else {
-                token = jwtService.extractToken(request);
-            }
-
-            if (response != null) {
-                var isSecure = request.isSecure();
-                var authCookie = org.springframework.http.ResponseCookie.from(com.tictactore.security.CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, "")
-                        .httpOnly(true)
-                        .secure(isSecure)
-                        .path("/")
-                        .maxAge(0)
-                        .sameSite("Lax")
-                        .build();
-
-                var sessionCookie = org.springframework.http.ResponseCookie.from(com.tictactore.security.CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, "")
-                        .httpOnly(false)
-                        .secure(isSecure)
-                        .path("/")
-                        .maxAge(0)
-                        .sameSite("Lax")
-                        .build();
-
-                response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, authCookie.toString());
-                response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, sessionCookie.toString());
-            }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
         } else {
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7);
-            }
+            token = jwtService.extractToken(request);
+        }
+
+        if (response != null) {
+            var isSecure = request.isSecure();
+            var authCookie = org.springframework.http.ResponseCookie.from(com.tictactore.security.CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, "")
+                    .httpOnly(true)
+                    .secure(isSecure)
+                    .path("/")
+                    .maxAge(0)
+                    .sameSite("Lax")
+                    .build();
+
+            var sessionCookie = org.springframework.http.ResponseCookie.from(com.tictactore.security.CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, "")
+                    .httpOnly(false)
+                    .secure(isSecure)
+                    .path("/")
+                    .maxAge(0)
+                    .sameSite("Lax")
+                    .build();
+
+            response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, authCookie.toString());
+            response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, sessionCookie.toString());
         }
 
         if (token != null) {
             tokenRevocationService.revoke(token);
         }
+
+        var session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
 
         return ResponseEntity.noContent().build();
     }

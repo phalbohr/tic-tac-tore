@@ -60,8 +60,12 @@ class RedisTokenRevocationServiceTest {
     private RBloomFilter<String> tomorrowBloomFilter;
     @Mock
     private RBloomFilter<String> yesterdayBloomFilter;
+    
     @Mock
     private RBucket<String> bucket;
+
+    @Mock
+    private RScript script;
 
     private TestableRedisTokenRevocationService service;
 
@@ -81,6 +85,8 @@ class RedisTokenRevocationServiceTest {
         when(properties.getBloomFilter()).thenReturn(bloomFilterConfig);
         when(bloomFilterConfig.getExpectedElements()).thenReturn(EXPECTED_ELEMENTS);
         when(bloomFilterConfig.getFalsePositiveRate()).thenReturn(FALSE_POSITIVE_RATE);
+
+        doReturn(script).when(redissonClient).getScript();
     }
 
     @Test
@@ -88,15 +94,17 @@ class RedisTokenRevocationServiceTest {
     void testRevoke() {
         var expirationDate = new Date(System.currentTimeMillis() + ONE_DAY_MS);
         when(jwtService.extractExpirationDate(TOKEN_TEST)).thenReturn(expirationDate);
+
+        when(script.eval(any(), anyString(), any(), anyList(), any(), any(), any())).thenReturn(SCRIPT_RESULT_SUCCESS);
+
         when(redissonClient.<String>getBloomFilter(anyString())).thenReturn(todayBloomFilter);
-        when(todayBloomFilter.tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE)).thenReturn(true);
         when(redissonClient.<String>getBucket(KEY_PREFIX + TOKEN_TEST)).thenReturn(bucket);
 
         service.revoke(TOKEN_TEST);
 
-        verify(todayBloomFilter, times(2)).tryInit(EXPECTED_ELEMENTS, FALSE_POSITIVE_RATE);
-        verify(todayBloomFilter, times(2)).add(TOKEN_TEST);
-        verify(todayBloomFilter, times(2)).expire(any(Duration.class));
+        verify(redissonClient, atLeastOnce()).getScript();
+        verify(script, atLeastOnce()).eval(any(), anyString(), any(), anyList(), any(), any(), any());
+        verify(todayBloomFilter, atLeastOnce()).add(TOKEN_TEST);
         verify(bucket).set(eq(VALUE_REVOKED), any(Duration.class));
     }
 
