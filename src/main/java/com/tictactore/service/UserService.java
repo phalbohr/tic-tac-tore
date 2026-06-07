@@ -104,22 +104,29 @@ public class UserService {
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
-        String nickname = baseNickname;
 
-        java.util.Set<String> existingNicknames = userRepository.findNicknamesStartingWith(baseNickname);
-
-        int attempts = 0;
-        while (existingNicknames.contains(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + String.format("%04d", random.nextInt(10000));
-            attempts++;
+        java.util.List<String> candidates = new java.util.ArrayList<>();
+        candidates.add(baseNickname);
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS - 1; i++) {
+            candidates.add(baseNickname + String.format("%04d", random.nextInt(10000)));
         }
 
-        if (attempts >= MAX_NICKNAME_ATTEMPTS) {
+        java.util.Set<String> existingNicknames = userRepository.findNicknamesIn(candidates);
+
+        String nickname = null;
+        for (String candidate : candidates) {
+            if (!existingNicknames.contains(candidate)) {
+                nickname = candidate;
+                break;
+            }
+        }
+
+        if (nickname == null) {
             int fallbackAttempts = 0;
             do {
                 nickname = baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
                 fallbackAttempts++;
-            } while (existingNicknames.contains(nickname) && fallbackAttempts < MAX_NICKNAME_ATTEMPTS);
+            } while (userRepository.existsByNickname(nickname) && fallbackAttempts < MAX_NICKNAME_ATTEMPTS);
             
             if (fallbackAttempts >= MAX_NICKNAME_ATTEMPTS) {
                 throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");

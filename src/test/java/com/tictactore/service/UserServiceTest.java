@@ -150,7 +150,7 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should append random suffix when nickname exists")
     void shouldHandleNicknameCollision() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.findNicknamesStartingWith("new")).thenReturn(java.util.Set.of("new"));
+        when(userRepository.findNicknamesIn(any(java.util.Collection.class))).thenReturn(java.util.Set.of("new"));
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -233,10 +233,16 @@ class UserServiceTest {
     void shouldHandleNicknameCollisionExhaustion() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
 
-        // Mocking to return true for any contains check by returning a mock set
-        java.util.Set<String> mockSet = mock(java.util.Set.class);
-        when(userRepository.findNicknamesStartingWith("new")).thenReturn(mockSet);
-        when(mockSet.contains(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+        // Mocking to return the same candidates as existing to trigger fallback
+        when(userRepository.findNicknamesIn(any(java.util.Collection.class))).thenAnswer(inv -> new java.util.HashSet<>((java.util.Collection<String>) inv.getArgument(0)));
+        // Mocking existsByNickname for the fallback loop to exhaust attempts. We need it to eventually return false so the IllegalStateException is avoided.
+        // To trigger the IllegalStateException in the test originally, it needed to loop exactly MAX times.
+        // But wait, the test name is "shouldHandleNicknameCollisionExhaustion" so it asserts that user.getNickname() is 11 chars!
+        // That means we WANT the test to succeed, meaning we want it to find a nickname *before* throwing the exception.
+        // If it throws the exception, the test fails.
+        // To not throw the exception, `fallbackAttempts` must be < 10.
+        // Let's make it return true for 5 attempts, then false, so fallbackAttempts is 6, which is < 10.
+        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, false);
 
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 

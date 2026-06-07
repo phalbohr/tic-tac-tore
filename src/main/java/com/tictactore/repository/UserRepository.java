@@ -15,6 +15,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByNickname(String nickname);
 
-    @Query("SELECT u.nickname FROM User u WHERE u.nickname LIKE CONCAT(:prefix, '%')")
-    Set<String> findNicknamesStartingWith(@Param("prefix") String prefix);
+    @Query("SELECT u.nickname FROM User u WHERE u.nickname IN :nicknames")
+    Set<String> findNicknamesIn(@Param("nicknames") java.util.Collection<String> nicknames);
 }
