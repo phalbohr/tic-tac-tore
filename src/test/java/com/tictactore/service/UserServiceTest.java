@@ -150,8 +150,7 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should append random suffix when nickname exists")
     void shouldHandleNicknameCollision() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname("new")).thenReturn(true);
-        when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
+        when(userRepository.findNicknamesStartingWith("new")).thenReturn(java.util.Set.of("new"));
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -233,7 +232,12 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should use UUID fallback after max attempts")
     void shouldHandleNicknameCollisionExhaustion() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+
+        // Mocking to return true for any contains check by returning a mock set
+        java.util.Set<String> mockSet = mock(java.util.Set.class);
+        when(userRepository.findNicknamesStartingWith("new")).thenReturn(mockSet);
+        when(mockSet.contains(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
