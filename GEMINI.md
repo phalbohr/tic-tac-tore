@@ -51,8 +51,8 @@ ast-grep run --pattern 'someCode()' --lang java --debug-query=ast src/
 
 ### Code Standards
 
-- **Writing code**: Follow rules in `_project-spec/rules/1-write.md`. Read this file before writing any production code.
-- **Writing tests**: Follow rules in `_project-spec/rules/2-test.md`. Read this file before writing any tests.
+1. When writing production code use /Users/ppolukhin/.agents/skills/code-1-guide/SKILL.md
+2. When writing test code use /Users/ppolukhin/.agents/skills/code-2-test/SKILL.md
 
 #### 1. Think Before Coding
 
