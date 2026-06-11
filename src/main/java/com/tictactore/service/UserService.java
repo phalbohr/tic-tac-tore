@@ -17,6 +17,8 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -77,13 +79,16 @@ public class UserService {
                 return userCreator.createUser(newUser);
             } catch (DataIntegrityViolationException e) {
                 lastException = e;
-                var existingUser = userRepository.findByEmail(email);
-                if (existingUser.isPresent()) {
-                    User u = existingUser.get();
-                    if (u.getProviderId() == null || !u.getProviderId().equals(providerId)) {
-                        throw new BadCredentialsException(ERR_EMAIL_COLLISION);
-                    }
-                    return u;
+                var existingUser = userRepository.findByEmail(email)
+                        .map(u -> {
+                            if (u.getProviderId() == null || !u.getProviderId().equals(providerId)) {
+                                throw new BadCredentialsException(ERR_EMAIL_COLLISION);
+                            }
+                            return u;
+                        })
+                        .orElse(null);
+                if (existingUser != null) {
+                    return existingUser;
                 }
                 // If findByEmail is empty, it's a nickname collision. Retry to generate a new nickname.
             }
@@ -105,13 +110,13 @@ public class UserService {
             baseNickname = "user";
         }
 
-        java.util.List<String> candidates = new java.util.ArrayList<>();
+        List<String> candidates = new ArrayList<>();
         candidates.add(baseNickname);
         for (int i = 0; i < MAX_NICKNAME_ATTEMPTS - 1; i++) {
             candidates.add(baseNickname + String.format("%04d", random.nextInt(10000)));
         }
 
-        java.util.Set<String> existingNicknames = userRepository.findNicknamesIn(candidates);
+        List<String> existingNicknames = userRepository.findExistingNicknames(candidates);
 
         String nickname = null;
         for (String candidate : candidates) {
@@ -122,13 +127,21 @@ public class UserService {
         }
 
         if (nickname == null) {
-            int fallbackAttempts = 0;
-            do {
-                nickname = baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-                fallbackAttempts++;
-            } while (userRepository.existsByNickname(nickname) && fallbackAttempts < MAX_NICKNAME_ATTEMPTS);
+            List<String> fallbackCandidates = new ArrayList<>();
+            for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+                fallbackCandidates.add(baseNickname + UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+            }
+
+            List<String> existingFallback = userRepository.findExistingNicknames(fallbackCandidates);
+
+            for (String candidate : fallbackCandidates) {
+                if (!existingFallback.contains(candidate)) {
+                    nickname = candidate;
+                    break;
+                }
+            }
             
-            if (fallbackAttempts >= MAX_NICKNAME_ATTEMPTS) {
+            if (nickname == null) {
                 throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
             }
         }
@@ -143,7 +156,7 @@ public class UserService {
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new IllegalStateException("SHA-256 algorithm not found", e);
         }
     }
 
@@ -214,4 +227,3 @@ public class UserService {
         }
     }
 }
-

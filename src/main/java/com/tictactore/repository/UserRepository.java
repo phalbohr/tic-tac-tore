@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
@@ -16,5 +15,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByNickname(String nickname);
 
     @Query("SELECT u.nickname FROM User u WHERE u.nickname IN :nicknames")
-    Set<String> findNicknamesIn(@Param("nicknames") java.util.Collection<String> nicknames);
+    java.util.List<String> findExistingNicknames(@Param("nicknames") java.util.Collection<String> nicknames);
 }
