@@ -175,6 +175,30 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("PATCH /me - should return 400 when avatar is invalid")
+    void patchMe_shouldReturn400_whenAvatarIsInvalid() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"invalid-avatar-name\"}"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("DELETE /me - should return 401 when unauthenticated")
     void deleteAccount_shouldReturn401_whenUnauthenticated() throws Exception {
         var result = mockMvc.perform(delete("/api/v1/profile/me")

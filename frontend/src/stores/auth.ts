@@ -57,9 +57,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateProfile(nickname?: string, language?: string, avatar?: string) {
+  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string }) {
     if (!profile.value) return
 
+    const { nickname, language, avatar } = options
     const previousProfile = { ...profile.value }
 
     // Optimistic UI updates

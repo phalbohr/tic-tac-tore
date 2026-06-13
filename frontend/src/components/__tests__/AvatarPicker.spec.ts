@@ -13,19 +13,17 @@ describe('AvatarPicker', () => {
       global: { plugins: [testI18n] },
     })
 
-    const buttons = wrapper.findAll('button')
-    // 24 preset buttons + 1 close button + 1 cancel button = 26 buttons total
-    expect(buttons.length).toBe(26)
+    const avatarButtons = wrapper.findAll('[data-testid^="avatar-option-"]')
+
+    expect(avatarButtons.length).toBe(24)
   })
 
   it('emits select event when an avatar is clicked', async () => {
     const wrapper = mount(AvatarPicker, {
       global: { plugins: [testI18n] },
     })
+    const firstAvatarBtn = wrapper.find('[data-testid="avatar-option-ball-classic"]')
 
-    const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBeGreaterThan(1)
-    const firstAvatarBtn = buttons[1]!
     await firstAvatarBtn.trigger('click')
 
     const emittedSelect = wrapper.emitted('select')
@@ -37,10 +35,8 @@ describe('AvatarPicker', () => {
     const wrapper = mount(AvatarPicker, {
       global: { plugins: [testI18n] },
     })
+    const cancelBtn = wrapper.find('[data-testid="cancel-picker-button"]')
 
-    const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBeGreaterThan(0)
-    const cancelBtn = buttons[buttons.length - 1]!
     await cancelBtn.trigger('click')
 
     expect(wrapper.emitted('close')).toBeTruthy()
@@ -50,10 +46,8 @@ describe('AvatarPicker', () => {
     const wrapper = mount(AvatarPicker, {
       global: { plugins: [testI18n] },
     })
+    const closeIconBtn = wrapper.find('[data-testid="close-picker-icon-button"]')
 
-    const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBeGreaterThan(0)
-    const closeIconBtn = buttons[0]!
     await closeIconBtn.trigger('click')
 
     expect(wrapper.emitted('close')).toBeTruthy()

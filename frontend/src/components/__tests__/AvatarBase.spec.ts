@@ -8,8 +8,9 @@ describe('AvatarBase', () => {
       props: { avatar: 'ball-classic' },
     })
 
-    expect(wrapper.html()).toContain('svg')
-    expect(wrapper.html()).toContain('polygon')
+    const svg = wrapper.find('[data-testid="avatar-svg"]')
+    expect(svg.exists()).toBe(true)
+    expect(svg.find('use').attributes('href')).toBe('/avatars.svg#ball-classic')
     expect(wrapper.find('img').exists()).toBe(false)
   })
 
@@ -18,8 +19,9 @@ describe('AvatarBase', () => {
       props: { avatar: 'anonymous' },
     })
 
-    expect(wrapper.html()).toContain('svg')
-    expect(wrapper.html()).toContain('rotate(10)')
+    const svg = wrapper.find('[data-testid="avatar-svg"]')
+    expect(svg.exists()).toBe(true)
+    expect(svg.find('use').attributes('href')).toBe('/avatars.svg#anonymous')
   })
 
   it('renders anonymous fallback SVG when avatar is null or undefined', () => {
@@ -27,7 +29,9 @@ describe('AvatarBase', () => {
       props: { avatar: null },
     })
 
-    expect(wrapper.html()).toContain('svg')
+    const svg = wrapper.find('[data-testid="avatar-svg"]')
+    expect(svg.exists()).toBe(true)
+    expect(svg.find('use').attributes('href')).toBe('/avatars.svg#anonymous')
   })
 
   it('renders img element when avatar is a URL', () => {
