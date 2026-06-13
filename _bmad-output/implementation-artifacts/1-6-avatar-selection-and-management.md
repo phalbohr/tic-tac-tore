@@ -1,6 +1,6 @@
 # Story 1.6: Avatar Selection & Management
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -101,6 +101,24 @@ This story implements the avatar selection feature for the user profile. Accordi
 - [x] [Review][Patch] E2E test violates strict AAA pattern block layout [frontend/e2e/avatar-selection.spec.ts]
 - [x] [Review][Patch] E2E test does not verify optimistic UI updates [frontend/e2e/avatar-selection.spec.ts]
 - [x] [Review][Defer] Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts] — deferred, pre-existing
+- [x] [Review][Defer] Brittle Optimistic Rollbacks in auth.ts [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state
+- [x] [Review][Patch] Redundant/Unreachable "anonymous" validation [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] DTO allows empty string triggering external Dicebear avatar [src/main/java/com/tictactore/dto/UpdateProfileRequest.java]
+- [x] [Review][Patch] Flaky E2E Architecture [frontend/e2e/avatar-selection.spec.ts]
+- [x] [Review][Patch] E2E Test Violates Strict AAA Layout Constraint [frontend/e2e/avatar-selection.spec.ts]
+- [x] [Review][Patch] Half-Baked Keyboard Navigation [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Fragile Magic Numbers in Keyboard Nav [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Redundant Template Branching in AvatarBase [frontend/src/components/AvatarBase.vue]
+- [x] [Review][Patch] Lazy Type Safety in AvatarBase [frontend/src/components/AvatarBase.vue]
+- [x] [Review][Patch] Invisible Focus States in AvatarPicker [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] ARIA Specification Violation in Cabinet [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] Shared State Race Condition in Cabinet [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] Sloppy AAA Formatting in UserControllerTest [src/test/java/com/tictactore/controller/UserControllerTest.java]
+- [x] [Review][Patch] Backend Whitelist Uses Regex instead of Enum/Set [src/main/java/com/tictactore/dto/UpdateProfileRequest.java]
+- [x] [Review][Patch] UI language desyncs from rolled-back auth profile [frontend/src/stores/auth.ts]
+- [x] [Review][Patch] Focus escapes trapped modal into background DOM [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Internal service bypasses @Valid with unknown avatar [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] Currently active avatar is not visually highlighted [frontend/src/components/AvatarPicker.vue]
 
 ## Dev Notes
 

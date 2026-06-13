@@ -130,7 +130,10 @@ async function confirmDelete() {
       </button>
     </header>
 
-    <main class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
+    <main v-if="!authStore.profile" class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center">
+      <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+    </main>
+    <main v-else class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
         <button 
@@ -138,7 +141,6 @@ async function confirmDelete() {
           @click="isAvatarPickerOpen = true" 
           :disabled="isUpdating"
           aria-haspopup="dialog"
-          :aria-expanded="isAvatarPickerOpen"
           aria-label="Change avatar" 
           data-testid="change-avatar-button"
         >
@@ -250,7 +252,7 @@ async function confirmDelete() {
     </main>
 
     <!-- Footer Action -->
-    <footer class="w-full max-w-md px-6 pb-6 pt-2">
+    <footer v-if="authStore.profile" class="w-full max-w-md px-6 pb-6 pt-2">
       <button 
         @click="handleSave"
         data-testid="save-button"
@@ -316,6 +318,7 @@ async function confirmDelete() {
     <Transition name="fade">
       <AvatarPicker 
         v-if="isAvatarPickerOpen"
+        :current-avatar="authStore.profile?.avatar"
         @select="handleAvatarSelect"
         @close="isAvatarPickerOpen = false"
       />

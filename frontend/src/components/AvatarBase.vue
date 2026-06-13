@@ -6,24 +6,17 @@ const props = defineProps<{
   avatar?: string | null
 }>()
 
-const isSvgPreset = computed(() => {
-  if (!props.avatar) return false
-  return AVATAR_KEYS.includes(props.avatar as any)
+const resolvedAvatar = computed(() => {
+  if (!props.avatar || props.avatar === 'anonymous') return 'anonymous'
+  if ((AVATAR_KEYS as readonly string[]).includes(props.avatar)) return props.avatar
+  return 'anonymous'
 })
-
-const isAnonymous = computed(() => {
-  return props.avatar === 'anonymous' || !props.avatar
-})
-
 </script>
 
 <template>
   <div class="avatar-base w-full h-full flex items-center justify-center overflow-hidden">
-    <svg v-if="isSvgPreset || isAnonymous" class="w-full h-full" aria-hidden="true" data-testid="avatar-svg">
-      <use :href="`/avatars.svg#${isAnonymous ? 'anonymous' : props.avatar}`" />
-    </svg>
-    <svg v-else class="w-full h-full bg-surface-container-highest text-on-surface-variant" aria-hidden="true" data-testid="avatar-svg-fallback">
-      <use href="/avatars.svg#anonymous" />
+    <svg class="w-full h-full" aria-hidden="true" data-testid="avatar-svg">
+      <use :href="`/avatars.svg#${resolvedAvatar}`" />
     </svg>
   </div>
 </template>

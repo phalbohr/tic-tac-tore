@@ -419,12 +419,12 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updateProfile(userId, request))
                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Cannot set avatar to anonymous");
+                .hasMessage("Invalid avatar selection");
     }
 
     @Test
-    @DisplayName("Update Profile - should reset to deterministic avatar when avatar is empty")
-    void updateProfile_shouldResetToDeterministicAvatar_whenAvatarIsEmpty() {
+    @DisplayName("Update Profile - should throw exception when avatar is empty")
+    void updateProfile_shouldThrowException_whenAvatarIsEmpty() {
         UUID userId = UUID.randomUUID();
         User user = new User();
         user.setId(userId);
@@ -433,11 +433,10 @@ class UserServiceTest {
         user.setEmail("test@example.com");
         UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("").build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.getAvatar()).contains("api.dicebear.com");
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Invalid avatar selection");
     }
 }
 

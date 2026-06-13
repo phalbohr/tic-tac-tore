@@ -188,13 +188,10 @@ public class UserService {
 
         if (request.getAvatar() != null) {
             String avatarVal = request.getAvatar().trim();
-            if (avatarVal.isEmpty()) {
-                user.setAvatar(generateDeterministicAvatar(user.getEmail()));
-            } else if ("anonymous".equals(avatarVal)) {
-                throw new com.tictactore.exception.ValidationException("Cannot set avatar to anonymous");
-            } else {
-                user.setAvatar(avatarVal);
+            if (!com.tictactore.validation.AvatarValidator.ALLOWED_AVATARS.contains(avatarVal)) {
+                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
             }
+            user.setAvatar(avatarVal);
         }
 
         try {
