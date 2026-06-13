@@ -29,6 +29,15 @@ public class UserService {
     private static final String ERR_EMAIL_COLLISION = "Email already registered with a different identity provider";
     private static final int MAX_NICKNAME_ATTEMPTS = 10;
 
+    private static final java.util.Set<String> ALLOWED_AVATARS = java.util.Set.of(
+            "ball-classic", "ball-cork", "player-red-1", "player-red-2",
+            "player-blue-1", "player-blue-2", "table-classic", "table-top",
+            "beer-mug", "beer-bottle", "trophy-gold", "trophy-silver",
+            "glove-red", "glove-blue", "whistle-gold", "foosball-rod",
+            "handle-wood", "handle-rubber", "score-counter", "snack-pretzel",
+            "snack-pizza", "jersey-red", "jersey-blue", "crown"
+    );
+
     private final UserRepository userRepository;
     private final UserCreator userCreator;
     private final ApplicationProperties properties;
@@ -184,6 +193,13 @@ public class UserService {
                 throw new com.tictactore.exception.ValidationException("Language must be EN or DE");
             }
             user.setLanguage(lang);
+        }
+
+        if (request.getAvatar() != null) {
+            if (!ALLOWED_AVATARS.contains(request.getAvatar())) {
+                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
+            }
+            user.setAvatar(request.getAvatar());
         }
 
         try {

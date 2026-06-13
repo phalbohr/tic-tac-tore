@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import AvatarBase from '@/components/AvatarBase.vue'
+import AvatarPicker from '@/components/AvatarPicker.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -14,6 +16,19 @@ const isDropdownOpen = ref(false)
 const message = ref('')
 const error = ref('')
 const isUpdating = ref(false)
+const isAvatarPickerOpen = ref(false)
+
+async function handleAvatarSelect(selectedAvatar: string) {
+  isAvatarPickerOpen.value = false
+  error.value = ''
+  message.value = ''
+  try {
+    await authStore.updateProfile(undefined, undefined, selectedAvatar)
+    message.value = t('cabinet.avatarSuccess')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('common.error')
+  }
+}
 
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
@@ -114,17 +129,19 @@ async function confirmDelete() {
     <main class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
-        <div class="relative group">
-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
-            <img 
-              v-if="authStore.profile && authStore.profile.avatar !== 'anonymous'" 
-              :src="authStore.profile.avatar" 
-              alt="Avatar" 
-              class="w-full h-full object-cover"
-            />
-            <div v-else-if="authStore.profile && authStore.profile.avatar === 'anonymous'" class="w-full h-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant">
-              <span class="material-symbols-outlined text-4xl">person_off</span>
-            </div>
+        <div 
+          class="relative group cursor-pointer" 
+          @click="isAvatarPickerOpen = true" 
+          role="button" 
+          aria-label="Change avatar" 
+          data-testid="change-avatar-button"
+        >
+          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center">
+            <AvatarBase :avatar="authStore.profile?.avatar" />
+          </div>
+          <!-- Edit Overlay Icon -->
+          <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
+            <span class="material-symbols-outlined text-2xl">edit</span>
           </div>
         </div>
         <div class="mt-3 text-center" v-if="authStore.profile">
@@ -287,6 +304,15 @@ async function confirmDelete() {
           </div>
         </div>
       </div>
+    </Transition>
+
+    <!-- Avatar Picker Modal -->
+    <Transition name="fade">
+      <AvatarPicker 
+        v-if="isAvatarPickerOpen"
+        @select="handleAvatarSelect"
+        @close="isAvatarPickerOpen = false"
+      />
     </Transition>
   </div>
 </template>

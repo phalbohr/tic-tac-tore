@@ -116,6 +116,38 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("PATCH /me - should update avatar")
+    void patchMe_shouldUpdateAvatar() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        User updatedUser = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .avatar("ball-classic")
+                .build();
+        when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"ball-classic\"}"));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.avatar").value("ball-classic"));
+    }
+
+    @Test
     @DisplayName("DELETE /me - should return 204 and revoke token when authenticated")
     void deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated() throws Exception {
         UUID userId = UUID.randomUUID();

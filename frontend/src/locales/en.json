@@ -47,6 +47,10 @@
     "deleteAccount": "Delete Account",
     "deleteTitle": "Delete Account",
     "deleteConfirmMessage": "This action is irreversible. All your personal data will be permanently removed, and your account will be anonymized. Your match history will be preserved.",
-    "confirmDelete": "Confirm Deletion"
+    "confirmDelete": "Confirm Deletion",
+    "avatarSuccess": "Avatar updated successfully"
+  },
+  "avatarPicker": {
+    "title": "Select Avatar"
   }
 }
