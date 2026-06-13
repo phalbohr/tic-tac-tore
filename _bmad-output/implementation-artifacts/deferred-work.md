@@ -33,3 +33,6 @@
 
 ## Deferred from: code review of 1-4-profile-management-in-personal-cabinet (2026-05-30)
 - [x] [Review][Defer] Unhandled OptimisticLockingFailureException on concurrent updates [UserService.java] — deferred, pre-existing
+
+## Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)
+- [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.

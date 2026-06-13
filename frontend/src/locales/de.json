@@ -47,6 +47,10 @@
     "deleteAccount": "Konto löschen",
     "deleteTitle": "Konto löschen",
     "deleteConfirmMessage": "Diese Aktion ist unumkehrbar. Alle Ihre persönlichen Daten werden dauerhaft entfernt und Ihr Konto wird anonymisiert. Ihr Spielverlauf bleibt erhalten.",
-    "confirmDelete": "Löschen bestätigen"
+    "confirmDelete": "Löschen bestätigen",
+    "avatarSuccess": "Avatar erfolgreich aktualisiert"
+  },
+  "avatarPicker": {
+    "title": "Avatar auswählen"
   }
 }

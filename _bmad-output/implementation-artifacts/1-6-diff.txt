@@ -1,0 +1,1011 @@
+diff --git a/_bmad-output/implementation-artifacts/1-6-avatar-selection-and-management.md b/_bmad-output/implementation-artifacts/1-6-avatar-selection-and-management.md
+index e3f50ce..b3404e8 100644
+--- a/_bmad-output/implementation-artifacts/1-6-avatar-selection-and-management.md
++++ b/_bmad-output/implementation-artifacts/1-6-avatar-selection-and-management.md
+@@ -1,6 +1,6 @@
+ # Story 1.6: Avatar Selection & Management
+ 
+-Status: ready-for-dev
++Status: in-progress
+ 
+ <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+ 
+@@ -52,23 +52,23 @@ This story implements the avatar selection feature for the user profile. Accordi
+ 
+ ## Tasks / Subtasks
+ 
+-- [ ] **Icon Generation**
+-  - [ ] Invoke the `stitch-design` skill to generate 24 authentic kicker/foosball themed SVG icons.
+-- [ ] **Backend: API & Validation**
+-  - [ ] Extend `updateProfile` in `UserService` and `ProfileApi` to accept `avatar`.
+-  - [ ] Implement strict whitelist validation (Enum/Set) for the 24 icon names in the backend to reject invalid payloads.
+-- [ ] **Backend: Testing**
+-  - [ ] Add unit tests for avatar update and validation logic (AAA format, no comments).
+-  - [ ] Add API integration test for the profile update endpoint.
+-- [ ] **Frontend: Components & UI**
+-  - [ ] Create `AvatarBase.vue` as a pure visual primitive that handles the 24 SVG icons AND the `"anonymous"` fallback state.
+-  - [ ] Create `AvatarPicker.vue` that displays the grid of 24 icons and emits `@select`.
+-  - [ ] Update `Cabinet.vue` to use `AvatarBase` and open `AvatarPicker` via modal/overlay.
+-- [ ] **Frontend: State & Extensibility**
+-  - [ ] Update `auth.ts` Pinia store with optimistic UI update for avatar changes, with rollback on failure.
+-  - [ ] Add localization strings for avatar selection to `en.json` and `de.json`.
+-- [ ] **Frontend: E2E Validation**
+-  - [ ] Implement E2E test in `frontend/e2e/avatar-selection.spec.ts`.
++- [x] **Icon Generation**
++  - [x] Invoke the `stitch-design` skill to generate 24 authentic kicker/foosball themed SVG icons.
++- [x] **Backend: API & Validation**
++  - [x] Extend `updateProfile` in `UserService` and `ProfileApi` to accept `avatar`.
++  - [x] Implement strict whitelist validation (Enum/Set) for the 24 icon names in the backend to reject invalid payloads.
++- [x] **Backend: Testing**
++  - [x] Add unit tests for avatar update and validation logic (AAA format, no comments).
++  - [x] Add API integration test for the profile update endpoint.
++- [x] **Frontend: Components & UI**
++  - [x] Create `AvatarBase.vue` as a pure visual primitive that handles the 24 SVG icons AND the `"anonymous"` fallback state.
++  - [x] Create `AvatarPicker.vue` that displays the grid of 24 icons and emits `@select`.
++  - [x] Update `Cabinet.vue` to use `AvatarBase` and open `AvatarPicker` via modal/overlay.
++- [x] **Frontend: State & Extensibility**
++  - [x] Update `auth.ts` Pinia store with optimistic UI update for avatar changes, with rollback on failure.
++  - [x] Add localization strings for avatar selection to `en.json` and `de.json`.
++- [x] **Frontend: E2E Validation**
++  - [x] Implement E2E test in `frontend/e2e/avatar-selection.spec.ts`.
+ 
+ ## Dev Notes
+ 
+@@ -83,3 +83,49 @@ This story implements the avatar selection feature for the user profile. Accordi
+ ## BMAD Workflow Rules (from GEMINI.md)
+ - **Feature Branch**: Create and work in `story/1-6-avatar-selection-and-management` off `develop`.
+ - **Validation**: NEVER present a feature completion without first running `./scripts/ci-local.sh`.
++
++## File List
++
++New files:
++- `frontend/src/assets/avatars.ts`
++- `frontend/src/components/AvatarBase.vue`
++- `frontend/src/components/AvatarPicker.vue`
++- `frontend/src/components/__tests__/AvatarBase.spec.ts`
++- `frontend/src/components/__tests__/AvatarPicker.spec.ts`
++- `frontend/e2e/avatar-selection.spec.ts`
++
++Modified files:
++- `src/main/java/com/tictactore/dto/UpdateProfileRequest.java`
++- `src/main/java/com/tictactore/service/UserService.java`
++- `src/test/java/com/tictactore/service/UserServiceTest.java`
++- `src/test/java/com/tictactore/controller/UserControllerTest.java`
++- `frontend/src/stores/auth.ts`
++- `frontend/src/features/profile/Cabinet.vue`
++- `frontend/src/locales/en.json`
++- `frontend/src/locales/de.json`
++- `_bmad-output/implementation-artifacts/sprint-status.yaml`
++
++## Change Log
++
++- 2026-06-12: Implemented and tested preset avatar selection for Story 1.6.
++
++## Status
++
++Status: review
++
++## Dev Agent Record
++
++### Implementation Plan
++
++1. **Icon Assets**: Create `avatars.ts` containing 24 authentic foosball flat SVGs and `anonymous` fallback.
++2. **Backend**: Add `avatar` parameter to `UpdateProfileRequest` DTO. Add whitelist validation in `UserService.updateProfile` against the 24 kicker icon names.
++3. **Backend Tests**: Add unit tests in `UserServiceTest` and controller API tests in `UserControllerTest` following strict AAA format with zero structural comments.
++4. **Frontend Components**: Create `AvatarBase.vue` visual primitive and `AvatarPicker.vue` grid selector. Update `Cabinet.vue` to use them.
++5. **Frontend State & Locales**: Update Pinia auth store with optimistic UI update and failure rollback. Add translation keys.
++6. **E2E Validation**: Add E2E tests in `avatar-selection.spec.ts` and run local CI pipeline checks.
++
++### Completion Notes
++
++Successfully implemented user avatar selection from a preset grid of 24 custom kicker-themed SVGs.
++The backend update profile API now validates the selected preset name against a strict whitelist set, rejecting any invalid requests. Unit tests and API mock MVC tests check correct validation and successful updates, adhering to the AAA test style.
++On the frontend, the `AvatarBase` visual primitive handles both preset icons and the `anonymous` fallback state (rendered as boots hung on a nail). The Pinia store performs optimistic UI updates of the avatar and rolls back immediately if the network request fails. All unit tests and Playwright E2E tests pass, and local CI validation checks (`./scripts/ci-local.sh`) are fully green.
+diff --git a/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
+new file mode 100644
+index 0000000..77806ed
+--- /dev/null
++++ b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
+@@ -0,0 +1,86 @@
++# Story 1.7: Onboarding Tutorial
++
++Status: ready-for-dev
++
++<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
++
++## Story
++
++As a new user,
++I want an onboarding tutorial,
++so that I can learn how to use the app.
++
++## Acceptance Criteria
++
++- **Given** a newly registered user logs in for the first time (or someone who hasn't completed/skipped the tutorial)
++- **When** the Home Hub renders
++- **Then** the system triggers a dismissible onboarding tutorial overlay explaining core features (FR56)
++- **And** the tutorial consists of 3 swipeable slides as per the UX Design Spec
++- **And** skipping or finishing the tutorial updates the user profile to prevent it from showing again
++
++## Developer Context
++
++This story implements the onboarding experience for new users, following the "confirmation-first organic onboarding" pattern defined in the UX specification. It intercepts the user upon first login at the `HomeHub` (or before they proceed) to show a lightweight 3-slide tutorial.
++
++### Technical Requirements & Guardrails
++
++- **Backend API & Data Model:** Add a `tutorialCompleted` (or `onboardingCompleted`) boolean flag to the `User` entity, database schema (via a Flyway migration), `UserService`, and Profile DTOs.
++- **Frontend State:** Expose this new flag via the `auth.ts` Pinia store (`profile.tutorialCompleted`).
++- **Frontend Component:** Build a `TutorialCarousel.vue` component to present the 3 slides:
++  1. "Tap to record"
++  2. "Tap to confirm"
++  3. "Find your strength"
++  (Use simple SVG illustrations/emojis or placeholder visuals matching the "Clubhouse Editorial" theme for MVP).
++- **Trigger Logic:** In `HomeHub.vue`, if `authStore.profile.tutorialCompleted` is false, show the `TutorialCarousel` overlay.
++- **Skip/Finish:** Implement an API call to `PATCH /api/v1/profile/me` with `{ tutorialCompleted: true }` when the user skips or finishes the tutorial, and hide the overlay.
++
++### Architecture Compliance
++
++- **No-Line Rule (UX-DR3):** Ensure the `TutorialCarousel` overlay relies on background shifts and spacing instead of explicit borders.
++- **Dependencies:** Avoid adding heavy 3rd-party carousel libraries. Use native CSS Scroll Snap (`snap-x`, `snap-mandatory` in Tailwind) for the swipeable carousel.
++- **Clubhouse Editorial Theme (UX-DR7):** Use warm darks and space grotesk/manrope typography.
++- Follow the 500-Line Rule (IP-04) for all files.
++
++### Testing Requirements
++
++- **Strict AAA Pattern:** All new backend unit/integration tests must follow the Arrange-Act-Assert pattern with a single blank line separating the phases, and **absolutely zero structural comments** (like `// Arrange`, `// Act`, `// Assert`).
++- **E2E Testing:** Add a Playwright test in `frontend/e2e/onboarding.spec.ts` that mocks a new user, verifies the tutorial appears on the Home Hub, interacts with it (skips/finishes), and verifies it doesn't appear on subsequent reloads.
++- Run `./scripts/ci-local.sh` to ensure all checks pass.
++
++## Previous Story Intelligence (Story 1.6)
++
++- **Testing AAA Pattern:** Remember to avoid structural comments in tests.
++- **Transaction Boundaries:** Be aware of `ObjectOptimisticLockingFailureException` since `User` uses `@Version`.
++- **UI Consistency:** The modal/popover should maintain the "No-Line" rule and "Clubhouse Editorial" theme, matching the style established in `AvatarPicker`.
++
++## Tasks / Subtasks
++
++- [ ] **Backend: API & Service Implementation**
++  - [ ] Add Flyway migration (e.g. `V3__add_tutorial_completed_to_user.sql`) to add `tutorial_completed` boolean column to `user` table (default `false`).
++  - [ ] Update `User` entity (use `@Builder.Default` since it uses Lombok `@Builder`), `ProfileDto`, and `UpdateProfileRequest` to handle `tutorialCompleted`.
++  - [ ] Update `UserService.updateProfile` to process `tutorialCompleted` flag updates.
++- [ ] **Backend: Testing**
++  - [ ] Add unit tests for `tutorialCompleted` update logic (AAA format, no comments).
++  - [ ] Update integration tests to cover the new profile field.
++- [ ] **Frontend: UI & State**
++  - [ ] Update `auth.ts` Pinia store to parse and handle `tutorialCompleted`.
++  - [ ] Create `TutorialCarousel.vue` component with native CSS scroll snapping.
++  - [ ] Update `HomeHub.vue` to conditionally render `TutorialCarousel` based on the profile flag.
++  - [ ] Refactor `updateProfile` signature in `auth.ts` to accept an object payload to safely add `tutorialCompleted`, and update all existing callers (like `Cabinet.vue`) to prevent regressions.
++  - [ ] Hook up skip/finish buttons in the carousel to trigger `updateProfile({ tutorialCompleted: true })`.
++  - [ ] Add localization strings for tutorial slides to `en.json` and `de.json`.
++- [ ] **Frontend: E2E Validation**
++  - [ ] Implement E2E test in `frontend/e2e/onboarding.spec.ts`.
++
++## Dev Notes
++
++- The tutorial content slides:
++  1. **"Tap to record"** — 5-second clip/illustration of New Match flow.
++  2. **"Tap to confirm"** — push notification → tap → done.
++  3. **"Find your strength"** — leaderboard teaser with positional stats highlight.
++- Since we don't have video clips yet, use simple SVG icons or styled text to represent these concepts for MVP.
++- The `auth.ts` file currently defines `updateProfile` with positional arguments (`nickname?: string, language?: string`). You MUST refactor this to an object payload to safely add `tutorialCompleted`, and make sure to update existing callers like `Cabinet.vue` to prevent regressions.
++
++## BMAD Workflow Rules (from GEMINI.md)
++- **Feature Branch**: Create and work in `story/1-7-onboarding-tutorial` off `develop`.
++- **Validation**: NEVER present a feature completion without first running `./scripts/ci-local.sh`.
+diff --git a/_bmad-output/implementation-artifacts/sprint-status.yaml b/_bmad-output/implementation-artifacts/sprint-status.yaml
+index 15b9c4e..845d7b6 100644
+--- a/_bmad-output/implementation-artifacts/sprint-status.yaml
++++ b/_bmad-output/implementation-artifacts/sprint-status.yaml
+@@ -35,7 +35,7 @@
+ # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+ 
+ generated: "2026-05-02"
+-last_updated: "2026-06-08"
++last_updated: "2026-06-12"
+ project: tic-tac-tore
+ project_key: NOKEY
+ tracking_system: file-system
+@@ -50,7 +50,7 @@ development_status:
+   1-3-automatic-profile-generation-and-first-entry: done
+   1-4-profile-management-in-personal-cabinet: done
+   1-5-account-deletion-with-anonymization: review
+-  1-6-avatar-selection-and-management: ready-for-dev
++  1-6-avatar-selection-and-management: review
+   1-7-onboarding-tutorial: ready-for-dev
+   epic-1-retrospective: optional
+   epic-2: backlog
+diff --git a/frontend/e2e/avatar-selection.spec.ts b/frontend/e2e/avatar-selection.spec.ts
+new file mode 100644
+index 0000000..a96ab57
+--- /dev/null
++++ b/frontend/e2e/avatar-selection.spec.ts
+@@ -0,0 +1,18 @@
++import { test, expect } from '@playwright/test';
++
++test.describe('Avatar Selection & Management E2E', () => {
++  test('[P1] Select avatar from preset grid and verify persistence', async ({ page }) => {
++    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
++    const email = `e2e-avatar-user-${randomSuffix}@example.com`;
++    const nickname = `E2EAvatarUser${randomSuffix}`;
++    await page.request.get('/api/auth/test-login', {
++      params: { email, nickname }
++    });
++
++    await page.goto('/cabinet');
++    await page.getByTestId('change-avatar-button').click();
++    await page.getByTestId('avatar-option-ball-classic').click();
++
++    await expect(page.getByTestId('success-message')).toContainText('Avatar updated successfully');
++  });
++});
+diff --git a/frontend/src/assets/avatars.ts b/frontend/src/assets/avatars.ts
+new file mode 100644
+index 0000000..afc3103
+--- /dev/null
++++ b/frontend/src/assets/avatars.ts
+@@ -0,0 +1,230 @@
++export const AVATARS: Record<string, string> = {
++  'ball-classic': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="50" r="45" fill="#f5f6fa" stroke="#2b2624" stroke-width="3"/>
++  <polygon points="50,35 62,44 57,58 43,58 38,44" fill="#2b2624"/>
++  <polygon points="50,5 57,17 43,17" fill="#2b2624"/>
++  <polygon points="90,30 80,38 85,50" fill="#2b2624"/>
++  <polygon points="75,80 65,70 78,65" fill="#2b2624"/>
++  <polygon points="25,80 35,70 22,65" fill="#2b2624"/>
++  <polygon points="10,30 20,38 15,50" fill="#2b2624"/>
++  <line x1="50" y1="17" x2="50" y2="35" stroke="#2b2624" stroke-width="3"/>
++  <line x1="62" y1="44" x2="80" y2="38" stroke="#2b2624" stroke-width="3"/>
++  <line x1="57" y1="58" x2="65" y2="70" stroke="#2b2624" stroke-width="3"/>
++  <line x1="43" y1="58" x2="35" y2="70" stroke="#2b2624" stroke-width="3"/>
++  <line x1="38" y1="44" x2="20" y2="38" stroke="#2b2624" stroke-width="3"/>
++</svg>`,
++
++  'ball-cork': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="50" r="45" fill="#d35400" stroke="#2b2624" stroke-width="3"/>
++  <circle cx="30" cy="30" r="4" fill="#e67e22"/>
++  <circle cx="70" cy="35" r="5" fill="#ba4a00"/>
++  <circle cx="45" cy="65" r="3" fill="#e67e22"/>
++  <circle cx="60" cy="70" r="4" fill="#ba4a00"/>
++  <circle cx="35" cy="50" r="5" fill="#ba4a00"/>
++  <circle cx="55" cy="25" r="3" fill="#ba4a00"/>
++  <circle cx="68" cy="58" r="4" fill="#e67e22"/>
++  <circle cx="25" cy="68" r="4" fill="#ba4a00"/>
++</svg>`,
++
++  'player-red-1': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
++  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <circle cx="50" cy="12" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
++  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
++</svg>`,
++
++  'player-red-2': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
++  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <circle cx="50" cy="12" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <path d="M42,12 L58,12 L56,16 L44,16 Z" fill="#2b2624"/>
++  <line x1="40" y1="12" x2="60" y2="12" stroke="#2b2624" stroke-width="2"/>
++  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
++  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
++</svg>`,
++
++  'player-blue-1': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
++  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <circle cx="50" cy="12" r="10" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
++  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
++</svg>`,
++
++  'player-blue-2': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
++  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <circle cx="50" cy="12" r="10" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <rect x="40" y="8" width="20" height="3" fill="#a64d32"/>
++  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
++  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
++</svg>`,
++
++  'table-classic': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <rect x="20" y="50" width="8" height="40" fill="#2b2624"/>
++  <rect x="72" y="50" width="8" height="40" fill="#2b2624"/>
++  <rect x="15" y="25" width="70" height="30" rx="4" fill="#2d5a27" stroke="#2b2624" stroke-width="3"/>
++  <line x1="5" y1="30" x2="95" y2="30" stroke="#bdc3c7" stroke-width="4"/>
++  <line x1="5" y1="40" x2="95" y2="40" stroke="#bdc3c7" stroke-width="4"/>
++  <rect x="2" y="28" width="6" height="4" rx="1" fill="#a64d32"/>
++  <rect x="92" y="38" width="6" height="4" rx="1" fill="#a64d32"/>
++</svg>`,
++
++  'table-top': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <rect x="10" y="10" width="80" height="80" rx="5" fill="#2d5a27" stroke="#2b2624" stroke-width="4"/>
++  <line x1="50" y1="10" x2="50" y2="90" stroke="#ffffff" stroke-width="3"/>
++  <circle cx="50" cy="50" r="15" fill="none" stroke="#ffffff" stroke-width="3"/>
++  <rect x="10" y="30" width="12" height="40" fill="none" stroke="#ffffff" stroke-width="3"/>
++  <rect x="78" y="30" width="12" height="40" fill="none" stroke="#ffffff" stroke-width="3"/>
++</svg>`,
++
++  'beer-mug': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M65,40 H75 V70 H65" fill="none" stroke="#f1c40f" stroke-width="8" stroke-linecap="round"/>
++  <rect x="25" y="30" width="40" height="50" rx="5" fill="#f1c40f" stroke="#e67e22" stroke-width="2"/>
++  <line x1="35" y1="38" x2="35" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
++  <line x1="45" y1="38" x2="45" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
++  <line x1="55" y1="38" x2="55" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
++  <circle cx="30" cy="26" r="10" fill="#ffffff"/>
++  <circle cx="45" cy="22" r="12" fill="#ffffff"/>
++  <circle cx="60" cy="26" r="10" fill="#ffffff"/>
++</svg>`,
++
++  'beer-bottle': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M42,20 L58,20 L58,35 L68,45 L68,85 L32,85 L32,45 L42,35 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
++  <rect x="42" y="15" width="16" height="5" fill="#f1c40f"/>
++  <rect x="36" y="55" width="28" height="20" fill="#2d5a27"/>
++  <circle cx="50" cy="65" r="6" fill="#f1c40f"/>
++</svg>`,
++
++  'trophy-gold': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M30,30 C15,30 15,50 30,50" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round"/>
++  <path d="M70,30 C85,30 85,50 70,50" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round"/>
++  <path d="M30,20 L70,20 L65,55 C60,65 40,65 35,55 Z" fill="#f1c40f" stroke="#e67e22" stroke-width="2"/>
++  <rect x="46" y="60" width="8" height="15" fill="#f1c40f"/>
++  <rect x="30" y="75" width="40" height="10" rx="2" fill="#2b2624"/>
++</svg>`,
++
++  'trophy-silver': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M30,30 C15,30 15,50 30,50" fill="none" stroke="#bdc3c7" stroke-width="5" stroke-linecap="round"/>
++  <path d="M70,30 C85,30 85,50 70,50" fill="none" stroke="#bdc3c7" stroke-width="5" stroke-linecap="round"/>
++  <path d="M30,20 L70,20 L65,55 C60,65 40,65 35,55 Z" fill="#bdc3c7" stroke="#95a5a6" stroke-width="2"/>
++  <rect x="46" y="60" width="8" height="15" fill="#bdc3c7"/>
++  <rect x="30" y="75" width="40" height="10" rx="2" fill="#2b2624"/>
++</svg>`,
++
++  'glove-red': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M30,85 L30,45 C30,35 45,20 60,35 C65,40 70,45 70,55 L70,85 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <path d="M30,58 C20,58 20,48 30,48" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <rect x="30" y="72" width="40" height="8" fill="#2b2624"/>
++  <circle cx="50" cy="76" r="2" fill="#ffffff"/>
++</svg>`,
++
++  'glove-blue': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M30,85 L30,45 C30,35 45,20 60,35 C65,40 70,45 70,55 L70,85 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <path d="M30,58 C20,58 20,48 30,48" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <rect x="30" y="72" width="40" height="8" fill="#2b2624"/>
++  <circle cx="50" cy="76" r="2" fill="#ffffff"/>
++</svg>`,
++
++  'whistle-gold': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <circle cx="45" cy="50" r="22" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
++  <rect x="55" y="36" width="30" height="16" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
++  <rect x="42" y="38" width="10" height="8" fill="#2b2624"/>
++  <circle cx="20" cy="50" r="6" fill="none" stroke="#2b2624" stroke-width="3"/>
++</svg>`,
++
++  'foosball-rod': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <line x1="10" y1="50" x2="90" y2="50" stroke="#bdc3c7" stroke-width="6"/>
++  <rect x="2" y="44" width="8" height="12" rx="2" fill="#a64d32"/>
++  <rect x="25" y="35" width="12" height="30" rx="2" fill="#3498db"/>
++  <rect x="50" y="35" width="12" height="30" rx="2" fill="#3498db"/>
++  <rect x="75" y="35" width="12" height="30" rx="2" fill="#3498db"/>
++</svg>`,
++
++  'handle-wood': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <rect x="45" y="10" width="10" height="20" fill="#bdc3c7"/>
++  <path d="M35,30 L65,30 C70,40 70,70 65,90 L35,90 C30,70 30,40 35,30 Z" fill="#e67e22" stroke="#2b2624" stroke-width="3"/>
++  <path d="M42,40 Q45,60 42,80" fill="none" stroke="#ba4a00" stroke-width="2"/>
++  <path d="M50,35 Q52,55 50,85" fill="none" stroke="#ba4a00" stroke-width="2"/>
++  <path d="M58,40 Q55,60 58,80" fill="none" stroke="#ba4a00" stroke-width="2"/>
++</svg>`,
++
++  'handle-rubber': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <rect x="45" y="10" width="10" height="20" fill="#bdc3c7"/>
++  <path d="M35,30 L65,30 C70,40 70,70 65,90 L35,90 C30,70 30,40 35,30 Z" fill="#2b2624" stroke="#1b1614" stroke-width="3"/>
++  <line x1="36" y1="42" x2="64" y2="42" stroke="#4a403d" stroke-width="3"/>
++  <line x1="35" y1="52" x2="65" y2="52" stroke="#4a403d" stroke-width="3"/>
++  <line x1="35" y1="62" x2="65" y2="62" stroke="#4a403d" stroke-width="3"/>
++  <line x1="35" y1="72" x2="65" y2="72" stroke="#4a403d" stroke-width="3"/>
++  <line x1="36" y1="82" x2="64" y2="82" stroke="#4a403d" stroke-width="3"/>
++</svg>`,
++
++  'score-counter': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <line x1="10" y1="50" x2="90" y2="50" stroke="#2b2624" stroke-width="4"/>
++  <circle cx="20" cy="50" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="2"/>
++  <circle cx="38" cy="50" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="2"/>
++  <circle cx="56" cy="50" r="10" fill="#bdc3c7" stroke="#2b2624" stroke-width="2"/>
++  <circle cx="74" cy="50" r="10" fill="#bdc3c7" stroke="#2b2624" stroke-width="2"/>
++</svg>`,
++
++  'snack-pretzel': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M50,85 C25,85 15,60 30,45 C40,35 50,45 50,55 C50,45 60,35 70,45 C85,60 75,85 50,85 Z" fill="none" stroke="#a64d32" stroke-width="12" stroke-linecap="round"/>
++  <path d="M30,45 C45,30 45,55 50,55 C55,55 55,30 70,45" fill="none" stroke="#a64d32" stroke-width="12" stroke-linecap="round"/>
++  <rect x="22" y="60" width="3" height="3" fill="#ffffff"/>
++  <rect x="35" y="75" width="3" height="3" fill="#ffffff"/>
++  <rect x="50" y="80" width="3" height="3" fill="#ffffff"/>
++  <rect x="65" y="75" width="3" height="3" fill="#ffffff"/>
++  <rect x="75" y="60" width="3" height="3" fill="#ffffff"/>
++  <rect x="42" y="42" width="3" height="3" fill="#ffffff"/>
++  <rect x="55" y="42" width="3" height="3" fill="#ffffff"/>
++</svg>`,
++
++  'snack-pizza': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M20,15 Q50,5 80,15 L78,25 Q50,15 22,25 Z" fill="#d35400"/>
++  <polygon points="22,25 78,25 50,90" fill="#f1c40f"/>
++  <circle cx="50" cy="40" r="6" fill="#a64d32"/>
++  <circle cx="38" cy="55" r="5" fill="#a64d32"/>
++  <circle cx="60" cy="58" r="5" fill="#a64d32"/>
++  <circle cx="50" cy="72" r="4" fill="#a64d32"/>
++</svg>`,
++
++  'jersey-red': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M25,25 L38,15 L62,15 L75,25 L75,40 L65,40 L65,85 L35,85 L35,40 L25,40 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
++  <text x="50" y="62" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">10</text>
++  <line x1="25" y1="32" x2="35" y2="32" stroke="#ffffff" stroke-width="3"/>
++  <line x1="65" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="3"/>
++</svg>`,
++
++  'jersey-blue': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <path d="M25,25 L38,15 L62,15 L75,25 L75,40 L65,40 L65,85 L35,85 L35,40 L25,40 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
++  <text x="50" y="62" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">7</text>
++  <line x1="25" y1="32" x2="35" y2="32" stroke="#ffffff" stroke-width="3"/>
++  <line x1="65" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="3"/>
++</svg>`,
++
++  'crown': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <polygon points="15,75 15,35 32,55 50,25 68,55 85,35 85,75" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
++  <rect x="15" y="75" width="70" height="8" fill="#d35400"/>
++  <circle cx="15" cy="35" r="4" fill="#a64d32"/>
++  <circle cx="50" cy="25" r="4" fill="#3498db"/>
++  <circle cx="85" cy="35" r="4" fill="#a64d32"/>
++  <circle cx="32" cy="55" r="3" fill="#2d5a27"/>
++  <circle cx="68" cy="55" r="3" fill="#2d5a27"/>
++</svg>`,
++
++  'anonymous': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
++  <line x1="50" y1="15" x2="50" y2="30" stroke="#bdc3c7" stroke-width="4" stroke-linecap="round"/>
++  <circle cx="50" cy="15" r="4" fill="#7f8c8d"/>
++  <path d="M50,15 Q35,40 38,55" fill="none" stroke="#2b2624" stroke-width="2"/>
++  <path d="M50,15 Q65,40 62,55" fill="none" stroke="#2b2624" stroke-width="2"/>
++  <g transform="translate(25, 45) rotate(10)">
++    <path d="M10,10 L22,10 L22,30 L35,35 L35,42 L5,42 L8,25 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
++    <path d="M5,42 L35,42" stroke="#bdc3c7" stroke-width="2"/>
++  </g>
++  <g transform="translate(48, 45) rotate(-15)">
++    <path d="M10,10 L22,10 L22,30 L35,35 L35,42 L5,42 L8,25 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
++    <path d="M5,42 L35,42" stroke="#bdc3c7" stroke-width="2"/>
++  </g>
++</svg>`
++};
+diff --git a/frontend/src/components/AvatarBase.vue b/frontend/src/components/AvatarBase.vue
+new file mode 100644
+index 0000000..722397b
+--- /dev/null
++++ b/frontend/src/components/AvatarBase.vue
+@@ -0,0 +1,50 @@
++<script setup lang="ts">
++import { computed } from 'vue'
++import { AVATARS } from '@/assets/avatars'
++
++const props = defineProps<{
++  avatar?: string | null
++}>()
++
++const isSvgPreset = computed(() => {
++  if (!props.avatar) return false
++  return props.avatar in AVATARS
++})
++
++const isAnonymous = computed(() => {
++  return props.avatar === 'anonymous' || !props.avatar
++})
++
++const svgContent = computed(() => {
++  if (isSvgPreset.value) {
++    return AVATARS[props.avatar as string]
++  }
++  if (isAnonymous.value) {
++    return AVATARS['anonymous']
++  }
++  return ''
++})
++
++const isExternalImage = computed(() => {
++  return props.avatar && !isSvgPreset.value && !isAnonymous.value && (props.avatar.startsWith('http') || props.avatar.startsWith('/'))
++})
++</script>
++
++<template>
++  <div class="avatar-base w-full h-full flex items-center justify-center overflow-hidden">
++    <div v-if="isSvgPreset || isAnonymous" class="w-full h-full flex items-center justify-center" v-html="svgContent" />
++    <img v-else-if="isExternalImage" :src="props.avatar!" alt="Avatar" class="w-full h-full object-cover" />
++    <div v-else class="w-full h-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant" v-html="AVATARS['anonymous']" />
++  </div>
++</template>
++
++<style scoped>
++.avatar-base {
++  user-select: none;
++}
++:deep(svg) {
++  width: 100%;
++  height: 100%;
++  display: block;
++}
++</style>
+diff --git a/frontend/src/components/AvatarPicker.vue b/frontend/src/components/AvatarPicker.vue
+new file mode 100644
+index 0000000..c26fd60
+--- /dev/null
++++ b/frontend/src/components/AvatarPicker.vue
+@@ -0,0 +1,82 @@
++<script setup lang="ts">
++import { ref } from 'vue'
++import { AVATARS } from '@/assets/avatars'
++import { useI18n } from 'vue-i18n'
++
++const emit = defineEmits<{
++  (e: 'select', avatar: string): void
++  (e: 'close'): void
++}>()
++
++const { t } = useI18n()
++
++// Exclude 'anonymous' from the picker grid
++const presetAvatars = Object.keys(AVATARS).filter(key => key !== 'anonymous')
++
++const selected = ref<string | null>(null)
++
++function selectAvatar(avatar: string) {
++  selected.value = avatar
++  emit('select', avatar)
++}
++</script>
++
++<template>
++  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md" role="dialog" aria-modal="true">
++    <div class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-6 flex flex-col max-h-[90vh]">
++      
++      <!-- Header -->
++      <div class="flex justify-between items-center">
++        <h2 class="font-headline text-lg font-bold text-on-surface tracking-tight">
++          {{ t('avatarPicker.title') }}
++        </h2>
++        <button 
++          @click="emit('close')"
++          class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest active:scale-95 transition-all"
++        >
++          <span class="material-symbols-outlined text-sm">close</span>
++        </button>
++      </div>
++
++      <!-- Grid of Avatars -->
++      <div class="grid grid-cols-4 gap-4 overflow-y-auto pr-1 py-1 flex-grow scrollbar-thin">
++        <button
++          v-for="avatar in presetAvatars"
++          :key="avatar"
++          @click="selectAvatar(avatar)"
++          :data-testid="'avatar-option-' + avatar"
++          :class="[
++            'aspect-square p-2.5 rounded-xl bg-surface-container-highest transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm hover:shadow-md hover:translate-y-[-2px]',
++            selected === avatar ? 'bg-primary/20 scale-105 shadow-md' : 'hover:bg-surface-container-highest/80'
++          ]"
++        >
++          <div class="w-full h-full flex items-center justify-center" v-html="AVATARS[avatar]" />
++        </button>
++      </div>
++
++      <!-- Action Button -->
++      <div class="pt-2">
++        <button 
++          @click="emit('close')"
++          class="w-full py-3 rounded-xl bg-surface-container-highest text-on-surface font-headline font-bold text-sm hover:bg-surface-container-highest/80 active:scale-95 transition-colors"
++        >
++          {{ t('common.cancel') }}
++        </button>
++      </div>
++
++    </div>
++  </div>
++</template>
++
++<style scoped>
++.scrollbar-thin::-webkit-scrollbar {
++  width: 4px;
++}
++.scrollbar-thin::-webkit-scrollbar-track {
++  background: transparent;
++}
++.scrollbar-thin::-webkit-scrollbar-thumb {
++  background: var(--md-sys-color-surface-container-highest, #4a403d);
++  border-radius: 2px;
++}
++</style>
+diff --git a/frontend/src/components/__tests__/AvatarBase.spec.ts b/frontend/src/components/__tests__/AvatarBase.spec.ts
+new file mode 100644
+index 0000000..cdaf991
+--- /dev/null
++++ b/frontend/src/components/__tests__/AvatarBase.spec.ts
+@@ -0,0 +1,41 @@
++import { mount } from '@vue/test-utils'
++import { describe, it, expect } from 'vitest'
++import AvatarBase from '@/components/AvatarBase.vue'
++
++describe('AvatarBase', () => {
++  it('renders a preset SVG avatar when valid preset name is provided', () => {
++    const wrapper = mount(AvatarBase, {
++      props: { avatar: 'ball-classic' },
++    })
++
++    expect(wrapper.html()).toContain('svg')
++    expect(wrapper.html()).toContain('polygon')
++    expect(wrapper.find('img').exists()).toBe(false)
++  })
++
++  it('renders anonymous fallback SVG when avatar is anonymous', () => {
++    const wrapper = mount(AvatarBase, {
++      props: { avatar: 'anonymous' },
++    })
++
++    expect(wrapper.html()).toContain('svg')
++    expect(wrapper.html()).toContain('rotate(10)')
++  })
++
++  it('renders anonymous fallback SVG when avatar is null or undefined', () => {
++    const wrapper = mount(AvatarBase, {
++      props: { avatar: null },
++    })
++
++    expect(wrapper.html()).toContain('svg')
++  })
++
++  it('renders img element when avatar is a URL', () => {
++    const wrapper = mount(AvatarBase, {
++      props: { avatar: 'http://example.com/avatar.png' },
++    })
++
++    expect(wrapper.find('img').exists()).toBe(true)
++    expect(wrapper.find('img').attributes('src')).toBe('http://example.com/avatar.png')
++  })
++})
+diff --git a/frontend/src/components/__tests__/AvatarPicker.spec.ts b/frontend/src/components/__tests__/AvatarPicker.spec.ts
+new file mode 100644
+index 0000000..3dbdd9b
+--- /dev/null
++++ b/frontend/src/components/__tests__/AvatarPicker.spec.ts
+@@ -0,0 +1,61 @@
++import { mount } from '@vue/test-utils'
++import { describe, it, expect } from 'vitest'
++import { createI18n } from 'vue-i18n'
++import AvatarPicker from '@/components/AvatarPicker.vue'
++import en from '@/locales/en.json'
++import de from '@/locales/de.json'
++
++const testI18n = createI18n({ legacy: false, locale: 'en', messages: { en, de } })
++
++describe('AvatarPicker', () => {
++  it('renders all 24 preset avatar buttons', () => {
++    const wrapper = mount(AvatarPicker, {
++      global: { plugins: [testI18n] },
++    })
++
++    const buttons = wrapper.findAll('button')
++    // 24 preset buttons + 1 close button + 1 cancel button = 26 buttons total
++    expect(buttons.length).toBe(26)
++  })
++
++  it('emits select event when an avatar is clicked', async () => {
++    const wrapper = mount(AvatarPicker, {
++      global: { plugins: [testI18n] },
++    })
++
++    const buttons = wrapper.findAll('button')
++    expect(buttons.length).toBeGreaterThan(1)
++    const firstAvatarBtn = buttons[1]!
++    await firstAvatarBtn.trigger('click')
++
++    const emittedSelect = wrapper.emitted('select')
++    expect(emittedSelect).toBeTruthy()
++    expect(emittedSelect?.[0]?.[0]).toBe('ball-classic')
++  })
++
++  it('emits close event when cancel button is clicked', async () => {
++    const wrapper = mount(AvatarPicker, {
++      global: { plugins: [testI18n] },
++    })
++
++    const buttons = wrapper.findAll('button')
++    expect(buttons.length).toBeGreaterThan(0)
++    const cancelBtn = buttons[buttons.length - 1]!
++    await cancelBtn.trigger('click')
++
++    expect(wrapper.emitted('close')).toBeTruthy()
++  })
++
++  it('emits close event when close icon button is clicked', async () => {
++    const wrapper = mount(AvatarPicker, {
++      global: { plugins: [testI18n] },
++    })
++
++    const buttons = wrapper.findAll('button')
++    expect(buttons.length).toBeGreaterThan(0)
++    const closeIconBtn = buttons[0]!
++    await closeIconBtn.trigger('click')
++
++    expect(wrapper.emitted('close')).toBeTruthy()
++  })
++})
+diff --git a/frontend/src/features/profile/Cabinet.vue b/frontend/src/features/profile/Cabinet.vue
+index b951e8d..b1dd913 100644
+--- a/frontend/src/features/profile/Cabinet.vue
++++ b/frontend/src/features/profile/Cabinet.vue
+@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
+ import { useRouter } from 'vue-router'
+ import { useI18n } from 'vue-i18n'
+ import { useAuthStore } from '@/stores/auth'
++import AvatarBase from '@/components/AvatarBase.vue'
++import AvatarPicker from '@/components/AvatarPicker.vue'
+ 
+ const { t } = useI18n()
+ const router = useRouter()
+@@ -14,6 +16,19 @@ const isDropdownOpen = ref(false)
+ const message = ref('')
+ const error = ref('')
+ const isUpdating = ref(false)
++const isAvatarPickerOpen = ref(false)
++
++async function handleAvatarSelect(selectedAvatar: string) {
++  isAvatarPickerOpen.value = false
++  error.value = ''
++  message.value = ''
++  try {
++    await authStore.updateProfile(undefined, undefined, selectedAvatar)
++    message.value = t('cabinet.avatarSuccess')
++  } catch (err) {
++    error.value = err instanceof Error ? err.message : t('common.error')
++  }
++}
+ 
+ onMounted(async () => {
+   if (!authStore.isAuthenticated) {
+@@ -114,17 +129,19 @@ async function confirmDelete() {
+     <main class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
+       <!-- Avatar Section -->
+       <section class="flex flex-col items-center">
+-        <div class="relative group">
+-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
+-            <img 
+-              v-if="authStore.profile && authStore.profile.avatar !== 'anonymous'" 
+-              :src="authStore.profile.avatar" 
+-              alt="Avatar" 
+-              class="w-full h-full object-cover"
+-            />
+-            <div v-else-if="authStore.profile && authStore.profile.avatar === 'anonymous'" class="w-full h-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant">
+-              <span class="material-symbols-outlined text-4xl">person_off</span>
+-            </div>
++        <div 
++          class="relative group cursor-pointer" 
++          @click="isAvatarPickerOpen = true" 
++          role="button" 
++          aria-label="Change avatar" 
++          data-testid="change-avatar-button"
++        >
++          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center">
++            <AvatarBase :avatar="authStore.profile?.avatar" />
++          </div>
++          <!-- Edit Overlay Icon -->
++          <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
++            <span class="material-symbols-outlined text-2xl">edit</span>
+           </div>
+         </div>
+         <div class="mt-3 text-center" v-if="authStore.profile">
+@@ -288,6 +305,15 @@ async function confirmDelete() {
+         </div>
+       </div>
+     </Transition>
++
++    <!-- Avatar Picker Modal -->
++    <Transition name="fade">
++      <AvatarPicker 
++        v-if="isAvatarPickerOpen"
++        @select="handleAvatarSelect"
++        @close="isAvatarPickerOpen = false"
++      />
++    </Transition>
+   </div>
+ </template>
+ 
+diff --git a/frontend/src/locales/de.json b/frontend/src/locales/de.json
+index 7d47fa6..169766e 100644
+--- a/frontend/src/locales/de.json
++++ b/frontend/src/locales/de.json
+@@ -47,6 +47,10 @@
+     "deleteAccount": "Konto löschen",
+     "deleteTitle": "Konto löschen",
+     "deleteConfirmMessage": "Diese Aktion ist unumkehrbar. Alle Ihre persönlichen Daten werden dauerhaft entfernt und Ihr Konto wird anonymisiert. Ihr Spielverlauf bleibt erhalten.",
+-    "confirmDelete": "Löschen bestätigen"
++    "confirmDelete": "Löschen bestätigen",
++    "avatarSuccess": "Avatar erfolgreich aktualisiert"
++  },
++  "avatarPicker": {
++    "title": "Avatar auswählen"
+   }
+ }
+diff --git a/frontend/src/locales/en.json b/frontend/src/locales/en.json
+index c965072..e5afcd1 100644
+--- a/frontend/src/locales/en.json
++++ b/frontend/src/locales/en.json
+@@ -47,6 +47,10 @@
+     "deleteAccount": "Delete Account",
+     "deleteTitle": "Delete Account",
+     "deleteConfirmMessage": "This action is irreversible. All your personal data will be permanently removed, and your account will be anonymized. Your match history will be preserved.",
+-    "confirmDelete": "Confirm Deletion"
++    "confirmDelete": "Confirm Deletion",
++    "avatarSuccess": "Avatar updated successfully"
++  },
++  "avatarPicker": {
++    "title": "Select Avatar"
+   }
+ }
+diff --git a/frontend/src/stores/auth.ts b/frontend/src/stores/auth.ts
+index 38f1e44..44d37ee 100644
+--- a/frontend/src/stores/auth.ts
++++ b/frontend/src/stores/auth.ts
+@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
+     }
+   }
+ 
+-  async function updateProfile(nickname?: string, language?: string) {
++  async function updateProfile(nickname?: string, language?: string, avatar?: string) {
+     if (!profile.value) return
+ 
+     const previousProfile = { ...profile.value }
+@@ -79,6 +79,9 @@ export const useAuthStore = defineStore('auth', () => {
+         localeStore.setLocale(lang)
+       }
+     }
++    if (avatar !== undefined) {
++      profile.value.avatar = avatar
++    }
+ 
+     try {
+       const csrfToken = getCookie(CSRF_COOKIE_NAME)
+@@ -92,7 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
+       const response = await fetch(PROFILE_ENDPOINT, {
+         method: 'PATCH',
+         headers,
+-        body: JSON.stringify({ nickname: finalNickname, language })
++        body: JSON.stringify({ nickname: finalNickname, language, avatar })
+       })
+ 
+       if (!response.ok) {
+diff --git a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
+index 35a8ab5..56f5f6a 100644
+--- a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
++++ b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
+@@ -21,4 +21,7 @@ public class UpdateProfileRequest {
+     @Schema(description = "New interface language (EN/DE)", example = "EN")
+     @Pattern(regexp = "^(?i)(EN|DE)$", message = "Language must be EN or DE")
+     private String language;
++
++    @Schema(description = "New avatar name from preset grid", example = "ball-classic")
++    private String avatar;
+ }
+diff --git a/src/main/java/com/tictactore/service/UserService.java b/src/main/java/com/tictactore/service/UserService.java
+index 36053bb..42165af 100644
+--- a/src/main/java/com/tictactore/service/UserService.java
++++ b/src/main/java/com/tictactore/service/UserService.java
+@@ -29,6 +29,15 @@ public class UserService {
+     private static final String ERR_EMAIL_COLLISION = "Email already registered with a different identity provider";
+     private static final int MAX_NICKNAME_ATTEMPTS = 10;
+ 
++    private static final java.util.Set<String> ALLOWED_AVATARS = java.util.Set.of(
++            "ball-classic", "ball-cork", "player-red-1", "player-red-2",
++            "player-blue-1", "player-blue-2", "table-classic", "table-top",
++            "beer-mug", "beer-bottle", "trophy-gold", "trophy-silver",
++            "glove-red", "glove-blue", "whistle-gold", "foosball-rod",
++            "handle-wood", "handle-rubber", "score-counter", "snack-pretzel",
++            "snack-pizza", "jersey-red", "jersey-blue", "crown"
++    );
++
+     private final UserRepository userRepository;
+     private final UserCreator userCreator;
+     private final ApplicationProperties properties;
+@@ -186,6 +195,13 @@ public class UserService {
+             user.setLanguage(lang);
+         }
+ 
++        if (request.getAvatar() != null) {
++            if (!ALLOWED_AVATARS.contains(request.getAvatar())) {
++                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
++            }
++            user.setAvatar(request.getAvatar());
++        }
++
+         try {
+             return userRepository.save(user);
+         } catch (DataIntegrityViolationException e) {
+diff --git a/src/test/java/com/tictactore/controller/UserControllerTest.java b/src/test/java/com/tictactore/controller/UserControllerTest.java
+index c569547..b9d2b45 100644
+--- a/src/test/java/com/tictactore/controller/UserControllerTest.java
++++ b/src/test/java/com/tictactore/controller/UserControllerTest.java
+@@ -115,6 +115,38 @@ class UserControllerTest {
+                 .andExpect(jsonPath("$.message").value("Nickname can only be changed once every 30 days"));
+     }
+ 
++    @Test
++    @DisplayName("PATCH /me - should update avatar")
++    void patchMe_shouldUpdateAvatar() throws Exception {
++        UUID userId = UUID.randomUUID();
++        User principal = User.builder()
++                .id(userId)
++                .email("test@example.com")
++                .nickname("oldNickname")
++                .build();
++        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
++                principal,
++                null,
++                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
++        );
++        User updatedUser = User.builder()
++                .id(userId)
++                .email("test@example.com")
++                .nickname("oldNickname")
++                .avatar("ball-classic")
++                .build();
++        when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
++
++        var result = mockMvc.perform(patch("/api/v1/profile/me")
++                        .with(authentication(auth))
++                        .with(csrf())
++                        .contentType(MediaType.APPLICATION_JSON)
++                        .content("{\"avatar\":\"ball-classic\"}"));
++
++        result.andExpect(status().isOk())
++                .andExpect(jsonPath("$.avatar").value("ball-classic"));
++    }
++
+     @Test
+     @DisplayName("DELETE /me - should return 204 and revoke token when authenticated")
+     void deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated() throws Exception {
+diff --git a/src/test/java/com/tictactore/service/UserServiceTest.java b/src/test/java/com/tictactore/service/UserServiceTest.java
+index a9096ec..142b9fc 100644
+--- a/src/test/java/com/tictactore/service/UserServiceTest.java
++++ b/src/test/java/com/tictactore/service/UserServiceTest.java
+@@ -388,5 +388,38 @@ class UserServiceTest {
+                 .isInstanceOf(IllegalStateException.class)
+                 .hasMessageContaining("Account was concurrently modified during deletion. Please try again.");
+     }
++
++    @Test
++    @DisplayName("Update Profile - should update avatar when avatar whitelisted")
++    void updateProfile_shouldUpdateAvatar_whenAvatarWhitelisted() {
++        UUID userId = UUID.randomUUID();
++        User user = new User();
++        user.setId(userId);
++        user.setNickname("nickname");
++        user.setAvatar("old-avatar");
++        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("ball-classic").build();
++        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
++        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
++
++        User updatedUser = userService.updateProfile(userId, request);
++
++        assertThat(updatedUser.getAvatar()).isEqualTo("ball-classic");
++    }
++
++    @Test
++    @DisplayName("Update Profile - should throw exception when avatar not whitelisted")
++    void updateProfile_shouldThrowException_whenAvatarNotWhitelisted() {
++        UUID userId = UUID.randomUUID();
++        User user = new User();
++        user.setId(userId);
++        user.setNickname("nickname");
++        user.setAvatar("old-avatar");
++        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("invalid-avatar-name").build();
++        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
++
++        assertThatThrownBy(() -> userService.updateProfile(userId, request))
++                .isInstanceOf(com.tictactore.exception.ValidationException.class)
++                .hasMessage("Invalid avatar selection");
++    }
+ }
+ 

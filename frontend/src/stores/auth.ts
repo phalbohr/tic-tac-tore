@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateProfile(nickname?: string, language?: string) {
+  async function updateProfile(nickname?: string, language?: string, avatar?: string) {
     if (!profile.value) return
 
     const previousProfile = { ...profile.value }
@@ -79,6 +79,9 @@ export const useAuthStore = defineStore('auth', () => {
         localeStore.setLocale(lang)
       }
     }
+    if (avatar !== undefined) {
+      profile.value.avatar = avatar
+    }
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
@@ -92,7 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ nickname: finalNickname, language })
+        body: JSON.stringify({ nickname: finalNickname, language, avatar })
       })
 
       if (!response.ok) {

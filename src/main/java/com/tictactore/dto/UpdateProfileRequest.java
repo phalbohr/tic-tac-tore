@@ -21,4 +21,7 @@ public class UpdateProfileRequest {
     @Schema(description = "New interface language (EN/DE)", example = "EN")
     @Pattern(regexp = "^(?i)(EN|DE)$", message = "Language must be EN or DE")
     private String language;
+
+    @Schema(description = "New avatar name from preset grid", example = "ball-classic")
+    private String avatar;
 }
