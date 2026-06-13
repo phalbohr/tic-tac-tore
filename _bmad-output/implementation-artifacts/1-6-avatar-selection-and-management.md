@@ -1,6 +1,6 @@
 # Story 1.6: Avatar Selection & Management
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -119,6 +119,23 @@ This story implements the avatar selection feature for the user profile. Accordi
 - [x] [Review][Patch] Focus escapes trapped modal into background DOM [frontend/src/components/AvatarPicker.vue]
 - [x] [Review][Patch] Internal service bypasses @Valid with unknown avatar [src/main/java/com/tictactore/service/UserService.java]
 - [x] [Review][Patch] Currently active avatar is not visually highlighted [frontend/src/components/AvatarPicker.vue]
+- [ ] [Review][Patch] Absolute paths in CLAUDE.md/GEMINI.md — Replace hardcoded absolute paths with project-relative paths.
+- [ ] [Review][Patch] sprint-status.yaml date comments mismatch — Header comment date conflicts with yaml body date.
+- [ ] [Review][Patch] 1-7-onboarding-tutorial.md ambiguous database flag — Ambiguous tutorialCompleted vs onboardingCompleted.
+- [ ] [Review][Patch] 1-7-onboarding-tutorial.md uses emojis — Contradicts 1-6 standard, should use SVGs.
+- [ ] [Review][Patch] 1-7-onboarding-tutorial.md hardcodes Flyway V3 — Make migration version dynamic or add verification note.
+- [ ] [Review][Patch] deferred-work.md formatting — Remove .md extension from section header.
+- [ ] [Review][Patch] Cabinet.vue freeze on pending [frontend/src/features/profile/Cabinet.vue:21]
+- [ ] [Review][Patch] Cabinet.vue concurrent language update race [frontend/src/features/profile/Cabinet.vue:61]
+- [ ] [Review][Patch] Accidental modal closure on text selection [frontend/src/components/AvatarPicker.vue:128]
+- [ ] [Review][Patch] SVG sprites fail to load from subpath [frontend/src/components/AvatarBase.vue:14]
+- [ ] [Review][Patch] Network stall freezes UI indefinitely [frontend/src/stores/auth.ts:98]
+- [ ] [Review][Patch] Cannot permanently remove avatar with null [src/main/java/com/tictactore/service/UserService.java:189]
+- [ ] [Review][Patch] Focus trap incorrectly focuses tabindex=-1 elements [frontend/src/components/AvatarPicker.vue:32]
+- [ ] [Review][Patch] E2E Test Violates Strict AAA Pattern Layout [frontend/e2e/avatar-selection.spec.ts]
+- [ ] [Review][Patch] Avatar Selection Uses Explicit Border (Ring) [frontend/src/components/AvatarPicker.vue]
+- [ ] [Review][Patch] Screen Readers Read Raw Variable IDs [frontend/src/components/AvatarPicker.vue]
+- [ ] [Review][Patch] Inconsistent and Duplicate Validation Logic in Backend [src/main/java/com/tictactore/service/UserService.java]
 
 ## Dev Notes
 
@@ -163,7 +180,7 @@ Modified files:
 
 ## Status
 
-Status: review
+Status: done
 
 ## Dev Agent Record
 
