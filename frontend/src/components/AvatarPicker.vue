@@ -25,6 +25,69 @@ function selectAvatar(avatar: string) {
 function handleKeyDown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     emit('close')
+  } else if (event.key === 'Tab') {
+    if (!modalRef.value) return
+    const focusableElements = modalRef.value.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusableElements.length === 0) return
+    
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (firstElement && lastElement) {
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus()
+          event.preventDefault()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus()
+          event.preventDefault()
+        }
+      }
+    }
+  }
+}
+
+function handleGridKeyDown(event: KeyboardEvent, index: number) {
+  const columns = 4
+  let newIndex = index
+
+  switch (event.key) {
+    case 'ArrowRight':
+      newIndex = (index + 1) % presetAvatars.length
+      break
+    case 'ArrowLeft':
+      newIndex = (index - 1 + presetAvatars.length) % presetAvatars.length
+      break
+    case 'ArrowDown':
+      if (index + columns < presetAvatars.length) {
+        newIndex = index + columns
+      }
+      break
+    case 'ArrowUp':
+      if (index - columns >= 0) {
+        newIndex = index - columns
+      }
+      break
+    case 'Home':
+      newIndex = 0
+      break
+    case 'End':
+      newIndex = presetAvatars.length - 1
+      break
+    default:
+      return
+  }
+
+  event.preventDefault()
+  
+  const buttons = modalRef.value?.querySelectorAll<HTMLElement>('[data-testid^="avatar-option-"]')
+  if (buttons && buttons.length > newIndex) {
+    const btn = buttons[newIndex]
+    if (btn) btn.focus()
   }
 }
 
@@ -72,9 +135,10 @@ onBeforeUnmount(() => {
       <!-- Grid of Avatars -->
       <div class="grid grid-cols-4 gap-4 overflow-y-auto pr-1 py-1 flex-grow scrollbar-thin">
         <button
-          v-for="avatar in presetAvatars"
+          v-for="(avatar, index) in presetAvatars"
           :key="avatar"
           @click="selectAvatar(avatar)"
+          @keydown="handleGridKeyDown($event, index)"
           :data-testid="'avatar-option-' + avatar"
           :aria-label="avatar"
           :class="[
@@ -106,6 +170,10 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-surface-container-highest, #4a403d) transparent;
+}
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }

@@ -23,6 +23,6 @@ public class UpdateProfileRequest {
     private String language;
 
     @Schema(description = "New avatar name from preset grid", example = "ball-classic")
-    @Pattern(regexp = "^(ball-classic|ball-cork|player-red-1|player-red-2|player-blue-1|player-blue-2|table-classic|table-top|beer-mug|beer-bottle|trophy-gold|trophy-silver|glove-red|glove-blue|whistle-gold|foosball-rod|handle-wood|handle-rubber|score-counter|snack-pretzel|snack-pizza|jersey-red|jersey-blue|crown|anonymous|)?$", message = "Invalid avatar selection")
+    @Pattern(regexp = "^(ball-classic|ball-cork|player-red-1|player-red-2|player-blue-1|player-blue-2|table-classic|table-top|beer-mug|beer-bottle|trophy-gold|trophy-silver|glove-red|glove-blue|whistle-gold|foosball-rod|handle-wood|handle-rubber|score-counter|snack-pretzel|snack-pizza|jersey-red|jersey-blue|crown|)?$", message = "Invalid avatar selection")
     private String avatar;
 }

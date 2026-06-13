@@ -133,24 +133,23 @@ async function confirmDelete() {
     <main class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
-        <div 
-          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl" 
+        <button 
+          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" 
           @click="isAvatarPickerOpen = true" 
-          @keydown.enter="isAvatarPickerOpen = true"
-          @keydown.space.prevent="isAvatarPickerOpen = true"
-          tabindex="0"
-          role="button" 
+          :disabled="isUpdating"
+          aria-haspopup="dialog"
+          :aria-expanded="isAvatarPickerOpen"
           aria-label="Change avatar" 
           data-testid="change-avatar-button"
         >
-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center">
+          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center">
             <AvatarBase :avatar="authStore.profile?.avatar" />
           </div>
           <!-- Edit Overlay Icon -->
           <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
             <span class="material-symbols-outlined text-2xl">edit</span>
           </div>
-        </div>
+        </button>
         <div class="mt-3 text-center" v-if="authStore.profile">
           <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">{{ authStore.profile.nickname }}</h2>
           <p class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70">Clubhouse Member</p>

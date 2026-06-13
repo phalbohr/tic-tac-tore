@@ -113,6 +113,7 @@ class UserControllerTest {
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Nickname can only be changed once every 30 days"));
+
     }
 
     @Test
@@ -188,14 +189,42 @@ class UserControllerTest {
                 null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
-
         var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"avatar\":\"invalid-avatar-name\"}"));
 
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid avatar selection"));
+        verify(userService, org.mockito.Mockito.never()).updateProfile(any(), any());
+
+    }
+
+    @Test
+    @DisplayName("PATCH /me - should return 400 when setting anonymous avatar")
+    void patchMe_shouldReturn400_whenSettingAnonymousAvatar() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"anonymous\"}"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid avatar selection"));
+        verify(userService, org.mockito.Mockito.never()).updateProfile(any(), any());
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Story 1.6: Avatar Selection & Management
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -86,6 +86,21 @@ This story implements the avatar selection feature for the user profile. Accordi
 - [x] [Review][Patch] Missing controller test for invalid avatar input [src/test/java/com/tictactore/controller/UserControllerTest.java]
 - [x] [Review][Patch] Brittle assertion on exact button count [frontend/src/components/__tests__/AvatarPicker.spec.ts]
 - [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.
+- [x] [Review][Patch] Duplicate Validation Sources of Truth [UserService.java / UpdateProfileRequest.java]
+- [x] [Review][Patch] Improper Focus Trapping in Modal [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Dead Code for External Images [frontend/src/components/AvatarBase.vue]
+- [x] [Review][Patch] API Loophole Permitting Impersonation of Deleted Users [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] Missing Keyboard Affordance on Avatar Trigger [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] Missing Dialog Semantics on Trigger [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] Broken Cross-Browser Scrollbars [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Flash of Missing Avatar (FOMA) sprite not preloaded [index.html / Cabinet.vue]
+- [x] [Review][Patch] Pointless Type Safety Bypass [frontend/src/components/AvatarBase.vue]
+- [x] [Review][Patch] Weak and Brittle Controller Tests [src/test/java/com/tictactore/controller/UserControllerTest.java]
+- [x] [Review][Patch] Abysmal Grid Keyboard Navigation [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] State Race Condition on Profile Updates (Modal Trigger & selectLanguage) [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] E2E test violates strict AAA pattern block layout [frontend/e2e/avatar-selection.spec.ts]
+- [x] [Review][Patch] E2E test does not verify optimistic UI updates [frontend/e2e/avatar-selection.spec.ts]
+- [x] [Review][Defer] Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts] — deferred, pre-existing
 
 ## Dev Notes
 
@@ -154,3 +169,4 @@ Addressed all code review findings:
 6. Handled avatar unsetting and setting `"anonymous"` in the backend `UserService` and added `@Pattern` validation on the DTO.
 7. Expanded test coverage: added service unit tests for unsetting, a controller validation test, non-brittle test-id assertions in `AvatarPicker.spec.ts`, and DOM/reload assertions in E2E tests.
 8. Ran `./scripts/ci-local.sh` and confirmed all checks and tests are completely green.
+9. Fixed 14 new review findings: removed duplicate avatar validation logic from UserService, added modal focus trapping and keyboard navigation in AvatarPicker, removed dead external image code and type safety bypass in AvatarBase, prevented impersonation with anonymous avatar in UserService, upgraded Cabinet trigger to semantic button with ARIA dialog roles, fixed scrollbars for Firefox, preloaded avatars.svg in index.html, strengthened brittle controller tests, fixed Cabinet state race condition, and corrected E2E tests for AAA layout and optimistic updates.

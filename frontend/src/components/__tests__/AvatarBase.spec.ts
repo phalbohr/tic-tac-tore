@@ -34,12 +34,4 @@ describe('AvatarBase', () => {
     expect(svg.find('use').attributes('href')).toBe('/avatars.svg#anonymous')
   })
 
-  it('renders img element when avatar is a URL', () => {
-    const wrapper = mount(AvatarBase, {
-      props: { avatar: 'http://example.com/avatar.png' },
-    })
-
-    expect(wrapper.find('img').exists()).toBe(true)
-    expect(wrapper.find('img').attributes('src')).toBe('http://example.com/avatar.png')
-  })
 })
