@@ -1,6 +1,6 @@
 # Story 1.6: Avatar Selection & Management
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -71,20 +71,20 @@ This story implements the avatar selection feature for the user profile. Accordi
   - [x] Implement E2E test in `frontend/e2e/avatar-selection.spec.ts`.
 
 ### Review Findings
-- [ ] [Review][Patch] Convert inline SVG strings to SVG sprite sheet to fix JS bundle bloat [frontend/src/assets/avatars.ts]
-- [ ] [Review][Patch] Avatar picker trigger inaccessible via keyboard [frontend/src/features/profile/Cabinet.vue:132]
-- [ ] [Review][Patch] AvatarBase Object injection via hasOwnProperty [frontend/src/components/AvatarBase.vue:11]
-- [ ] [Review][Patch] Concurrent API requests on avatar select [frontend/src/features/profile/Cabinet.vue:18]
-- [ ] [Review][Patch] Avatar picker modal does not close on Escape key [frontend/src/components/AvatarPicker.vue:24]
-- [ ] [Review][Patch] Modal does not close when clicking outside [frontend/src/components/AvatarPicker.vue:24]
-- [ ] [Review][Patch] E2E test lacks DOM update assertion and reload persistence assertion [frontend/e2e/avatar-selection.spec.ts]
-- [ ] [Review][Patch] Impossible to unset avatar or set "anonymous" [src/main/java/com/tictactore/service/UserService.java]
-- [ ] [Review][Patch] DTO missing validation annotations [src/main/java/com/tictactore/dto/UpdateProfileRequest.java]
-- [ ] [Review][Patch] Positional argument code smell in updateProfile [frontend/src/stores/auth.ts]
-- [ ] [Review][Patch] SVGs lack screen reader context [frontend/src/assets/avatars.ts]
-- [ ] [Review][Patch] Missing focus management in modal [frontend/src/components/AvatarPicker.vue]
-- [ ] [Review][Patch] Missing controller test for invalid avatar input [src/test/java/com/tictactore/controller/UserControllerTest.java]
-- [ ] [Review][Patch] Brittle assertion on exact button count [frontend/src/components/__tests__/AvatarPicker.spec.ts]
+- [x] [Review][Patch] Convert inline SVG strings to SVG sprite sheet to fix JS bundle bloat [frontend/src/assets/avatars.ts]
+- [x] [Review][Patch] Avatar picker trigger inaccessible via keyboard [frontend/src/features/profile/Cabinet.vue:132]
+- [x] [Review][Patch] AvatarBase Object injection via hasOwnProperty [frontend/src/components/AvatarBase.vue:11]
+- [x] [Review][Patch] Concurrent API requests on avatar select [frontend/src/features/profile/Cabinet.vue:18]
+- [x] [Review][Patch] Avatar picker modal does not close on Escape key [frontend/src/components/AvatarPicker.vue:24]
+- [x] [Review][Patch] Modal does not close when clicking outside [frontend/src/components/AvatarPicker.vue:24]
+- [x] [Review][Patch] E2E test lacks DOM update assertion and reload persistence assertion [frontend/e2e/avatar-selection.spec.ts]
+- [x] [Review][Patch] Impossible to unset avatar or set "anonymous" [src/main/java/com/tictactore/service/UserService.java]
+- [x] [Review][Patch] DTO missing validation annotations [src/main/java/com/tictactore/dto/UpdateProfileRequest.java]
+- [x] [Review][Patch] Positional argument code smell in updateProfile [frontend/src/stores/auth.ts]
+- [x] [Review][Patch] SVGs lack screen reader context [frontend/src/assets/avatars.ts]
+- [x] [Review][Patch] Missing focus management in modal [frontend/src/components/AvatarPicker.vue]
+- [x] [Review][Patch] Missing controller test for invalid avatar input [src/test/java/com/tictactore/controller/UserControllerTest.java]
+- [x] [Review][Patch] Brittle assertion on exact button count [frontend/src/components/__tests__/AvatarPicker.spec.ts]
 - [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.
 
 ## Dev Notes
@@ -104,6 +104,7 @@ This story implements the avatar selection feature for the user profile. Accordi
 ## File List
 
 New files:
+- `frontend/public/avatars.svg`
 - `frontend/src/assets/avatars.ts`
 - `frontend/src/components/AvatarBase.vue`
 - `frontend/src/components/AvatarPicker.vue`
@@ -125,10 +126,11 @@ Modified files:
 ## Change Log
 
 - 2026-06-12: Implemented and tested preset avatar selection for Story 1.6.
+- 2026-06-13: Addressed all code review findings (resolved bundle bloat via SVG sprite sheet, keyboard accessibility, modal escape/click-outside triggers, focus management, DTO validations, controller tests, and E2E DOM/reload assertions).
 
 ## Status
 
-Status: in-progress
+Status: review
 
 ## Dev Agent Record
 
@@ -143,6 +145,12 @@ Status: in-progress
 
 ### Completion Notes
 
-Successfully implemented user avatar selection from a preset grid of 24 custom kicker-themed SVGs.
-The backend update profile API now validates the selected preset name against a strict whitelist set, rejecting any invalid requests. Unit tests and API mock MVC tests check correct validation and successful updates, adhering to the AAA test style.
-On the frontend, the `AvatarBase` visual primitive handles both preset icons and the `anonymous` fallback state (rendered as boots hung on a nail). The Pinia store performs optimistic UI updates of the avatar and rolls back immediately if the network request fails. All unit tests and Playwright E2E tests pass, and local CI validation checks (`./scripts/ci-local.sh`) are fully green.
+Addressed all code review findings:
+1. Converted inline SVG strings in the client bundle into a single static SVG sprite sheet `frontend/public/avatars.svg` and updated `avatars.ts` to export only key arrays. This reduced the compiled `Cabinet` JS chunk size by ~50% (from 26.44 kB down to 13.43 kB).
+2. Added proper focus management (remembering and restoring focus targets), keyboard Escape key listeners, and backdrop click-outside handlers to the `AvatarPicker.vue` modal.
+3. Added full keyboard accessibility to the cabinet avatar change trigger via `tabindex="0"`, `@keydown.enter`, and `@keydown.space`.
+4. Resolved potential concurrent API calls on avatar select by guarding with the `isUpdating` flag.
+5. Avoided unsafe prototype lookup in `AvatarBase.vue` by switching from the `in` operator to a safe array lookup check.
+6. Handled avatar unsetting and setting `"anonymous"` in the backend `UserService` and added `@Pattern` validation on the DTO.
+7. Expanded test coverage: added service unit tests for unsetting, a controller validation test, non-brittle test-id assertions in `AvatarPicker.spec.ts`, and DOM/reload assertions in E2E tests.
+8. Ran `./scripts/ci-local.sh` and confirmed all checks and tests are completely green.

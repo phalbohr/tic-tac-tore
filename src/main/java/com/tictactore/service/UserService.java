@@ -196,10 +196,15 @@ public class UserService {
         }
 
         if (request.getAvatar() != null) {
-            if (!ALLOWED_AVATARS.contains(request.getAvatar())) {
-                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
+            String avatarVal = request.getAvatar().trim();
+            if (avatarVal.isEmpty() || "anonymous".equals(avatarVal)) {
+                user.setAvatar("anonymous");
+            } else {
+                if (!ALLOWED_AVATARS.contains(avatarVal)) {
+                    throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
+                }
+                user.setAvatar(avatarVal);
             }
-            user.setAvatar(request.getAvatar());
         }
 
         try {

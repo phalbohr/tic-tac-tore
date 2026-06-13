@@ -1,230 +1,28 @@
-export const AVATARS: Record<string, string> = {
-  'ball-classic': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="50" r="45" fill="#f5f6fa" stroke="#2b2624" stroke-width="3"/>
-  <polygon points="50,35 62,44 57,58 43,58 38,44" fill="#2b2624"/>
-  <polygon points="50,5 57,17 43,17" fill="#2b2624"/>
-  <polygon points="90,30 80,38 85,50" fill="#2b2624"/>
-  <polygon points="75,80 65,70 78,65" fill="#2b2624"/>
-  <polygon points="25,80 35,70 22,65" fill="#2b2624"/>
-  <polygon points="10,30 20,38 15,50" fill="#2b2624"/>
-  <line x1="50" y1="17" x2="50" y2="35" stroke="#2b2624" stroke-width="3"/>
-  <line x1="62" y1="44" x2="80" y2="38" stroke="#2b2624" stroke-width="3"/>
-  <line x1="57" y1="58" x2="65" y2="70" stroke="#2b2624" stroke-width="3"/>
-  <line x1="43" y1="58" x2="35" y2="70" stroke="#2b2624" stroke-width="3"/>
-  <line x1="38" y1="44" x2="20" y2="38" stroke="#2b2624" stroke-width="3"/>
-</svg>`,
+export const AVATAR_KEYS = [
+  'ball-classic',
+  'ball-cork',
+  'player-red-1',
+  'player-red-2',
+  'player-blue-1',
+  'player-blue-2',
+  'table-classic',
+  'table-top',
+  'beer-mug',
+  'beer-bottle',
+  'trophy-gold',
+  'trophy-silver',
+  'glove-red',
+  'glove-blue',
+  'whistle-gold',
+  'foosball-rod',
+  'handle-wood',
+  'handle-rubber',
+  'score-counter',
+  'snack-pretzel',
+  'snack-pizza',
+  'jersey-red',
+  'jersey-blue',
+  'crown'
+] as const;
 
-  'ball-cork': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="50" r="45" fill="#d35400" stroke="#2b2624" stroke-width="3"/>
-  <circle cx="30" cy="30" r="4" fill="#e67e22"/>
-  <circle cx="70" cy="35" r="5" fill="#ba4a00"/>
-  <circle cx="45" cy="65" r="3" fill="#e67e22"/>
-  <circle cx="60" cy="70" r="4" fill="#ba4a00"/>
-  <circle cx="35" cy="50" r="5" fill="#ba4a00"/>
-  <circle cx="55" cy="25" r="3" fill="#ba4a00"/>
-  <circle cx="68" cy="58" r="4" fill="#e67e22"/>
-  <circle cx="25" cy="68" r="4" fill="#ba4a00"/>
-</svg>`,
-
-  'player-red-1': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
-  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <circle cx="50" cy="12" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
-  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
-</svg>`,
-
-  'player-red-2': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
-  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <circle cx="50" cy="12" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <path d="M42,12 L58,12 L56,16 L44,16 Z" fill="#2b2624"/>
-  <line x1="40" y1="12" x2="60" y2="12" stroke="#2b2624" stroke-width="2"/>
-  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
-  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
-</svg>`,
-
-  'player-blue-1': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
-  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <circle cx="50" cy="12" r="10" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
-  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
-</svg>`,
-
-  'player-blue-2': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="50" cy="20" r="12" fill="#2b2624"/>
-  <path d="M35,32 L65,32 L60,70 L40,70 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <circle cx="50" cy="12" r="10" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <rect x="40" y="8" width="20" height="3" fill="#a64d32"/>
-  <rect x="42" y="70" width="16" height="15" rx="3" fill="#2b2624"/>
-  <line x1="42" y1="78" x2="58" y2="78" stroke="#ffffff" stroke-width="2"/>
-</svg>`,
-
-  'table-classic': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <rect x="20" y="50" width="8" height="40" fill="#2b2624"/>
-  <rect x="72" y="50" width="8" height="40" fill="#2b2624"/>
-  <rect x="15" y="25" width="70" height="30" rx="4" fill="#2d5a27" stroke="#2b2624" stroke-width="3"/>
-  <line x1="5" y1="30" x2="95" y2="30" stroke="#bdc3c7" stroke-width="4"/>
-  <line x1="5" y1="40" x2="95" y2="40" stroke="#bdc3c7" stroke-width="4"/>
-  <rect x="2" y="28" width="6" height="4" rx="1" fill="#a64d32"/>
-  <rect x="92" y="38" width="6" height="4" rx="1" fill="#a64d32"/>
-</svg>`,
-
-  'table-top': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <rect x="10" y="10" width="80" height="80" rx="5" fill="#2d5a27" stroke="#2b2624" stroke-width="4"/>
-  <line x1="50" y1="10" x2="50" y2="90" stroke="#ffffff" stroke-width="3"/>
-  <circle cx="50" cy="50" r="15" fill="none" stroke="#ffffff" stroke-width="3"/>
-  <rect x="10" y="30" width="12" height="40" fill="none" stroke="#ffffff" stroke-width="3"/>
-  <rect x="78" y="30" width="12" height="40" fill="none" stroke="#ffffff" stroke-width="3"/>
-</svg>`,
-
-  'beer-mug': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M65,40 H75 V70 H65" fill="none" stroke="#f1c40f" stroke-width="8" stroke-linecap="round"/>
-  <rect x="25" y="30" width="40" height="50" rx="5" fill="#f1c40f" stroke="#e67e22" stroke-width="2"/>
-  <line x1="35" y1="38" x2="35" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-  <line x1="45" y1="38" x2="45" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-  <line x1="55" y1="38" x2="55" y2="72" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="30" cy="26" r="10" fill="#ffffff"/>
-  <circle cx="45" cy="22" r="12" fill="#ffffff"/>
-  <circle cx="60" cy="26" r="10" fill="#ffffff"/>
-</svg>`,
-
-  'beer-bottle': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M42,20 L58,20 L58,35 L68,45 L68,85 L32,85 L32,45 L42,35 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
-  <rect x="42" y="15" width="16" height="5" fill="#f1c40f"/>
-  <rect x="36" y="55" width="28" height="20" fill="#2d5a27"/>
-  <circle cx="50" cy="65" r="6" fill="#f1c40f"/>
-</svg>`,
-
-  'trophy-gold': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M30,30 C15,30 15,50 30,50" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round"/>
-  <path d="M70,30 C85,30 85,50 70,50" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round"/>
-  <path d="M30,20 L70,20 L65,55 C60,65 40,65 35,55 Z" fill="#f1c40f" stroke="#e67e22" stroke-width="2"/>
-  <rect x="46" y="60" width="8" height="15" fill="#f1c40f"/>
-  <rect x="30" y="75" width="40" height="10" rx="2" fill="#2b2624"/>
-</svg>`,
-
-  'trophy-silver': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M30,30 C15,30 15,50 30,50" fill="none" stroke="#bdc3c7" stroke-width="5" stroke-linecap="round"/>
-  <path d="M70,30 C85,30 85,50 70,50" fill="none" stroke="#bdc3c7" stroke-width="5" stroke-linecap="round"/>
-  <path d="M30,20 L70,20 L65,55 C60,65 40,65 35,55 Z" fill="#bdc3c7" stroke="#95a5a6" stroke-width="2"/>
-  <rect x="46" y="60" width="8" height="15" fill="#bdc3c7"/>
-  <rect x="30" y="75" width="40" height="10" rx="2" fill="#2b2624"/>
-</svg>`,
-
-  'glove-red': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M30,85 L30,45 C30,35 45,20 60,35 C65,40 70,45 70,55 L70,85 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <path d="M30,58 C20,58 20,48 30,48" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <rect x="30" y="72" width="40" height="8" fill="#2b2624"/>
-  <circle cx="50" cy="76" r="2" fill="#ffffff"/>
-</svg>`,
-
-  'glove-blue': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M30,85 L30,45 C30,35 45,20 60,35 C65,40 70,45 70,55 L70,85 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <path d="M30,58 C20,58 20,48 30,48" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <rect x="30" y="72" width="40" height="8" fill="#2b2624"/>
-  <circle cx="50" cy="76" r="2" fill="#ffffff"/>
-</svg>`,
-
-  'whistle-gold': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="45" cy="50" r="22" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
-  <rect x="55" y="36" width="30" height="16" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
-  <rect x="42" y="38" width="10" height="8" fill="#2b2624"/>
-  <circle cx="20" cy="50" r="6" fill="none" stroke="#2b2624" stroke-width="3"/>
-</svg>`,
-
-  'foosball-rod': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <line x1="10" y1="50" x2="90" y2="50" stroke="#bdc3c7" stroke-width="6"/>
-  <rect x="2" y="44" width="8" height="12" rx="2" fill="#a64d32"/>
-  <rect x="25" y="35" width="12" height="30" rx="2" fill="#3498db"/>
-  <rect x="50" y="35" width="12" height="30" rx="2" fill="#3498db"/>
-  <rect x="75" y="35" width="12" height="30" rx="2" fill="#3498db"/>
-</svg>`,
-
-  'handle-wood': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <rect x="45" y="10" width="10" height="20" fill="#bdc3c7"/>
-  <path d="M35,30 L65,30 C70,40 70,70 65,90 L35,90 C30,70 30,40 35,30 Z" fill="#e67e22" stroke="#2b2624" stroke-width="3"/>
-  <path d="M42,40 Q45,60 42,80" fill="none" stroke="#ba4a00" stroke-width="2"/>
-  <path d="M50,35 Q52,55 50,85" fill="none" stroke="#ba4a00" stroke-width="2"/>
-  <path d="M58,40 Q55,60 58,80" fill="none" stroke="#ba4a00" stroke-width="2"/>
-</svg>`,
-
-  'handle-rubber': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <rect x="45" y="10" width="10" height="20" fill="#bdc3c7"/>
-  <path d="M35,30 L65,30 C70,40 70,70 65,90 L35,90 C30,70 30,40 35,30 Z" fill="#2b2624" stroke="#1b1614" stroke-width="3"/>
-  <line x1="36" y1="42" x2="64" y2="42" stroke="#4a403d" stroke-width="3"/>
-  <line x1="35" y1="52" x2="65" y2="52" stroke="#4a403d" stroke-width="3"/>
-  <line x1="35" y1="62" x2="65" y2="62" stroke="#4a403d" stroke-width="3"/>
-  <line x1="35" y1="72" x2="65" y2="72" stroke="#4a403d" stroke-width="3"/>
-  <line x1="36" y1="82" x2="64" y2="82" stroke="#4a403d" stroke-width="3"/>
-</svg>`,
-
-  'score-counter': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <line x1="10" y1="50" x2="90" y2="50" stroke="#2b2624" stroke-width="4"/>
-  <circle cx="20" cy="50" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="2"/>
-  <circle cx="38" cy="50" r="10" fill="#a64d32" stroke="#2b2624" stroke-width="2"/>
-  <circle cx="56" cy="50" r="10" fill="#bdc3c7" stroke="#2b2624" stroke-width="2"/>
-  <circle cx="74" cy="50" r="10" fill="#bdc3c7" stroke="#2b2624" stroke-width="2"/>
-</svg>`,
-
-  'snack-pretzel': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M50,85 C25,85 15,60 30,45 C40,35 50,45 50,55 C50,45 60,35 70,45 C85,60 75,85 50,85 Z" fill="none" stroke="#a64d32" stroke-width="12" stroke-linecap="round"/>
-  <path d="M30,45 C45,30 45,55 50,55 C55,55 55,30 70,45" fill="none" stroke="#a64d32" stroke-width="12" stroke-linecap="round"/>
-  <rect x="22" y="60" width="3" height="3" fill="#ffffff"/>
-  <rect x="35" y="75" width="3" height="3" fill="#ffffff"/>
-  <rect x="50" y="80" width="3" height="3" fill="#ffffff"/>
-  <rect x="65" y="75" width="3" height="3" fill="#ffffff"/>
-  <rect x="75" y="60" width="3" height="3" fill="#ffffff"/>
-  <rect x="42" y="42" width="3" height="3" fill="#ffffff"/>
-  <rect x="55" y="42" width="3" height="3" fill="#ffffff"/>
-</svg>`,
-
-  'snack-pizza': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M20,15 Q50,5 80,15 L78,25 Q50,15 22,25 Z" fill="#d35400"/>
-  <polygon points="22,25 78,25 50,90" fill="#f1c40f"/>
-  <circle cx="50" cy="40" r="6" fill="#a64d32"/>
-  <circle cx="38" cy="55" r="5" fill="#a64d32"/>
-  <circle cx="60" cy="58" r="5" fill="#a64d32"/>
-  <circle cx="50" cy="72" r="4" fill="#a64d32"/>
-</svg>`,
-
-  'jersey-red': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M25,25 L38,15 L62,15 L75,25 L75,40 L65,40 L65,85 L35,85 L35,40 L25,40 Z" fill="#a64d32" stroke="#2b2624" stroke-width="3"/>
-  <text x="50" y="62" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">10</text>
-  <line x1="25" y1="32" x2="35" y2="32" stroke="#ffffff" stroke-width="3"/>
-  <line x1="65" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="3"/>
-</svg>`,
-
-  'jersey-blue': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <path d="M25,25 L38,15 L62,15 L75,25 L75,40 L65,40 L65,85 L35,85 L35,40 L25,40 Z" fill="#3498db" stroke="#2b2624" stroke-width="3"/>
-  <text x="50" y="62" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">7</text>
-  <line x1="25" y1="32" x2="35" y2="32" stroke="#ffffff" stroke-width="3"/>
-  <line x1="65" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="3"/>
-</svg>`,
-
-  'crown': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="15,75 15,35 32,55 50,25 68,55 85,35 85,75" fill="#f1c40f" stroke="#e67e22" stroke-width="3"/>
-  <rect x="15" y="75" width="70" height="8" fill="#d35400"/>
-  <circle cx="15" cy="35" r="4" fill="#a64d32"/>
-  <circle cx="50" cy="25" r="4" fill="#3498db"/>
-  <circle cx="85" cy="35" r="4" fill="#a64d32"/>
-  <circle cx="32" cy="55" r="3" fill="#2d5a27"/>
-  <circle cx="68" cy="55" r="3" fill="#2d5a27"/>
-</svg>`,
-
-  'anonymous': `<svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-  <line x1="50" y1="15" x2="50" y2="30" stroke="#bdc3c7" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="50" cy="15" r="4" fill="#7f8c8d"/>
-  <path d="M50,15 Q35,40 38,55" fill="none" stroke="#2b2624" stroke-width="2"/>
-  <path d="M50,15 Q65,40 62,55" fill="none" stroke="#2b2624" stroke-width="2"/>
-  <g transform="translate(25, 45) rotate(10)">
-    <path d="M10,10 L22,10 L22,30 L35,35 L35,42 L5,42 L8,25 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
-    <path d="M5,42 L35,42" stroke="#bdc3c7" stroke-width="2"/>
-  </g>
-  <g transform="translate(48, 45) rotate(-15)">
-    <path d="M10,10 L22,10 L22,30 L35,35 L35,42 L5,42 L8,25 Z" fill="#2b2624" stroke="#1b1614" stroke-width="2"/>
-    <path d="M5,42 L35,42" stroke="#bdc3c7" stroke-width="2"/>
-  </g>
-</svg>`
-};
+export type AvatarKey = typeof AVATAR_KEYS[number];

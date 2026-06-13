@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { AVATARS } from '@/assets/avatars'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { AVATAR_KEYS } from '@/assets/avatars'
 import { useI18n } from 'vue-i18n'
 
 const emit = defineEmits<{
@@ -10,19 +10,48 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-// Exclude 'anonymous' from the picker grid
-const presetAvatars = Object.keys(AVATARS).filter(key => key !== 'anonymous')
+// Use the avatar keys array from avatars.ts
+const presetAvatars = AVATAR_KEYS
 
 const selected = ref<string | null>(null)
+const modalRef = ref<HTMLElement | null>(null)
+let previouslyFocusedElement: HTMLElement | null = null
 
 function selectAvatar(avatar: string) {
   selected.value = avatar
   emit('select', avatar)
 }
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    emit('close')
+  }
+}
+
+onMounted(() => {
+  previouslyFocusedElement = document.activeElement as HTMLElement
+  modalRef.value?.focus()
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+  if (previouslyFocusedElement) {
+    previouslyFocusedElement.focus()
+  }
+})
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md" role="dialog" aria-modal="true">
+  <div 
+    ref="modalRef"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md" 
+    role="dialog" 
+    aria-modal="true"
+    tabindex="-1"
+    @click.self="emit('close')"
+    data-testid="avatar-picker-backdrop"
+  >
     <div class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-6 flex flex-col max-h-[90vh]">
       
       <!-- Header -->
@@ -33,6 +62,8 @@ function selectAvatar(avatar: string) {
         <button 
           @click="emit('close')"
           class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest active:scale-95 transition-all"
+          data-testid="close-picker-icon-button"
+          aria-label="Close"
         >
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
@@ -45,12 +76,17 @@ function selectAvatar(avatar: string) {
           :key="avatar"
           @click="selectAvatar(avatar)"
           :data-testid="'avatar-option-' + avatar"
+          :aria-label="avatar"
           :class="[
             'aspect-square p-2.5 rounded-xl bg-surface-container-highest transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm hover:shadow-md hover:translate-y-[-2px]',
             selected === avatar ? 'bg-primary/20 scale-105 shadow-md' : 'hover:bg-surface-container-highest/80'
           ]"
         >
-          <div class="w-full h-full flex items-center justify-center" v-html="AVATARS[avatar]" />
+          <div class="w-full h-full flex items-center justify-center">
+            <svg class="w-full h-full" aria-hidden="true">
+              <use :href="`/avatars.svg#${avatar}`" />
+            </svg>
+          </div>
         </button>
       </div>
 
@@ -59,6 +95,7 @@ function selectAvatar(avatar: string) {
         <button 
           @click="emit('close')"
           class="w-full py-3 rounded-xl bg-surface-container-highest text-on-surface font-headline font-bold text-sm hover:bg-surface-container-highest/80 active:scale-95 transition-colors"
+          data-testid="cancel-picker-button"
         >
           {{ t('common.cancel') }}
         </button>

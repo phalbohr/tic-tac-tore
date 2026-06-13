@@ -19,14 +19,18 @@ const isUpdating = ref(false)
 const isAvatarPickerOpen = ref(false)
 
 async function handleAvatarSelect(selectedAvatar: string) {
+  if (isUpdating.value) return
+  isUpdating.value = true
   isAvatarPickerOpen.value = false
   error.value = ''
   message.value = ''
   try {
-    await authStore.updateProfile(undefined, undefined, selectedAvatar)
+    await authStore.updateProfile({ avatar: selectedAvatar })
     message.value = t('cabinet.avatarSuccess')
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('common.error')
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -57,7 +61,7 @@ async function selectLanguage(lang: 'EN' | 'DE') {
   error.value = ''
   message.value = ''
   try {
-    await authStore.updateProfile(undefined, lang)
+    await authStore.updateProfile({ language: lang })
   } catch (err) {
     selectedLanguage.value = previousLang
     error.value = err instanceof Error ? err.message : t('common.error')
@@ -72,7 +76,7 @@ async function handleSave() {
   message.value = ''
   error.value = ''
   try {
-    await authStore.updateProfile(nickname.value, selectedLanguage.value)
+    await authStore.updateProfile({ nickname: nickname.value, language: selectedLanguage.value })
     if (authStore.profile) {
       nickname.value = authStore.profile.nickname
     }
@@ -130,8 +134,11 @@ async function confirmDelete() {
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
         <div 
-          class="relative group cursor-pointer" 
+          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl" 
           @click="isAvatarPickerOpen = true" 
+          @keydown.enter="isAvatarPickerOpen = true"
+          @keydown.space.prevent="isAvatarPickerOpen = true"
+          tabindex="0"
           role="button" 
           aria-label="Change avatar" 
           data-testid="change-avatar-button"
