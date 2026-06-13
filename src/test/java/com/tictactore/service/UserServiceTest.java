@@ -407,24 +407,8 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Update Profile - should throw exception when avatar not whitelisted")
-    void updateProfile_shouldThrowException_whenAvatarNotWhitelisted() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("nickname");
-        user.setAvatar("old-avatar");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("invalid-avatar-name").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Invalid avatar selection");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should set avatar to anonymous when avatar is anonymous")
-    void updateProfile_shouldSetAvatarToAnonymous_whenAvatarIsAnonymous() {
+    @DisplayName("Update Profile - should throw exception when avatar is anonymous")
+    void updateProfile_shouldThrowException_whenAvatarIsAnonymous() {
         UUID userId = UUID.randomUUID();
         User user = new User();
         user.setId(userId);
@@ -432,28 +416,28 @@ class UserServiceTest {
         user.setAvatar("old-avatar");
         UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("anonymous").build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.getAvatar()).isEqualTo("anonymous");
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Cannot set avatar to anonymous");
     }
 
     @Test
-    @DisplayName("Update Profile - should set avatar to anonymous when avatar is empty")
-    void updateProfile_shouldSetAvatarToAnonymous_whenAvatarIsEmpty() {
+    @DisplayName("Update Profile - should reset to deterministic avatar when avatar is empty")
+    void updateProfile_shouldResetToDeterministicAvatar_whenAvatarIsEmpty() {
         UUID userId = UUID.randomUUID();
         User user = new User();
         user.setId(userId);
         user.setNickname("nickname");
         user.setAvatar("old-avatar");
+        user.setEmail("test@example.com");
         UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("").build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User updatedUser = userService.updateProfile(userId, request);
 
-        assertThat(updatedUser.getAvatar()).isEqualTo("anonymous");
+        assertThat(updatedUser.getAvatar()).contains("api.dicebear.com");
     }
 }
 

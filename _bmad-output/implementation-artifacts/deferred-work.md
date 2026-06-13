@@ -36,3 +36,4 @@
 
 ## Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)
 - [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.
+- [x] [Review][Defer] Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts] — deferred, pre-existing
