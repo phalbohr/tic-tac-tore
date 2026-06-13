@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { AVATAR_KEYS } from '@/assets/avatars'
 import { useI18n } from 'vue-i18n'
+
+const props = defineProps<{
+  currentAvatar?: string
+}>()
 
 const emit = defineEmits<{
   (e: 'select', avatar: string): void
@@ -13,7 +17,7 @@ const { t } = useI18n()
 // Use the avatar keys array from avatars.ts
 const presetAvatars = AVATAR_KEYS
 
-const selected = ref<string | null>(null)
+const selected = ref<string | null>(props.currentAvatar || null)
 const modalRef = ref<HTMLElement | null>(null)
 let previouslyFocusedElement: HTMLElement | null = null
 
@@ -34,25 +38,45 @@ function handleKeyDown(event: KeyboardEvent) {
     
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
+    if (!firstElement || !lastElement) return
 
-    if (firstElement && lastElement) {
-      if (event.shiftKey) {
-        if (document.activeElement === firstElement) {
-          lastElement.focus()
-          event.preventDefault()
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          firstElement.focus()
-          event.preventDefault()
-        }
+    if (!modalRef.value.contains(document.activeElement)) {
+      firstElement.focus()
+      event.preventDefault()
+    } else if (event.shiftKey) {
+      if (document.activeElement === firstElement) {
+        lastElement.focus()
+        event.preventDefault()
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        firstElement.focus()
+        event.preventDefault()
       }
     }
   }
 }
 
+function getGridColumns(): number {
+  if (!modalRef.value) return 4
+  const buttons = modalRef.value.querySelectorAll<HTMLElement>('[data-testid^="avatar-option-"]')
+  const firstButton = buttons[0]
+  if (!firstButton) return 4
+  const firstTop = firstButton.offsetTop
+  let cols = 0
+  for (let i = 0; i < buttons.length; i++) {
+    const btn = buttons[i]
+    if (btn && btn.offsetTop === firstTop) {
+      cols++
+    } else {
+      break
+    }
+  }
+  return cols || 4
+}
+
 function handleGridKeyDown(event: KeyboardEvent, index: number) {
-  const columns = 4
+  const columns = getGridColumns()
   let newIndex = index
 
   switch (event.key) {
@@ -93,7 +117,18 @@ function handleGridKeyDown(event: KeyboardEvent, index: number) {
 
 onMounted(() => {
   previouslyFocusedElement = document.activeElement as HTMLElement
-  modalRef.value?.focus()
+  nextTick(() => {
+    if (selected.value && modalRef.value) {
+      const selectedBtn = modalRef.value.querySelector<HTMLElement>(`[data-testid="avatar-option-${selected.value}"]`)
+      if (selectedBtn) {
+        selectedBtn.focus()
+      } else {
+        modalRef.value?.focus()
+      }
+    } else {
+      modalRef.value?.focus()
+    }
+  })
   window.addEventListener('keydown', handleKeyDown)
 })
 
@@ -124,7 +159,7 @@ onBeforeUnmount(() => {
         </h2>
         <button 
           @click="emit('close')"
-          class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest active:scale-95 transition-all"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           data-testid="close-picker-icon-button"
           aria-label="Close"
         >
@@ -143,7 +178,8 @@ onBeforeUnmount(() => {
           :aria-label="avatar"
           :class="[
             'aspect-square p-2.5 rounded-xl bg-surface-container-highest transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm hover:shadow-md hover:translate-y-[-2px]',
-            selected === avatar ? 'bg-primary/20 scale-105 shadow-md' : 'hover:bg-surface-container-highest/80'
+            'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+            selected === avatar ? 'bg-primary/20 scale-105 shadow-md ring-2 ring-primary' : 'hover:bg-surface-container-highest/80'
           ]"
         >
           <div class="w-full h-full flex items-center justify-center">

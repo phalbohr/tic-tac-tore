@@ -113,7 +113,6 @@ class UserControllerTest {
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Nickname can only be changed once every 30 days"));
-
     }
 
     @Test
@@ -189,6 +188,7 @@ class UserControllerTest {
                 null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
+
         var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
                         .with(csrf())
@@ -198,7 +198,6 @@ class UserControllerTest {
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Invalid avatar selection"));
         verify(userService, org.mockito.Mockito.never()).updateProfile(any(), any());
-
     }
 
     @Test
