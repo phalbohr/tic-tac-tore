@@ -169,14 +169,17 @@ Modified files:
 - `src/test/java/com/tictactore/controller/UserControllerTest.java`
 - `frontend/src/stores/auth.ts`
 - `frontend/src/features/profile/Cabinet.vue`
+- `frontend/src/views/HomeHub.vue`
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
+- `frontend/e2e/profile-generation.spec.ts`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Change Log
 
 - 2026-06-12: Implemented and tested preset avatar selection for Story 1.6.
 - 2026-06-13: Addressed all code review findings (resolved bundle bloat via SVG sprite sheet, keyboard accessibility, modal escape/click-outside triggers, focus management, DTO validations, controller tests, and E2E DOM/reload assertions).
+- 2026-06-14: Fixed a bug on the title page (`HomeHub.vue`) where avatars appeared as broken images due to raw `<img>` tags not being updated to `AvatarBase`.
 
 ## Status
 
@@ -205,3 +208,4 @@ Addressed all code review findings:
 7. Expanded test coverage: added service unit tests for unsetting, a controller validation test, non-brittle test-id assertions in `AvatarPicker.spec.ts`, and DOM/reload assertions in E2E tests.
 8. Ran `./scripts/ci-local.sh` and confirmed all checks and tests are completely green.
 9. Fixed 14 new review findings: removed duplicate avatar validation logic from UserService, added modal focus trapping and keyboard navigation in AvatarPicker, removed dead external image code and type safety bypass in AvatarBase, prevented impersonation with anonymous avatar in UserService, upgraded Cabinet trigger to semantic button with ARIA dialog roles, fixed scrollbars for Firefox, preloaded avatars.svg in index.html, strengthened brittle controller tests, fixed Cabinet state race condition, and corrected E2E tests for AAA layout and optimistic updates.
+10. Fixed an edge-case bug where `HomeHub.vue` title page was rendering a broken image string instead of using the `AvatarBase.vue` SVG rendering primitive.
