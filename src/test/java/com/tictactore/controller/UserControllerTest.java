@@ -116,6 +116,38 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("PATCH /me - should update avatar")
+    void patchMe_shouldUpdateAvatar() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        User updatedUser = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .avatar("ball-classic")
+                .build();
+        when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"ball-classic\"}"));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.avatar").value("ball-classic"));
+    }
+
+    @Test
     @DisplayName("DELETE /me - should return 204 and revoke token when authenticated")
     void deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -140,6 +172,58 @@ class UserControllerTest {
         result.andExpect(status().isNoContent());
         verify(userService).deleteAccount(userId);
         verify(tokenRevocationService).revoke(token);
+    }
+
+    @Test
+    @DisplayName("PATCH /me - should return 400 when avatar is invalid")
+    void patchMe_shouldReturn400_whenAvatarIsInvalid() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"invalid-avatar-name\"}"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid avatar selection"));
+        verify(userService, org.mockito.Mockito.never()).updateProfile(any(), any());
+    }
+
+    @Test
+    @DisplayName("PATCH /me - should return 400 when setting anonymous avatar")
+    void patchMe_shouldReturn400_whenSettingAnonymousAvatar() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("oldNickname")
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        var result = mockMvc.perform(patch("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avatar\":\"anonymous\"}"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid avatar selection"));
+        verify(userService, org.mockito.Mockito.never()).updateProfile(any(), any());
     }
 
     @Test

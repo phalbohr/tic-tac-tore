@@ -388,5 +388,55 @@ class UserServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Account was concurrently modified during deletion. Please try again.");
     }
+
+    @Test
+    @DisplayName("Update Profile - should update avatar when avatar whitelisted")
+    void updateProfile_shouldUpdateAvatar_whenAvatarWhitelisted() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("nickname");
+        user.setAvatar("old-avatar");
+        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("ball-classic").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.getAvatar()).isEqualTo("ball-classic");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw exception when avatar is anonymous")
+    void updateProfile_shouldThrowException_whenAvatarIsAnonymous() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("nickname");
+        user.setAvatar("old-avatar");
+        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("anonymous").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Invalid avatar selection");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw exception when avatar is empty")
+    void updateProfile_shouldThrowException_whenAvatarIsEmpty() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setNickname("nickname");
+        user.setAvatar("old-avatar");
+        user.setEmail("test@example.com");
+        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> userService.updateProfile(userId, request))
+                .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                .hasMessage("Invalid avatar selection");
+    }
 }
 

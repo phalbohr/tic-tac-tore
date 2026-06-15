@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import AvatarBase from '@/components/AvatarBase.vue'
+import AvatarPicker from '@/components/AvatarPicker.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -14,6 +16,23 @@ const isDropdownOpen = ref(false)
 const message = ref('')
 const error = ref('')
 const isUpdating = ref(false)
+const isAvatarPickerOpen = ref(false)
+
+async function handleAvatarSelect(selectedAvatar: string) {
+  if (isUpdating.value) return
+  isUpdating.value = true
+  isAvatarPickerOpen.value = false
+  error.value = ''
+  message.value = ''
+  try {
+    await authStore.updateProfile({ avatar: selectedAvatar })
+    message.value = t('cabinet.avatarSuccess')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('common.error')
+  } finally {
+    isUpdating.value = false
+  }
+}
 
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
@@ -42,7 +61,7 @@ async function selectLanguage(lang: 'EN' | 'DE') {
   error.value = ''
   message.value = ''
   try {
-    await authStore.updateProfile(undefined, lang)
+    await authStore.updateProfile({ language: lang })
   } catch (err) {
     selectedLanguage.value = previousLang
     error.value = err instanceof Error ? err.message : t('common.error')
@@ -57,7 +76,7 @@ async function handleSave() {
   message.value = ''
   error.value = ''
   try {
-    await authStore.updateProfile(nickname.value, selectedLanguage.value)
+    await authStore.updateProfile({ nickname: nickname.value, language: selectedLanguage.value })
     if (authStore.profile) {
       nickname.value = authStore.profile.nickname
     }
@@ -111,22 +130,28 @@ async function confirmDelete() {
       </button>
     </header>
 
-    <main class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
+    <main v-if="!authStore.profile" class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center">
+      <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+    </main>
+    <main v-else class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
-        <div class="relative group">
-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
-            <img 
-              v-if="authStore.profile && authStore.profile.avatar !== 'anonymous'" 
-              :src="authStore.profile.avatar" 
-              alt="Avatar" 
-              class="w-full h-full object-cover"
-            />
-            <div v-else-if="authStore.profile && authStore.profile.avatar === 'anonymous'" class="w-full h-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant">
-              <span class="material-symbols-outlined text-4xl">person_off</span>
-            </div>
+        <button 
+          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+          @click="isAvatarPickerOpen = true" 
+          :disabled="isUpdating"
+          aria-haspopup="dialog"
+          aria-label="Change avatar" 
+          data-testid="change-avatar-button"
+        >
+          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center">
+            <AvatarBase :avatar="authStore.profile?.avatar" />
           </div>
-        </div>
+          <!-- Edit Overlay Icon -->
+          <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
+            <span class="material-symbols-outlined text-2xl">edit</span>
+          </div>
+        </button>
         <div class="mt-3 text-center" v-if="authStore.profile">
           <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">{{ authStore.profile.nickname }}</h2>
           <p class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70">Clubhouse Member</p>
@@ -227,7 +252,7 @@ async function confirmDelete() {
     </main>
 
     <!-- Footer Action -->
-    <footer class="w-full max-w-md px-6 pb-6 pt-2">
+    <footer v-if="authStore.profile" class="w-full max-w-md px-6 pb-6 pt-2">
       <button 
         @click="handleSave"
         data-testid="save-button"
@@ -287,6 +312,16 @@ async function confirmDelete() {
           </div>
         </div>
       </div>
+    </Transition>
+
+    <!-- Avatar Picker Modal -->
+    <Transition name="fade">
+      <AvatarPicker 
+        v-if="isAvatarPickerOpen"
+        :current-avatar="authStore.profile?.avatar"
+        @select="handleAvatarSelect"
+        @close="isAvatarPickerOpen = false"
+      />
     </Transition>
   </div>
 </template>
