@@ -52,4 +52,34 @@ describe('AvatarPicker', () => {
 
     expect(wrapper.emitted('close')).toBeTruthy()
   })
+
+  it('handles Shift+Tab correctly when modal container is focused', async () => {
+    const wrapper = mount(AvatarPicker, {
+      global: { plugins: [testI18n] },
+      attachTo: document.body
+    })
+
+    const modalRef = wrapper.find('[data-testid="avatar-picker-backdrop"]')
+    const cancelBtn = wrapper.find('[data-testid="cancel-picker-button"]')
+
+    // Focus the modal container
+    ;(modalRef.element as HTMLElement).focus()
+    expect(document.activeElement).toBe(modalRef.element)
+
+    // Simulate Shift+Tab
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true
+    })
+
+    // dispatch event on the window, since event listener is attached to window
+    window.dispatchEvent(event)
+
+    // Focus should be moved to the last focusable element (cancel button)
+    expect(document.activeElement).toBe(cancelBtn.element)
+
+    wrapper.unmount()
+  })
 })
