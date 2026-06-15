@@ -44,7 +44,7 @@ function handleKeyDown(event: KeyboardEvent) {
       firstElement.focus()
       event.preventDefault()
     } else if (event.shiftKey) {
-      if (document.activeElement === firstElement) {
+      if (document.activeElement === firstElement || document.activeElement === modalRef.value) {
         lastElement.focus()
         event.preventDefault()
       }
