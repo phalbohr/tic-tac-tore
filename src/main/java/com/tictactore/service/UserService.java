@@ -186,6 +186,14 @@ public class UserService {
             user.setLanguage(lang);
         }
 
+        if (request.getAvatar() != null) {
+            String avatarVal = request.getAvatar().trim();
+            if (!com.tictactore.validation.AvatarValidator.ALLOWED_AVATARS.contains(avatarVal)) {
+                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
+            }
+            user.setAvatar(avatarVal);
+        }
+
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {

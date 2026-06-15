@@ -57,10 +57,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateProfile(nickname?: string, language?: string) {
+  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string }) {
     if (!profile.value) return
 
+    const { nickname, language, avatar } = options
     const previousProfile = { ...profile.value }
+
+    const localeStore = useLocaleStore()
+    const previousLocale = localeStore.locale
 
     // Optimistic UI updates
     let finalNickname = nickname
@@ -73,11 +77,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
     if (language !== undefined) {
       profile.value.language = language
-      const localeStore = useLocaleStore()
       const lang = language.toLowerCase()
       if (lang === 'en' || lang === 'de') {
-        localeStore.setLocale(lang)
+        localeStore.setLocale(lang as any)
       }
+    }
+    if (avatar !== undefined) {
+      profile.value.avatar = avatar
     }
 
     try {
@@ -92,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ nickname: finalNickname, language })
+        body: JSON.stringify({ nickname: finalNickname, language, avatar })
       })
 
       if (!response.ok) {
@@ -116,19 +122,14 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await response.json()
       profile.value = data
       if (data.language) {
-        const localeStore = useLocaleStore()
         const lang = data.language.toLowerCase()
         if (lang === 'en' || lang === 'de') {
-          localeStore.setLocale(lang)
+          localeStore.setLocale(lang as any)
         }
       }
     } catch (e) {
       profile.value = previousProfile
-      const localeStore = useLocaleStore()
-      const prevLang = (previousProfile.language || 'EN').toLowerCase()
-      if (prevLang === 'en' || prevLang === 'de') {
-        localeStore.setLocale(prevLang)
-      }
+      localeStore.setLocale(previousLocale)
       throw e
     }
   }

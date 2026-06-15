@@ -15,7 +15,7 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
         contentType: 'application/json',
         body: JSON.stringify({
           nickname: 'johndoe',
-          avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=79e78294ea51167733230b503067672e811197931f6d3f2ec8c9035293ca7a77',
+          avatar: 'ball-classic',
           language: 'en'
         }),
       });
@@ -25,8 +25,8 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
 
     await expect(page.getByText(/johndoe/)).toBeVisible();
     
-    const avatarImg = page.locator('img[alt="User Avatar"]');
-    await expect(avatarImg).toBeVisible();
-    await expect(avatarImg).toHaveAttribute('src', /dicebear/);
+    const avatarSvg = page.getByTestId('avatar-svg').first();
+    await expect(avatarSvg).toBeVisible();
+    await expect(avatarSvg.locator('use')).toHaveAttribute('href', '/avatars.svg#ball-classic');
   });
 });
