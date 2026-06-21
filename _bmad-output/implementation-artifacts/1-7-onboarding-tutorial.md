@@ -1,6 +1,6 @@
 # Story 1.7: Onboarding Tutorial
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -84,3 +84,21 @@ This story implements the onboarding experience for new users, following the "co
 ## BMAD Workflow Rules (from GEMINI.md)
 - **Feature Branch**: Create and work in `story/1-7-onboarding-tutorial` off `develop`.
 - **Validation**: NEVER present a feature completion without first running `./scripts/ci-local.sh`.
+
+### Review Findings
+
+- [ ] [Review][Decision] Business Logic Loophole (allow false) — UserController blindly allows clients to send tutorialCompleted: false. Ambiguous whether this should be allowed.
+- [ ] [Review][Patch] Memory Leak in Carousel [TutorialCarousel.vue]
+- [ ] [Review][Patch] Failing CI Checks and Committed Test Junk [test-results/.last-run.json]
+- [ ] [Review][Patch] Missing Rollback on Optimistic UI Update [authStore.ts]
+- [ ] [Review][Patch] Silent failure without UI feedback [TutorialCarousel.vue:157-158]
+- [ ] [Review][Patch] Missing Accessibility Traps (inert/aria-hidden) [TutorialCarousel.vue]
+- [ ] [Review][Patch] Missing Keyboard Dismissal (Escape) [TutorialCarousel.vue]
+- [ ] [Review][Patch] Missing Body Scroll Lock [TutorialCarousel.vue]
+- [ ] [Review][Patch] Dangerous Test Concurrency Side Effects [UserService.java]
+- [ ] [Review][Patch] Incomplete API Contract [UpdateProfileRequest.java]
+- [ ] [Review][Patch] NaN on zero clientWidth [TutorialCarousel.vue:141]
+- [ ] [Review][Patch] Rapid clicks on Next break state [TutorialCarousel.vue:252]
+- [ ] [Review][Patch] Missing Integration Tests [UserServiceTest.java]
+- [ ] [Review][Patch] E2E Test File Path Deviation [e2e/scenarios/onboarding.spec.ts]
+- [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing

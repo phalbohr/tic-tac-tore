@@ -70,4 +70,20 @@ class UserRepositoryTest {
 
         assertThat(result).isFalse();
     }
+
+    @Test
+    @DisplayName("Save User - should persist tutorialCompleted flag")
+    void saveUser_PersistsTutorialCompletedFlag() {
+        var user = User.builder()
+                .email(TEST_EMAIL)
+                .nickname(TEST_NICKNAME)
+                .tutorialCompleted(true)
+                .build();
+        userRepository.save(user);
+
+        var result = userRepository.findByEmail(TEST_EMAIL);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().isTutorialCompleted()).isTrue();
+    }
 }
