@@ -1,6 +1,6 @@
 # Story 1.7: Onboarding Tutorial
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,22 +55,22 @@ This story implements the onboarding experience for new users, following the "co
 
 ## Tasks / Subtasks
 
-- [ ] **Backend: API & Service Implementation**
-  - [ ] Add Flyway migration (e.g. `V3__add_tutorial_completed_to_user.sql`) to add `tutorial_completed` boolean column to `user` table (default `false`).
-  - [ ] Update `User` entity (use `@Builder.Default` since it uses Lombok `@Builder`), `ProfileDto`, and `UpdateProfileRequest` to handle `tutorialCompleted`.
-  - [ ] Update `UserService.updateProfile` to process `tutorialCompleted` flag updates.
-- [ ] **Backend: Testing**
-  - [ ] Add unit tests for `tutorialCompleted` update logic (AAA format, no comments).
-  - [ ] Update integration tests to cover the new profile field.
-- [ ] **Frontend: UI & State**
-  - [ ] Update `auth.ts` Pinia store to parse and handle `tutorialCompleted`.
-  - [ ] Create `TutorialCarousel.vue` component with native CSS scroll snapping.
-  - [ ] Update `HomeHub.vue` to conditionally render `TutorialCarousel` based on the profile flag.
-  - [ ] Refactor `updateProfile` signature in `auth.ts` to accept an object payload to safely add `tutorialCompleted`, and update all existing callers (like `Cabinet.vue`) to prevent regressions.
-  - [ ] Hook up skip/finish buttons in the carousel to trigger `updateProfile({ tutorialCompleted: true })`.
-  - [ ] Add localization strings for tutorial slides to `en.json` and `de.json`.
-- [ ] **Frontend: E2E Validation**
-  - [ ] Implement E2E test in `frontend/e2e/onboarding.spec.ts`.
+-[x] **Backend: API & Service Implementation**
+  -[x] Add Flyway migration (e.g. `V3__add_tutorial_completed_to_user.sql`) to add `tutorial_completed` boolean column to `user` table (default `false`).
+  -[x] Update `User` entity (use `@Builder.Default` since it uses Lombok `@Builder`), `ProfileDto`, and `UpdateProfileRequest` to handle `tutorialCompleted`.
+  -[x] Update `UserService.updateProfile` to process `tutorialCompleted` flag updates.
+-[x] **Backend: Testing**
+  -[x] Add unit tests for `tutorialCompleted` update logic (AAA format, no comments).
+  -[x] Update integration tests to cover the new profile field.
+-[x] **Frontend: UI & State**
+  -[x] Update `auth.ts` Pinia store to parse and handle `tutorialCompleted`.
+  -[x] Create `TutorialCarousel.vue` component with native CSS scroll snapping.
+  -[x] Update `HomeHub.vue` to conditionally render `TutorialCarousel` based on the profile flag.
+  -[x] Refactor `updateProfile` signature in `auth.ts` to accept an object payload to safely add `tutorialCompleted`, and update all existing callers (like `Cabinet.vue`) to prevent regressions.
+  -[x] Hook up skip/finish buttons in the carousel to trigger `updateProfile({ tutorialCompleted: true })`.
+  -[x] Add localization strings for tutorial slides to `en.json` and `de.json`.
+-[x] **Frontend: E2E Validation**
+  -[x] Implement E2E test in `frontend/e2e/onboarding.spec.ts`.
 
 ## Dev Notes
 
@@ -87,18 +87,18 @@ This story implements the onboarding experience for new users, following the "co
 
 ### Review Findings
 
-- [ ] [Review][Decision] Business Logic Loophole (allow false) — UserController blindly allows clients to send tutorialCompleted: false. Ambiguous whether this should be allowed.
-- [ ] [Review][Patch] Memory Leak in Carousel [TutorialCarousel.vue]
-- [ ] [Review][Patch] Failing CI Checks and Committed Test Junk [test-results/.last-run.json]
-- [ ] [Review][Patch] Missing Rollback on Optimistic UI Update [authStore.ts]
-- [ ] [Review][Patch] Silent failure without UI feedback [TutorialCarousel.vue:157-158]
-- [ ] [Review][Patch] Missing Accessibility Traps (inert/aria-hidden) [TutorialCarousel.vue]
-- [ ] [Review][Patch] Missing Keyboard Dismissal (Escape) [TutorialCarousel.vue]
-- [ ] [Review][Patch] Missing Body Scroll Lock [TutorialCarousel.vue]
-- [ ] [Review][Patch] Dangerous Test Concurrency Side Effects [UserService.java]
-- [ ] [Review][Patch] Incomplete API Contract [UpdateProfileRequest.java]
-- [ ] [Review][Patch] NaN on zero clientWidth [TutorialCarousel.vue:141]
-- [ ] [Review][Patch] Rapid clicks on Next break state [TutorialCarousel.vue:252]
-- [ ] [Review][Patch] Missing Integration Tests [UserServiceTest.java]
-- [ ] [Review][Patch] E2E Test File Path Deviation [e2e/scenarios/onboarding.spec.ts]
+-[x] [Review][Decision] Business Logic Loophole (allow false) — UserController blindly allows clients to send tutorialCompleted: false. Ambiguous whether this should be allowed.
+-[x] [Review][Patch] Memory Leak in Carousel [TutorialCarousel.vue]
+-[x] [Review][Patch] Failing CI Checks and Committed Test Junk [test-results/.last-run.json]
+-[x] [Review][Patch] Missing Rollback on Optimistic UI Update [authStore.ts]
+-[x] [Review][Patch] Silent failure without UI feedback [TutorialCarousel.vue:157-158]
+-[x] [Review][Patch] Missing Accessibility Traps (inert/aria-hidden) [TutorialCarousel.vue]
+-[x] [Review][Patch] Missing Keyboard Dismissal (Escape) [TutorialCarousel.vue]
+-[x] [Review][Patch] Missing Body Scroll Lock [TutorialCarousel.vue]
+-[x] [Review][Patch] Dangerous Test Concurrency Side Effects [UserService.java]
+-[x] [Review][Patch] Incomplete API Contract [UpdateProfileRequest.java]
+-[x] [Review][Patch] NaN on zero clientWidth [TutorialCarousel.vue:141]
+-[x] [Review][Patch] Rapid clicks on Next break state [TutorialCarousel.vue:252]
+-[x] [Review][Patch] Missing Integration Tests [UserServiceTest.java]
+-[x] [Review][Patch] E2E Test File Path Deviation [e2e/scenarios/onboarding.spec.ts]
 - [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
