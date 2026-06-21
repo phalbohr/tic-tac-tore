@@ -1,0 +1,1608 @@
+diff --git a/.gitignore b/.gitignore
+index 9329e61..4d93e8e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -44,3 +44,4 @@ graphify-out/
+ 
+ ### BMAD ###
+ _bmad-output/implementation-artifacts/current_diff.diff
++test-results/
+diff --git a/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
+index 77806ed..3842f32 100644
+--- a/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
++++ b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
+@@ -1,6 +1,6 @@
+ # Story 1.7: Onboarding Tutorial
+ 
+-Status: ready-for-dev
++Status: in-progress
+ 
+ <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+ 
+@@ -84,3 +84,21 @@ This story implements the onboarding experience for new users, following the "co
+ ## BMAD Workflow Rules (from GEMINI.md)
+ - **Feature Branch**: Create and work in `story/1-7-onboarding-tutorial` off `develop`.
+ - **Validation**: NEVER present a feature completion without first running `./scripts/ci-local.sh`.
++
++### Review Findings
++
++- [ ] [Review][Decision] Business Logic Loophole (allow false) — UserController blindly allows clients to send tutorialCompleted: false. Ambiguous whether this should be allowed.
++- [ ] [Review][Patch] Memory Leak in Carousel [TutorialCarousel.vue]
++- [ ] [Review][Patch] Failing CI Checks and Committed Test Junk [test-results/.last-run.json]
++- [ ] [Review][Patch] Missing Rollback on Optimistic UI Update [authStore.ts]
++- [ ] [Review][Patch] Silent failure without UI feedback [TutorialCarousel.vue:157-158]
++- [ ] [Review][Patch] Missing Accessibility Traps (inert/aria-hidden) [TutorialCarousel.vue]
++- [ ] [Review][Patch] Missing Keyboard Dismissal (Escape) [TutorialCarousel.vue]
++- [ ] [Review][Patch] Missing Body Scroll Lock [TutorialCarousel.vue]
++- [ ] [Review][Patch] Dangerous Test Concurrency Side Effects [UserService.java]
++- [ ] [Review][Patch] Incomplete API Contract [UpdateProfileRequest.java]
++- [ ] [Review][Patch] NaN on zero clientWidth [TutorialCarousel.vue:141]
++- [ ] [Review][Patch] Rapid clicks on Next break state [TutorialCarousel.vue:252]
++- [ ] [Review][Patch] Missing Integration Tests [UserServiceTest.java]
++- [ ] [Review][Patch] E2E Test File Path Deviation [e2e/scenarios/onboarding.spec.ts]
++- [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
+diff --git a/_bmad-output/implementation-artifacts/deferred-work.md b/_bmad-output/implementation-artifacts/deferred-work.md
+index 881d2b2..7e7db57 100644
+--- a/_bmad-output/implementation-artifacts/deferred-work.md
++++ b/_bmad-output/implementation-artifacts/deferred-work.md
+@@ -38,3 +38,6 @@
+ - [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.
+ - [x] [Review][Defer] Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts] — deferred, pre-existing
+ - [x] [Review][Defer] Brittle Optimistic Rollbacks in auth.ts [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state
++
++## Deferred from: code review of 1-7-onboarding-tutorial (2026-06-17)
++- [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
+diff --git a/_bmad-output/implementation-artifacts/sprint-status.yaml b/_bmad-output/implementation-artifacts/sprint-status.yaml
+index fc355c0..dcb6555 100644
+--- a/_bmad-output/implementation-artifacts/sprint-status.yaml
++++ b/_bmad-output/implementation-artifacts/sprint-status.yaml
+@@ -35,7 +35,7 @@
+ # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+ 
+ generated: "2026-05-02"
+-last_updated: "2026-06-13"
++last_updated: "2026-06-17"
+ project: tic-tac-tore
+ project_key: NOKEY
+ tracking_system: file-system
+@@ -51,7 +51,7 @@ development_status:
+   1-4-profile-management-in-personal-cabinet: done
+   1-5-account-deletion-with-anonymization: done
+   1-6-avatar-selection-and-management: done
+-  1-7-onboarding-tutorial: ready-for-dev
++  1-7-onboarding-tutorial: in-progress
+   epic-1-retrospective: optional
+   epic-2: backlog
+   2-1-rule-system-selection-and-inline-creation: backlog
+diff --git a/_bmad-output/scratch/review-diff.txt b/_bmad-output/scratch/review-diff.txt
+new file mode 100644
+index 0000000..9632443
+--- /dev/null
++++ b/_bmad-output/scratch/review-diff.txt
+@@ -0,0 +1,555 @@
++diff --git a/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
++index 77806ed..4f16453 100644
++--- a/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
+++++ b/_bmad-output/implementation-artifacts/1-7-onboarding-tutorial.md
++@@ -1,6 +1,6 @@
++ # Story 1.7: Onboarding Tutorial
++ 
++-Status: ready-for-dev
+++Status: in-progress
++ 
++ <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
++ 
++diff --git a/_bmad-output/implementation-artifacts/sprint-status.yaml b/_bmad-output/implementation-artifacts/sprint-status.yaml
++index fc355c0..74e59e1 100644
++--- a/_bmad-output/implementation-artifacts/sprint-status.yaml
+++++ b/_bmad-output/implementation-artifacts/sprint-status.yaml
++@@ -35,7 +35,7 @@
++ # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
++ 
++ generated: "2026-05-02"
++-last_updated: "2026-06-13"
+++last_updated: "2026-06-16"
++ project: tic-tac-tore
++ project_key: NOKEY
++ tracking_system: file-system
++@@ -51,7 +51,7 @@ development_status:
++   1-4-profile-management-in-personal-cabinet: done
++   1-5-account-deletion-with-anonymization: done
++   1-6-avatar-selection-and-management: done
++-  1-7-onboarding-tutorial: ready-for-dev
+++  1-7-onboarding-tutorial: in-progress
++   epic-1-retrospective: optional
++   epic-2: backlog
++   2-1-rule-system-selection-and-inline-creation: backlog
++diff --git a/frontend/e2e/scenarios/onboarding.spec.ts b/frontend/e2e/scenarios/onboarding.spec.ts
++new file mode 100644
++index 0000000..01c9be9
++--- /dev/null
+++++ b/frontend/e2e/scenarios/onboarding.spec.ts
++@@ -0,0 +1,76 @@
+++import { test, expect } from '@playwright/test';
+++
+++test.describe('Onboarding Tutorial Flow', () => {
+++  test('should show tutorial on first login and not show after skip', async ({ page }) => {
+++    // Setup a new user with tutorialCompleted = false via test-login
+++    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+++    const email = `e2e-onboarding-user-${randomSuffix}@example.com`;
+++    const nickname = `E2EOnboardingUser${randomSuffix}`;
+++    
+++    // Explicitly set tutorial completed false for test robustness, though default is false
+++    await page.request.get('/api/auth/test-login', {
+++      params: { email, nickname }
+++    });
+++
+++    await page.goto('/');
+++
+++    // Wait for the tutorial overlay to appear
+++    const tutorialCarousel = page.getByTestId('tutorial-carousel');
+++    await expect(tutorialCarousel).toBeVisible();
+++
+++    // Verify slide 1 content
+++    await expect(page.getByText('Tap to record')).toBeVisible();
+++
+++    // Skip tutorial
+++    await page.getByTestId('tutorial-skip').click();
+++
+++    // Verify tutorial disappears
+++    await expect(tutorialCarousel).toBeHidden();
+++
+++    // Reload page
+++    await page.reload();
+++
+++    // Verify tutorial does NOT reappear
+++    await expect(page.getByTestId('tutorial-carousel')).toBeHidden();
+++  });
+++
+++  test('should show tutorial on first login and not show after finish', async ({ page }) => {
+++    // Setup another new user
+++    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+++    const email = `e2e-onboarding-user2-${randomSuffix}@example.com`;
+++    const nickname = `E2EOnboardingUserTwo${randomSuffix}`;
+++
+++    await page.request.get('/api/auth/test-login', {
+++      params: { email, nickname }
+++    });
+++
+++    await page.goto('/');
+++
+++    // Wait for the tutorial overlay to appear
+++    const tutorialCarousel = page.getByTestId('tutorial-carousel');
+++    await expect(tutorialCarousel).toBeVisible();
+++
+++    // Verify slide 1 content
+++    await expect(page.getByText('Tap to record')).toBeVisible();
+++
+++    // Click "Next" to go to slide 2
+++    await page.getByTestId('tutorial-next').click();
+++    await expect(page.getByText('Tap to confirm')).toBeVisible();
+++
+++    // Click "Next" to go to slide 3
+++    await page.getByTestId('tutorial-next').click();
+++    await expect(page.getByText('Find your strength')).toBeVisible();
+++
+++    // Click "Finish"
+++    await page.getByTestId('tutorial-finish').click();
+++
+++    // Verify tutorial disappears
+++    await expect(tutorialCarousel).toBeHidden();
+++
+++    // Reload page
+++    await page.reload();
+++
+++    // Verify tutorial does NOT reappear
+++    await expect(page.getByTestId('tutorial-carousel')).toBeHidden();
+++  });
+++});
++diff --git a/frontend/src/components/TutorialCarousel.vue b/frontend/src/components/TutorialCarousel.vue
++new file mode 100644
++index 0000000..19c4664
++--- /dev/null
+++++ b/frontend/src/components/TutorialCarousel.vue
++@@ -0,0 +1,158 @@
+++<script setup lang="ts">
+++import { ref, onMounted } from 'vue'
+++import { useI18n } from 'vue-i18n'
+++import { useAuthStore } from '@/stores/auth'
+++
+++const { t } = useI18n()
+++const authStore = useAuthStore()
+++
+++const currentSlide = ref(0)
+++const totalSlides = 3
+++const carouselRef = ref<HTMLElement | null>(null)
+++
+++const isCompleting = ref(false)
+++
+++const handleScroll = () => {
+++  if (!carouselRef.value) return
+++  const scrollLeft = carouselRef.value.scrollLeft
+++  const width = carouselRef.value.clientWidth
+++  currentSlide.value = Math.round(scrollLeft / width)
+++}
+++
+++const scrollToSlide = (index: number) => {
+++  if (!carouselRef.value) return
+++  carouselRef.value.scrollTo({
+++    left: carouselRef.value.clientWidth * index,
+++    behavior: 'smooth'
+++  })
+++}
+++
+++const completeTutorial = async () => {
+++  if (isCompleting.value) return
+++  isCompleting.value = true
+++  try {
+++    await authStore.updateProfile({ tutorialCompleted: true })
+++  } catch (error) {
+++    console.error('Failed to complete tutorial', error)
+++  } finally {
+++    isCompleting.value = false
+++  }
+++}
+++
+++onMounted(() => {
+++  if (carouselRef.value) {
+++    carouselRef.value.addEventListener('scroll', handleScroll, { passive: true })
+++  }
+++})
+++</script>
+++
+++<template>
+++  <div class="fixed inset-0 z-[100] bg-surface-container/95 backdrop-blur-xl flex flex-col w-full h-full">
+++    <!-- Carousel Container -->
+++    <div 
+++      ref="carouselRef"
+++      class="flex-1 flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+++      data-testid="tutorial-carousel"
+++    >
+++      <!-- Slide 1 -->
+++      <div 
+++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
+++        :class="{ 'invisible': currentSlide !== 0 }"
+++        :aria-hidden="currentSlide !== 0"
+++      >
+++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
+++          <span class="material-symbols-outlined text-6xl text-primary">add_circle</span>
+++        </div>
+++        <div class="text-center space-y-4 max-w-xs">
+++          <h2 class="text-3xl font-headline font-bold text-on-surface">{{ t('tutorial.slide1.title') }}</h2>
+++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">{{ t('tutorial.slide1.description') }}</p>
+++        </div>
+++      </div>
+++
+++      <!-- Slide 2 -->
+++      <div 
+++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
+++        :class="{ 'invisible': currentSlide !== 1 }"
+++        :aria-hidden="currentSlide !== 1"
+++      >
+++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
+++          <span class="material-symbols-outlined text-6xl text-primary">notifications_active</span>
+++        </div>
+++        <div class="text-center space-y-4 max-w-xs">
+++          <h2 class="text-3xl font-headline font-bold text-on-surface">{{ t('tutorial.slide2.title') }}</h2>
+++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">{{ t('tutorial.slide2.description') }}</p>
+++        </div>
+++      </div>
+++
+++      <!-- Slide 3 -->
+++      <div 
+++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
+++        :class="{ 'invisible': currentSlide !== 2 }"
+++        :aria-hidden="currentSlide !== 2"
+++      >
+++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
+++          <span class="material-symbols-outlined text-6xl text-primary">leaderboard</span>
+++        </div>
+++        <div class="text-center space-y-4 max-w-xs">
+++          <h2 class="text-3xl font-headline font-bold text-on-surface">{{ t('tutorial.slide3.title') }}</h2>
+++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">{{ t('tutorial.slide3.description') }}</p>
+++        </div>
+++      </div>
+++    </div>
+++
+++    <!-- Navigation / Controls -->
+++    <div class="h-32 flex flex-col items-center justify-center gap-6 px-8 pb-8">
+++      <!-- Dots -->
+++      <div class="flex gap-3">
+++        <button 
+++          v-for="(_, index) in totalSlides" 
+++          :key="index"
+++          @click="scrollToSlide(index)"
+++          class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+++          :class="currentSlide === index ? 'bg-primary scale-125' : 'bg-on-surface/20'"
+++          :aria-label="`Go to slide ${index + 1}`"
+++        />
+++      </div>
+++
+++      <!-- Actions -->
+++      <div class="flex justify-between w-full max-w-sm items-center">
+++        <button 
+++          @click="completeTutorial"
+++          class="text-on-surface-variant font-headline font-medium tracking-wide hover:text-on-surface transition-colors px-4 py-2"
+++          data-testid="tutorial-skip"
+++        >
+++          {{ t('tutorial.skip') }}
+++        </button>
+++
+++        <button 
+++          v-if="currentSlide < totalSlides - 1"
+++          @click="scrollToSlide(currentSlide + 1)"
+++          class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold tracking-wide shadow-lg hover:shadow-xl transition-all active:scale-95"
+++          data-testid="tutorial-next"
+++        >
+++          {{ t('tutorial.next') }}
+++        </button>
+++
+++        <button 
+++          v-else
+++          @click="completeTutorial"
+++          :disabled="isCompleting"
+++          class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold tracking-wide shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-50"
+++          data-testid="tutorial-finish"
+++        >
+++          {{ isCompleting ? t('common.loading') : t('tutorial.finish') }}
+++        </button>
+++      </div>
+++    </div>
+++  </div>
+++</template>
+++
+++<style scoped>
+++.hide-scrollbar {
+++  -ms-overflow-style: none;
+++  scrollbar-width: none;
+++}
+++.hide-scrollbar::-webkit-scrollbar {
+++  display: none;
+++}
+++</style>
++diff --git a/frontend/src/locales/de.json b/frontend/src/locales/de.json
++index 169766e..5fa83bc 100644
++--- a/frontend/src/locales/de.json
+++++ b/frontend/src/locales/de.json
++@@ -52,5 +52,22 @@
++   },
++   "avatarPicker": {
++     "title": "Avatar auswählen"
+++  },
+++  "tutorial": {
+++    "skip": "Überspringen",
+++    "next": "Weiter",
+++    "finish": "Los geht's",
+++    "slide1": {
+++      "title": "Tippen zum Aufzeichnen",
+++      "description": "Protokollieren Sie Ihre Tischkicker-Spiele schnell und einfach."
+++    },
+++    "slide2": {
+++      "title": "Tippen zum Bestätigen",
+++      "description": "Bestätigen Sie Spiele mit einem einzigen Tippen, wenn Sie benachrichtigt werden."
+++    },
+++    "slide3": {
+++      "title": "Finde deine Stärke",
+++      "description": "Klimme die Rangliste hinauf und sieh zu, wie sich deine Statistiken verbessern."
+++    }
++   }
++ }
++diff --git a/frontend/src/locales/en.json b/frontend/src/locales/en.json
++index e5afcd1..fa98243 100644
++--- a/frontend/src/locales/en.json
+++++ b/frontend/src/locales/en.json
++@@ -52,5 +52,22 @@
++   },
++   "avatarPicker": {
++     "title": "Select Avatar"
+++  },
+++  "tutorial": {
+++    "skip": "Skip",
+++    "next": "Next",
+++    "finish": "Let's Go",
+++    "slide1": {
+++      "title": "Tap to record",
+++      "description": "Log your foosball matches quickly and easily."
+++    },
+++    "slide2": {
+++      "title": "Tap to confirm",
+++      "description": "Approve matches with a single tap when notified."
+++    },
+++    "slide3": {
+++      "title": "Find your strength",
+++      "description": "Climb the leaderboard and see your stats improve."
+++    }
++   }
++ }
++diff --git a/frontend/src/stores/auth.ts b/frontend/src/stores/auth.ts
++index cfa5dc6..52557f9 100644
++--- a/frontend/src/stores/auth.ts
+++++ b/frontend/src/stores/auth.ts
++@@ -14,6 +14,7 @@ interface UserProfile {
++   nickname: string
++   avatar: string
++   language?: string
+++  tutorialCompleted?: boolean
++ }
++ 
++ export const useAuthStore = defineStore('auth', () => {
++@@ -57,10 +58,10 @@ export const useAuthStore = defineStore('auth', () => {
++     }
++   }
++ 
++-  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string }) {
+++  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string; tutorialCompleted?: boolean }) {
++     if (!profile.value) return
++ 
++-    const { nickname, language, avatar } = options
+++    const { nickname, language, avatar, tutorialCompleted } = options
++     const previousProfile = { ...profile.value }
++ 
++     const localeStore = useLocaleStore()
++@@ -85,6 +86,9 @@ export const useAuthStore = defineStore('auth', () => {
++     if (avatar !== undefined) {
++       profile.value.avatar = avatar
++     }
+++    if (tutorialCompleted !== undefined) {
+++      profile.value.tutorialCompleted = tutorialCompleted
+++    }
++ 
++     try {
++       const csrfToken = getCookie(CSRF_COOKIE_NAME)
++@@ -98,7 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
++       const response = await fetch(PROFILE_ENDPOINT, {
++         method: 'PATCH',
++         headers,
++-        body: JSON.stringify({ nickname: finalNickname, language, avatar })
+++        body: JSON.stringify({ nickname: finalNickname, language, avatar, tutorialCompleted })
++       })
++ 
++       if (!response.ok) {
++diff --git a/frontend/src/views/HomeHub.vue b/frontend/src/views/HomeHub.vue
++index 9f24a52..941acba 100644
++--- a/frontend/src/views/HomeHub.vue
+++++ b/frontend/src/views/HomeHub.vue
++@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
++ import { useAuthStore } from '@/stores/auth'
++ import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
++ import AvatarBase from '@/components/AvatarBase.vue'
+++import TutorialCarousel from '@/components/TutorialCarousel.vue'
++ 
++ const { t } = useI18n()
++ const authStore = useAuthStore()
++@@ -24,6 +25,11 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
++ 
++ <template>
++   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
+++    <!-- Tutorial Overlay -->
+++    <Transition name="fade">
+++      <TutorialCarousel v-if="authStore.isAuthenticated && authStore.profile && !authStore.profile.tutorialCompleted" />
+++    </Transition>
+++
++     <!-- Header -->
++     <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50">
++       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
++@@ -70,3 +76,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
++     </main>
++   </div>
++ </template>
+++
+++<style scoped>
+++.fade-enter-active,
+++.fade-leave-active {
+++  transition: opacity 0.3s ease;
+++}
+++
+++.fade-enter-from,
+++.fade-leave-to {
+++  opacity: 0;
+++}
+++</style>
++diff --git a/src/main/java/com/tictactore/controller/UserController.java b/src/main/java/com/tictactore/controller/UserController.java
++index 831bbf8..af9016d 100644
++--- a/src/main/java/com/tictactore/controller/UserController.java
+++++ b/src/main/java/com/tictactore/controller/UserController.java
++@@ -32,6 +32,7 @@ public class UserController implements ProfileApi {
++                 .nickname(user.getNickname())
++                 .avatar(user.getAvatar())
++                 .language(user.getLanguage())
+++                .tutorialCompleted(user.isTutorialCompleted())
++                 .build();
++                 
++         return ResponseEntity.ok(profile);
++@@ -51,6 +52,7 @@ public class UserController implements ProfileApi {
++                 .nickname(user.getNickname())
++                 .avatar(user.getAvatar())
++                 .language(user.getLanguage())
+++                .tutorialCompleted(user.isTutorialCompleted())
++                 .build();
++                 
++         return ResponseEntity.ok(profile);
++diff --git a/src/main/java/com/tictactore/dto/ProfileDto.java b/src/main/java/com/tictactore/dto/ProfileDto.java
++index 68157a9..1164005 100644
++--- a/src/main/java/com/tictactore/dto/ProfileDto.java
+++++ b/src/main/java/com/tictactore/dto/ProfileDto.java
++@@ -17,4 +17,7 @@ public class ProfileDto {
++ 
++     @Schema(description = "User's preferred language", example = "en")
++     private String language;
+++
+++    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true")
+++    private Boolean tutorialCompleted;
++ }
++diff --git a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
++index a0f7f11..3904a94 100644
++--- a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
+++++ b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
++@@ -25,4 +25,7 @@ public class UpdateProfileRequest {
++     @Schema(description = "New avatar name from preset grid", example = "ball-classic")
++     @com.tictactore.validation.ValidAvatar
++     private String avatar;
+++
+++    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true")
+++    private Boolean tutorialCompleted;
++ }
++diff --git a/src/main/java/com/tictactore/model/User.java b/src/main/java/com/tictactore/model/User.java
++index 250bbcb..2235f6c 100644
++--- a/src/main/java/com/tictactore/model/User.java
+++++ b/src/main/java/com/tictactore/model/User.java
++@@ -33,6 +33,10 @@ public class User {
++     @Column(name = "last_nickname_update", columnDefinition = "TIMESTAMP WITH TIME ZONE")
++     private java.time.Instant lastNicknameUpdate;
++ 
+++    @Column(name = "tutorial_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+++    @Builder.Default
+++    private boolean tutorialCompleted = false;
+++
++     @Version
++     private Long version;
++ }
++diff --git a/src/main/java/com/tictactore/service/UserService.java b/src/main/java/com/tictactore/service/UserService.java
++index 8401292..b03afcf 100644
++--- a/src/main/java/com/tictactore/service/UserService.java
+++++ b/src/main/java/com/tictactore/service/UserService.java
++@@ -49,12 +49,18 @@ public class UserService {
++     @Transactional
++     public User findOrCreateTestUser(String email, String nickname) {
++         return userRepository.findByEmail(email)
+++                .map(user -> {
+++                    // Force tutorial flag reset for consistent E2E testing
+++                    user.setTutorialCompleted(false);
+++                    return userRepository.save(user);
+++                })
++                 .orElseGet(() -> {
++                     User newUser = User.builder()
++                             .email(email)
++                             .nickname(nickname)
++                             .avatar(generateDeterministicAvatar(email))
++                             .language("EN")
+++                            .tutorialCompleted(false)
++                             .build();
++                     return userRepository.save(newUser);
++                 });
++@@ -194,6 +200,10 @@ public class UserService {
++             user.setAvatar(avatarVal);
++         }
++ 
+++        if (request.getTutorialCompleted() != null) {
+++            user.setTutorialCompleted(request.getTutorialCompleted());
+++        }
+++
++         try {
++             return userRepository.save(user);
++         } catch (DataIntegrityViolationException e) {
++diff --git a/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql b/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql
++new file mode 100644
++index 0000000..ccd5abc
++--- /dev/null
+++++ b/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql
++@@ -0,0 +1 @@
+++ALTER TABLE "user" ADD COLUMN IF NOT EXISTS tutorial_completed BOOLEAN NOT NULL DEFAULT FALSE;
++diff --git a/src/test/java/com/tictactore/service/UserServiceTest.java b/src/test/java/com/tictactore/service/UserServiceTest.java
++index 5b0b6c3..6703519 100644
++--- a/src/test/java/com/tictactore/service/UserServiceTest.java
+++++ b/src/test/java/com/tictactore/service/UserServiceTest.java
++@@ -438,5 +438,21 @@ class UserServiceTest {
++                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
++                 .hasMessage("Invalid avatar selection");
++     }
+++
+++    @Test
+++    @DisplayName("Update Profile - should update tutorialCompleted when provided")
+++    void updateProfile_shouldUpdateTutorialCompleted_whenProvided() {
+++        UUID userId = UUID.randomUUID();
+++        User user = new User();
+++        user.setId(userId);
+++        user.setTutorialCompleted(false);
+++        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(true).build();
+++        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+++        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+++
+++        User updatedUser = userService.updateProfile(userId, request);
+++
+++        assertThat(updatedUser.isTutorialCompleted()).isTrue();
+++    }
++ }
++ 
++diff --git a/test-results/.last-run.json b/test-results/.last-run.json
++new file mode 100644
++index 0000000..5fca3f8
++--- /dev/null
+++++ b/test-results/.last-run.json
++@@ -0,0 +1,4 @@
+++{
+++  "status": "failed",
+++  "failedTests": []
+++}
++\ No newline at end of file
+diff --git a/frontend/e2e/onboarding.spec.ts b/frontend/e2e/onboarding.spec.ts
+new file mode 100644
+index 0000000..01c9be9
+--- /dev/null
++++ b/frontend/e2e/onboarding.spec.ts
+@@ -0,0 +1,76 @@
++import { test, expect } from '@playwright/test';
++
++test.describe('Onboarding Tutorial Flow', () => {
++  test('should show tutorial on first login and not show after skip', async ({ page }) => {
++    // Setup a new user with tutorialCompleted = false via test-login
++    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
++    const email = `e2e-onboarding-user-${randomSuffix}@example.com`;
++    const nickname = `E2EOnboardingUser${randomSuffix}`;
++    
++    // Explicitly set tutorial completed false for test robustness, though default is false
++    await page.request.get('/api/auth/test-login', {
++      params: { email, nickname }
++    });
++
++    await page.goto('/');
++
++    // Wait for the tutorial overlay to appear
++    const tutorialCarousel = page.getByTestId('tutorial-carousel');
++    await expect(tutorialCarousel).toBeVisible();
++
++    // Verify slide 1 content
++    await expect(page.getByText('Tap to record')).toBeVisible();
++
++    // Skip tutorial
++    await page.getByTestId('tutorial-skip').click();
++
++    // Verify tutorial disappears
++    await expect(tutorialCarousel).toBeHidden();
++
++    // Reload page
++    await page.reload();
++
++    // Verify tutorial does NOT reappear
++    await expect(page.getByTestId('tutorial-carousel')).toBeHidden();
++  });
++
++  test('should show tutorial on first login and not show after finish', async ({ page }) => {
++    // Setup another new user
++    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
++    const email = `e2e-onboarding-user2-${randomSuffix}@example.com`;
++    const nickname = `E2EOnboardingUserTwo${randomSuffix}`;
++
++    await page.request.get('/api/auth/test-login', {
++      params: { email, nickname }
++    });
++
++    await page.goto('/');
++
++    // Wait for the tutorial overlay to appear
++    const tutorialCarousel = page.getByTestId('tutorial-carousel');
++    await expect(tutorialCarousel).toBeVisible();
++
++    // Verify slide 1 content
++    await expect(page.getByText('Tap to record')).toBeVisible();
++
++    // Click "Next" to go to slide 2
++    await page.getByTestId('tutorial-next').click();
++    await expect(page.getByText('Tap to confirm')).toBeVisible();
++
++    // Click "Next" to go to slide 3
++    await page.getByTestId('tutorial-next').click();
++    await expect(page.getByText('Find your strength')).toBeVisible();
++
++    // Click "Finish"
++    await page.getByTestId('tutorial-finish').click();
++
++    // Verify tutorial disappears
++    await expect(tutorialCarousel).toBeHidden();
++
++    // Reload page
++    await page.reload();
++
++    // Verify tutorial does NOT reappear
++    await expect(page.getByTestId('tutorial-carousel')).toBeHidden();
++  });
++});
+diff --git a/frontend/src/components/TutorialCarousel.vue b/frontend/src/components/TutorialCarousel.vue
+new file mode 100644
+index 0000000..20f6c1f
+--- /dev/null
++++ b/frontend/src/components/TutorialCarousel.vue
+@@ -0,0 +1,209 @@
++<script setup lang="ts">
++import { ref, onMounted, onUnmounted } from 'vue'
++import { useI18n } from 'vue-i18n'
++import { useAuthStore } from '@/stores/auth'
++
++const { t } = useI18n()
++const authStore = useAuthStore()
++
++const currentSlide = ref(0)
++const totalSlides = 3
++const carouselRef = ref<HTMLElement | null>(null)
++
++const isCompleting = ref(false)
++const errorMessage = ref('')
++
++const handleKeydown = (e: KeyboardEvent) => {
++  if (e.key === 'Escape') {
++    completeTutorial()
++  }
++}
++
++const handleScroll = () => {
++  if (!carouselRef.value) return
++  const scrollLeft = carouselRef.value.scrollLeft
++  const width = carouselRef.value.clientWidth
++  if (width === 0) return
++  currentSlide.value = Math.round(scrollLeft / width)
++}
++
++const isScrolling = ref(false)
++
++const scrollToSlide = (index: number) => {
++  if (!carouselRef.value || isScrolling.value) return
++  isScrolling.value = true
++  carouselRef.value.scrollTo({
++    left: carouselRef.value.clientWidth * index,
++    behavior: 'smooth',
++  })
++  setTimeout(() => {
++    isScrolling.value = false
++  }, 500)
++}
++
++const completeTutorial = async () => {
++  if (isCompleting.value) return
++  isCompleting.value = true
++  try {
++    await authStore.updateProfile({ tutorialCompleted: true })
++  } catch (error) {
++    console.error('Failed to complete tutorial', error)
++    errorMessage.value = t('tutorial.error') || 'Failed to complete tutorial. Please try again.'
++  } finally {
++    isCompleting.value = false
++  }
++}
++
++onMounted(() => {
++  if (carouselRef.value) {
++    carouselRef.value.addEventListener('scroll', handleScroll, { passive: true })
++  }
++  document.addEventListener('keydown', handleKeydown)
++  document.body.style.overflow = 'hidden'
++})
++
++onUnmounted(() => {
++  if (carouselRef.value) {
++    carouselRef.value.removeEventListener('scroll', handleScroll)
++  }
++  document.removeEventListener('keydown', handleKeydown)
++  document.body.style.overflow = ''
++})
++</script>
++
++<template>
++  <div
++    class="fixed inset-0 z-[100] bg-surface-container/95 backdrop-blur-xl flex flex-col w-full h-full"
++    role="dialog"
++    aria-modal="true"
++    aria-label="Tutorial"
++  >
++    <!-- Carousel Container -->
++    <div
++      ref="carouselRef"
++      class="flex-1 flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
++      data-testid="tutorial-carousel"
++    >
++      <!-- Slide 1 -->
++      <div
++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
++        :class="{ invisible: currentSlide !== 0 }"
++        :aria-hidden="currentSlide !== 0"
++      >
++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
++          <span class="material-symbols-outlined text-6xl text-primary">add_circle</span>
++        </div>
++        <div class="text-center space-y-4 max-w-xs">
++          <h2 class="text-3xl font-headline font-bold text-on-surface">
++            {{ t('tutorial.slide1.title') }}
++          </h2>
++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">
++            {{ t('tutorial.slide1.description') }}
++          </p>
++        </div>
++      </div>
++
++      <!-- Slide 2 -->
++      <div
++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
++        :class="{ invisible: currentSlide !== 1 }"
++        :aria-hidden="currentSlide !== 1"
++      >
++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
++          <span class="material-symbols-outlined text-6xl text-primary">notifications_active</span>
++        </div>
++        <div class="text-center space-y-4 max-w-xs">
++          <h2 class="text-3xl font-headline font-bold text-on-surface">
++            {{ t('tutorial.slide2.title') }}
++          </h2>
++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">
++            {{ t('tutorial.slide2.description') }}
++          </p>
++        </div>
++      </div>
++
++      <!-- Slide 3 -->
++      <div
++        class="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center p-8 gap-8"
++        :class="{ invisible: currentSlide !== 2 }"
++        :aria-hidden="currentSlide !== 2"
++      >
++        <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
++          <span class="material-symbols-outlined text-6xl text-primary">leaderboard</span>
++        </div>
++        <div class="text-center space-y-4 max-w-xs">
++          <h2 class="text-3xl font-headline font-bold text-on-surface">
++            {{ t('tutorial.slide3.title') }}
++          </h2>
++          <p class="text-on-surface-variant font-body text-lg leading-relaxed">
++            {{ t('tutorial.slide3.description') }}
++          </p>
++        </div>
++      </div>
++    </div>
++
++    <!-- Error Message -->
++    <div
++      v-if="errorMessage"
++      class="text-error text-center font-body text-sm px-4 py-2"
++      role="alert"
++    >
++      {{ errorMessage }}
++    </div>
++
++    <!-- Navigation / Controls -->
++    <div class="h-32 flex flex-col items-center justify-center gap-6 px-8 pb-8">
++      <!-- Dots -->
++      <div class="flex gap-3">
++        <button
++          v-for="(_, index) in totalSlides"
++          :key="index"
++          @click="scrollToSlide(index)"
++          class="w-2.5 h-2.5 rounded-full transition-all duration-300"
++          :class="currentSlide === index ? 'bg-primary scale-125' : 'bg-on-surface/20'"
++          :aria-label="`Go to slide ${index + 1}`"
++        />
++      </div>
++
++      <!-- Actions -->
++      <div class="flex justify-between w-full max-w-sm items-center">
++        <button
++          @click="completeTutorial"
++          class="text-on-surface-variant font-headline font-medium tracking-wide hover:text-on-surface transition-colors px-4 py-2"
++          data-testid="tutorial-skip"
++        >
++          {{ t('tutorial.skip') }}
++        </button>
++
++        <button
++          v-if="currentSlide < totalSlides - 1"
++          @click="scrollToSlide(currentSlide + 1)"
++          class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold tracking-wide shadow-lg hover:shadow-xl transition-all active:scale-95"
++          data-testid="tutorial-next"
++        >
++          {{ t('tutorial.next') }}
++        </button>
++
++        <button
++          v-else
++          @click="completeTutorial"
++          :disabled="isCompleting"
++          class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold tracking-wide shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-50"
++          data-testid="tutorial-finish"
++        >
++          {{ isCompleting ? t('common.loading') : t('tutorial.finish') }}
++        </button>
++      </div>
++    </div>
++  </div>
++</template>
++
++<style scoped>
++.hide-scrollbar {
++  -ms-overflow-style: none;
++  scrollbar-width: none;
++}
++.hide-scrollbar::-webkit-scrollbar {
++  display: none;
++}
++</style>
+diff --git a/frontend/src/features/profile/Cabinet.vue b/frontend/src/features/profile/Cabinet.vue
+index 779ed79..2a7d4dd 100644
+--- a/frontend/src/features/profile/Cabinet.vue
++++ b/frontend/src/features/profile/Cabinet.vue
+@@ -1,4 +1,6 @@
+ <script setup lang="ts">
++defineOptions({ name: 'ProfileCabinet' })
++
+ import { ref, onMounted } from 'vue'
+ import { useRouter } from 'vue-router'
+ import { useI18n } from 'vue-i18n'
+@@ -120,49 +122,80 @@ async function confirmDelete() {
+ <template>
+   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center">
+     <!-- Top Bar -->
+-    <header class="bg-surface-container-low/80 backdrop-blur-xl text-primary font-headline tracking-tight top-0 sticky z-50 flex justify-between items-center w-full max-w-md px-6 py-4">
+-      <button @click="goBack" class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center">
++    <header
++      class="bg-surface-container-low/80 backdrop-blur-xl text-primary font-headline tracking-tight top-0 sticky z-50 flex justify-between items-center w-full max-w-md px-6 py-4"
++    >
++      <button
++        @click="goBack"
++        class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center"
++      >
+         <span class="material-symbols-outlined text-on-surface text-xl">home</span>
+       </button>
+-      <h1 class="text-lg font-bold text-on-surface tracking-tight text-center flex-1">{{ t('cabinet.title') }}</h1>
+-      <button @click="goBack" class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center">
++      <h1 class="text-lg font-bold text-on-surface tracking-tight text-center flex-1">
++        {{ t('cabinet.title') }}
++      </h1>
++      <button
++        @click="goBack"
++        class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center"
++      >
+         <span class="material-symbols-outlined text-on-surface text-xl">arrow_back</span>
+       </button>
+     </header>
+ 
+-    <main v-if="!authStore.profile" class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center">
++    <main
++      v-if="!authStore.profile"
++      class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center"
++    >
+       <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+     </main>
+     <main v-else class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
+       <!-- Avatar Section -->
+       <section class="flex flex-col items-center">
+-        <button 
+-          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+-          @click="isAvatarPickerOpen = true" 
++        <button
++          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
++          @click="isAvatarPickerOpen = true"
+           :disabled="isUpdating"
+           aria-haspopup="dialog"
+-          aria-label="Change avatar" 
++          aria-label="Change avatar"
+           data-testid="change-avatar-button"
+         >
+-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center">
++          <div
++            class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center"
++          >
+             <AvatarBase :avatar="authStore.profile?.avatar" />
+           </div>
+           <!-- Edit Overlay Icon -->
+-          <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
++          <div
++            class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none"
++          >
+             <span class="material-symbols-outlined text-2xl">edit</span>
+           </div>
+         </button>
+         <div class="mt-3 text-center" v-if="authStore.profile">
+-          <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">{{ authStore.profile.nickname }}</h2>
+-          <p class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70">Clubhouse Member</p>
++          <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">
++            {{ authStore.profile.nickname }}
++          </h2>
++          <p
++            class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70"
++          >
++            Clubhouse Member
++          </p>
+         </div>
+       </section>
+ 
+       <!-- Feedback Messages -->
+-      <div v-if="message" data-testid="success-message" class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center">
++      <div
++        v-if="message"
++        data-testid="success-message"
++        class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center"
++      >
+         {{ message }}
+       </div>
+-      <div v-if="error" data-testid="error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
++      <div
++        v-if="error"
++        data-testid="error-message"
++        class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center"
++      >
+         {{ error }}
+       </div>
+ 
+@@ -170,17 +203,22 @@ async function confirmDelete() {
+       <div class="space-y-6">
+         <!-- Nickname Field -->
+         <div class="space-y-2">
+-          <label for="nickname" class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">
++          <label
++            for="nickname"
++            class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1"
++          >
+             {{ t('cabinet.nickname') }}
+           </label>
+-          <input 
++          <input
+             id="nickname"
+             v-model="nickname"
+             type="text"
+             class="w-full bg-surface-container-highest text-on-surface px-4 py-2.5 rounded-lg focus:outline-none focus:ring-0 font-headline text-base transition-all"
+             placeholder="Enter nickname"
+           />
+-          <p class="text-[9px] text-on-surface-variant font-headline italic flex items-center gap-2 px-1">
++          <p
++            class="text-[9px] text-on-surface-variant font-headline italic flex items-center gap-2 px-1"
++          >
+             <span class="material-symbols-outlined text-[12px]">info</span>
+             {{ t('cabinet.cooldownMessage') }}
+           </p>
+@@ -188,12 +226,14 @@ async function confirmDelete() {
+ 
+         <!-- Language Selection -->
+         <div class="space-y-2">
+-          <label class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">
++          <label
++            class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1"
++          >
+             {{ t('cabinet.language') }}
+           </label>
+-          
++
+           <div class="relative">
+-            <button 
++            <button
+               role="button"
+               aria-haspopup="listbox"
+               aria-label="Language"
+@@ -202,17 +242,19 @@ async function confirmDelete() {
+               data-testid="language-select"
+               class="w-full flex justify-between items-center bg-surface-container-low text-on-surface px-4 py-2.5 rounded-lg font-headline text-sm hover:bg-surface-container-highest/50 transition-colors"
+             >
+-              <span>{{ selectedLanguage === 'EN' ? t('cabinet.english') : t('cabinet.german') }}</span>
++              <span>{{
++                selectedLanguage === 'EN' ? t('cabinet.english') : t('cabinet.german')
++              }}</span>
+               <span class="material-symbols-outlined text-sm">expand_more</span>
+             </button>
+ 
+             <!-- Dropdown Options -->
+-            <div 
++            <div
+               v-if="isDropdownOpen"
+               role="listbox"
+               class="absolute z-10 w-full mt-1 bg-surface-container-highest rounded-lg shadow-xl py-1 overflow-hidden"
+             >
+-              <div 
++              <div
+                 role="option"
+                 data-testid="lang-en"
+                 :aria-selected="selectedLanguage === 'EN'"
+@@ -221,7 +263,7 @@ async function confirmDelete() {
+               >
+                 {{ t('cabinet.english') }}
+               </div>
+-              <div 
++              <div
+                 role="option"
+                 data-testid="lang-de"
+                 :aria-selected="selectedLanguage === 'DE'"
+@@ -240,7 +282,7 @@ async function confirmDelete() {
+         <h3 class="font-headline text-[10px] font-bold uppercase tracking-widest text-red-400 ml-1">
+           {{ t('cabinet.dangerZone') }}
+         </h3>
+-        <button 
++        <button
+           @click="openDeleteModal"
+           data-testid="delete-account-button"
+           class="w-full py-3 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
+@@ -253,7 +295,7 @@ async function confirmDelete() {
+ 
+     <!-- Footer Action -->
+     <footer v-if="authStore.profile" class="w-full max-w-md px-6 pb-6 pt-2">
+-      <button 
++      <button
+         @click="handleSave"
+         data-testid="save-button"
+         class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-background font-headline font-extrabold uppercase tracking-[0.2em] shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3"
+@@ -261,22 +303,26 @@ async function confirmDelete() {
+         {{ t('common.save') }}
+         <span aria-hidden="true" class="material-symbols-outlined font-bold">check_circle</span>
+       </button>
+-      <p class="text-center mt-3 text-[9px] text-on-surface-variant font-headline uppercase tracking-widest opacity-40">
++      <p
++        class="text-center mt-3 text-[9px] text-on-surface-variant font-headline uppercase tracking-widest opacity-40"
++      >
+         Tic-Tac-Tore • Clubhouse Edition
+       </p>
+     </footer>
+ 
+     <!-- Delete Confirmation Modal -->
+     <Transition name="fade">
+-      <div 
+-        v-if="showDeleteModal" 
++      <div
++        v-if="showDeleteModal"
+         class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
+         role="dialog"
+         aria-modal="true"
+       >
+         <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl">
+           <div class="text-center space-y-2">
+-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2">
++            <div
++              class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2"
++            >
+               <span class="material-symbols-outlined text-2xl">warning</span>
+             </div>
+             <h2 class="font-headline text-lg font-bold text-on-surface">
+@@ -287,22 +333,28 @@ async function confirmDelete() {
+             </p>
+           </div>
+ 
+-          <div v-if="error" data-testid="modal-error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
++          <div
++            v-if="error"
++            data-testid="modal-error-message"
++            class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center"
++          >
+             {{ error }}
+           </div>
+ 
+           <div class="flex flex-col gap-2">
+-            <button 
++            <button
+               @click="confirmDelete"
+               data-testid="confirm-delete-button"
+               :disabled="isDeleting"
+               class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-headline font-extrabold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+             >
+-              <span v-if="isDeleting" class="animate-spin material-symbols-outlined text-sm">sync</span>
++              <span v-if="isDeleting" class="animate-spin material-symbols-outlined text-sm"
++                >sync</span
++              >
+               <span v-else>{{ t('cabinet.confirmDelete') }}</span>
+             </button>
+-            
+-            <button 
++
++            <button
+               @click="showDeleteModal = false"
+               :disabled="isDeleting"
+               class="w-full py-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface font-headline font-bold text-xs transition-colors"
+@@ -316,7 +368,7 @@ async function confirmDelete() {
+ 
+     <!-- Avatar Picker Modal -->
+     <Transition name="fade">
+-      <AvatarPicker 
++      <AvatarPicker
+         v-if="isAvatarPickerOpen"
+         :current-avatar="authStore.profile?.avatar"
+         @select="handleAvatarSelect"
+diff --git a/frontend/src/locales/de.json b/frontend/src/locales/de.json
+index 169766e..5fa83bc 100644
+--- a/frontend/src/locales/de.json
++++ b/frontend/src/locales/de.json
+@@ -52,5 +52,22 @@
+   },
+   "avatarPicker": {
+     "title": "Avatar auswählen"
++  },
++  "tutorial": {
++    "skip": "Überspringen",
++    "next": "Weiter",
++    "finish": "Los geht's",
++    "slide1": {
++      "title": "Tippen zum Aufzeichnen",
++      "description": "Protokollieren Sie Ihre Tischkicker-Spiele schnell und einfach."
++    },
++    "slide2": {
++      "title": "Tippen zum Bestätigen",
++      "description": "Bestätigen Sie Spiele mit einem einzigen Tippen, wenn Sie benachrichtigt werden."
++    },
++    "slide3": {
++      "title": "Finde deine Stärke",
++      "description": "Klimme die Rangliste hinauf und sieh zu, wie sich deine Statistiken verbessern."
++    }
+   }
+ }
+diff --git a/frontend/src/locales/en.json b/frontend/src/locales/en.json
+index e5afcd1..fa98243 100644
+--- a/frontend/src/locales/en.json
++++ b/frontend/src/locales/en.json
+@@ -52,5 +52,22 @@
+   },
+   "avatarPicker": {
+     "title": "Select Avatar"
++  },
++  "tutorial": {
++    "skip": "Skip",
++    "next": "Next",
++    "finish": "Let's Go",
++    "slide1": {
++      "title": "Tap to record",
++      "description": "Log your foosball matches quickly and easily."
++    },
++    "slide2": {
++      "title": "Tap to confirm",
++      "description": "Approve matches with a single tap when notified."
++    },
++    "slide3": {
++      "title": "Find your strength",
++      "description": "Climb the leaderboard and see your stats improve."
++    }
+   }
+ }
+diff --git a/frontend/src/stores/auth.ts b/frontend/src/stores/auth.ts
+index cfa5dc6..6c5f1ce 100644
+--- a/frontend/src/stores/auth.ts
++++ b/frontend/src/stores/auth.ts
+@@ -14,6 +14,7 @@ interface UserProfile {
+   nickname: string
+   avatar: string
+   language?: string
++  tutorialCompleted?: boolean
+ }
+ 
+ export const useAuthStore = defineStore('auth', () => {
+@@ -57,10 +58,15 @@ export const useAuthStore = defineStore('auth', () => {
+     }
+   }
+ 
+-  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string }) {
++  async function updateProfile(options: {
++    nickname?: string
++    language?: string
++    avatar?: string
++    tutorialCompleted?: boolean
++  }) {
+     if (!profile.value) return
+ 
+-    const { nickname, language, avatar } = options
++    const { nickname, language, avatar, tutorialCompleted } = options
+     const previousProfile = { ...profile.value }
+ 
+     const localeStore = useLocaleStore()
+@@ -79,17 +85,20 @@ export const useAuthStore = defineStore('auth', () => {
+       profile.value.language = language
+       const lang = language.toLowerCase()
+       if (lang === 'en' || lang === 'de') {
+-        localeStore.setLocale(lang as any)
++        localeStore.setLocale(lang as 'en' | 'de')
+       }
+     }
+     if (avatar !== undefined) {
+       profile.value.avatar = avatar
+     }
++    if (tutorialCompleted !== undefined) {
++      profile.value.tutorialCompleted = tutorialCompleted
++    }
+ 
+     try {
+       const csrfToken = getCookie(CSRF_COOKIE_NAME)
+       const headers: HeadersInit = {
+-        'Content-Type': 'application/json'
++        'Content-Type': 'application/json',
+       }
+       if (csrfToken) {
+         headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
+@@ -98,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
+       const response = await fetch(PROFILE_ENDPOINT, {
+         method: 'PATCH',
+         headers,
+-        body: JSON.stringify({ nickname: finalNickname, language, avatar })
++        body: JSON.stringify({ nickname: finalNickname, language, avatar, tutorialCompleted }),
+       })
+ 
+       if (!response.ok) {
+@@ -124,7 +133,7 @@ export const useAuthStore = defineStore('auth', () => {
+       if (data.language) {
+         const lang = data.language.toLowerCase()
+         if (lang === 'en' || lang === 'de') {
+-          localeStore.setLocale(lang as any)
++          localeStore.setLocale(lang as 'en' | 'de')
+         }
+       }
+     } catch (e) {
+@@ -145,9 +154,9 @@ export const useAuthStore = defineStore('auth', () => {
+         headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
+       }
+ 
+-      const response = await fetch(LOGOUT_ENDPOINT, { 
++      const response = await fetch(LOGOUT_ENDPOINT, {
+         method: METHOD_POST,
+-        headers 
++        headers,
+       })
+ 
+       if (!response.ok && response.status === 0) {
+@@ -176,7 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
+ 
+       const response = await fetch(PROFILE_ENDPOINT, {
+         method: 'DELETE',
+-        headers
++        headers,
+       })
+ 
+       if (!response.ok) {
+@@ -192,15 +201,24 @@ export const useAuthStore = defineStore('auth', () => {
+         }
+         throw new Error(errorMessage)
+       }
+-      
++
+       isMaybeAuthenticated.value = false
+       profile.value = null
+       deleteCookie(SESSION_COOKIE_NAME)
+     } catch (e) {
++      console.error('Failed to delete account', e)
+       throw e
+     }
+   }
+ 
+-  return { isAuthenticated, profile, setAuthenticated, fetchProfile, updateProfile, clearToken, logout, deleteAccount }
++  return {
++    isAuthenticated,
++    profile,
++    setAuthenticated,
++    fetchProfile,
++    updateProfile,
++    clearToken,
++    logout,
++    deleteAccount,
++  }
+ })
+-
+diff --git a/frontend/src/views/HomeHub.vue b/frontend/src/views/HomeHub.vue
+index 9f24a52..941acba 100644
+--- a/frontend/src/views/HomeHub.vue
++++ b/frontend/src/views/HomeHub.vue
+@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
+ import { useAuthStore } from '@/stores/auth'
+ import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
+ import AvatarBase from '@/components/AvatarBase.vue'
++import TutorialCarousel from '@/components/TutorialCarousel.vue'
+ 
+ const { t } = useI18n()
+ const authStore = useAuthStore()
+@@ -24,6 +25,11 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
+ 
+ <template>
+   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
++    <!-- Tutorial Overlay -->
++    <Transition name="fade">
++      <TutorialCarousel v-if="authStore.isAuthenticated && authStore.profile && !authStore.profile.tutorialCompleted" />
++    </Transition>
++
+     <!-- Header -->
+     <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50">
+       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
+@@ -70,3 +76,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
+     </main>
+   </div>
+ </template>
++
++<style scoped>
++.fade-enter-active,
++.fade-leave-active {
++  transition: opacity 0.3s ease;
++}
++
++.fade-enter-from,
++.fade-leave-to {
++  opacity: 0;
++}
++</style>
+diff --git a/src/main/java/com/tictactore/controller/UserController.java b/src/main/java/com/tictactore/controller/UserController.java
+index 831bbf8..af9016d 100644
+--- a/src/main/java/com/tictactore/controller/UserController.java
++++ b/src/main/java/com/tictactore/controller/UserController.java
+@@ -32,6 +32,7 @@ public class UserController implements ProfileApi {
+                 .nickname(user.getNickname())
+                 .avatar(user.getAvatar())
+                 .language(user.getLanguage())
++                .tutorialCompleted(user.isTutorialCompleted())
+                 .build();
+                 
+         return ResponseEntity.ok(profile);
+@@ -51,6 +52,7 @@ public class UserController implements ProfileApi {
+                 .nickname(user.getNickname())
+                 .avatar(user.getAvatar())
+                 .language(user.getLanguage())
++                .tutorialCompleted(user.isTutorialCompleted())
+                 .build();
+                 
+         return ResponseEntity.ok(profile);
+diff --git a/src/main/java/com/tictactore/dto/ProfileDto.java b/src/main/java/com/tictactore/dto/ProfileDto.java
+index 68157a9..1164005 100644
+--- a/src/main/java/com/tictactore/dto/ProfileDto.java
++++ b/src/main/java/com/tictactore/dto/ProfileDto.java
+@@ -17,4 +17,7 @@ public class ProfileDto {
+ 
+     @Schema(description = "User's preferred language", example = "en")
+     private String language;
++
++    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true")
++    private Boolean tutorialCompleted;
+ }
+diff --git a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
+index a0f7f11..a93de88 100644
+--- a/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
++++ b/src/main/java/com/tictactore/dto/UpdateProfileRequest.java
+@@ -25,4 +25,7 @@ public class UpdateProfileRequest {
+     @Schema(description = "New avatar name from preset grid", example = "ball-classic")
+     @com.tictactore.validation.ValidAvatar
+     private String avatar;
++
++    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true", defaultValue = "false")
++    private Boolean tutorialCompleted;
+ }
+diff --git a/src/main/java/com/tictactore/model/User.java b/src/main/java/com/tictactore/model/User.java
+index 250bbcb..2235f6c 100644
+--- a/src/main/java/com/tictactore/model/User.java
++++ b/src/main/java/com/tictactore/model/User.java
+@@ -33,6 +33,10 @@ public class User {
+     @Column(name = "last_nickname_update", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+     private java.time.Instant lastNicknameUpdate;
+ 
++    @Column(name = "tutorial_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
++    @Builder.Default
++    private boolean tutorialCompleted = false;
++
+     @Version
+     private Long version;
+ }
+diff --git a/src/main/java/com/tictactore/service/UserService.java b/src/main/java/com/tictactore/service/UserService.java
+index 8401292..8fd0c2c 100644
+--- a/src/main/java/com/tictactore/service/UserService.java
++++ b/src/main/java/com/tictactore/service/UserService.java
+@@ -55,6 +55,7 @@ public class UserService {
+                             .nickname(nickname)
+                             .avatar(generateDeterministicAvatar(email))
+                             .language("EN")
++                            .tutorialCompleted(false)
+                             .build();
+                     return userRepository.save(newUser);
+                 });
+@@ -194,6 +195,10 @@ public class UserService {
+             user.setAvatar(avatarVal);
+         }
+ 
++        if (request.getTutorialCompleted() != null) {
++            user.setTutorialCompleted(request.getTutorialCompleted());
++        }
++
+         try {
+             return userRepository.save(user);
+         } catch (DataIntegrityViolationException e) {
+diff --git a/src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java b/src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java
+index ede5beb..9d79aaf 100644
+--- a/src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java
++++ b/src/main/java/com/tictactore/service/impl/RedisTokenRevocationService.java
+@@ -121,7 +121,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
+             log.debug(LOG_TOKEN_REVOKED);
+         } catch (RedisException e) {
+             log.error(LOG_REVOKE_ERROR, e);
+-            throw new RuntimeException(ERR_REDIS_UNAVAILABLE, e);
++            throw new org.springframework.data.redis.RedisSystemException(ERR_REDIS_UNAVAILABLE, e);
+         }
+     }
+ 
+@@ -147,8 +147,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
+                 var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + currentDay), token);
+                 inToday = Long.valueOf(1).equals(res);
+             } catch (RedisException e) {
+-                log.debug("Ignored error checking today Bloom filter", e);
+-                bloomError = true;
++                log.error(LOG_IS_REVOKED_ERROR, e);
++                throw new org.springframework.data.redis.RedisSystemException(ERR_REDIS_UNAVAILABLE, e);
+             }
+ 
+             var inYesterday = false;
+@@ -156,8 +156,8 @@ public class RedisTokenRevocationService implements TokenRevocationService {
+                 var res = script.eval(RScript.Mode.READ_ONLY, luaCheck, RScript.ReturnType.VALUE, List.of(BLOOM_FILTER_PREFIX + (currentDay - 1)), token);
+                 inYesterday = Long.valueOf(1).equals(res);
+             } catch (RedisException e) {
+-                log.debug("Ignored error checking yesterday Bloom filter", e);
+-                bloomError = true;
++                log.error(LOG_IS_REVOKED_ERROR, e);
++                throw new org.springframework.data.redis.RedisSystemException(ERR_REDIS_UNAVAILABLE, e);
+             }
+ 
+             if (bloomError && !inToday && !inYesterday) {
+@@ -173,7 +173,7 @@ public class RedisTokenRevocationService implements TokenRevocationService {
+             return bucket.isExists();
+         } catch (RedisException e) {
+             log.error(LOG_IS_REVOKED_ERROR, e);
+-            return true;
++            throw new org.springframework.data.redis.RedisSystemException(ERR_REDIS_UNAVAILABLE, e);
+         }
+     }
+ 
+diff --git a/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql b/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql
+new file mode 100644
+index 0000000..ccd5abc
+--- /dev/null
++++ b/src/main/resources/db/migration/V3__add_tutorial_completed_to_user.sql
+@@ -0,0 +1 @@
++ALTER TABLE "user" ADD COLUMN IF NOT EXISTS tutorial_completed BOOLEAN NOT NULL DEFAULT FALSE;
+diff --git a/src/test/java/com/tictactore/repository/UserRepositoryTest.java b/src/test/java/com/tictactore/repository/UserRepositoryTest.java
+index 6f76e11..0343cc0 100644
+--- a/src/test/java/com/tictactore/repository/UserRepositoryTest.java
++++ b/src/test/java/com/tictactore/repository/UserRepositoryTest.java
+@@ -70,4 +70,20 @@ class UserRepositoryTest {
+ 
+         assertThat(result).isFalse();
+     }
++
++    @Test
++    @DisplayName("Save User - should persist tutorialCompleted flag")
++    void saveUser_PersistsTutorialCompletedFlag() {
++        var user = User.builder()
++                .email(TEST_EMAIL)
++                .nickname(TEST_NICKNAME)
++                .tutorialCompleted(true)
++                .build();
++        userRepository.save(user);
++
++        var result = userRepository.findByEmail(TEST_EMAIL);
++
++        assertThat(result).isPresent();
++        assertThat(result.get().isTutorialCompleted()).isTrue();
++    }
+ }
+diff --git a/src/test/java/com/tictactore/service/UserServiceTest.java b/src/test/java/com/tictactore/service/UserServiceTest.java
+index 5b0b6c3..6703519 100644
+--- a/src/test/java/com/tictactore/service/UserServiceTest.java
++++ b/src/test/java/com/tictactore/service/UserServiceTest.java
+@@ -438,5 +438,21 @@ class UserServiceTest {
+                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
+                 .hasMessage("Invalid avatar selection");
+     }
++
++    @Test
++    @DisplayName("Update Profile - should update tutorialCompleted when provided")
++    void updateProfile_shouldUpdateTutorialCompleted_whenProvided() {
++        UUID userId = UUID.randomUUID();
++        User user = new User();
++        user.setId(userId);
++        user.setTutorialCompleted(false);
++        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(true).build();
++        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
++        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
++
++        User updatedUser = userService.updateProfile(userId, request);
++
++        assertThat(updatedUser.isTutorialCompleted()).isTrue();
++    }
+ }
+ 
+
