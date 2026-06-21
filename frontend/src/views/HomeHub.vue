@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
+import TutorialCarousel from '@/components/TutorialCarousel.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -24,6 +25,11 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
+    <!-- Tutorial Overlay -->
+    <Transition name="fade">
+      <TutorialCarousel v-if="authStore.isAuthenticated && authStore.profile && !authStore.profile.tutorialCompleted" />
+    </Transition>
+
     <!-- Header -->
     <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50">
       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
@@ -70,3 +76,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
     </main>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

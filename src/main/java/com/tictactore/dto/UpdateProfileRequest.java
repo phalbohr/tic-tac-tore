@@ -25,4 +25,7 @@ public class UpdateProfileRequest {
     @Schema(description = "New avatar name from preset grid", example = "ball-classic")
     @com.tictactore.validation.ValidAvatar
     private String avatar;
+
+    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true", defaultValue = "false")
+    private Boolean tutorialCompleted;
 }

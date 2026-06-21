@@ -52,5 +52,22 @@
   },
   "avatarPicker": {
     "title": "Avatar auswählen"
+  },
+  "tutorial": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "finish": "Los geht's",
+    "slide1": {
+      "title": "Tippen zum Aufzeichnen",
+      "description": "Protokollieren Sie Ihre Tischkicker-Spiele schnell und einfach."
+    },
+    "slide2": {
+      "title": "Tippen zum Bestätigen",
+      "description": "Bestätigen Sie Spiele mit einem einzigen Tippen, wenn Sie benachrichtigt werden."
+    },
+    "slide3": {
+      "title": "Finde deine Stärke",
+      "description": "Klimme die Rangliste hinauf und sieh zu, wie sich deine Statistiken verbessern."
+    }
   }
 }

@@ -14,6 +14,7 @@ interface UserProfile {
   nickname: string
   avatar: string
   language?: string
+  tutorialCompleted?: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -57,10 +58,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateProfile(options: { nickname?: string; language?: string; avatar?: string }) {
+  async function updateProfile(options: {
+    nickname?: string
+    language?: string
+    avatar?: string
+    tutorialCompleted?: boolean
+  }) {
     if (!profile.value) return
 
-    const { nickname, language, avatar } = options
+    const { nickname, language, avatar, tutorialCompleted } = options
     const previousProfile = { ...profile.value }
 
     const localeStore = useLocaleStore()
@@ -79,17 +85,20 @@ export const useAuthStore = defineStore('auth', () => {
       profile.value.language = language
       const lang = language.toLowerCase()
       if (lang === 'en' || lang === 'de') {
-        localeStore.setLocale(lang as any)
+        localeStore.setLocale(lang as 'en' | 'de')
       }
     }
     if (avatar !== undefined) {
       profile.value.avatar = avatar
     }
+    if (tutorialCompleted !== undefined) {
+      profile.value.tutorialCompleted = tutorialCompleted
+    }
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
       const headers: HeadersInit = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       }
       if (csrfToken) {
         headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
@@ -98,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ nickname: finalNickname, language, avatar })
+        body: JSON.stringify({ nickname: finalNickname, language, avatar, tutorialCompleted }),
       })
 
       if (!response.ok) {
@@ -124,7 +133,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (data.language) {
         const lang = data.language.toLowerCase()
         if (lang === 'en' || lang === 'de') {
-          localeStore.setLocale(lang as any)
+          localeStore.setLocale(lang as 'en' | 'de')
         }
       }
     } catch (e) {
@@ -145,9 +154,9 @@ export const useAuthStore = defineStore('auth', () => {
         headers[CSRF_HEADER_NAME] = decodeURIComponent(csrfToken)
       }
 
-      const response = await fetch(LOGOUT_ENDPOINT, { 
+      const response = await fetch(LOGOUT_ENDPOINT, {
         method: METHOD_POST,
-        headers 
+        headers,
       })
 
       if (!response.ok && response.status === 0) {
@@ -176,7 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'DELETE',
-        headers
+        headers,
       })
 
       if (!response.ok) {
@@ -192,15 +201,24 @@ export const useAuthStore = defineStore('auth', () => {
         }
         throw new Error(errorMessage)
       }
-      
+
       isMaybeAuthenticated.value = false
       profile.value = null
       deleteCookie(SESSION_COOKIE_NAME)
     } catch (e) {
+      console.error('Failed to delete account', e)
       throw e
     }
   }
 
-  return { isAuthenticated, profile, setAuthenticated, fetchProfile, updateProfile, clearToken, logout, deleteAccount }
+  return {
+    isAuthenticated,
+    profile,
+    setAuthenticated,
+    fetchProfile,
+    updateProfile,
+    clearToken,
+    logout,
+    deleteAccount,
+  }
 })
-

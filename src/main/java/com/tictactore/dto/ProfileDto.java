@@ -17,4 +17,7 @@ public class ProfileDto {
 
     @Schema(description = "User's preferred language", example = "en")
     private String language;
+
+    @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true")
+    private Boolean tutorialCompleted;
 }

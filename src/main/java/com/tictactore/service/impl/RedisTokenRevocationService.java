@@ -87,25 +87,29 @@ public class RedisTokenRevocationService implements TokenRevocationService {
                 var script = redissonClient.getScript(StringCodec.INSTANCE);
                 var ttlSeconds = TimeUnit.DAYS.toSeconds((day - currentDay) + DAYS_TO_KEEP);
 
-                var result = script.eval(
-                        RScript.Mode.READ_WRITE,
-                        LUA_INIT_AND_EXPIRE,
-                        RScript.ReturnType.VALUE,
-                        List.of(filterName),
-                        String.valueOf(bfConfig.getFalsePositiveRate()),
-                        String.valueOf(bfConfig.getExpectedElements()),
-                        String.valueOf(ttlSeconds));
+                try {
+                    var result = script.eval(
+                            RScript.Mode.READ_WRITE,
+                            LUA_INIT_AND_EXPIRE,
+                            RScript.ReturnType.VALUE,
+                            List.of(filterName),
+                            String.valueOf(bfConfig.getFalsePositiveRate()),
+                            String.valueOf(bfConfig.getExpectedElements()),
+                            String.valueOf(ttlSeconds));
 
-                if (Long.valueOf(1).equals(result)) {
-                    log.info(LOG_CREATED_FILTER, filterName);
+                    if (Long.valueOf(1).equals(result)) {
+                        log.info(LOG_CREATED_FILTER, filterName);
+                    }
+
+                    script.eval(
+                            RScript.Mode.READ_WRITE,
+                            "redis.call('BF.ADD', KEYS[1], ARGV[1]); return 1;",
+                            RScript.ReturnType.VALUE,
+                            List.of(filterName),
+                            token);
+                } catch (RedisException e) {
+                    log.debug("RedisBloom commands not available, skipping Bloom Filter update for " + filterName);
                 }
-
-                script.eval(
-                        RScript.Mode.READ_WRITE,
-                        "redis.call('BF.ADD', KEYS[1], ARGV[1]); return 1;",
-                        RScript.ReturnType.VALUE,
-                        List.of(filterName),
-                        token);
 
                 if (day == currentDay) {
                     if (ThreadLocalRandom.current().nextInt(RANDOM_LOG_CHANCE) == 0) {

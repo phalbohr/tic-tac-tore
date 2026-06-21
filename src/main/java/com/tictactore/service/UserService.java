@@ -55,6 +55,7 @@ public class UserService {
                             .nickname(nickname)
                             .avatar(generateDeterministicAvatar(email))
                             .language("EN")
+                            .tutorialCompleted(false)
                             .build();
                     return userRepository.save(newUser);
                 });
@@ -192,6 +193,10 @@ public class UserService {
                 throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
             }
             user.setAvatar(avatarVal);
+        }
+
+        if (request.getTutorialCompleted() != null) {
+            user.setTutorialCompleted(request.getTutorialCompleted());
         }
 
         try {
