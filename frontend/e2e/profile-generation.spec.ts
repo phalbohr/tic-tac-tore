@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Automatic Profile Generation E2E (ATDD)', () => {
   test('[P0] should display generated nickname and avatar on first login', async ({ page, context }) => {
+    // Given
     await context.addCookies([{
       name: 'TTT_SESSION',
       value: 'true',
@@ -21,8 +22,10 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
       });
     });
 
+    // When
     await page.goto('/');
 
+    // Then
     await expect(page.getByText(/johndoe/)).toBeVisible();
     
     const avatarSvg = page.getByTestId('avatar-svg').first();
