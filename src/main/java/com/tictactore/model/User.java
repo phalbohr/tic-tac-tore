@@ -33,6 +33,10 @@ public class User {
     @Column(name = "last_nickname_update", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private java.time.Instant lastNicknameUpdate;
 
+    @Column(name = "tutorial_completed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Builder.Default
+    private boolean tutorialCompleted = false;
+
     @Version
     private Long version;
 }
