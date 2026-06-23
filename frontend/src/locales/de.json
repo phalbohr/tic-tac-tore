@@ -57,6 +57,7 @@
     "skip": "Überspringen",
     "next": "Weiter",
     "finish": "Los geht's",
+    "error": "Fehler beim Abschluss des Tutorials. Bitte versuchen Sie es erneut.",
     "slide1": {
       "title": "Tippen zum Aufzeichnen",
       "description": "Protokollieren Sie Ihre Tischkicker-Spiele schnell und einfach."

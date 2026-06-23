@@ -67,7 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!profile.value) return
 
     const { nickname, language, avatar, tutorialCompleted } = options
-    const previousProfile = { ...profile.value }
+    const previousProfile = JSON.parse(JSON.stringify(profile.value))
 
     const localeStore = useLocaleStore()
     const previousLocale = localeStore.locale
@@ -91,9 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (avatar !== undefined) {
       profile.value.avatar = avatar
     }
-    if (tutorialCompleted !== undefined) {
-      profile.value.tutorialCompleted = tutorialCompleted
-    }
+    // Do not optimistically update tutorialCompleted to avoid component remounting on failure
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)

@@ -9,7 +9,7 @@ test.describe('Onboarding Tutorial Flow', () => {
     
     // Explicitly set tutorial completed false for test robustness, though default is false
     await page.request.get('/api/auth/test-login', {
-      params: { email, nickname }
+      params: { email, nickname, tutorialCompleted: false }
     });
 
     await page.goto('/');
@@ -41,7 +41,7 @@ test.describe('Onboarding Tutorial Flow', () => {
     const nickname = `E2EOnboardingUserTwo${randomSuffix}`;
 
     await page.request.get('/api/auth/test-login', {
-      params: { email, nickname }
+      params: { email, nickname, tutorialCompleted: false }
     });
 
     await page.goto('/');
@@ -56,12 +56,21 @@ test.describe('Onboarding Tutorial Flow', () => {
     // Click "Next" to go to slide 2
     await page.getByTestId('tutorial-next').click();
     await expect(page.getByText('Tap to confirm')).toBeVisible();
-    await page.waitForTimeout(600); // wait for scroll debounce (500ms)
+    // To ensure scroll animation finishes and isScrolling is reset, wait for the Next button to be stable
+    // A robust way without exposing state is to wait for the scroll element's left position to stabilize.
+    await expect(async () => {
+      const scrollLeft = await tutorialCarousel.evaluate((el) => el.scrollLeft);
+      const width = await tutorialCarousel.evaluate((el) => el.clientWidth);
+      expect(scrollLeft).toBeCloseTo(width, -1); // Roughly equal to 1 width
+    }).toPass();
 
     // Click "Next" to go to slide 3
+    // Wait until 'Find your strength' slide is not invisible (which implies scroll reached halfway)
+    // and wait for scroll to finish by ensuring 'Finish' button is present and not disabled?
+    // In our new implementation, we can just wait for the button text to change to 'Let's Go'
     await page.getByTestId('tutorial-next').click();
     await expect(page.getByText('Find your strength')).toBeVisible();
-    await page.waitForTimeout(600); // wait for scroll debounce (500ms)
+    await expect(page.getByTestId('tutorial-finish')).toBeVisible();
 
     // Click "Finish"
     await page.getByTestId('tutorial-finish').click();

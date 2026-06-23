@@ -79,6 +79,7 @@ class UserRepositoryTest {
                 .nickname(TEST_NICKNAME)
                 .tutorialCompleted(true)
                 .build();
+
         userRepository.save(user);
 
         var result = userRepository.findByEmail(TEST_EMAIL);

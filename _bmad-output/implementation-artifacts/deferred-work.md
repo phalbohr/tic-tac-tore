@@ -41,3 +41,6 @@
 
 ## Deferred from: code review of 1-7-onboarding-tutorial (2026-06-17)
 - [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
+
+## Deferred from: code review of 1-7-onboarding-tutorial.md (2026-06-21)
+- [x] [Review][Defer] Concurrency Blindspot in Profile Updates — deferred, pre-existing. The updateProfile method reads the user, mutates the state, and saves it without any explicit optimistic locking mechanism handling, silently overwriting concurrent updates.

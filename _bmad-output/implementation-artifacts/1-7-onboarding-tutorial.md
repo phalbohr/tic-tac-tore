@@ -87,18 +87,20 @@ This story implements the onboarding experience for new users, following the "co
 
 ### Review Findings
 
--[x] [Review][Decision] Business Logic Loophole (allow false) — UserController blindly allows clients to send tutorialCompleted: false. Ambiguous whether this should be allowed.
--[x] [Review][Patch] Memory Leak in Carousel [TutorialCarousel.vue]
--[x] [Review][Patch] Failing CI Checks and Committed Test Junk [test-results/.last-run.json]
--[x] [Review][Patch] Missing Rollback on Optimistic UI Update [authStore.ts]
--[x] [Review][Patch] Silent failure without UI feedback [TutorialCarousel.vue:157-158]
--[x] [Review][Patch] Missing Accessibility Traps (inert/aria-hidden) [TutorialCarousel.vue]
--[x] [Review][Patch] Missing Keyboard Dismissal (Escape) [TutorialCarousel.vue]
--[x] [Review][Patch] Missing Body Scroll Lock [TutorialCarousel.vue]
--[x] [Review][Patch] Dangerous Test Concurrency Side Effects [UserService.java]
--[x] [Review][Patch] Incomplete API Contract [UpdateProfileRequest.java]
--[x] [Review][Patch] NaN on zero clientWidth [TutorialCarousel.vue:141]
--[x] [Review][Patch] Rapid clicks on Next break state [TutorialCarousel.vue:252]
--[x] [Review][Patch] Missing Integration Tests [UserServiceTest.java]
--[x] [Review][Patch] E2E Test File Path Deviation [e2e/scenarios/onboarding.spec.ts]
-- [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
+- [x] [Review][Patch] Flawed Optimistic UI Rollback on API Failure
+- [x] [Review][Patch] Flaky E2E Test Relying on Magic Sleep
+- [x] [Review][Patch] Layout Thrashing in Scroll Event Handler
+- [x] [Review][Patch] Irresponsible Document State Mutation for Overflow
+- [x] [Review][Patch] Reckless Global Event Listeners (Escape key)
+- [x] [Review][Patch] Missing Focus Trapping for Accessibility
+- [x] [Review][Patch] Race Conditions in Scroll Debouncing
+- [x] [Review][Patch] Incomplete Integration Testing
+- [x] [Review][Patch] Masked Schema Drift in Migrations
+- [x] [Review][Patch] macOS rubber-band scroll yields negative scrollLeft
+- [x] [Review][Patch] Missing Translation Key for Tutorial Error
+- [x] [Review][Patch] Old error message remains visible during retry
+- [x] [Review][Patch] Pagination dots aria-current issue
+- [x] [Review][Patch] Unrelated Formatting Changes in Cabinet.vue
+- [x] [Review][Patch] Missing Blank Line Between Arrange and Act Phases
+- [x] [Review][Patch] Contradictory Comment in E2E Test Implementation
+- [x] [Review][Defer] Concurrency Blindspot in Profile Updates — deferred, pre-existing
