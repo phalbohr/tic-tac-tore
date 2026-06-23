@@ -137,7 +137,7 @@ async function confirmDelete() {
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
         <button 
-          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300" 
           @click="isAvatarPickerOpen = true" 
           :disabled="isUpdating"
           aria-haspopup="dialog"
@@ -159,11 +159,13 @@ async function confirmDelete() {
       </section>
 
       <!-- Feedback Messages -->
-      <div v-if="message" data-testid="success-message" class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center">
-        {{ message }}
-      </div>
-      <div v-if="error" data-testid="error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
-        {{ error }}
+      <div class="min-h-[40px] flex flex-col justify-center w-full transition-all duration-300">
+        <div v-if="message" data-testid="success-message" class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center">
+          {{ message }}
+        </div>
+        <div v-else-if="error" data-testid="error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
+          {{ error }}
+        </div>
       </div>
 
       <!-- Form Content -->
@@ -256,10 +258,16 @@ async function confirmDelete() {
       <button 
         @click="handleSave"
         data-testid="save-button"
-        class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-background font-headline font-extrabold uppercase tracking-[0.2em] shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3"
+        :disabled="isUpdating"
+        class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-background font-headline font-extrabold uppercase tracking-[0.2em] shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
       >
-        {{ t('common.save') }}
-        <span aria-hidden="true" class="material-symbols-outlined font-bold">check_circle</span>
+        <template v-if="isUpdating">
+          <span class="material-symbols-outlined animate-spin font-bold">sync</span>
+        </template>
+        <template v-else>
+          {{ t('common.save') }}
+          <span aria-hidden="true" class="material-symbols-outlined font-bold">check_circle</span>
+        </template>
       </button>
       <p class="text-center mt-3 text-[9px] text-on-surface-variant font-headline uppercase tracking-widest opacity-40">
         Tic-Tac-Tore • Clubhouse Edition

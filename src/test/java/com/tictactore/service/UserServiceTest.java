@@ -438,5 +438,52 @@ class UserServiceTest {
                 .isInstanceOf(com.tictactore.exception.ValidationException.class)
                 .hasMessage("Invalid avatar selection");
     }
+
+    @Test
+    @DisplayName("Update Profile - should update tutorialCompleted when provided")
+    void updateProfile_shouldUpdateTutorialCompleted_whenProvided() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setTutorialCompleted(false);
+        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(true).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.isTutorialCompleted()).isTrue();
+    }
+    @Test
+    @DisplayName("Update Profile - should update tutorialCompleted to false when explicitly provided")
+    void updateProfile_shouldUpdateTutorialCompletedToFalse_whenProvided() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setTutorialCompleted(true);
+        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(false).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.isTutorialCompleted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Update Profile - should not modify tutorialCompleted when omitted from request")
+    void updateProfile_shouldNotModifyTutorialCompleted_whenOmitted() {
+        UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        user.setTutorialCompleted(true);
+        UpdateProfileRequest request = UpdateProfileRequest.builder().build(); // tutorialCompleted is null
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updatedUser = userService.updateProfile(userId, request);
+
+        assertThat(updatedUser.isTutorialCompleted()).isTrue();
+    }
 }
 

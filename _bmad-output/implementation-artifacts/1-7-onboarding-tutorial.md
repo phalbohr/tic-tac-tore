@@ -1,6 +1,6 @@
 # Story 1.7: Onboarding Tutorial
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -55,22 +55,22 @@ This story implements the onboarding experience for new users, following the "co
 
 ## Tasks / Subtasks
 
-- [ ] **Backend: API & Service Implementation**
-  - [ ] Add Flyway migration (e.g. `V3__add_tutorial_completed_to_user.sql`) to add `tutorial_completed` boolean column to `user` table (default `false`).
-  - [ ] Update `User` entity (use `@Builder.Default` since it uses Lombok `@Builder`), `ProfileDto`, and `UpdateProfileRequest` to handle `tutorialCompleted`.
-  - [ ] Update `UserService.updateProfile` to process `tutorialCompleted` flag updates.
-- [ ] **Backend: Testing**
-  - [ ] Add unit tests for `tutorialCompleted` update logic (AAA format, no comments).
-  - [ ] Update integration tests to cover the new profile field.
-- [ ] **Frontend: UI & State**
-  - [ ] Update `auth.ts` Pinia store to parse and handle `tutorialCompleted`.
-  - [ ] Create `TutorialCarousel.vue` component with native CSS scroll snapping.
-  - [ ] Update `HomeHub.vue` to conditionally render `TutorialCarousel` based on the profile flag.
-  - [ ] Refactor `updateProfile` signature in `auth.ts` to accept an object payload to safely add `tutorialCompleted`, and update all existing callers (like `Cabinet.vue`) to prevent regressions.
-  - [ ] Hook up skip/finish buttons in the carousel to trigger `updateProfile({ tutorialCompleted: true })`.
-  - [ ] Add localization strings for tutorial slides to `en.json` and `de.json`.
-- [ ] **Frontend: E2E Validation**
-  - [ ] Implement E2E test in `frontend/e2e/onboarding.spec.ts`.
+-[x] **Backend: API & Service Implementation**
+  -[x] Add Flyway migration (e.g. `V3__add_tutorial_completed_to_user.sql`) to add `tutorial_completed` boolean column to `user` table (default `false`).
+  -[x] Update `User` entity (use `@Builder.Default` since it uses Lombok `@Builder`), `ProfileDto`, and `UpdateProfileRequest` to handle `tutorialCompleted`.
+  -[x] Update `UserService.updateProfile` to process `tutorialCompleted` flag updates.
+-[x] **Backend: Testing**
+  -[x] Add unit tests for `tutorialCompleted` update logic (AAA format, no comments).
+  -[x] Update integration tests to cover the new profile field.
+-[x] **Frontend: UI & State**
+  -[x] Update `auth.ts` Pinia store to parse and handle `tutorialCompleted`.
+  -[x] Create `TutorialCarousel.vue` component with native CSS scroll snapping.
+  -[x] Update `HomeHub.vue` to conditionally render `TutorialCarousel` based on the profile flag.
+  -[x] Refactor `updateProfile` signature in `auth.ts` to accept an object payload to safely add `tutorialCompleted`, and update all existing callers (like `Cabinet.vue`) to prevent regressions.
+  -[x] Hook up skip/finish buttons in the carousel to trigger `updateProfile({ tutorialCompleted: true })`.
+  -[x] Add localization strings for tutorial slides to `en.json` and `de.json`.
+-[x] **Frontend: E2E Validation**
+  -[x] Implement E2E test in `frontend/e2e/onboarding.spec.ts`.
 
 ## Dev Notes
 
@@ -84,3 +84,23 @@ This story implements the onboarding experience for new users, following the "co
 ## BMAD Workflow Rules (from GEMINI.md)
 - **Feature Branch**: Create and work in `story/1-7-onboarding-tutorial` off `develop`.
 - **Validation**: NEVER present a feature completion without first running `./scripts/ci-local.sh`.
+
+### Review Findings
+
+- [x] [Review][Patch] Flawed Optimistic UI Rollback on API Failure
+- [x] [Review][Patch] Flaky E2E Test Relying on Magic Sleep
+- [x] [Review][Patch] Layout Thrashing in Scroll Event Handler
+- [x] [Review][Patch] Irresponsible Document State Mutation for Overflow
+- [x] [Review][Patch] Reckless Global Event Listeners (Escape key)
+- [x] [Review][Patch] Missing Focus Trapping for Accessibility
+- [x] [Review][Patch] Race Conditions in Scroll Debouncing
+- [x] [Review][Patch] Incomplete Integration Testing
+- [x] [Review][Patch] Masked Schema Drift in Migrations
+- [x] [Review][Patch] macOS rubber-band scroll yields negative scrollLeft
+- [x] [Review][Patch] Missing Translation Key for Tutorial Error
+- [x] [Review][Patch] Old error message remains visible during retry
+- [x] [Review][Patch] Pagination dots aria-current issue
+- [x] [Review][Patch] Unrelated Formatting Changes in Cabinet.vue
+- [x] [Review][Patch] Missing Blank Line Between Arrange and Act Phases
+- [x] [Review][Patch] Contradictory Comment in E2E Test Implementation
+- [x] [Review][Defer] Concurrency Blindspot in Profile Updates — deferred, pre-existing

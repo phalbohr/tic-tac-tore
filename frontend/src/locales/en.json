@@ -52,5 +52,23 @@
   },
   "avatarPicker": {
     "title": "Select Avatar"
+  },
+  "tutorial": {
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Let's Go",
+    "error": "Failed to complete tutorial. Please try again.",
+    "slide1": {
+      "title": "Tap to record",
+      "description": "Log your foosball matches quickly and easily."
+    },
+    "slide2": {
+      "title": "Tap to confirm",
+      "description": "Approve matches with a single tap when notified."
+    },
+    "slide3": {
+      "title": "Find your strength",
+      "description": "Climb the leaderboard and see your stats improve."
+    }
   }
 }
