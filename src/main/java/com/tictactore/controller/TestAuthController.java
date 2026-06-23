@@ -32,10 +32,11 @@ public class TestAuthController implements TestAuthApi {
     public ResponseEntity<Void> testLogin(
             String email,
             String nickname,
+            Boolean tutorialCompleted,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        User user = userService.findOrCreateTestUser(email, nickname);
+        User user = userService.findOrCreateTestUser(email, nickname, tutorialCompleted);
 
         String jwt = jwtService.generateToken(user);
         boolean isSecure = request.isSecure();

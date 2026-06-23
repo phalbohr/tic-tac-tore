@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HexFormat;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,18 +48,25 @@ public class UserService {
     }
 
     @Transactional
-    public User findOrCreateTestUser(String email, String nickname) {
-        return userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .email(email)
-                            .nickname(nickname)
-                            .avatar(generateDeterministicAvatar(email))
-                            .language("EN")
-                            .tutorialCompleted(false)
-                            .build();
-                    return userRepository.save(newUser);
-                });
+    public User findOrCreateTestUser(String email, String nickname, Boolean tutorialCompleted) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (tutorialCompleted != null) {
+                user.setTutorialCompleted(tutorialCompleted);
+                return userRepository.save(user);
+            }
+            return user;
+        }
+
+        User newUser = User.builder()
+                .email(email)
+                .nickname(nickname)
+                .avatar(generateDeterministicAvatar(email))
+                .language("EN")
+                .tutorialCompleted(tutorialCompleted != null ? tutorialCompleted : false)
+                .build();
+        return userRepository.save(newUser);
     }
 
     @Transactional(readOnly = true)

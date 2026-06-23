@@ -57,6 +57,7 @@
     "skip": "Skip",
     "next": "Next",
     "finish": "Let's Go",
+    "error": "Failed to complete tutorial. Please try again.",
     "slide1": {
       "title": "Tap to record",
       "description": "Log your foosball matches quickly and easily."

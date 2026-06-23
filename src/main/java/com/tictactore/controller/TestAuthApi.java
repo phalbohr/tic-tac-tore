@@ -19,6 +19,7 @@ public interface TestAuthApi {
     ResponseEntity<Void> testLogin(
             @org.springframework.web.bind.annotation.RequestParam String email,
             @org.springframework.web.bind.annotation.RequestParam String nickname,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Boolean tutorialCompleted,
             HttpServletRequest request,
             HttpServletResponse response
     );
