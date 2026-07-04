@@ -2,6 +2,11 @@
 # Security: This script is for local simulation of CI environment.
 # It uses the same commands as .github/workflows/test.yml
 
+# Force Java 21 to avoid Lombok compiler API incompatibilities with newer JDKs
+if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+  export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+fi
+
 echo "🚀 Simulating CI environment locally..."
 
 echo "📦 Backend: Compiling and running tests..."

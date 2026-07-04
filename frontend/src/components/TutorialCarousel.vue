@@ -14,6 +14,7 @@ const isCompleting = ref(false)
 const errorMessage = ref('')
 
 const handleKeydown = (e: KeyboardEvent) => {
+  if (e.defaultPrevented) return
   const target = e.target as HTMLElement
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return
   
