@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 
 test.describe('Account Deletion with Anonymization', () => {
   test('[P0] Account deletion flow with anonymization', async ({ page }) => {
@@ -36,7 +35,7 @@ test.describe('Account Deletion with Anonymization', () => {
         await route.fulfill({
           status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ message: 'Internal Server Error' }),
+          body: JSON.stringify({ message: 'Failed to delete account' }),
         });
       } else {
         await route.continue();

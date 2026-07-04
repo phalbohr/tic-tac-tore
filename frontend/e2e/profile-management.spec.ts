@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 
 test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
   test('[P1] Language change applies optimistic UI update', async ({ page }) => {
