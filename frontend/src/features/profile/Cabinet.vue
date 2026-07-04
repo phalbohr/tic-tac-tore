@@ -177,6 +177,7 @@ async function confirmDelete() {
           </label>
           <input 
             id="nickname"
+            data-testid="nickname-input"
             v-model="nickname"
             type="text"
             class="w-full bg-surface-container-highest text-on-surface px-4 py-2.5 rounded-lg focus:outline-none focus:ring-0 font-headline text-base transition-all"

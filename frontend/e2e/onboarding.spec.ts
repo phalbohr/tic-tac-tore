@@ -4,8 +4,9 @@ import { faker } from '@faker-js/faker';
 test.describe('Onboarding Tutorial Flow', () => {
   test('[P0] should show tutorial on first login and not show after skip', async ({ page }) => {
     // Given - Setup a new user with tutorialCompleted = false via test-login
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-onboarding-user-${randomSuffix}@example.com`;
+    const nickname = `E2EOnboardingUser${randomSuffix}`;
     
     // Explicitly set tutorial completed false for test robustness, though default is false
     await page.request.get('/api/auth/test-login', {
@@ -37,8 +38,9 @@ test.describe('Onboarding Tutorial Flow', () => {
 
   test('[P0] should show tutorial on first login and not show after finish', async ({ page }) => {
     // Given - Setup another new user
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-onboarding-user2-${randomSuffix}@example.com`;
+    const nickname = `E2EOnboardingUserTwo${randomSuffix}`;
 
     await page.request.get('/api/auth/test-login', {
       params: { email, nickname, tutorialCompleted: false }

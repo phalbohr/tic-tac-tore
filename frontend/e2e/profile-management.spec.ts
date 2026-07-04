@@ -4,8 +4,9 @@ import { faker } from '@faker-js/faker';
 test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
   test('[P1] Language change applies optimistic UI update', async ({ page }) => {
     // Given
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-lang-user-${randomSuffix}@example.com`;
+    const nickname = `E2ELangUser${randomSuffix}`;
     await page.request.get('/api/auth/test-login', {
       params: { email, nickname }
     });
@@ -22,14 +23,15 @@ test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
 
   test('[P1] Nickname 30-day cooldown enforcement', async ({ page }) => {
     // Given
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-cooldown-user-${randomSuffix}@example.com`;
+    const nickname = `E2ECooldownUser${randomSuffix}`;
     await page.request.get('/api/auth/test-login', {
       params: { email, nickname }
     });
 
-    const newNick = faker.internet.userName();
-    const anotherNick = faker.internet.userName();
+    const newNick = `NewNick${randomSuffix}`;
+    const anotherNick = `AnotherNick${randomSuffix}`;
 
     await page.goto('/cabinet');
     const nicknameInput = page.getByTestId('nickname-input');
