@@ -179,7 +179,7 @@ FR60: Epic 4 - Match history view
 
 ## Epic List
 
-### Epic 1: Quick Start (Auth & Basic Profile)
+### Epic 1: Quick Start (Auth & Basic Profile) [COMPLETED]
 Focus on frictionless onboarding via Google OAuth2, automatic nickname generation from email, and basic profile settings.
 **FRs covered:** FR29, FR30, FR31, FR32, FR33, FR34, FR56, FR59.
 
@@ -211,7 +211,20 @@ Personalization via avatars, achievement systems (badges), and UI refinements.
 Tools for organizing tournaments, featuring bracket generation and seeding, integrated with Live Mode.
 **FRs covered:** FR18, FR26, FR41, FR42, FR43, FR44, FR45, FR46, FR47.
 
-## Epic 1: Quick Start (Auth & Basic Profile)
+## Parallel Execution Strategy (4-Track)
+
+To continuously engage 4 parallel developers without blocking or merge conflicts, the epics and stories will be executed across 4 independent architectural vectors:
+
+*   **Track A (Core UI & Match Flow):** Focuses on match entry interfaces.
+    *   *Sequence:* Epic 2 (1v1 Entry) -> Epic 2 (2v2 Form & Rotations) -> Epic 3 (Verification UI).
+*   **Track B (Domain & Rules Engine):** Focuses on backend logic and algorithms.
+    *   *Sequence:* Epic 2 (Custom Rules Engine) -> Epic 8 (Tournament Bracket Generation).
+*   **Track C (Data & Analytics):** Focuses on read-heavy aggregations.
+    *   *Sequence:* Epic 4 (Individual Stats) -> Epic 4 (Team Stats) -> Epic 4 (Leaderboards).
+*   **Track D (Real-time & Social):** Focuses on websockets and interaction.
+    *   *Sequence:* Epic 5 (Live Mode Scoring) -> Epic 6 (Pools & Matchmaking).
+
+## Epic 1: Quick Start (Auth & Basic Profile) [COMPLETED]
 
 Focus on frictionless onboarding via Google OAuth2, automatic nickname generation from email, and basic profile settings in the personal cabinet.
 
