@@ -4,14 +4,15 @@ import { faker } from '@faker-js/faker';
 test.describe('Account Deletion with Anonymization', () => {
   test('[P0] Account deletion flow with anonymization', async ({ page }) => {
     // Given
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-delete-user-${randomSuffix}@example.com`;
+    const nickname = `E2EDeleteUser${randomSuffix}`;
     await page.request.get('/api/auth/test-login', { params: { email, nickname } });
     await page.goto('/cabinet');
 
     // When
     await page.getByTestId('delete-account-button').click();
-    await page.getByTestId('confirm-button').click();
+    await page.getByTestId('confirm-delete-button').click();
 
     // Then
     await expect(page).toHaveURL('/');
@@ -24,8 +25,9 @@ test.describe('Account Deletion with Anonymization', () => {
 
   test('[P1] Account deletion flow should show error when API fails', async ({ page }) => {
     // Given
-    const email = faker.internet.email();
-    const nickname = faker.internet.userName();
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-delete-fail-${randomSuffix}@example.com`;
+    const nickname = `E2EDeleteFail${randomSuffix}`;
     await page.request.get('/api/auth/test-login', { params: { email, nickname } });
     
     // Network-first pattern
@@ -34,7 +36,7 @@ test.describe('Account Deletion with Anonymization', () => {
         await route.fulfill({
           status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ message: 'Failed to delete account' }),
+          body: JSON.stringify({ message: 'Internal Server Error' }),
         });
       } else {
         await route.continue();
@@ -44,12 +46,12 @@ test.describe('Account Deletion with Anonymization', () => {
 
     // When
     await page.getByTestId('delete-account-button').click();
-    await page.getByTestId('confirm-button').click();
+    await page.getByTestId('confirm-delete-button').click();
 
     // Then
     const errorMessage = page.getByTestId('modal-error-message');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toHaveText('Failed to delete account');
-    await expect(page.getByTestId('confirm-button')).toBeVisible();
+    await expect(page.getByTestId('confirm-delete-button')).toBeVisible();
   });
 });
