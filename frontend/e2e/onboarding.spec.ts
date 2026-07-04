@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 
 test.describe('Onboarding Tutorial Flow', () => {
   test('[P0] should show tutorial on first login and not show after skip', async ({ page }) => {
