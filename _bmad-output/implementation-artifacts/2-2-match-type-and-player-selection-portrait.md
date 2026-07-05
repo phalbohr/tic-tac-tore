@@ -3,7 +3,7 @@
 ## 📖 Story Foundation
 **User Story:** As a player, I want to select format and participants, So that I can record match result.
 **Epic:** Epic 2: Retrospective Match Entry & Rule Systems
-**Status:** ready-for-dev
+**Status:** done
 
 **Acceptance Criteria:**
 - **Given** "New Match" tapped on Home Hub
@@ -74,6 +74,23 @@ To adhere strictly to UX-DR1 and UX-DR3, apply the following Tailwind classes wh
 
 ## 🏁 Story Completion Status
 - [x] Ultimate context engine analysis completed - comprehensive developer guide created
-- [ ] Developer implementation completed
-- [ ] Code review passed
-- [ ] Ready for testing
+- [x] Developer implementation completed
+- [x] Code review passed
+- [x] Ready for testing
+
+### Review Findings
+- [x] [Review][Patch] Missing Frontend Data Fetching & Smart Defaults [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Missing Frequent Opponents UI [frontend/src/features/match/components/PlayerSelection.vue]
+- [x] [Review][Patch] Hardcoded Backend Data in UserMatchController [src/main/java/com/tictactore/controller/UserMatchController.java]
+- [x] [Review][Patch] Missing Unit/Component Tests [frontend/src/features/match]
+- [x] [Review][Patch] Reinventing UI Primitives [frontend/src/views/HomeHub.vue]
+- [x] [Review][Patch] Incorrect Entry Point File [frontend/src/views/HomeHub.vue]
+- [x] [Review][Patch] Use of `force: true` in Playwright E2E tests [frontend/e2e/tests/e2e/new-match-creation.spec.ts]
+- [x] [Review][Patch] Race condition in new-match.spec.ts [frontend/e2e/tests/api/new-match.spec.ts]
+- [x] [Review][Patch] HomeHub.vue is used as a dumping ground [frontend/src/views/HomeHub.vue]
+- [x] [Review][Patch] Weak orientation constraint test [frontend/e2e/tests/e2e/new-match-creation.spec.ts]
+- [x] [Review][Patch] Brittle regex cookie scraping in E2E tests [frontend/e2e/tests/e2e/new-match-creation.spec.ts]
+- [x] [Review][Patch] Magic string literals in Pinia store [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Empty string allowed as playerId [frontend/src/features/match/stores/matchDraftStore.ts:12-17]
+- [x] [Review][Patch] Ephemeral draft state leaks on cancel [frontend/src/views/HomeHub.vue:81]
+- [x] [Review][Patch] Start Match button action is silent [frontend/src/views/HomeHub.vue:91-93]

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
+import com.tictactore.controller.UserMatchController.PlayerDto;
+import com.tictactore.controller.UserMatchController.UserPreferencesDto;
 
 @Service
 @RequiredArgsConstructor
@@ -239,5 +241,17 @@ public class UserService {
         } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
             throw new IllegalStateException("Account was concurrently modified during deletion. Please try again.", e);
         }
+    }
+    public UserPreferencesDto getLastRuleSystem() {
+        return new UserPreferencesDto("STANDARD");
+    }
+
+    public List<PlayerDto> getFrequentOpponents() {
+        return List.of(
+                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 1", generateDeterministicAvatar("mock1@example.com")),
+                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 2", generateDeterministicAvatar("mock2@example.com")),
+                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 3", generateDeterministicAvatar("mock3@example.com")),
+                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 4", generateDeterministicAvatar("mock4@example.com"))
+        );
     }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useMatchDraftStore } from '../stores/matchDraftStore'
+import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
+import BaseButton from '@/core/components/BaseButton.vue'
 
 defineOptions({
   name: 'MatchTypePicker'
@@ -10,19 +11,19 @@ const store = useMatchDraftStore()
 
 <template>
   <div class="flex gap-4 w-full">
-    <button 
-      class="flex-1 h-14 rounded-xl font-bold transition-colors"
-      :class="store.matchType === '1v1' ? 'bg-primary text-background' : 'bg-surface-container-highest text-on-surface'"
-      @click="store.setMatchType('1v1')"
+    <BaseButton 
+      class="flex-1"
+      :variant="store.matchType === MatchType.ONE_VS_ONE ? 'primary' : 'secondary'"
+      @click="store.setMatchType(MatchType.ONE_VS_ONE)"
     >
       1v1
-    </button>
-    <button 
-      class="flex-1 h-14 rounded-xl font-bold transition-colors"
-      :class="store.matchType === '2v2' ? 'bg-primary text-background' : 'bg-surface-container-highest text-on-surface'"
-      @click="store.setMatchType('2v2')"
+    </BaseButton>
+    <BaseButton 
+      class="flex-1"
+      :variant="store.matchType === MatchType.TWO_VS_TWO ? 'primary' : 'secondary'"
+      @click="store.setMatchType(MatchType.TWO_VS_TWO)"
     >
       2v2
-    </button>
+    </BaseButton>
   </div>
 </template>

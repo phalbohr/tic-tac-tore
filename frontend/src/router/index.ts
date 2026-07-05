@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeHub from '@/views/HomeHub.vue'
+import HomeView from '@/views/HomeView.vue'
 import OAuthRedirectHandler from '@/components/OAuthRedirectHandler.vue'
 
 const router = createRouter({
@@ -8,7 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeHub,
+      component: HomeView,
     },
     {
       path: '/oauth2/redirect',

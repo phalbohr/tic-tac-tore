@@ -6,8 +6,8 @@ import { useAuthStore } from '@/stores/auth'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import TutorialCarousel from '@/components/TutorialCarousel.vue'
-import MatchTypePicker from '@/features/match/components/MatchTypePicker.vue'
-import PlayerSelection from '@/features/match/components/PlayerSelection.vue'
+import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import BaseButton from '@/core/components/BaseButton.vue'
 import { ref } from 'vue'
 
 const { t } = useI18n()
@@ -69,34 +69,17 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         </div>
 
         <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
-          <button 
+          <BaseButton 
             @click="showNewMatch = true"
-            class="bg-primary text-background font-bold h-14 rounded-full w-full mt-4"
+            class="w-full mt-4 rounded-full"
           >
             New Match
-          </button>
+          </BaseButton>
           <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
         </div>
 
-        <div v-else class="w-full flex flex-col items-center bg-surface-container-low rounded-2xl p-4 gap-6 w-full">
-          <div class="flex justify-between items-center w-full mb-2">
-            <h2 class="text-on-surface font-bold text-xl">New Match</h2>
-            <button @click="showNewMatch = false" class="text-on-surface-variant font-bold h-12 px-4 rounded-xl bg-surface-container-highest">Cancel</button>
-          </div>
-          
-          <div class="w-full flex flex-col gap-2 text-start">
-            <h3 class="text-on-surface font-headline font-bold mb-1">Match Type</h3>
-            <MatchTypePicker />
-          </div>
-          
-          <PlayerSelection />
-          
-          <button class="bg-primary text-background font-bold h-14 rounded-full w-full mt-4">
-            Start Match
-          </button>
-        </div>
+        <NewMatchFlow v-else @cancel="showNewMatch = false" />
 
-        
         <button 
           v-if="!showNewMatch"
           @click="authStore.logout()" 
