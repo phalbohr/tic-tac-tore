@@ -18,6 +18,6 @@ test.describe('Real-time Scoring Interface', () => {
     await quadrant.waitFor({ state: 'visible' })
     await quadrant.tap()
 
-    await expect(quadrant).toHaveClass(/flashing/)
+    await expect(quadrant).toHaveClass(/ch-bg-green-500/)
   })
 })

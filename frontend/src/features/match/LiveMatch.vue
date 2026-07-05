@@ -13,7 +13,7 @@ const showRotateFallback = ref(false)
 const liveMatchContainer = ref<HTMLElement | null>(null)
 
 const startMatch = async () => {
-  if (liveMatchContainer.value && liveMatchContainer.value.requestFullscreen) {
+  if (liveMatchContainer.value) {
     try {
       if (liveMatchContainer.value.requestFullscreen) {
         await liveMatchContainer.value.requestFullscreen()
