@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { useStatsStore } from '../stores/useStatsStore'
-import { onMounted } from 'vue'
 
 const statsStore = useStatsStore()
 
-onMounted(() => {
-  statsStore.fetchStats()
-})
 </script>
 
 <template>

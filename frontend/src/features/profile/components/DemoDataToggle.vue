@@ -43,8 +43,3 @@ function toggleDemoMode() {
   </section>
 </template>
 
-<style scoped>
-.ch-demo-toggle {
-  /* custom scoped styles with ch- prefix as requested */
-}
-</style>

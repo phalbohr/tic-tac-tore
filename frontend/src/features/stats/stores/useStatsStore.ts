@@ -1,24 +1,30 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { getPersonalStats, type PlayerStats, type PersonalStatsParams } from '@/services/statisticsService'
 import { generateDemoData } from '../utils/demoDataGenerator'
-
-const DEMO_MODE_KEY = 'tictactore.demoModeEnabled'
+import { useAuthStore } from '@/stores/auth'
 
 export const useStatsStore = defineStore('stats', () => {
+  const authStore = useAuthStore()
+  
+  const getDemoModeKey = () => `tictactore.demoModeEnabled_${authStore.profile?.nickname || 'guest'}`
+
   const stats = ref<PlayerStats | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const confirmedMatchesCount = ref(0) 
+  const confirmedMatchesCount = ref<number | null>(null)
 
-  // Make demo mode reactive by using a ref
-  const _isDemoModeEnabled = ref(localStorage.getItem(DEMO_MODE_KEY) === 'true')
+  const _isDemoModeEnabledExplicit = ref(localStorage.getItem(getDemoModeKey()) === 'true')
+  const _isDemoModeDisabledExplicit = ref(localStorage.getItem(getDemoModeKey()) === 'false')
 
-  // AC 1 & PRD Decision: serve demo data when matches < 5 OR explicit demo mode toggle
+  watch(() => authStore.profile?.nickname, () => {
+    _isDemoModeEnabledExplicit.value = localStorage.getItem(getDemoModeKey()) === 'true'
+    _isDemoModeDisabledExplicit.value = localStorage.getItem(getDemoModeKey()) === 'false'
+  })
+
   const shouldShowDemoData = computed(() => {
-    // If we have < 5 confirmed matches AND demo mode is NOT explicitly disabled
-    const implicitDemo = confirmedMatchesCount.value < 5 && localStorage.getItem(DEMO_MODE_KEY) !== 'false'
-    return _isDemoModeEnabled.value || implicitDemo
+    const implicitDemo = confirmedMatchesCount.value !== null && confirmedMatchesCount.value < 5 && !_isDemoModeDisabledExplicit.value
+    return _isDemoModeEnabledExplicit.value || implicitDemo
   })
 
   async function fetchStats(params: PersonalStatsParams = {}) {
@@ -26,16 +32,14 @@ export const useStatsStore = defineStore('stats', () => {
     error.value = null
 
     try {
-      // First, try to fetch real stats to check real matches count
       const realStats = await getPersonalStats(params)
       
-      // Update lifetime matches 
       confirmedMatchesCount.value = realStats.overall.matches
       
-      // Auto-disable demo data if lifetime matches >= 5
       if (confirmedMatchesCount.value >= 5) {
-        _isDemoModeEnabled.value = false
-        localStorage.setItem(DEMO_MODE_KEY, 'false')
+        localStorage.setItem(getDemoModeKey(), 'false')
+        _isDemoModeEnabledExplicit.value = false
+        _isDemoModeDisabledExplicit.value = true
       }
 
       if (shouldShowDemoData.value) {
@@ -56,8 +60,9 @@ export const useStatsStore = defineStore('stats', () => {
   }
 
   function toggleDemoMode(enabled: boolean) {
-    _isDemoModeEnabled.value = enabled
-    localStorage.setItem(DEMO_MODE_KEY, String(enabled))
+    localStorage.setItem(getDemoModeKey(), String(enabled))
+    _isDemoModeEnabledExplicit.value = enabled
+    _isDemoModeDisabledExplicit.value = !enabled
     fetchStats()
   }
 

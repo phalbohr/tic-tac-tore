@@ -242,7 +242,7 @@ async function confirmDelete() {
         </div>
       </div>
 
-      <DemoDataToggle v-if="statsStore.confirmedMatchesCount < 5" />
+      <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 
       <!-- Danger Zone -->
       <section class="pt-6 space-y-3">

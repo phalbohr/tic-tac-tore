@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { useStatsStore } from '../stores/useStatsStore'
+import { useRouter } from 'vue-router'
 
 const statsStore = useStatsStore()
+const router = useRouter()
 
 function enableDemoData() {
   statsStore.toggleDemoMode(true)
 }
 
 function recordFirstMatch() {
-  console.log('Navigate to record match')
+  router.push('/matches/new')
 }
 </script>
 
 <template>
-  <div class="ch-empty-state fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md">
+  <div class="ch-empty-state w-full flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl text-center">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-primary mb-2">
         <span class="material-symbols-outlined text-3xl">sports_soccer</span>
@@ -47,8 +49,3 @@ function recordFirstMatch() {
   </div>
 </template>
 
-<style scoped>
-.ch-empty-state {
-  /* custom scoped styles with ch- prefix */
-}
-</style>
