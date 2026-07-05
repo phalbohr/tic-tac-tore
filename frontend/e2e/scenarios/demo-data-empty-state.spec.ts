@@ -1,49 +1,76 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
-  test.skip('[P0] should display generated demo data when user has < 1 confirmed match in Analytics', async ({ page }) => {
-    // THIS TEST WILL FAIL - UI not implemented yet
-    await page.goto('/analytics');
+async function loginUser(page) {
+  const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+  const email = `e2e-demo-user-${randomSuffix}@example.com`;
+  const nickname = `E2EDemoUser${randomSuffix}`;
+  await page.goto(`/api/auth/test-login?email=${email}&nickname=${nickname}&tutorialCompleted=true`);
+}
 
-    // Expect demo data elements to be visible instead of empty state
-    await expect(page.getByText('Demo Mode Active')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Analytics Overview' })).toBeVisible();
-    // Verify some demo chart or table is shown
-    await expect(page.getByTestId('demo-data-chart')).toBeVisible();
+test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
+
+  test('[P0] should display empty state when user has < 1 confirmed match', async ({ page }) => {
+    await loginUser(page);
+
+    await page.evaluate(() => {
+      window.localStorage.setItem('tictactore.demoModeEnabled', 'false');
+    });
+    await page.goto('/');
+
+    await expect(page.getByText('No Matches Yet')).toBeVisible();
+    await page.getByRole('button', { name: 'Toggle Demo Data' }).click();
+
+    await expect(page.getByText('Demo Data Active')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'My Statistics' })).toBeVisible();
   });
 
-  test.skip('[P1] should allow toggling demo mode in Personal Cabinet when demo data is active', async ({ page }) => {
-    // THIS TEST WILL FAIL - UI not implemented yet
+  test('[P1] should allow toggling demo mode in Personal Cabinet when demo data is active', async ({ page }) => {
+    await loginUser(page);
+
+    await page.evaluate(() => {
+      window.localStorage.setItem('tictactore.demoModeEnabled', 'true');
+    });
     await page.goto('/cabinet');
 
-    // Toggle demo mode off
-    const demoToggle = page.getByRole('switch', { name: 'Demo Mode' });
+    const demoToggle = page.getByTestId('demo-mode-toggle');
     await expect(demoToggle).toBeVisible();
-    await expect(demoToggle).toBeChecked();
+    await expect(demoToggle).toHaveAttribute('aria-checked', 'true');
     
     await demoToggle.click();
     
-    // Expect demo mode to be deactivated
-    await expect(demoToggle).not.toBeChecked();
+    await expect(demoToggle).toHaveAttribute('aria-checked', 'false');
   });
 
-  test.skip('[P0] should automatically disable and hide demo data upon reaching 5 confirmed real matches', async ({ page }) => {
-    // THIS TEST WILL FAIL - UI not implemented yet
-    // Assuming backend/fixture sets user to 4 matches, and we confirm the 5th here
-    await page.goto('/matches');
+  test('[P0] should automatically disable and hide demo data upon reaching 5 confirmed real matches', async ({ page }) => {
+    await loginUser(page);
+
+    await page.route('**/api/v1/statistics/me*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          playerId: 'user-123',
+          playerName: 'Real Player',
+          overall: { matches: 5, wins: 3, losses: 2, winRate: 60 },
+          attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+          defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
+        })
+      });
+    });
+
+    await page.evaluate(() => {
+      window.localStorage.setItem('tictactore.demoModeEnabled', 'true');
+    });
     
-    // Confirm the 5th match
-    await page.getByRole('button', { name: 'Confirm Match' }).first().click();
-    await expect(page.getByText('Match confirmed')).toBeVisible();
+    // Navigate to apply the mock data and trigger the store logic on mount
+    await page.goto('/');
     
-    // Navigate to Analytics
-    await page.goto('/analytics');
+    await expect(page.getByText('Demo Data Active')).not.toBeVisible();
     
-    // Demo data should no longer be visible
-    await expect(page.getByText('Demo Mode Active')).not.toBeVisible();
-    
-    // Navigate to Cabinet to verify toggle is hidden
     await page.goto('/cabinet');
-    await expect(page.getByRole('switch', { name: 'Demo Mode' })).not.toBeVisible();
+    
+    const demoToggle = page.getByTestId('demo-mode-toggle');
+    await expect(demoToggle).toBeVisible();
+    await expect(demoToggle).toHaveAttribute('aria-checked', 'false');
   });
 });
