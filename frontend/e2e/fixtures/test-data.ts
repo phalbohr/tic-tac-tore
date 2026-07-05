@@ -1,4 +1,1 @@
-export const testUserData = {
-  newUser: { matches: 0, demoDataActive: true },
-  userWith4Matches: { matches: 4, demoDataActive: true },
-};
+export const testUserData = { email: 'test@example.com', password: 'SecurePass123!' };
