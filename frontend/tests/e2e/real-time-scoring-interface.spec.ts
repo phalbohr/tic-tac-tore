@@ -16,21 +16,7 @@ test.describe('Real-time Scoring Interface', () => {
 
     const quadrant = page.getByTestId('quadrant-teamA.attacker')
     await quadrant.waitFor({ state: 'visible' })
-    await quadrant.evaluate((node) => {
-      let event;
-      if (typeof window.TouchEvent !== 'undefined') {
-        try {
-          event = new TouchEvent('touchstart', { bubbles: true, cancelable: true });
-        } catch (e) {
-          event = document.createEvent('Event');
-          event.initEvent('touchstart', true, true);
-        }
-      } else {
-        event = document.createEvent('Event');
-        event.initEvent('touchstart', true, true);
-      }
-      node.dispatchEvent(event);
-    });
+    await quadrant.tap()
 
     await expect(quadrant).toHaveClass(/flashing/)
   })
