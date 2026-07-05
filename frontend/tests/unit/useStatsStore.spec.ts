@@ -21,7 +21,7 @@ describe('[Story 4.1] useStatsStore', () => {
   });
 
   it('[P0] should disable implicit demo data when explicit toggle is false', () => {
-    localStorage.setItem('tictactore.demoModeEnabled', 'false');
+    localStorage.setItem('tictactore.demoModeEnabled_guest', 'false');
     const store = useStatsStore();
     store.confirmedMatchesCount = 4;
     expect(store.shouldShowDemoData).toBe(false);
@@ -41,17 +41,17 @@ describe('[Story 4.1] useStatsStore', () => {
     
     expect(store.confirmedMatchesCount).toBe(5);
     expect(store.isDemoModeEnabled).toBe(false);
-    expect(localStorage.getItem('tictactore.demoModeEnabled')).toBe('false');
+    expect(localStorage.getItem('tictactore.demoModeEnabled_guest')).toBe('false');
   });
 
   it('[P1] should persist demo mode toggle to localStorage', () => {
     const store = useStatsStore();
     store.toggleDemoMode(true);
     expect(store.isDemoModeEnabled).toBe(true);
-    expect(localStorage.getItem('tictactore.demoModeEnabled')).toBe('true');
+    expect(localStorage.getItem('tictactore.demoModeEnabled_guest')).toBe('true');
 
     store.toggleDemoMode(false);
     expect(store.isDemoModeEnabled).toBe(false);
-    expect(localStorage.getItem('tictactore.demoModeEnabled')).toBe('false');
+    expect(localStorage.getItem('tictactore.demoModeEnabled_guest')).toBe('false');
   });
 });

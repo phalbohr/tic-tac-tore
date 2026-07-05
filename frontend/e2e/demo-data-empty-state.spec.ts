@@ -5,26 +5,44 @@ async function loginUser(page: Page) {
   const email = `e2e-demo-user-${randomSuffix}@example.com`;
   const nickname = `E2EDemoUser${randomSuffix}`;
   await page.goto(`/api/auth/test-login?email=${email}&nickname=${nickname}&tutorialCompleted=true`);
-  await page.waitForURL('**/*'); // wait for navigation
+  await page.waitForURL('**/*');
+  return nickname;
+}
+
+async function mockZeroMatches(page: Page) {
+  await page.route('**/api/v1/statistics/me*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        playerId: 'user-123',
+        playerName: 'Real Player',
+        overall: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+        attacker: { matches: 0, wins: 0, losses: 0, winRate: 0 },
+        defender: { matches: 0, wins: 0, losses: 0, winRate: 0 }
+      })
+    });
+  });
 }
 
 test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
 
   test('[P0] should display demo data by default on first load (implicit demo)', async ({ page }) => {
     await loginUser(page);
+    await mockZeroMatches(page);
     await page.goto('/');
     
-    // We expect demo data to be visible by default since matches < 5 and not explicitly toggled off
     await expect(page.getByText('Demo Data Active')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'My Statistics' })).toBeVisible();
   });
 
   test('[P0] should display empty state when demo is explicitly disabled and matches < 5', async ({ page }) => {
-    await loginUser(page);
+    const nickname = await loginUser(page);
+    await mockZeroMatches(page);
 
-    await page.evaluate(() => {
-      window.localStorage.setItem('tictactore.demoModeEnabled', 'false');
-    });
+    await page.evaluate((nick) => {
+      window.localStorage.setItem(`tictactore.demoModeEnabled_${nick}`, 'false');
+    }, nickname);
     await page.goto('/');
 
     await expect(page.getByText('No Matches Yet')).toBeVisible();
@@ -34,11 +52,12 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
   });
 
   test('[P1] should allow toggling demo mode in Personal Cabinet when demo data is active', async ({ page }) => {
-    await loginUser(page);
+    const nickname = await loginUser(page);
+    await mockZeroMatches(page);
 
-    await page.evaluate(() => {
-      window.localStorage.setItem('tictactore.demoModeEnabled', 'true');
-    });
+    await page.evaluate((nick) => {
+      window.localStorage.setItem(`tictactore.demoModeEnabled_${nick}`, 'true');
+    }, nickname);
     await page.goto('/cabinet');
 
     const demoToggle = page.getByTestId('demo-mode-toggle');
@@ -51,7 +70,7 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
   });
 
   test('[P0] should automatically disable and hide demo data upon reaching 5 confirmed real matches', async ({ page }) => {
-    await loginUser(page);
+    const nickname = await loginUser(page);
 
     await page.route('**/api/v1/statistics/me*', async (route) => {
       await route.fulfill({
@@ -67,9 +86,9 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
       });
     });
 
-    await page.evaluate(() => {
-      window.localStorage.setItem('tictactore.demoModeEnabled', 'true');
-    });
+    await page.evaluate((nick) => {
+      window.localStorage.setItem(`tictactore.demoModeEnabled_${nick}`, 'true');
+    }, nickname);
     
     await page.goto('/');
     await expect(page.getByText('Demo Data Active')).not.toBeVisible();
@@ -96,7 +115,6 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
       });
     });
     
-    // Not explicitly disabled
     await page.goto('/');
     await expect(page.getByText('Demo Data Active')).toBeVisible();
   });
