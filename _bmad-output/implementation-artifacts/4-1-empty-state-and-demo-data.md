@@ -1,6 +1,6 @@
 # Story 4.1: Empty State & Demo Data
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -32,6 +32,22 @@ so that I can understand the value of the platform.
 - [ ] Task 3: Integrate Demo Data in Statistics Views (AC: 1, 3)
   - [ ] Update `frontend/src/features/stats/stores/useStatsStore.ts` (or similar store file) to intercept state and serve demo data when `tictactore.demoModeEnabled` is true, or when confirmed matches < 1 (and lifetime matches < 5).
   - [ ] Implement the "Empty State is a CTA" UX rule: if demo data is toggled off and matches < 1, display an empty state overlay with a primary CTA button "Record First Match" and a secondary CTA button "Toggle Demo Data".
+
+### Review Findings
+
+- [x] [Review][Decision] Spec contradiction regarding CTA threshold — PRD dictates "If a user has < 5 matches... a demo data overlay CTA must be shown." Task 3 dictates "if demo data is toggled off and matches < 1, display an empty state". Behavior for 1 to 4 matches is undefined.
+- [x] [Review][Patch] Missing component and generator source files [frontend/src/features/profile/Cabinet.vue]
+- [x] [Review][Patch] Missing demo data state logic in useStatsStore.ts [frontend/src/features/stats/stores/useStatsStore.ts]
+- [x] [Review][Patch] Missing ATDD unit test file useStatsStore.spec.ts [frontend/tests/unit/useStatsStore.spec.ts]
+- [x] [Review][Patch] Unconditional rendering of StatsDashboard and EmptyStateCTA [frontend/src/views/HomeHub.vue:66-68]
+- [x] [Review][Patch] DemoDataToggle ignores 5-match threshold [frontend/src/features/profile/Cabinet.vue:242]
+- [x] [Review][Patch] Destructive changes to existing testUserData keys [frontend/e2e/fixtures/test-data.ts:1-4]
+- [x] [Review][Patch] Inclusion of out-of-scope test fixtures [frontend/tests/fixtures/test-data.ts]
+- [x] [Review][Patch] Fragile E2E localStorage injection [frontend/e2e/scenarios/demo-data-empty-state.spec.ts]
+- [x] [Review][Patch] Missing type annotation in E2E helper [frontend/e2e/scenarios/demo-data-empty-state.spec.ts]
+- [x] [Review][Patch] E2E test enforces inverse of AC3 [frontend/e2e/scenarios/demo-data-empty-state.spec.ts:74]
+- [x] [Review][Patch] Missing E2E coverage for default demo data [frontend/e2e/scenarios/demo-data-empty-state.spec.ts]
+- [x] [Review][Patch] DemoDataToggle component test ignores persistence [frontend/tests/components/DemoDataToggle.spec.ts]
 
 ## Dev Notes
 

@@ -3,16 +3,21 @@ import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useStatsStore } from '@/features/stats/stores/useStatsStore'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import TutorialCarousel from '@/components/TutorialCarousel.vue'
+import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
+import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+const statsStore = useStatsStore()
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
+    await statsStore.fetchStats()
   }
 })
 
@@ -64,7 +69,12 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
-        <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
+        <template v-if="statsStore.confirmedMatchesCount < 5 && !statsStore.shouldShowDemoData">
+          <EmptyStateCTA />
+        </template>
+        <template v-else>
+          <StatsDashboard />
+        </template>
         
         <button 
           @click="authStore.logout()" 
