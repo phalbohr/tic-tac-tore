@@ -13,10 +13,7 @@ function recordFirstMatch() {
 </script>
 
 <template>
-  <div 
-    v-if="!statsStore.shouldShowDemoData && statsStore.confirmedMatchesCount < 1"
-    class="ch-empty-state fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
-  >
+  <div class="ch-empty-state fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md">
     <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl text-center">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-primary mb-2">
         <span class="material-symbols-outlined text-3xl">sports_soccer</span>
