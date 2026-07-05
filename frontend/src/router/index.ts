@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'cabinet',
       component: () => import('@/features/profile/Cabinet.vue'),
     },
+    {
+      path: '/live-match',
+      name: 'live-match',
+      component: () => import('@/features/match/LiveMatch.vue'),
+    },
   ],
 })
 
