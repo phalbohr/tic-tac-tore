@@ -28,8 +28,21 @@
 - **Frontend Stack:** Vue 3 `<script setup>` (Composition API), Pinia, SCSS + Tailwind v4.
 - **SCSS Prefixing:** All custom SCSS styles MUST use the `ch-` prefix to prevent Tailwind utility class conflicts.
 - **Component Reuse:** Utilize existing UI primitives from `src/core/components/` (buttons, lists, toggles) instead of reinventing them in the feature folder.
-- **Mobile-First:** Ensure touch targets are sized for mobile devices.
-- **No-Line Rule (UX-DR3):** Use background color shifts for boundaries, absolutely no 1px borders. Use `surface-container-highest` for secondary actions (e.g., 1v1/2v2 toggle).
+- **Mobile-First:** Ensure touch targets are sized for mobile devices (min `h-12`).
+- **No-Line Rule (UX-DR3):** Use background color shifts for boundaries, absolutely no 1px borders (`border`, `divide-y`, etc. are forbidden).
+
+### 🎨 Tailwind UI Design Specifications (Extracted Context)
+To adhere strictly to UX-DR1 and UX-DR3, apply the following Tailwind classes when creating the components:
+- **Backgrounds:** The main page uses `bg-background` (#171211).
+- **Cards/Containers:** Use `bg-surface-container-low` (#1f1b19) for main list items or groups, and `bg-surface-container-highest` (#393431) for secondary/inner interactive elements (like the 1v1 / 2v2 toggle pill).
+- **Typography:**
+  - Headlines: `font-headline text-on-surface text-xl md:text-2xl font-bold`
+  - Body text: `font-body text-on-surface`
+  - Secondary text/subtitles: `text-on-surface-variant`
+- **Buttons / Actions:**
+  - Primary button: `bg-primary text-background font-bold h-14 rounded-full w-full flex items-center justify-center`
+  - Selection slots (players): `h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2`
+- **No-Line Separation:** Instead of borders between player slots, rely on the `mb-2` gap and the `bg-surface-container-highest` pill shape.
 
 ### 📚 Library & Framework Requirements
 - Pinia stores must be modular, fully typed with TypeScript, and use the Composition API syntax (`defineStore`).
@@ -54,6 +67,10 @@
 - **Checklist:** `/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/atdd-checklist-2-2-match-type-and-player-selection-portrait.md`
 - **API Tests:** `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/api/new-match.spec.ts`
 - **E2E Tests:** `/Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/new-match-creation.spec.ts`
+
+### 🎨 Design Artifacts
+- **Design System Spec:** `/Users/ppolukhin/Projects/tic-tac-tore/.stitch/DESIGN.md`
+- **Generated UI Layout (HTML):** `/Users/ppolukhin/Projects/tic-tac-tore/.stitch/designs/match-type-and-player-selection.html`
 
 ## 🏁 Story Completion Status
 - [x] Ultimate context engine analysis completed - comprehensive developer guide created
