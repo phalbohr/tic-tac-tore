@@ -6,6 +6,8 @@ import { useAuthStore } from '@/stores/auth'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import TutorialCarousel from '@/components/TutorialCarousel.vue'
+import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
+import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -64,7 +66,8 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
-        <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
+        <StatsDashboard />
+        <EmptyStateCTA />
         
         <button 
           @click="authStore.logout()" 

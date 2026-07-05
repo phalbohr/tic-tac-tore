@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
+import DemoDataToggle from './components/DemoDataToggle.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -237,6 +238,8 @@ async function confirmDelete() {
           </div>
         </div>
       </div>
+
+      <DemoDataToggle />
 
       <!-- Danger Zone -->
       <section class="pt-6 space-y-3">
