@@ -1,6 +1,6 @@
 # Story 5.1: Real-time Scoring Interface (Landscape)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -82,3 +82,18 @@ Gemini 3.1 Pro (High)
 ### File List
 - `frontend/src/features/match/LiveMatch.vue` (to be created)
 - `frontend/src/features/match/LiveMatch.spec.ts` (to be created)
+
+### Review Findings
+- [x] [Review][Patch] Missing CSS fallback & robust error handling for fullscreen/landscape mode [`frontend/src/features/match/LiveMatch.vue:15`]
+- [x] [Review][Patch] Missing Tailwind v4, SCSS, and design tokens [`frontend/src/features/match/LiveMatch.vue`]
+- [x] [Review][Patch] Missing unit tests for quadrant mapping
+- [x] [Review][Patch] Incorrect Pinia store naming [`frontend/src/stores/match.ts`]
+- [x] [Review][Patch] Incorrect E2E test file location [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [x] [Review][Patch] crypto.randomUUID() lacks fallback [`frontend/src/stores/match.ts`]
+- [x] [Review][Patch] Visual flash truncated on rapid taps [`frontend/src/features/match/LiveQuadrant.vue:24`]
+- [x] [Review][Patch] Brittle Playwright TouchEvent hack [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [x] [Review][Patch] E2E test fails to verify business logic [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [x] [Review][Patch] Test fixture data scattered across directories
+- [x] [Review][Patch] Unrelated skipped tests committed [`frontend/tests/unit/useStatsStore.spec.ts`]
+- [x] [Review][Defer] Hardcoded team names in Pinia store [`frontend/src/stores/match.ts:14`] — deferred, pre-existing
+- [x] [Review][Defer] Goals can be infinitely added to a finished match [`frontend/src/stores/match.ts:24`] — deferred, pre-existing

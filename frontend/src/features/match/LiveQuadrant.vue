@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const isFlashing = ref(false)
+let flashTimer: any = null
 
 const handleTouch = (event: Event) => {
   event.preventDefault()
@@ -21,7 +22,8 @@ const handleTouch = (event: Event) => {
   }
 
   isFlashing.value = true
-  setTimeout(() => {
+  if (flashTimer) clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => {
     isFlashing.value = false
   }, 300)
 
@@ -31,49 +33,18 @@ const handleTouch = (event: Event) => {
 
 <template>
   <div
-    class="live-quadrant"
-    :class="{ flashing: isFlashing }"
+    class="flex items-center justify-center border border-gray-800 transition-colors duration-100 touch-manipulation select-none"
+    :class="isFlashing ? 'ch-bg-green-500' : 'ch-bg-gray-800'"
     @touchstart="handleTouch"
     :data-testid="`quadrant-${role}`"
   >
-    <div class="quadrant-content">
-      <span class="player-name">{{ playerName }}</span>
-      <span class="player-role">{{ role }}</span>
+    <div class="flex flex-col items-center">
+      <span class="font-bold text-2xl ch-text-white">{{ playerName }}</span>
+      <span class="text-base ch-text-gray-400">{{ role }}</span>
     </div>
   </div>
 </template>
 
-<style scoped>
-.live-quadrant {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
-  user-select: none;
-  border: 1px solid #ccc;
-  background-color: #f8f9fa;
-  transition: background-color 0.1s;
-}
-
-.flashing {
-  background-color: #4ade80;
-}
-
-.quadrant-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.player-name {
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-
-.player-role {
-  font-size: 1rem;
-  color: #666;
-}
+<style scoped lang="scss">
+/* Tailwind handles layout */
 </style>

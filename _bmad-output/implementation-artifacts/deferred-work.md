@@ -44,3 +44,7 @@
 
 ## Deferred from: code review of 1-7-onboarding-tutorial.md (2026-06-21)
 - [x] [Review][Defer] Concurrency Blindspot in Profile Updates — deferred, pre-existing. The updateProfile method reads the user, mutates the state, and saves it without any explicit optimistic locking mechanism handling, silently overwriting concurrent updates.
+
+## Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)
+- [x] [Review][Defer] Hardcoded team names in Pinia store [`frontend/src/stores/match.ts:14`] — deferred, pre-existing
+- [x] [Review][Defer] Goals can be infinitely added to a finished match [`frontend/src/stores/match.ts:24`] — deferred, pre-existing
