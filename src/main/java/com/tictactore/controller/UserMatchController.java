@@ -1,5 +1,6 @@
 package com.tictactore.controller;
 
+import com.tictactore.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,17 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users/me")
 public class UserMatchController {
 
+    private final UserService userService;
+
+    public UserMatchController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping("/preferences/last-rule-system")
     public ResponseEntity<UserPreferencesDto> getLastRuleSystem() {
-        return ResponseEntity.ok(new UserPreferencesDto("STANDARD"));
+        return ResponseEntity.ok(userService.getLastRuleSystem());
     }
 
     @GetMapping("/frequent-opponents")
     public ResponseEntity<java.util.List<PlayerDto>> getFrequentOpponents() {
-        return ResponseEntity.ok(java.util.List.of(
-                new PlayerDto(java.util.UUID.randomUUID().toString(), "Mock Player 1", "avatar1"),
-                new PlayerDto(java.util.UUID.randomUUID().toString(), "Mock Player 2", "avatar2")
-        ));
+        return ResponseEntity.ok(userService.getFrequentOpponents());
     }
 
     public record UserPreferencesDto(String lastRuleSystem) {}

@@ -1,19 +1,47 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+export enum MatchType {
+  ONE_VS_ONE = '1v1',
+  TWO_VS_TWO = '2v2'
+}
+
 export const useMatchDraftStore = defineStore('matchDraft', () => {
-  const matchType = ref<'1v1' | '2v2'>('1v1')
+  const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
   const selectedPlayers = ref<string[]>([])
-  
-  function setMatchType(type: '1v1' | '2v2') {
+  const ruleSystem = ref<string>('STANDARD')
+  const frequentOpponents = ref<any[]>([])
+
+  async function fetchDefaults() {
+    try {
+      const [opponentsRes, prefsRes] = await Promise.all([
+        fetch('/api/users/me/frequent-opponents'),
+        fetch('/api/users/me/preferences/last-rule-system')
+      ])
+      if (opponentsRes.ok) {
+        frequentOpponents.value = await opponentsRes.json()
+      }
+      if (prefsRes.ok) {
+        const data = await prefsRes.json()
+        if (data.lastRuleSystem) {
+          ruleSystem.value = data.lastRuleSystem
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch match defaults', e)
+    }
+  }
+
+  function setMatchType(type: MatchType) {
     matchType.value = type
-    if (type === '1v1') {
+    if (type === MatchType.ONE_VS_ONE) {
       selectedPlayers.value = selectedPlayers.value.slice(0, 2)
     }
   }
 
   function addPlayer(playerId: string) {
-    const maxPlayers = matchType.value === '1v1' ? 2 : 4
+    if (!playerId.trim()) return;
+    const maxPlayers = matchType.value === MatchType.ONE_VS_ONE ? 2 : 4
     if (selectedPlayers.value.length < maxPlayers && !selectedPlayers.value.includes(playerId)) {
       selectedPlayers.value.push(playerId)
     }
@@ -24,13 +52,17 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   }
 
   function reset() {
-    matchType.value = '1v1'
+    matchType.value = MatchType.ONE_VS_ONE
     selectedPlayers.value = []
+    ruleSystem.value = 'STANDARD'
   }
 
   return {
     matchType,
     selectedPlayers,
+    ruleSystem,
+    frequentOpponents,
+    fetchDefaults,
     setMatchType,
     addPlayer,
     removePlayer,
