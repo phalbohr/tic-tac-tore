@@ -15,7 +15,6 @@ const isFlashing = ref(false)
 let flashTimer: any = null
 
 const handleTouch = (event: Event) => {
-  event.preventDefault()
 
   if (navigator.vibrate) {
     navigator.vibrate([50])
@@ -35,7 +34,7 @@ const handleTouch = (event: Event) => {
   <div
     class="flex items-center justify-center border border-gray-800 transition-colors duration-100 touch-manipulation select-none"
     :class="isFlashing ? 'ch-bg-green-500' : 'ch-bg-gray-800'"
-    @touchstart="handleTouch"
+    @touchstart.prevent="handleTouch"
     :data-testid="`quadrant-${role}`"
   >
     <div class="flex flex-col items-center">
