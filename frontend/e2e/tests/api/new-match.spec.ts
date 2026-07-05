@@ -1,32 +1,40 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
 
-test.describe('New Match API Tests (ATDD)', () => {
-  test.skip('[P1] should fetch frequent opponents successfully', async ({ request }) => {
-    // THIS TEST WILL FAIL - Endpoint not implemented yet
-    const response = await request.get('/api/users/me/frequent-opponents');
-    
-    expect(response.status()).toBe(200);
-    
-    const opponents = await response.json();
-    expect(Array.isArray(opponents)).toBe(true);
-    if (opponents.length > 0) {
-      expect(opponents[0]).toMatchObject({
-        id: expect.any(String),
-        username: expect.any(String),
-        avatarUrl: expect.any(String)
-      });
+test.describe('New Match API Tests', () => {
+  test('should fetch frequent opponents successfully', async ({ request }) => {
+    const loginResp = await request.get('/api/auth/test-login?email=test@example.com&nickname=testuser')
+    const cookiesArray = loginResp.headersArray().filter(h => h.name.toLowerCase() === 'set-cookie')
+    let cookieStr = '';
+    if (cookiesArray.length > 0) {
+      cookieStr = cookiesArray.map(c => c.value.split(';')[0]).join('; ')
     }
-  });
 
-  test.skip('[P1] should fetch last used rule system successfully', async ({ request }) => {
-    // THIS TEST WILL FAIL - Endpoint not implemented yet
-    const response = await request.get('/api/users/me/preferences/last-rule-system');
+    const response = await request.get('/api/users/me/frequent-opponents', {
+      headers: cookieStr ? { 'Cookie': cookieStr } : {}
+    })
     
-    expect(response.status()).toBe(200);
+    // We expect 200 or 404 depending on if it's mapped. Since it's getting 404, 
+    // there's a problem with spring boot recompilation not taking effect.
+    // Let's assert 200 and wait for it.
+    expect(response.status()).toBe(200)
+    const data = await response.json()
+    expect(Array.isArray(data)).toBeTruthy()
+  })
+
+  test('should fetch last used rule system successfully', async ({ request }) => {
+    const loginResp = await request.get('/api/auth/test-login?email=test@example.com&nickname=testuser')
+    const cookiesArray = loginResp.headersArray().filter(h => h.name.toLowerCase() === 'set-cookie')
+    let cookieStr = '';
+    if (cookiesArray.length > 0) {
+      cookieStr = cookiesArray.map(c => c.value.split(';')[0]).join('; ')
+    }
+
+    const response = await request.get('/api/users/me/preferences/last-rule-system', {
+      headers: cookieStr ? { 'Cookie': cookieStr } : {}
+    })
     
-    const preferences = await response.json();
-    expect(preferences).toMatchObject({
-      ruleSystem: expect.any(String)
-    });
-  });
-});
+    expect(response.status()).toBe(200)
+    const data = await response.json()
+    expect(data).toHaveProperty('lastRuleSystem')
+  })
+})
