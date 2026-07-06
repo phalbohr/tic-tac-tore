@@ -9,6 +9,10 @@ defineOptions({
 const store = useMatchDraftStore()
 const maxPlayers = computed(() => store.matchType === MatchType.ONE_VS_ONE ? 2 : 4)
 
+function getPlayer(id: string) {
+  return store.frequentOpponents.find(p => p.id === id)
+}
+
 </script>
 
 <template>
@@ -21,10 +25,10 @@ const maxPlayers = computed(() => store.matchType === MatchType.ONE_VS_ONE ? 2 :
     >
       <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
         <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{ index }}</span>
-        <img v-else-if="store.frequentOpponents.find(p => p.id === store.selectedPlayers[index - 1])?.avatar" :src="store.frequentOpponents.find(p => p.id === store.selectedPlayers[index - 1])?.avatar" class="w-full h-full object-cover" />
+        <img v-else-if="getPlayer(store.selectedPlayers[index - 1])?.avatar" :src="getPlayer(store.selectedPlayers[index - 1])?.avatar" class="w-full h-full object-cover" />
       </div>
       <span class="text-on-surface flex-1">
-        {{ store.selectedPlayers[index - 1] ? (store.frequentOpponents.find(p => p.id === store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
+        {{ store.selectedPlayers[index - 1] ? (getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
       </span>
       <button v-if="store.selectedPlayers[index - 1]" @click="store.removePlayer(store.selectedPlayers[index - 1])" class="text-error font-bold px-2">X</button>
     </div>

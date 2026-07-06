@@ -17,12 +17,13 @@ describe('matchDraftStore', () => {
 
   it('changes match type and truncates players if needed', () => {
     const store = useMatchDraftStore()
+    store.setMatchType(MatchType.TWO_VS_TWO)
     store.addPlayer('p1')
     store.addPlayer('p2')
     store.addPlayer('p3')
     
-    store.setMatchType(MatchType.TWO_VS_TWO)
     expect(store.matchType).toBe(MatchType.TWO_VS_TWO)
+    expect(store.selectedPlayers.length).toBe(3)
     
     store.setMatchType(MatchType.ONE_VS_ONE)
     expect(store.selectedPlayers.length).toBe(2)

@@ -6,23 +6,33 @@ export enum MatchType {
   TWO_VS_TWO = '2v2'
 }
 
+export interface PlayerDto {
+  id: string
+  nickname: string
+  avatar: string
+}
+
 export const useMatchDraftStore = defineStore('matchDraft', () => {
   const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
   const selectedPlayers = ref<string[]>([])
   const ruleSystem = ref<string>('STANDARD')
-  const frequentOpponents = ref<any[]>([])
+  const frequentOpponents = ref<PlayerDto[]>([])
 
   async function fetchDefaults() {
     try {
-      const [opponentsRes, prefsRes] = await Promise.all([
+      const results = await Promise.allSettled([
         fetch('/api/users/me/frequent-opponents'),
         fetch('/api/users/me/preferences/last-rule-system')
       ])
-      if (opponentsRes.ok) {
-        frequentOpponents.value = await opponentsRes.json()
+      
+      const opponentsRes = results[0]
+      if (opponentsRes.status === 'fulfilled' && opponentsRes.value.ok) {
+        frequentOpponents.value = await opponentsRes.value.json()
       }
-      if (prefsRes.ok) {
-        const data = await prefsRes.json()
+      
+      const prefsRes = results[1]
+      if (prefsRes.status === 'fulfilled' && prefsRes.value.ok) {
+        const data = await prefsRes.value.json()
         if (data.lastRuleSystem) {
           ruleSystem.value = data.lastRuleSystem
         }
