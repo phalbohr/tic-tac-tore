@@ -8,6 +8,7 @@ import BaseButton from '@/core/components/BaseButton.vue'
 const store = useMatchDraftStore()
 const emit = defineEmits<{
   (e: 'cancel'): void
+  (e: 'complete'): void
 }>()
 
 onMounted(() => {
@@ -22,7 +23,7 @@ function submitMatchDraft() {
   console.log('Submitting match draft', store.matchType, store.selectedPlayers, store.ruleSystem)
   // Logic to actually create the match
   store.reset()
-  emit('cancel')
+  emit('complete')
 }
 
 function handleCancel() {
