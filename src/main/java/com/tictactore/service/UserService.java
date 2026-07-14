@@ -248,10 +248,10 @@ public class UserService {
 
     public List<PlayerDto> getFrequentOpponents() {
         return List.of(
-                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 1", generateDeterministicAvatar("mock1@example.com")),
-                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 2", generateDeterministicAvatar("mock2@example.com")),
-                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 3", generateDeterministicAvatar("mock3@example.com")),
-                new PlayerDto(UUID.randomUUID().toString(), "Mock Player 4", generateDeterministicAvatar("mock4@example.com"))
+                new PlayerDto("550e8400-e29b-41d4-a716-446655440000", "Mock Player 1", generateDeterministicAvatar("mock1@example.com")),
+                new PlayerDto("550e8400-e29b-41d4-a716-446655440001", "Mock Player 2", generateDeterministicAvatar("mock2@example.com")),
+                new PlayerDto("550e8400-e29b-41d4-a716-446655440002", "Mock Player 3", generateDeterministicAvatar("mock3@example.com")),
+                new PlayerDto("550e8400-e29b-41d4-a716-446655440003", "Mock Player 4", generateDeterministicAvatar("mock4@example.com"))
         );
     }
 }
