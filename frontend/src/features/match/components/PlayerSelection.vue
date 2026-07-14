@@ -26,6 +26,7 @@ function getPlayer(id: string) {
       <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
         <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{ index }}</span>
         <img v-else-if="getPlayer(store.selectedPlayers[index - 1])?.avatar" :src="getPlayer(store.selectedPlayers[index - 1])?.avatar" class="w-full h-full object-cover" />
+        <span v-else class="text-on-surface-variant font-bold">{{ getPlayer(store.selectedPlayers[index - 1])?.nickname?.charAt(0)?.toUpperCase() || '?' }}</span>
       </div>
       <span class="text-on-surface flex-1">
         {{ store.selectedPlayers[index - 1] ? (getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
