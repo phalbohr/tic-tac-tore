@@ -10,6 +10,7 @@ export const useStatsStore = defineStore('stats', () => {
   const getDemoModeKey = () => `tictactore.demoModeEnabled_${authStore.profile?.nickname || 'guest'}`
 
   const stats = ref<PlayerStats | null>(null)
+  const realStats = ref<PlayerStats | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const confirmedMatchesCount = ref<number | null>(null)
@@ -32,9 +33,10 @@ export const useStatsStore = defineStore('stats', () => {
     error.value = null
 
     try {
-      const realStats = await getPersonalStats(params)
+      const fetchedStats = await getPersonalStats(params)
+      realStats.value = fetchedStats
       
-      confirmedMatchesCount.value = realStats.overall.matches
+      confirmedMatchesCount.value = fetchedStats.overall.matches
       
       if (confirmedMatchesCount.value >= 5) {
         localStorage.setItem(getDemoModeKey(), 'false')
@@ -44,7 +46,7 @@ export const useStatsStore = defineStore('stats', () => {
       if (shouldShowDemoData.value) {
         stats.value = generateDemoData()
       } else {
-        stats.value = realStats
+        stats.value = fetchedStats
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch statistics'
@@ -62,7 +64,11 @@ export const useStatsStore = defineStore('stats', () => {
     const stringVal = String(enabled)
     localStorage.setItem(getDemoModeKey(), stringVal)
     rawDemoModeSetting.value = stringVal
-    fetchStats()
+    if (shouldShowDemoData.value) {
+      stats.value = generateDemoData()
+    } else {
+      stats.value = realStats.value
+    }
   }
 
   return {

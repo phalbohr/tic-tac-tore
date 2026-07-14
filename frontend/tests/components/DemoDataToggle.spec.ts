@@ -14,7 +14,6 @@ describe('[Story 4.1] DemoDataToggle.vue (ATDD Red Phase)', () => {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     const store = useStatsStore();
-    // set to 0 to enable implicit demo mode
     store.confirmedMatchesCount = 0;
     await wrapper.vm.$nextTick();
     
@@ -26,7 +25,6 @@ describe('[Story 4.1] DemoDataToggle.vue (ATDD Red Phase)', () => {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     const store = useStatsStore();
-    // set to 5 to disable demo mode
     store.confirmedMatchesCount = 5;
     await wrapper.vm.$nextTick();
     
@@ -38,7 +36,7 @@ describe('[Story 4.1] DemoDataToggle.vue (ATDD Red Phase)', () => {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     const store = useStatsStore();
-    store.confirmedMatchesCount = 0; // makes isDemoModeEnabled true
+    store.confirmedMatchesCount = 0;
     await wrapper.vm.$nextTick();
     
     await wrapper.find('button[role="switch"]').trigger('click');
@@ -51,7 +49,7 @@ describe('[Story 4.1] DemoDataToggle.vue (ATDD Red Phase)', () => {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     const store = useStatsStore();
-    store.confirmedMatchesCount = 5; // makes isDemoModeEnabled false
+    store.confirmedMatchesCount = 5;
     await wrapper.vm.$nextTick();
     
     await wrapper.find('button[role="switch"]').trigger('click');
