@@ -12,7 +12,7 @@ describe('LiveQuadrant', () => {
       }
     })
 
-    await wrapper.trigger('touchstart')
+    await wrapper.trigger('pointerdown')
     
     expect(wrapper.emitted()).toHaveProperty('score')
     const scoreEvent = wrapper.emitted('score')
@@ -29,7 +29,7 @@ describe('LiveQuadrant', () => {
     })
 
     expect(wrapper.classes()).not.toContain('ch-bg-green-500')
-    await wrapper.trigger('touchstart')
+    await wrapper.trigger('pointerdown')
     expect(wrapper.classes()).toContain('ch-bg-green-500')
   })
 })

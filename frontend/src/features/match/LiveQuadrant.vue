@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 const props = defineProps<{
   playerId: string
@@ -28,13 +28,17 @@ const handleTouch = (event: Event) => {
 
   emit('score', props.playerId, props.role)
 }
+
+onUnmounted(() => {
+  if (flashTimer) clearTimeout(flashTimer)
+})
 </script>
 
 <template>
   <div
     class="flex items-center justify-center border border-gray-800 transition-colors duration-100 touch-manipulation select-none"
     :class="isFlashing ? 'ch-bg-green-500' : 'ch-bg-gray-800'"
-    @touchstart.prevent="handleTouch"
+    @pointerdown.prevent="handleTouch"
     :data-testid="`quadrant-${role}`"
   >
     <div class="flex flex-col items-center">
