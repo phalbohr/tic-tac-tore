@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'cabinet',
       component: () => import('@/features/profile/Cabinet.vue'),
     },
+    {
+      path: '/matches/new',
+      name: 'new-match',
+      component: () => import('@/components/RuleSystemSelection.vue'),
+    },
   ],
 })
 
