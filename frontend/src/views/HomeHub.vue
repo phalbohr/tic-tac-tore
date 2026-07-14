@@ -74,7 +74,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
           </div>
         </template>
-        <template v-else-if="(statsStore.confirmedMatchesCount ?? 0) < 5 && !statsStore.shouldShowDemoData">
+        <template v-else-if="statsStore.confirmedMatchesCount !== null && statsStore.confirmedMatchesCount < 1 && !statsStore.shouldShowDemoData">
           <EmptyStateCTA />
         </template>
         <template v-else>
