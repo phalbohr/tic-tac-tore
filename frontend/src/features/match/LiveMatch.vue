@@ -9,7 +9,6 @@ defineOptions({
 
 const matchStore = useLiveMatchStore()
 const isMatchStarted = ref(false)
-const showRotateFallback = ref(false)
 const liveMatchContainer = ref<HTMLElement | null>(null)
 
 const startMatch = async () => {
@@ -24,8 +23,7 @@ const startMatch = async () => {
         await (screen.orientation as any).lock('landscape')
       }
     } catch (err) {
-      console.warn('Orientation lock failed, showing fallback', err)
-      showRotateFallback.value = true
+      console.warn('Orientation lock failed', err)
     }
   }
   isMatchStarted.value = true
@@ -38,7 +36,7 @@ const onScore = (playerId: string, role: string) => {
 
 <template>
   <div ref="liveMatchContainer" class="ch-bg-gray-900 ch-text-white w-screen h-screen overflow-hidden">
-    <div v-if="showRotateFallback" class="absolute inset-0 flex items-center justify-center ch-bg-gray-900 z-50 landscape:hidden">
+    <div v-if="isMatchStarted" class="absolute inset-0 flex items-center justify-center ch-bg-gray-900 z-50 landscape:hidden">
       <p class="text-xl">Please rotate your device to landscape mode</p>
     </div>
     <div v-if="!isMatchStarted" class="flex items-center justify-center w-full h-full">
