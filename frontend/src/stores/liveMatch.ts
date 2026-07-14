@@ -8,7 +8,7 @@ export interface Goal {
   timestamp: number
 }
 
-export const useLiveMatchStore = defineStore('match', () => {
+export const useLiveMatchStore = defineStore('liveMatch', () => {
   const goals = ref<Goal[]>([])
 
   const teamA = ref({
@@ -23,7 +23,7 @@ export const useLiveMatchStore = defineStore('match', () => {
 
   const recordGoal = (playerId: string, quadrantRole: string) => {
     goals.value.push({
-      id: (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)),
+      id: (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)),
       playerId,
       quadrantRole,
       timestamp: Date.now(),
