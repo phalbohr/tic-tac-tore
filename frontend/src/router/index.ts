@@ -25,6 +25,11 @@ const router = createRouter({
       name: 'live-match',
       component: () => import('@/features/match/LiveMatch.vue'),
     },
+    {
+      path: '/matches/new',
+      name: 'new-match',
+      component: () => import('@/components/RuleSystemSelection.vue'),
+    },
   ],
 })
 
