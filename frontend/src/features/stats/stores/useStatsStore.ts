@@ -14,17 +14,17 @@ export const useStatsStore = defineStore('stats', () => {
   const error = ref<string | null>(null)
   const confirmedMatchesCount = ref<number | null>(null)
 
-  const _isDemoModeEnabledExplicit = ref(localStorage.getItem(getDemoModeKey()) === 'true')
-  const _isDemoModeDisabledExplicit = ref(localStorage.getItem(getDemoModeKey()) === 'false')
+  const rawDemoModeSetting = ref<string | null>(localStorage.getItem(getDemoModeKey()))
 
   watch(() => authStore.profile?.nickname, () => {
-    _isDemoModeEnabledExplicit.value = localStorage.getItem(getDemoModeKey()) === 'true'
-    _isDemoModeDisabledExplicit.value = localStorage.getItem(getDemoModeKey()) === 'false'
+    rawDemoModeSetting.value = localStorage.getItem(getDemoModeKey())
   })
 
   const shouldShowDemoData = computed(() => {
-    const implicitDemo = confirmedMatchesCount.value !== null && confirmedMatchesCount.value < 5 && !_isDemoModeDisabledExplicit.value
-    return _isDemoModeEnabledExplicit.value || implicitDemo
+    const isExplicitlyDisabled = rawDemoModeSetting.value === 'false'
+    const isExplicitlyEnabled = rawDemoModeSetting.value === 'true'
+    const implicitDemo = confirmedMatchesCount.value !== null && confirmedMatchesCount.value < 5 && !isExplicitlyDisabled
+    return isExplicitlyEnabled || implicitDemo
   })
 
   async function fetchStats(params: PersonalStatsParams = {}) {
@@ -38,8 +38,7 @@ export const useStatsStore = defineStore('stats', () => {
       
       if (confirmedMatchesCount.value >= 5) {
         localStorage.setItem(getDemoModeKey(), 'false')
-        _isDemoModeEnabledExplicit.value = false
-        _isDemoModeDisabledExplicit.value = true
+        rawDemoModeSetting.value = 'false'
       }
 
       if (shouldShowDemoData.value) {
@@ -60,9 +59,9 @@ export const useStatsStore = defineStore('stats', () => {
   }
 
   function toggleDemoMode(enabled: boolean) {
-    localStorage.setItem(getDemoModeKey(), String(enabled))
-    _isDemoModeEnabledExplicit.value = enabled
-    _isDemoModeDisabledExplicit.value = !enabled
+    const stringVal = String(enabled)
+    localStorage.setItem(getDemoModeKey(), stringVal)
+    rawDemoModeSetting.value = stringVal
     fetchStats()
   }
 
