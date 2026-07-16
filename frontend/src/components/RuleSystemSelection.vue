@@ -63,7 +63,7 @@ const submitCustomRule = async () => {
     await store.createCustomRule(customRule.value);
     alert('Custom rule created successfully!');
     customRule.value = { name: '', goalLimit: 5, gameLimit: 1, winByTwo: false };
-  } catch (error) {
+  } catch {
     alert('Failed to create custom rule');
   }
 };

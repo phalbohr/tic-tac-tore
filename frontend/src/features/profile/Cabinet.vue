@@ -6,6 +6,10 @@ import { useAuthStore } from '@/stores/auth'
 import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
 
+defineOptions({
+  name: 'CabinetView'
+})
+
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
