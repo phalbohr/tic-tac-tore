@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /Users/ppolukhin/Projects/tic-tac-tore/.bmad-loop/bmad_loop_hook.py SessionStart",
+            "command": "python3 ./.bmad-loop/bmad_loop_hook.py SessionStart",
             "timeout": 60000
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /Users/ppolukhin/Projects/tic-tac-tore/.bmad-loop/bmad_loop_hook.py Stop",
+            "command": "python3 ./.bmad-loop/bmad_loop_hook.py Stop",
             "timeout": 60000
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /Users/ppolukhin/Projects/tic-tac-tore/.bmad-loop/bmad_loop_hook.py SessionEnd",
+            "command": "python3 ./.bmad-loop/bmad_loop_hook.py SessionEnd",
             "timeout": 60000
           }
         ]
