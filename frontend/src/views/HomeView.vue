@@ -3,9 +3,12 @@ import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useStatsStore } from '@/features/stats/stores/useStatsStore'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import TutorialCarousel from '@/components/TutorialCarousel.vue'
+import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
+import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { ref } from 'vue'
@@ -13,10 +16,12 @@ import { ref } from 'vue'
 const { t } = useI18n()
 const showNewMatch = ref(false)
 const authStore = useAuthStore()
+const statsStore = useStatsStore()
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
+    await statsStore.fetchStats()
   }
 })
 
@@ -68,18 +73,29 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
-        <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
-          <BaseButton 
-            @click="showNewMatch = true"
-            class="w-full mt-4 rounded-full"
-          >
-            New Match
-          </BaseButton>
-          <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
-        </div>
+        <template v-if="statsStore.isLoading">
+          <div class="animate-pulse flex flex-col items-center w-full gap-4">
+            <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
+          </div>
+        </template>
+        <template v-else-if="statsStore.confirmedMatchesCount !== null && statsStore.confirmedMatchesCount < 1 && !statsStore.shouldShowDemoData">
+          <EmptyStateCTA />
+        </template>
+        <template v-else>
+          <StatsDashboard v-if="!showNewMatch" />
+          
+          <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
+            <BaseButton 
+              @click="showNewMatch = true"
+              class="w-full mt-4 rounded-full"
+            >
+              New Match
+            </BaseButton>
+            <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
+          </div>
 
-        <NewMatchFlow v-else @cancel="showNewMatch = false" />
-
+          <NewMatchFlow v-else @cancel="showNewMatch = false" />
+        </template>
         <button 
           v-if="!showNewMatch"
           @click="authStore.logout()" 
