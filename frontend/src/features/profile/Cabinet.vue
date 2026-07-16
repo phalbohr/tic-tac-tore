@@ -8,6 +8,10 @@ import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
 import DemoDataToggle from './components/DemoDataToggle.vue'
 
+defineOptions({
+  name: 'CabinetView'
+})
+
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
