@@ -9,7 +9,8 @@ defineOptions({
 const store = useMatchDraftStore()
 const maxPlayers = computed(() => store.matchType === MatchType.ONE_VS_ONE ? 2 : 4)
 
-function getPlayer(id: string) {
+function getPlayer(id?: string) {
+  if (!id) return undefined
   return store.frequentOpponents.find(p => p.id === id)
 }
 
@@ -31,7 +32,7 @@ function getPlayer(id: string) {
       <span class="text-on-surface flex-1">
         {{ store.selectedPlayers[index - 1] ? (getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
       </span>
-      <button v-if="store.selectedPlayers[index - 1]" @click="store.removePlayer(store.selectedPlayers[index - 1])" class="text-error font-bold px-2">X</button>
+      <button v-if="store.selectedPlayers[index - 1]" @click="store.removePlayer(store.selectedPlayers[index - 1]!)" class="text-error font-bold px-2">X</button>
     </div>
     
     <div v-if="store.frequentOpponents.length > 0 && store.selectedPlayers.length < maxPlayers" class="mt-4">

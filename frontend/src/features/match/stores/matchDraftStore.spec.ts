@@ -5,7 +5,7 @@ import { useMatchDraftStore, MatchType } from './matchDraftStore'
 describe('matchDraftStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    global.fetch = vi.fn()
+    globalThis.fetch = vi.fn() as unknown as typeof fetch
   })
 
   it('initializes with default values', () => {
