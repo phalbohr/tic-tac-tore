@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>New Match - Player Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#2e2927",
+                        "on-primary-fixed": "#002201",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface": "#171211",
+                        "inverse-on-surface": "#352f2d",
+                        "primary-fixed": "#bcf0ae",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#cea700",
+                        "primary-fixed-dim": "#a1d494",
+                        "on-surface": "#ebe0dd",
+                        "error": "#ffb4ab",
+                        "background": "#171211",
+                        "surface-bright": "#3e3836",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "on-primary": "#0a3909",
+                        "secondary-container": "#7f3017",
+                        "surface-container-highest": "#393431",
+                        "outline-variant": "#42493e",
+                        "on-secondary-fixed": "#3a0a00",
+                        "tertiary-fixed-dim": "#eec209",
+                        "on-secondary": "#5d1802",
+                        "surface-container": "#231f1d",
+                        "secondary": "#ffb59f",
+                        "on-secondary-fixed-variant": "#7c2e15",
+                        "secondary-fixed": "#ffdbd1",
+                        "on-background": "#ebe0dd",
+                        "surface-variant": "#393431",
+                        "inverse-surface": "#ebe0dd",
+                        "primary": "#a1d494",
+                        "primary-container": "#2d5a27",
+                        "secondary-fixed-dim": "#ffb59f",
+                        "tertiary-fixed": "#ffe084",
+                        "surface-container-low": "#1f1b19",
+                        "on-tertiary-fixed": "#231b00",
+                        "on-secondary-container": "#ffa084",
+                        "tertiary": "#efc209",
+                        "on-surface-variant": "#c2c9bb",
+                        "surface-container-lowest": "#110d0c",
+                        "on-primary-container": "#9dd090",
+                        "outline": "#8c9387",
+                        "surface-dim": "#171211",
+                        "inverse-primary": "#3b6934",
+                        "on-tertiary-container": "#4e3e00",
+                        "on-tertiary": "#3c2f00",
+                        "surface-tint": "#a1d494",
+                        "on-primary-fixed-variant": "#23501e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "display": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #171211;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #393431;
+            border-radius: 10px;
+        }
+        .glass-effect {
+            background: rgba(31, 27, 25, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-primary-container selection:text-primary">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#1f1b19]/80 backdrop-blur-xl">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#393431]/50 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#ebe0dd]">arrow_back</span>
+</button>
+<h1 class="font-['Space_Grotesk'] tracking-tight uppercase font-bold text-[#a1d494] text-lg">NEW MATCH</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#393431]/50 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#ebe0dd]">home</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-32 px-5 max-w-2xl mx-auto min-h-screen relative">
+<!-- Ambient Background Decoration -->
+<div class="fixed inset-0 pointer-events-none opacity-30 overflow-hidden">
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container rounded-full blur-[120px]"></div>
+<div class="absolute top-1/2 -right-24 w-64 h-64 bg-secondary-container rounded-full blur-[100px]"></div>
+</div>
+<section class="relative z-10 space-y-8">
+<!-- Match Type Toggle -->
+<div class="space-y-3">
+<label class="text-xs font-bold uppercase tracking-widest text-outline ml-1">Select Format</label>
+<div class="bg-surface-container-low p-1.5 rounded-full flex items-center w-full shadow-inner">
+<button class="flex-1 py-3 text-sm font-bold tracking-tight rounded-full transition-all duration-300 bg-surface-container-highest text-primary" id="toggle-1v1" onclick="toggleMatch('1v1')">
+                        1v1
+                    </button>
+<button class="flex-1 py-3 text-sm font-bold tracking-tight rounded-full transition-all duration-300 text-on-surface-variant hover:text-on-surface" id="toggle-2v2" onclick="toggleMatch('2v2')">
+                        2v2
+                    </button>
+</div>
+</div>
+<!-- Frequent Opponents -->
+<div class="space-y-4">
+<label class="text-xs font-bold uppercase tracking-widest text-outline ml-1">Frequent Opponents</label>
+<div class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar snap-x">
+<div class="flex-shrink-0 flex flex-col items-center space-y-2 snap-start">
+<div class="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-primary to-transparent">
+<div class="w-full h-full rounded-full bg-cover bg-center border-2 border-surface" data-alt="A close-up portrait of a professional e-sports player in a dark, atmospheric gaming lounge. Low-key dramatic lighting highlights their determined expression, with soft green and amber reflections bouncing off their skin. Modern dark mode aesthetic, cinematic photography style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDq8JL11CrsYOZsAqvTNZqQyhScx_s5lxWxwADLyGaHDCxEd3k0pQI1cG6fxXeJ8YpJOsWn7j-Z8C3qeba0ECIS5Pbbhk26WxIyCGDJzWG5u31prCFtQT5uliol6_t8V1EgunQSIFF_HsUuD7WwykG7-1N-WonjDvf4qxAg0DnlO1kV44npirsBahhVQxlJ2MM8uvYAGNmwh4Mpr0rnpGoh3JqdmQGdLT-R-pDAMl4UteU1eqyDKEzbK3GQeYk_HrwVgNYSEZy6Wl0')"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Kaelan</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center space-y-2 snap-start">
+<div class="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-tertiary to-transparent">
+<div class="w-full h-full rounded-full bg-cover bg-center border-2 border-surface" data-alt="A cinematic portrait of a young woman with a sharp gaze, set in a moody office lounge at dusk. The warm glow of a desk lamp creates high-contrast shadows. The color palette is dominated by deep charcoals and warm stone tones, fitting a premium dark mode UI." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBCYOZ7y4dVc4mq1V4mav9l-HG5y8Q5pxqhIRjBVylLDN5wUK8QCSaNJYLN5_aFVJdWZfVd-KM7_VjmC4tgaAli39sU1euAgM2EnWKhaopUtUPA7V_TGmFHQV0K_3L__NjtqNpcfR2Igh7JPNPUqaKCds5dBkjIKSrrzl-QpyJRi9tYYRT7CMwll5a5drBwQ-Omvpmdzq9n_zkA9r0P5KKlKra-C50TE9iGVD5xf3AG5Zd4Nx0Q3T6--7sJTvtiC1VAhqb0xliDzSs')"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Sia</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center space-y-2 snap-start">
+<div class="w-16 h-16 rounded-full p-0.5">
+<div class="w-full h-full rounded-full bg-cover bg-center border-2 border-surface" data-alt="A middle-aged man with a sophisticated look, leaning against a dark wood paneled wall in a luxury lounge. Evening light spills from a window, creating a moody, professional atmosphere. Deep greens and rich browns define the visual style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBVw2r4iTTM8ESo1mQ8Cq1rsgbl5Y346Pkny0C5YQ5h7TmIAQ-0wEZUsX-8icnAr_t4mxQs_d-80Sh5k_gvzyv8ok_k6UvpyLgXD7m73VQCisa5SDBcCX6CSUN5ClekEAP15SeW6KXhuJQ03NSQFGFctkezFViajna8kJEWBPun6NGJf7fAWZsw-OniL_HL2p5WErbtLgWD4WqKFcyXiW9euCg-izaXPUAkV87PEqC9jx9LwV6YYYsJ9mTPYyK7rCNLH8xZ-HtiGPQ')"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Marcus</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center space-y-2 snap-start">
+<div class="w-16 h-16 rounded-full p-0.5">
+<div class="w-full h-full rounded-full bg-cover bg-center border-2 border-surface" data-alt="Dynamic portrait of a competitor in a high-end tech environment. The lighting is cold and focused, with sharp highlights. Professional photography with a shallow depth of field, set against a dark, textured background of a modern workspace." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvWGw5Hb3er6okJaJCBkmNdojmbw5J0r8ppHiXgzpOXUFPCtuZql8KY8JGI3IQLB4CLG_DoZJOaRijTW7vKIn2lKH3K3y2vgAYUJ8mYaYNgXxhbYdZI1l68E-5e2F-LGpt-mvBxFOT_BKlKeFI9Q5SJfLXqyQx4HqBPx8G78ewCk8M7ZdqGPye5e6DPTP8cw55QZAuYLzd89kmV8Wgn00q7RijKa0wmcek3lKR1HUiJwYlDY0ZpMBvFlbk_Ta-YRuA0254WI5-EQw')"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Elena</span>
+</div>
+<div class="flex-shrink-0 flex flex-col items-center space-y-2 snap-start">
+<div class="w-16 h-16 rounded-full p-0.5">
+<div class="w-full h-full rounded-full bg-cover bg-center border-2 border-surface" data-alt="An artistic portrait of a focused man in a dark environment with green neon accents. The style is sleek and futuristic, utilizing a dark mode color palette of deep greens and charcoal. The mood is intense and competitive." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCI2qaF-VhC01wxM5pgSOSr1MxLQSdw_BStobzTlcx9yj5SAh3kHfoFDLr0C2qyW7crGEHD2tGGBGpRC2KoENt3WQF62S_B4l73MnGS1vTsXzt_SstvTSY4dpdu4hZlB3CvB1JXqwTW6zbrlw_pu3CANsgHypRhuiUP3eJWAmMsYtz5I1NfLSoiW-bEksNxSO9yJxmgAnyZpNvZe4XlGbPn70tljCutbw5Nq9OijjA_81mVsxHLXi9BYD77zu2rT_d6DMAIMkTNP3g')"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Viktor</span>
+</div>
+</div>
+</div>
+<!-- Player Selection Slots -->
+<div class="space-y-6">
+<div class="flex justify-between items-end">
+<label class="text-xs font-bold uppercase tracking-widest text-outline ml-1">Team Selection</label>
+<span class="text-[10px] font-bold bg-primary-container/30 text-primary px-2 py-0.5 rounded uppercase tracking-widest" id="match-label">Doubles Match</span>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<!-- Team A -->
+<div class="space-y-2">
+<div class="flex items-center gap-2 px-2">
+<div class="w-1 h-3 bg-primary rounded-full"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Team Alpha</span>
+</div>
+<div class="space-y-1">
+<div class="h-16 bg-surface-container-highest rounded-2xl flex items-center px-4 gap-4 hover:bg-surface-bright transition-colors cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">You</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Player 1</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">check_circle</span>
+</div>
+<div class="h-16 bg-surface-container-highest rounded-2xl flex items-center px-4 gap-4 hover:bg-surface-bright transition-colors cursor-pointer group border-l-4 border-transparent active:border-primary" id="p2-slot">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">add</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface/50">Select Teammate</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Player 2</p>
+</div>
+<span class="material-symbols-outlined text-outline/30">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Team B -->
+<div class="space-y-2 pt-2">
+<div class="flex items-center gap-2 px-2">
+<div class="w-1 h-3 bg-secondary rounded-full"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Team Beta</span>
+</div>
+<div class="space-y-1">
+<div class="h-16 bg-surface-container-highest rounded-2xl flex items-center px-4 gap-4 hover:bg-surface-bright transition-colors cursor-pointer group border-l-4 border-transparent">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">person_search</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface/50">Select Opponent</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Player 3</p>
+</div>
+<span class="material-symbols-outlined text-outline/30">chevron_right</span>
+</div>
+<div class="h-16 bg-surface-container-highest rounded-2xl flex items-center px-4 gap-4 hover:bg-surface-bright transition-colors cursor-pointer group border-l-4 border-transparent" id="p4-slot">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">add</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface/50">Select Opponent</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Player 4</p>
+</div>
+<span class="material-symbols-outlined text-outline/30">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Location Meta -->
+<div class="bg-surface-container-low rounded-2xl p-4 flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden grayscale contrast-125">
+<div class="w-full h-full bg-cover bg-center" data-alt="A stylized, high-contrast map of a modern city center at night. The aesthetic is dark and technical, featuring glowing lines for streets and subtle landmarks. It fits a premium dark-themed dashboard with deep greys and sharp highlights." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC6N5sYF5PvFyK7l78c1086z9ewQvuzTTdOhWKQmsMydPg1KRXeQTYavHB48wXligBY3EbJqXF5O6F299dg4_gNxoDHA56W1QK1v3kpKmeqsiOkShCcqMCPE_aotveGSznhJ4vt-W-F124GA1kTX5xQu887_iHPWkxKNSFG1UVmNmQ3t-N2j2KVC3rQaqP5Udmvm5fL_CJ5oMMUbCAH1oXp_NYV75UDUaNtBOpVR6aHBgnaTe3I_zPCNSknu_w2L8iBiUMvsGtm2BY')"></div>
+</div>
+<div class="flex-1">
+<p class="text-[10px] font-bold uppercase tracking-widest text-primary">Location</p>
+<p class="text-sm font-medium">The Sky Lounge Court</p>
+</div>
+<span class="material-symbols-outlined text-outline">map</span>
+</div>
+</section>
+</main>
+<!-- Sticky Bottom Action -->
+<footer class="fixed bottom-0 left-0 w-full z-50 p-6 bg-gradient-to-t from-background via-background/95 to-transparent">
+<button class="w-full py-4 rounded-2xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform duration-150">
+            Start Match
+        </button>
+</footer>
+<!-- Bottom Navigation (Implicit Shell Integration) -->
+<nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 pt-20 pb-3 pointer-events-none opacity-0">
+<!-- Hidden but present for structural requirement from JSON -->
+</nav>
+<script>
+        function toggleMatch(type) {
+            const btn1v1 = document.getElementById('toggle-1v1');
+            const btn2v2 = document.getElementById('toggle-2v2');
+            const label = document.getElementById('match-label');
+            const p2Slot = document.getElementById('p2-slot');
+            const p4Slot = document.getElementById('p4-slot');
+
+            if (type === '1v1') {
+                btn1v1.classList.add('bg-surface-container-highest', 'text-primary');
+                btn1v1.classList.remove('text-on-surface-variant');
+                btn2v2.classList.remove('bg-surface-container-highest', 'text-primary');
+                btn2v2.classList.add('text-on-surface-variant');
+                label.textContent = "Singles Match";
+                
+                // Animate out slots
+                p2Slot.style.opacity = '0.3';
+                p2Slot.style.pointerEvents = 'none';
+                p4Slot.style.opacity = '0.3';
+                p4Slot.style.pointerEvents = 'none';
+            } else {
+                btn2v2.classList.add('bg-surface-container-highest', 'text-primary');
+                btn2v2.classList.remove('text-on-surface-variant');
+                btn1v1.classList.remove('bg-surface-container-highest', 'text-primary');
+                btn1v1.classList.add('text-on-surface-variant');
+                label.textContent = "Doubles Match";
+                
+                // Animate in slots
+                p2Slot.style.opacity = '1';
+                p2Slot.style.pointerEvents = 'auto';
+                p4Slot.style.opacity = '1';
+                p4Slot.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Micro-interaction for slots
+        document.querySelectorAll('.cursor-pointer').forEach(slot => {
+            slot.addEventListener('click', function() {
+                this.classList.add('scale-[0.98]');
+                setTimeout(() => this.classList.remove('scale-[0.98]'), 150);
+            });
+        });
+    </script>
+</body></html>
