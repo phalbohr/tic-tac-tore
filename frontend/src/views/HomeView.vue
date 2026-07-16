@@ -6,8 +6,12 @@ import { useAuthStore } from '@/stores/auth'
 import GoogleOAuthButton from '@/components/GoogleOAuthButton.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import TutorialCarousel from '@/components/TutorialCarousel.vue'
+import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import BaseButton from '@/core/components/BaseButton.vue'
+import { ref } from 'vue'
 
 const { t } = useI18n()
+const showNewMatch = ref(false)
 const authStore = useAuthStore()
 
 onMounted(async () => {
@@ -64,9 +68,20 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
-        <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
-        
+        <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
+          <BaseButton 
+            @click="showNewMatch = true"
+            class="w-full mt-4 rounded-full"
+          >
+            New Match
+          </BaseButton>
+          <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
+        </div>
+
+        <NewMatchFlow v-else @cancel="showNewMatch = false" />
+
         <button 
+          v-if="!showNewMatch"
           @click="authStore.logout()" 
           class="px-6 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium"
         >

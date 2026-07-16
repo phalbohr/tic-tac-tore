@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: 2026-06-13
+# last_updated: 2026-07-04
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-06-17"
+last_updated: "2026-07-05"
 project: tic-tac-tore
 project_key: NOKEY
 tracking_system: file-system
@@ -52,10 +52,10 @@ development_status:
   1-5-account-deletion-with-anonymization: done
   1-6-avatar-selection-and-management: done
   1-7-onboarding-tutorial: done
-  epic-1-retrospective: optional
-  epic-2: backlog
-  2-1-rule-system-selection-and-inline-creation: backlog
-  2-2-match-type-and-player-selection-portrait: backlog
+  epic-1-retrospective: done
+  epic-2: in-progress
+  2-1-rule-system-selection-and-inline-creation: ready-for-dev
+  2-2-match-type-and-player-selection-portrait: done
   2-3-score-entry-and-automatic-completion: backlog
   2-4-match-submission-with-undo-window: backlog
   2-5-position-swapping-between-games: backlog
@@ -68,16 +68,16 @@ development_status:
   3-5-publication-rules-and-24-hour-cooldown: backlog
   3-6-submission-rate-limiting-anti-spam: backlog
   epic-3-retrospective: optional
-  epic-4: backlog
-  4-1-empty-state-and-demo-data: backlog
+  epic-4: in-progress
+  4-1-empty-state-and-demo-data: ready-for-dev
   4-2-global-leaderboard-with-filtering: backlog
   4-3-positional-statistics-attack-vs-defense: backlog
   4-4-team-pair-statistics: backlog
   4-5-head-to-head-h2h-comparison: backlog
   4-6-unified-match-history-my-matches: backlog
   epic-4-retrospective: optional
-  epic-5: backlog
-  5-1-real-time-scoring-interface-landscape: backlog
+  epic-5: in-progress
+  5-1-real-time-scoring-interface-landscape: ready-for-dev
   5-2-live-activity-timeline-and-undo: backlog
   5-3-live-position-swapping: backlog
   5-4-third-party-referee-mode: backlog
