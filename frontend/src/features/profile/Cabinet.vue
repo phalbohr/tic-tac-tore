@@ -3,8 +3,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { useStatsStore } from '@/features/stats/stores/useStatsStore'
 import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
+import DemoDataToggle from './components/DemoDataToggle.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -13,6 +15,7 @@ defineOptions({
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
+const statsStore = useStatsStore()
 
 const nickname = ref('')
 const selectedLanguage = ref('EN')
@@ -46,6 +49,7 @@ onMounted(async () => {
   if (!authStore.profile) {
     await authStore.fetchProfile()
   }
+  await statsStore.fetchStats()
   if (authStore.profile) {
     nickname.value = authStore.profile.nickname
     selectedLanguage.value = authStore.profile.language || 'EN'
@@ -241,6 +245,8 @@ async function confirmDelete() {
           </div>
         </div>
       </div>
+
+      <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 
       <!-- Danger Zone -->
       <section class="pt-6 space-y-3">
