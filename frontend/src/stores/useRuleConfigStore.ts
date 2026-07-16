@@ -1,8 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
+export interface RuleConfig {
+    id?: string;
+    name: string;
+    goalLimit: number;
+    gameLimit: number;
+    winByTwo: boolean;
+    type?: string;
+}
+
 export const useRuleConfigStore = defineStore('ruleConfig', () => {
-    const presets = ref<any[]>([]);
+    const presets = ref<RuleConfig[]>([]);
 
     async function fetchPresets() {
         const response = await fetch('/api/v1/rule-configurations?type=PRESET');
@@ -11,7 +20,7 @@ export const useRuleConfigStore = defineStore('ruleConfig', () => {
         }
     }
 
-    async function createCustomRule(ruleData: any) {
+    async function createCustomRule(ruleData: Omit<RuleConfig, 'id' | 'type'>) {
         const response = await fetch('/api/v1/rule-configurations', {
             method: 'POST',
             headers: {
