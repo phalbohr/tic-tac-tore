@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-07-17T20:23:00.000Z",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "2-3-score-entry-and-automatic-completion",
+    "label": "Story 2.3: Score Entry & Automatic Completion"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "FAIL",
+  "rationale": "P0 coverage is 0% (required: 100%). 2 critical requirements uncovered.",
+  "p0_status": "NOT_MET",
+  "p1_status": "NOT_MET",
+  "overall_status": "NOT_MET",
+  "critical_open": 2,
+  "links": {
+    "trace_report_path": "/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/traceability/trace-2-3-score-entry-and-automatic-completion.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

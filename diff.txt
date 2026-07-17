@@ -1,0 +1,477 @@
+diff --git a/frontend/e2e/demo-data-empty-state.spec.ts b/frontend/e2e/demo-data-empty-state.spec.ts
+index 7c2671a..2091652 100644
+--- a/frontend/e2e/demo-data-empty-state.spec.ts
++++ b/frontend/e2e/demo-data-empty-state.spec.ts
+@@ -91,11 +91,11 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
+     }, nickname);
+     
+     await page.goto('/');
+-    await expect(page.getByText('Demo Data Active')).not.toBeVisible();
++    await expect(page.getByText('Demo Data Active')).toBeHidden();
+     
+     await page.goto('/cabinet');
+     const demoToggle = page.getByTestId('demo-mode-toggle');
+-    await expect(demoToggle).not.toBeVisible();
++    await expect(demoToggle).toBeHidden();
+   });
+   
+   test('[P0] should show demo data implicitly for boundary condition 4 matches', async ({ page }) => {
+diff --git a/frontend/e2e/real-time-scoring-interface.spec.ts b/frontend/e2e/real-time-scoring-interface.spec.ts
+index db659f9..d426b33 100644
+--- a/frontend/e2e/real-time-scoring-interface.spec.ts
++++ b/frontend/e2e/real-time-scoring-interface.spec.ts
+@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
+ 
+ test.describe('Real-time Scoring Interface', () => {
+   test.use({ hasTouch: true })
++
+   test('tapping screen quadrant awards goal to specific player and provides haptic feedback', async ({ page, context }) => {
+     await context.grantPermissions([])
+     await page.addInitScript(() => {
+diff --git a/frontend/src/features/match/components/NewMatchFlow.vue b/frontend/src/features/match/components/NewMatchFlow.vue
+index 63a274b..58e142d 100644
+--- a/frontend/src/features/match/components/NewMatchFlow.vue
++++ b/frontend/src/features/match/components/NewMatchFlow.vue
+@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
+ import { useMatchDraftStore } from '../stores/matchDraftStore'
+ import MatchTypePicker from './MatchTypePicker.vue'
+ import PlayerSelection from './PlayerSelection.vue'
++import ScoreEntry from './ScoreEntry.vue'
+ import BaseButton from '@/core/components/BaseButton.vue'
+ 
+ const store = useMatchDraftStore()
+@@ -19,21 +20,23 @@ onUnmounted(() => {
+   store.reset()
+ })
+ 
+-function submitMatchDraft() {
+-  console.log('Submitting match draft', store.matchType, store.selectedPlayers, store.ruleSystem)
+-  // Logic to actually create the match
+-  store.reset()
+-  emit('complete')
++async function submitMatchDraft() {
++  await store.loadRuleConfig()
++  store.matchState = 'score_entry'
+ }
+ 
+ function handleCancel() {
+   store.reset()
+   emit('cancel')
+ }
++
++function handleMatchReady() {
++  emit('complete')
++}
+ </script>
+ 
+ <template>
+-  <div class="w-full flex flex-col items-center bg-surface-container-low rounded-2xl p-4 gap-6">
++  <div v-if="store.matchState === 'draft'" class="w-full flex flex-col items-center bg-surface-container-low rounded-2xl p-4 gap-6">
+     <div class="flex justify-between items-center w-full mb-2">
+       <h2 class="text-on-surface font-bold text-xl">New Match</h2>
+       <BaseButton variant="secondary" @click="handleCancel" class="!h-12">Cancel</BaseButton>
+@@ -50,4 +53,11 @@ function handleCancel() {
+       Start Match
+     </BaseButton>
+   </div>
++  
++  <ScoreEntry 
++    v-else-if="store.matchState === 'score_entry' || store.matchState === 'ready_for_submission'" 
++    @complete="handleMatchReady" 
++    @cancel="handleCancel" 
++  />
+ </template>
++
+diff --git a/frontend/src/features/match/stores/matchDraftStore.spec.ts b/frontend/src/features/match/stores/matchDraftStore.spec.ts
+index 5dce375..a3247de 100644
+--- a/frontend/src/features/match/stores/matchDraftStore.spec.ts
++++ b/frontend/src/features/match/stores/matchDraftStore.spec.ts
+@@ -1,11 +1,14 @@
+ import { setActivePinia, createPinia } from 'pinia'
+-import { describe, it, expect, beforeEach, vi } from 'vitest'
++import { describe, it, expect, beforeEach, vi, Mock } from 'vitest'
+ import { useMatchDraftStore, MatchType } from './matchDraftStore'
+ 
+ describe('matchDraftStore', () => {
++  let fetchMock: Mock
++
+   beforeEach(() => {
+     setActivePinia(createPinia())
+-    globalThis.fetch = vi.fn() as unknown as typeof fetch
++    fetchMock = vi.fn()
++    globalThis.fetch = fetchMock as unknown as typeof fetch
+   })
+ 
+   it('initializes with default values', () => {
+@@ -13,6 +16,7 @@ describe('matchDraftStore', () => {
+     expect(store.matchType).toBe(MatchType.ONE_VS_ONE)
+     expect(store.selectedPlayers).toEqual([])
+     expect(store.ruleSystem).toBe('STANDARD')
++    expect(store.matchState).toBe('draft')
+   })
+ 
+   it('changes match type and truncates players if needed', () => {
+@@ -34,4 +38,91 @@ describe('matchDraftStore', () => {
+     store.addPlayer('   ')
+     expect(store.selectedPlayers).toEqual([])
+   })
++
++  describe('Score Entry and Auto-Completion', () => {
++    it('handles successful loadRuleConfig', async () => {
++      fetchMock.mockResolvedValueOnce({
++        ok: true,
++        json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2 })
++      })
++      const store = useMatchDraftStore()
++      await store.loadRuleConfig()
++      expect(store.ruleConfig).toEqual({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2 })
++    })
++
++    it('handles API error in loadRuleConfig by falling back to standard', async () => {
++      fetchMock.mockResolvedValueOnce({
++        ok: false
++      })
++      const store = useMatchDraftStore()
++      await store.loadRuleConfig()
++      expect(store.ruleConfig).toEqual({ scoreLimit: 10, gameLimit: 1, winsNeeded: 1 })
++    })
++
++    it('increments score but caps at scoreLimit', async () => {
++      const store = useMatchDraftStore()
++      // manually set config
++      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1 }
++      store.incrementScore(1, 1)
++      expect(store.currentGame.team1Score).toBe(1)
++      
++      store.incrementScore(1, 5) // Should cap at 5
++      // Wait, checkAutoCompletion pushes game and resets currentGame.
++      // If we reach limit, it resets to 0. So let's check games array.
++      expect(store.games.length).toBe(1)
++      expect(store.games[0].team1Score).toBe(5)
++      expect(store.currentGame.team1Score).toBe(0)
++    })
++
++    it('decrements score but prevents negative', () => {
++      const store = useMatchDraftStore()
++      store.incrementScore(2, 2)
++      expect(store.currentGame.team2Score).toBe(2)
++      store.decrementScore(2)
++      expect(store.currentGame.team2Score).toBe(1)
++      store.decrementScore(2)
++      store.decrementScore(2)
++      expect(store.currentGame.team2Score).toBe(0)
++    })
++
++    it('auto-completes a game and starts next when scoreLimit is reached', () => {
++      const store = useMatchDraftStore()
++      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
++      store.incrementScore(1, 5)
++      expect(store.games.length).toBe(1)
++      expect(store.games[0].team1Score).toBe(5)
++      expect(store.currentGame.team1Score).toBe(0)
++      expect(store.matchState).toBe('draft') // Still not ready for submission because winsNeeded = 2
++    })
++
++    it('auto-completes match when winsNeeded is reached', () => {
++      const store = useMatchDraftStore()
++      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
++      
++      // Game 1
++      store.incrementScore(1, 5)
++      expect(store.games.length).toBe(1)
++      expect(store.matchState).toBe('draft')
++      
++      // Game 2
++      store.incrementScore(1, 5)
++      expect(store.games.length).toBe(2)
++      expect(store.matchState).toBe('ready_for_submission')
++    })
++    
++    it('auto-completes match when gameLimit is reached', () => {
++      const store = useMatchDraftStore()
++      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3 }
++      
++      // Game 1
++      store.incrementScore(2, 5)
++      expect(store.games.length).toBe(1)
++      expect(store.matchState).toBe('draft')
++      
++      // Game 2
++      store.incrementScore(2, 5)
++      expect(store.games.length).toBe(2)
++      expect(store.matchState).toBe('ready_for_submission')
++    })
++  })
+ })
+diff --git a/frontend/src/features/match/stores/matchDraftStore.ts b/frontend/src/features/match/stores/matchDraftStore.ts
+index 6c5cf0a..59d0254 100644
+--- a/frontend/src/features/match/stores/matchDraftStore.ts
++++ b/frontend/src/features/match/stores/matchDraftStore.ts
+@@ -12,11 +12,28 @@ export interface PlayerDto {
+   avatar: string
+ }
+ 
++export interface GameScore {
++  id?: string
++  team1Score: number
++  team2Score: number
++}
++
++export interface RuleConfig {
++  scoreLimit: number
++  gameLimit: number
++  winsNeeded: number
++}
++
+ export const useMatchDraftStore = defineStore('matchDraft', () => {
+   const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
+   const selectedPlayers = ref<string[]>([])
+   const ruleSystem = ref<string>('STANDARD')
+   const frequentOpponents = ref<PlayerDto[]>([])
++  
++  const ruleConfig = ref<RuleConfig | null>(null)
++  const games = ref<GameScore[]>([])
++  const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
++  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission'>('draft')
+ 
+   async function fetchDefaults() {
+     try {
+@@ -42,6 +59,20 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
+     }
+   }
+ 
++  async function loadRuleConfig() {
++    try {
++      const res = await fetch(`/api/rules/${ruleSystem.value}`)
++      if (res.ok) {
++        ruleConfig.value = await res.json()
++      } else {
++        throw new Error('API failed')
++      }
++    } catch (e) {
++      console.warn('Failed to load rule config, falling back to Standard rules', e)
++      ruleConfig.value = { scoreLimit: 10, gameLimit: 1, winsNeeded: 1 }
++    }
++  }
++
+   function setMatchType(type: MatchType) {
+     matchType.value = type
+     if (type === MatchType.ONE_VS_ONE) {
+@@ -61,10 +92,50 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
+     selectedPlayers.value = selectedPlayers.value.filter(id => id !== playerId)
+   }
+ 
++  function incrementScore(team: 1 | 2, amount: number) {
++    const limit = ruleConfig.value?.scoreLimit ?? 10
++    if (team === 1) {
++      currentGame.value.team1Score = Math.min(currentGame.value.team1Score + amount, limit)
++    } else {
++      currentGame.value.team2Score = Math.min(currentGame.value.team2Score + amount, limit)
++    }
++    checkAutoCompletion()
++  }
++
++  function decrementScore(team: 1 | 2) {
++    if (team === 1) {
++      currentGame.value.team1Score = Math.max(0, currentGame.value.team1Score - 1)
++    } else {
++      currentGame.value.team2Score = Math.max(0, currentGame.value.team2Score - 1)
++    }
++  }
++
++  function checkAutoCompletion() {
++    const limit = ruleConfig.value?.scoreLimit ?? 10
++    if (currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit) {
++      games.value.push({ ...currentGame.value })
++      currentGame.value = { team1Score: 0, team2Score: 0 }
++      
++      const winsNeeded = ruleConfig.value?.winsNeeded ?? 1
++      const gameLimit = ruleConfig.value?.gameLimit ?? 1
++      
++      const team1Wins = games.value.filter(g => g.team1Score > g.team2Score).length
++      const team2Wins = games.value.filter(g => g.team2Score > g.team1Score).length
++      
++      if (team1Wins >= winsNeeded || team2Wins >= winsNeeded || games.value.length >= gameLimit) {
++        matchState.value = 'ready_for_submission'
++      }
++    }
++  }
++
+   function reset() {
+     matchType.value = MatchType.ONE_VS_ONE
+     selectedPlayers.value = []
+     ruleSystem.value = 'STANDARD'
++    ruleConfig.value = null
++    games.value = []
++    currentGame.value = { team1Score: 0, team2Score: 0 }
++    matchState.value = 'draft'
+   }
+ 
+   return {
+@@ -72,10 +143,17 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
+     selectedPlayers,
+     ruleSystem,
+     frequentOpponents,
++    ruleConfig,
++    games,
++    currentGame,
++    matchState,
+     fetchDefaults,
++    loadRuleConfig,
+     setMatchType,
+     addPlayer,
+     removePlayer,
++    incrementScore,
++    decrementScore,
+     reset
+   }
+ })
+diff --git a/frontend/src/features/match/components/ScoreEntry.vue b/frontend/src/features/match/components/ScoreEntry.vue
+new file mode 100644
+index 0000000..934f15a
+--- /dev/null
++++ b/frontend/src/features/match/components/ScoreEntry.vue
+@@ -0,0 +1,101 @@
++<script setup lang="ts">
++import { computed } from 'vue'
++import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
++import ScoreStepper from './ScoreStepper.vue'
++import BaseButton from '@/core/components/BaseButton.vue'
++
++const store = useMatchDraftStore()
++const emit = defineEmits<{
++  (e: 'complete'): void
++  (e: 'cancel'): void
++}>()
++
++const getPlayerName = (id: string) => {
++  const opp = store.frequentOpponents.find(o => o.id === id)
++  return opp ? opp.nickname : `Player ${id.substring(0, 4)}`
++}
++
++const team1Name = computed(() => {
++  if (store.matchType === MatchType.ONE_VS_ONE) {
++    return getPlayerName(store.selectedPlayers[0])
++  } else {
++    return `${getPlayerName(store.selectedPlayers[0])} & ${getPlayerName(store.selectedPlayers[1])}`
++  }
++})
++
++const team2Name = computed(() => {
++  if (store.matchType === MatchType.ONE_VS_ONE) {
++    return getPlayerName(store.selectedPlayers[1])
++  } else {
++    return `${getPlayerName(store.selectedPlayers[2])} & ${getPlayerName(store.selectedPlayers[3])}`
++  }
++})
++
++const team1Wins = computed(() => {
++  return store.games.filter(g => g.team1Score > g.team2Score).length
++})
++
++const team2Wins = computed(() => {
++  return store.games.filter(g => g.team2Score > g.team1Score).length
++})
++
++function onTeam1Increment(amount: number) {
++  store.incrementScore(1, amount)
++  checkCompletion()
++}
++function onTeam1Decrement() {
++  store.decrementScore(1)
++}
++function onTeam2Increment(amount: number) {
++  store.incrementScore(2, amount)
++  checkCompletion()
++}
++function onTeam2Decrement() {
++  store.decrementScore(2)
++}
++
++function checkCompletion() {
++  if (store.matchState === 'ready_for_submission') {
++    emit('complete')
++  }
++}
++</script>
++
++<template>
++  <div class="w-full flex flex-col bg-surface-container-low rounded-2xl p-4">
++    <!-- Header with past match context -->
++    <div class="flex justify-between items-center mb-6">
++      <BaseButton variant="secondary" @click="emit('cancel')" class="!h-10 px-4">Cancel</BaseButton>
++      <div class="text-on-surface-variant text-base font-bold flex flex-col items-center">
++        <span>Match Score</span>
++        <span class="text-xl text-on-surface">{{ team1Wins }} - {{ team2Wins }}</span>
++      </div>
++      <!-- placeholder for spacing -->
++      <div class="w-[88px]"></div>
++    </div>
++    
++    <div class="flex justify-between gap-4">
++      <!-- Team 1 -->
++      <div class="flex-1 flex flex-col items-center">
++        <h3 class="text-on-surface font-bold text-center mb-4 line-clamp-2 h-12 w-full flex items-center justify-center break-words">{{ team1Name }}</h3>
++        <ScoreStepper 
++          :score="store.currentGame.team1Score"
++          :score-limit="store.ruleConfig?.scoreLimit || 10"
++          @increment="onTeam1Increment"
++          @decrement="onTeam1Decrement"
++        />
++      </div>
++      
++      <!-- Team 2 -->
++      <div class="flex-1 flex flex-col items-center">
++        <h3 class="text-on-surface font-bold text-center mb-4 line-clamp-2 h-12 w-full flex items-center justify-center break-words">{{ team2Name }}</h3>
++        <ScoreStepper 
++          :score="store.currentGame.team2Score"
++          :score-limit="store.ruleConfig?.scoreLimit || 10"
++          @increment="onTeam2Increment"
++          @decrement="onTeam2Decrement"
++        />
++      </div>
++    </div>
++  </div>
++</template>
+diff --git a/frontend/src/features/match/components/ScoreStepper.vue b/frontend/src/features/match/components/ScoreStepper.vue
+new file mode 100644
+index 0000000..12e734c
+--- /dev/null
++++ b/frontend/src/features/match/components/ScoreStepper.vue
+@@ -0,0 +1,36 @@
++<script setup lang="ts">
++defineProps<{
++  score: number
++  scoreLimit: number
++}>()
++const emit = defineEmits<{
++  (e: 'increment', amount: number): void
++  (e: 'decrement'): void
++}>()
++</script>
++
++<template>
++  <div class="flex flex-col items-center gap-2">
++    <!-- +5 stepper, visually distinct and larger, hidden if scoreLimit < 5 -->
++    <button v-if="scoreLimit >= 5" 
++            @click="emit('increment', 5)"
++            class="bg-surface-container-highest text-on-surface font-bold text-2xl w-24 h-16 rounded-xl flex items-center justify-center cursor-pointer hover:bg-surface-container-highest/80 transition-colors">
++      +5
++    </button>
++    
++    <!-- +1 stepper -->
++    <button @click="emit('increment', 1)"
++            class="bg-surface-container-highest text-on-surface font-bold text-xl w-20 h-12 rounded-xl flex items-center justify-center cursor-pointer hover:bg-surface-container-highest/80 transition-colors mt-2">
++      +1
++    </button>
++    
++    <!-- Current score -->
++    <div class="text-4xl font-bold text-on-surface my-4">{{ score }}</div>
++    
++    <!-- -1 stepper -->
++    <button @click="emit('decrement')"
++            class="bg-surface-container-highest text-on-surface font-bold text-xl w-20 h-12 rounded-xl flex items-center justify-center cursor-pointer hover:bg-surface-container-highest/80 transition-colors">
++      -1
++    </button>
++  </div>
++</template>

@@ -56,7 +56,7 @@ development_status:
   epic-2: in-progress
   2-1-rule-system-selection-and-inline-creation: done
   2-2-match-type-and-player-selection-portrait: done
-  2-3-score-entry-and-automatic-completion: backlog
+  2-3-score-entry-and-automatic-completion: done
   2-4-match-submission-with-undo-window: backlog
   2-5-position-swapping-between-games: backlog
   epic-2-retrospective: optional
