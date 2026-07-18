@@ -48,6 +48,7 @@ export const useStatsStore = defineStore('stats', () => {
       } else {
         stats.value = fetchedStats
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch statistics'
       if (shouldShowDemoData.value) {

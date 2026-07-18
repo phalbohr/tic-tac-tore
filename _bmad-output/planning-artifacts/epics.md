@@ -24,7 +24,7 @@ FR2: Player can create a retrospective match record for a completed 2v2 match.
 FR3: Player can select a rule system (ITSF, DTFB, or Custom template) before entering match data.
 FR4: Player can record a live match in real-time by tapping screen quadrants.
 FR5: Third-party observer (referee) can record a match with adapted UI.
-FR6: System automatically completes a game/match when win condition is met.
+FR6: System requires manual confirmation to complete a game/match when win condition is met to prevent misclicks.
 FR7: Player can swap teammate positions between games.
 FR8: Player can swap teammate positions within a game during live match.
 FR9: Player can undo the last recorded goal during live match entry.
@@ -121,7 +121,7 @@ FR2: Epic 2 - Retrospective match 2v2
 FR3: Epic 2 - Rule system selection
 FR4: Epic 5 - Live match recording
 FR5: Epic 5 - Referee live mode
-FR6: Epic 2 - Auto-completion logic
+FR6: Epic 2 - Manual completion logic
 FR7: Epic 2 - Position swap (between games)
 FR8: Epic 5 - Position swap (within game)
 FR9: Epic 5 - Goal undo (live mode)
@@ -320,13 +320,13 @@ As a player, I want to select format and participants, So that I can record matc
 - **Then** 2 or 4 slots available
 - **And** UI follows "No-Line" rule (UX-DR3)
 
-### Story 2.3: Score Entry & Automatic Completion
+### Story 2.3: Score Entry & Manual Completion
 As a player, I want to quickly enter game scores, So that system determines outcome automatically.
 **Acceptance Criteria:**
 - **Given** players/rules selected
 - **When** score entry opens (+/- steppers)
 - **Then** game completes on limit (FR6)
-- **And** match completes on win condition
+- **And** match requires manual completion on win condition
 
 ### Story 2.4: Match Submission with Undo Window
 As a player, I want to submit and have a short undo window, So that I can correct mistakes.

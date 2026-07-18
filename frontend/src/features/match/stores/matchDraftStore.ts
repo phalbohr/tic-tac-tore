@@ -1,3 +1,4 @@
+import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -29,6 +30,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const selectedPlayers = ref<string[]>([])
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
+  const fetchedPlayers = ref<Record<string, PlayerDto>>({})
   
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
@@ -59,17 +61,27 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
   }
 
-  async function loadRuleConfig() {
+  async function loadRuleConfig(signal?: AbortSignal) {
     try {
-      const res = await fetch(`/api/rules/${ruleSystem.value}`)
+      const res = await fetch(`/api/rules/${encodeURIComponent(ruleSystem.value)}`, { signal })
       if (res.ok) {
-        ruleConfig.value = await res.json()
+        const data = await res.json()
+        if (typeof data.scoreLimit !== 'number' && typeof data.scoreLimit !== 'string') {
+           throw new Error('Invalid numeric fields in rule config')
+        }
+        ruleConfig.value = { 
+          scoreLimit: Number(data.scoreLimit), 
+          gameLimit: Number(data.gameLimit), 
+          winsNeeded: Number(data.winsNeeded) 
+        }
       } else {
         throw new Error('API failed')
       }
-    } catch (e) {
-      console.warn('Failed to load rule config, falling back to Standard rules', e)
-      ruleConfig.value = { scoreLimit: 10, gameLimit: 1, winsNeeded: 1 }
+    } catch (error) {
+      const e = error as Error;
+      if (e.name === 'AbortError') throw e;
+      console.warn('Failed to load rule config, falling back to Best of 3 rules', e)
+      ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2 }
     }
   }
 
@@ -80,11 +92,25 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
   }
 
+    async function fetchPlayer(id: string) {
+    if (frequentOpponents.value.find(o => o.id === id)) return;
+    if (fetchedPlayers.value[id]) return;
+    try {
+      const res = await fetch(`/api/v1/players/${id}`);
+      if (res.ok) {
+        fetchedPlayers.value[id] = await res.json();
+      }
+    } catch (e) {
+      console.warn('Failed to fetch player profile', e);
+    }
+  }
+
   function addPlayer(playerId: string) {
     if (!playerId.trim()) return;
     const maxPlayers = matchType.value === MatchType.ONE_VS_ONE ? 2 : 4
     if (selectedPlayers.value.length < maxPlayers && !selectedPlayers.value.includes(playerId)) {
       selectedPlayers.value.push(playerId)
+      fetchPlayer(playerId)
     }
   }
 
@@ -92,18 +118,41 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectedPlayers.value = selectedPlayers.value.filter(id => id !== playerId)
   }
 
+  
+
+  const isGameComplete = computed(() => {
+    const limit = ruleConfig.value?.scoreLimit ?? 10
+    return currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit
+  })
+
+  const isMatchComplete = computed(() => {
+    const winsNeeded = ruleConfig.value?.winsNeeded ?? 1
+    const gameLimit = ruleConfig.value?.gameLimit ?? 1
+    
+    let t1w = games.value.filter(g => g.team1Score > g.team2Score).length
+    let t2w = games.value.filter(g => g.team2Score > g.team1Score).length
+    
+    if (isGameComplete.value) {
+       if (currentGame.value.team1Score > currentGame.value.team2Score) t1w++;
+       else if (currentGame.value.team2Score > currentGame.value.team1Score) t2w++;
+    }
+    
+    return t1w >= winsNeeded || t2w >= winsNeeded || (games.value.length + 1) >= gameLimit
+  })
+
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
+    
     const limit = ruleConfig.value?.scoreLimit ?? 10
     if (team === 1) {
       currentGame.value.team1Score = Math.min(currentGame.value.team1Score + amount, limit)
     } else {
       currentGame.value.team2Score = Math.min(currentGame.value.team2Score + amount, limit)
     }
-    checkAutoCompletion()
   }
 
   function decrementScore(team: 1 | 2) {
+    if (matchState.value === 'ready_for_submission') return
     if (team === 1) {
       currentGame.value.team1Score = Math.max(0, currentGame.value.team1Score - 1)
     } else {
@@ -111,21 +160,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
   }
 
-  function checkAutoCompletion() {
-    const limit = ruleConfig.value?.scoreLimit ?? 10
-    if (currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit) {
-      games.value.push({ ...currentGame.value })
-      currentGame.value = { team1Score: 0, team2Score: 0 }
-      
-      const winsNeeded = ruleConfig.value?.winsNeeded ?? 1
-      const gameLimit = ruleConfig.value?.gameLimit ?? 1
-      
-      const team1Wins = games.value.filter(g => g.team1Score > g.team2Score).length
-      const team2Wins = games.value.filter(g => g.team2Score > g.team1Score).length
-      
-      if (team1Wins >= winsNeeded || team2Wins >= winsNeeded || games.value.length >= gameLimit) {
-        matchState.value = 'ready_for_submission'
-      }
+  function completeCurrentGame() {
+    if (!isGameComplete.value) return;
+    
+    const wasMatchComplete = isMatchComplete.value;
+    games.value.push({ ...currentGame.value });
+    
+    if (wasMatchComplete) {
+      matchState.value = 'ready_for_submission';
+    } else {
+      currentGame.value = { team1Score: 0, team2Score: 0 };
     }
   }
 
@@ -148,6 +192,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectedPlayers,
     ruleSystem,
     frequentOpponents,
+    fetchedPlayers,
+    isGameComplete,
+    isMatchComplete,
+    completeCurrentGame,
     ruleConfig,
     games,
     currentGame,

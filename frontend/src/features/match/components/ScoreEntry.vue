@@ -13,7 +13,10 @@ const emit = defineEmits<{
 const getPlayerName = (id?: string) => {
   if (!id) return 'Unknown'
   const opp = store.frequentOpponents.find(o => o.id === id)
-  return opp ? opp.nickname : `Player ${id.substring(0, 4)}`
+  if (opp) return opp.nickname
+  const fetched = store.fetchedPlayers[id]
+  if (fetched) return fetched.nickname
+  return `Player ${id.substring(0, 4)}`
 }
 
 const team1Name = computed(() => {
@@ -71,10 +74,21 @@ watch(() => store.matchState, (newVal) => {
       </div>
     </div>
     
+    <div class="flex flex-col items-center mb-4 gap-1">
+      <div v-for="idx in (store.ruleConfig?.gameLimit || 1)" :key="idx" class="text-sm text-on-surface-variant h-5 flex items-center justify-center">
+        <span v-if="idx <= store.games.length">
+          Game {{ idx }}: {{ store.games[idx - 1].team1Score }} - {{ store.games[idx - 1].team2Score }}
+        </span>
+        <span v-else class="opacity-50">
+          Game {{ idx }}: -
+        </span>
+      </div>
+    </div>
+    
     <div class="flex justify-between gap-4">
       <!-- Team 1 -->
       <div class="flex-1 flex flex-col items-center">
-        <h3 class="text-on-surface font-bold text-center mb-4 line-clamp-2 h-12 w-full flex items-center justify-center break-words">{{ team1Name }}</h3>
+        <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team1Name }}</h3>
         <ScoreStepper 
           :score="store.currentGame.team1Score"
           :score-limit="store.ruleConfig?.scoreLimit || 10"
@@ -85,7 +99,7 @@ watch(() => store.matchState, (newVal) => {
       
       <!-- Team 2 -->
       <div class="flex-1 flex flex-col items-center">
-        <h3 class="text-on-surface font-bold text-center mb-4 line-clamp-2 h-12 w-full flex items-center justify-center break-words">{{ team2Name }}</h3>
+        <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team2Name }}</h3>
         <ScoreStepper 
           :score="store.currentGame.team2Score"
           :score-limit="store.ruleConfig?.scoreLimit || 10"
@@ -94,5 +108,13 @@ watch(() => store.matchState, (newVal) => {
         />
       </div>
     </div>
+    
+    <BaseButton 
+      :disabled="!store.isGameComplete"
+      @click="store.completeCurrentGame()"
+      class="w-full mt-6"
+    >
+      {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
+    </BaseButton>
   </div>
 </template>

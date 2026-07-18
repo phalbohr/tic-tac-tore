@@ -5,7 +5,7 @@ defineProps<{
 </script>
 <template>
   <button 
-    class="flex items-center justify-center font-bold rounded-xl transition-colors h-14 px-4"
+    class="flex items-center justify-center font-bold rounded-xl transition-colors h-14 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
       'bg-primary text-background': variant === 'primary' || !variant,
       'bg-surface-container-highest text-on-surface': variant === 'secondary',
