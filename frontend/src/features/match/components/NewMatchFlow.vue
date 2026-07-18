@@ -21,18 +21,31 @@ onUnmounted(() => {
 })
 
 const isSubmitting = ref(false)
+const errorMsg = ref('')
+let abortController: AbortController | null = null
+
 async function submitMatchDraft() {
   if (isSubmitting.value) return
+  if (store.selectedPlayers.length !== (store.matchType === '1v1' ? 2 : 4)) return
   isSubmitting.value = true
+  errorMsg.value = ''
+  abortController = new AbortController()
   try {
-    await store.loadRuleConfig()
-    store.beginScoreEntry()
+    await store.loadRuleConfig(abortController.signal)
+    if (store.matchState === 'draft' && (!abortController || !abortController.signal.aborted)) store.beginScoreEntry()
+  } catch (error) {
+    const e = error as Error;
+    if (e.name !== 'AbortError') {
+      errorMsg.value = 'Failed to start match. Check rules config.'
+    }
   } finally {
     isSubmitting.value = false
+    abortController = null
   }
 }
 
 function handleCancel() {
+  if (abortController) abortController.abort()
   store.reset()
   emit('cancel')
 }
@@ -55,6 +68,7 @@ function handleMatchReady() {
     </div>
     
     <PlayerSelection />
+    <div v-if="errorMsg" class="text-red-500 text-sm mt-2">{{ errorMsg }}</div>
     
     <BaseButton @click="submitMatchDraft" :disabled="isSubmitting" class="w-full mt-4 rounded-full">
       {{ isSubmitting ? 'Loading...' : 'Start Match' }}
@@ -66,5 +80,10 @@ function handleMatchReady() {
     @complete="handleMatchReady" 
     @cancel="handleCancel" 
   />
+  
+  <div v-else class="w-full flex flex-col items-center bg-surface-container-low rounded-2xl p-4 gap-6">
+    <p>Invalid match state. Please try again.</p>
+    <BaseButton @click="handleCancel">Go Back</BaseButton>
+  </div>
 </template>
 

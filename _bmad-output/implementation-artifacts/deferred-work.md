@@ -68,3 +68,13 @@ source_spec: `spec-2-3-score-entry-and-automatic-completion.md`
 severity: low
 reason: The follow-up-review damping cap (limits.max_followup_reviews = 1) was spent with the story finalized (status: done, verify green) while the review pass still recommended an independent follow-up. The work was committed by bmad-loop run 20260717-193102-8fc5; this entry preserves the lingering recommendation for a deliberate later review.
 status: open
+
+## Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)
+- Undo winning point misclick: Aggressive `currentGame` zeroing locks accidental win into history permanently.
+- Hardcoded win logic without win-by-two: Assumes naive absolute score ceiling, breaks for win-by-two.
+- Hardcoded array indices crash on 3v3: Array index hardcoding in `ScoreEntry.vue` fails if matchType is extended.
+
+## Deferred from: code review (Iteration 2)
+- Unconfirmed Cancellations: Cancel button triggers total state reset without confirm.
+- Hardcoded array indexing roulette: Hardcoded array indices for team names.
+- Naive win calculation: Assumes static score limit, breaks win-by-two.

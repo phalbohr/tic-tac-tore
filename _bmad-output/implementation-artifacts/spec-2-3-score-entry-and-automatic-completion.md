@@ -17,56 +17,89 @@ final_revision: '85e3f2d'
 
 **Problem:** After selecting the match type and players, users need a way to enter game scores quickly and easily without manual progression logic, so they can complete the retrospective match entry flow.
 
-**Approach:** Implement a portrait-oriented "kicker-table" style score entry interface using `+1`/`-1` and `+5` steppers. Expand the `MatchDraft` store to track game scores and automatically complete a game when the score limit is reached (and the match when win conditions are met), based on the selected rule system's configuration.
+**Approach:** Implement a portrait-oriented score entry interface using `+1`/`-1` and `+5` steppers. Expand the `MatchDraft` store to inherit state from Story 2.2, track game scores, and automatically complete games/matches based on the active `RuleConfiguration` from the backend.
 
 ## Boundaries & Constraints
 
 **Always:**
-- Strictly follow the "No-Line" rule (UX-DR3) for UI boundaries using background color shifts.
-- Optimize for one-handed mobile use in portrait orientation (no horizontal scrolling).
-- Visually distinguish the `+5` stepper (larger) from the `+1`/`-1` steppers.
-- Hide the `+5` stepper if the rule's `score_limit < 5`.
-- End-to-end performance of match entry must remain < 10 seconds.
+- **State Integration:** Inherit `matchType` (1v1/2v2) and `ruleConfigId` directly from the `MatchDraft` store populated in Story 2.2.
+- **Component Reuse:** Utilize existing UI primitives from `frontend/src/core/components/` for buttons and containers; do not reinvent them.
+- **Strict No-Line Design (UX-DR3):** Use `bg-surface-container-highest` layered over `bg-surface-container-low` for separation. 1px borders (`border`, `divide-y`) are strictly forbidden.
+- **500-Line Rule (IP-04):** `matchDraftStore.ts` and UI components must not exceed 500 lines. Refactor scoring logic into composables if necessary.
+- **Decoupled Logic:** Keep scoring/auto-completion logic fully decoupled from `ScoreEntry.vue` so it can be reused in Epic 5 (Live Mode).
+- **Mobile Orientation:** Optimize for one-handed portrait use (no horizontal scrolling).
+- **Stepper Logic:** Visually distinguish the `+5` stepper (larger) from the `+1`/`-1` steppers. Hide the `+5` stepper if the `RuleConfiguration` `scoreLimit` < 5.
 
 **Block If:**
-- The rule configuration API endpoint format is unknown or not documented enough to fetch `score_limit` and win conditions.
+- Missing rule configuration endpoints prevent fetching `scoreLimit` and `winsNeeded`.
+- Player name resolution endpoints are unavailable for players not in `frequentOpponents`.
 
 **Never:**
-- Never require the user to manually click "End Game" or "End Match" if the rule limits are reached; it must auto-advance.
-- Do not use 1px borders (`border`, `divide-y`).
+- Require manual "End Game" or "End Match" clicks if limits are reached (must auto-advance).
+- Hallucinate player names or rules APIs.
 
 ## I/O & Edge-Case Matrix
 
 | Scenario | Input / State | Expected Output / Behavior | Error Handling |
 |----------|--------------|---------------------------|----------------|
-| Score Limit Reached | User taps `+1` reaching the `score_limit` for a game | The game automatically completes, and the next game starts (or match finishes if win condition met). | No error expected |
-| Match Win Condition | User reaches the score limit, satisfying the match win condition | The match is marked as ready for submission (Story 2.4). | No error expected |
-| Score < 5 Rule | The rule system defines a `score_limit < 5` | The `+5` stepper is hidden from the UI. | No error expected |
-| Stepper Decrement | User taps `-1` on a score of 0 | Score remains 0 (cannot be negative). | Ignore input gracefully |
+| Score Limit Reached | User taps `+1` reaching the `scoreLimit` for a game | Game completes automatically; next game starts or match finishes. | N/A |
+| Match Win Condition | User reaches the score limit, satisfying the match win condition | Match advances to the submission state (Story 2.4). | N/A |
+| Score < 5 Rule | The rule system defines a `scoreLimit` < 5 | The `+5` stepper is hidden from the UI. | N/A |
+| Stepper Decrement | User taps `-1` on a score of 0 | Score remains 0 (cannot be negative). | Ignore input |
 
 </intent-contract>
 
 ## Code Map
 
-- `frontend/src/features/match/components/ScoreEntry.vue` -- New component for entering scores using steppers.
+- `frontend/src/features/match/components/ScoreEntry.vue` -- Score entry view layout.
 - `frontend/src/features/match/components/ScoreStepper.vue` -- Reusable UI component for the +5, +1, -1 buttons.
-- `frontend/src/features/match/stores/matchDraftStore.ts` -- Needs to track current scores, game history, and evaluate auto-completion rules.
-- `frontend/src/features/match/components/NewMatchFlow.vue` -- Integrate the score entry screen into the flow after player selection.
+- `frontend/src/features/match/stores/matchDraftStore.ts` -- Score tracking, rule evaluation, and game history.
+- `frontend/src/features/match/components/NewMatchFlow.vue` -- Integrate score entry into the creation flow.
+
+## Developer Context & Guardrails
+
+### 🔌 API & State Management
+- **RuleConfiguration API:** Fetch the active rule configuration using the `ruleConfigId` stored in `MatchDraft`. The backend domain model `RuleConfiguration` (AD-01) provides `scoreLimit` and `winsNeeded`. Do not mock or invent a parallel rules engine.
+- **Player Name Resolution:** To format team names in 2v2 (e.g., "Alice & Bob"), check if players are in the `frequentOpponents` list. For unknown players, fetch details using `/api/v1/players/{id}` or the equivalent user service. Handle missing/loading names safely.
+- **State Integration:** The `MatchDraft` store must seamlessly carry over the selected players and match type from Story 2.2.
+
+### 🎨 UI & Layout Requirements
+- **No-Line Rule:** Implement UX-DR3 precisely using Tailwind tokens: base containers use `bg-surface-container-low`, and distinct interactive elements (like steppers) use `bg-surface-container-highest`.
+- **Component Primitives:** Use layout and button components from `src/core/components/` to build the steppers and score board.
+- **Context Display:** Display past game results and the overall match score above the current game steppers.
 
 ## Tasks & Acceptance
+### Review Findings
+
+- [x] [Review][Patch] Jarring Auto-Completion Transition — Отменить мгновенное авто-завершение. При достижении победного условия должна появляться/активироваться кнопка завершения ввода (блокируя ввод новых голов, кроме отмены), которую пользователь должен нажать сам.
+- [x] [Review][Patch] Missing Player Name API Fetching [frontend/src/features/match/components/ScoreEntry.vue]
+- [x] [Review][Patch] Unsafe and Silent loadRuleConfig [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Missing Display of Past Games [frontend/src/features/match/components/ScoreEntry.vue]
+- [x] [Review][Patch] Missing Player Count Validation on Submit [frontend/src/features/match/components/NewMatchFlow.vue]
+- [x] [Review][Patch] Active Stepper at Zero [frontend/src/features/match/components/ScoreStepper.vue]
+- [x] [Review][Patch] Redundant Cancel Buttons [frontend/src/features/match/components/ScoreEntry.vue]
+- [x] [Review][Patch] Missing ARIA Labels on Steppers [frontend/src/features/match/components/ScoreStepper.vue]
+- [x] [Review][Patch] CSS Conflict line-clamp with flex [frontend/src/features/match/components/ScoreEntry.vue]
+- [x] [Review][Patch] Cancel during fetch corrupts store [frontend/src/features/match/components/NewMatchFlow.vue]
+- [x] [Review][Patch] Invalid matchState renders blank screen [frontend/src/features/match/components/NewMatchFlow.vue]
+- [x] [Review][Defer] Undo winning point misclick [frontend/src/features/match/stores/matchDraftStore.ts] — deferred, pre-existing
+- [x] [Review][Defer] Hardcoded win logic without win-by-two [frontend/src/features/match/stores/matchDraftStore.ts] — deferred, pre-existing
+- [x] [Review][Defer] Hardcoded array indices crash on 3v3 [frontend/src/features/match/components/ScoreEntry.vue] — deferred, pre-existing
+
 
 **Execution:**
-- [x] `frontend/src/features/match/components/ScoreStepper.vue` -- Create reusable stepper component with `+5`, `+1`, `-1` buttons, handling the hidden `+5` state.
-- [x] `frontend/src/features/match/components/ScoreEntry.vue` -- Create the score entry view with "kicker-table" layout, adhering to "No-Line" rule. Display past games/match score context above the current game. Format team names properly for 2v2 (combine player names with "&") and safely fallback user name lookup if they aren't in `frequentOpponents`.
-- [x] `frontend/src/features/match/stores/matchDraftStore.ts` -- Add state for current games and scores. Add logic to fetch rule limits and automatically complete games/matches when limits are reached. Cap the score at `goalLimit` when incrementing (e.g. `+5`). Fix `gameLimit` vs `winsNeeded` logic for draws/completion. Add error handling for API failures in `loadRuleConfig` and log if falling back to Standard rules.
-- [x] `frontend/src/features/match/components/NewMatchFlow.vue` -- Update to transition to `ScoreEntry` after player selection is complete.
-- [x] `frontend/src/features/match/stores/matchDraftStore.spec.ts` -- Add unit tests for score incrementing (including capping at limit), decrementing (prevent <0), auto-completion logic, and API error handling.
+- [x] **Store Logic:** Update `matchDraftStore.ts` to fetch and apply `RuleConfiguration` constraints (`scoreLimit`, `winsNeeded`). Implement state to track games and scores, auto-completing games and capping increments at `scoreLimit`.
+- [x] **API Fallbacks:** Add error handling in the store for `RuleConfiguration` or Player Name API failures, logging gracefully.
+- [x] **ScoreStepper Component:** Create `ScoreStepper.vue` adhering strictly to the No-Line rule using core UI primitives. Handle the hidden `+5` state.
+- [x] **ScoreEntry Component:** Create `ScoreEntry.vue`. Combine player names with "&" for 2v2. Keep logic decoupled from the UI.
+- [x] **Flow Integration:** Update `NewMatchFlow.vue` to transition to `ScoreEntry.vue` after player selection.
+- [x] **Testing:** Add unit tests to `matchDraftStore.spec.ts` for scoring increments, decrements, capping, auto-completion, and API error states.
 
 **Acceptance Criteria:**
-- Given a match draft in progress, when the score entry view opens, then the score steppers are presented without 1px borders.
-- Given the score limit is `< 5`, when the score entry view opens, then the `+5` stepper is hidden.
-- Given score entry, when a player's score reaches the limit, then the game automatically completes.
-- Given game completion, when the overall match win conditions are met, then the match automatically advances to the submission state.
+- Given a match draft in progress, when the score entry view opens, then the score steppers are presented using background shifts (no 1px borders).
+- Given the active `RuleConfiguration` has a `scoreLimit` < 5, when the view opens, then the `+5` stepper is hidden.
+- Given score entry, when a player's score reaches the `scoreLimit`, then the game automatically completes.
+- Given game completion, when the overall match `winsNeeded` are met, then the match automatically advances to the submission state.
 
 ## Spec Change Log
 
@@ -130,3 +163,17 @@ Implemented the portrait-oriented "kicker-table" score entry interface per Story
 **Residual Risks:**
 - Multi-game undo states and final submission flow rely on the subsequent implementation of Story 2.4.
 
+### Review Findings (Iteration 2)
+
+- [x] [Review][Patch] Final game data is stranded — completeCurrentGame does not push the final game into games array when match completes [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Invalid ES module import placement — import { computed } is inside useMatchDraftStore [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Broken Unit Tests — Tests expect auto-completion despite manual implementation [frontend/src/features/match/stores/matchDraftStore.spec.ts]
+- [x] [Review][Patch] Outdated Spec ACs — Manual completion violates old auto-advance constraints in this very spec file [spec-2-3-score-entry-and-automatic-completion.md]
+- [x] [Review][Patch] Cancellation race condition — Canceling during loadRuleConfig sets state to draft, which causes beginScoreEntry to execute [frontend/src/features/match/components/NewMatchFlow.vue]
+- [x] [Review][Patch] Decrement after completion — decrementScore lacks matchState ready_for_submission guard [frontend/src/features/match/stores/matchDraftStore.ts]
+- [x] [Review][Patch] Misleading +5 Stepper UI — +5 button remains visible when < 5 points are needed [frontend/src/features/match/components/ScoreStepper.vue]
+- [x] [Review][Patch] Context-blind multi-game matches — UI omits current game number [frontend/src/features/match/components/ScoreEntry.vue]
+- [x] [Review][Patch] Reckless test mutation — globalThis.fetch is not cleaned up in afterEach [frontend/src/features/match/stores/matchDraftStore.spec.ts]
+- [x] [Review][Defer] Unconfirmed Cancellations — Cancel button triggers total state reset without confirm — deferred, pre-existing
+- [x] [Review][Defer] Hardcoded array indexing roulette — Hardcoded array indices for team names — deferred, pre-existing
+- [x] [Review][Defer] Naive win calculation — Assumes static score limit, breaks win-by-two — deferred, pre-existing

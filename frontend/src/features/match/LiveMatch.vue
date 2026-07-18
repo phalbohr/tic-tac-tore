@@ -16,10 +16,11 @@ const startMatch = async () => {
     try {
       if (liveMatchContainer.value.requestFullscreen) {
         await liveMatchContainer.value.requestFullscreen()
-      } else if ((liveMatchContainer.value as any).webkitRequestFullscreen) {
-        await (liveMatchContainer.value as any).webkitRequestFullscreen()
+      } else if ((liveMatchContainer.value as any).webkitRequestFullscreen) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        await (liveMatchContainer.value as any).webkitRequestFullscreen() // eslint-disable-line @typescript-eslint/no-explicit-any
       }
-      if (screen.orientation && (screen.orientation as any).lock) {
+      if (screen.orientation && (screen.orientation as any).lock) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (screen.orientation as any).lock('landscape')
       }
     } catch (err) {

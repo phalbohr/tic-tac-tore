@@ -7,7 +7,7 @@ This document maps all stories from Epics 2-8 into 4 distinct, independent devel
 
 **Phase 1: Basic Match Flow (Epic 2)**
 - **Story 2.2:** Match Type & Player Selection (Portrait) *(1v1 UI foundation)*
-- **Story 2.3:** Score Entry & Automatic Completion
+- **Story 2.3:** Score Entry & Manual Completion
 - **Story 2.4:** Match Submission with Undo Window
 
 **Phase 2: Complex Match Flow (Epic 2)**

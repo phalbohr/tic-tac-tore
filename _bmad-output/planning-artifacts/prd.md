@@ -638,7 +638,7 @@ Flexible scheduling
 - **FR3:** Player can select a rule system (ITSF, DTFB, or a saved Custom template) before entering match data, or create a new custom template inline. The system enforces the selected rule system's constraints (game count, score limits, win conditions)
 - **FR4:** Player can record a live match in real-time by tapping screen quadrants to attribute goals to specific players during play (Phase 1.5)
 - **FR5:** Third-party observer (referee) can record a match they are not participating in, with adapted UI for their viewing position (Phase 1.5)
-- **FR6:** System automatically completes a game when a team reaches the score limit and automatically completes a match when the win condition is met — no manual "end game" needed
+- **FR6:** System requires manual completion when a team reaches the score limit or when the match win condition is met. A "Complete Game" or "Complete Match" button must appear/become active while disabling further score increments to allow undoing misclicks.
 - **FR7:** Player can swap teammate positions between games (mandatory or free, per rule system) in both retrospective and live entry modes
 - **FR8:** Player can swap teammate positions within a game during live match mode via a per-team swap button, if the active rule system permits within-game swaps (Phase 1.5). In retrospective entry, within-game swaps cannot be tracked — this is an accepted limitation per KD-03 (Speed over Precision)
 - **FR9:** Player can undo the last recorded goal during live match entry (Phase 1.5)
