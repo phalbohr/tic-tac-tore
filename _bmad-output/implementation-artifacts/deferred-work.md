@@ -6,6 +6,7 @@ source_spec: `spec-2-3-score-entry-and-automatic-completion.md`
 severity: low
 reason: The follow-up-review damping cap (limits.max_followup_reviews = 1) was spent with the story finalized (status: done, verify green) while the review pass still recommended an independent follow-up. The work was committed by bmad-loop run 20260717-193102-8fc5; this entry preserves the lingering recommendation for a deliberate later review.
 status: open
+decision: 2026-07-19 Run Review — Run a bmad-code-review session on the score entry code to catch any remaining issues.
 
 ### DW-2: Critical security vulnerabilities, including "JWT Leaked in URL", "XSS Exposure via LocalStorage", and "Account Takeover via Email Collision", are explicitly deferred to a later time. Merging code with known critical security flaws compromises the application and user data. These vulnerabilities must be fixed in the current PR.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-01)"), 2026-07-19
