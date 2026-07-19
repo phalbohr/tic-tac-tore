@@ -33,6 +33,7 @@ origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-
 location: n/a
 reason: [ ] [Review][Defer] Static role assignment (ROLE_USER only) [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:46] — deferred, pre-existing architecture limit.
 status: done 2026-07-19
+decision: 2026-07-19 Keep static roles — Static roles are sufficient for the current scope. We will defer role management until an admin panel is required.
 resolution: closed by human decision: Static roles are sufficient for the current scope. We will defer role management until an admin panel is required.
 decision: 2026-07-19 Keep static roles — Static roles are sufficient for the current scope. We will defer role management until an admin panel is required.
 
@@ -47,6 +48,7 @@ origin: migrated from legacy ledger ("Deferred from: code review of 1-1a-statele
 location: n/a
 reason: [ ] [Review][Defer] Consistency: `isRevoked()` checks only today/yesterday Bloom Filters, but `revoke()` writes to all filters until token expiration — tokens revoked >2 days ago will pass as valid if Redis bucket expired. Is a rolling 2-day window acceptable, or must coverage match JWT TTL exactly? [`RedisTokenRevocationService.java`] — deferred, need to investigate.
 status: done 2026-07-19
+decision: 2026-07-19 Accept 2-day window — The 2-day window is an acceptable trade-off for performance. JWT TTL should be kept under 2 days.
 resolution: closed by human decision: The 2-day window is an acceptable trade-off for performance. JWT TTL should be kept under 2 days.
 decision: 2026-07-19 Accept 2-day window — The 2-day window is an acceptable trade-off for performance. JWT TTL should be kept under 2 days.
 
@@ -55,6 +57,7 @@ origin: migrated from legacy ledger ("Deferred from: code review of 1-2-localiza
 location: n/a
 reason: Anonymization verification test logic flaw: TC-P0-004 plans to assert that an anonymized record has no PII via an API call after account deletion. However, account deletion revokes authentication (401), so a client-side E2E test cannot assert state without elevated endpoints.
 status: open
+decision: 2026-07-19 Build admin endpoint — Create a test-only admin endpoint to query the database state for deleted accounts to verify anonymization.
 decision: 2026-07-19 Build admin endpoint — Create a test-only admin endpoint to query the database state for deleted accounts to verify anonymization.
 
 ### DW-9: Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673]
