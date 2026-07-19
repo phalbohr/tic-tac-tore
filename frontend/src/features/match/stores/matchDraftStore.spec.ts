@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia'
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest'
 import { useMatchDraftStore, MatchType } from './matchDraftStore'
 
 describe('matchDraftStore', () => {
@@ -78,7 +78,7 @@ describe('matchDraftStore', () => {
       
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.games[0].team1Score).toBe(5)
+      expect(store.games[0]?.team1Score).toBe(5)
       expect(store.matchState).toBe('ready_for_submission')
     })
 
@@ -101,7 +101,7 @@ describe('matchDraftStore', () => {
       
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.games[0].team1Score).toBe(5)
+      expect(store.games[0]?.team1Score).toBe(5)
       expect(store.currentGame.team1Score).toBe(0)
       expect(store.matchState).toBe('draft') // Not ready for submission because winsNeeded = 2
     })

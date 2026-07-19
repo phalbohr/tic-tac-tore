@@ -29,11 +29,11 @@ test.describe('New Match Creation E2E Tests', () => {
     
     expect(scrollState.bodyScrollWidth).toBe(scrollState.docClientWidth)
 
-    const hrCount = await page.locator('hr').count()
-    expect(hrCount).toBe(0)
+    const hrCount = page.locator('hr')
+    await expect(hrCount).toHaveCount(0)
     
-    const elementsWithBorder = await page.locator('[class*="border-"], [class~="border"]').count()
-    expect(elementsWithBorder).toBe(0)
+    const elementsWithBorder = page.locator('[class*="border-"], [class~="border"]')
+    await expect(elementsWithBorder).toHaveCount(0)
 
     const fourPlayersBtn = page.getByRole('button', { name: /2v2/i })
     await fourPlayersBtn.click()

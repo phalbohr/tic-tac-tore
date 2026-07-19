@@ -77,7 +77,7 @@ watch(() => store.matchState, (newVal) => {
     <div class="flex flex-col items-center mb-4 gap-1">
       <div v-for="idx in (store.ruleConfig?.gameLimit || 1)" :key="idx" class="text-sm text-on-surface-variant h-5 flex items-center justify-center">
         <span v-if="idx <= store.games.length">
-          Game {{ idx }}: {{ store.games[idx - 1].team1Score }} - {{ store.games[idx - 1].team2Score }}
+          Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
         </span>
         <span v-else class="opacity-50">
           Game {{ idx }}: -
