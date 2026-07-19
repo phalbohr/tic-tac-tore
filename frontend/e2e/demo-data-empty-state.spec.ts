@@ -91,11 +91,11 @@ test.describe('Empty State & Demo Data E2E User Journey (ATDD)', () => {
     }, nickname);
     
     await page.goto('/');
-    await expect(page.getByText('Demo Data Active')).not.toBeVisible();
+    await expect(page.getByText('Demo Data Active')).toBeHidden();
     
     await page.goto('/cabinet');
     const demoToggle = page.getByTestId('demo-mode-toggle');
-    await expect(demoToggle).not.toBeVisible();
+    await expect(demoToggle).toBeHidden();
   });
   
   test('[P0] should show demo data implicitly for boundary condition 4 matches', async ({ page }) => {

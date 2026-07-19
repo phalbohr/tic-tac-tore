@@ -194,8 +194,8 @@ The loop is asymmetric by design: one person records (proactive effort), multipl
 |---------------|---------|
 | Apply correct confirmation rules (1v1/2v2/referee) | Automatically based on match context |
 | Enforce position swap between games | Automatically based on selected rule system |
-| Complete game when score limit reached | Automatically during score entry |
-| Complete match when win condition met | Automatically based on rule system |
+| Complete game when score limit reached | Manually via "Complete Game" button |
+| Complete match when win condition met | Manually via "Complete Match" button |
 | Publish to statistics after cooldown | 24h timer or second confirmation |
 | Tournament bracket progression | Automatic after match confirmation |
 | Rate limiting on submissions | Automatically, context-aware thresholds |
@@ -305,7 +305,7 @@ This project is not inspired by any specific product. It grows organically from 
 | **Smart defaults with override** | Pre-fill the most likely option, let user change if needed | Last-used rule system pre-selected; match type defaults to most frequent (2v2 or 1v1) |
 | **Frequency-sorted lists** | Most-used items at top, not alphabetical | Player selection: frequent opponents first, then alphabetical |
 | **Stepper controls (+/- and +5)** | Tap to increment/decrement; large-step shortcut for common scores | Score entry: +1/−1 for fine-tuning, +5 shortcut for fast entry. Game to 10 = two taps (+5, +5) instead of ten. Game to 5 = one tap |
-| **Auto-advance on completion** | When a field is complete, move to next automatically | Game auto-completes when score limit reached; match auto-completes when win condition met |
+| **Auto-advance on completion** | When a field is complete, move to next automatically | Game requires manual click to complete when score limit reached; match requires manual click when win condition met |
 | **Inline validation, not blocking dialogs** | Show errors contextually, never in a popup | "Score exceeds limit" shown inline, not as alert |
 
 #### Asynchronous Confirmation
@@ -541,7 +541,7 @@ flowchart TD
     G -->|Auto-return| A
 ```
 
-**Match scope is rule-template-determined.** Number of games and win condition fixed at template selection — no mid-match scope ambiguity. Auto-detected end is deterministic, not magic.
+**Match scope is rule-template-determined.** Number of games and win condition fixed at template selection — no mid-match scope ambiguity. End condition is deterministic, requiring manual completion to prevent misclicks.
 
 **Entry points:** Home Hub primary CTA; deep link from Want-to-Play pool match (Phase 2); QR code at table → /login → /match/new (returning user fast path).
 
@@ -898,7 +898,7 @@ Cross-flow rules promoted from per-flow optimizations.
 
 7. **One gesture per outcome.** Confirm = one tap. Submit = one tap. Reject + reason = one tap to open reason picker, one tap to choose reason. Multi-tap reserved for power-user flows (template creation).
 
-8. **Match scope is rule-template-determined.** Number of games and win condition fixed by selected rule template before play begins. Auto-detected match end is deterministic. No mid-match "add another game?" prompts.
+8. **Match scope is rule-template-determined.** Number of games and win condition fixed by selected rule template before play begins. Match end is deterministic but requires manual completion to prevent misclicks. No mid-match "add another game?" prompts.
 
 ## Component Strategy
 
