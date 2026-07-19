@@ -11,19 +11,22 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-01)"), 2026-07-19
 location: n/a
 reason: [ ] Critical security vulnerabilities, including "JWT Leaked in URL", "XSS Exposure via LocalStorage", and "Account Takeover via Email Collision", are explicitly deferred to a later time. Merging code with known critical security flaws compromises the application and user data. These vulnerabilities must be fixed in the current PR.
-status: open
+status: done 2026-07-19
+resolution: already resolved: CustomOAuth2SuccessHandler.java uses HttpOnly cookies; UserService.java:44 handles email collisions properly
 
 ### DW-3: Database exhaustion in JwtAuthenticationFilter. This filter executes a synchronous database lookup for every single authenticated request. This introduces a massive bottleneck and makes the application trivial to DoS. Statelessness of JWT is defeated.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-01)"), 2026-07-19
 location: n/a
 reason: [ ] Database exhaustion in JwtAuthenticationFilter. This filter executes a synchronous database lookup for every single authenticated request. This introduces a massive bottleneck and makes the application trivial to DoS. Statelessness of JWT is defeated.
-status: open
+status: done 2026-07-19
+resolution: already resolved: JwtAuthenticationFilter.java:54 builds User object from claims without database queries
 
 ### DW-4: Missing Redis-based denylist with Bloom filters. Violates: Architecture Patterns and Constraints (AD-03: Stateless JWT with Redis Denylist).
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-01)"), 2026-07-19
 location: n/a
 reason: [ ] Missing Redis-based denylist with Bloom filters. Violates: Architecture Patterns and Constraints (AD-03: Stateless JWT with Redis Denylist).
-status: open
+status: done 2026-07-19
+resolution: already resolved: RedisTokenRevocationService.java exists and implements Bloom Filters for denylist
 
 ### DW-5: Static role assignment (ROLE_USER only) [src/main/java/com/tictactore/security/JwtAuthenticationFilter.java:46]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-02)"), 2026-07-19
@@ -53,7 +56,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: [ ] [Review][Defer] Missing DB Migration for Non-Nullable Nickname [src/main/java/com/tictactore/model/User.java:672-673] — Nickname column is added as non-nullable, unique, but no DB migration script exists to backfill existing users.
-status: open
+status: done 2026-07-19
+resolution: already resolved: V2__add_profile_fields.sql:3-6 adds migration logic for non-nullable nickname
 
 ### DW-10: Complete API Mocking in E2E Tests
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -83,7 +87,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: Semantic Mismatch in JWT Claims: old 'name' claim might inject spaces into nickname.
-status: open
+status: done 2026-07-19
+resolution: already resolved: JwtService.java:41 uses sanitized nickname from user object, preventing space injection
 
 ### DW-15: Unused and Unnecessary Versioning: @Version added to User but not utilized.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -125,7 +130,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state, YAGNI.
-status: open
+status: done 2026-07-19
+resolution: already resolved: frontend/src/stores/auth.ts:70 uses JSON.parse(JSON.stringify) for deep copy
 
 ### DW-22: Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)"), 2026-07-19
@@ -155,13 +161,15 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Hardcoded team names in Pinia store [`frontend/src/stores/match.ts:14`] — deferred, pre-existing
-status: open
+status: done 2026-07-19
+resolution: already resolved: ScoreEntry.vue computes team names dynamically; matchDraftStore.ts does not hardcode team names
 
 ### DW-27: Goals can be infinitely added to a finished match [`frontend/src/stores/match.ts:24`]
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Goals can be infinitely added to a finished match [`frontend/src/stores/match.ts:24`] — deferred, pre-existing
-status: open
+status: done 2026-07-19
+resolution: already resolved: matchDraftStore.ts:144 and :147 reject increments when match is ready_for_submission and cap at limit
 
 ### DW-28: Provide an undo mechanism for game transitions in multi-game matches before final submission.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
@@ -173,7 +181,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Allow score decrementing to revert a game win state if tapped immediately.
-status: open
+status: done 2026-07-19
+resolution: already resolved: ScoreEntry.vue:112 manual 'Next Game' button requires completeCurrentGame() explicitly, decrement freely available before that
 
 ### DW-30: Add confirmation dialog when clicking Cancel in the score entry view to prevent accidental resets.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
