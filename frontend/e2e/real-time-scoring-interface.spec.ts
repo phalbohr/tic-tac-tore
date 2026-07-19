@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Real-time Scoring Interface', () => {
   test.use({ hasTouch: true })
+
   test('tapping screen quadrant awards goal to specific player and provides haptic feedback', async ({ page, context }) => {
     await context.grantPermissions([])
     await page.addInitScript(() => {

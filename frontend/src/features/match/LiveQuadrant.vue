@@ -12,9 +12,10 @@ const emit = defineEmits<{
 }>()
 
 const isFlashing = ref(false)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let flashTimer: any = null
 
-const handleTouch = (event: Event) => {
+const handleTouch = () => {
 
   if (navigator.vibrate) {
     navigator.vibrate([50])
