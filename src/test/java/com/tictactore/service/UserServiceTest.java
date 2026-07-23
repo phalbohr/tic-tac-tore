@@ -68,6 +68,18 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("findOrCreate - should use 8-digit suffix when base nickname is taken")
+    void findOrCreate_shouldUse8DigitSuffix_whenBaseNicknameIsTaken() {
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.existsByNickname("new")).thenReturn(true).thenReturn(false);
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        assertThat(user.getNickname()).matches("new\\d{8}");
+    }
+
+    @Test
     @DisplayName("Create User - should save and return new user when email not found")
     void findOrCreate_createsNewUser_whenEmailNotFound() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
@@ -157,7 +169,7 @@ class UserServiceTest {
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).startsWith("new");
-        assertThat(user.getNickname()).hasSize(7);
+        assertThat(user.getNickname()).hasSize(11);
     }
 
     @Test

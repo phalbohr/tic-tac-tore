@@ -124,7 +124,7 @@ public class UserService {
 
         int attempts = 0;
         while (userRepository.existsByNickname(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + String.format("%04d", random.nextInt(10000));
+            nickname = baseNickname + String.format("%08d", random.nextInt(100_000_000));
             attempts++;
         }
 
