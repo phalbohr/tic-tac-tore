@@ -47,6 +47,9 @@ class UserServiceTest {
     private UserCreator userCreator;
 
     @Mock
+    private UserOperation userOperation;
+
+    @Mock
     private ApplicationProperties properties;
 
     @Mock
@@ -243,247 +246,28 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Update Profile - should update nickname when cooldown passed")
-    void updateProfile_shouldUpdateNickname_whenCooldownPassed() {
+    @DisplayName("Update Profile - should delegate to UserOperation")
+    void updateProfile_shouldDelegateToUserOperation() {
         UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("oldNickname");
-        user.setLastNicknameUpdate(Instant.parse("2026-05-25T12:00:00Z").minus(31, java.time.temporal.ChronoUnit.DAYS));
         UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("newNickname").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByNickname("newNickname")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        User expectedUser = new User();
+        expectedUser.setNickname("newNickname");
+        when(userOperation.updateProfile(userId, request)).thenReturn(expectedUser);
 
-        User updatedUser = userService.updateProfile(userId, request);
+        User actualUser = userService.updateProfile(userId, request);
 
-        assertThat(updatedUser.getNickname()).isEqualTo("newNickname");
-        assertThat(updatedUser.getLastNicknameUpdate()).isEqualTo(Instant.parse("2026-05-25T12:00:00Z"));
+        assertThat(actualUser).isSameAs(expectedUser);
+        verify(userOperation).updateProfile(userId, request);
     }
 
     @Test
-    @DisplayName("Update Profile - should throw exception when cooldown not passed")
-    void updateProfile_shouldThrowException_whenCooldownNotPassed() {
+    @DisplayName("Delete Account - should delegate to UserOperation")
+    void deleteAccount_shouldDelegateToUserOperation() {
         UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("oldNickname");
-        user.setLastNicknameUpdate(Instant.parse("2026-05-25T12:00:00Z").minus(15, java.time.temporal.ChronoUnit.DAYS));
-        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("newNickname").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Nickname can only be changed once every 30 days");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should sanitize nickname")
-    void updateProfile_shouldSanitizeNickname() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("oldNickname");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("new_Nick-123!").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByNickname("newNick123")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.getNickname()).isEqualTo("newNick123");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should throw exception when nickname not unique")
-    void updateProfile_shouldThrowException_whenNicknameNotUnique() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("oldNickname");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("takenNickname").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByNickname("takenNickname")).thenReturn(true);
-
-        assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Nickname already taken");
-    }
-
-    @Test
-    @DisplayName("Delete Account - should anonymize user data")
-    void deleteAccount_shouldAnonymizeUserData() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
-                .id(userId)
-                .email("test@example.com")
-                .nickname("player1")
-                .avatar("https://avatar.url")
-                .providerId("google-123")
-                .language("RU")
-                .lastNicknameUpdate(Instant.now())
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.deleteAccount(userId);
 
-        assertThat(user.getId()).isEqualTo(userId);
-        assertThat(user.getEmail()).startsWith("deleted-").endsWith("@tic-tac-tore.invalid");
-        assertThat(user.getNickname()).startsWith("ex-player-");
-        assertThat(user.getAvatar()).isEqualTo("anonymous");
-        assertThat(user.getProviderId()).isNull();
-        assertThat(user.getLanguage()).isNull();
-        assertThat(user.getLastNicknameUpdate()).isNull();
-        
-        verify(userRepository).flush();
-    }
-
-    @Test
-    @DisplayName("Delete Account - should throw exception when user not found")
-    void deleteAccount_shouldThrowException_whenUserNotFound() {
-        UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> userService.deleteAccount(userId))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
-                .hasMessageContaining("User not found");
-    }
-
-    @Test
-    @DisplayName("Delete Account - should keep user ID intact and never call delete on repository to preserve references")
-    void deleteAccount_shouldKeepUserIdIntactAndNeverCallDelete() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
-                .id(userId)
-                .email("test@example.com")
-                .nickname("player1")
-                .avatar("https://avatar.url")
-                .providerId("google-123")
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        userService.deleteAccount(userId);
-
-        assertThat(user.getId()).isEqualTo(userId);
-        verify(userRepository, never()).delete(any());
-        verify(userRepository, never()).deleteById(any());
-    }
-
-    @Test
-    @DisplayName("Delete Account - should throw IllegalStateException when optimistic locking failure occurs")
-    void deleteAccount_shouldThrowIllegalStateException_onOptimisticLockingFailure() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
-                .id(userId)
-                .email("test@example.com")
-                .nickname("player1")
-                .avatar("https://avatar.url")
-                .providerId("google-123")
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        doThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(User.class, userId))
-                .when(userRepository).flush();
-
-        assertThatThrownBy(() -> userService.deleteAccount(userId))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Account was concurrently modified during deletion. Please try again.");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should update avatar when avatar whitelisted")
-    void updateProfile_shouldUpdateAvatar_whenAvatarWhitelisted() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("nickname");
-        user.setAvatar("old-avatar");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("ball-classic").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.getAvatar()).isEqualTo("ball-classic");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should throw exception when avatar is anonymous")
-    void updateProfile_shouldThrowException_whenAvatarIsAnonymous() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("nickname");
-        user.setAvatar("old-avatar");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("anonymous").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Invalid avatar selection");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should throw exception when avatar is empty")
-    void updateProfile_shouldThrowException_whenAvatarIsEmpty() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setNickname("nickname");
-        user.setAvatar("old-avatar");
-        user.setEmail("test@example.com");
-        UpdateProfileRequest request = UpdateProfileRequest.builder().avatar("").build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> userService.updateProfile(userId, request))
-                .isInstanceOf(com.tictactore.exception.ValidationException.class)
-                .hasMessage("Invalid avatar selection");
-    }
-
-    @Test
-    @DisplayName("Update Profile - should update tutorialCompleted when provided")
-    void updateProfile_shouldUpdateTutorialCompleted_whenProvided() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setTutorialCompleted(false);
-        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(true).build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.isTutorialCompleted()).isTrue();
-    }
-    @Test
-    @DisplayName("Update Profile - should update tutorialCompleted to false when explicitly provided")
-    void updateProfile_shouldUpdateTutorialCompletedToFalse_whenProvided() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setTutorialCompleted(true);
-        UpdateProfileRequest request = UpdateProfileRequest.builder().tutorialCompleted(false).build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.isTutorialCompleted()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Update Profile - should not modify tutorialCompleted when omitted from request")
-    void updateProfile_shouldNotModifyTutorialCompleted_whenOmitted() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
-        user.setTutorialCompleted(true);
-        UpdateProfileRequest request = UpdateProfileRequest.builder().build(); // tutorialCompleted is null
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        User updatedUser = userService.updateProfile(userId, request);
-
-        assertThat(updatedUser.isTutorialCompleted()).isTrue();
+        verify(userOperation).deleteAccount(userId);
     }
 }
 
