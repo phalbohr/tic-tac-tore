@@ -115,6 +115,10 @@ public class UserService {
     }
 
     private String generateUniqueNickname(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null");
+        }
+
         String prefix = email.split("@")[0];
         String baseNickname = sanitizeNickname(prefix);
         if (baseNickname.isEmpty()) {
