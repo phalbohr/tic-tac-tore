@@ -26,6 +26,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_NAME = "name";
+    private static final String CLAIM_AVATAR = "avatar";
+    private static final String CLAIM_LANGUAGE = "language";
+    private static final String CLAIM_TUTORIAL_COMPLETED = "tutorialCompleted";
     private static final String ROLE_USER = "ROLE_USER";
 
     private final JwtService jwtService;
@@ -43,6 +46,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var userId = claims.getSubject();
                 var email = claims.get(CLAIM_EMAIL, String.class);
                 var nickname = claims.get(CLAIM_NAME, String.class);
+                var avatar = claims.get(CLAIM_AVATAR, String.class);
+                var language = claims.get(CLAIM_LANGUAGE, String.class);
+                var tutorialCompleted = claims.get(CLAIM_TUTORIAL_COMPLETED, Boolean.class);
 
                 if (userId == null) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing user ID");
@@ -55,6 +61,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .id(UUID.fromString(userId))
                             .email(email)
                             .nickname(nickname)
+                            .avatar(avatar)
+                            .language(language)
+                            .tutorialCompleted(Boolean.TRUE.equals(tutorialCompleted))
                             .build();
                 } catch (IllegalArgumentException e) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid user ID format");
