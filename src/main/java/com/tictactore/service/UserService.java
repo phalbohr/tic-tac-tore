@@ -123,35 +123,35 @@ public class UserService {
         baseNickname = baseNickname.substring(0, Math.min(baseNickname.length(), 40));
         String nickname = baseNickname;
 
-        int attempts = 0;
-        while (userRepository.existsByNickname(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + String.format("%04d", random.nextInt(10000));
-            attempts++;
+        if (!userRepository.existsByNickname(nickname)) {
+            return nickname;
         }
 
-        if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            List<String> candidates = new ArrayList<>();
-            for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-                candidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
-            }
-
-            List<String> existing = userRepository.findExistingNicknames(candidates);
-
-            String selectedFallback = null;
-            for (String candidate : candidates) {
-                if (!existing.contains(candidate)) {
-                    selectedFallback = candidate;
-                    break;
-                }
-            }
-            
-            if (selectedFallback == null) {
-                throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
-            }
-            nickname = selectedFallback;
+        List<String> suffixCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            suffixCandidates.add(baseNickname + String.format("%04d", random.nextInt(10000)));
         }
 
-        return nickname;
+        List<String> existingSuffixes = userRepository.findExistingNicknames(suffixCandidates);
+        for (String candidate : suffixCandidates) {
+            if (!existingSuffixes.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        List<String> fallbackCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            fallbackCandidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+        }
+
+        List<String> existingFallbacks = userRepository.findExistingNicknames(fallbackCandidates);
+        for (String candidate : fallbackCandidates) {
+            if (!existingFallbacks.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
     }
 
     private String generateDeterministicAvatar(String email) {
