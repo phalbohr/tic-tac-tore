@@ -67,7 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!profile.value) return
 
     const { nickname, language, avatar, tutorialCompleted } = options
-    const previousProfile = JSON.parse(JSON.stringify(profile.value))
+    const previousProfile = { ...profile.value }
 
     const localeStore = useLocaleStore()
     const previousLocale = localeStore.locale
