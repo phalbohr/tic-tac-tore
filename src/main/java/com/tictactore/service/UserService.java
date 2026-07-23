@@ -120,6 +120,7 @@ public class UserService {
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
+        baseNickname = baseNickname.substring(0, Math.min(baseNickname.length(), 40));
         String nickname = baseNickname;
 
         int attempts = 0;

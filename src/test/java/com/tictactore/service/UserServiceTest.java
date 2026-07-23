@@ -68,6 +68,19 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Find or Create - should truncate long email prefix for nickname")
+    void findOrCreate_shouldTruncateLongEmailPrefix() {
+        String longEmail = "thisisaverylongemailprefixthatgoeswaybeyondsixtyfourcharacters@example.com";
+        when(userRepository.findByEmail(longEmail)).thenReturn(Optional.empty());
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate(longEmail, SUB_NEW);
+
+        assertThat(user.getNickname().length()).isLessThanOrEqualTo(48);
+        assertThat(user.getNickname()).startsWith("thisisaverylongemailprefixthatgoeswaybey");
+    }
+
+    @Test
     @DisplayName("Create User - should save and return new user when email not found")
     void findOrCreate_createsNewUser_whenEmailNotFound() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
