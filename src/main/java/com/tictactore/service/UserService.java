@@ -74,7 +74,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.UserNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
@@ -167,7 +167,7 @@ public class UserService {
     @Transactional
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.UserNotFoundException("User not found"));
 
         if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
             String sanitized = sanitizeNickname(request.getNickname());
@@ -222,7 +222,7 @@ public class UserService {
             throw new IllegalArgumentException("User ID cannot be null");
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.UserNotFoundException("User not found"));
 
         if (user.getProviderId() == null && "anonymous".equals(user.getAvatar())) {
             return;

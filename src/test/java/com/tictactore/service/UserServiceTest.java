@@ -214,7 +214,7 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(id))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .isInstanceOf(com.tictactore.exception.UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -345,7 +345,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.deleteAccount(userId))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .isInstanceOf(com.tictactore.exception.UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
