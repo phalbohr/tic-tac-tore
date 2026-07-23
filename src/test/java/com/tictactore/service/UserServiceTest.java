@@ -151,7 +151,7 @@ class UserServiceTest {
     void shouldHandleNicknameCollision() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userRepository.existsByNickname("new")).thenReturn(true);
-        when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
+        when(userRepository.findExistingNicknames(anyList())).thenReturn(java.util.Collections.emptyList());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -233,7 +233,14 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should use UUID fallback after max attempts")
     void shouldHandleNicknameCollisionExhaustion() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+        when(userRepository.existsByNickname("new")).thenReturn(true);
+        when(userRepository.findExistingNicknames(anyList())).thenAnswer(inv -> {
+            java.util.List<String> args = inv.getArgument(0);
+            if (!args.isEmpty() && args.get(0).length() <= "new".length() + 4) {
+                return new java.util.ArrayList<>(args);
+            }
+            return java.util.Collections.emptyList();
+        });
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
