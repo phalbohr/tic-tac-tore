@@ -6,6 +6,7 @@ import com.tictactore.security.CustomOAuth2SuccessHandler;
 import com.tictactore.security.JwtAuthenticationFilter;
 import com.tictactore.service.JwtService;
 import com.tictactore.service.TokenRevocationService;
+import com.tictactore.config.ApplicationProperties;
 import com.tictactore.service.UserService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -53,8 +54,43 @@ class UserControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    @MockBean
+    private ApplicationProperties applicationProperties;
+
     @Test
-    @DisplayName("PATCH /me - should update language and nickname")
+    @DisplayName("GET /me - should return profile from principal without calling userService")
+    void getMyProfile_shouldReturnProfileFromPrincipal() throws Exception {
+        UUID userId = UUID.randomUUID();
+        User principal = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("testUser")
+                .avatar("avatar.png")
+                .language("EN")
+                .tutorialCompleted(true)
+                .build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+
+        var result = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/profile/me")
+                        .with(authentication(auth))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value("testUser"))
+                .andExpect(jsonPath("$.avatar").value("avatar.png"))
+                .andExpect(jsonPath("$.language").value("EN"))
+                .andExpect(jsonPath("$.tutorialCompleted").value(true));
+
+        verify(userService, org.mockito.Mockito.never()).getProfile(any());
+    }
+
+    @Test
+    @DisplayName("PATCH /me - should update language and nickname and set cookie")
     void patchMe_shouldUpdateLanguageAndNickname() throws Exception {
         UUID userId = UUID.randomUUID();
         User principal = User.builder()
@@ -75,6 +111,11 @@ class UserControllerTest {
                 .avatar("avatar-url")
                 .build();
         when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
+        when(jwtService.extractToken(any())).thenReturn("oldToken");
+        when(jwtService.generateToken(updatedUser)).thenReturn("newToken");
+        ApplicationProperties.Jwt jwtProps = new ApplicationProperties.Jwt();
+        jwtProps.setExpiration(3600000L);
+        when(applicationProperties.getJwt()).thenReturn(jwtProps);
 
         var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
@@ -85,7 +126,10 @@ class UserControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname").value("newNickname"))
                 .andExpect(jsonPath("$.language").value("DE"))
-                .andExpect(jsonPath("$.avatar").value("avatar-url"));
+                .andExpect(jsonPath("$.avatar").value("avatar-url"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Set-Cookie", org.hamcrest.Matchers.containsString("TTT_TOKEN=newToken")));
+
+        verify(tokenRevocationService).revoke("oldToken");
     }
 
     @Test
@@ -136,6 +180,11 @@ class UserControllerTest {
                 .avatar("ball-classic")
                 .build();
         when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class))).thenReturn(updatedUser);
+        when(jwtService.extractToken(any())).thenReturn(null);
+        when(jwtService.generateToken(updatedUser)).thenReturn("newToken");
+        ApplicationProperties.Jwt jwtProps = new ApplicationProperties.Jwt();
+        jwtProps.setExpiration(3600000L);
+        when(applicationProperties.getJwt()).thenReturn(jwtProps);
 
         var result = mockMvc.perform(patch("/api/v1/profile/me")
                         .with(authentication(auth))
@@ -144,7 +193,8 @@ class UserControllerTest {
                         .content("{\"avatar\":\"ball-classic\"}"));
 
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.avatar").value("ball-classic"));
+                .andExpect(jsonPath("$.avatar").value("ball-classic"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Set-Cookie", org.hamcrest.Matchers.containsString("TTT_TOKEN=newToken")));
     }
 
     @Test
