@@ -8,6 +8,7 @@ describe('useAuthStore', () => {
   let originalFetch: typeof global.fetch
 
   beforeEach(() => {
+    document.cookie = `${SESSION_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
     setActivePinia(createPinia())
     originalFetch = global.fetch
     document.cookie = `${SESSION_COOKIE_NAME}=test_token; path=/`
@@ -15,7 +16,6 @@ describe('useAuthStore', () => {
 
   afterEach(() => {
     global.fetch = originalFetch
-    document.cookie = `${SESSION_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
     vi.restoreAllMocks()
   })
 
