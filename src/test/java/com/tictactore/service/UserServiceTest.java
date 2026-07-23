@@ -98,6 +98,16 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("findOrCreate - should throw exception when email is null")
+    void findOrCreate_shouldThrowException_whenEmailIsNull() {
+        when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.findOrCreate(null, "provider123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email cannot be null");
+    }
+
+    @Test
     @DisplayName("Provider Mismatch - should throw BadCredentialsException to prevent account takeover")
     void findOrCreate_throwsException_whenEmailFoundButProviderMismatch() {
         var existing = User.builder()
