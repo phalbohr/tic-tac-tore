@@ -1,35 +1,25 @@
 import { test, expect } from '@playwright/test';
+import * as crypto from 'crypto';
 
 test.describe('Automatic Profile Generation E2E (ATDD)', () => {
-  test('[P0] should display generated nickname and avatar on first login', async ({ page, context }) => {
+  test('[P0] should display generated nickname and avatar on first login', async ({ page }) => {
     // Given
-    await context.addCookies([{
-      name: 'TTT_SESSION',
-      value: 'true',
-      domain: 'localhost',
-      path: '/',
-    }]);
+    const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+    const email = `e2e-profile-user-${randomSuffix}@example.com`;
+    const nickname = `johndoe${randomSuffix}`;
 
-    await page.route('**/api/v1/profile/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          nickname: 'johndoe',
-          avatar: 'ball-classic',
-          language: 'en'
-        }),
-      });
+    await page.request.get('/api/auth/test-login', {
+      params: { email, nickname }
     });
 
     // When
     await page.goto('/');
 
     // Then
-    await expect(page.getByText(/johndoe/)).toBeVisible();
+    await expect(page.getByText(new RegExp(nickname))).toBeVisible();
     
     const avatarSvg = page.getByTestId('avatar-svg').first();
     await expect(avatarSvg).toBeVisible();
-    await expect(avatarSvg.locator('use')).toHaveAttribute('href', '/avatars.svg#ball-classic');
+    await expect(avatarSvg.locator('use')).toHaveAttribute('href', /^\/avatars\.svg#/);
   });
 });
