@@ -19,7 +19,16 @@ public class E2ETestSupportController {
     private final UserRepository userRepository;
 
     @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<com.tictactore.dto.E2EUserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> com.tictactore.dto.E2EUserDto.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .nickname(user.getNickname())
+                        .providerId(user.getProviderId())
+                        .avatar(user.getAvatar())
+                        .language(user.getLanguage())
+                        .build())
+                .toList();
     }
 }
