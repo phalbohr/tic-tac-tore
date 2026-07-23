@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.tictactore.dto.UpdateProfileRequest;
+import com.tictactore.exception.UserNotFoundException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -144,7 +145,7 @@ class UserServiceTest {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+        var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).isEqualTo("new");
     }
@@ -157,7 +158,7 @@ class UserServiceTest {
         when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+        var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).startsWith("new");
         assertThat(user.getNickname()).hasSize(7);
@@ -169,9 +170,9 @@ class UserServiceTest {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+        var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
-        String expectedHash = "19d7f5455ecc3199ffa0f29a6755a288fceb6b88ec694e053c5aa24b4317771c";
+        var expectedHash = "19d7f5455ecc3199ffa0f29a6755a288fceb6b88ec694e053c5aa24b4317771c";
         assertThat(user.getAvatar()).isEqualTo("https://api.dicebear.com/7.x/identicon/svg?seed=" + expectedHash);
     }
 
@@ -186,7 +187,7 @@ class UserServiceTest {
                 .build();
         when(userRepository.findByEmail(EMAIL_EXISTING)).thenReturn(Optional.of(existing));
 
-        User user = userService.findOrCreate(EMAIL_EXISTING, SUB_EXISTING);
+        var user = userService.findOrCreate(EMAIL_EXISTING, SUB_EXISTING);
 
         assertThat(user.getNickname()).isEqualTo("custom_nick");
         assertThat(user.getAvatar()).isEqualTo("custom_avatar");
@@ -217,7 +218,7 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(id))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -227,7 +228,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("test.user+123@example.com")).thenReturn(Optional.empty());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate("test.user+123@example.com", SUB_NEW);
+        var user = userService.findOrCreate("test.user+123@example.com", SUB_NEW);
 
         assertThat(user.getNickname()).isEqualTo("testuser123");
     }
@@ -239,7 +240,7 @@ class UserServiceTest {
         when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+        var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).startsWith("new");
         assertThat(user.getNickname().length()).isEqualTo(11);
@@ -248,22 +249,27 @@ class UserServiceTest {
     @Test
     @DisplayName("Update Profile - should delegate to UserOperation")
     void updateProfile_shouldDelegateToUserOperation() {
-        UUID userId = UUID.randomUUID();
-        UpdateProfileRequest request = UpdateProfileRequest.builder().nickname("newNickname").build();
-        User expectedUser = new User();
+        var userId = UUID.randomUUID();
+        var request = UpdateProfileRequest.builder()
+                .nickname("newNickname")
+                .language("DE")
+                .avatar("ball-classic")
+                .tutorialCompleted(true)
+                .build();
+        var expectedUser = new User();
         expectedUser.setNickname("newNickname");
-        when(userOperation.updateProfile(userId, request)).thenReturn(expectedUser);
+        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true)).thenReturn(expectedUser);
 
-        User actualUser = userService.updateProfile(userId, request);
+        var actualUser = userService.updateProfile(userId, request);
 
         assertThat(actualUser).isSameAs(expectedUser);
-        verify(userOperation).updateProfile(userId, request);
+        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true);
     }
 
     @Test
     @DisplayName("Delete Account - should delegate to UserOperation")
     void deleteAccount_shouldDelegateToUserOperation() {
-        UUID userId = UUID.randomUUID();
+        var userId = UUID.randomUUID();
 
         userService.deleteAccount(userId);
 

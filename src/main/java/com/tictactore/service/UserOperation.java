@@ -1,9 +1,11 @@
 package com.tictactore.service;
 
 import com.tictactore.annotation.Idempotent;
-import com.tictactore.dto.UpdateProfileRequest;
+import com.tictactore.exception.UserNotFoundException;
+import com.tictactore.exception.ValidationException;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
+import com.tictactore.validation.AvatarValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserOperation {
 
+    private static final String ERR_USER_NOT_FOUND = "User not found";
+    private static final String ERR_NICKNAME_EMPTY = "Nickname cannot be empty";
+    private static final String ERR_NICKNAME_COOLDOWN = "Nickname can only be changed once every 30 days";
+    private static final String ERR_NICKNAME_TAKEN = "Nickname already taken";
+    private static final String ERR_LANGUAGE_INVALID = "Language must be EN or DE";
+    private static final String ERR_AVATAR_INVALID = "Invalid avatar selection";
+    private static final String ERR_USER_ID_NULL = "User ID cannot be null";
+    private static final int DAYS_30 = 30;
+    private static final String LANG_EN = "EN";
+    private static final String LANG_DE = "DE";
+    private static final String ANONYMOUS_AVATAR = "anonymous";
+    private static final String DELETED_EMAIL_PREFIX = "deleted-";
+    private static final String EX_PLAYER_PREFIX = "ex-player-";
+    private static final String DELETED_EMAIL_SUFFIX = "@tic-tac-tore.invalid";
+
     private final UserRepository userRepository;
     private final Clock clock;
 
-    public String sanitizeNickname(String nickname) {
+    private String sanitizeNickname(String nickname) {
         if (nickname == null) {
             return "";
         }
@@ -31,54 +48,54 @@ public class UserOperation {
 
     @Idempotent
     @Transactional(propagation = Propagation.REQUIRED)
-    public User updateProfile(UUID userId, UpdateProfileRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+    public User updateProfile(UUID userId, String nickname, String language, String avatar, Boolean tutorialCompleted) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(ERR_USER_NOT_FOUND));
 
-        if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
-            String sanitized = sanitizeNickname(request.getNickname());
+        if (nickname != null && !nickname.trim().isEmpty()) {
+            var sanitized = sanitizeNickname(nickname);
             if (sanitized.isEmpty()) {
-                throw new com.tictactore.exception.ValidationException("Nickname cannot be empty");
+                throw new ValidationException(ERR_NICKNAME_EMPTY);
             }
             if (!sanitized.equals(user.getNickname())) {
                 if (user.getLastNicknameUpdate() != null) {
-                    Instant nextAllowedUpdate = user.getLastNicknameUpdate().plus(30, ChronoUnit.DAYS);
+                    var nextAllowedUpdate = user.getLastNicknameUpdate().plus(DAYS_30, ChronoUnit.DAYS);
                     if (Instant.now(clock).isBefore(nextAllowedUpdate)) {
-                        throw new com.tictactore.exception.ValidationException("Nickname can only be changed once every 30 days");
+                        throw new ValidationException(ERR_NICKNAME_COOLDOWN);
                     }
                 }
                 if (userRepository.existsByNickname(sanitized)) {
-                    throw new com.tictactore.exception.ValidationException("Nickname already taken");
+                    throw new ValidationException(ERR_NICKNAME_TAKEN);
                 }
                 user.setNickname(sanitized);
                 user.setLastNicknameUpdate(Instant.now(clock));
             }
         }
 
-        if (request.getLanguage() != null) {
-            String lang = request.getLanguage().toUpperCase();
-            if (!lang.equals("EN") && !lang.equals("DE")) {
-                throw new com.tictactore.exception.ValidationException("Language must be EN or DE");
+        if (language != null) {
+            var lang = language.toUpperCase();
+            if (!lang.equals(LANG_EN) && !lang.equals(LANG_DE)) {
+                throw new ValidationException(ERR_LANGUAGE_INVALID);
             }
             user.setLanguage(lang);
         }
 
-        if (request.getAvatar() != null) {
-            String avatarVal = request.getAvatar().trim();
-            if (!com.tictactore.validation.AvatarValidator.ALLOWED_AVATARS.contains(avatarVal)) {
-                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
+        if (avatar != null) {
+            var avatarVal = avatar.trim();
+            if (!AvatarValidator.ALLOWED_AVATARS.contains(avatarVal)) {
+                throw new ValidationException(ERR_AVATAR_INVALID);
             }
             user.setAvatar(avatarVal);
         }
 
-        if (request.getTutorialCompleted() != null) {
-            user.setTutorialCompleted(request.getTutorialCompleted());
+        if (tutorialCompleted != null) {
+            user.setTutorialCompleted(tutorialCompleted);
         }
 
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new com.tictactore.exception.ValidationException("Nickname already taken");
+            throw new ValidationException(ERR_NICKNAME_TAKEN);
         }
     }
 
@@ -86,19 +103,19 @@ public class UserOperation {
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteAccount(UUID userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
+            throw new IllegalArgumentException(ERR_USER_ID_NULL);
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(ERR_USER_NOT_FOUND));
 
-        if (user.getProviderId() == null && "anonymous".equals(user.getAvatar())) {
+        if (user.getProviderId() == null && ANONYMOUS_AVATAR.equals(user.getAvatar())) {
             return;
         }
 
-        UUID uuid = java.util.UUID.randomUUID();
-        user.setEmail("deleted-" + uuid + "@tic-tac-tore.invalid");
-        user.setNickname("ex-player-" + uuid);
-        user.setAvatar("anonymous");
+        var uuid = UUID.randomUUID();
+        user.setEmail(DELETED_EMAIL_PREFIX + uuid + DELETED_EMAIL_SUFFIX);
+        user.setNickname(EX_PLAYER_PREFIX + uuid);
+        user.setAvatar(ANONYMOUS_AVATAR);
         user.setProviderId(null);
         user.setLanguage(null);
         user.setLastNicknameUpdate(null);

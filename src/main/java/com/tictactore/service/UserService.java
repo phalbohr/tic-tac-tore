@@ -13,6 +13,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.tictactore.dto.UpdateProfileRequest;
+import com.tictactore.exception.UserNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -55,9 +56,9 @@ public class UserService {
 
     @Transactional
     public User findOrCreateTestUser(String email, String nickname, Boolean tutorialCompleted) {
-        Optional<User> existingUser = userRepository.findByEmail(email);
+        var existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
-            User user = existingUser.get();
+            var user = existingUser.get();
             if (tutorialCompleted != null) {
                 user.setTutorialCompleted(tutorialCompleted);
                 return userRepository.save(user);
@@ -65,7 +66,7 @@ public class UserService {
             return user;
         }
 
-        User newUser = User.builder()
+        var newUser = User.builder()
                 .email(email)
                 .nickname(nickname)
                 .avatar(generateDeterministicAvatar(email))
@@ -78,13 +79,13 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
-        int maxRetries = 3;
+        var maxRetries = 3;
         DataIntegrityViolationException lastException = null;
-        for (int i = 0; i < maxRetries; i++) {
+        for (var i = 0; i < maxRetries; i++) {
             try {
                 var newUser = new User();
                 newUser.setEmail(email);
@@ -119,29 +120,29 @@ public class UserService {
     }
 
     private String generateUniqueNickname(String email) {
-        String prefix = email.split("@")[0];
-        String baseNickname = sanitizeNickname(prefix);
+        var prefix = email.split("@")[0];
+        var baseNickname = sanitizeNickname(prefix);
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
-        String nickname = baseNickname;
+        var nickname = baseNickname;
 
-        int attempts = 0;
+        var attempts = 0;
         while (userRepository.existsByNickname(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
             nickname = baseNickname + String.format("%04d", random.nextInt(10000));
             attempts++;
         }
 
         if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            List<String> candidates = new ArrayList<>();
-            for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-                candidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+            var candidates = new ArrayList<String>();
+            for (var i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+                candidates.add(baseNickname + UUID.randomUUID().toString().replace("-", "").substring(0, 8));
             }
 
-            List<String> existing = userRepository.findExistingNicknames(candidates);
+            var existing = userRepository.findExistingNicknames(candidates);
 
             String selectedFallback = null;
-            for (String candidate : candidates) {
+            for (var candidate : candidates) {
                 if (!existing.contains(candidate)) {
                     selectedFallback = candidate;
                     break;
@@ -159,9 +160,9 @@ public class UserService {
 
     private String generateDeterministicAvatar(String email) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            var digest = MessageDigest.getInstance("SHA-256");
+            var input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
+            var hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 algorithm not found", e);
@@ -174,7 +175,7 @@ public class UserService {
             backoff = @Backoff(delay = 100)
     )
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
-        return userOperation.updateProfile(userId, request);
+        return userOperation.updateProfile(userId, request.getNickname(), request.getLanguage(), request.getAvatar(), request.getTutorialCompleted());
     }
 
     @Retryable(
