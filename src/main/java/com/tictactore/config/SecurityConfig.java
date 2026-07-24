@@ -59,6 +59,7 @@ public class SecurityConfig {
         java.util.List<String> publicEndpoints = new java.util.ArrayList<>(java.util.Arrays.asList(PUBLIC_ENDPOINTS));
         if (env.acceptsProfiles(org.springframework.core.env.Profiles.of("test", "e2e"))) {
             publicEndpoints.add("/api/auth/test-login");
+            publicEndpoints.add("/api/e2e/**");
         }
 
         http
