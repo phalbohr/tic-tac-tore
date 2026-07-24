@@ -8,8 +8,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.tictactore.dto.UpdateProfileRequest;
+import com.tictactore.exception.UserNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +38,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserCreator userCreator;
+    private final UserOperation userOperation;
     private final ApplicationProperties properties;
     private final Clock clock;
     private final SecureRandom random = new SecureRandom();
@@ -51,9 +56,9 @@ public class UserService {
 
     @Transactional
     public User findOrCreateTestUser(String email, String nickname, Boolean tutorialCompleted) {
-        Optional<User> existingUser = userRepository.findByEmail(email);
+        var existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
-            User user = existingUser.get();
+            var user = existingUser.get();
             if (tutorialCompleted != null) {
                 user.setTutorialCompleted(tutorialCompleted);
                 return userRepository.save(user);
@@ -61,7 +66,7 @@ public class UserService {
             return user;
         }
 
-        User newUser = User.builder()
+        var newUser = User.builder()
                 .email(email)
                 .nickname(nickname)
                 .avatar(generateDeterministicAvatar(email))
@@ -74,13 +79,13 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.UserNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
-        int maxRetries = 3;
+        var maxRetries = 3;
         DataIntegrityViolationException lastException = null;
-        for (int i = 0; i < maxRetries; i++) {
+        for (var i = 0; i < maxRetries; i++) {
             try {
                 var newUser = new User();
                 newUser.setEmail(email);
@@ -115,132 +120,76 @@ public class UserService {
     }
 
     private String generateUniqueNickname(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null");
+        }
+
         String prefix = email.split("@")[0];
         String baseNickname = sanitizeNickname(prefix);
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
+        baseNickname = baseNickname.substring(0, Math.min(baseNickname.length(), 40));
         String nickname = baseNickname;
 
-        int attempts = 0;
-        while (userRepository.existsByNickname(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + String.format("%04d", random.nextInt(10000));
-            attempts++;
+        if (!userRepository.existsByNickname(nickname)) {
+            return nickname;
         }
 
-        if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            List<String> candidates = new ArrayList<>();
-            for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-                candidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
-            }
-
-            List<String> existing = userRepository.findExistingNicknames(candidates);
-
-            String selectedFallback = null;
-            for (String candidate : candidates) {
-                if (!existing.contains(candidate)) {
-                    selectedFallback = candidate;
-                    break;
-                }
-            }
-            
-            if (selectedFallback == null) {
-                throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
-            }
-            nickname = selectedFallback;
+        List<String> suffixCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            suffixCandidates.add(baseNickname + String.format("%08d", random.nextInt(100_000_000)));
         }
 
-        return nickname;
+        List<String> existingSuffixes = userRepository.findExistingNicknames(suffixCandidates);
+        for (String candidate : suffixCandidates) {
+            if (!existingSuffixes.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        List<String> fallbackCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            fallbackCandidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+        }
+
+        List<String> existingFallbacks = userRepository.findExistingNicknames(fallbackCandidates);
+        for (String candidate : fallbackCandidates) {
+            if (!existingFallbacks.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
     }
 
     private String generateDeterministicAvatar(String email) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            var digest = MessageDigest.getInstance("SHA-256");
+            var input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
+            var hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 algorithm not found", e);
         }
     }
 
-    @Transactional
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100)
+    )
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
-
-        if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {
-            String sanitized = sanitizeNickname(request.getNickname());
-            if (sanitized.isEmpty()) {
-                throw new com.tictactore.exception.ValidationException("Nickname cannot be empty");
-            }
-            if (!sanitized.equals(user.getNickname())) {
-                if (user.getLastNicknameUpdate() != null) {
-                    Instant nextAllowedUpdate = user.getLastNicknameUpdate().plus(30, ChronoUnit.DAYS);
-                    if (Instant.now(clock).isBefore(nextAllowedUpdate)) {
-                        throw new com.tictactore.exception.ValidationException("Nickname can only be changed once every 30 days");
-                    }
-                }
-                if (userRepository.existsByNickname(sanitized)) {
-                    throw new com.tictactore.exception.ValidationException("Nickname already taken");
-                }
-                user.setNickname(sanitized);
-                user.setLastNicknameUpdate(Instant.now(clock));
-            }
-        }
-
-        if (request.getLanguage() != null) {
-            String lang = request.getLanguage().toUpperCase();
-            if (!lang.equals("EN") && !lang.equals("DE")) {
-                throw new com.tictactore.exception.ValidationException("Language must be EN or DE");
-            }
-            user.setLanguage(lang);
-        }
-
-        if (request.getAvatar() != null) {
-            String avatarVal = request.getAvatar().trim();
-            if (!com.tictactore.validation.AvatarValidator.ALLOWED_AVATARS.contains(avatarVal)) {
-                throw new com.tictactore.exception.ValidationException("Invalid avatar selection");
-            }
-            user.setAvatar(avatarVal);
-        }
-
-        if (request.getTutorialCompleted() != null) {
-            user.setTutorialCompleted(request.getTutorialCompleted());
-        }
-
-        try {
-            return userRepository.save(user);
-        } catch (DataIntegrityViolationException e) {
-            throw new com.tictactore.exception.ValidationException("Nickname already taken");
-        }
+        return userOperation.updateProfile(userId, request.getNickname(), request.getLanguage(), request.getAvatar(), request.getTutorialCompleted());
     }
 
-    @Transactional
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100)
+    )
     public void deleteAccount(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
-        }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("User not found"));
-
-        if (user.getProviderId() == null && "anonymous".equals(user.getAvatar())) {
-            return;
-        }
-
-        UUID uuid = java.util.UUID.randomUUID();
-        user.setEmail("deleted-" + uuid + "@tic-tac-tore.invalid");
-        user.setNickname("ex-player-" + uuid);
-        user.setAvatar("anonymous");
-        user.setProviderId(null);
-        user.setLanguage(null);
-        user.setLastNicknameUpdate(null);
-
-        try {
-            userRepository.flush();
-        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
-            throw new IllegalStateException("Account was concurrently modified during deletion. Please try again.", e);
-        }
+        userOperation.deleteAccount(userId);
     }
     public UserPreferencesDto getLastRuleSystem() {
         return new UserPreferencesDto("STANDARD");

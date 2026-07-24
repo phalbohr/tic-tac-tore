@@ -5,6 +5,7 @@ import com.tictactore.model.User;
 import com.tictactore.service.UserService;
 import com.tictactore.service.TokenRevocationService;
 import com.tictactore.service.JwtService;
+import com.tictactore.config.ApplicationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +21,7 @@ public class UserController implements ProfileApi {
     private final UserService userService;
     private final TokenRevocationService tokenRevocationService;
     private final JwtService jwtService;
+    private final ApplicationProperties properties;
 
     @Override
     public ResponseEntity<ProfileDto> getMyProfile(@AuthenticationPrincipal User principal) {
@@ -27,12 +29,12 @@ public class UserController implements ProfileApi {
             return ResponseEntity.status(401).build();
         }
         
-        var user = userService.getProfile(principal.getId());
         var profile = ProfileDto.builder()
-                .nickname(user.getNickname())
-                .avatar(user.getAvatar())
-                .language(user.getLanguage())
-                .tutorialCompleted(user.isTutorialCompleted())
+                .nickname(principal.getNickname())
+                .avatar(principal.getAvatar())
+                .language(principal.getLanguage())
+                .tutorialCompleted(principal.isTutorialCompleted())
+                .version(principal.getVersion())
                 .build();
                 
         return ResponseEntity.ok(profile);
@@ -41,18 +43,33 @@ public class UserController implements ProfileApi {
     @Override
     public ResponseEntity<ProfileDto> updateProfile(
             @AuthenticationPrincipal User principal,
-            com.tictactore.dto.UpdateProfileRequest request
+            com.tictactore.dto.UpdateProfileRequest request,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            jakarta.servlet.http.HttpServletResponse httpResponse
     ) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
 
         var user = userService.updateProfile(principal.getId(), request);
+
+        String oldToken = jwtService.extractToken(httpRequest);
+        if (oldToken != null) {
+            tokenRevocationService.revoke(oldToken);
+        }
+
+        String newToken = jwtService.generateToken(user);
+        var isSecure = httpRequest.isSecure();
+        var maxAge = java.time.Duration.ofMillis(properties.getJwt().getExpiration());
+        var authCookie = com.tictactore.util.CookieUtils.buildCookie(com.tictactore.security.CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME, newToken, isSecure, true, maxAge);
+        httpResponse.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, authCookie.toString());
+
         var profile = ProfileDto.builder()
                 .nickname(user.getNickname())
                 .avatar(user.getAvatar())
                 .language(user.getLanguage())
                 .tutorialCompleted(user.isTutorialCompleted())
+                .version(user.getVersion())
                 .build();
                 
         return ResponseEntity.ok(profile);

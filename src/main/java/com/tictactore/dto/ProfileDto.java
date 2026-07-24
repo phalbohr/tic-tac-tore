@@ -20,4 +20,7 @@ public class ProfileDto {
 
     @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true")
     private Boolean tutorialCompleted;
+
+    @Schema(description = "Version for optimistic locking", example = "1")
+    private Long version;
 }
