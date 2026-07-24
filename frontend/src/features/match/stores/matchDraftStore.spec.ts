@@ -139,5 +139,38 @@ describe('matchDraftStore', () => {
       expect(store.games.length).toBe(2)
       expect(store.matchState).toBe('ready_for_submission')
     })
+
+    it('undos last game correctly', () => {
+      const store = useMatchDraftStore()
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+      expect(store.games.length).toBe(1)
+      expect(store.matchState).toBe('draft')
+
+      store.undoLastGame()
+      expect(store.games.length).toBe(0)
+      expect(store.currentGame.team1Score).toBe(5)
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('undos last game from ready_for_submission state', () => {
+      const store = useMatchDraftStore()
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3 }
+
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+      expect(store.games.length).toBe(2)
+      expect(store.matchState).toBe('ready_for_submission')
+
+      store.undoLastGame()
+      expect(store.games.length).toBe(1)
+      expect(store.currentGame.team1Score).toBe(5)
+      expect(store.matchState).toBe('score_entry')
+    })
   })
 })

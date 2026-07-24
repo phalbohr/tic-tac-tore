@@ -177,6 +177,15 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'score_entry'
   }
 
+  function undoLastGame() {
+    if (games.value.length === 0) return
+    const lastGame = games.value.pop()
+    if (lastGame) {
+      currentGame.value = { ...lastGame }
+      matchState.value = 'score_entry'
+    }
+  }
+
   function reset() {
     matchType.value = MatchType.ONE_VS_ONE
     selectedPlayers.value = []
@@ -207,6 +216,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     removePlayer,
     incrementScore,
     decrementScore,
+    undoLastGame,
     beginScoreEntry,
     reset
   }
