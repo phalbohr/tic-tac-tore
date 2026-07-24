@@ -43,7 +43,8 @@ decision: 2026-07-19 Keep static roles — Static roles are sufficient for the c
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1-project-initialization-and-authentication-via-google-oauth2 (2026-05-02)"), 2026-07-19
 location: n/a
 reason: [ ] [Review][Defer] Missing production CORS config [src/main/java/com/tictactore/config/SecurityConfig.java:27] — deferred, out of scope for initialization.
-status: open
+status: done 2026-07-24
+resolution: already resolved: src/main/java/com/tictactore/config/SecurityConfig.java:43-52 and commit ac4aa43 configured production CORS using allowedOriginPatterns and application.security.cors.allowed-origins property.
 
 ### DW-7: Consistency: `isRevoked()` checks only today/yesterday Bloom Filters, but `revoke()` writes to all filters until token expiration
 origin: migrated from legacy ledger ("Deferred from: code review of 1-1a-stateless-jwt-with-redis-denylist-and-bloom-filters (2026-05-10)"), 2026-07-19
@@ -122,7 +123,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: [ ] [Review][Defer] Missing Null Check in generateUniqueNickname
-status: open
+status: done 2026-07-24
+resolution: already resolved: src/main/java/com/tictactore/service/UserService.java:123 includes explicit null check: if (email == null) throw new IllegalArgumentException('Email cannot be null');
 
 ### DW-19: High Collision Probability in Nickname Suffix
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -134,7 +136,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-4-profile-management-in-personal-cabinet (2026-05-30)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Unhandled OptimisticLockingFailureException on concurrent updates [UserService.java] — deferred, pre-existing
-status: open
+status: done 2026-07-24
+resolution: already resolved: src/main/java/com/tictactore/service/UserService.java:177,186 annotates updateProfile and deleteAccount with @Retryable(retryFor = {ObjectOptimisticLockingFailureException.class}, maxAttempts = 3, backoff = @Backoff(delay = 100)).
 
 ### DW-21: Shallow copy for rollback might corrupt state [frontend/src/stores/auth.ts]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)"), 2026-07-19
@@ -159,7 +162,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-7-onboarding-tutorial (2026-06-17)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue] — deferred, pre-existing
-status: open
+status: done 2026-07-24
+resolution: already resolved: frontend/src/components/TutorialCarousel.vue:114 uses z-[100] with Tailwind design tokens (bg-surface-container/95, backdrop-blur-xl).
 
 ### DW-25: Concurrency Blindspot in Profile Updates
 origin: migrated from legacy ledger ("Deferred from: code review of 1-7-onboarding-tutorial.md (2026-06-21)"), 2026-07-19
