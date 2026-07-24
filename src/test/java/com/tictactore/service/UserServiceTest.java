@@ -71,12 +71,26 @@ class UserServiceTest {
     @DisplayName("findOrCreate - should use 8-digit suffix when base nickname is taken")
     void findOrCreate_shouldUse8DigitSuffix_whenBaseNicknameIsTaken() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname("new")).thenReturn(true).thenReturn(false);
+        when(userRepository.existsByNickname("new")).thenReturn(true);
+        when(userRepository.findExistingNicknames(any())).thenReturn(java.util.Collections.emptyList());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).matches("new\\d{8}");
+    }
+
+    @Test
+    @DisplayName("Find or Create - should truncate long email prefix for nickname")
+    void findOrCreate_shouldTruncateLongEmailPrefix() {
+        String longEmail = "thisisaverylongemailprefixthatgoeswaybeyondsixtyfourcharacters@example.com";
+        when(userRepository.findByEmail(longEmail)).thenReturn(Optional.empty());
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate(longEmail, SUB_NEW);
+
+        assertThat(user.getNickname().length()).isLessThanOrEqualTo(48);
+        assertThat(user.getNickname()).startsWith("thisisaverylongemailprefixthatgoeswaybey");
     }
 
     @Test
@@ -107,6 +121,16 @@ class UserServiceTest {
 
         assertThat(result).isSameAs(existing);
         verify(userCreator, never()).createUser(any());
+    }
+
+    @Test
+    @DisplayName("findOrCreate - should throw exception when email is null")
+    void findOrCreate_shouldThrowException_whenEmailIsNull() {
+        when(userRepository.findByEmail(null)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.findOrCreate(null, "provider123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email cannot be null");
     }
 
     @Test
@@ -163,7 +187,7 @@ class UserServiceTest {
     void shouldHandleNicknameCollision() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userRepository.existsByNickname("new")).thenReturn(true);
-        when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
+        when(userRepository.findExistingNicknames(anyList())).thenReturn(java.util.Collections.emptyList());
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -226,7 +250,7 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfile(id))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .isInstanceOf(com.tictactore.exception.UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 
@@ -245,7 +269,14 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should use UUID fallback after max attempts")
     void shouldHandleNicknameCollisionExhaustion() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+        when(userRepository.existsByNickname("new")).thenReturn(true);
+        when(userRepository.findExistingNicknames(anyList())).thenAnswer(inv -> {
+            java.util.List<String> args = inv.getArgument(0);
+            if (!args.isEmpty() && args.get(0).length() <= "new".length() + 4) {
+                return new java.util.ArrayList<>(args);
+            }
+            return java.util.Collections.emptyList();
+        });
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -357,7 +388,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.deleteAccount(userId))
-                .isInstanceOf(com.tictactore.exception.ResourceNotFoundException.class)
+                .isInstanceOf(com.tictactore.exception.UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 

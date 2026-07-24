@@ -31,7 +31,9 @@ public interface ProfileApi {
     @org.springframework.web.bind.annotation.PatchMapping("/me")
     ResponseEntity<ProfileDto> updateProfile(
             @AuthenticationPrincipal User user,
-            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.tictactore.dto.UpdateProfileRequest request
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.tictactore.dto.UpdateProfileRequest request,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            jakarta.servlet.http.HttpServletResponse httpResponse
     );
 
     @Operation(summary = "Delete current user account")
