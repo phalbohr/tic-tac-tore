@@ -92,6 +92,7 @@ watch(() => store.matchState, (newVal) => {
         <ScoreStepper 
           :score="store.currentGame.team1Score"
           :score-limit="store.ruleConfig?.scoreLimit || 10"
+          :win-by-two="store.ruleConfig?.winByTwo || false"
           @increment="onTeam1Increment"
           @decrement="onTeam1Decrement"
         />
@@ -103,6 +104,7 @@ watch(() => store.matchState, (newVal) => {
         <ScoreStepper 
           :score="store.currentGame.team2Score"
           :score-limit="store.ruleConfig?.scoreLimit || 10"
+          :win-by-two="store.ruleConfig?.winByTwo || false"
           @increment="onTeam2Increment"
           @decrement="onTeam2Decrement"
         />
