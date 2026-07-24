@@ -21,6 +21,9 @@ public class JwtService {
     private static final String ERR_MISSING_SECRET = "JWT secret must be configured";
     private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_NAME = "name";
+    private static final String CLAIM_AVATAR = "avatar";
+    private static final String CLAIM_LANGUAGE = "language";
+    private static final String CLAIM_TUTORIAL_COMPLETED = "tutorialCompleted";
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final int BEARER_PREFIX_LENGTH = 7;
@@ -39,6 +42,9 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .claim(CLAIM_EMAIL, user.getEmail())
                 .claim(CLAIM_NAME, user.getNickname())
+                .claim(CLAIM_AVATAR, user.getAvatar())
+                .claim(CLAIM_LANGUAGE, user.getLanguage())
+                .claim(CLAIM_TUTORIAL_COMPLETED, user.isTutorialCompleted())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(signingKey)

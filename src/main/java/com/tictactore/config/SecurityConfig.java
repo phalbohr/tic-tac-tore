@@ -42,7 +42,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-XSRF-TOKEN", "X-Requested-With", "Accept", "Origin"));
         configuration.setAllowCredentials(true);
@@ -59,6 +59,7 @@ public class SecurityConfig {
         java.util.List<String> publicEndpoints = new java.util.ArrayList<>(java.util.Arrays.asList(PUBLIC_ENDPOINTS));
         if (env.acceptsProfiles(org.springframework.core.env.Profiles.of("test", "e2e"))) {
             publicEndpoints.add("/api/auth/test-login");
+            publicEndpoints.add("/api/e2e/**");
         }
 
         http

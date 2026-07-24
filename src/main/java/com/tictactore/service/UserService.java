@@ -79,7 +79,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getProfile(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new com.tictactore.exception.UserNotFoundException("User not found"));
     }
 
     private User createNewUser(String email, String providerId) {
@@ -120,42 +120,47 @@ public class UserService {
     }
 
     private String generateUniqueNickname(String email) {
-        var prefix = email.split("@")[0];
-        var baseNickname = sanitizeNickname(prefix);
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null");
+        }
+
+        String prefix = email.split("@")[0];
+        String baseNickname = sanitizeNickname(prefix);
         if (baseNickname.isEmpty()) {
             baseNickname = "user";
         }
-        var nickname = baseNickname;
+        baseNickname = baseNickname.substring(0, Math.min(baseNickname.length(), 40));
+        String nickname = baseNickname;
 
-        var attempts = 0;
-        while (userRepository.existsByNickname(nickname) && attempts < MAX_NICKNAME_ATTEMPTS) {
-            nickname = baseNickname + String.format("%04d", random.nextInt(10000));
-            attempts++;
+        if (!userRepository.existsByNickname(nickname)) {
+            return nickname;
         }
 
-        if (attempts >= MAX_NICKNAME_ATTEMPTS) {
-            var candidates = new ArrayList<String>();
-            for (var i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-                candidates.add(baseNickname + UUID.randomUUID().toString().replace("-", "").substring(0, 8));
-            }
-
-            var existing = userRepository.findExistingNicknames(candidates);
-
-            String selectedFallback = null;
-            for (var candidate : candidates) {
-                if (!existing.contains(candidate)) {
-                    selectedFallback = candidate;
-                    break;
-                }
-            }
-            
-            if (selectedFallback == null) {
-                throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
-            }
-            nickname = selectedFallback;
+        List<String> suffixCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            suffixCandidates.add(baseNickname + String.format("%08d", random.nextInt(100_000_000)));
         }
 
-        return nickname;
+        List<String> existingSuffixes = userRepository.findExistingNicknames(suffixCandidates);
+        for (String candidate : suffixCandidates) {
+            if (!existingSuffixes.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        List<String> fallbackCandidates = new ArrayList<>();
+        for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
+            fallbackCandidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+        }
+
+        List<String> existingFallbacks = userRepository.findExistingNicknames(fallbackCandidates);
+        for (String candidate : fallbackCandidates) {
+            if (!existingFallbacks.contains(candidate)) {
+                return candidate;
+            }
+        }
+
+        throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
     }
 
     private String generateDeterministicAvatar(String email) {
