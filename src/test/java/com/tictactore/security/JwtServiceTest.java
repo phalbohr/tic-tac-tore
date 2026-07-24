@@ -84,4 +84,28 @@ class JwtServiceTest {
 
         assertThat(jwtService.extractUserId(token)).isEqualTo(userId.toString());
     }
+
+    @Test
+    @DisplayName("Extract All Claims - should contain all custom claims")
+    void extractAllClaims_containsAllCustomClaims() {
+        var userId = UUID.randomUUID();
+        var user = User.builder()
+                .id(userId)
+                .email(EMAIL_TEST)
+                .nickname(NICKNAME_TEST)
+                .avatar("avatar.png")
+                .language("EN")
+                .tutorialCompleted(true)
+                .build();
+
+        var token = jwtService.generateToken(user);
+
+        var claims = jwtService.extractAllClaims(token);
+
+        assertThat(claims.get("email")).isEqualTo(EMAIL_TEST);
+        assertThat(claims.get("name")).isEqualTo(NICKNAME_TEST);
+        assertThat(claims.get("avatar")).isEqualTo("avatar.png");
+        assertThat(claims.get("language")).isEqualTo("EN");
+        assertThat(claims.get("tutorialCompleted")).isEqualTo(true);
+    }
 }

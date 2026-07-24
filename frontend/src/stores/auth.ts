@@ -76,10 +76,11 @@ export const useAuthStore = defineStore('auth', () => {
     let finalNickname = nickname
     if (nickname !== undefined) {
       const sanitized = nickname.replace(/[^a-zA-Z0-9]/g, '')
-      if (sanitized.length > 0) {
-        profile.value.nickname = sanitized
-        finalNickname = sanitized
+      if (sanitized.length === 0) {
+        throw new Error('Nickname cannot be empty')
       }
+      profile.value.nickname = sanitized
+      finalNickname = sanitized
     }
     if (language !== undefined) {
       profile.value.language = language
