@@ -34,6 +34,7 @@ public class UserController implements ProfileApi {
                 .avatar(principal.getAvatar())
                 .language(principal.getLanguage())
                 .tutorialCompleted(principal.isTutorialCompleted())
+                .version(principal.getVersion())
                 .build();
                 
         return ResponseEntity.ok(profile);
@@ -68,6 +69,7 @@ public class UserController implements ProfileApi {
                 .avatar(user.getAvatar())
                 .language(user.getLanguage())
                 .tutorialCompleted(user.isTutorialCompleted())
+                .version(user.getVersion())
                 .build();
                 
         return ResponseEntity.ok(profile);
