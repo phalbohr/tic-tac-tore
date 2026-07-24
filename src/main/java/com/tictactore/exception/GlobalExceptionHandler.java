@@ -10,21 +10,21 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(com.tictactore.exception.ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleResourceNotFound(com.tictactore.exception.ResourceNotFoundException e) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException e) {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(com.tictactore.exception.ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(com.tictactore.exception.ValidationException e) {
-        String msg = e.getMessage() != null ? e.getMessage() : "Invalid input";
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException e) {
+        var msg = e.getMessage() != null ? e.getMessage() : "Invalid input";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
         var error = e.getBindingResult().getFieldError();
-        String msg = error != null ? error.getDefaultMessage() : "Validation error";
+        var msg = error != null ? error.getDefaultMessage() : "Validation error";
         return ResponseEntity.badRequest().body(Map.of("message", msg != null ? msg : "Validation error"));
     }
 }
