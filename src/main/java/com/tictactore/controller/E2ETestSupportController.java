@@ -1,7 +1,6 @@
 package com.tictactore.controller;
 
-import com.tictactore.model.User;
-import com.tictactore.repository.UserRepository;
+import com.tictactore.service.E2ETestSupportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,19 +15,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class E2ETestSupportController {
 
-    private final UserRepository userRepository;
+    private final E2ETestSupportService e2eTestSupportService;
 
     @GetMapping("/users")
     public List<com.tictactore.dto.E2EUserDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> com.tictactore.dto.E2EUserDto.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .nickname(user.getNickname())
-                        .providerId(user.getProviderId())
-                        .avatar(user.getAvatar())
-                        .language(user.getLanguage())
-                        .build())
-                .toList();
+        return e2eTestSupportService.getAllUsers();
     }
 }
