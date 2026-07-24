@@ -133,7 +133,7 @@ public class UserService {
 
         List<String> suffixCandidates = new ArrayList<>();
         for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-            suffixCandidates.add(baseNickname + String.format("%04d", random.nextInt(10000)));
+            suffixCandidates.add(baseNickname + String.format("%08d", random.nextInt(100_000_000)));
         }
 
         List<String> existingSuffixes = userRepository.findExistingNicknames(suffixCandidates);

@@ -68,6 +68,19 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("findOrCreate - should use 8-digit suffix when base nickname is taken")
+    void findOrCreate_shouldUse8DigitSuffix_whenBaseNicknameIsTaken() {
+        when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
+        when(userRepository.existsByNickname("new")).thenReturn(true);
+        when(userRepository.findExistingNicknames(any())).thenReturn(java.util.Collections.emptyList());
+        when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
+
+        assertThat(user.getNickname()).matches("new\\d{8}");
+    }
+
+    @Test
     @DisplayName("Find or Create - should truncate long email prefix for nickname")
     void findOrCreate_shouldTruncateLongEmailPrefix() {
         String longEmail = "thisisaverylongemailprefixthatgoeswaybeyondsixtyfourcharacters@example.com";
@@ -180,7 +193,7 @@ class UserServiceTest {
         User user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).startsWith("new");
-        assertThat(user.getNickname()).hasSize(7);
+        assertThat(user.getNickname()).hasSize(11);
     }
 
     @Test
