@@ -189,7 +189,8 @@ resolution: already resolved: matchDraftStore.ts:144 and :147 reject increments 
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Provide an undo mechanism for game transitions in multi-game matches before final submission.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #139 (with canUndoLastGame guard against active score data loss)
 
 ### DW-29: Allow score decrementing to revert a game win state if tapped immediately.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19

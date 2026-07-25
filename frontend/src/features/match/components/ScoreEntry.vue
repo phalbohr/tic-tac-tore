@@ -110,13 +110,24 @@ watch(() => store.matchState, (newVal) => {
       </div>
     </div>
     
-    <BaseButton 
-      :disabled="!store.isGameComplete"
-      @click="store.completeCurrentGame()"
-      class="w-full mt-6"
-    >
-      {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
-    </BaseButton>
+    <div class="flex flex-col gap-2 mt-6 w-full">
+      <BaseButton
+        :disabled="!store.isGameComplete"
+        @click="store.completeCurrentGame()"
+        class="w-full"
+      >
+        {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
+      </BaseButton>
+
+      <BaseButton
+        v-if="store.canUndoLastGame"
+        variant="secondary"
+        @click="store.undoLastGame()"
+        class="w-full"
+      >
+        Undo Last Game
+      </BaseButton>
+    </div>
 
     <Transition name="ch-fade">
       <div
