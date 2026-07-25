@@ -1,16 +1,16 @@
 {
   "schema_version": "0.1.0",
-  "evaluated_at": "2026-06-07T13:47:00Z",
+  "evaluated_at": "2026-07-25T17:50:00.000Z",
   "repo": "tic-tac-tore",
   "target": {
     "type": "story",
-    "id": "1.5",
-    "label": "Account Deletion with Anonymization"
+    "id": "2-4",
+    "label": "Story 2.4: Match Submission with Undo Window"
   },
   "collection_status": "COLLECTED",
   "gate_basis": "priority_thresholds",
   "gate_status": "PASS",
-  "rationale": "All quality criteria met. P0 coverage is 100%, P1 coverage is 100%, and overall coverage is 100%. Critical gaps resolved. UI error path handling verified.",
+  "rationale": "P0 coverage is 100%, P1 coverage is 100% (target: 90%), and overall coverage is 100% (minimum: 80%).",
   "p0_status": "MET",
   "p1_status": "MET",
   "overall_status": "MET",

@@ -17,7 +17,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  store.reset()
+  if (!store.isPendingSubmission && !store.isOfflinePending) {
+    store.reset()
+  }
 })
 
 const isSubmitting = ref(false)

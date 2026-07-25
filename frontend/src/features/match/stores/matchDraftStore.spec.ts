@@ -215,4 +215,74 @@ describe('matchDraftStore', () => {
       expect(store.currentGame.team2Score).toBe(2)
     })
   })
+
+  describe('Submission Timer & Undo Window', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('initializes countdown timer and payload when startSubmissionTimer is called', () => {
+      const store = useMatchDraftStore()
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+
+      store.startSubmissionTimer()
+
+      expect(store.isPendingSubmission).toBe(true)
+      expect(store.submissionCountdown).toBe(15)
+      expect(store.pendingSubmission).not.toBeNull()
+      expect(store.pendingSubmission?.payload.teamAAttackerId).toBe('p1')
+    })
+
+    it('executes HTTP POST and resets store when 15 seconds timer expires', async () => {
+      const store = useMatchDraftStore()
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+
+      fetchMock.mockResolvedValueOnce({ ok: true })
+
+      store.startSubmissionTimer()
+      expect(store.isPendingSubmission).toBe(true)
+
+      vi.advanceTimersByTime(15000)
+
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/matches', expect.objectContaining({
+        method: 'POST'
+      }))
+      expect(store.isPendingSubmission).toBe(false)
+      expect(store.pendingSubmission).toBeNull()
+    })
+
+    it('aborts timer and restores ready_for_submission state when cancelSubmissionTimer is called', () => {
+      const store = useMatchDraftStore()
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+
+      store.startSubmissionTimer()
+      vi.advanceTimersByTime(5000)
+
+      store.cancelSubmissionTimer()
+
+      expect(store.isPendingSubmission).toBe(false)
+      expect(store.pendingSubmission).toBeNull()
+      expect(store.matchState).toBe('ready_for_submission')
+      expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
+    })
+  })
 })

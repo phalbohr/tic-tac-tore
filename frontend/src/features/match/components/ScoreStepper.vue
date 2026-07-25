@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   score: number
   scoreLimit: number
   winByTwo?: boolean

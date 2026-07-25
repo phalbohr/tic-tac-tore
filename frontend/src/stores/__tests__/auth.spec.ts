@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from '../auth'
-import { useLocaleStore } from '../locale'
 
 vi.mock('../locale', () => ({
   useLocaleStore: vi.fn(() => ({

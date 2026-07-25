@@ -22,7 +22,10 @@
     "submit": "Submit Match",
     "pending": "Pending Confirmation",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "willRetryOnline": "Will retry when online",
+    "submittedTapUndo": "Match submitted. Tap to undo.",
+    "undo": "Undo"
   },
   "leaderboard": {
     "title": "Leaderboard",
