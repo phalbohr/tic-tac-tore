@@ -8,6 +8,7 @@ const store = useMatchDraftStore()
 const emit = defineEmits<{
   (e: 'complete'): void
   (e: 'cancel'): void
+  (e: 'back'): void
 }>()
 
 const getPlayerName = (id?: string) => {
@@ -67,11 +68,12 @@ watch(() => store.matchState, (newVal) => {
   <div class="w-full flex flex-col bg-surface-container-low rounded-2xl p-4">
     <!-- Header with past match context -->
     <div class="relative flex items-center justify-center mb-6">
-      <BaseButton variant="secondary" @click="emit('cancel')" class="!h-10 px-4 absolute left-0">Cancel</BaseButton>
+      <BaseButton variant="secondary" @click="emit('back')" class="!h-10 px-4 absolute left-0">Back</BaseButton>
       <div class="text-on-surface-variant text-base font-bold flex flex-col items-center">
         <span>Match Score</span>
         <span class="text-xl text-on-surface">{{ team1Wins }} - {{ team2Wins }}</span>
       </div>
+      <BaseButton variant="secondary" @click="emit('cancel')" class="!h-10 px-4 absolute right-0">Cancel</BaseButton>
     </div>
     
     <div class="flex flex-col items-center mb-4 gap-1">
