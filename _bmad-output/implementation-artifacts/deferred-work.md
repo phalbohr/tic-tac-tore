@@ -222,4 +222,5 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)"), 2026-07-19
 location: n/a
 reason: Hardcoded array indices crash on 3v3: Array index hardcoding in `ScoreEntry.vue` fails if matchType is extended.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #138 (dynamic team names and tests for 1v1, 2v2, 3v3)
