@@ -1,16 +1,16 @@
 {
   "schema_version": "0.1.0",
-  "snapshot_at": "2026-06-07T13:47:00Z",
+  "snapshot_at": "2026-07-25T17:50:00.000Z",
   "repo": "tic-tac-tore",
-  "collection_mode": "sequential",
+  "collection_mode": "contract_static",
   "collection_status": "COLLECTED",
   "inventory_basis": "acceptance_criteria",
   "gate_basis": "priority_thresholds",
   "source_sha": "",
   "target": {
     "type": "story",
-    "id": "1.5",
-    "label": "Account Deletion with Anonymization"
+    "id": "2-4",
+    "label": "Story 2.4: Match Submission with Undo Window"
   },
   "decision_mode": "deterministic",
   "evaluator": "Pavel",
@@ -19,26 +19,26 @@
     "resolution_mode": "formal_requirements",
     "confidence": "high",
     "sources": [
-      "_bmad-output/implementation-artifacts/1-5-account-deletion-with-anonymization.md"
+      "_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md"
     ],
     "external_pointer_status": "not_used",
     "synthetic": false
   },
   "coverage": {
     "inventory": {
-      "covered": 5,
-      "total": 5,
+      "covered": 7,
+      "total": 7,
       "pct": 100
     },
     "priority_breakdown": {
       "P0": {
-        "total": 4,
-        "covered": 4,
+        "total": 5,
+        "covered": 5,
         "pct": 100
       },
       "P1": {
-        "total": 1,
-        "covered": 1,
+        "total": 2,
+        "covered": 2,
         "pct": 100
       },
       "P2": {
@@ -53,31 +53,15 @@
       }
     },
     "by_level": {
-      "e2e": {
-        "tests": 2,
-        "criteria_covered": 3
-      },
-      "api": {
-        "tests": 2,
-        "criteria_covered": 3
-      },
-      "component": {
-        "tests": 0,
-        "criteria_covered": 0
-      },
-      "unit": {
-        "tests": 4,
-        "criteria_covered": 2
-      },
-      "other": {
-        "tests": 0,
-        "criteria_covered": 0
-      }
+      "e2e": { "tests": 3, "criteria_covered": 5 },
+      "api": { "tests": 3, "criteria_covered": 2 },
+      "component": { "tests": 0, "criteria_covered": 0 },
+      "unit": { "tests": 7, "criteria_covered": 6 }
     }
   },
   "tests": {
-    "files": 3,
-    "cases": 8,
+    "files": 4,
+    "cases": 13,
     "skipped_cases": 0,
     "fixme_cases": 0,
     "pending_cases": 0
@@ -99,7 +83,7 @@
   "recommendations": [
     {
       "priority": "LOW",
-      "action": "Run /bmad:tea:test-review to assess test quality",
+      "action": "Maintain high quality test execution and continue automated regression monitoring.",
       "requirements": []
     }
   ],

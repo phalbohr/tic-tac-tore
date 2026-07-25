@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue'
-import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
+import { useMatchDraftStore, type PlayerDto, type GameScore } from '../stores/matchDraftStore'
 import ScoreStepper from './ScoreStepper.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 
@@ -15,7 +15,7 @@ const showCancelModal = ref(false)
 
 const getPlayerName = (id?: string) => {
   if (!id) return 'Unknown'
-  const opp = store.frequentOpponents.find(o => o.id === id)
+  const opp = store.frequentOpponents.find((o: PlayerDto) => o.id === id)
   if (opp) return opp.nickname
   const fetched = store.fetchedPlayers[id]
   if (fetched) return fetched.nickname
@@ -24,20 +24,20 @@ const getPlayerName = (id?: string) => {
 
 const team1Name = computed(() => {
   const half = Math.ceil(store.selectedPlayers.length / 2)
-  return store.selectedPlayers.slice(0, half).map(id => getPlayerName(id)).join(' & ') || 'Team 1'
+  return store.selectedPlayers.slice(0, half).map((id: string) => getPlayerName(id)).join(' & ') || 'Team 1'
 })
 
 const team2Name = computed(() => {
   const half = Math.ceil(store.selectedPlayers.length / 2)
-  return store.selectedPlayers.slice(half).map(id => getPlayerName(id)).join(' & ') || 'Team 2'
+  return store.selectedPlayers.slice(half).map((id: string) => getPlayerName(id)).join(' & ') || 'Team 2'
 })
 
 const team1Wins = computed(() => {
-  return store.games.filter(g => g.team1Score > g.team2Score).length
+  return store.games.filter((g: GameScore) => g.team1Score > g.team2Score).length
 })
 
 const team2Wins = computed(() => {
-  return store.games.filter(g => g.team2Score > g.team1Score).length
+  return store.games.filter((g: GameScore) => g.team2Score > g.team1Score).length
 })
 
 function onTeam1Increment(amount: number) {

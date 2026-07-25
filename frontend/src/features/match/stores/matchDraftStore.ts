@@ -1,6 +1,6 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
 
 export enum MatchType {
   ONE_VS_ONE = '1v1',
@@ -213,7 +213,74 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
   }
 
-  function reset() {
+  async function executeCommit(item: { idempotencyKey: string; payload: Record<string, unknown> }): Promise<SubmissionResult> {
+    try {
+      const res = await fetch('/api/v1/matches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': item.idempotencyKey
+        },
+        body: JSON.stringify(item.payload)
+      })
+      if (res.ok) {
+        resetDraftStateOnly()
+        return SubmissionResult.SUCCESS
+      } else if (res.status >= 400 && res.status < 500) {
+        return SubmissionResult.CLIENT_ERROR
+      } else {
+        return SubmissionResult.SERVER_OR_NETWORK_ERROR
+      }
+    } catch {
+      return SubmissionResult.SERVER_OR_NETWORK_ERROR
+    }
+  }
+
+  const {
+    countdown: submissionCountdown,
+    isPending: isPendingSubmission,
+    isOfflinePending,
+    pendingSubmission,
+    startTimer,
+    cancelTimer,
+    clearTimer
+  } = useSubmissionTimer(executeCommit)
+
+  function startSubmissionTimer() {
+    const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
+    if (selectedPlayers.value.length < requiredPlayers) return
+
+    if (games.value.length === 0 && isGameComplete.value) {
+      completeCurrentGame()
+    }
+    if (games.value.length === 0) return
+
+    const idempotencyKey = crypto.randomUUID()
+    
+    const teamAAttackerId = selectedPlayers.value[0]
+    const teamADefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : undefined
+    const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : selectedPlayers.value[1]
+    const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : undefined
+
+    const payload = {
+      idempotencyKey,
+      creatorId: teamAAttackerId,
+      teamAAttackerId,
+      teamADefenderId,
+      teamBAttackerId,
+      teamBDefenderId,
+      games: games.value.map(g => ({ teamAScore: g.team1Score, teamBScore: g.team2Score }))
+    }
+
+    startTimer({ idempotencyKey, payload })
+  }
+
+  function cancelSubmissionTimer() {
+    cancelTimer()
+    matchState.value = 'ready_for_submission'
+  }
+
+  function resetDraftStateOnly() {
     matchType.value = MatchType.ONE_VS_ONE
     selectedPlayers.value = []
     ruleSystem.value = 'STANDARD'
@@ -221,6 +288,11 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
+  }
+
+  function reset() {
+    resetDraftStateOnly()
+    clearTimer()
   }
 
   return {
@@ -237,6 +309,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games,
     currentGame,
     matchState,
+    pendingSubmission,
+    isPendingSubmission,
+    isOfflinePending,
+    submissionCountdown,
+    startSubmissionTimer,
+    cancelSubmissionTimer,
     fetchDefaults,
     loadRuleConfig,
     setMatchType,
