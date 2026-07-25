@@ -217,7 +217,8 @@ resolution: fixed in PR #141 (added back button in ScoreEntry and returnToPlayer
 origin: migrated from legacy ledger ("Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)"), 2026-07-19
 location: n/a
 reason: Hardcoded win logic without win-by-two: Assumes naive absolute score ceiling, breaks for win-by-two.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #142 (added winByTwo support in matchDraftStore and ScoreStepper)
 
 ### DW-33: Hardcoded array indices crash on 3v3: Array index hardcoding in `ScoreEntry.vue` fails if matchType is extended.
 origin: migrated from legacy ledger ("Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)"), 2026-07-19

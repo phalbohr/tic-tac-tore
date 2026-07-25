@@ -49,11 +49,11 @@ describe('matchDraftStore', () => {
     it('handles successful loadRuleConfig', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2 })
+        json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true })
       })
       const store = useMatchDraftStore()
       await store.loadRuleConfig()
-      expect(store.ruleConfig).toEqual({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2 })
+      expect(store.ruleConfig).toEqual({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true })
     })
 
     it('handles API error in loadRuleConfig by falling back to standard', async () => {
@@ -62,12 +62,12 @@ describe('matchDraftStore', () => {
       })
       const store = useMatchDraftStore()
       await store.loadRuleConfig()
-      expect(store.ruleConfig).toEqual({ scoreLimit: 10, gameLimit: 3, winsNeeded: 2 })
+      expect(store.ruleConfig).toEqual({ scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false })
     })
 
     it('increments score but caps at scoreLimit, requires manual complete', async () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
       store.incrementScore(1, 1)
       expect(store.currentGame.team1Score).toBe(1)
       
@@ -93,9 +93,36 @@ describe('matchDraftStore', () => {
       expect(store.currentGame.team2Score).toBe(0)
     })
 
+    it('increments score past limit when winByTwo is true', async () => {
+      const store = useMatchDraftStore()
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: true }
+
+      store.incrementScore(1, 4)
+      store.incrementScore(2, 4)
+      expect(store.currentGame.team1Score).toBe(4)
+      expect(store.currentGame.team2Score).toBe(4)
+      expect(store.isGameComplete).toBe(false)
+
+      store.incrementScore(1, 1) // 5 - 4
+      expect(store.currentGame.team1Score).toBe(5)
+      expect(store.isGameComplete).toBe(false) // Needs 2 point lead
+
+      store.incrementScore(2, 1) // 5 - 5
+      expect(store.currentGame.team2Score).toBe(5)
+      expect(store.isGameComplete).toBe(false)
+
+      store.incrementScore(1, 1) // 6 - 5
+      expect(store.currentGame.team1Score).toBe(6)
+      expect(store.isGameComplete).toBe(false)
+
+      store.incrementScore(1, 1) // 7 - 5
+      expect(store.currentGame.team1Score).toBe(7)
+      expect(store.isGameComplete).toBe(true) // Has 2 point lead
+    })
+
     it('manually completes a game and starts next when scoreLimit is reached', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
       store.incrementScore(1, 5)
       expect(store.isGameComplete).toBe(true)
       
@@ -108,7 +135,7 @@ describe('matchDraftStore', () => {
 
     it('manually completes match when winsNeeded is reached', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
       
       // Game 1
       store.incrementScore(1, 5)
@@ -125,7 +152,7 @@ describe('matchDraftStore', () => {
     
     it('manually completes match when gameLimit is reached', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3, winByTwo: false }
       
       // Game 1
       store.incrementScore(2, 5)
