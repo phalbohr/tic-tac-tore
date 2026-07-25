@@ -118,7 +118,7 @@ watch(() => store.matchState, (newVal) => {
       {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
     </BaseButton>
 
-    <Transition name="fade">
+    <Transition name="ch-fade">
       <div
         v-if="showCancelModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
@@ -139,19 +139,20 @@ watch(() => store.matchState, (newVal) => {
           </div>
 
           <div class="flex flex-col gap-2">
-            <button
-              @click="emit('cancel')"
-              class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-headline font-extrabold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2"
+            <BaseButton
+              @click="showCancelModal = false; emit('cancel')"
+              class="w-full !bg-red-600 hover:!bg-red-700 !text-white font-headline font-extrabold uppercase tracking-wider text-xs !h-12"
             >
               Confirm Cancel
-            </button>
+            </BaseButton>
 
-            <button
+            <BaseButton
+              variant="secondary"
               @click="showCancelModal = false"
-              class="w-full py-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface font-headline font-bold text-xs transition-colors"
+              class="w-full font-headline font-bold text-xs !h-12"
             >
               Keep Playing
-            </button>
+            </BaseButton>
           </div>
         </div>
       </div>
@@ -160,13 +161,13 @@ watch(() => store.matchState, (newVal) => {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+.ch-fade-enter-active,
+.ch-fade-leave-active {
   transition: opacity 0.2s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.ch-fade-enter-from,
+.ch-fade-leave-to {
   opacity: 0;
 }
 </style>

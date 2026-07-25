@@ -202,7 +202,8 @@ resolution: already resolved: ScoreEntry.vue:112 manual 'Next Game' button requi
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Add confirmation dialog when clicking Cancel in the score entry view to prevent accidental resets.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #140
 
 ### DW-31: Add a back button in the score entry view to return to player selection.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
