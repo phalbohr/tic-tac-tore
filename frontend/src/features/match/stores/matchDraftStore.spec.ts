@@ -45,6 +45,54 @@ describe('matchDraftStore', () => {
     expect(store.selectedPlayers).toEqual([])
   })
 
+  describe('Position Swapping', () => {
+    it('sets state to position_swap for 2v2 games on beginScoreEntry', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      expect(store.matchState).toBe('position_swap')
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+      expect(store.currentGame.teamBAttackerId).toBe('p3')
+      expect(store.currentGame.teamBDefenderId).toBe('p4')
+    })
+
+    it('sets state to score_entry for 1v1 games on beginScoreEntry', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.ONE_VS_ONE)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+
+      store.beginScoreEntry()
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('swaps positions and confirms correctly', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+
+      store.swapPositions(1)
+      expect(store.currentGame.teamAAttackerId).toBe('p2')
+      expect(store.currentGame.teamADefenderId).toBe('p1')
+
+      store.confirmPositions()
+      expect(store.matchState).toBe('score_entry')
+    })
+  })
+
   describe('Score Entry and Manual Completion', () => {
     it('handles successful loadRuleConfig', async () => {
       fetchMock.mockResolvedValueOnce({
