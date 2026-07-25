@@ -23,6 +23,7 @@ export interface RuleConfig {
   scoreLimit: number
   gameLimit: number
   winsNeeded: number
+  winByTwo: boolean
 }
 
 export const useMatchDraftStore = defineStore('matchDraft', () => {
@@ -72,7 +73,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         ruleConfig.value = { 
           scoreLimit: Number(data.scoreLimit), 
           gameLimit: Number(data.gameLimit), 
-          winsNeeded: Number(data.winsNeeded) 
+          winsNeeded: Number(data.winsNeeded),
+          winByTwo: Boolean(data.winByTwo)
         }
       } else {
         throw new Error('API failed')
@@ -81,7 +83,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       const e = error as Error;
       if (e.name === 'AbortError') throw e;
       console.warn('Failed to load rule config, falling back to Best of 3 rules', e)
-      ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2 }
+      ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
     }
   }
 
@@ -122,7 +124,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   const isGameComplete = computed(() => {
     const limit = ruleConfig.value?.scoreLimit ?? 10
-    return currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit
+    const reachedLimit = currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit
+    if (!reachedLimit) return false
+
+    if (ruleConfig.value?.winByTwo) {
+      return Math.abs(currentGame.value.team1Score - currentGame.value.team2Score) >= 2
+    }
+
+    return true
   })
 
   const isMatchComplete = computed(() => {
@@ -144,10 +153,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     if (matchState.value === 'ready_for_submission') return
     
     const limit = ruleConfig.value?.scoreLimit ?? 10
+    const winByTwo = ruleConfig.value?.winByTwo ?? false
+
     if (team === 1) {
-      currentGame.value.team1Score = Math.min(currentGame.value.team1Score + amount, limit)
+      currentGame.value.team1Score = winByTwo
+        ? currentGame.value.team1Score + amount
+        : Math.min(currentGame.value.team1Score + amount, limit)
     } else {
-      currentGame.value.team2Score = Math.min(currentGame.value.team2Score + amount, limit)
+      currentGame.value.team2Score = winByTwo
+        ? currentGame.value.team2Score + amount
+        : Math.min(currentGame.value.team2Score + amount, limit)
     }
   }
 
