@@ -50,6 +50,10 @@ function handleCancel() {
   emit('cancel')
 }
 
+function handleBack() {
+  store.returnToDraft()
+}
+
 function handleMatchReady() {
   emit('complete')
 }
@@ -79,6 +83,7 @@ function handleMatchReady() {
     v-else-if="store.matchState === 'score_entry' || store.matchState === 'ready_for_submission'" 
     @complete="handleMatchReady" 
     @cancel="handleCancel" 
+    @back="handleBack"
   />
   
   <div v-else class="w-full flex flex-col items-center bg-surface-container-low rounded-2xl p-4 gap-6">
