@@ -15,6 +15,10 @@ baseline_commit: HEAD
 - **Then** prompt to confirm/swap Attacker/Defender
 - **And** data persisted for each game
 - **And** the match submission payload (Story 2.4) correctly includes positional data
+- **And** 1v1 matches must explicitly ignore or reject positional data to prevent regressions
+
+**Out of Scope:**
+- Calculation or display of statistics (belongs to Epic 4).
 
 ---
 
@@ -26,6 +30,10 @@ baseline_commit: HEAD
 - **Context:** Story 2.4 implemented the match submission payload. Story 2.5 expands the payload to include positional data, which is critical for accurate player-level statistics (Epic 4).
 
 ### 2. Architecture & Data Integrity Guardrails (Backend `code-1-guide` Compliance)
+- **Database Migration:** You MUST create a new Flyway migration script (e.g., `V<version>__add_player_positions.sql`) to add the necessary columns for storing positions. Do not modify existing migrations.
+- **Data Structure:**
+  - Create a `Position` Enum with values `ATTACKER` and `DEFENDER`.
+  - Update `Game` and `Match` models by explicitly defining how positions are stored (e.g., mapping players to the `Position` Enum).
 - **Three-Layer Transaction Architecture (Rule 3):** Strict separation of retry and transaction boundaries:
   - **Outer Service (`MatchServiceImpl`):** Annotated with `@Retryable` ONLY. Orchestrates validation and calls the inner operation. NEVER combine `@Retryable` and `@Transactional`.
   - **Inner Operation (`MatchOperation`):** Annotated with `@Idempotent` + `@Transactional`. Handles atomic database saves so each retry opens a clean transaction.
@@ -37,6 +45,7 @@ baseline_commit: HEAD
 
 ### 3. Frontend Implementation Guardrails (Vue 3 + Pinia + TEA Framework)
 - **State Management:** Extend the Pinia match store (`useMatchStore`) to track positions for each player in each game of a 2v2 match. Ensure changes trigger UI updates.
+- **Reinvention Prevention:** Reuse existing Vue components for the drafting flow (e.g., existing match entry UI components) instead of creating new ones from scratch. Extend them with positional selectors.
 - **Component Design (`5-style` Compliance):**
   - Use `<script setup>` syntax exclusively.
   - Apply `ch-` prefix for custom UI styles (e.g., `ch-position-swap`).
@@ -47,6 +56,7 @@ baseline_commit: HEAD
   - Use `page.getByRole()` instead of brittle CSS selectors for Playwright tests.
   - E2E scripts belong in `frontend/e2e/`.
   - Do not assert directly against Pinia internal state; assert against UI reflections (e.g., "Attacker" label rendering in the correct player slot).
+- **Pinia Testing Guardrails:** When writing unit tests for `useMatchStore`, ALWAYS call `setActivePinia(createPinia())` in the `beforeEach` block to ensure proper test isolation and prevent store state bleed between tests.
 
 ### 4. Code Standards & Testing (`5-style` & `6-test`)
 - **Zero Comments Policy:** No inline, block, or Javadoc comments. Extract complex logic into named variables/methods instead.
@@ -62,7 +72,12 @@ baseline_commit: HEAD
 
 - Update `frontend/src/stores/matchStore.ts` (or similar) to handle positions.
 - Update `backend/src/main/java/com/tictactore/dto/GameDto.java` and relevant Request classes to accept `Attacker`/`Defender` values for 2v2 matches.
-- Backend entities: Update `Game` and `Match` models. Ensure positional constraints are enforced (e.g., exactly 1 attacker and 1 defender per team in a 2v2 game).
+- **Database updates (JPA):**
+  1. Add `Position` enum to domain.
+  2. Update `Game` and `Match` entities with new positional fields mapped to the enum.
+  3. Validate that 1v1 games reject positions.
+  4. Ensure 2v2 games strictly enforce 1 attacker and 1 defender per team.
+  5. Add Flyway migration in `backend/src/main/resources/db/migration/`.
 
 ---
 
