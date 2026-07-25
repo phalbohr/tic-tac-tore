@@ -22,7 +22,10 @@
     "submit": "Spiel einreichen",
     "pending": "Ausstehende Bestätigung",
     "approved": "Bestätigt",
-    "rejected": "Abgelehnt"
+    "rejected": "Abgelehnt",
+    "willRetryOnline": "Erneuter Versuch wenn online",
+    "submittedTapUndo": "Spiel eingereicht. Tippen zum Rückgängigmachen.",
+    "undo": "Rückgängig"
   },
   "leaderboard": {
     "title": "Rangliste",

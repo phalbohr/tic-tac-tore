@@ -226,3 +226,10 @@ location: n/a
 reason: Hardcoded array indices crash on 3v3: Array index hardcoding in `ScoreEntry.vue` fails if matchType is extended.
 status: done 2026-07-25
 resolution: fixed in PR #138 (dynamic team names and tests for 1v1, 2v2, 3v3)
+
+### DW-34: Unrelated deletion of Story 2.3 TEA result files during Story 2.4 work
+origin: code review of story 2-4-match-submission-with-undo-window.md (2026-07-25)
+location: `_bmad-output/implementation-artifacts/bmad-dev-auto-result-2-3-*.md`
+reason: Unrelated TEA artifact files were deleted during story execution. Pre-existing cleanup noise.
+status: open
+

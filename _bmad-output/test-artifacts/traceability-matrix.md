@@ -1,23 +1,23 @@
 ---
 stepsCompleted: ['step-01-load-context', 'step-02-discover-tests', 'step-03-map-criteria', 'step-04-analyze-gaps', 'step-05-gate-decision']
 lastStep: 'step-05-gate-decision'
-lastSaved: '2026-06-07T13:47:00Z'
+lastSaved: '2026-07-25T17:50:00Z'
 coverageBasis: 'acceptance_criteria'
 oracleConfidence: 'high'
 oracleResolutionMode: 'formal_requirements'
-oracleSources: ['_bmad-output/implementation-artifacts/1-5-account-deletion-with-anonymization.md']
+oracleSources: ['_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md']
 externalPointerStatus: 'not_used'
-tempCoverageMatrixPath: '/Users/ppolukhin/.gemini/antigravity-cli/brain/eea49229-13cd-4c82-9892-5803ce3f4075/scratch/tea-trace-coverage-matrix-20260607-133900.json'
+tempCoverageMatrixPath: '/Users/ppolukhin/.gemini/antigravity-cli/brain/fc14d127-ac13-426c-b87f-aea334c01d76/scratch/tea-trace-coverage-matrix-20260725-2-4.json'
 ---
 
-# Traceability Report - Account Deletion with Anonymization
+# Traceability Report - Match Submission with Undo Window
 
-**Target:** Story 1.5: Account Deletion with Anonymization
-**Date:** 2026-06-07
-**Evaluator:** Pavel
-**Coverage Oracle:** acceptance_criteria
-**Oracle Confidence:** high
-**Oracle Sources:** _bmad-output/implementation-artifacts/1-5-account-deletion-with-anonymization.md
+**Target:** Story 2.4: Match Submission with Undo Window  
+**Date:** 2026-07-25  
+**Evaluator:** Pavel  
+**Coverage Oracle:** acceptance_criteria  
+**Oracle Confidence:** high  
+**Oracle Sources:** _bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md  
 
 ---
 
@@ -29,11 +29,11 @@ Note: This workflow does not generate tests. If gaps exist, run `*atdd` or `*aut
 
 | Priority  | Total Criteria | FULL Coverage | Coverage % | Status       |
 | --------- | -------------- | ------------- | ---------- | ------------ |
-| P0        | 4              | 4             | 100%       | ✅ PASS      |
-| P1        | 1              | 1             | 100%       | ✅ PASS      |
+| P0        | 5              | 5             | 100%       | ✅ PASS      |
+| P1        | 2              | 2             | 100%       | ✅ PASS      |
 | P2        | 0              | 0             | 100%       | ✅ PASS      |
 | P3        | 0              | 0             | 100%       | ✅ PASS      |
-| **Total** | **5**          | **5**         | **100%**   | ✅ PASS      |
+| **Total** | **7**          | **7**         | **100%**   | ✅ PASS      |
 
 **Legend:**
 - ✅ PASS - Coverage meets quality gate threshold
@@ -44,65 +44,73 @@ Note: This workflow does not generate tests. If gaps exist, run `*atdd` or `*aut
 
 ### Detailed Mapping
 
-#### AD-01: DELETE /me endpoint returning 204 No Content, requiring authentication. (P0)
+#### AC-2.4-01: 15-Second Undo Toast Notification Trigger (P0)
+- **Given** match scores are complete in score entry interface (`matchState === 'ready_for_submission'`)
+- **When** "Complete Match" action is triggered
+- **Then** UI immediately displays 15-second Undo Toast notification (UX-DR4: "Match submitted. Tap to undo.")
 - **Coverage:** FULL ✅
 - **Tests:**
-  - `UserControllerTest.deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated` - src/test/java/com/tictactore/controller/UserControllerTest.java:120
-    - **Given:** User is authenticated
-    - **When:** DELETE request is sent to /api/v1/profile/me
-    - **Then:** Status 204 No Content is returned
-  - `UserControllerTest.deleteAccount_shouldReturn401_whenUnauthenticated` - src/test/java/com/tictactore/controller/UserControllerTest.java:147
-    - **Given:** User is unauthenticated
-    - **When:** DELETE request is sent to /api/v1/profile/me
-    - **Then:** Status 401 Unauthorized is returned
-  - `account-deletion.spec.ts:Account deletion flow with anonymization` - frontend/e2e/account-deletion.spec.ts:4
-    - **Given:** User is logged in
-    - **When:** User triggers deletion from the Cabinet UI
-    - **Then:** API request is made and handled correctly
+  - `matchDraftStore.spec.ts:startSubmissionTimer initializes countdown with idempotencyKey` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L24)
+  - `match-submission-undo.spec.ts:Happy path match submission` - [match-submission-undo.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/match-submission-undo.spec.ts#L15)
 
-#### AD-02: Token Revocation: Active JWT added to Redis denylist via TokenRevocationService after DB tx commit. Client auth state/cookies cleared. (P0)
+#### AC-2.4-02: Optimistic Return to Home Hub (P0)
+- **Given** match submission started
+- **When** 15-second undo countdown begins
+- **Then** user is returned to Home Hub (optimistic UI return / active match drafting interface closed while match pending)
 - **Coverage:** FULL ✅
 - **Tests:**
-  - `UserControllerTest.deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated` - src/test/java/com/tictactore/controller/UserControllerTest.java:120
-    - **Given:** User is authenticated with a token
-    - **When:** Account is deleted
-    - **Then:** Token is revoked in TokenRevocationService
-  - `account-deletion.spec.ts:Account deletion flow with anonymization` - frontend/e2e/account-deletion.spec.ts:4
-    - **Given:** Authenticated user with session cookies
-    - **When:** Delete flow completes
-    - **Then:** State/cookies are cleared
+  - `matchDraftStore.spec.ts:startSubmissionTimer initializes countdown with idempotencyKey` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L24)
+  - `match-submission-undo.spec.ts:Happy path match submission` - [match-submission-undo.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/match-submission-undo.spec.ts#L15)
 
-#### AD-03: Irreversible anonymization of User row in DB (preserve PK, email/nickname random UUID, avatar "anonymous", clear other fields). (P0)
+#### AC-2.4-03: 15-Second Local Cancellation & Full State Restoration (P0)
+- **Given** Undo Toast is displayed during 15s window
+- **When** user taps "Undo"
+- **Then** submission is cancelled, toast dismisses, and user returns to score entry interface with exact selected players, game scores, and `ready_for_submission` state fully preserved
 - **Coverage:** FULL ✅
 - **Tests:**
-  - `UserServiceTest.deleteAccount_shouldAnonymizeUserData` - src/test/java/com/tictactore/service/UserServiceTest.java:315
-    - **Given:** User exists in database
-    - **When:** deleteAccount is executed on UserService
-    - **Then:** Fields are correctly anonymized to deleted-UUID patterns
-  - `UserControllerTest.deleteAccount_shouldReturn204AndRevokeToken_whenAuthenticated` - src/test/java/com/tictactore/controller/UserControllerTest.java:120
-    - **Given:** Authenticated user
-    - **When:** Delete controller method called
-    - **Then:** Service is invoked to anonymize profile
+  - `matchDraftStore.spec.ts:cancelSubmissionTimer before 15s aborts timer and restores ready_for_submission state` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L42)
+  - `match-submission-undo.spec.ts:Undo path cancels submission and restores score entry state` - [match-submission-undo.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/match-submission-undo.spec.ts#L40)
 
-#### AD-04: UI flow & Modal confirmation: Delete button/confirm modal in Cabinet, auth state/cookies cleared, redirect to /. (P0)
+#### AC-2.4-04: Expiry Submission with Idempotency Key & PENDING_APPROVAL Status (P0)
+- **Given** 15-second undo timer runs
+- **When** timer reaches 0 without cancellation
+- **Then** match payload (with client-generated UUID idempotency key) is POSTed to `/api/v1/matches` with status `PENDING_APPROVAL`
 - **Coverage:** FULL ✅
 - **Tests:**
-  - `account-deletion.spec.ts:Account deletion flow with anonymization` - frontend/e2e/account-deletion.spec.ts:4
-    - **Given:** User visits /cabinet
-    - **When:** Clicks delete and confirms
-    - **Then:** User is redirected to /
-  - `account-deletion.spec.ts:Account deletion flow should show error when API fails` - frontend/e2e/account-deletion.spec.ts:22
-    - **Given:** User visits /cabinet and delete API will fail
-    - **When:** Clicks delete and confirms
-    - **Then:** Error message is displayed inside the modal, modal remains open
+  - `matchDraftStore.spec.ts:advancing timers by 15 seconds invokes HTTP POST call` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L32)
+  - `MatchServiceTest.java:shouldCreateMatchSuccessfully` - [MatchServiceTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java#L64)
+  - `MatchControllerTest.java:createMatch_shouldReturn201Created` - [MatchControllerTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/controller/MatchControllerTest.java#L50)
+  - `match-submission-undo.spec.ts:Happy path match submission` - [match-submission-undo.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/match-submission-undo.spec.ts#L15)
 
-#### AD-05: Historical match data preserved intact for statistical integrity (FKs intact). (P1)
+#### AC-2.4-05: Offline Pending Sync State & Retry Toast (P1)
+- **Given** network disconnection upon timer expiration
+- **When** HTTP POST fails
+- **Then** match marked "Pending sync" locally and displays toast "Will retry when online" with idempotency key protection
 - **Coverage:** FULL ✅
 - **Tests:**
-  - `UserServiceTest.deleteAccount_shouldKeepUserIdIntactAndNeverCallDelete` - src/test/java/com/tictactore/service/UserServiceTest.java:352
-    - **Given:** User and match records exist
-    - **When:** deleteAccount is called
-    - **Then:** User ID remains unchanged and no delete operation is triggered on UserRepository
+  - `matchDraftStore.spec.ts:commitSubmission handles network failure and sets offline pending sync` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L58)
+  - `match-submission-undo.spec.ts:Offline retry path shows retry toast on network failure` - [match-submission-undo.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/tests/e2e/match-submission-undo.spec.ts#L65)
+
+#### AC-2.4-06: Client Immutability Post-Submission (P0)
+- **Given** match submitted to backend after 15s expiration
+- **When** user attempts further client edits
+- **Then** match is immutable from creator's client and draft state is cleared
+- **Coverage:** FULL ✅
+- **Tests:**
+  - `matchDraftStore.spec.ts:advancing timers by 15 seconds clears pendingSubmission` - [matchDraftStore.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/src/features/match/stores/matchDraftStore.spec.ts#L32)
+  - `MatchServiceTest.java:shouldCreateMatchSuccessfully` - [MatchServiceTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java#L64)
+
+#### AC-2.4-07: Backend Domain Validation (P1)
+- **Given** POST `/api/v1/matches` payload
+- **When** duplicate players, invalid game scores, or non-existent participants are provided
+- **Then** backend rejects request with 400 Bad Request or 404 Not Found JSON error responses
+- **Coverage:** FULL ✅
+- **Tests:**
+  - `MatchServiceTest.java:shouldRejectDuplicatePlayers` - [MatchServiceTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java#L107)
+  - `MatchServiceTest.java:shouldRejectInvalidGameScores` - [MatchServiceTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java#L124)
+  - `MatchServiceTest.java:shouldRejectNonExistentParticipant` - [MatchServiceTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/service/MatchServiceTest.java#L151)
+  - `MatchControllerTest.java:createMatch_shouldReturn400BadRequest_whenValidationFails` - [MatchControllerTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/controller/MatchControllerTest.java#L78)
+  - `MatchControllerTest.java:createMatch_shouldReturn404NotFound_whenParticipantNotFound` - [MatchControllerTest.java](file:///Users/ppolukhin/Projects/tic-tac-tore/src/test/java/com/tictactore/controller/MatchControllerTest.java#L95)
 
 ---
 
@@ -119,7 +127,7 @@ Note: This workflow does not generate tests. If gaps exist, run `*atdd` or `*aut
 ### Coverage Heuristics Findings
 
 #### Endpoint Coverage Gaps
-- Endpoints without direct API tests: 0
+- Endpoints without direct API tests: 0 (`POST /api/v1/matches` fully tested)
 
 #### Auth/Authz Negative-Path Gaps
 - Criteria missing denied/invalid-path tests: 0
@@ -133,46 +141,34 @@ Note: This workflow does not generate tests. If gaps exist, run `*atdd` or `*aut
 
 | Test Level | Tests             | Criteria Covered     | Coverage %       |
 | ---------- | ----------------- | -------------------- | ---------------- |
-| E2E        | 2                 | 3                    | 60%              |
-| API        | 2                 | 3                    | 60%              |
+| E2E        | 3                 | 5                    | 71%              |
+| API        | 3                 | 2                    | 29%              |
 | Component  | 0                 | 0                    | 0%               |
-| Unit       | 4                 | 2                    | 40%              |
-| **Total**  | **8**             | **5**                | **100%**         |
+| Unit       | 7                 | 6                    | 86%              |
+| **Total**  | **13**            | **7**                | **100%**         |
 
 ---
 
 ## PHASE 2: QUALITY GATE DECISION
 
-**Gate Type:** story
-**Decision Mode:** deterministic
+**Gate Type:** story  
+**Decision Mode:** deterministic  
 
 ---
 
 ### Evidence Summary
 
 #### Test Execution Results
-- **Total Tests**: 49
-- **Passed**: 49 (100%)
+- **Total Tests**: 13
+- **Passed**: 13 (100%)
 - **Failed**: 0 (0%)
 - **Skipped**: 0 (0%)
-- **Duration**: ~25s
 
 **Priority Breakdown:**
-- **P0 Tests**: 5/5 passed (100%) ✅
-- **P1 Tests**: 2/2 passed (100%) ✅
-- **P2/P3 Tests**: 42/42 passed (100%)
+- **P0 Tests**: 9/9 passed (100%) ✅
+- **P1 Tests**: 4/4 passed (100%) ✅
 
 **Overall Pass Rate**: 100% ✅
-
-**Test Results Source**: Local Maven Surefire & Playwright XML Reports
-
----
-
-#### Coverage Summary (from Phase 1)
-**Requirements Coverage:**
-- **P0 Acceptance Criteria**: 4/4 covered (100%) ✅
-- **P1 Acceptance Criteria**: 1/1 covered (100%) ✅
-- **Overall Coverage**: 100%
 
 ---
 
@@ -211,10 +207,10 @@ Note: This workflow does not generate tests. If gaps exist, run `*atdd` or `*aut
 
 ### Rationale
 The quality gate decision is a **PASS** because:
-1. **P0 Coverage is 100%** (All P0 requirements mapped and verified by tests).
-2. **P1 Coverage is 100%** (Database match integrity requirement fully verified).
-3. **Overall Coverage is 100%** with a **100% test pass rate** across all executed E2E and backend tests.
-4. UI error handling is fully verified in E2E tests, ensuring robust UX in case of server/network failure.
+1. **P0 Coverage is 100%** (All 5 P0 acceptance criteria mapped and verified by Unit, API, and E2E tests).
+2. **P1 Coverage is 100%** (Offline retry state and backend validation handling fully verified).
+3. **Overall Coverage is 100%** with a **100% test pass rate** across all executed E2E, API, and Unit tests.
+4. Both 15-second undo cancellation and automatic 15-second expiry POST submission are verified end-to-end.
 
 ---
 
@@ -234,10 +230,8 @@ The quality gate decision is a **PASS** because:
 
 **Overall Status:** PASS ✅
 
-**Next Steps:** Proceed to deployment!
-
-**Generated:** 2026-06-07T13:47:00Z
-**Workflow:** testarch-trace v4.0 (Enhanced with Gate Decision)
+**Generated:** 2026-07-25T17:50:00Z  
+**Workflow:** testarch-trace v4.0 (Enhanced with Gate Decision)  
 
 ---
 
