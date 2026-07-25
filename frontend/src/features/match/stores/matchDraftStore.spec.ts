@@ -169,7 +169,7 @@ describe('matchDraftStore', () => {
 
     it('undos last game correctly', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
 
       store.incrementScore(1, 5)
       store.completeCurrentGame()
@@ -184,7 +184,7 @@ describe('matchDraftStore', () => {
 
     it('undos last game from ready_for_submission state', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3, winByTwo: false }
 
       store.incrementScore(1, 5)
       store.completeCurrentGame()
@@ -202,7 +202,7 @@ describe('matchDraftStore', () => {
 
     it('prevents undo when points are already scored in current game', () => {
       const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
 
       store.incrementScore(1, 5)
       store.completeCurrentGame()

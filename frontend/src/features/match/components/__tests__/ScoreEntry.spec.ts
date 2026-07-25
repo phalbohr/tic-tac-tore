@@ -52,8 +52,8 @@ describe('ScoreEntry.vue', () => {
     const headings = wrapper.findAll('h3')
 
     expect(headings.length).toBe(2)
-    expect(headings[0].text()).toBe('Alice')
-    expect(headings[1].text()).toBe('Bob')
+    expect(headings[0]!.text()).toBe('Alice')
+    expect(headings[1]!.text()).toBe('Bob')
   })
 
   it('renders correctly for 2v2', () => {
@@ -72,8 +72,8 @@ describe('ScoreEntry.vue', () => {
     const wrapper = mount(ScoreEntry)
     const headings = wrapper.findAll('h3')
 
-    expect(headings[0].text()).toBe('Alice & Bob')
-    expect(headings[1].text()).toBe('Charlie & Dave')
+    expect(headings[0]!.text()).toBe('Alice & Bob')
+    expect(headings[1]!.text()).toBe('Charlie & Dave')
   })
 
   it('renders correctly for 3v3 (6 players)', () => {
@@ -91,7 +91,7 @@ describe('ScoreEntry.vue', () => {
     const wrapper = mount(ScoreEntry)
     const headings = wrapper.findAll('h3')
 
-    expect(headings[0].text()).toBe('P1 & P2 & P3')
-    expect(headings[1].text()).toBe('P4 & P5 & P6')
+    expect(headings[0]!.text()).toBe('P1 & P2 & P3')
+    expect(headings[1]!.text()).toBe('P4 & P5 & P6')
   })
 })

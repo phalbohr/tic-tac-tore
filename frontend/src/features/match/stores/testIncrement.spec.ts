@@ -10,7 +10,7 @@ describe('incrementScore bug', () => {
   it('allows losing team to increment score even after winning team reaches limit', () => {
     const store = useMatchDraftStore()
     // Setup rule limit
-    store.ruleConfig = { scoreLimit: 10, gameLimit: 1, winsNeeded: 1 }
+    store.ruleConfig = { scoreLimit: 10, gameLimit: 1, winsNeeded: 1, winByTwo: false }
     
     // Team 1 reaches 10
     store.currentGame.team1Score = 10
