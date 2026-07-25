@@ -189,7 +189,8 @@ resolution: already resolved: matchDraftStore.ts:144 and :147 reject increments 
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Provide an undo mechanism for game transitions in multi-game matches before final submission.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #139 (with canUndoLastGame guard against active score data loss)
 
 ### DW-29: Allow score decrementing to revert a game win state if tapped immediately.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
@@ -202,7 +203,8 @@ resolution: already resolved: ScoreEntry.vue:112 manual 'Next Game' button requi
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Add confirmation dialog when clicking Cancel in the score entry view to prevent accidental resets.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #140
 
 ### DW-31: Add a back button in the score entry view to return to player selection.
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
@@ -221,4 +223,5 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)"), 2026-07-19
 location: n/a
 reason: Hardcoded array indices crash on 3v3: Array index hardcoding in `ScoreEntry.vue` fails if matchType is extended.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #138 (dynamic team names and tests for 1v1, 2v2, 3v3)

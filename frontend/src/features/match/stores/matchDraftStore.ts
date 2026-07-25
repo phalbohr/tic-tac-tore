@@ -140,6 +140,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return t1w >= winsNeeded || t2w >= winsNeeded || (games.value.length + 1) >= gameLimit
   })
 
+  const canUndoLastGame = computed(() => {
+    if (games.value.length === 0) return false
+    if (matchState.value === 'ready_for_submission') return true
+    return currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
+  })
+
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
     
@@ -183,6 +189,15 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'draft'
   }
 
+  function undoLastGame() {
+    if (!canUndoLastGame.value) return
+    const lastGame = games.value.pop()
+    if (lastGame) {
+      currentGame.value = { ...lastGame }
+      matchState.value = 'score_entry'
+    }
+  }
+
   function reset() {
     matchType.value = MatchType.ONE_VS_ONE
     selectedPlayers.value = []
@@ -201,6 +216,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     fetchedPlayers,
     isGameComplete,
     isMatchComplete,
+    canUndoLastGame,
     completeCurrentGame,
     ruleConfig,
     games,
@@ -213,6 +229,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     removePlayer,
     incrementScore,
     decrementScore,
+    undoLastGame,
     beginScoreEntry,
     returnToDraft,
     reset

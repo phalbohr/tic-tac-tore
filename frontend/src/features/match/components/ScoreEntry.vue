@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
 import ScoreStepper from './ScoreStepper.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
@@ -11,6 +11,8 @@ const emit = defineEmits<{
   (e: 'back'): void
 }>()
 
+const showCancelModal = ref(false)
+
 const getPlayerName = (id?: string) => {
   if (!id) return 'Unknown'
   const opp = store.frequentOpponents.find(o => o.id === id)
@@ -21,19 +23,13 @@ const getPlayerName = (id?: string) => {
 }
 
 const team1Name = computed(() => {
-  if (store.matchType === MatchType.ONE_VS_ONE) {
-    return getPlayerName(store.selectedPlayers[0])
-  } else {
-    return `${getPlayerName(store.selectedPlayers[0])} & ${getPlayerName(store.selectedPlayers[1])}`
-  }
+  const half = Math.ceil(store.selectedPlayers.length / 2)
+  return store.selectedPlayers.slice(0, half).map(id => getPlayerName(id)).join(' & ') || 'Team 1'
 })
 
 const team2Name = computed(() => {
-  if (store.matchType === MatchType.ONE_VS_ONE) {
-    return getPlayerName(store.selectedPlayers[1])
-  } else {
-    return `${getPlayerName(store.selectedPlayers[2])} & ${getPlayerName(store.selectedPlayers[3])}`
-  }
+  const half = Math.ceil(store.selectedPlayers.length / 2)
+  return store.selectedPlayers.slice(half).map(id => getPlayerName(id)).join(' & ') || 'Team 2'
 })
 
 const team1Wins = computed(() => {
@@ -66,14 +62,14 @@ watch(() => store.matchState, (newVal) => {
 
 <template>
   <div class="w-full flex flex-col bg-surface-container-low rounded-2xl p-4">
-    <!-- Header with past match context -->
+
     <div class="relative flex items-center justify-center mb-6">
       <BaseButton variant="secondary" @click="emit('back')" class="!h-10 px-4 absolute left-0">Back</BaseButton>
       <div class="text-on-surface-variant text-base font-bold flex flex-col items-center">
         <span>Match Score</span>
         <span class="text-xl text-on-surface">{{ team1Wins }} - {{ team2Wins }}</span>
       </div>
-      <BaseButton variant="secondary" @click="emit('cancel')" class="!h-10 px-4 absolute right-0">Cancel</BaseButton>
+      <BaseButton variant="secondary" @click="showCancelModal = true" class="!h-10 px-4 absolute right-0">Cancel</BaseButton>
     </div>
     
     <div class="flex flex-col items-center mb-4 gap-1">
@@ -88,7 +84,7 @@ watch(() => store.matchState, (newVal) => {
     </div>
     
     <div class="flex justify-between gap-4">
-      <!-- Team 1 -->
+
       <div class="flex-1 flex flex-col items-center">
         <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team1Name }}</h3>
         <ScoreStepper 
@@ -99,7 +95,6 @@ watch(() => store.matchState, (newVal) => {
         />
       </div>
       
-      <!-- Team 2 -->
       <div class="flex-1 flex flex-col items-center">
         <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team2Name }}</h3>
         <ScoreStepper 
@@ -111,12 +106,75 @@ watch(() => store.matchState, (newVal) => {
       </div>
     </div>
     
-    <BaseButton 
-      :disabled="!store.isGameComplete"
-      @click="store.completeCurrentGame()"
-      class="w-full mt-6"
-    >
-      {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
-    </BaseButton>
+    <div class="flex flex-col gap-2 mt-6 w-full">
+      <BaseButton
+        :disabled="!store.isGameComplete"
+        @click="store.completeCurrentGame()"
+        class="w-full"
+      >
+        {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
+      </BaseButton>
+
+      <BaseButton
+        v-if="store.canUndoLastGame"
+        variant="secondary"
+        @click="store.undoLastGame()"
+        class="w-full"
+      >
+        Undo Last Game
+      </BaseButton>
+    </div>
+
+    <Transition name="ch-fade">
+      <div
+        v-if="showCancelModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl">
+          <div class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2">
+              <span class="material-symbols-outlined text-2xl">warning</span>
+            </div>
+            <h2 class="font-headline text-lg font-bold text-on-surface">
+              Cancel Match
+            </h2>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Are you sure you want to cancel this match? All recorded scores will be lost.
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <BaseButton
+              @click="showCancelModal = false; emit('cancel')"
+              class="w-full !bg-red-600 hover:!bg-red-700 !text-white font-headline font-extrabold uppercase tracking-wider text-xs !h-12"
+            >
+              Confirm Cancel
+            </BaseButton>
+
+            <BaseButton
+              variant="secondary"
+              @click="showCancelModal = false"
+              class="w-full font-headline font-bold text-xs !h-12"
+            >
+              Keep Playing
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.ch-fade-enter-active,
+.ch-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.ch-fade-enter-from,
+.ch-fade-leave-to {
+  opacity: 0;
+}
+</style>
