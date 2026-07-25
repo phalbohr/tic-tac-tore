@@ -1,12 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createTestingPinia } from '@pinia/testing'
 import ScoreEntry from '../ScoreEntry.vue'
 import { useMatchDraftStore, MatchType } from '../../stores/matchDraftStore'
 
 describe('ScoreEntry.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+  })
+
+  it('emits back event when back button is clicked', async () => {
+    const wrapper = mount(ScoreEntry, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              matchDraft: {
+                matchState: 'score_entry',
+                games: [],
+                currentGame: { team1Score: 0, team2Score: 0 },
+                ruleConfig: { gameLimit: 3 },
+                frequentOpponents: [],
+                fetchedPlayers: {},
+                selectedPlayers: ['p1', 'p2']
+              }
+            }
+          })
+        ]
+      }
+    })
+
+    const backButton = wrapper.findAll('button').find(w => w.text().includes('Back'))
+    expect(backButton).toBeDefined()
+    await backButton!.trigger('click')
+
+    expect(wrapper.emitted()).toHaveProperty('back')
   })
 
   it('renders correctly for 1v1', () => {

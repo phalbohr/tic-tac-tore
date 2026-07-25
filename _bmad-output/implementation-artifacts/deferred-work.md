@@ -210,7 +210,8 @@ resolution: fixed in PR #140
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
 location: n/a
 reason: Add a back button in the score entry view to return to player selection.
-status: open
+status: done 2026-07-25
+resolution: fixed in PR #141 (added back button in ScoreEntry and returnToPlayerSelection in store)
 
 ### DW-32: Hardcoded win logic without win-by-two: Assumes naive absolute score ceiling, breaks for win-by-two.
 origin: migrated from legacy ledger ("Deferred from: code review (spec-2-3-score-entry-and-automatic-completion.md)"), 2026-07-19
