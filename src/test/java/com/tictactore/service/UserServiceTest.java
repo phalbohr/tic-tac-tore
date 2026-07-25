@@ -155,13 +155,12 @@ class UserServiceTest {
     void shouldHandleNicknameCollision() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
         when(userRepository.existsByNickname("new")).thenReturn(true);
-        when(userRepository.existsByNickname(argThat(s -> s != null && !s.equals("new")))).thenReturn(false);
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
         assertThat(user.getNickname()).startsWith("new");
-        assertThat(user.getNickname()).hasSize(7);
+        assertThat(user.getNickname()).hasSize(11);
     }
 
     @Test
