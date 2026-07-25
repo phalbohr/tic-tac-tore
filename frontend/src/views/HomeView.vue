@@ -10,13 +10,26 @@ import TutorialCarousel from '@/components/TutorialCarousel.vue'
 import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import UndoToast from '@/features/match/components/UndoToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
+import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { ref } from 'vue'
 
 const { t } = useI18n()
 const showNewMatch = ref(false)
 const authStore = useAuthStore()
 const statsStore = useStatsStore()
+const matchStore = useMatchDraftStore()
+
+function handleMatchComplete() {
+  showNewMatch.value = false
+  matchStore.startSubmissionTimer()
+}
+
+function handleUndo() {
+  matchStore.cancelSubmissionTimer()
+  showNewMatch.value = true
+}
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
@@ -94,7 +107,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
           </div>
 
-          <NewMatchFlow v-else @cancel="showNewMatch = false" />
+          <NewMatchFlow v-else @cancel="showNewMatch = false" @complete="handleMatchComplete" />
         </template>
         <button 
           v-if="!showNewMatch"
@@ -104,6 +117,13 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           {{ t('auth.signOut') }}
         </button>
       </div>
+
+      <UndoToast
+        v-if="matchStore.isPendingSubmission || matchStore.isOfflinePending"
+        :countdown="matchStore.submissionCountdown"
+        :is-offline="matchStore.isOfflinePending"
+        @undo="handleUndo"
+      />
     </main>
   </div>
 </template>

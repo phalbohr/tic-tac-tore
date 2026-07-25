@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
+import { useMatchDraftStore, MatchType, type PlayerDto } from '../stores/matchDraftStore'
 
 defineOptions({
   name: 'PlayerSelection'
@@ -11,7 +11,7 @@ const maxPlayers = computed(() => store.matchType === MatchType.ONE_VS_ONE ? 2 :
 
 function getPlayer(id?: string) {
   if (!id) return undefined
-  return store.frequentOpponents.find(p => p.id === id)
+  return store.frequentOpponents.find((p: PlayerDto) => p.id === id)
 }
 
 </script>

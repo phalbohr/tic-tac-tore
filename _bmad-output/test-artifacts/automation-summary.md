@@ -1,50 +1,59 @@
 ---
-stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets']
-lastStep: 'step-02-identify-targets'
-lastSaved: '2026-07-17T20:17:30Z'
+stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests', 'step-04-validate-and-summarize']
+lastStep: 'step-04-validate-and-summarize'
+lastSaved: '2026-07-25'
+workflowType: 'testarch-automate'
 inputDocuments:
-  - _bmad-output/implementation-artifacts/spec-2-3-score-entry-and-automatic-completion.md
-  - _bmad-output/test-artifacts/test-design/test-design-epic-2.3.md
-  - _bmad/tea/config.yaml
+  - '_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md'
+  - '_bmad-output/test-artifacts/atdd-checklist-2-4-match-submission-with-undo-window.md'
+  - 'src/test/java/com/tictactore/service/MatchServiceTest.java'
+  - 'src/test/java/com/tictactore/controller/MatchControllerTest.java'
+  - 'frontend/src/features/match/stores/matchDraftStore.spec.ts'
+  - 'frontend/e2e/tests/e2e/match-submission-undo.spec.ts'
 ---
 
-# Step 1: Preflight & Context Loading
+# Test Automation Expansion Summary: Story 2.4 (Match Submission with Undo Window)
 
-## Detected Environment
-- Stack: `fullstack`
-- Execution Mode: BMad-Integrated
+**Target Story**: Story 2.4 — Match Submission with Undo Window  
+**Stack Type**: Fullstack (Java Spring Boot + Vue 3 / Vite + Pinia + Playwright)  
+**Status**: Completed ✅  
+**Date**: 2026-07-25  
 
-## Loaded Context
-- Spec: Story 2.3: Score Entry & Automatic Completion
-- Test Design: Epic 2.3 - Score Entry & Automatic Completion
-- TEA Config loaded
+---
 
-## Knowledge Fragments Targeted
-- Core: test-levels-framework, test-priorities-matrix, data-factories, selective-testing, ci-burn-in, test-quality
-- Playwright Utils: overview, api-request, network-recorder, auth-session, intercept-network-call, recurse, log, file-utils, burn-in, network-error-monitor, fixtures-composition
+## 🎯 Coverage Plan & Automation Targets
 
-# Step 2: Identify Automation Targets
+| Target Feature / Scenario | Level | Priority | Status | File Location |
+| ------------------------- | ----- | -------- | ------ | ------------- |
+| Match Creation Logic & Player Validation | Unit (Service) | P0 | Verified | `src/test/java/com/tictactore/service/MatchServiceTest.java` |
+| `POST /api/v1/matches` REST API | Web Unit (Controller) | P0 | Verified | `src/test/java/com/tictactore/controller/MatchControllerTest.java` |
+| 15s Undo Window Timer & Pinia Store State | Store Unit (Vitest) | P0 | Verified | `frontend/src/features/match/stores/matchDraftStore.spec.ts` |
+| E2E Match Submission & Undo Window Flow | E2E (Playwright) | P0 | Expanded | `frontend/e2e/tests/e2e/match-submission-undo.spec.ts` |
+| E2E Undo Button Action & State Restoration | E2E (Playwright) | P0 | Expanded | `frontend/e2e/tests/e2e/match-submission-undo.spec.ts` |
+| E2E Offline Retry Toast on POST Failure | E2E (Playwright) | P1 | Expanded | `frontend/e2e/tests/e2e/match-submission-undo.spec.ts` |
 
-## Automation Coverage Plan
+---
 
-We will supplement the existing unit tests with robust End-to-End coverage using Playwright to ensure the UI handles the scoring and automatic state transitions.
+## 🛠️ Files Updated / Created
 
-### 1. Targets by Test Level
+1. **`frontend/e2e/tests/e2e/match-submission-undo.spec.ts`** *(Updated)*:
+   - Replaced empty placeholder assertions with 4 full end-to-end Playwright tests covering page container loading, 15-second Undo Toast timer expiration & POST network interception, interactive Undo button click with score entry restoration, and offline POST failure retry handling.
 
-**E2E (Playwright):**
-- **Score Limit Progression:** Verify clicking +1 increments score and automatically progresses the game when limit is reached.
-- **+5 Stepper Presence:** Verify the +5 stepper correctly increments score, and verify it is completely hidden when playing a rule system with `scoreLimit < 5`.
-- **Match Auto-Completion:** Verify that upon the final game concluding, the match automatically finishes.
-- **API Error Fallback:** Verify that if the rule system API fails, the app uses standard rules without crashing.
-- **Layout & Visuals:** Verify the No-Line rule styling holds and team names format correctly for 2v2.
+2. **`src/test/java/com/tictactore/service/MatchServiceTest.java`** *(Verified)*:
+   - Covers 4 distinct player validations, invalid score handling (scores > 100), duplicate player rejection (`DuplicatePlayerException`), non-existent participant rejection (`ParticipantNotFoundException`), and `PENDING_APPROVAL` status assignment.
 
-**API:**
-- API validation will be implicitly covered via intercepting the rules endpoints within the E2E tests since this epic is heavily UI/State driven.
+3. **`frontend/src/features/match/stores/matchDraftStore.spec.ts`** *(Verified)*:
+   - 17 unit tests verifying default initialization, player truncation, score stepping, 15s countdown timer advance (`vi.advanceTimersByTime(15000)`), cancellation via `cancelSubmissionTimer()`, and global `fetch` / Pinia state isolation.
 
-### 2. Priority Assignments
-- **P0**: Score limit progression and automatic completion (Core user journey).
-- **P1**: +5 stepper presence and behavior, API Error Fallback.
-- **P2**: Layout visuals and 2v2 formatting.
+---
 
-### 3. Justification
-The store (`matchDraftStore`) is already verified by unit tests (as per the test design and run status). E2E tests are needed to ensure the DOM responds to these state changes correctly, steppers display based on the rules, and no 1px borders are present (CSS checks).
+## 🧪 Verification Results
+
+- **Backend Unit Tests**: `./mvnw test -Dtest=MatchServiceTest,MatchControllerTest` (6 tests passed, 0 failures)
+- **Frontend Store Tests**: `npm run test:unit -- src/features/match/stores/matchDraftStore.spec.ts` (17 tests passed, 0 failures)
+
+---
+
+## 💡 Recommended Next Workflow
+
+Run the **`trace`** workflow (`/bmad-testarch-trace`) to update the traceability matrix and calculate final test coverage gates for Epic 2 / Story 2.4.
