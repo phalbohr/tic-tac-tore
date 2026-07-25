@@ -172,5 +172,20 @@ describe('matchDraftStore', () => {
       expect(store.currentGame.team1Score).toBe(5)
       expect(store.matchState).toBe('score_entry')
     })
+
+    it('prevents undo when points are already scored in current game', () => {
+      const store = useMatchDraftStore()
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2 }
+
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+      expect(store.games.length).toBe(1)
+
+      store.incrementScore(2, 2)
+      expect(store.canUndoLastGame).toBe(false)
+      store.undoLastGame()
+      expect(store.games.length).toBe(1)
+      expect(store.currentGame.team2Score).toBe(2)
+    })
   })
 })

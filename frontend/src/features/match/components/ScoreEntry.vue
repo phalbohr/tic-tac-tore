@@ -119,7 +119,7 @@ watch(() => store.matchState, (newVal) => {
       </BaseButton>
 
       <BaseButton
-        v-if="store.games.length > 0"
+        v-if="store.canUndoLastGame"
         variant="secondary"
         @click="store.undoLastGame()"
         class="w-full"
