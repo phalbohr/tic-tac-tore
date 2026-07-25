@@ -83,7 +83,7 @@ test.describe('Story 2.4: Match Submission with Undo Window', () => {
     await startBtn.click();
 
     // 4. Increment score to win limit (5) and complete match
-    const incrementBtn = page.locator('.score-stepper button').first();
+    const incrementBtn = page.getByRole('button', { name: 'Add 1' }).first();
     for (let i = 0; i < 5; i++) {
       await incrementBtn.click();
     }
@@ -112,7 +112,7 @@ test.describe('Story 2.4: Match Submission with Undo Window', () => {
     await page.getByRole('button', { name: /Start Match/i }).click();
 
     // 2. Increment score to win (5) and complete match
-    const incrementBtn = page.locator('.score-stepper button').first();
+    const incrementBtn = page.getByRole('button', { name: 'Add 1' }).first();
     for (let i = 0; i < 5; i++) {
       await incrementBtn.click();
     }
@@ -149,7 +149,7 @@ test.describe('Story 2.4: Match Submission with Undo Window', () => {
     await page.getByRole('button', { name: 'Bob' }).click();
     await page.getByRole('button', { name: /Start Match/i }).click();
 
-    const incrementBtn = page.locator('.score-stepper button').first();
+    const incrementBtn = page.getByRole('button', { name: 'Add 1' }).first();
     for (let i = 0; i < 5; i++) {
       await incrementBtn.click();
     }
