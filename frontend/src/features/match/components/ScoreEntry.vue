@@ -22,19 +22,13 @@ const getPlayerName = (id?: string) => {
 }
 
 const team1Name = computed(() => {
-  if (store.matchType === MatchType.ONE_VS_ONE) {
-    return getPlayerName(store.selectedPlayers[0])
-  } else {
-    return `${getPlayerName(store.selectedPlayers[0])} & ${getPlayerName(store.selectedPlayers[1])}`
-  }
+  const half = Math.ceil(store.selectedPlayers.length / 2)
+  return store.selectedPlayers.slice(0, half).map(id => getPlayerName(id)).join(' & ') || 'Team 1'
 })
 
 const team2Name = computed(() => {
-  if (store.matchType === MatchType.ONE_VS_ONE) {
-    return getPlayerName(store.selectedPlayers[1])
-  } else {
-    return `${getPlayerName(store.selectedPlayers[2])} & ${getPlayerName(store.selectedPlayers[3])}`
-  }
+  const half = Math.ceil(store.selectedPlayers.length / 2)
+  return store.selectedPlayers.slice(half).map(id => getPlayerName(id)).join(' & ') || 'Team 2'
 })
 
 const team1Wins = computed(() => {
