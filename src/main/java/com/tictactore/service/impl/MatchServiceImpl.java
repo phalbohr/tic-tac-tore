@@ -56,6 +56,10 @@ public class MatchServiceImpl implements MatchService {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
         }
 
+        if (request.creatorId() != null && !uniqueIds.contains(request.creatorId())) {
+            throw new ParticipantNotFoundException("Creator must be a participant in the match");
+        }
+
         List<User> foundUsers = userRepository.findAllById(playerIds);
         if (foundUsers.size() != playerIds.size()) {
             Set<UUID> foundIds = foundUsers.stream().map(User::getId).collect(Collectors.toSet());

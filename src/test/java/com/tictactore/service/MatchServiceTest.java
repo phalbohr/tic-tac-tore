@@ -247,6 +247,23 @@ class MatchServiceTest {
         }
 
         @Test
+        @DisplayName("[P1] Should throw ParticipantNotFoundException when creatorId does not belong to match participants")
+        void shouldRejectCreatorNotParticipant() {
+            UUID nonParticipantCreator = UUID.randomUUID();
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "idempotency-1000",
+                    nonParticipantCreator, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+            );
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(ParticipantNotFoundException.class)
+                    .hasMessageContaining("Creator must be a participant in the match");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
         @DisplayName("[P1] Should throw InvalidPositionException when 2v2 game players do not match match players")
         void shouldReject2v2MismatchMatchPlayers() {
             // Given
