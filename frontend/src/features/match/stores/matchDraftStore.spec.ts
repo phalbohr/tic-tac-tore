@@ -370,7 +370,7 @@ describe('matchDraftStore', () => {
       store.startSubmissionTimer()
 
       expect(store.pendingSubmission).not.toBeNull()
-      const payload = store.pendingSubmission?.payload
+      const payload = store.pendingSubmission?.payload as any
       
       // The overall match attackers/defenders come from selectedPlayers
       expect(payload?.teamAAttackerId).toBe('p1')
