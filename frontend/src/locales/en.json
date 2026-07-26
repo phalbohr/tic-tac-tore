@@ -25,7 +25,9 @@
     "rejected": "Rejected",
     "willRetryOnline": "Will retry when online",
     "submittedTapUndo": "Match submitted. Tap to undo.",
-    "undo": "Undo"
+    "undo": "Undo",
+    "swapTeam1": "Swap Team 1",
+    "swapTeam2": "Swap Team 2"
   },
   "leaderboard": {
     "title": "Leaderboard",

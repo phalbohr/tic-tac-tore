@@ -193,6 +193,22 @@ class MatchServiceTest {
         }
 
         @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when attacker IDs are null")
+        void shouldRejectNullAttackerIds() {
+            var request = new CreateMatchRequest(
+                    "idempotency-null-attacker",
+                    p1, null, p2, p3, p4,
+                    List.of(new GameDto(10, 8, null, p2, p3, p4))
+            );
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("Attacker IDs must not be null");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
         @DisplayName("[P1] Should throw InvalidPositionException when 2v2 match game lacks positional data")
         void shouldReject2v2MissingPositionalData() {
             var request = new CreateMatchRequest(

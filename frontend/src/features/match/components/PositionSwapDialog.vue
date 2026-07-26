@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { useMatchDraftStore } from '../stores/matchDraftStore'
 import { computed } from 'vue'
@@ -7,6 +8,7 @@ defineOptions({
   name: 'PositionSwapDialog'
 })
 
+const { t } = useI18n()
 const store = useMatchDraftStore()
 
 const getPlayerName = (id?: string) => {
@@ -61,7 +63,7 @@ function swapTeam2() {
             <span class="text-on-surface-variant">Defender:</span>
             <span class="font-bold">{{ team1DefenderName }}</span>
           </div>
-          <BaseButton variant="secondary" @click="swapTeam1" class="!h-8 text-xs">Swap Team 1</BaseButton>
+          <BaseButton variant="secondary" @click="swapTeam1" class="!h-8 text-xs">{{ t('match.swapTeam1', 'Swap Team 1') }}</BaseButton>
         </div>
 
         <!-- Team 2 -->
@@ -75,7 +77,7 @@ function swapTeam2() {
             <span class="text-on-surface-variant">Defender:</span>
             <span class="font-bold">{{ team2DefenderName }}</span>
           </div>
-          <BaseButton variant="secondary" @click="swapTeam2" class="!h-8 text-xs">Swap Team 2</BaseButton>
+          <BaseButton variant="secondary" @click="swapTeam2" class="!h-8 text-xs">{{ t('match.swapTeam2', 'Swap Team 2') }}</BaseButton>
         </div>
       </div>
 

@@ -25,7 +25,9 @@
     "rejected": "Abgelehnt",
     "willRetryOnline": "Erneuter Versuch wenn online",
     "submittedTapUndo": "Spiel eingereicht. Tippen zum Rückgängigmachen.",
-    "undo": "Rückgängig"
+    "undo": "Rückgängig",
+    "swapTeam1": "Team 1 tauschen",
+    "swapTeam2": "Team 2 tauschen"
   },
   "leaderboard": {
     "title": "Rangliste",
