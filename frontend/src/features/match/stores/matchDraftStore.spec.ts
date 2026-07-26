@@ -385,7 +385,7 @@ describe('matchDraftStore', () => {
       expect(payload?.games[0].teamBDefenderId).toBe('p3')
     })
 
-    it('aborts timer and restores ready_for_submission state when cancelSubmissionTimer is called', () => {
+    it('aborts timer and restores score_entry state when cancelSubmissionTimer is called', () => {
       const store = useMatchDraftStore()
       store.addPlayer('p1')
       store.addPlayer('p2')
@@ -400,7 +400,9 @@ describe('matchDraftStore', () => {
 
       expect(store.isPendingSubmission).toBe(false)
       expect(store.pendingSubmission).toBeNull()
-      expect(store.matchState).toBe('ready_for_submission')
+      expect(store.matchState).toBe('score_entry')
+      expect(store.games.length).toBe(0)
+      expect(store.currentGame.team1Score).toBe(5)
       expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
     })
   })
