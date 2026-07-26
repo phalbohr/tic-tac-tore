@@ -10,7 +10,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class})
+    @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class, InvalidPositionException.class, DuplicatePositionException.class})
     public ResponseEntity<Map<String, String>> handleDomainValidation(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Invalid match data";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
