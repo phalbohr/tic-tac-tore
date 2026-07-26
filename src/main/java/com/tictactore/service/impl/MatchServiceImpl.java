@@ -42,7 +42,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         if ((request.teamADefenderId() == null) != (request.teamBDefenderId() == null)) {
-            throw new InvalidMatchScoreException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
+            throw new InvalidPositionException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
         }
 
         List<UUID> playerIds = new ArrayList<>();

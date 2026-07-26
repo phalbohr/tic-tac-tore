@@ -289,7 +289,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
     if (selectedPlayers.value.length < requiredPlayers) return
 
-    if (games.value.length === 0 && isGameComplete.value) {
+    if (isGameComplete.value) {
       completeCurrentGame()
     }
     if (games.value.length === 0) return
