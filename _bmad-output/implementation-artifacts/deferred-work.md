@@ -233,3 +233,16 @@ location: `_bmad-output/implementation-artifacts/bmad-dev-auto-result-2-3-*.md`
 reason: Unrelated TEA artifact files were deleted during story execution. Pre-existing cleanup noise.
 status: open
 
+### DW-35: Non-atomic idempotency key check outside `MatchOperation` transaction
+origin: code review of 2-5-position-swapping-between-games.md (2026-07-26)
+location: `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:37-42`
+reason: [x] [Review][Defer] Non-atomic idempotency key check outside `MatchOperation` transaction — deferred, pre-existing concurrency refinement.
+status: open
+
+### DW-36: Hardcoded String used for match status instead of Enum
+origin: code review of 2-5-position-swapping-between-games.md (2026-07-26)
+location: `src/main/java/com/tictactore/model/Match.java:43`
+reason: [x] [Review][Defer] Hardcoded String used for match status instead of Enum — deferred, pre-existing domain refinement.
+status: open
+
+

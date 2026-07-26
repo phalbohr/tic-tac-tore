@@ -4,7 +4,9 @@ import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.GameDto;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.DuplicatePlayerException;
+import com.tictactore.exception.DuplicatePositionException;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.exception.InvalidPositionException;
 import com.tictactore.exception.ParticipantNotFoundException;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
@@ -39,8 +41,12 @@ public class MatchServiceImpl implements MatchService {
             }
         }
 
+        if (request.teamAAttackerId() == null || request.teamBAttackerId() == null) {
+            throw new InvalidPositionException("Attacker IDs must not be null");
+        }
+
         if ((request.teamADefenderId() == null) != (request.teamBDefenderId() == null)) {
-            throw new InvalidMatchScoreException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
+            throw new InvalidPositionException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
         }
 
         List<UUID> playerIds = new ArrayList<>();
@@ -52,6 +58,10 @@ public class MatchServiceImpl implements MatchService {
         Set<UUID> uniqueIds = new HashSet<>(playerIds);
         if (uniqueIds.size() != playerIds.size()) {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
+        }
+
+        if (request.creatorId() != null && !uniqueIds.contains(request.creatorId())) {
+            throw new ParticipantNotFoundException("Creator must be a participant in the match");
         }
 
         List<User> foundUsers = userRepository.findAllById(playerIds);
@@ -87,10 +97,48 @@ public class MatchServiceImpl implements MatchService {
 
         for (int i = 0; i < request.games().size(); i++) {
             GameDto dto = request.games().get(i);
+
+            if (request.teamADefenderId() == null) {
+                if (dto.teamAAttackerId() != null || dto.teamADefenderId() != null ||
+                    dto.teamBAttackerId() != null || dto.teamBDefenderId() != null) {
+                    throw new InvalidPositionException("1v1 matches must not contain positional data");
+                }
+            } else {
+                if (dto.teamAAttackerId() == null || dto.teamADefenderId() == null ||
+                    dto.teamBAttackerId() == null || dto.teamBDefenderId() == null) {
+                    throw new InvalidPositionException("2v2 games must contain positional data");
+                }
+
+                Set<UUID> gamePositions = new HashSet<>(Arrays.asList(
+                    dto.teamAAttackerId(), dto.teamADefenderId(),
+                    dto.teamBAttackerId(), dto.teamBDefenderId()
+                ));
+                if (gamePositions.size() != 4) {
+                    throw new DuplicatePositionException("Same player selected in multiple positions");
+                }
+
+                if (!gamePositions.equals(uniqueIds)) {
+                    throw new InvalidPositionException("Game players must match match players");
+                }
+                
+                Set<UUID> matchTeamA = Set.of(request.teamAAttackerId(), request.teamADefenderId());
+                Set<UUID> matchTeamB = Set.of(request.teamBAttackerId(), request.teamBDefenderId());
+                Set<UUID> gameTeamA = Set.of(dto.teamAAttackerId(), dto.teamADefenderId());
+                Set<UUID> gameTeamB = Set.of(dto.teamBAttackerId(), dto.teamBDefenderId());
+
+                if (!matchTeamA.equals(gameTeamA) || !matchTeamB.equals(gameTeamB)) {
+                    throw new InvalidPositionException("Team A players cannot be assigned to Team B positions");
+                }
+            }
+
             Game game = Game.builder()
                     .gameOrder(i + 1)
                     .teamAScore(dto.teamAScore())
                     .teamBScore(dto.teamBScore())
+                    .teamAAttackerId(dto.teamAAttackerId())
+                    .teamADefenderId(dto.teamADefenderId())
+                    .teamBAttackerId(dto.teamBAttackerId())
+                    .teamBDefenderId(dto.teamBDefenderId())
                     .build();
             match.addGame(game);
         }
@@ -101,7 +149,11 @@ public class MatchServiceImpl implements MatchService {
 
     private MatchResponse mapToResponse(Match match) {
         List<GameDto> gameDtos = match.getGames().stream()
-                .map(g -> new GameDto(g.getTeamAScore(), g.getTeamBScore()))
+                .map(g -> new GameDto(
+                    g.getTeamAScore(), g.getTeamBScore(),
+                    g.getTeamAAttackerId(), g.getTeamADefenderId(),
+                    g.getTeamBAttackerId(), g.getTeamBDefenderId()
+                ))
                 .collect(Collectors.toList());
 
         return new MatchResponse(

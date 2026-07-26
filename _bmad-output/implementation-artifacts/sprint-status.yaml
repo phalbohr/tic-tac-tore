@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-07-25"
+last_updated: "2026-07-26"
 project: tic-tac-tore
 project_key: NOKEY
 tracking_system: file-system
@@ -58,7 +58,8 @@ development_status:
   2-2-match-type-and-player-selection-portrait: done
   2-3-score-entry-and-automatic-completion: done
   2-4-match-submission-with-undo-window: done
-  2-5-position-swapping-between-games: backlog
+  2-5-position-swapping-between-games: in-progress
+
   epic-2-retrospective: optional
   epic-3: backlog
   3-1-confirmation-requests-and-push-notifications: backlog

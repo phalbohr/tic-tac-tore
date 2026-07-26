@@ -45,6 +45,90 @@ describe('matchDraftStore', () => {
     expect(store.selectedPlayers).toEqual([])
   })
 
+  describe('Position Swapping', () => {
+    it('sets state to position_swap for 2v2 games on beginScoreEntry', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      expect(store.matchState).toBe('position_swap')
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+      expect(store.currentGame.teamBAttackerId).toBe('p3')
+      expect(store.currentGame.teamBDefenderId).toBe('p4')
+    })
+
+    it('sets state to score_entry for 1v1 games on beginScoreEntry', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.ONE_VS_ONE)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+
+      store.beginScoreEntry()
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('swaps positions and confirms correctly', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+
+      store.swapPositions(1)
+      expect(store.currentGame.teamAAttackerId).toBe('p2')
+      expect(store.currentGame.teamADefenderId).toBe('p1')
+
+      store.confirmPositions()
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('swaps positions for team 2', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      expect(store.currentGame.teamBAttackerId).toBe('p3')
+      expect(store.currentGame.teamBDefenderId).toBe('p4')
+
+      store.swapPositions(2)
+      expect(store.currentGame.teamBAttackerId).toBe('p4')
+      expect(store.currentGame.teamBDefenderId).toBe('p3')
+    })
+
+    it('swaps positions back and forth', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+
+      store.beginScoreEntry()
+      
+      store.swapPositions(1)
+      expect(store.currentGame.teamAAttackerId).toBe('p2')
+      expect(store.currentGame.teamADefenderId).toBe('p1')
+
+      store.swapPositions(1)
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+    })
+  })
+
   describe('Score Entry and Manual Completion', () => {
     it('handles successful loadRuleConfig', async () => {
       fetchMock.mockResolvedValueOnce({
@@ -266,7 +350,42 @@ describe('matchDraftStore', () => {
       expect(store.pendingSubmission).toBeNull()
     })
 
-    it('aborts timer and restores ready_for_submission state when cancelSubmissionTimer is called', () => {
+    it('preserves swapped position mapping in submission payload', () => {
+      const store = useMatchDraftStore()
+      store.setMatchType(MatchType.TWO_VS_TWO)
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.addPlayer('p3')
+      store.addPlayer('p4')
+      store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
+
+      store.beginScoreEntry()
+      store.swapPositions(1) // swap team 1 (p1/p2 -> p2/p1)
+      store.swapPositions(2) // swap team 2 (p3/p4 -> p4/p3)
+      store.confirmPositions()
+
+      store.incrementScore(1, 5)
+      store.completeCurrentGame()
+
+      store.startSubmissionTimer()
+
+      expect(store.pendingSubmission).not.toBeNull()
+      const payload = store.pendingSubmission?.payload as any
+      
+      // The overall match attackers/defenders come from selectedPlayers
+      expect(payload?.teamAAttackerId).toBe('p1')
+      expect(payload?.teamADefenderId).toBe('p2')
+      expect(payload?.teamBAttackerId).toBe('p3')
+      expect(payload?.teamBDefenderId).toBe('p4')
+
+      // The game-specific attackers/defenders come from the swapped current game state
+      expect(payload?.games[0].teamAAttackerId).toBe('p2')
+      expect(payload?.games[0].teamADefenderId).toBe('p1')
+      expect(payload?.games[0].teamBAttackerId).toBe('p4')
+      expect(payload?.games[0].teamBDefenderId).toBe('p3')
+    })
+
+    it('aborts timer and restores score_entry state when cancelSubmissionTimer is called', () => {
       const store = useMatchDraftStore()
       store.addPlayer('p1')
       store.addPlayer('p2')
@@ -281,7 +400,9 @@ describe('matchDraftStore', () => {
 
       expect(store.isPendingSubmission).toBe(false)
       expect(store.pendingSubmission).toBeNull()
-      expect(store.matchState).toBe('ready_for_submission')
+      expect(store.matchState).toBe('score_entry')
+      expect(store.games.length).toBe(0)
+      expect(store.currentGame.team1Score).toBe(5)
       expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
     })
   })

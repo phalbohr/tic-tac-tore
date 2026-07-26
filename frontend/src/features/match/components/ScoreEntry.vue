@@ -2,6 +2,7 @@
 import { computed, watch, ref } from 'vue'
 import { useMatchDraftStore, type PlayerDto, type GameScore } from '../stores/matchDraftStore'
 import ScoreStepper from './ScoreStepper.vue'
+import PositionSwapDialog from './PositionSwapDialog.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 
 const store = useMatchDraftStore()
@@ -126,6 +127,10 @@ watch(() => store.matchState, (newVal) => {
         Undo Last Game
       </BaseButton>
     </div>
+
+    <Transition name="ch-fade">
+      <PositionSwapDialog v-if="store.matchState === 'position_swap'" />
+    </Transition>
 
     <Transition name="ch-fade">
       <div

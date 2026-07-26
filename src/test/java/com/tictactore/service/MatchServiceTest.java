@@ -4,7 +4,9 @@ import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.GameDto;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.DuplicatePlayerException;
+import com.tictactore.exception.DuplicatePositionException;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.exception.InvalidPositionException;
 import com.tictactore.exception.ParticipantNotFoundException;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
@@ -68,7 +70,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-123",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8), new GameDto(10, 6))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4), new GameDto(10, 6, p1, p2, p3, p4))
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-123")).thenReturn(Optional.empty());
@@ -110,7 +112,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-456",
                     p1, p1, p1, p3, p4, // p1 duplicated
-                    List.of(new GameDto(10, 8))
+                    List.of(new GameDto(10, 8, p1, p1, p3, p4))
             );
 
             // When / Then
@@ -128,7 +130,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-789",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(101, 8)) // score > 100
+                    List.of(new GameDto(101, 8, p1, p2, p3, p4)) // score > 100
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-789")).thenReturn(Optional.empty());
@@ -154,7 +156,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-999",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-999")).thenReturn(Optional.empty());
@@ -166,6 +168,144 @@ class MatchServiceTest {
                     .hasMessageContaining("Player not found with ID");
 
             verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when 1v1 match contains positional data")
+        void shouldReject1v1PositionalData() {
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-1",
+                    p1, p1, null, p3, null,
+                    List.of(new GameDto(10, 8, p1, null, null, null))
+            );
+
+            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p3).build()
+            ));
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("1v1 matches must not contain positional data");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when attacker IDs are null")
+        void shouldRejectNullAttackerIds() {
+            var request = new CreateMatchRequest(
+                    "idempotency-null-attacker",
+                    p1, null, p2, p3, p4,
+                    List.of(new GameDto(10, 8, null, p2, p3, p4))
+            );
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("Attacker IDs must not be null");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when 2v2 match game lacks positional data")
+        void shouldReject2v2MissingPositionalData() {
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-2",
+                    p1, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p2, null, p4))
+            );
+
+            givenFourPlayersExist();
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("2v2 games must contain positional data");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw DuplicatePositionException when 2v2 game contains duplicate positional players")
+        void shouldReject2v2DuplicatePositionalData() {
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-3",
+                    p1, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p1, p3, p4))
+            );
+
+            givenFourPlayersExist();
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(DuplicatePositionException.class)
+                    .hasMessageContaining("Same player selected in multiple positions");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw ParticipantNotFoundException when creatorId does not belong to match participants")
+        void shouldRejectCreatorNotParticipant() {
+            var nonParticipantCreator = UUID.randomUUID();
+            var request = new CreateMatchRequest(
+                    "idempotency-1000",
+                    nonParticipantCreator, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+            );
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(ParticipantNotFoundException.class)
+                    .hasMessageContaining("Creator must be a participant in the match");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when 2v2 game players do not match match players")
+        void shouldReject2v2MismatchMatchPlayers() {
+            var p5 = UUID.randomUUID();
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-4",
+                    p1, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p2, p3, p5))
+            );
+
+            givenFourPlayersExist();
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("Game players must match match players");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when Team A player is assigned to Team B position")
+        void shouldReject2v2SwappingTeamPositions() {
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-5",
+                    p1, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p3, p2, p4))
+            );
+
+            givenFourPlayersExist();
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("Team A players cannot be assigned to Team B positions");
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        private void givenFourPlayersExist() {
+            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build(),
+                    User.builder().id(p3).build(),
+                    User.builder().id(p4).build()
+            ));
         }
     }
 }

@@ -17,6 +17,10 @@ export interface GameScore {
   id?: string
   team1Score: number
   team2Score: number
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
 }
 
 export interface RuleConfig {
@@ -36,7 +40,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
-  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission'>('draft')
+  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
+  const submitError = ref<string | null>(null)
+
+  function clearSubmitError() {
+    submitError.value = null
+  }
 
   async function fetchDefaults() {
     try {
@@ -187,15 +196,51 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const wasMatchComplete = isMatchComplete.value;
     games.value.push({ ...currentGame.value });
     
+    const prevGame = currentGame.value;
+    currentGame.value = {
+      team1Score: 0,
+      team2Score: 0,
+      teamAAttackerId: prevGame.teamAAttackerId,
+      teamADefenderId: prevGame.teamADefenderId,
+      teamBAttackerId: prevGame.teamBAttackerId,
+      teamBDefenderId: prevGame.teamBDefenderId
+    };
+
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
     } else {
-      currentGame.value = { team1Score: 0, team2Score: 0 };
+      if (matchType.value === MatchType.TWO_VS_TWO) {
+        matchState.value = 'position_swap'
+      }
     }
   }
 
   function beginScoreEntry() {
+    if (matchType.value === MatchType.TWO_VS_TWO) {
+      matchState.value = 'position_swap'
+      currentGame.value.teamAAttackerId = selectedPlayers.value[0]
+      currentGame.value.teamADefenderId = selectedPlayers.value[1]
+      currentGame.value.teamBAttackerId = selectedPlayers.value[2]
+      currentGame.value.teamBDefenderId = selectedPlayers.value[3]
+    } else {
+      matchState.value = 'score_entry'
+    }
+  }
+
+  function confirmPositions() {
     matchState.value = 'score_entry'
+  }
+
+  function swapPositions(team: 1 | 2) {
+    if (team === 1) {
+      const temp = currentGame.value.teamAAttackerId
+      currentGame.value.teamAAttackerId = currentGame.value.teamADefenderId
+      currentGame.value.teamADefenderId = temp
+    } else {
+      const temp = currentGame.value.teamBAttackerId
+      currentGame.value.teamBAttackerId = currentGame.value.teamBDefenderId
+      currentGame.value.teamBDefenderId = temp
+    }
   }
 
   function returnToDraft() {
@@ -227,6 +272,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         resetDraftStateOnly()
         return SubmissionResult.SUCCESS
       } else if (res.status >= 400 && res.status < 500) {
+        let msg = 'Failed to submit match'
+        try {
+          const data = await res.json()
+          if (data.message) msg = data.message
+        } catch {
+          // ignore parsing error
+        }
+        submitError.value = msg
         return SubmissionResult.CLIENT_ERROR
       } else {
         return SubmissionResult.SERVER_OR_NETWORK_ERROR
@@ -247,10 +300,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   } = useSubmissionTimer(executeCommit)
 
   function startSubmissionTimer() {
+    clearSubmitError()
+    
     const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
     if (selectedPlayers.value.length < requiredPlayers) return
 
-    if (games.value.length === 0 && isGameComplete.value) {
+    if (matchState.value !== 'ready_for_submission' && isGameComplete.value) {
       completeCurrentGame()
     }
     if (games.value.length === 0) return
@@ -269,7 +324,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamADefenderId,
       teamBAttackerId,
       teamBDefenderId,
-      games: games.value.map(g => ({ teamAScore: g.team1Score, teamBScore: g.team2Score }))
+      games: games.value.map(g => ({
+        teamAScore: g.team1Score,
+        teamBScore: g.team2Score,
+        teamAAttackerId: g.teamAAttackerId,
+        teamADefenderId: g.teamADefenderId,
+        teamBAttackerId: g.teamBAttackerId,
+        teamBDefenderId: g.teamBDefenderId
+      }))
     }
 
     startTimer({ idempotencyKey, payload })
@@ -277,7 +339,11 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function cancelSubmissionTimer() {
     cancelTimer()
-    matchState.value = 'ready_for_submission'
+    if (canUndoLastGame.value) {
+      undoLastGame()
+    } else {
+      matchState.value = 'score_entry'
+    }
   }
 
   function resetDraftStateOnly() {
@@ -288,6 +354,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
+    clearSubmitError()
   }
 
   function reset() {
@@ -309,6 +376,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games,
     currentGame,
     matchState,
+    submitError,
+    clearSubmitError,
     pendingSubmission,
     isPendingSubmission,
     isOfflinePending,
@@ -324,6 +393,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     decrementScore,
     undoLastGame,
     beginScoreEntry,
+    confirmPositions,
+    swapPositions,
     returnToDraft,
     reset
   }
