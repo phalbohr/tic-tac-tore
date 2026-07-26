@@ -272,5 +272,29 @@ class MatchServiceTest {
 
             verifyNoInteractions(matchOperation);
         }
+        @Test
+        @DisplayName("[P1] Should throw InvalidPositionException when Team A player is assigned to Team B position")
+        void shouldReject2v2SwappingTeamPositions() {
+            var request = new CreateMatchRequest(
+                    "idempotency-pos-5",
+                    p1, p1, p2, p3, p4,
+                    List.of(new GameDto(10, 8, p1, p3, p2, p4))
+            );
+
+            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build(),
+                    User.builder().id(p3).build(),
+                    User.builder().id(p4).build()
+            ));
+
+            assertThatThrownBy(() -> matchService.createMatch(request))
+                    .isInstanceOf(InvalidPositionException.class)
+                    .hasMessageContaining("Team A players cannot be assigned to Team B positions");
+
+            verifyNoInteractions(matchOperation);
+        }
+
     }
 }

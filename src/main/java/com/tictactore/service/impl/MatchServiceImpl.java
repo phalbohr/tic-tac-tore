@@ -112,6 +112,15 @@ public class MatchServiceImpl implements MatchService {
                 if (!gamePositions.equals(uniqueIds)) {
                     throw new InvalidPositionException("Game players must match match players");
                 }
+                
+                Set<UUID> matchTeamA = Set.of(request.teamAAttackerId(), request.teamADefenderId());
+                Set<UUID> matchTeamB = Set.of(request.teamBAttackerId(), request.teamBDefenderId());
+                Set<UUID> gameTeamA = Set.of(dto.teamAAttackerId(), dto.teamADefenderId());
+                Set<UUID> gameTeamB = Set.of(dto.teamBAttackerId(), dto.teamBDefenderId());
+
+                if (!matchTeamA.equals(gameTeamA) || !matchTeamB.equals(gameTeamB)) {
+                    throw new InvalidPositionException("Team A players cannot be assigned to Team B positions");
+                }
             }
 
             Game game = Game.builder()
