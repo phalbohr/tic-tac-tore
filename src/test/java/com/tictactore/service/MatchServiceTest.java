@@ -173,8 +173,7 @@ class MatchServiceTest {
         @Test
         @DisplayName("[P1] Should throw InvalidPositionException when 1v1 match contains positional data")
         void shouldReject1v1PositionalData() {
-            // Given
-            CreateMatchRequest request = new CreateMatchRequest(
+            var request = new CreateMatchRequest(
                     "idempotency-pos-1",
                     p1, p1, null, p3, null,
                     List.of(new GameDto(10, 8, p1, null, null, null))
@@ -186,7 +185,6 @@ class MatchServiceTest {
                     User.builder().id(p3).build()
             ));
 
-            // When / Then
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(InvalidPositionException.class)
                     .hasMessageContaining("1v1 matches must not contain positional data");
@@ -197,22 +195,14 @@ class MatchServiceTest {
         @Test
         @DisplayName("[P1] Should throw InvalidPositionException when 2v2 match game lacks positional data")
         void shouldReject2v2MissingPositionalData() {
-            // Given
-            CreateMatchRequest request = new CreateMatchRequest(
+            var request = new CreateMatchRequest(
                     "idempotency-pos-2",
                     p1, p1, p2, p3, p4,
                     List.of(new GameDto(10, 8, p1, p2, null, p4))
             );
 
-            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(p1).build(),
-                    User.builder().id(p2).build(),
-                    User.builder().id(p3).build(),
-                    User.builder().id(p4).build()
-            ));
+            givenFourPlayersExist();
 
-            // When / Then
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(InvalidPositionException.class)
                     .hasMessageContaining("2v2 games must contain positional data");
@@ -223,22 +213,14 @@ class MatchServiceTest {
         @Test
         @DisplayName("[P1] Should throw DuplicatePositionException when 2v2 game contains duplicate positional players")
         void shouldReject2v2DuplicatePositionalData() {
-            // Given
-            CreateMatchRequest request = new CreateMatchRequest(
+            var request = new CreateMatchRequest(
                     "idempotency-pos-3",
                     p1, p1, p2, p3, p4,
                     List.of(new GameDto(10, 8, p1, p1, p3, p4))
             );
 
-            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(p1).build(),
-                    User.builder().id(p2).build(),
-                    User.builder().id(p3).build(),
-                    User.builder().id(p4).build()
-            ));
+            givenFourPlayersExist();
 
-            // When / Then
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(DuplicatePositionException.class)
                     .hasMessageContaining("Same player selected in multiple positions");
@@ -249,8 +231,8 @@ class MatchServiceTest {
         @Test
         @DisplayName("[P1] Should throw ParticipantNotFoundException when creatorId does not belong to match participants")
         void shouldRejectCreatorNotParticipant() {
-            UUID nonParticipantCreator = UUID.randomUUID();
-            CreateMatchRequest request = new CreateMatchRequest(
+            var nonParticipantCreator = UUID.randomUUID();
+            var request = new CreateMatchRequest(
                     "idempotency-1000",
                     nonParticipantCreator, p1, p2, p3, p4,
                     List.of(new GameDto(10, 8, p1, p2, p3, p4))
@@ -266,29 +248,22 @@ class MatchServiceTest {
         @Test
         @DisplayName("[P1] Should throw InvalidPositionException when 2v2 game players do not match match players")
         void shouldReject2v2MismatchMatchPlayers() {
-            // Given
-            UUID p5 = UUID.randomUUID();
-            CreateMatchRequest request = new CreateMatchRequest(
+            var p5 = UUID.randomUUID();
+            var request = new CreateMatchRequest(
                     "idempotency-pos-4",
                     p1, p1, p2, p3, p4,
                     List.of(new GameDto(10, 8, p1, p2, p3, p5))
             );
 
-            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(p1).build(),
-                    User.builder().id(p2).build(),
-                    User.builder().id(p3).build(),
-                    User.builder().id(p4).build()
-            ));
+            givenFourPlayersExist();
 
-            // When / Then
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(InvalidPositionException.class)
                     .hasMessageContaining("Game players must match match players");
 
             verifyNoInteractions(matchOperation);
         }
+
         @Test
         @DisplayName("[P1] Should throw InvalidPositionException when Team A player is assigned to Team B position")
         void shouldReject2v2SwappingTeamPositions() {
@@ -298,13 +273,7 @@ class MatchServiceTest {
                     List.of(new GameDto(10, 8, p1, p3, p2, p4))
             );
 
-            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(p1).build(),
-                    User.builder().id(p2).build(),
-                    User.builder().id(p3).build(),
-                    User.builder().id(p4).build()
-            ));
+            givenFourPlayersExist();
 
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(InvalidPositionException.class)
@@ -313,5 +282,14 @@ class MatchServiceTest {
             verifyNoInteractions(matchOperation);
         }
 
+        private void givenFourPlayersExist() {
+            when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build(),
+                    User.builder().id(p3).build(),
+                    User.builder().id(p4).build()
+            ));
+        }
     }
 }

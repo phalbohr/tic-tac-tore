@@ -196,18 +196,19 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const wasMatchComplete = isMatchComplete.value;
     games.value.push({ ...currentGame.value });
     
+    const prevGame = currentGame.value;
+    currentGame.value = {
+      team1Score: 0,
+      team2Score: 0,
+      teamAAttackerId: prevGame.teamAAttackerId,
+      teamADefenderId: prevGame.teamADefenderId,
+      teamBAttackerId: prevGame.teamBAttackerId,
+      teamBDefenderId: prevGame.teamBDefenderId
+    };
+
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
     } else {
-      const prevGame = currentGame.value;
-      currentGame.value = {
-        team1Score: 0,
-        team2Score: 0,
-        teamAAttackerId: prevGame.teamAAttackerId,
-        teamADefenderId: prevGame.teamADefenderId,
-        teamBAttackerId: prevGame.teamBAttackerId,
-        teamBDefenderId: prevGame.teamBDefenderId
-      };
       if (matchType.value === MatchType.TWO_VS_TWO) {
         matchState.value = 'position_swap'
       }
@@ -304,7 +305,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
     if (selectedPlayers.value.length < requiredPlayers) return
 
-    if (isGameComplete.value) {
+    if (matchState.value !== 'ready_for_submission' && isGameComplete.value) {
       completeCurrentGame()
     }
     if (games.value.length === 0) return
@@ -338,7 +339,11 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function cancelSubmissionTimer() {
     cancelTimer()
-    matchState.value = 'ready_for_submission'
+    if (canUndoLastGame.value) {
+      undoLastGame()
+    } else {
+      matchState.value = 'score_entry'
+    }
   }
 
   function resetDraftStateOnly() {
