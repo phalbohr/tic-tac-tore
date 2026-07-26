@@ -82,7 +82,7 @@ function handleMatchReady() {
   </div>
   
   <ScoreEntry 
-    v-else-if="store.matchState === 'score_entry' || store.matchState === 'ready_for_submission'" 
+    v-else-if="store.matchState === 'score_entry' || store.matchState === 'ready_for_submission' || store.matchState === 'position_swap'" 
     @complete="handleMatchReady" 
     @cancel="handleCancel" 
     @back="handleBack"
