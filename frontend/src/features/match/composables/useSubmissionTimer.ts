@@ -36,6 +36,11 @@ export function useSubmissionTimer(commitCallback: (payload: PendingSubmissionPa
           const result = await commitCallback(payload)
           if (result === SubmissionResult.SERVER_OR_NETWORK_ERROR) {
             isOfflinePending.value = true
+          } else if (result === SubmissionResult.CLIENT_ERROR) {
+            isPending.value = false
+            pendingSubmission.value = null
+            // For client errors we do NOT want to mark it as offline pending
+            // We just clear the timer and let the caller handle the error state
           } else {
             isPending.value = false
             pendingSubmission.value = null

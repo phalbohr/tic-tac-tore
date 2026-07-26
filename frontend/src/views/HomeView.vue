@@ -11,6 +11,7 @@ import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
+import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { ref } from 'vue'
@@ -30,6 +31,16 @@ function handleUndo() {
   matchStore.cancelSubmissionTimer()
   showNewMatch.value = true
 }
+
+function handleDismissError() {
+  matchStore.clearSubmitError()
+}
+
+watch(() => matchStore.submitError, (newVal) => {
+  if (newVal) {
+    showNewMatch.value = true
+  }
+})
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
@@ -123,6 +134,12 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         :countdown="matchStore.submissionCountdown"
         :is-offline="matchStore.isOfflinePending"
         @undo="handleUndo"
+      />
+
+      <ErrorToast
+        v-if="matchStore.submitError"
+        :message="matchStore.submitError"
+        @dismiss="handleDismissError"
       />
     </main>
   </div>

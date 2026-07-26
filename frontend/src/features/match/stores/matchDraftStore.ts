@@ -41,6 +41,11 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
   const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
+  const submitError = ref<string | null>(null)
+
+  function clearSubmitError() {
+    submitError.value = null
+  }
 
   async function fetchDefaults() {
     try {
@@ -266,6 +271,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         resetDraftStateOnly()
         return SubmissionResult.SUCCESS
       } else if (res.status >= 400 && res.status < 500) {
+        let msg = 'Failed to submit match'
+        try {
+          const data = await res.json()
+          if (data.message) msg = data.message
+        } catch {
+          // ignore parsing error
+        }
+        submitError.value = msg
         return SubmissionResult.CLIENT_ERROR
       } else {
         return SubmissionResult.SERVER_OR_NETWORK_ERROR
@@ -286,6 +299,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   } = useSubmissionTimer(executeCommit)
 
   function startSubmissionTimer() {
+    clearSubmitError()
+
     const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
     if (selectedPlayers.value.length < requiredPlayers) return
 
@@ -334,6 +349,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
+    clearSubmitError()
   }
 
   function reset() {
@@ -355,6 +371,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games,
     currentGame,
     matchState,
+    submitError,
+    clearSubmitError,
     pendingSubmission,
     isPendingSubmission,
     isOfflinePending,
