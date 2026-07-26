@@ -7,7 +7,8 @@ baseline_commit: HEAD
 ## 📖 Story Foundation
 **User Story:** As a 2v2 participant, I want to indicate positions, So that stats remain accurate.
 **Epic:** Epic 2: Retrospective Match Entry & Rule Systems
-**Status:** ready-for-dev
+**Status:** in-progress
+
 
 **Acceptance Criteria:**
 - **Given** a 2v2 match is being recorded
@@ -85,3 +86,22 @@ baseline_commit: HEAD
 
 ### File List
 - `_bmad-output/implementation-artifacts/2-5-position-swapping-between-games.md`
+
+---
+
+## 📋 Review Findings
+
+### Patches
+- [ ] [Review][Patch] Missing `DuplicatePositionException` and `InvalidPositionException` in `GlobalExceptionHandler` [`src/main/java/com/tictactore/exception/GlobalExceptionHandler.java:13-17`]
+- [ ] [Review][Patch] Game validation permits Team A players in Team B position slots (and vice versa) [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:104-114`]
+- [ ] [Review][Patch] `NewMatchFlow.vue` state check excludes `position_swap`, rendering error screen instead of position swap dialog [`frontend/src/features/match/components/NewMatchFlow.vue:85`]
+- [ ] [Review][Patch] Active game in progress dropped when submitting match if previous games exist [`frontend/src/features/match/stores/matchDraftStore.ts:292-295`]
+- [ ] [Review][Patch] Asymmetric defender check throws `InvalidMatchScoreException` instead of `InvalidPositionException` [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:44-46`]
+- [ ] [Review][Patch] 4xx validation errors silently clear timer without notifying user or allowing draft recovery [`frontend/src/features/match/stores/matchDraftStore.ts:268-275`]
+- [ ] [Review][Patch] Match payload allows client to specify arbitrary `creatorId` [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:77-81`]
+- [ ] [Review][Patch] Missing test coverage for 2v2 position swaps in `matchDraftStore.spec.ts` [`frontend/src/features/match/stores/matchDraftStore.spec.ts`]
+
+### Deferred
+- [x] [Review][Defer] Non-atomic idempotency key check outside `MatchOperation` transaction [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:37-42`] — deferred, pre-existing
+- [x] [Review][Defer] Hardcoded String used for match status instead of Enum [`src/main/java/com/tictactore/model/Match.java:43`] — deferred, pre-existing
+
