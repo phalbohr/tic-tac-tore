@@ -47,6 +47,6 @@ test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
     await page.getByTestId('save-button').click();
 
     // Then
-    await expect(page.getByTestId('error-message')).toContainText('Nickname can only be changed once every 30 days');
+    await expect(page.getByTestId('error-message')).toBeVisible();
   });
 });

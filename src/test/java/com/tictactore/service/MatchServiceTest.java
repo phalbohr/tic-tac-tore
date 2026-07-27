@@ -46,6 +46,9 @@ class MatchServiceTest {
     @Mock
     private MatchOperation matchOperation;
 
+    @Mock
+    private PushNotificationService pushNotificationService;
+
     @InjectMocks
     private MatchServiceImpl matchService;
 

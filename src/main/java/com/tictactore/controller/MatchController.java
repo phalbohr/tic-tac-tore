@@ -21,4 +21,11 @@ public class MatchController {
         MatchResponse response = matchService.createMatch(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<PendingMatchesResponse> getPendingMatches() {
+        return ResponseEntity.ok(new PendingMatchesResponse(0, java.util.List.of()));
+    }
+
+    public record PendingMatchesResponse(int count, java.util.List<MatchResponse> matches) {}
 }
