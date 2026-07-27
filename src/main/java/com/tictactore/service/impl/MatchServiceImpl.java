@@ -16,6 +16,7 @@ import com.tictactore.repository.UserRepository;
 import com.tictactore.service.MatchService;
 import com.tictactore.service.operation.MatchOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Retryable
@@ -151,25 +153,65 @@ public class MatchServiceImpl implements MatchService {
             Instant startOfDay = nowUtc.toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
             Instant endOfDay = nowUtc.toLocalDate().atTime(23, 59, 59, 999_999_999).atZone(java.time.ZoneOffset.UTC).toInstant();
 
-            List<Match> existingDuplicates = matchRepository.findDuplicatesOnDate(
-                    startOfDay, endOfDay, request.teamAAttackerId(), request.teamBAttackerId()
+            List<Match> candidateDuplicates = matchRepository.findDuplicatesOnDate(
+                    startOfDay, endOfDay,
+                    request.teamAAttackerId(), request.teamBAttackerId(),
+                    request.teamADefenderId(), request.teamBDefenderId()
             );
 
-            boolean isDuplicateWarning = existingDuplicates.stream()
-                    .anyMatch(m -> !m.getId().equals(savedMatch.getId()));
+            boolean isDuplicateWarning = candidateDuplicates.stream()
+                    .filter(m -> !m.getId().equals(savedMatch.getId()))
+                    .anyMatch(m -> isIdenticalMatch(m, savedMatch, uniqueIds));
 
-            List<UUID> opponentIds = new ArrayList<>(uniqueIds);
-            if (request.creatorId() != null) {
-                opponentIds.remove(request.creatorId());
-            }
-
+            List<UUID> opponentIds = resolveOpponentIds(request, uniqueIds);
             List<User> opponents = userRepository.findAllById(opponentIds);
             pushNotificationService.sendConfirmationRequest(savedMatch, opponents, isDuplicateWarning);
         } catch (Exception e) {
-            // Notification failures must not roll back match creation
+            log.error("Failed to dispatch push notifications for match {}", savedMatch.getId(), e);
         }
 
         return mapToResponse(savedMatch);
+    }
+
+    @Override
+    public com.tictactore.dto.PendingMatchesResponse getPendingMatches() {
+        List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
+        List<MatchResponse> responses = pendingMatches.stream().map(this::mapToResponse).toList();
+        return new com.tictactore.dto.PendingMatchesResponse(responses.size(), responses);
+    }
+
+    private List<UUID> resolveOpponentIds(CreateMatchRequest request, Collection<UUID> allParticipants) {
+        UUID creatorId = request.creatorId();
+        boolean isOnTeamA = creatorId != null && (creatorId.equals(request.teamAAttackerId()) || creatorId.equals(request.teamADefenderId()));
+        boolean isOnTeamB = creatorId != null && (creatorId.equals(request.teamBAttackerId()) || creatorId.equals(request.teamBDefenderId()));
+
+        List<UUID> opponents = new ArrayList<>();
+        if (isOnTeamA) {
+            if (request.teamBAttackerId() != null) opponents.add(request.teamBAttackerId());
+            if (request.teamBDefenderId() != null) opponents.add(request.teamBDefenderId());
+        } else if (isOnTeamB) {
+            if (request.teamAAttackerId() != null) opponents.add(request.teamAAttackerId());
+            if (request.teamADefenderId() != null) opponents.add(request.teamADefenderId());
+        } else {
+            opponents.addAll(allParticipants);
+            if (creatorId != null) {
+                opponents.remove(creatorId);
+            }
+        }
+        return opponents;
+    }
+
+    private boolean isIdenticalMatch(Match candidate, Match current, Collection<UUID> currentParticipants) {
+        List<UUID> candidateParticipants = new ArrayList<>();
+        if (candidate.getTeamAAttackerId() != null) candidateParticipants.add(candidate.getTeamAAttackerId());
+        if (candidate.getTeamADefenderId() != null) candidateParticipants.add(candidate.getTeamADefenderId());
+        if (candidate.getTeamBAttackerId() != null) candidateParticipants.add(candidate.getTeamBAttackerId());
+        if (candidate.getTeamBDefenderId() != null) candidateParticipants.add(candidate.getTeamBDefenderId());
+
+        if (new HashSet<>(candidateParticipants).equals(new HashSet<>(currentParticipants))) {
+            return true;
+        }
+        return false;
     }
 
     private MatchResponse mapToResponse(Match match) {

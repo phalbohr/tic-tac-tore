@@ -13,5 +13,9 @@ public interface PushSubscriptionRepository extends JpaRepository<PushSubscripti
 
     Optional<PushSubscription> findByUserIdAndEndpoint(UUID userId, String endpoint);
 
+    Optional<PushSubscription> findByEndpoint(String endpoint);
+
     void deleteByUserIdAndEndpoint(UUID userId, String endpoint);
+
+    void deleteByEndpoint(String endpoint);
 }

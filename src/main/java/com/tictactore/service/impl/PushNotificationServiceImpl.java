@@ -42,6 +42,19 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     private final VapidProperties vapidProperties;
     private final ObjectMapper objectMapper;
 
+    private PushService cachedPushService;
+
+    private synchronized PushService getPushService() throws Exception {
+        if (cachedPushService == null) {
+            cachedPushService = new PushService(
+                    vapidProperties.getPublicKey(),
+                    vapidProperties.getPrivateKey(),
+                    vapidProperties.getSubject()
+            );
+        }
+        return cachedPushService;
+    }
+
     @Override
     public void subscribe(UUID userId, PushSubscriptionRequest request) {
         notificationOperation.saveSubscription(userId, request.endpoint(), request.p256dh(), request.auth());
@@ -77,7 +90,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         for (User opponent : opponents) {
             List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(opponent.getId());
             if (subscriptions.isEmpty()) {
-                recordNotificationLog(opponent.getId(), match.getId(), "CONFIRMATION_REQUEST", jsonPayload, "QUEUED", "No push subscription registered");
+                recordNotificationLog(opponent.getId(), match.getId(), "CONFIRMATION_REQUEST", jsonPayload, "SKIPPED", "No push subscription registered");
                 continue;
             }
 
@@ -108,17 +121,13 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     private void dispatchPushNotification(PushSubscription sub, UUID recipientId, UUID matchId, String jsonPayload) {
         try {
-            PushService pushService = new PushService(
-                    vapidProperties.getPublicKey(),
-                    vapidProperties.getPrivateKey(),
-                    vapidProperties.getSubject()
-            );
-
-            byte[] authBytes = java.util.Base64.getUrlDecoder().decode(sub.getAuth());
+            PushService pushService = getPushService();
+            byte[] authBytes = safeDecodeBase64(sub.getAuth());
+            byte[] p256dhBytes = safeDecodeBase64(sub.getP256dh());
 
             Notification notification = new Notification(
                     sub.getEndpoint(),
-                    Utils.loadPublicKey(sub.getP256dh()),
+                    Utils.loadPublicKey(p256dhBytes),
                     authBytes,
                     jsonPayload.getBytes()
             );
@@ -127,12 +136,34 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode < 300) {
                 recordNotificationLog(recipientId, matchId, "CONFIRMATION_REQUEST", jsonPayload, "DELIVERED", null);
+            } else if (statusCode == 404 || statusCode == 410) {
+                log.info("Push subscription expired/invalid for recipient {}. Removing endpoint.", recipientId);
+                notificationOperation.deleteSubscriptionByEndpoint(sub.getEndpoint());
+                recordNotificationLog(recipientId, matchId, "CONFIRMATION_REQUEST", jsonPayload, "FAILED", "Expired subscription HTTP " + statusCode);
             } else {
                 recordNotificationLog(recipientId, matchId, "CONFIRMATION_REQUEST", jsonPayload, "FAILED", "Push server returned HTTP " + statusCode);
             }
         } catch (Exception e) {
             log.warn("Failed to deliver Web Push to recipient {}: {}", recipientId, e.getMessage());
             recordNotificationLog(recipientId, matchId, "CONFIRMATION_REQUEST", jsonPayload, "FAILED", e.getMessage());
+        }
+    }
+
+    private byte[] safeDecodeBase64(String value) {
+        if (value == null || value.isBlank()) {
+            return new byte[0];
+        }
+        String normalized = value.trim();
+        try {
+            return java.util.Base64.getUrlDecoder().decode(normalized);
+        } catch (IllegalArgumentException e1) {
+            try {
+                return java.util.Base64.getDecoder().decode(normalized);
+            } catch (IllegalArgumentException e2) {
+                int missingPadding = (4 - (normalized.length() % 4)) % 4;
+                String padded = normalized + "=".repeat(missingPadding);
+                return java.util.Base64.getUrlDecoder().decode(padded);
+            }
         }
     }
 

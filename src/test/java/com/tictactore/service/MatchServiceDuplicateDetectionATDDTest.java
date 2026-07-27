@@ -83,7 +83,7 @@ class MatchServiceDuplicateDetectionATDDTest {
                 .createdAt(Instant.now())
                 .build();
 
-        when(matchRepository.findDuplicatesOnDate(any(), any(), eq(playerA), eq(playerB)))
+        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(existingDuplicate, savedMatch));
 
         CreateMatchRequest request = new CreateMatchRequest(

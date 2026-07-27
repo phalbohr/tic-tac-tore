@@ -92,6 +92,17 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         </p>
       </div>
 
+      <!-- Permission Request CTA -->
+      <button
+        v-if="permissionState === 'default'"
+        @click="requestPermissionAndSubscribe"
+        class="w-full bg-surface-container-high text-primary p-4 rounded-xl mb-2 text-left text-sm flex items-center justify-between shadow-sm hover:opacity-90 transition-all font-medium"
+        data-testid="enable-notifications-btn"
+      >
+        <span>🔔 Enable push notifications for match verification</span>
+        <span class="font-bold text-xs bg-primary text-on-primary px-2 py-1 rounded-lg">Enable</span>
+      </button>
+
       <div v-if="!authStore.isAuthenticated" class="text-center flex flex-col items-center gap-6 mt-12">
         <div>
           <h1 class="text-4xl font-bold text-on-surface mb-2 font-headline">{{ t('home.title') }}</h1>

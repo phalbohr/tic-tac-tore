@@ -13,18 +13,22 @@ import java.util.UUID;
 public interface MatchRepository extends JpaRepository<Match, UUID> {
     Optional<Match> findByIdempotencyKey(String idempotencyKey);
 
+    List<Match> findByStatus(String status);
+
     @Query("""
         SELECT m FROM Match m
         WHERE m.createdAt >= :startOfDay AND m.createdAt <= :endOfDay
         AND (
-            (m.teamAAttackerId = :p1 OR m.teamADefenderId = :p1 OR m.teamBAttackerId = :p1 OR m.teamBDefenderId = :p1)
-            AND (m.teamAAttackerId = :p2 OR m.teamADefenderId = :p2 OR m.teamBAttackerId = :p2 OR m.teamBDefenderId = :p2)
+            (m.teamAAttackerId IN (:p1, :p2, :p3, :p4) OR m.teamADefenderId IN (:p1, :p2, :p3, :p4)
+             OR m.teamBAttackerId IN (:p1, :p2, :p3, :p4) OR m.teamBDefenderId IN (:p1, :p2, :p3, :p4))
         )
         """)
     List<Match> findDuplicatesOnDate(
             @Param("startOfDay") Instant startOfDay,
             @Param("endOfDay") Instant endOfDay,
             @Param("p1") UUID p1,
-            @Param("p2") UUID p2
+            @Param("p2") UUID p2,
+            @Param("p3") UUID p3,
+            @Param("p4") UUID p4
     );
 }

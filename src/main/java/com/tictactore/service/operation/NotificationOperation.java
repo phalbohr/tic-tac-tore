@@ -7,6 +7,7 @@ import com.tictactore.repository.NotificationLogRepository;
 import com.tictactore.repository.PushSubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -23,9 +24,10 @@ public class NotificationOperation {
     @Idempotent
     @Transactional
     public PushSubscription saveSubscription(UUID userId, String endpoint, String p256dh, String auth) {
-        var existing = pushSubscriptionRepository.findByUserIdAndEndpoint(userId, endpoint);
+        var existing = pushSubscriptionRepository.findByEndpoint(endpoint);
         if (existing.isPresent()) {
             var sub = existing.get();
+            sub.setUserId(userId);
             sub.setP256dh(p256dh);
             sub.setAuth(auth);
             return pushSubscriptionRepository.save(sub);
@@ -46,13 +48,19 @@ public class NotificationOperation {
         pushSubscriptionRepository.deleteByUserIdAndEndpoint(userId, endpoint);
     }
 
+    @Idempotent
+    @Transactional
+    public void deleteSubscriptionByEndpoint(String endpoint) {
+        pushSubscriptionRepository.deleteByEndpoint(endpoint);
+    }
+
     @Transactional(readOnly = true)
     public List<PushSubscription> getSubscriptionsForUser(UUID userId) {
         return pushSubscriptionRepository.findByUserId(userId);
     }
 
     @Idempotent
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public NotificationLog saveNotificationLog(NotificationLog log) {
         return notificationLogRepository.save(log);
     }
