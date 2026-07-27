@@ -31,6 +31,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchOperation matchOperation;
+    private final com.tictactore.service.PushNotificationService pushNotificationService;
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
@@ -144,6 +145,30 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Match savedMatch = matchOperation.saveMatch(match);
+
+        try {
+            java.time.ZonedDateTime nowUtc = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC);
+            Instant startOfDay = nowUtc.toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+            Instant endOfDay = nowUtc.toLocalDate().atTime(23, 59, 59, 999_999_999).atZone(java.time.ZoneOffset.UTC).toInstant();
+
+            List<Match> existingDuplicates = matchRepository.findDuplicatesOnDate(
+                    startOfDay, endOfDay, request.teamAAttackerId(), request.teamBAttackerId()
+            );
+
+            boolean isDuplicateWarning = existingDuplicates.stream()
+                    .anyMatch(m -> !m.getId().equals(savedMatch.getId()));
+
+            List<UUID> opponentIds = new ArrayList<>(uniqueIds);
+            if (request.creatorId() != null) {
+                opponentIds.remove(request.creatorId());
+            }
+
+            List<User> opponents = userRepository.findAllById(opponentIds);
+            pushNotificationService.sendConfirmationRequest(savedMatch, opponents, isDuplicateWarning);
+        } catch (Exception e) {
+            // Notification failures must not roll back match creation
+        }
+
         return mapToResponse(savedMatch);
     }
 

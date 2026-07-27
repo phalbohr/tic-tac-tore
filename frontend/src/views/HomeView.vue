@@ -14,6 +14,8 @@ import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
+import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
+import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
 import { ref } from 'vue'
 
 const { t } = useI18n()
@@ -21,6 +23,8 @@ const showNewMatch = ref(false)
 const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
+const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
+const { pendingCount } = usePendingMatches()
 
 function handleMatchComplete() {
   showNewMatch.value = false
@@ -74,6 +78,20 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
     </header>
 
     <main class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8 p-6 text-center">
+      <!-- Permission Re-prompt Banner -->
+      <div
+        v-if="permissionState === 'denied'"
+        class="w-full bg-error-container text-on-error-container p-4 rounded-xl mb-2 text-left text-sm flex flex-col gap-2 shadow-sm"
+        data-testid="permission-warning-banner"
+      >
+        <div class="font-bold flex items-center gap-2">
+          <span>⚠️ Push notifications disabled</span>
+        </div>
+        <p>
+          Push notifications are disabled. You may miss match confirmation requests. Enable notifications in your browser settings.
+        </p>
+      </div>
+
       <div v-if="!authStore.isAuthenticated" class="text-center flex flex-col items-center gap-6 mt-12">
         <div>
           <h1 class="text-4xl font-bold text-on-surface mb-2 font-headline">{{ t('home.title') }}</h1>
@@ -85,8 +103,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 
       <div v-else class="flex flex-col items-center gap-6 mt-12 w-full">
         <div v-if="authStore.profile" class="flex flex-col items-center gap-3">
-          <div class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden">
+          <div class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden relative">
             <AvatarBase :avatar="authStore.profile.avatar" />
+            <div
+              v-if="pendingCount > 0"
+              class="absolute top-1 right-1 bg-error text-on-error rounded-full px-2 py-0.5 text-xs font-bold shadow-md"
+              data-testid="pending-badge-counter"
+            >
+              {{ pendingCount }}
+            </div>
           </div>
           <p class="text-on-surface text-2xl font-bold font-headline mt-2">
             {{ t('home.welcomeBack') }}, {{ authStore.profile.nickname }}
