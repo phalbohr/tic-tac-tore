@@ -9,6 +9,9 @@ import java.util.UUID;
 @Entity
 @Table(
     name = "push_subscription",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_push_sub_endpoint", columnNames = {"endpoint"})
+    },
     indexes = {
         @Index(name = "idx_push_sub_user_id", columnList = "user_id")
     }

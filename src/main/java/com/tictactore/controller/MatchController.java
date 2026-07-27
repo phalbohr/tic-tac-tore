@@ -2,6 +2,7 @@ package com.tictactore.controller;
 
 import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.MatchResponse;
+import com.tictactore.dto.PendingMatchesResponse;
 import com.tictactore.service.MatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,6 @@ public class MatchController {
 
     @GetMapping("/pending")
     public ResponseEntity<PendingMatchesResponse> getPendingMatches() {
-        return ResponseEntity.ok(new PendingMatchesResponse(0, java.util.List.of()));
+        return ResponseEntity.ok(matchService.getPendingMatches());
     }
-
-    public record PendingMatchesResponse(int count, java.util.List<MatchResponse> matches) {}
 }

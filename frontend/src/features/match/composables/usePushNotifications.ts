@@ -57,15 +57,20 @@ export function usePushNotifications() {
       const p256dh = rawSub.keys?.p256dh || ''
       const auth = rawSub.keys?.auth || ''
 
-      await fetch('/api/v1/notifications/subscribe', {
+      const res = await fetch('/api/v1/notifications/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           endpoint: subscription.endpoint,
           p256dh,
           auth,
         }),
       })
+
+      if (!res.ok) {
+        throw new Error(`Subscribe failed with status ${res.status}`)
+      }
 
       isSubscribed.value = true
       return true

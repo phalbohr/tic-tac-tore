@@ -7,7 +7,7 @@ baseline_commit: 251fc1a86f20e36d71223f7118909aafbac016e1
 ## 📖 Story Foundation
 **User Story:** As a player who just submitted a match, I want the system to notify opponents, so that they can verify the results.
 **Epic:** Epic 3: The Verification Loop & Trust Architecture
-**Status:** ready-for-dev
+**Status:** done
 
 **Acceptance Criteria:**
 - **Given** a match has been successfully submitted by the creator (or 15-second local undo window in `useSubmissionTimer` has expired without cancellation)
@@ -120,6 +120,24 @@ baseline_commit: 251fc1a86f20e36d71223f7118909aafbac016e1
   - [x] Test Push Subscription & Mock Strategy: intercept `/api/v1/notifications/subscribe` and inject browser spies for `ServiceWorkerRegistration.showNotification` to empirically verify subscription registration without flaky CI OS dependencies.
   - [x] Test Match Submission & Notification Trigger: Player A submits match against Player B -> verify match transitions to `PENDING_APPROVAL` -> verify backend audit log (`NotificationLog`) contains entry for Player B.
   - [x] Test Duplicate Warning, Routing Stub & In-App Fallback Badge: Player A submits a second identical match on the same day -> verify UI displays fallback badge counter -> verify backend logged notification payload with duplicate warning flag -> simulate notification click deep-linking to `/match/:id/review` stub resolving cleanly without 404s.
+
+### Review Findings
+- [x] [Review][Patch] Insecure Fallback to Hardcoded UUID in Notification Endpoints [NotificationController.java:36,48]
+- [x] [Review][Patch] Incomplete Duplicate Match Detection Query & Logic [MatchRepository.java:24-29]
+- [x] [Review][Patch] Incorrect Opponent Identification in 2v2 Matches [MatchServiceImpl.java:161-167]
+- [x] [Review][Patch] Hardcoded Stub in /api/v1/matches/pending Prevents UI Fallback Badging [MatchController.java:25-30]
+- [x] [Review][Patch] Missing UI CTA to Trigger Push Notification Subscription [HomeView.vue:26]
+- [x] [Review][Patch] Improper Transaction Propagation for Audit Logging [NotificationOperation.java:55]
+- [x] [Review][Patch] Expired Subscriptions Are Not Cleaned Up on HTTP 404/410 [PushNotificationServiceImpl.java:128-132]
+- [x] [Review][Patch] Swallowed Exception & Zero Comments Policy Violation in Match Creation [MatchServiceImpl.java:168-170]
+- [x] [Review][Patch] Missing Global Unique Constraint and Deduplication on Push Endpoints [PushSubscription.java:10-15]
+- [x] [Review][Patch] Inaccurate Audit Log Status When No Subscription Exists [PushNotificationServiceImpl.java:80]
+- [x] [Review][Patch] Repeated Instantiation of PushService in Delivery Loop [PushNotificationServiceImpl.java:111-115]
+- [x] [Review][Patch] Unsafe Base64 Decoding of Subscription Auth Keys [PushNotificationServiceImpl.java:117]
+- [x] [Review][Patch] Unchecked HTTP Response Status on Frontend Subscription Request [usePushNotifications.ts:60-70]
+- [x] [Review][Patch] Service Worker notificationclick URL Matching Failure [sw.js:40-51]
+- [x] [Review][Patch] Unhandled Promise Rejection in Service Worker showNotification [sw.js:34]
+- [x] [Review][Defer] Fragile Nickname Pseudonymization Logic [PushNotificationServiceImpl.java:90-101] — deferred, pre-existing domain refinement
 
 ---
 

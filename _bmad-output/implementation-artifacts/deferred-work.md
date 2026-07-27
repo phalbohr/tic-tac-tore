@@ -245,4 +245,10 @@ location: `src/main/java/com/tictactore/model/Match.java:43`
 reason: [x] [Review][Defer] Hardcoded String used for match status instead of Enum — deferred, pre-existing domain refinement.
 status: open
 
+### DW-37: Fragile Nickname Pseudonymization Logic
+origin: code review of 3-1-confirmation-requests-and-push-notifications.md (2026-07-27)
+location: `src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java:90-101`
+reason: [x] [Review][Defer] Fragile Nickname Pseudonymization Logic [src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java:90-101] — deferred, pre-existing domain refinement.
+status: open
+
 
