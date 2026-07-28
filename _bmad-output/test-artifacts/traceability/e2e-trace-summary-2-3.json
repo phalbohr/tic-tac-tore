@@ -6,7 +6,7 @@
   "collection_status": "COLLECTED",
   "inventory_basis": "acceptance_criteria",
   "gate_basis": "priority_thresholds",
-  "source_sha": "",
+  "source_sha": "834182f0bbe13b153750174df26edd913a8f983f",
   "target": {
     "type": "story",
     "id": "2-3-score-entry-and-automatic-completion",
@@ -19,7 +19,7 @@
     "resolution_mode": "formal_requirements",
     "confidence": "high",
     "sources": [
-      "/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/implementation-artifacts/spec-2-3-score-entry-and-automatic-completion.md"
+      "_bmad-output/implementation-artifacts/spec-2-3-score-entry-and-automatic-completion.md"
     ],
     "external_pointer_status": "not_used",
     "synthetic": false
@@ -80,7 +80,10 @@
     "ui_journey_status": "not_applicable",
     "ui_state_status": "not_applicable"
   },
-  "blockers": [],
+  "blockers": [
+    "AC3: P0 requirement uncovered (NONE coverage status)",
+    "AC4: P0 requirement uncovered (NONE coverage status)"
+  ],
   "recommendations": [
     {
       "priority": "URGENT",
@@ -94,7 +97,7 @@
     }
   ],
   "links": {
-    "trace_report_path": "/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/traceability/trace-2-3-score-entry-and-automatic-completion.md",
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-2-3-score-entry-and-automatic-completion.md",
     "trace_report_url": "",
     "artifact_url": "",
     "journey_evidence_url": ""

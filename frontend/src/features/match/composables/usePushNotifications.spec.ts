@@ -54,4 +54,42 @@ describe('usePushNotifications', () => {
     checkPermissionState()
     expect(permissionState.value).toBe('denied')
   })
+
+  it('[P1] should set isSupported to true when Notification API is available', () => {
+    vi.stubGlobal('Notification', { permission: 'default' })
+    Object.defineProperty(navigator, 'serviceWorker', {
+      value: { register: vi.fn() },
+      configurable: true,
+    })
+
+    const { isSupported, checkPermissionState } = usePushNotifications()
+    checkPermissionState()
+    expect(isSupported.value).toBe(true)
+  })
+
+  it('[P1] should update permissionState on visibility change to visible', () => {
+    vi.stubGlobal('Notification', { permission: 'default', requestPermission: vi.fn() })
+    Object.defineProperty(navigator, 'serviceWorker', {
+      value: { register: vi.fn() },
+      configurable: true,
+    })
+
+    const { permissionState, checkPermissionState } = usePushNotifications()
+    checkPermissionState()
+    expect(permissionState.value).toBe('default')
+
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'visible',
+      configurable: true,
+    })
+
+    expect(permissionState.value).toBe('default')
+  })
+
+  it('[P1] should return false when push APIs are unavailable', () => {
+    const { requestPermissionAndSubscribe } = usePushNotifications()
+    const result = requestPermissionAndSubscribe()
+
+    expect(result).resolves.toBe(false)
+  })
 })

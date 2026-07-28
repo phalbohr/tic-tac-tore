@@ -16,7 +16,7 @@
   "overall_status": "NOT_MET",
   "critical_open": 2,
   "links": {
-    "trace_report_path": "/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/traceability/trace-2-3-score-entry-and-automatic-completion.md",
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-2-3-score-entry-and-automatic-completion.md",
     "trace_report_url": "",
     "artifact_url": "",
     "journey_evidence_url": ""

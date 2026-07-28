@@ -38,4 +38,15 @@ describe('usePendingMatches', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
   })
+
+  it('[P1] should retain previous count when fetch fails', async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'))
+    vi.stubGlobal('fetch', mockFetch)
+
+    const { fetchPendingCount, pendingCount } = usePendingMatches()
+    pendingCount.value = 5
+    await fetchPendingCount()
+
+    expect(pendingCount.value).toBe(5)
+  })
 })
