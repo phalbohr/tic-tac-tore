@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class VapidProperties {
-    private String publicKey = "BEl62iUYgUivxIkv69yViEuiBIa40yYvrx1m0A7Vn65a7p5y_dummy_public_key_string_for_testing_purposes";
+    private String publicKey = "dummy_public_key_string_for_testing_purposes";
     private String privateKey = "dummy_private_key_string_for_testing_purposes";
     private String subject = "mailto:admin@tictactore.com";
 }

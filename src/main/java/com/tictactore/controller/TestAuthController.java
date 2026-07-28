@@ -51,6 +51,8 @@ public class TestAuthController implements TestAuthApi {
         response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
+                .location(java.net.URI.create(properties.getOauth2().getRedirectUri()))
+                .build();
     }
 }

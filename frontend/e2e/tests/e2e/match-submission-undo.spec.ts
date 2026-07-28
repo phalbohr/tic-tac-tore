@@ -10,7 +10,7 @@ test.describe('Story 2.4: Match Submission with Undo Window', () => {
     });
 
     // Mock rule config API to use 1 game limit for fast E2E completion
-    await page.route('**/api/rules/**', async (route) => {
+    await page.route('**/api/v1/rule-configurations*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

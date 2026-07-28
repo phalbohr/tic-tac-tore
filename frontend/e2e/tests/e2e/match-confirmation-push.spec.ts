@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Story 3.1: Confirmation Requests & Push Notifications E2E', () => {
   test.beforeEach(async ({ page }) => {
+    await page.request.get('/api/auth/test-login?email=test@example.com&nickname=testuser')
     await page.goto('/')
   })
 

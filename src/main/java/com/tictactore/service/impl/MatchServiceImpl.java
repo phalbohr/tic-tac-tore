@@ -174,11 +174,36 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public com.tictactore.dto.PendingMatchesResponse getPendingMatches() {
+    public com.tictactore.dto.PendingMatchesResponse getPendingMatches(UUID currentUserId) {
+        if (currentUserId == null) {
+            return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
+        }
         List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
-        List<MatchResponse> responses = pendingMatches.stream().map(this::mapToResponse).toList();
-        return new com.tictactore.dto.PendingMatchesResponse(responses.size(), responses);
+        List<MatchResponse> userPendingResponses = pendingMatches.stream()
+                .filter(m -> isUserPendingApprover(m, currentUserId))
+                .map(this::mapToResponse)
+                .toList();
+        return new com.tictactore.dto.PendingMatchesResponse(userPendingResponses.size(), userPendingResponses);
     }
+
+    private boolean isUserPendingApprover(Match match, UUID userId) {
+        if (userId == null || userId.equals(match.getCreatorId())) {
+            return false;
+        }
+        UUID creatorId = match.getCreatorId();
+        boolean creatorOnTeamA = creatorId != null && (creatorId.equals(match.getTeamAAttackerId()) || creatorId.equals(match.getTeamADefenderId()));
+        boolean creatorOnTeamB = creatorId != null && (creatorId.equals(match.getTeamBAttackerId()) || creatorId.equals(match.getTeamBDefenderId()));
+
+        if (creatorOnTeamA) {
+            return userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
+        } else if (creatorOnTeamB) {
+            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId());
+        } else {
+            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId())
+                || userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
+        }
+    }
+
 
     private List<UUID> resolveOpponentIds(CreateMatchRequest request, Collection<UUID> allParticipants) {
         UUID creatorId = request.creatorId();

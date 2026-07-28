@@ -35,7 +35,7 @@ application:
     cors:
       allowed-origins: ${TTT_CORS_ALLOWED_ORIGINS:http://localhost:3000}
     vapid:
-      public-key: ${TTT_VAPID_PUBLIC_KEY:BEl62iUYgUivxIkv69yViEuiBIa40yYvrx1m0A7Vn65a7p5y_dummy_public_key_string_for_testing_purposes}
+      public-key: ${TTT_VAPID_PUBLIC_KEY:dummy_public_key_string_for_testing_purposes}
       private-key: ${TTT_VAPID_PRIVATE_KEY:dummy_private_key_string_for_testing_purposes}
       subject: ${TTT_VAPID_SUBJECT:mailto:admin@tictactore.com}
     bloom-filter:

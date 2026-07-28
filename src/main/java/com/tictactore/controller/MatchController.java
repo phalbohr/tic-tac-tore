@@ -3,11 +3,13 @@ package com.tictactore.controller;
 import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.dto.PendingMatchesResponse;
+import com.tictactore.model.User;
 import com.tictactore.service.MatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +26,9 @@ public class MatchController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<PendingMatchesResponse> getPendingMatches() {
-        return ResponseEntity.ok(matchService.getPendingMatches());
+    public ResponseEntity<PendingMatchesResponse> getPendingMatches(@AuthenticationPrincipal User principal) {
+        var currentUserId = principal != null ? principal.getId() : null;
+        return ResponseEntity.ok(matchService.getPendingMatches(currentUserId));
     }
 }
+

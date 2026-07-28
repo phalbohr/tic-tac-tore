@@ -13,7 +13,7 @@ public class UserCreator {
 
     private final UserRepository userRepository;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User createUser(User user) {
         return userRepository.save(user);
     }

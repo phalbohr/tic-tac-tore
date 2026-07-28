@@ -16,7 +16,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "loading": "Loading...",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "close": "Close"
   },
   "match": {
     "submit": "Submit Match",

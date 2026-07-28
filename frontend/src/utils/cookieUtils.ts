@@ -14,3 +14,8 @@ export function getCookie(name: string): string | undefined {
 export function deleteCookie(name: string) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
 }
+
+export function getCsrfHeaders(): Record<string, string> {
+  const token = getCookie('XSRF-TOKEN')
+  return token ? { 'X-XSRF-TOKEN': decodeURIComponent(token) } : {}
+}

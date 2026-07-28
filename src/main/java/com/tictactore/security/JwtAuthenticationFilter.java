@@ -55,20 +55,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                User user;
+                UUID uuid;
                 try {
-                    user = User.builder()
-                            .id(UUID.fromString(userId))
-                            .email(email)
-                            .nickname(nickname)
-                            .avatar(avatar)
-                            .language(language)
-                            .tutorialCompleted(Boolean.TRUE.equals(tutorialCompleted))
-                            .build();
+                    uuid = UUID.fromString(userId);
                 } catch (IllegalArgumentException e) {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid user ID format");
-                    return;
+                    String effectiveEmail = (email != null && !email.isBlank()) ? email : userId;
+                    uuid = UUID.nameUUIDFromBytes(effectiveEmail.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    if (email == null) {
+                        email = effectiveEmail;
+                    }
+                    if (nickname == null) {
+                        nickname = effectiveEmail.split("@")[0];
+                    }
                 }
+
+                User user = User.builder()
+                        .id(uuid)
+                        .email(email)
+                        .nickname(nickname)
+                        .avatar(avatar)
+                        .language(language)
+                        .tutorialCompleted(Boolean.TRUE.equals(tutorialCompleted))
+                        .build();
 
                 var authentication = new UsernamePasswordAuthenticationToken(
                         user,
