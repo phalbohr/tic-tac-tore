@@ -65,5 +65,42 @@ class NotificationControllerATDDTest {
                     .param("endpoint", "https://push.services.mozilla.com/push/v1/gAAAAA..."))
                     .andExpect(status().isNoContent());
         }
+
+        @Test
+        @WithMockUser
+        @DisplayName("[P1] POST /subscribe should return 400 when @Valid payload is missing endpoint")
+        void shouldReturnBadRequestOnMissingEndpoint() throws Exception {
+            String jsonPayload = """
+                {
+                    "p256dh": "BNcR...",
+                    "auth": "tBc..."
+                }
+                """;
+
+            mockMvc.perform(post("/api/v1/notifications/subscribe")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonPayload))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser
+        @DisplayName("[P1] POST /subscribe should return 400 when @Valid payload has blank p256dh")
+        void shouldReturnBadRequestOnBlankP256dh() throws Exception {
+            String jsonPayload = """
+                {
+                    "endpoint": "https://push.services.mozilla.com/push/v1/gAAAAA...",
+                    "p256dh": "   ",
+                    "auth": "tBc..."
+                }
+                """;
+
+            mockMvc.perform(post("/api/v1/notifications/subscribe")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonPayload))
+                    .andExpect(status().isBadRequest());
+        }
     }
 }

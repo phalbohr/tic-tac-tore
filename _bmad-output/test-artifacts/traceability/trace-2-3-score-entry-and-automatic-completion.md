@@ -5,9 +5,9 @@ lastSaved: '2026-07-17T20:23:00.000Z'
 coverageBasis: 'acceptance_criteria'
 oracleConfidence: 'high'
 oracleResolutionMode: 'formal_requirements'
-oracleSources: ['/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/implementation-artifacts/spec-2-3-score-entry-and-automatic-completion.md']
+oracleSources: ['_bmad-output/implementation-artifacts/spec-2-3-score-entry-and-automatic-completion.md']
 externalPointerStatus: 'not_used'
-tempCoverageMatrixPath: '/Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/traceability/temp-coverage-matrix.json'
+tempCoverageMatrixPath: '{temp-coverage-matrix-output}'
 ---
 
 # Traceability Report

@@ -6,7 +6,7 @@
   "collection_status": "COLLECTED",
   "inventory_basis": "acceptance_criteria",
   "gate_basis": "priority_thresholds",
-  "source_sha": "",
+  "source_sha": "834182f0bbe13b153750174df26edd913a8f983f",
   "target": {
     "type": "story",
     "id": "2-4",
@@ -19,7 +19,9 @@
     "resolution_mode": "formal_requirements",
     "confidence": "high",
     "sources": [
-      "_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md"
+      "_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md",
+      "_bmad-output/test-artifacts/nfr-assessment.md",
+      "_bmad-output/test-artifacts/test-design-qa.md"
     ],
     "external_pointer_status": "not_used",
     "synthetic": false
