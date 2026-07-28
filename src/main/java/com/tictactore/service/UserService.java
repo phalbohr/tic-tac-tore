@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HexFormat;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.UUID;
 import com.tictactore.controller.UserMatchController.PlayerDto;
 import com.tictactore.controller.UserMatchController.UserPreferencesDto;
@@ -59,8 +60,17 @@ public class UserService {
         var existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
             var user = existingUser.get();
+            boolean updated = false;
+            if (nickname != null && !nickname.isBlank() && !nickname.equals(user.getNickname())) {
+                user.setNickname(nickname);
+                user.setLastNicknameUpdate(null);
+                updated = true;
+            }
             if (tutorialCompleted != null) {
                 user.setTutorialCompleted(tutorialCompleted);
+                updated = true;
+            }
+            if (updated) {
                 return userRepository.save(user);
             }
             return user;
@@ -196,11 +206,41 @@ public class UserService {
     }
 
     public List<PlayerDto> getFrequentOpponents() {
-        return List.of(
-                new PlayerDto("550e8400-e29b-41d4-a716-446655440000", "Mock Player 1", generateDeterministicAvatar("mock1@example.com")),
-                new PlayerDto("550e8400-e29b-41d4-a716-446655440001", "Mock Player 2", generateDeterministicAvatar("mock2@example.com")),
-                new PlayerDto("550e8400-e29b-41d4-a716-446655440002", "Mock Player 3", generateDeterministicAvatar("mock3@example.com")),
-                new PlayerDto("550e8400-e29b-41d4-a716-446655440003", "Mock Player 4", generateDeterministicAvatar("mock4@example.com"))
-        );
+        List<User> opponents = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            String email = "mock" + i + "@example.com";
+            String nickname = "Mock Player " + i;
+
+            Optional<User> existing = userRepository.findByEmail(email);
+            if (existing.isPresent()) {
+                opponents.add(existing.get());
+            } else {
+                Optional<User> existingByNick = userRepository.findByNickname(nickname);
+                if (existingByNick.isPresent()) {
+                    opponents.add(existingByNick.get());
+                } else {
+                    try {
+                        User mockUser = User.builder()
+                                .email(email)
+                                .nickname(nickname)
+                                .providerId("mock-provider-" + i)
+                                .avatar(generateDeterministicAvatar(email))
+                                .language("en")
+                                .tutorialCompleted(true)
+                                .build();
+                        User saved = userCreator.createUser(mockUser);
+                        opponents.add(saved);
+                    } catch (Exception ignored) {
+                        userRepository.findByEmail(email)
+                                .or(() -> userRepository.findByNickname(nickname))
+                                .ifPresent(opponents::add);
+                    }
+                }
+            }
+        }
+
+        return opponents.stream()
+                .map(u -> new PlayerDto(u.getId().toString(), u.getNickname(), u.getAvatar()))
+                .collect(Collectors.toList());
     }
 }

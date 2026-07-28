@@ -35,8 +35,8 @@ application:
     cors:
       allowed-origins: ${TTT_CORS_ALLOWED_ORIGINS:http://localhost:3000}
     vapid:
-      public-key: ${TTT_VAPID_PUBLIC_KEY:BEl62iUYgUivxIkv69yViEuiBIa40yYvrx1m0A7Vn65a7p5y_dummy_public_key_string_for_testing_purposes}
-      private-key: ${TTT_VAPID_PRIVATE_KEY:dummy_private_key_string_for_testing_purposes}
+      public-key: ${TTT_VAPID_PUBLIC_KEY:BE_jfHrmkFYm52tuVzmcTbD2KvuUg1uFGGbZAR9Y_8Ha6V8SeyH8UJG-h6nad1za6C6T1uUEyCCGIyP35waNJa0}
+      private-key: ${TTT_VAPID_PRIVATE_KEY:hy6yBC2PIX-WPm2Egq6abCRtNttqdCRz4mdoMBWTHj0}
       subject: ${TTT_VAPID_SUBJECT:mailto:admin@tictactore.com}
     bloom-filter:
       expected-elements: ${TTT_BLOOM_FILTER_EXPECTED_ELEMENTS:100000}

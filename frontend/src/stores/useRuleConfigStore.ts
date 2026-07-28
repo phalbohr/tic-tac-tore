@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { getCsrfHeaders } from '../utils/cookieUtils';
 
 export interface RuleConfig {
     id?: string;
@@ -25,6 +26,7 @@ export const useRuleConfigStore = defineStore('ruleConfig', () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...getCsrfHeaders(),
             },
             body: JSON.stringify(ruleData),
         });

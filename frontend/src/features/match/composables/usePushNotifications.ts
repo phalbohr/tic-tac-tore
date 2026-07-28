@@ -1,4 +1,5 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { getCsrfHeaders } from '../../../utils/cookieUtils'
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   try {
@@ -42,7 +43,7 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.register('/sw.js')
       await navigator.serviceWorker.ready
 
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa40yYvrx1m0A7Vn65a7p5y'
+      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BE_jfHrmkFYm52tuVzmcTbD2KvuUg1uFGGbZAR9Y_8Ha6V8SeyH8UJG-h6nad1za6C6T1uUEyCCGIyP35waNJa0'
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource
 
       let subscription = await registration.pushManager.getSubscription()
@@ -59,7 +60,7 @@ export function usePushNotifications() {
 
       const res = await fetch('/api/v1/notifications/subscribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         credentials: 'include',
         body: JSON.stringify({
           endpoint: subscription.endpoint,

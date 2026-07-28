@@ -118,7 +118,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             <AvatarBase :avatar="authStore.profile.avatar" />
             <div
               v-if="pendingCount > 0"
-              class="absolute top-1 right-1 bg-error text-on-error rounded-full px-2 py-0.5 text-xs font-bold shadow-md"
+              class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none"
               data-testid="pending-badge-counter"
             >
               {{ pendingCount }}
