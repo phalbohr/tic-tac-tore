@@ -6,10 +6,7 @@ test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
     const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
     const email = `e2e-lang-user-${randomSuffix}@example.com`;
     const nickname = `E2ELangUser${randomSuffix}`;
-    await page.request.get('/api/auth/test-login', {
-      params: { email, nickname }
-    });
-
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
     await page.goto('/cabinet');
     
     // When
@@ -25,9 +22,7 @@ test.describe('Profile Management in Personal Cabinet (ATDD)', () => {
     const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
     const email = `e2e-cooldown-user-${randomSuffix}@example.com`;
     const nickname = `E2ECooldownUser${randomSuffix}`;
-    await page.request.get('/api/auth/test-login', {
-      params: { email, nickname }
-    });
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
 
     const newNick = `NewNick${randomSuffix}`;
     const anotherNick = `AnotherNick${randomSuffix}`;

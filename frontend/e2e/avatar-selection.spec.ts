@@ -13,7 +13,7 @@ test.describe('Avatar Selection & Management E2E', () => {
       }
       await route.continue();
     });
-    await page.request.get('/api/auth/test-login', { params: { email, nickname } });
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
     await page.goto('/cabinet');
 
     await page.getByTestId('change-avatar-button').click();

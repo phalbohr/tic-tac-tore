@@ -82,7 +82,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy TTT_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4173 ./mvnw spring-boot:run',
+      command: `cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy TTT_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4173 TTT_OAUTH2_REDIRECT_URI=${process.env.CI ? 'http://localhost:4173/oauth2/redirect' : 'http://localhost:3000/oauth2/redirect'} ./mvnw spring-boot:run`,
       url: 'http://localhost:8080/actuator/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
