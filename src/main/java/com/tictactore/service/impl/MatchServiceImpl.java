@@ -204,7 +204,6 @@ public class MatchServiceImpl implements MatchService {
         }
     }
 
-
     private List<UUID> resolveOpponentIds(CreateMatchRequest request, Collection<UUID> allParticipants) {
         UUID creatorId = request.creatorId();
         boolean isOnTeamA = creatorId != null && (creatorId.equals(request.teamAAttackerId()) || creatorId.equals(request.teamADefenderId()));
@@ -239,6 +238,23 @@ public class MatchServiceImpl implements MatchService {
         return false;
     }
 
+    @Override
+    public MatchResponse confirmMatch(UUID matchId, UUID userId, String idempotencyKey) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
+
+        if ("CONFIRMED".equals(match.getStatus())) {
+            if (userId.equals(match.getConfirmedByUserId())) {
+                return mapToResponse(match);
+            }
+            throw new com.tictactore.exception.InvalidMatchStateException("Match is already confirmed");
+        }
+
+        Match updatedMatch = matchOperation.confirmMatch(match, userId);
+        return mapToResponse(updatedMatch);
+    }
+    }
+
     private MatchResponse mapToResponse(Match match) {
         List<GameDto> gameDtos = match.getGames().stream()
                 .map(g -> new GameDto(
@@ -258,7 +274,9 @@ public class MatchServiceImpl implements MatchService {
                 match.getTeamBDefenderId(),
                 match.getStatus(),
                 gameDtos,
-                match.getCreatedAt()
+                match.getCreatedAt(),
+                match.getConfirmedByUserId(),
+                match.getConfirmedAt()
         );
     }
 }

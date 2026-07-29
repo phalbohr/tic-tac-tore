@@ -10,12 +10,14 @@ import TutorialCarousel from '@/components/TutorialCarousel.vue'
 import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
+import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirmationStore'
 import { ref } from 'vue'
 
 const { t } = useI18n()
@@ -25,6 +27,9 @@ const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
 const { pendingCount } = usePendingMatches()
+const confirmationStore = useMatchConfirmationStore()
+
+const pendingMatches = ref<PendingMatchItem[]>([])
 
 function handleMatchComplete() {
   showNewMatch.value = false
@@ -34,6 +39,14 @@ function handleMatchComplete() {
 function handleUndo() {
   matchStore.cancelSubmissionTimer()
   showNewMatch.value = true
+}
+
+function handleConfirmMatch(matchId: string) {
+  confirmationStore.commitConfirmation(matchId)
+}
+
+function handleConfirmationUndo() {
+  confirmationStore.cancelConfirmationTimer()
 }
 
 function handleDismissError() {
@@ -133,6 +146,13 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
+        <PendingMatches
+          v-if="!showNewMatch && pendingMatches.length > 0"
+          :pending-matches="pendingMatches"
+          :pending-confirmation-id="confirmationStore.pendingConfirmation?.matchId"
+          @confirm="handleConfirmMatch"
+        />
+
         <template v-if="statsStore.isLoading">
           <div class="animate-pulse flex flex-col items-center w-full gap-4">
             <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
@@ -170,6 +190,14 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         :countdown="matchStore.submissionCountdown"
         :is-offline="matchStore.isOfflinePending"
         @undo="handleUndo"
+      />
+
+      <UndoToast
+        v-if="confirmationStore.isPending || confirmationStore.isOfflinePending"
+        :countdown="confirmationStore.countdown"
+        :is-offline="confirmationStore.isOfflinePending"
+        :message="t('match.confirmedTapUndo')"
+        @undo="handleConfirmationUndo"
       />
 
       <ErrorToast

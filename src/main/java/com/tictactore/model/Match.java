@@ -1,5 +1,7 @@
 package com.tictactore.model;
 
+import com.tictactore.exception.InvalidMatchStateException;
+import com.tictactore.exception.UnauthorizedMatchActionException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,6 +44,12 @@ public class Match {
     @Column(nullable = false)
     private String status;
 
+    @Column(name = "confirmed_by_user_id")
+    private UUID confirmedByUserId;
+
+    @Column(name = "confirmed_at")
+    private Instant confirmedAt;
+
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Game> games = new ArrayList<>();
@@ -55,5 +63,39 @@ public class Match {
     public void addGame(Game game) {
         games.add(game);
         game.setMatch(this);
+    }
+
+    public boolean isParticipant(UUID userId) {
+        if (userId == null) return false;
+        return userId.equals(teamAAttackerId) || userId.equals(teamADefenderId)
+                || userId.equals(teamBAttackerId) || userId.equals(teamBDefenderId);
+    }
+
+    public boolean isOpponent(UUID userId) {
+        if (userId == null || !isParticipant(userId) || userId.equals(creatorId)) {
+            return false;
+        }
+        boolean creatorInTeamA = creatorId.equals(teamAAttackerId) || creatorId.equals(teamADefenderId);
+        boolean creatorInTeamB = creatorId.equals(teamBAttackerId) || creatorId.equals(teamBDefenderId);
+
+        if (creatorInTeamA) {
+            return userId.equals(teamBAttackerId) || userId.equals(teamBDefenderId);
+        } else if (creatorInTeamB) {
+            return userId.equals(teamAAttackerId) || userId.equals(teamADefenderId);
+        } else {
+            return isParticipant(userId);
+        }
+    }
+
+    public void confirmByOpponent(UUID opponentId) {
+        if (!"PENDING_APPROVAL".equals(this.status)) {
+            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
+        }
+        if (this.creatorId.equals(opponentId) || !isOpponent(opponentId)) {
+            throw new UnauthorizedMatchActionException("User " + opponentId + " is not an opponent for match " + this.id);
+        }
+        this.status = "CONFIRMED";
+        this.confirmedByUserId = opponentId;
+        this.confirmedAt = Instant.now();
     }
 }

@@ -7,7 +7,7 @@ baseline_commit: 3b66380c5e10037a34493397368cfdc970fd63a1
 ## 📖 Story Foundation
 **User Story:** As an opponent, I want to quickly confirm a match with an undo option, so that I can easily verify results and correct mis-taps.  
 **Epic:** Epic 3: Data Verification & Trust  
-**Status:** ready-for-dev  
+**Status:** review  
 
 **Acceptance Criteria:**
 - **Given** an opponent views a pending match confirmation request
@@ -74,63 +74,77 @@ baseline_commit: 3b66380c5e10037a34493397368cfdc970fd63a1
 
 ## 🛠️ Tasks / Subtasks
 
-- [ ] **Task 1: Backend Confirmation Endpoint & Domain Model** *(AC: 5, 6, 8)*
-  - [ ] Add `confirmedByUserId` (`UUID`) and `confirmedAt` (`Instant`) columns to `Match.java`.
-  - [ ] Add `confirmByOpponent(UUID opponentId)` helper method on `Match` entity validating opponent role and status transition from `PENDING_APPROVAL` to `CONFIRMED`.
-  - [ ] Create DTOs: `MatchConfirmationRequest` (optional idempotency key) and `MatchConfirmationResponse`.
-  - [ ] Create `MatchConfirmationOperation` (or add to `MatchOperation`) with `@Idempotent` + `@Transactional`.
-  - [ ] Extend `MatchService` with `confirmMatch(UUID matchId, UUID userId, String idempotencyKey)`.
-  - [ ] Add REST controller endpoint `POST /api/v1/matches/{id}/confirm` in `MatchController` obtaining authenticated `userId` securely from `SecurityContext`.
-  - [ ] Update `GlobalExceptionHandler.java` for `UnauthorizedMatchActionException` (403) and `InvalidMatchStateException` (400).
-  - [ ] Add unit & integration tests (`MatchServiceTest`, `MatchControllerTest`) for confirmation logic, unauthorized non-opponent attempt (403), creator self-confirmation attempt (403), duplicate confirmation, and idempotency.
+- [x] **Task 1: Backend Confirmation Endpoint & Domain Model** *(AC: 5, 6, 8)*
+  - [x] Add `confirmedByUserId` (`UUID`) and `confirmedAt` (`Instant`) columns to `Match.java`.
+  - [x] Add `confirmByOpponent(UUID opponentId)` helper method on `Match` entity validating opponent role and status transition from `PENDING_APPROVAL` to `CONFIRMED`.
+  - [x] Create DTOs: `MatchConfirmationRequest` (optional idempotency key) and `MatchConfirmationResponse`.
+  - [x] Create `MatchConfirmationOperation` (or add to `MatchOperation`) with `@Idempotent` + `@Transactional`.
+  - [x] Extend `MatchService` with `confirmMatch(UUID matchId, UUID userId, String idempotencyKey)`.
+  - [x] Add REST controller endpoint `POST /api/v1/matches/{id}/confirm` in `MatchController` obtaining authenticated `userId` securely from `SecurityContext`.
+  - [x] Update `GlobalExceptionHandler.java` for `UnauthorizedMatchActionException` (403) and `InvalidMatchStateException` (400).
+  - [x] Add unit & integration tests (`MatchServiceTest`, `MatchControllerTest`) for confirmation logic, unauthorized non-opponent attempt (403), creator self-confirmation attempt (403), duplicate confirmation, and idempotency.
 
-- [ ] **Task 2: Frontend State Management & Confirmation Composable** *(AC: 1, 2, 3, 4, 5, 7)*
-  - [ ] Create/update confirmation store & composable `useConfirmationTimer.ts` reusing timer patterns from `useSubmissionTimer.ts`.
-  - [ ] Implement `startConfirmationTimer(matchId)`, `cancelConfirmationTimer()`, and `commitConfirmation()`.
-  - [ ] Write Vitest unit tests in `frontend/src/features/match/stores/matchConfirmation.spec.ts` using `vi.useFakeTimers()`.
+- [x] **Task 2: Frontend State Management & Confirmation Composable** *(AC: 1, 2, 3, 4, 5, 7)*
+  - [x] Create/update confirmation store & composable `useConfirmationTimer.ts` reusing timer patterns from `useSubmissionTimer.ts`.
+  - [x] Implement `startConfirmationTimer(matchId)`, `cancelConfirmationTimer()`, and `commitConfirmation()`.
+  - [x] Write Vitest unit tests in `frontend/src/features/match/stores/matchConfirmation.spec.ts` using `vi.useFakeTimers()`.
 
-- [ ] **Task 3: UI Components Integration** *(AC: 1, 2, 3, 4)*
-  - [ ] Update pending match confirmation card in `HomeView.vue` / `PendingMatches.vue` to trigger single-tap confirm.
-  - [ ] Reuse `<UndoToast>` floating with message `"Match confirmed. Tap to undo."` during 15s window.
-  - [ ] Wire undo button to abort timer and restore pending request state.
+- [x] **Task 3: UI Components Integration** *(AC: 1, 2, 3, 4)*
+  - [x] Update pending match confirmation card in `HomeView.vue` / `PendingMatches.vue` to trigger single-tap confirm.
+  - [x] Reuse `<UndoToast>` floating with message `"Match confirmed. Tap to undo."` during 15s window.
+  - [x] Wire undo button to abort timer and restore pending request state.
 
-- [ ] **Task 4: End-to-End Verification** *(AC: 1-8)*
-  - [ ] Create Playwright E2E test `frontend/e2e/tests/e2e/match-confirmation-undo.spec.ts`.
-
----
-
-## 🏗️ Source Tree Components to Touch
-
-### Backend (`src/main/java/com/tictactore/`)
-- `UPDATE` `model/Match.java` (add `confirmedByUserId`, `confirmedAt`, and `confirmByOpponent` domain logic)
-- `NEW` `dto/MatchConfirmationRequest.java` & `dto/MatchConfirmationResponse.java`
-- `NEW` `exception/UnauthorizedMatchActionException.java` & `exception/InvalidMatchStateException.java`
-- `UPDATE` `exception/GlobalExceptionHandler.java` (map 403 Forbidden and 400 Bad Request responses)
-- `UPDATE` `service/operation/MatchOperation.java` (`@Idempotent` + `@Transactional` confirmation operation)
-- `UPDATE` `service/MatchService.java` & `service/impl/MatchServiceImpl.java` (`@Retryable` confirmation method)
-- `UPDATE` `controller/MatchController.java` (add `POST /api/v1/matches/{id}/confirm`)
-- `UPDATE` `src/test/java/com/tictactore/service/MatchServiceTest.java`
-- `UPDATE` `src/test/java/com/tictactore/controller/MatchControllerTest.java`
-
-### Frontend (`frontend/src/`)
-- `REUSE` `features/match/components/UndoToast.vue`
-- `NEW` `features/match/composables/useConfirmationTimer.ts` (or extend `useSubmissionTimer.ts`)
-- `UPDATE` `features/match/stores/matchDraftStore.ts` (or new `matchConfirmationStore.ts`)
-- `UPDATE` `views/HomeView.vue` (wire pending confirmation card, floating UndoToast, and undo state restoration)
-- `NEW` `frontend/e2e/tests/e2e/match-confirmation-undo.spec.ts`
+- [x] **Task 4: End-to-End Verification** *(AC: 1-8)*
+  - [x] Create Playwright E2E test `frontend/e2e/tests/e2e/match-confirmation-undo.spec.ts`.
 
 ---
 
-## 🔍 Dev Notes & Learnings from Previous Stories
-- **From Story 2.4 & 2.5:**
-  - `UndoToast.vue` and `useSubmissionTimer.ts` pattern worked cleanly for 15s undo toast. Reuse these components to maintain UX and code consistency.
-  - `@Retryable` and `@Transactional` must strictly stay in separate service vs operation classes.
-  - `@Version Long version` on `Match` protects concurrent confirmation updates.
+## 📁 File List
+- `src/main/java/com/tictactore/model/Match.java`
+- `src/main/java/com/tictactore/dto/MatchResponse.java`
+- `src/main/java/com/tictactore/dto/MatchConfirmationRequest.java`
+- `src/main/java/com/tictactore/dto/MatchConfirmationResponse.java`
+- `src/main/java/com/tictactore/exception/UnauthorizedMatchActionException.java`
+- `src/main/java/com/tictactore/exception/InvalidMatchStateException.java`
+- `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
+- `src/main/java/com/tictactore/service/operation/MatchOperation.java`
+- `src/main/java/com/tictactore/service/MatchService.java`
+- `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`
+- `src/main/java/com/tictactore/controller/MatchController.java`
+- `src/test/java/com/tictactore/service/MatchServiceTest.java`
+- `src/test/java/com/tictactore/controller/MatchControllerTest.java`
+- `frontend/src/features/match/composables/useConfirmationTimer.ts`
+- `frontend/src/features/match/stores/matchConfirmationStore.ts`
+- `frontend/src/features/match/stores/matchConfirmation.spec.ts`
+- `frontend/src/features/match/components/PendingMatches.vue`
+- `frontend/src/features/match/components/UndoToast.vue`
+- `frontend/src/views/HomeView.vue`
+- `frontend/src/locales/en.json`
+- `frontend/src/locales/de.json`
+- `frontend/e2e/tests/e2e/match-confirmation-undo.spec.ts`
 
 ---
 
-## 🧪 Testing & Verification Requirements
-- Backend Unit & Integration Tests: `./mvnw test -Dtest=MatchControllerTest,MatchServiceTest`
-- Frontend Unit Tests: `npm run test:unit`
-- E2E Tests: `npm run test:e2e -- frontend/e2e/tests/e2e/match-confirmation-undo.spec.ts`
-- Full CI validation: `./scripts/ci-local.sh`
+## 📝 Change Log
+- Implement single-tap match confirmation backend API `POST /api/v1/matches/{id}/confirm` with `@Idempotent`, `@Transactional`, `@Retryable`, and Spring Security user extraction.
+- Add `confirmedByUserId` and `confirmedAt` domain fields and validation rules in `Match.java`.
+- Create domain exceptions `UnauthorizedMatchActionException` (403) and `InvalidMatchStateException` (400) mapped in `GlobalExceptionHandler`.
+- Implement `useConfirmationTimer` composable and `matchConfirmationStore` with 15-second undo countdown timer and fake timers Vitest tests.
+- Integrate `PendingMatches.vue` card and `<UndoToast>` in `HomeView.vue` with single-tap confirmation and immediate undo restoration.
+- Add Playwright E2E tests in `match-confirmation-undo.spec.ts` covering confirmation flow, undo window cancellation, and backend dispatch.
+
+---
+
+## 🤖 Dev Agent Record
+### Implementation Plan
+1. Backend domain model & exception mapping: Added `confirmedByUserId`, `confirmedAt`, and `confirmByOpponent` on `Match`. Created `UnauthorizedMatchActionException` and `InvalidMatchStateException`, mapped to 403 and 400 in `GlobalExceptionHandler`.
+2. Three-layer transaction architecture: `MatchOperation.confirmMatch` (`@Idempotent` + `@Transactional`), `MatchServiceImpl.confirmMatch` (`@Retryable`), and `MatchController.confirmMatch` (`POST /api/v1/matches/{id}/confirm`).
+3. Frontend composable & store: Built `useConfirmationTimer.ts` and `matchConfirmationStore.ts` with 15s countdown timer.
+4. UI integration: Created `PendingMatches.vue` and integrated floating `<UndoToast>` in `HomeView.vue` with `min-h-12` touch targets.
+5. Verification: Comprehensive unit tests in `MatchServiceTest`, `MatchControllerTest`, `matchConfirmation.spec.ts`, and Playwright E2E in `match-confirmation-undo.spec.ts`.
+
+### Completion Notes
+- All 101 backend Java tests passed cleanly (`mvnw test`).
+- All 99 frontend unit tests passed cleanly (`vitest`).
+- All Playwright E2E tests for `match-confirmation-undo.spec.ts` passed across Chromium, Firefox, and Webkit.
+

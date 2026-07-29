@@ -20,12 +20,14 @@
     "close": "Schließen"
   },
   "match": {
-    "submit": "Spiel einreichen",
+    "submit": "Spiel eintragen",
+    "confirm": "Bestätigen",
     "pending": "Ausstehende Bestätigung",
     "approved": "Bestätigt",
     "rejected": "Abgelehnt",
-    "willRetryOnline": "Erneuter Versuch wenn online",
+    "willRetryOnline": "Wird bei Wiederverbindung erneut versucht",
     "submittedTapUndo": "Spiel eingereicht. Tippen zum Rückgängigmachen.",
+    "confirmedTapUndo": "Match confirmed. Tap to undo.",
     "undo": "Rückgängig",
     "swapTeam1": "Team 1 tauschen",
     "swapTeam2": "Team 2 tauschen"

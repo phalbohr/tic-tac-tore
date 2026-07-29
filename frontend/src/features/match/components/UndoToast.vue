@@ -5,6 +5,7 @@ import BaseButton from '@/core/components/BaseButton.vue'
 defineProps<{
   countdown: number
   isOffline?: boolean
+  message?: string
 }>()
 
 const emit = defineEmits<{
@@ -26,7 +27,7 @@ const { t } = useI18n()
           {{ countdown }}s
         </div>
         <span class="text-sm font-medium">
-          {{ isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo') }}
+          {{ message ? message : (isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo')) }}
         </span>
       </div>
 
@@ -34,7 +35,7 @@ const { t } = useI18n()
         v-if="!isOffline"
         variant="primary"
         @click="emit('undo')"
-        class="!h-10 px-4 text-xs font-bold"
+        class="!h-10 px-4 text-xs font-bold min-h-12 min-w-[48px]"
       >
         {{ t('match.undo') }}
       </BaseButton>

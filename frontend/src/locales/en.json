@@ -21,11 +21,13 @@
   },
   "match": {
     "submit": "Submit Match",
+    "confirm": "Confirm",
     "pending": "Pending Confirmation",
     "approved": "Approved",
     "rejected": "Rejected",
     "willRetryOnline": "Will retry when online",
     "submittedTapUndo": "Match submitted. Tap to undo.",
+    "confirmedTapUndo": "Match confirmed. Tap to undo.",
     "undo": "Undo",
     "swapTeam1": "Swap Team 1",
     "swapTeam2": "Swap Team 2"
