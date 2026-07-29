@@ -16,7 +16,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "loading": "Lädt...",
-    "error": "Etwas ist schiefgelaufen"
+    "error": "Etwas ist schiefgelaufen",
+    "close": "Schließen"
   },
   "match": {
     "submit": "Spiel einreichen",

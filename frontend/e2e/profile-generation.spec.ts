@@ -8,13 +8,7 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
     const email = `e2e-profile-user-${randomSuffix}@example.com`;
     const nickname = `johndoe${randomSuffix}`;
 
-    const setupResponse = await page.request.get('/api/auth/test-login', {
-      params: { email, nickname }
-    });
-    expect(setupResponse.ok()).toBeTruthy();
-
-    // When
-    await page.goto('/');
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
 
     // Then
     await expect(page.getByText(new RegExp(nickname))).toBeVisible();

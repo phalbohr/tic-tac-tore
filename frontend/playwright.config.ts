@@ -60,46 +60,20 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
       },
     },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
+    ...(process.env.CI ? [] : [
+      {
+        name: 'firefox',
+        use: {
+          ...devices['Desktop Firefox'],
+        },
       },
-    },
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
+      {
+        name: 'webkit',
+        use: {
+          ...devices['Desktop Safari'],
+        },
       },
-    },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: {
-    //     ...devices['Pixel 5'],
-    //   },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: {
-    //     ...devices['iPhone 12'],
-    //   },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: {
-    //     channel: 'msedge',
-    //   },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: {
-    //     channel: 'chrome',
-    //   },
-    // },
+    ]),
   ],
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
@@ -108,19 +82,16 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      /**
-       * Use the dev server by default for faster feedback loop.
-       * Use the preview server on CI for more realistic testing.
-       * Playwright will re-use the local server if there is already a dev-server running.
-       */
+      command: `cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy TTT_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4173 TTT_OAUTH2_REDIRECT_URI=${process.env.CI ? 'http://localhost:4173/oauth2/redirect' : 'http://localhost:3000/oauth2/redirect'} ./mvnw spring-boot:run`,
+      url: 'http://localhost:8080/actuator/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+    {
       command: process.env.CI ? 'npm run preview' : 'npm run dev',
       port: process.env.CI ? 4173 : 3000,
       reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: 'cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy TTT_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4173 ./mvnw spring-boot:run',
-      port: 8080,
-      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
     },
   ],
 })

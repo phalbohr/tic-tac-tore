@@ -10,7 +10,7 @@ test.describe('Story 2.3: Score Entry & Automatic Completion (ATDD)', () => {
       ] });
     });
     // Default mock for rules to allow proceeding if not overridden
-    await page.route('**/api/rules/*', async route => {
+    await page.route('**/{api/rules/*,api/v1/rule-configurations*}', async route => {
       await route.fulfill({ json: { id: 'test-rule', scoreLimit: 10, winsNeeded: 1 } });
     });
     await page.route('**/api/users/me/preferences/last-rule-system', async route => {

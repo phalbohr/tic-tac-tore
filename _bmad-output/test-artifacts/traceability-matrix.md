@@ -5,9 +5,9 @@ lastSaved: '2026-07-25T17:50:00Z'
 coverageBasis: 'acceptance_criteria'
 oracleConfidence: 'high'
 oracleResolutionMode: 'formal_requirements'
-oracleSources: ['_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md']
+oracleSources: ['_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md', '_bmad-output/test-artifacts/nfr-assessment.md', '_bmad-output/test-artifacts/test-design-qa.md']
 externalPointerStatus: 'not_used'
-tempCoverageMatrixPath: '/Users/ppolukhin/.gemini/antigravity-cli/brain/fc14d127-ac13-426c-b87f-aea334c01d76/scratch/tea-trace-coverage-matrix-20260725-2-4.json'
+tempCoverageMatrixPath: '{temp-coverage-matrix-output}'
 ---
 
 # Traceability Report - Match Submission with Undo Window

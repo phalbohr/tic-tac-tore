@@ -46,6 +46,9 @@ class MatchServiceTest {
     @Mock
     private MatchOperation matchOperation;
 
+    @Mock
+    private PushNotificationService pushNotificationService;
+
     @InjectMocks
     private MatchServiceImpl matchService;
 
@@ -298,6 +301,163 @@ class MatchServiceTest {
             verifyNoInteractions(matchOperation);
         }
 
+    @Nested
+    @DisplayName("Duplicate Detection Tests")
+    class DuplicateDetectionTests {
+
+        @Test
+        @DisplayName("[P1] Should set isDuplicateWarning = true when identical match exists on same UTC day")
+        void shouldSetDuplicateWarningWhenIdenticalMatchExists() {
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "dup-1",
+                    p1, p1, null, p3, null,
+                    List.of(new GameDto(10, 8, null, null, null, null))
+            );
+
+            Match savedMatch = Match.builder()
+                    .id(UUID.randomUUID())
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p3)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            Match duplicate = Match.builder()
+                    .id(UUID.randomUUID())
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p3)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findByIdempotencyKey("dup-1")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p3).build()
+            ));
+            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(List.of(duplicate));
+
+            matchService.createMatch(request);
+
+            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
+        }
+
+        @Test
+        @DisplayName("[P1] Should set isDuplicateWarning = false when no duplicates exist on same day")
+        void shouldNotSetDuplicateWarningWhenNoDuplicates() {
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "dup-2",
+                    p1, p1, null, p3, null,
+                    List.of(new GameDto(10, 8, null, null, null, null))
+            );
+
+            Match savedMatch = Match.builder()
+                    .id(UUID.randomUUID())
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p3)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findByIdempotencyKey("dup-2")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p3).build()
+            ));
+            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(List.of(savedMatch));
+
+            matchService.createMatch(request);
+
+            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+        }
+
+        @Test
+        @DisplayName("[P1] Should resolve opposing team as recipients in 2v2 duplicate detection")
+        void shouldResolveOpposingTeamAsRecipientsIn2v2() {
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "dup-3",
+                    p1,
+                    p1, p2,
+                    p3, p4,
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+            );
+
+            when(matchRepository.findByIdempotencyKey("dup-3")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build(),
+                    User.builder().id(p3).build(),
+                    User.builder().id(p4).build()
+            ));
+
+            Match savedMatch = Match.builder()
+                    .id(UUID.randomUUID())
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            Match duplicate = Match.builder()
+                    .id(UUID.randomUUID())
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(List.of(duplicate));
+
+            matchService.createMatch(request);
+
+            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
+        }
+
+        @Test
+        @DisplayName("[P1] Should not fail match creation when push notification dispatch throws exception")
+        void shouldNotFailMatchCreationOnPushError() {
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "dup-4",
+                    p1, p1, null, p3, null,
+                    List.of(new GameDto(10, 8, null, null, null, null))
+            );
+
+            when(matchRepository.findByIdempotencyKey("dup-4")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p3).build()
+            ));
+            when(matchOperation.saveMatch(any())).thenAnswer(inv -> {
+                Match m = inv.getArgument(0);
+                m.setId(UUID.randomUUID());
+                return m;
+            });
+            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                    .thenReturn(List.of());
+            doThrow(new RuntimeException("Push service down")).when(pushNotificationService).sendConfirmationRequest(any(), anyList(), anyBoolean());
+
+            MatchResponse response = matchService.createMatch(request);
+
+            assertThat(response).isNotNull();
+            assertThat(response.status()).isEqualTo("PENDING_APPROVAL");
+        }
+    }
+
         private void givenFourPlayersExist() {
             when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             when(userRepository.findAllById(any())).thenReturn(List.of(
@@ -307,5 +467,15 @@ class MatchServiceTest {
                     User.builder().id(p4).build()
             ));
         }
+    }
+
+    private void givenFourPlayersExist() {
+        when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+        when(userRepository.findAllById(any())).thenReturn(List.of(
+                User.builder().id(p1).build(),
+                User.builder().id(p2).build(),
+                User.builder().id(p3).build(),
+                User.builder().id(p4).build()
+        ));
     }
 }

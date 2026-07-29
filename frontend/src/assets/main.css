@@ -9,7 +9,12 @@
   --color-secondary: #ffb59f;
   --color-primary-container: #2d5a27;
   --color-on-surface-variant: #c2c9bb;
+  --color-error: #ff5449;
+  --color-on-error: #ffffff;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
   
   --font-headline: "Space Grotesk", sans-serif;
   --font-body: "Manrope", sans-serif;
 }
+

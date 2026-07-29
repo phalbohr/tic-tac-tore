@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
+import { getCsrfHeaders } from '../../../utils/cookieUtils'
 
 export enum MatchType {
   ONE_VS_ONE = '1v1',
@@ -73,17 +74,32 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   async function loadRuleConfig(signal?: AbortSignal) {
     try {
-      const res = await fetch(`/api/rules/${encodeURIComponent(ruleSystem.value)}`, { signal })
+      const res = await fetch(`/api/v1/rule-configurations?type=PRESET`, { signal })
       if (res.ok) {
         const data = await res.json()
-        if (typeof data.scoreLimit !== 'number' && typeof data.scoreLimit !== 'string') {
-           throw new Error('Invalid numeric fields in rule config')
-        }
-        ruleConfig.value = { 
-          scoreLimit: Number(data.scoreLimit), 
-          gameLimit: Number(data.gameLimit), 
-          winsNeeded: Number(data.winsNeeded),
-          winByTwo: Boolean(data.winByTwo)
+        if (Array.isArray(data)) {
+          const preset = data.find((p: any) => p.name?.toUpperCase() === ruleSystem.value.toUpperCase() || p.id === ruleSystem.value) || data[0]
+          if (preset) {
+            const gameLimit = Number(preset.gameLimit ?? 3)
+            ruleConfig.value = {
+              scoreLimit: Number(preset.goalLimit ?? preset.scoreLimit ?? 10),
+              gameLimit: gameLimit,
+              winsNeeded: Number(preset.winsNeeded ?? Math.floor(gameLimit / 2) + 1),
+              winByTwo: Boolean(preset.winByTwo)
+            }
+          } else {
+            throw new Error('Preset not found')
+          }
+        } else {
+          if (typeof data.scoreLimit !== 'number' && typeof data.scoreLimit !== 'string') {
+             throw new Error('Invalid numeric fields in rule config')
+          }
+          ruleConfig.value = { 
+            scoreLimit: Number(data.scoreLimit), 
+            gameLimit: Number(data.gameLimit), 
+            winsNeeded: Number(data.winsNeeded),
+            winByTwo: Boolean(data.winByTwo)
+          }
         }
       } else {
         throw new Error('API failed')
@@ -264,7 +280,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': item.idempotencyKey
+          'Idempotency-Key': item.idempotencyKey,
+          ...getCsrfHeaders()
         },
         body: JSON.stringify(item.payload)
       })

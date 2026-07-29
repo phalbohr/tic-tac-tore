@@ -6,7 +6,7 @@ test.describe('Account Deletion with Anonymization', () => {
     const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
     const email = `e2e-delete-user-${randomSuffix}@example.com`;
     const nickname = `E2EDeleteUser${randomSuffix}`;
-    await page.request.get('/api/auth/test-login', { params: { email, nickname } });
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
     await page.goto('/cabinet');
 
     // When
@@ -27,7 +27,7 @@ test.describe('Account Deletion with Anonymization', () => {
     const randomSuffix = crypto.randomUUID().replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
     const email = `e2e-delete-fail-${randomSuffix}@example.com`;
     const nickname = `E2EDeleteFail${randomSuffix}`;
-    await page.request.get('/api/auth/test-login', { params: { email, nickname } });
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}`);
     
     // Network-first pattern
     await page.route('**/api/v1/profile/me', async route => {

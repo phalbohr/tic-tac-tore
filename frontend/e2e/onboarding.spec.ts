@@ -8,12 +8,7 @@ test.describe('Onboarding Tutorial Flow', () => {
     const nickname = `E2EOnboardingUser${randomSuffix}`;
     
     // Explicitly set tutorial completed false for test robustness, though default is false
-    await page.request.get('/api/auth/test-login', {
-      params: { email, nickname, tutorialCompleted: false }
-    });
-
-    // When
-    await page.goto('/');
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}&tutorialCompleted=false`);
 
     // Then - Wait for the tutorial overlay to appear
     const tutorialCarousel = page.getByTestId('tutorial-carousel');
@@ -41,12 +36,7 @@ test.describe('Onboarding Tutorial Flow', () => {
     const email = `e2e-onboarding-user2-${randomSuffix}@example.com`;
     const nickname = `E2EOnboardingUserTwo${randomSuffix}`;
 
-    await page.request.get('/api/auth/test-login', {
-      params: { email, nickname, tutorialCompleted: false }
-    });
-
-    // When
-    await page.goto('/');
+    await page.goto(`/api/auth/test-login?email=${encodeURIComponent(email)}&nickname=${encodeURIComponent(nickname)}&tutorialCompleted=false`);
 
     // Then - Wait for the tutorial overlay to appear
     const tutorialCarousel = page.getByTestId('tutorial-carousel');

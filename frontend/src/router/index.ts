@@ -30,6 +30,16 @@ const router = createRouter({
       name: 'new-match',
       component: () => import('@/components/RuleSystemSelection.vue'),
     },
+    {
+      path: '/match/:id/review',
+      name: 'match-review',
+      component: () => import('@/features/match/views/MatchReviewStub.vue'),
+    },
+    {
+      path: '/matches',
+      name: 'matches',
+      component: () => import('@/views/HomeView.vue'),
+    },
   ],
 })
 
