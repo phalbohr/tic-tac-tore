@@ -2,8 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Story 3.1: Confirmation Requests & Push Notifications E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.request.get('/api/auth/test-login?email=test@example.com&nickname=testuser')
-    await page.goto('/')
+    await page.goto('/api/auth/test-login?email=test@example.com&nickname=testuser')
   })
 
   test('[P0] should resolve deep-link match review stub cleanly without 404s', async ({ page }) => {
