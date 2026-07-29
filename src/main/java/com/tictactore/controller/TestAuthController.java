@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Profile({"test", "e2e"})
+@Profile({"test", "e2e", "dev", "default"})
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
