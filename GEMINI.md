@@ -121,6 +121,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - **Test Environment Parity**: Backend tests must not blindly mock critical startup configuration (e.g., via `application.properties` in `src/test/resources`). If an environment variable is required for production startup, the application must handle its absence gracefully (defaults), or the test must accurately simulate its absence.
 - **Boundary Testing**: Features involving frontend-to-backend proxies, static asset bundling, or OAuth redirects cannot be validated by unit tests alone. You must either write an E2E test (Playwright) or manually verify the integration using `curl`/shell scripts before marking the task complete.
 - **No Premature Completion**: Task checkboxes in stories or plans MUST ONLY be marked as complete AFTER a corresponding test verifying the functionality has been written and successfully passed.
+- **No Leaked Secrets**: NEVER hardcode or commit real private keys, API secrets, tokens, or credentials into repository files or default configuration fallbacks. Always use environment variables (`${VAR:dummy_placeholder}`) and store production secrets exclusively in secure secret managers / GitHub Secrets.
 - **Real Service Verification & JWT**: If verifying a hypothesis via an actual request to a real service is more precise and cheaper than analyzing code and theorizing, but fails due to a required JWT, explicitly ask the user for the JWT or retrieve it yourself if simpler, without modifying code.
 
 ## BMAD Workflow Rules
