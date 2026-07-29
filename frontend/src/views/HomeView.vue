@@ -59,16 +59,38 @@ watch(() => matchStore.submitError, (newVal) => {
   }
 })
 
+async function fetchPendingMatches() {
+  if (!authStore.isAuthenticated) return
+  try {
+    const res = await fetch('/api/v1/matches/pending')
+    if (res.ok) {
+      const data = await res.json()
+      const list = Array.isArray(data) ? data : (data.matches || [])
+      pendingMatches.value = list.map((m: any) => ({
+        id: m.id,
+        creatorNickname: m.creatorNickname || 'Opponent',
+        teamAScore: m.games?.[0]?.teamAScore,
+        teamBScore: m.games?.[0]?.teamBScore,
+        createdAt: m.createdAt
+      }))
+    }
+  } catch (e) {
+    console.warn('Failed to fetch pending matches', e)
+  }
+}
+
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
     await statsStore.fetchStats()
+    await fetchPendingMatches()
   }
 })
 
 watch(() => authStore.isAuthenticated, async (newVal) => {
   if (newVal && !authStore.profile) {
     await authStore.fetchProfile()
+    await fetchPendingMatches()
   }
 })
 </script>

@@ -253,7 +253,6 @@ public class MatchServiceImpl implements MatchService {
         Match updatedMatch = matchOperation.confirmMatch(match, userId);
         return mapToResponse(updatedMatch);
     }
-    }
 
     private MatchResponse mapToResponse(Match match) {
         List<GameDto> gameDtos = match.getGames().stream()

@@ -17,6 +17,8 @@ import com.tictactore.model.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.UUID;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
@@ -25,8 +27,23 @@ public class MatchController {
     private final MatchService matchService;
 
     @PostMapping
-    public ResponseEntity<MatchResponse> createMatch(@Valid @RequestBody CreateMatchRequest request) {
-        MatchResponse response = matchService.createMatch(request);
+    public ResponseEntity<MatchResponse> createMatch(
+            @Valid @RequestBody CreateMatchRequest request,
+            @AuthenticationPrincipal User principal
+    ) {
+        CreateMatchRequest finalRequest = request;
+        if (principal != null && request.creatorId() == null) {
+            finalRequest = new CreateMatchRequest(
+                    request.idempotencyKey(),
+                    principal.getId(),
+                    request.teamAAttackerId(),
+                    request.teamADefenderId(),
+                    request.teamBAttackerId(),
+                    request.teamBDefenderId(),
+                    request.games()
+            );
+        }
+        MatchResponse response = matchService.createMatch(finalRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

@@ -19,6 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -185,6 +188,28 @@ class MatchControllerTest {
 
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm"))
                     .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("[P0] Should return 200 OK and list of pending matches when authenticated")
+        void shouldReturn200AndPendingMatches_whenUserAuthenticated() throws Exception {
+            var user = com.tictactore.model.User.builder().id(p1).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    UUID.randomUUID(), "key-1", p2, p2, null, p1, null,
+                    "PENDING_APPROVAL", java.util.List.of(new GameDto(10, 5)), java.time.Instant.now()
+            );
+            var pendingResponse = new com.tictactore.dto.PendingMatchesResponse(1, java.util.List.of(response));
+            when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
+
+            mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.count").value(1))
+                    .andExpect(jsonPath("$.matches[0].status").value("PENDING_APPROVAL"));
         }
     }
 }

@@ -5,6 +5,7 @@ import com.tictactore.dto.MatchResponse;
 import com.tictactore.dto.PendingMatchesResponse;
 import java.util.UUID;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface MatchService {

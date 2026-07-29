@@ -591,5 +591,27 @@ class MatchServiceTest {
 
             verifyNoInteractions(matchOperation);
         }
+
+        @Test
+        @DisplayName("[P0] Should return pending matches for participant user")
+        void shouldReturnPendingMatchesForParticipantUser() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findByStatus("PENDING_APPROVAL")).thenReturn(java.util.List.of(match));
+
+            var result = matchService.getPendingMatches(p2);
+
+            assertThat(result.count()).isEqualTo(1);
+            assertThat(result.matches().get(0).id()).isEqualTo(matchId);
+        }
     }
 }

@@ -1,4 +1,5 @@
 import { ref, onUnmounted, getCurrentInstance } from 'vue'
+import { getCookie } from '../../../utils/cookieUtils'
 
 export interface PendingConfirmationPayload {
   matchId: string
@@ -13,11 +14,15 @@ export enum ConfirmationResult {
 
 export async function defaultCommitConfirmation(payload: PendingConfirmationPayload): Promise<ConfirmationResult> {
   try {
+    const csrfToken = getCookie('XSRF-TOKEN')
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     }
     if (payload.idempotencyKey) {
       headers['Idempotency-Key'] = payload.idempotencyKey
+    }
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken
     }
 
     const res = await fetch(`/api/v1/matches/${payload.matchId}/confirm`, {
