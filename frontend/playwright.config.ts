@@ -60,20 +60,21 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
       },
     },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
+    ...(process.env.CI ? [] : [
+      {
+        name: 'firefox',
+        use: {
+          ...devices['Desktop Firefox'],
+        },
       },
-    },
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
+      {
+        name: 'webkit',
+        use: {
+          ...devices['Desktop Safari'],
+        },
       },
-    },
-
-    /* Test against mobile viewports. */
+    ]),
+  ],
     // {
     //   name: 'Mobile Chrome',
     //   use: {
