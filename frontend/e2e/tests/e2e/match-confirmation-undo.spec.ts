@@ -16,7 +16,7 @@ test.describe('Story 3.2: Single-tap Confirmation with Undo Window', () => {
 
     // Evaluate single tap confirm state using pending matches component or toast state
     await page.evaluate(() => {
-      const pendingMatch = {
+      const _pendingMatch = {
         id: 'match-3-2-test',
         creatorNickname: 'Alice',
         teamAScore: 10,

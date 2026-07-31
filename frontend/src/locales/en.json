@@ -30,7 +30,10 @@
     "confirmedTapUndo": "Match confirmed. Tap to undo.",
     "undo": "Undo",
     "swapTeam1": "Swap Team 1",
-    "swapTeam2": "Swap Team 2"
+    "swapTeam2": "Swap Team 2",
+    "teamA": "Team A",
+    "teamB": "Team B",
+    "scores": "Scores"
   },
   "leaderboard": {
     "title": "Leaderboard",

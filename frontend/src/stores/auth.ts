@@ -92,7 +92,9 @@ export const useAuthStore = defineStore('auth', () => {
     if (avatar !== undefined) {
       profile.value.avatar = avatar
     }
-    // Do not optimistically update tutorialCompleted to avoid component remounting on failure
+    if (tutorialCompleted !== undefined) {
+      profile.value.tutorialCompleted = tutorialCompleted
+    }
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)

@@ -48,8 +48,13 @@ public class TestAuthController implements TestAuthApi {
         ResponseCookie sessionCookie = com.tictactore.util.CookieUtils.buildCookie(
                 CustomOAuth2SuccessHandler.SESSION_COOKIE_NAME, "true", isSecure, false, maxAge);
 
+        String csrfToken = java.util.UUID.randomUUID().toString();
+        ResponseCookie csrfCookie = com.tictactore.util.CookieUtils.buildCookie(
+                "XSRF-TOKEN", csrfToken, isSecure, false, maxAge);
+
         response.addHeader(HttpHeaders.SET_COOKIE, authCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
 
         return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
                 .location(java.net.URI.create(properties.getOauth2().getRedirectUri()))

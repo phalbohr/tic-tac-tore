@@ -78,7 +78,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       if (res.ok) {
         const data = await res.json()
         if (Array.isArray(data)) {
-          const preset = data.find((p: any) => p.name?.toUpperCase() === ruleSystem.value.toUpperCase() || p.id === ruleSystem.value) || data[0]
+          const preset = data.find((p: { name?: string; id?: string }) => p.name?.toUpperCase() === ruleSystem.value.toUpperCase() || p.id === ruleSystem.value) || data[0]
           if (preset) {
             const gameLimit = Number(preset.gameLimit ?? 3)
             ruleConfig.value = {

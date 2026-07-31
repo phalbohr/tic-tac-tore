@@ -179,10 +179,42 @@ public class MatchServiceImpl implements MatchService {
             return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
         }
         List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
-        List<MatchResponse> userPendingResponses = pendingMatches.stream()
+        List<Match> userPendingMatches = pendingMatches.stream()
                 .filter(m -> isUserPendingApprover(m, currentUserId))
-                .map(this::mapToResponse)
                 .toList();
+
+        Set<UUID> allUserIds = new HashSet<>();
+        for (Match m : userPendingMatches) {
+            if (m.getCreatorId() != null) allUserIds.add(m.getCreatorId());
+            if (m.getTeamAAttackerId() != null) allUserIds.add(m.getTeamAAttackerId());
+            if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
+            if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
+            if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
+        }
+
+        Map<UUID, String> userNicknameMap = new HashMap<>();
+        if (userRepository != null && !allUserIds.isEmpty()) {
+            try {
+                for (User u : userRepository.findAllById(allUserIds)) {
+                    if (u != null && u.getId() != null) {
+                        String name = u.getNickname();
+                        if (name == null || name.isBlank()) {
+                            name = u.getEmail();
+                        }
+                        if (name != null) {
+                            userNicknameMap.put(u.getId(), name);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to resolve user nicknames for pending matches", e);
+            }
+        }
+
+        List<MatchResponse> userPendingResponses = userPendingMatches.stream()
+                .map(m -> mapToResponseWithUserMap(m, userNicknameMap))
+                .toList();
+
         return new com.tictactore.dto.PendingMatchesResponse(userPendingResponses.size(), userPendingResponses);
     }
 
@@ -255,6 +287,36 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private MatchResponse mapToResponse(Match match) {
+        Set<UUID> allUserIds = new HashSet<>();
+        if (match.getCreatorId() != null) allUserIds.add(match.getCreatorId());
+        if (match.getTeamAAttackerId() != null) allUserIds.add(match.getTeamAAttackerId());
+        if (match.getTeamADefenderId() != null) allUserIds.add(match.getTeamADefenderId());
+        if (match.getTeamBAttackerId() != null) allUserIds.add(match.getTeamBAttackerId());
+        if (match.getTeamBDefenderId() != null) allUserIds.add(match.getTeamBDefenderId());
+
+        Map<UUID, String> userNicknameMap = new HashMap<>();
+        if (userRepository != null && !allUserIds.isEmpty()) {
+            try {
+                for (User u : userRepository.findAllById(allUserIds)) {
+                    if (u != null && u.getId() != null) {
+                        String name = u.getNickname();
+                        if (name == null || name.isBlank()) {
+                            name = u.getEmail();
+                        }
+                        if (name != null) {
+                            userNicknameMap.put(u.getId(), name);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to resolve user nicknames", e);
+            }
+        }
+
+        return mapToResponseWithUserMap(match, userNicknameMap);
+    }
+
+    private MatchResponse mapToResponseWithUserMap(Match match, Map<UUID, String> userNicknameMap) {
         List<GameDto> gameDtos = match.getGames().stream()
                 .map(g -> new GameDto(
                     g.getTeamAScore(), g.getTeamBScore(),
@@ -275,7 +337,12 @@ public class MatchServiceImpl implements MatchService {
                 gameDtos,
                 match.getCreatedAt(),
                 match.getConfirmedByUserId(),
-                match.getConfirmedAt()
+                match.getConfirmedAt(),
+                userNicknameMap.get(match.getCreatorId()),
+                userNicknameMap.get(match.getTeamAAttackerId()),
+                userNicknameMap.get(match.getTeamADefenderId()),
+                userNicknameMap.get(match.getTeamBAttackerId()),
+                userNicknameMap.get(match.getTeamBDefenderId())
         );
     }
 }

@@ -59,20 +59,53 @@ watch(() => matchStore.submitError, (newVal) => {
   }
 })
 
+interface ApiMatchItem {
+  id: string
+  creatorNickname?: string
+  teamAAttackerNickname?: string
+  teamADefenderNickname?: string
+  teamBAttackerNickname?: string
+  teamBDefenderNickname?: string
+  teamANames?: string[]
+  teamBNames?: string[]
+  teamAScore?: number
+  teamBScore?: number
+  games?: Array<{ teamAScore: number; teamBScore: number }>
+  createdAt?: string
+}
+
 async function fetchPendingMatches() {
   if (!authStore.isAuthenticated) return
   try {
     const res = await fetch('/api/v1/matches/pending')
     if (res.ok) {
       const data = await res.json()
-      const list = Array.isArray(data) ? data : (data.matches || [])
-      pendingMatches.value = list.map((m: any) => ({
-        id: m.id,
-        creatorNickname: m.creatorNickname || 'Opponent',
-        teamAScore: m.games?.[0]?.teamAScore,
-        teamBScore: m.games?.[0]?.teamBScore,
-        createdAt: m.createdAt
-      }))
+      const list: ApiMatchItem[] = Array.isArray(data) ? data : (data.matches || [])
+      pendingMatches.value = list.map((m) => {
+        const teamANames: string[] = []
+        if (m.teamAAttackerNickname) teamANames.push(m.teamAAttackerNickname)
+        if (m.teamADefenderNickname) teamANames.push(m.teamADefenderNickname)
+
+        const teamBNames: string[] = []
+        if (m.teamBAttackerNickname) teamBNames.push(m.teamBAttackerNickname)
+        if (m.teamBDefenderNickname) teamBNames.push(m.teamBDefenderNickname)
+
+        const games = (m.games || []).map((g) => ({
+          teamAScore: g.teamAScore,
+          teamBScore: g.teamBScore,
+        }))
+
+        return {
+          id: m.id,
+          creatorNickname: m.creatorNickname || 'Opponent',
+          teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
+          teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
+          teamAScore: games[0]?.teamAScore ?? m.teamAScore,
+          teamBScore: games[0]?.teamBScore ?? m.teamBScore,
+          games: games.length > 0 ? games : undefined,
+          createdAt: m.createdAt
+        }
+      })
     }
   } catch (e) {
     console.warn('Failed to fetch pending matches', e)

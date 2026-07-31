@@ -2,11 +2,19 @@
 import { useI18n } from 'vue-i18n'
 import BaseButton from '@/core/components/BaseButton.vue'
 
+export interface GameScoreItem {
+  teamAScore: number
+  teamBScore: number
+}
+
 export interface PendingMatchItem {
   id: string
   creatorNickname?: string
+  teamANames?: string[]
+  teamBNames?: string[]
   teamAScore?: number
   teamBScore?: number
+  games?: GameScoreItem[]
   createdAt?: string
 }
 
@@ -43,27 +51,67 @@ const { t } = useI18n()
         </span>
       </div>
 
-      <div class="flex items-center justify-between text-left">
-        <div>
-          <p class="font-bold text-on-surface text-base">
-            {{ match.creatorNickname ? match.creatorNickname : 'Match Request' }}
-          </p>
-          <p v-if="match.teamAScore !== undefined && match.teamBScore !== undefined" class="text-sm text-on-surface-variant">
-            Score: {{ match.teamAScore }} - {{ match.teamBScore }}
-          </p>
+      <!-- 3-Column Table Layout -->
+      <div class="grid grid-cols-3 gap-2 items-center bg-surface-container/60 p-3 rounded-xl">
+        <!-- Team A Column -->
+        <div class="flex flex-col text-left font-medium text-sm text-on-surface">
+          <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
+            {{ t('match.teamA') }}
+          </span>
+          <template v-if="match.teamANames && match.teamANames.length > 0">
+            <span v-for="(name, idx) in match.teamANames" :key="idx" class="truncate font-semibold">
+              {{ name }}
+            </span>
+          </template>
+          <span v-else class="truncate font-semibold">Team A</span>
         </div>
 
+        <!-- Scores Column (Center) -->
+        <div class="flex flex-col items-center justify-center text-center">
+          <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
+            {{ t('match.scores') }}
+          </span>
+          <template v-if="match.games && match.games.length > 0">
+            <div
+              v-for="(game, gIdx) in match.games"
+              :key="gIdx"
+              class="font-headline font-bold text-base text-primary leading-tight"
+            >
+              {{ game.teamAScore }} : {{ game.teamBScore }}
+            </div>
+          </template>
+          <div v-else-if="match.teamAScore !== undefined && match.teamBScore !== undefined" class="font-headline font-bold text-base text-primary leading-tight">
+            {{ match.teamAScore }} : {{ match.teamBScore }}
+          </div>
+        </div>
+
+        <!-- Team B Column -->
+        <div class="flex flex-col text-right font-medium text-sm text-on-surface">
+          <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
+            {{ t('match.teamB') }}
+          </span>
+          <template v-if="match.teamBNames && match.teamBNames.length > 0">
+            <span v-for="(name, idx) in match.teamBNames" :key="idx" class="truncate font-semibold">
+              {{ name }}
+            </span>
+          </template>
+          <span v-else class="truncate font-semibold">Team B</span>
+        </div>
+      </div>
+
+      <!-- Action Button / Confirmation State -->
+      <div class="w-full flex items-center justify-end mt-1">
         <BaseButton
           v-if="pendingConfirmationId !== match.id"
           variant="primary"
           @click="emit('confirm', match.id)"
-          class="!h-12 px-5 font-bold min-h-12 min-w-[48px]"
+          class="w-full !h-12 font-bold min-h-12"
           :data-testid="`confirm-match-btn-${match.id}`"
         >
           {{ t('match.confirm') }}
         </BaseButton>
-        <span v-else class="text-xs italic text-primary font-medium">
-          Match confirmed. Tap to undo.
+        <span v-else class="text-xs italic text-primary font-medium w-full text-center py-2">
+          {{ t('match.confirmedTapUndo') }}
         </span>
       </div>
     </div>

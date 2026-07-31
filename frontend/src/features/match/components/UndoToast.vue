@@ -18,6 +18,7 @@ const { t } = useI18n()
 <template>
   <Transition name="toast-slide">
     <div
+      v-if="countdown > 0"
       class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto bg-surface-container-highest text-on-surface rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
       role="status"
       aria-live="polite"

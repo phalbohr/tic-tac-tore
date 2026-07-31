@@ -30,7 +30,10 @@
     "confirmedTapUndo": "Match confirmed. Tap to undo.",
     "undo": "Rückgängig",
     "swapTeam1": "Team 1 tauschen",
-    "swapTeam2": "Team 2 tauschen"
+    "swapTeam2": "Team 2 tauschen",
+    "teamA": "Team A",
+    "teamB": "Team B",
+    "scores": "Ergebnisse"
   },
   "leaderboard": {
     "title": "Rangliste",
