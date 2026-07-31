@@ -18,16 +18,32 @@ export interface PendingMatchItem {
   createdAt?: string
 }
 
-defineProps<{
+const props = defineProps<{
   pendingMatches: PendingMatchItem[]
   pendingConfirmationId?: string | null
+  pendingConfirmationIds?: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'confirm', matchId: string): void
+  (e: 'confirm', matchId: string, matchNumber: number): void
 }>()
 
 const { t } = useI18n()
+
+function isPendingConfirmation(matchId: string): boolean {
+  if (props.pendingConfirmationIds && props.pendingConfirmationIds.includes(matchId)) {
+    return true
+  }
+  if (props.pendingConfirmationId && props.pendingConfirmationId === matchId) {
+    return true
+  }
+  return false
+}
+
+function getMatchBadgeText(index: number): string {
+  const res = t('match.pendingMatch', { number: index + 1 })
+  return res !== 'match.pendingMatch' ? res : `Match ${index + 1}`
+}
 </script>
 
 <template>
@@ -37,14 +53,14 @@ const { t } = useI18n()
     </h2>
 
     <div
-      v-for="match in pendingMatches"
+      v-for="(match, mIdx) in pendingMatches"
       :key="match.id"
       class="w-full bg-surface-container-highest rounded-2xl p-4 flex flex-col gap-3 shadow-md border-0"
       :data-testid="`pending-match-card-${match.id}`"
     >
       <div class="flex items-center justify-between">
         <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning/20 text-warning">
-          {{ t('match.pending') }}
+          {{ getMatchBadgeText(mIdx) }}
         </span>
         <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
           {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
@@ -102,9 +118,9 @@ const { t } = useI18n()
       <!-- Action Button / Confirmation State -->
       <div class="w-full flex items-center justify-end mt-1">
         <BaseButton
-          v-if="pendingConfirmationId !== match.id"
+          v-if="!isPendingConfirmation(match.id)"
           variant="primary"
-          @click="emit('confirm', match.id)"
+          @click="emit('confirm', match.id, mIdx + 1)"
           class="w-full !h-12 font-bold min-h-12"
           :data-testid="`confirm-match-btn-${match.id}`"
         >

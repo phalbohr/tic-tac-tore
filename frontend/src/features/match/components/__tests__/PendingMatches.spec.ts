@@ -4,7 +4,9 @@ import PendingMatches, { type PendingMatchItem } from '../PendingMatches.vue'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: (key: string) => {
+    t: (key: string, params?: Record<string, unknown>) => {
+      if (key === 'match.pendingMatch') return `Match ${params?.number ?? 1}`
+      if (key === 'match.matchConfirmedTapUndo') return `Match ${params?.number ?? 1} confirmed. Tap to undo.`
       const translations: Record<string, string> = {
         'match.pending': 'Pending Confirmation',
         'match.confirm': 'Confirm',
@@ -24,6 +26,22 @@ describe('PendingMatches.vue', () => {
       props: { pendingMatches: [] }
     })
     expect(wrapper.html()).toBe('<!--v-if-->')
+  })
+
+  it('renders sequential match numbers for cards in queue order', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      { id: 'm1', teamANames: ['A1'], teamBNames: ['B1'], games: [{ teamAScore: 10, teamBScore: 5 }] },
+      { id: 'm2', teamANames: ['A2'], teamBNames: ['B2'], games: [{ teamAScore: 10, teamBScore: 8 }] },
+      { id: 'm3', teamANames: ['A3'], teamBNames: ['B3'], games: [{ teamAScore: 7, teamBScore: 10 }] }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    expect(wrapper.text()).toContain('Match 1')
+    expect(wrapper.text()).toContain('Match 2')
+    expect(wrapper.text()).toContain('Match 3')
   })
 
   it('renders 3-column match details with Team A roster, scores, and Team B roster', () => {
@@ -59,7 +77,7 @@ describe('PendingMatches.vue', () => {
     expect(wrapper.text()).toContain('10 : 5')
   })
 
-  it('emits confirm event when confirm button is clicked', async () => {
+  it('emits confirm event with matchId and matchNumber when confirm button is clicked', async () => {
     const sampleMatches: PendingMatchItem[] = [
       {
         id: 'match-99',
@@ -78,6 +96,26 @@ describe('PendingMatches.vue', () => {
     await btn.trigger('click')
 
     expect(wrapper.emitted('confirm')).toBeTruthy()
-    expect(wrapper.emitted('confirm')![0]).toEqual(['match-99'])
+    expect(wrapper.emitted('confirm')![0]).toEqual(['match-99', 1])
+  })
+
+  it('displays confirmed status when match ID is in pendingConfirmationIds prop array', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      { id: 'match-1', teamANames: ['P1'], teamBNames: ['P2'], games: [{ teamAScore: 10, teamBScore: 2 }] },
+      { id: 'match-2', teamANames: ['P3'], teamBNames: ['P4'], games: [{ teamAScore: 10, teamBScore: 5 }] }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: {
+        pendingMatches: sampleMatches,
+        pendingConfirmationIds: ['match-1']
+      }
+    })
+
+    const card1 = wrapper.find('[data-testid="pending-match-card-match-1"]')
+    expect(card1.text()).toContain('Match confirmed. Tap to undo.')
+
+    const btn2 = wrapper.find('[data-testid="confirm-match-btn-match-2"]')
+    expect(btn2.exists()).toBe(true)
   })
 })

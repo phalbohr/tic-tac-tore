@@ -27,6 +27,7 @@ describe('matchConfirmationStore', () => {
     expect(store.countdown).toBe(15)
     expect(store.pendingConfirmation).toEqual({
       matchId: 'match-123',
+      matchNumber: 1,
       idempotencyKey: 'idempotency-abc'
     })
   })
@@ -42,8 +43,43 @@ describe('matchConfirmationStore', () => {
     expect(store.pendingConfirmation).toBeNull()
     expect(saved).toEqual({
       matchId: 'match-123',
+      matchNumber: 1,
       idempotencyKey: 'idempotency-abc'
     })
+  })
+
+  it('handles multiple active confirmation timers simultaneously', () => {
+    const store = useMatchConfirmationStore()
+    store.commitConfirmation('match-1', 1, 'key-1')
+    store.commitConfirmation('match-2', 2, 'key-2')
+
+    expect(store.activeConfirmations).toHaveLength(2)
+    expect(store.pendingConfirmationIds).toEqual(['match-1', 'match-2'])
+    expect(store.activeConfirmations[0]?.matchNumber).toBe(1)
+    expect(store.activeConfirmations[1]?.matchNumber).toBe(2)
+  })
+
+  it('decrements countdown second by second for active confirmations', () => {
+    const store = useMatchConfirmationStore()
+    store.commitConfirmation('match-1', 1, 'key-1')
+
+    expect(store.activeConfirmations[0]?.countdown).toBe(15)
+    vi.advanceTimersByTime(1000)
+    expect(store.activeConfirmations[0]?.countdown).toBe(14)
+    vi.advanceTimersByTime(2000)
+    expect(store.activeConfirmations[0]?.countdown).toBe(12)
+  })
+
+  it('cancels specific confirmation timer by matchId', () => {
+    const store = useMatchConfirmationStore()
+    store.commitConfirmation('match-1', 1, 'key-1')
+    store.commitConfirmation('match-2', 2, 'key-2')
+
+    const canceled = store.cancelConfirmationTimer('match-1')
+
+    expect(canceled?.matchId).toBe('match-1')
+    expect(store.activeConfirmations).toHaveLength(1)
+    expect(store.pendingConfirmationIds).toEqual(['match-2'])
   })
 
   it('dispatches POST /api/v1/matches/{id}/confirm when 15s timer reaches 0', async () => {

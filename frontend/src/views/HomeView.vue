@@ -50,12 +50,17 @@ function handleUndo() {
   showNewMatch.value = true
 }
 
-function handleConfirmMatch(matchId: string) {
-  confirmationStore.commitConfirmation(matchId)
+function handleConfirmMatch(matchId: string, matchNumber: number) {
+  confirmationStore.commitConfirmation(matchId, matchNumber)
 }
 
-function handleConfirmationUndo() {
-  confirmationStore.cancelConfirmationTimer()
+function handleConfirmationUndo(matchId?: string) {
+  confirmationStore.cancelConfirmationTimer(matchId)
+}
+
+function getConfirmationToastMessage(matchNumber: number): string {
+  const msg = t('match.matchConfirmedTapUndo', { number: matchNumber })
+  return msg !== 'match.matchConfirmedTapUndo' ? msg : `Match ${matchNumber} confirmed. Tap to undo.`
 }
 
 function handleDismissError() {
@@ -213,7 +218,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         <PendingMatches
           v-if="!showNewMatch && pendingMatches.length > 0"
           :pending-matches="pendingMatches"
-          :pending-confirmation-id="confirmationStore.pendingConfirmation?.matchId"
+          :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
           @confirm="handleConfirmMatch"
         />
 
@@ -256,13 +261,42 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         @undo="handleUndo"
       />
 
-      <UndoToast
-        v-if="confirmationStore.isPending || confirmationStore.isOfflinePending"
-        :countdown="confirmationStore.countdown"
-        :is-offline="confirmationStore.isOfflinePending"
-        :message="t('match.confirmedTapUndo')"
-        @undo="handleConfirmationUndo"
-      />
+      <!-- Multi-Toast Stack for Pending Confirmations -->
+      <div
+        v-if="confirmationStore.activeConfirmations.length > 0"
+        class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto pointer-events-none flex flex-col gap-2.5 items-stretch"
+        data-testid="confirmation-toast-stack"
+      >
+        <TransitionGroup name="toast-list">
+          <div
+            v-for="item in confirmationStore.activeConfirmations"
+            :key="item.matchId"
+            class="pointer-events-auto w-full bg-surface-container-highest text-on-surface rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
+            role="status"
+            aria-live="polite"
+            :data-testid="`confirmation-toast-${item.matchId}`"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                {{ item.countdown }}s
+              </div>
+              <span class="text-sm font-medium">
+                {{ item.isOfflinePending ? t('match.willRetryOnline') : getConfirmationToastMessage(item.matchNumber) }}
+              </span>
+            </div>
+
+            <BaseButton
+              v-if="!item.isOfflinePending"
+              variant="primary"
+              @click="handleConfirmationUndo(item.matchId)"
+              class="!h-10 px-4 text-xs font-bold min-h-12 min-w-[48px]"
+              :data-testid="`undo-confirmation-btn-${item.matchId}`"
+            >
+              {{ t('match.undo') }}
+            </BaseButton>
+          </div>
+        </TransitionGroup>
+      </div>
 
       <ErrorToast
         v-if="matchStore.submitError"
@@ -282,5 +316,17 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.toast-list-move,
+.toast-list-enter-active,
+.toast-list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-list-enter-from,
+.toast-list-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>

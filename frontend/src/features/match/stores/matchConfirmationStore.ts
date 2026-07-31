@@ -24,6 +24,8 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
   }
 
   const {
+    activeConfirmations,
+    pendingConfirmationIds,
     countdown,
     isPending,
     isOfflinePending,
@@ -33,12 +35,18 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
     clearTimer
   } = useConfirmationTimer(executeCommit, handleSuccess)
 
-  function commitConfirmation(matchId: string, idempotencyKey?: string) {
+  function commitConfirmation(
+    matchId: string,
+    matchNumberOrIdempotencyKey?: number | string,
+    idempotencyKey?: string
+  ) {
     confirmError.value = null
-    startConfirmationTimer(matchId, idempotencyKey)
+    startConfirmationTimer(matchId, matchNumberOrIdempotencyKey, idempotencyKey)
   }
 
   return {
+    activeConfirmations,
+    pendingConfirmationIds,
     countdown,
     isPending,
     isOfflinePending,
