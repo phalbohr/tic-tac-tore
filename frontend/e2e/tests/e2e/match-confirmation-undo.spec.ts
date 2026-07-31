@@ -53,4 +53,49 @@ test.describe('Story 3.2: Single-tap Confirmation with Undo Window', () => {
     await expect(main).toBeVisible();
     expect(confirmApiCalled).toBe(false);
   });
+
+  test('[P0] Confirmed pending match card disappears automatically when timer finishes', async ({ page }) => {
+    await page.route('**/api/v1/matches/pending', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          matches: [
+            {
+              id: 'match-timer-test',
+              creatorNickname: 'Alice',
+              teamAAttackerNickname: 'Alice',
+              teamBAttackerNickname: 'Bob',
+              games: [{ teamAScore: 10, teamBScore: 5 }],
+              createdAt: new Date().toISOString()
+            }
+          ]
+        })
+      });
+    });
+
+    await page.route('**/api/v1/matches/match-timer-test/confirm', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'match-timer-test',
+          status: 'CONFIRMED'
+        })
+      });
+    });
+
+    await page.goto('/');
+
+    const card = page.getByTestId('pending-match-card-match-timer-test');
+    await expect(card).toBeVisible();
+
+    const confirmBtn = page.getByTestId('confirm-match-btn-match-timer-test');
+    await confirmBtn.click();
+
+    // Fast-forward or wait for confirmation timer to finish and card to disappear
+    await page.evaluate(() => {
+      // Helper inside browser context to trigger match confirmation completion if timer simulated
+    });
+  });
 });

@@ -9,6 +9,7 @@ import {
 
 export const useMatchConfirmationStore = defineStore('matchConfirmation', () => {
   const confirmError = ref<string | null>(null)
+  const lastConfirmedMatchId = ref<string | null>(null)
 
   async function executeCommit(payload: PendingConfirmationPayload): Promise<ConfirmationResult> {
     const result = await defaultCommitConfirmation(payload)
@@ -16,6 +17,10 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
       confirmError.value = 'Failed to confirm match'
     }
     return result
+  }
+
+  function handleSuccess(payload: PendingConfirmationPayload) {
+    lastConfirmedMatchId.value = payload.matchId
   }
 
   const {
@@ -26,7 +31,7 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
     startConfirmationTimer,
     cancelConfirmationTimer,
     clearTimer
-  } = useConfirmationTimer(executeCommit)
+  } = useConfirmationTimer(executeCommit, handleSuccess)
 
   function commitConfirmation(matchId: string, idempotencyKey?: string) {
     confirmError.value = null
@@ -39,6 +44,7 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
     isOfflinePending,
     pendingConfirmation,
     confirmError,
+    lastConfirmedMatchId,
     commitConfirmation,
     startConfirmationTimer,
     cancelConfirmationTimer,

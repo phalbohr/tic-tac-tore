@@ -26,10 +26,19 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount } = usePendingMatches()
+const { pendingCount, fetchPendingCount } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
+
+watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
+  if (confirmedId) {
+    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== confirmedId)
+    await fetchPendingCount(true)
+    await statsStore.fetchStats()
+    await fetchPendingMatches()
+  }
+})
 
 function handleMatchComplete() {
   showNewMatch.value = false

@@ -66,6 +66,7 @@ describe('matchConfirmationStore', () => {
       }
     })
     expect(store.isPending).toBe(false)
+    expect(store.lastConfirmedMatchId).toBe('match-123')
   })
 
   it('sets isOfflinePending when network failure occurs upon timer expiration', async () => {

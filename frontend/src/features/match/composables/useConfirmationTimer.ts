@@ -43,7 +43,8 @@ export async function defaultCommitConfirmation(payload: PendingConfirmationPayl
 }
 
 export function useConfirmationTimer(
-  commitCallback: (payload: PendingConfirmationPayload) => Promise<ConfirmationResult> = defaultCommitConfirmation
+  commitCallback: (payload: PendingConfirmationPayload) => Promise<ConfirmationResult> = defaultCommitConfirmation,
+  onSuccess?: (payload: PendingConfirmationPayload) => void
 ) {
   const countdown = ref<number>(15)
   const isPending = ref<boolean>(false)
@@ -76,6 +77,9 @@ export function useConfirmationTimer(
           } else {
             isPending.value = false
             pendingConfirmation.value = null
+            if (result === ConfirmationResult.SUCCESS) {
+              onSuccess?.(payload)
+            }
           }
         } catch {
           isOfflinePending.value = true
