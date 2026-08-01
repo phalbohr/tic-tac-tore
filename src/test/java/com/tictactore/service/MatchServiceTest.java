@@ -613,6 +613,33 @@ class MatchServiceTest {
             assertThat(result.count()).isEqualTo(1);
             assertThat(result.matches().get(0).id()).isEqualTo(matchId);
         }
+
+        @Test
+        @DisplayName("[P0] Should return rejected matches created by current user")
+        void shouldReturnRejectedMatches_whenUserIsCreator() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("REJECTED")
+                    .rejectedByUserId(p2)
+                    .rejectedAt(Instant.now())
+                    .rejectionReason("Wrong score")
+                    .createdAt(Instant.now())
+                    .games(List.of())
+                    .build();
+
+            when(matchRepository.findByStatus("PENDING_APPROVAL")).thenReturn(List.of());
+            when(matchRepository.findByStatusAndCreatorId("REJECTED", p1)).thenReturn(List.of(match));
+
+            var result = matchService.getPendingMatches(p1);
+
+            assertThat(result.count()).isEqualTo(1);
+            assertThat(result.matches().get(0).id()).isEqualTo(matchId);
+            verify(matchRepository).findByStatusAndCreatorId("REJECTED", p1);
+        }
     }
 
     @Nested

@@ -183,15 +183,15 @@ public class MatchServiceImpl implements MatchService {
             return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
         }
         List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
-        List<Match> rejectedMatches = matchRepository.findByStatus("REJECTED");
+        List<Match> rejectedMatches = matchRepository.findByStatusAndCreatorId("REJECTED", currentUserId);
 
         List<Match> userPendingMatches = new ArrayList<>();
         pendingMatches.stream()
                 .filter(m -> isUserPendingApprover(m, currentUserId))
                 .forEach(userPendingMatches::add);
-        rejectedMatches.stream()
-                .filter(m -> currentUserId.equals(m.getCreatorId()))
-                .forEach(userPendingMatches::add);
+        if (rejectedMatches != null) {
+            userPendingMatches.addAll(rejectedMatches);
+        }
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : userPendingMatches) {

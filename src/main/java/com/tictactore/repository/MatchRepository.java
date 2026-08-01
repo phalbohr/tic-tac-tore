@@ -14,6 +14,8 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
 
     List<Match> findByStatus(String status);
 
+    List<Match> findByStatusAndCreatorId(String status, UUID creatorId);
+
     @Query("""
         SELECT m FROM Match m
         WHERE m.createdAt >= :startOfDay AND m.createdAt <= :endOfDay

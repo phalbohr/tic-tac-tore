@@ -1,5 +1,16 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
 export function usePendingMatches() {
   const pendingCount = ref(0)
   let lastFetchTime = 0
@@ -48,7 +59,7 @@ export function usePendingMatches() {
   async function rejectMatch(matchId: string, reason: string, customReason?: string): Promise<{ success: boolean; data?: any; error?: string }> {
     const trimmedReason = reason ? reason.trim() : ''
     const trimmedCustomReason = customReason ? customReason.trim() : ''
-    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'
+    const idempotencyKey = generateUUID()
 
     try {
       const res = await fetch(`/api/v1/matches/${matchId}/reject`, {

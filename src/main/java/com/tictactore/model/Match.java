@@ -56,7 +56,7 @@ public class Match {
     @Column(name = "rejected_at")
     private Instant rejectedAt;
 
-    @Column(name = "rejection_reason")
+    @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)

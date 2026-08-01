@@ -63,4 +63,50 @@ describe('usePendingMatches', () => {
 
     expect(pendingCount.value).toBe(5)
   })
+
+  it('[P0] should send unique idempotency key when crypto.randomUUID is supported', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ id: 'match-1', status: 'REJECTED' }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('crypto', { randomUUID: () => '12345678-1234-4234-8234-1234567890ab' })
+
+    const { rejectMatch } = usePendingMatches()
+    const result = await rejectMatch('match-1', 'Wrong score', 'Detailed reason')
+
+    expect(result.success).toBe(true)
+    expect(mockFetch).toHaveBeenCalledWith('/api/v1/matches/match-1/reject', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': '12345678-1234-4234-8234-1234567890ab'
+      },
+      body: JSON.stringify({ reason: 'Wrong score', customReason: 'Detailed reason' })
+    })
+  })
+
+  it('[P0] should send unique generated idempotency key when crypto.randomUUID is not available', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ id: 'match-2', status: 'REJECTED' }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('crypto', undefined)
+
+    const { rejectMatch } = usePendingMatches()
+    const result1 = await rejectMatch('match-2', 'Wrong score')
+    const result2 = await rejectMatch('match-2', 'Wrong score')
+    const rejectCalls = mockFetch.mock.calls.filter((call) => typeof call[0] === 'string' && call[0].includes('/reject'))
+    const opts1 = rejectCalls[0]?.[1] as { headers?: Record<string, string> } | undefined
+    const opts2 = rejectCalls[1]?.[1] as { headers?: Record<string, string> } | undefined
+    const key1 = opts1?.headers?.['Idempotency-Key']
+    const key2 = opts2?.headers?.['Idempotency-Key']
+
+    expect(result1.success).toBe(true)
+    expect(result2.success).toBe(true)
+    expect(key1).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+    expect(key2).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+    expect(key1).not.toBe(key2)
+  })
 })
