@@ -614,4 +614,141 @@ class MatchServiceTest {
             assertThat(result.matches().get(0).id()).isEqualTo(matchId);
         }
     }
+
+    @Nested
+    @DisplayName("POST /api/v1/matches/{id}/reject Specs")
+    class MatchRejectionTests {
+
+        @Test
+        @DisplayName("[P0] Should reject match and send push notification to creator when opponent submits valid rejection")
+        void shouldRejectMatch_whenOpponentSubmitsValidRejection() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            var rejectedMatch = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("REJECTED")
+                    .rejectedByUserId(p2)
+                    .rejectedAt(Instant.now())
+                    .rejectionReason("Wrong score: Game 1 was 10-5")
+                    .createdAt(Instant.now())
+                    .build();
+
+            var creatorUser = User.builder().id(p1).nickname("CreatorPlayer").build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.rejectMatch(eq(match), eq(p2), eq("Wrong score"), eq("Game 1 was 10-5"))).thenReturn(rejectedMatch);
+            when(userRepository.findById(p1)).thenReturn(Optional.of(creatorUser));
+
+            var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", "Game 1 was 10-5");
+            var response = matchService.rejectMatch(matchId, p2, request, "idem-reject-1");
+
+            assertThat(response.status()).isEqualTo("REJECTED");
+            assertThat(response.rejectedByUserId()).isEqualTo(p2);
+            assertThat(response.rejectionReason()).isEqualTo("Wrong score: Game 1 was 10-5");
+
+            verify(matchOperation).rejectMatch(match, p2, "Wrong score", "Game 1 was 10-5");
+            verify(pushNotificationService).sendRejectionNotification(rejectedMatch, creatorUser, "Wrong score: Game 1 was 10-5");
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw UnauthorizedMatchActionException when creator tries to reject")
+        void shouldThrowUnauthorized_whenCreatorTriesToReject() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.rejectMatch(any(Match.class), eq(p1), any(), any()))
+                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p1 + " is not an opponent for match " + matchId));
+
+            var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
+            assertThatThrownBy(() -> matchService.rejectMatch(matchId, p1, request, null))
+                    .isInstanceOf(com.tictactore.exception.UnauthorizedMatchActionException.class);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw UnauthorizedMatchActionException when non-participant tries to reject")
+        void shouldThrowUnauthorized_whenNonParticipantTriesToReject() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.rejectMatch(any(Match.class), eq(p3), any(), any()))
+                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p3 + " is not an opponent for match " + matchId));
+
+            var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
+            assertThatThrownBy(() -> matchService.rejectMatch(matchId, p3, request, null))
+                    .isInstanceOf(com.tictactore.exception.UnauthorizedMatchActionException.class);
+        }
+
+        @Test
+        @DisplayName("[P1] Should return rejected match when already rejected by same opponent (idempotency)")
+        void shouldReturnRejectedMatch_whenAlreadyRejectedBySameOpponent() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("REJECTED")
+                    .rejectedByUserId(p2)
+                    .rejectedAt(Instant.now())
+                    .rejectionReason("Wrong score")
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
+            var response = matchService.rejectMatch(matchId, p2, request, "idem-reject-1");
+
+            assertThat(response.status()).isEqualTo("REJECTED");
+            assertThat(response.rejectedByUserId()).isEqualTo(p2);
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidMatchStateException when match is already confirmed")
+        void shouldThrowInvalidState_whenMatchIsAlreadyConfirmed() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("CONFIRMED")
+                    .confirmedByUserId(p2)
+                    .confirmedAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
+            assertThatThrownBy(() -> matchService.rejectMatch(matchId, p2, request, null))
+                    .isInstanceOf(com.tictactore.exception.InvalidMatchStateException.class);
+
+            verifyNoInteractions(matchOperation);
+        }
+    }
 }

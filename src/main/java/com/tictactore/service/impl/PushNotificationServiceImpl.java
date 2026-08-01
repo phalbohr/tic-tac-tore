@@ -100,6 +100,41 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         }
     }
 
+    @Override
+    public void sendRejectionNotification(Match match, User creator, String rejectionReason) {
+        if (creator == null || creator.getId() == null) {
+            return;
+        }
+        String opponentName = resolveCreatorName(match.getRejectedByUserId());
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                match.getId(),
+                opponentName,
+                "Match rejected: " + rejectionReason,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize rejection push notification payload for match {}", match.getId(), e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(creator.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(creator.getId(), match.getId(), "MATCH_REJECTED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, creator.getId(), match.getId(), jsonPayload);
+        }
+    }
+
     private String resolveCreatorName(UUID creatorId) {
         if (creatorId == null) {
             return "A retired player";

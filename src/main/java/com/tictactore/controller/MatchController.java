@@ -67,4 +67,18 @@ public class MatchController {
         MatchResponse response = matchService.confirmMatch(id, principal.getId(), idempotencyKey);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<MatchResponse> rejectMatch(
+            @PathVariable("id") UUID id,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyHeader,
+            @Valid @RequestBody com.tictactore.dto.MatchRejectionRequest request,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        MatchResponse response = matchService.rejectMatch(id, principal.getId(), request, idempotencyHeader);
+        return ResponseEntity.ok(response);
+    }
 }

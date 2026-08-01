@@ -10,6 +10,7 @@ import TutorialCarousel from '@/components/TutorialCarousel.vue'
 import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import RejectReasonSelector from '@/features/match/components/RejectReasonSelector.vue'
 import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
@@ -26,10 +27,13 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount, fetchPendingCount } = usePendingMatches()
+const { pendingCount, fetchPendingCount, rejectMatch } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
+const selectedRejectMatchId = ref<string | null>(null)
+const isRejectModalOpen = ref(false)
+const rejectToastError = ref<string | null>(null)
 
 watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
   if (confirmedId) {
@@ -52,6 +56,26 @@ function handleUndo() {
 
 function handleConfirmMatch(matchId: string, matchNumber: number) {
   confirmationStore.commitConfirmation(matchId, matchNumber)
+}
+
+function handleRejectMatch(matchId: string) {
+  selectedRejectMatchId.value = matchId
+  isRejectModalOpen.value = true
+}
+
+async function handleSubmitRejection(payload: { reason: string; customReason: string }) {
+  if (!selectedRejectMatchId.value) return
+  const matchId = selectedRejectMatchId.value
+  isRejectModalOpen.value = false
+  selectedRejectMatchId.value = null
+
+  const res = await rejectMatch(matchId, payload.reason, payload.customReason)
+  if (res.success) {
+    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+    await fetchPendingCount(true)
+  } else {
+    rejectToastError.value = res.error || t('match.alreadyProcessed')
+  }
 }
 
 function handleConfirmationUndo(matchId?: string) {
@@ -220,6 +244,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           :pending-matches="pendingMatches"
           :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
           @confirm="handleConfirmMatch"
+          @reject="handleRejectMatch"
         />
 
         <template v-if="statsStore.isLoading">
@@ -302,6 +327,18 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         v-if="matchStore.submitError"
         :message="matchStore.submitError"
         @dismiss="handleDismissError"
+      />
+
+      <ErrorToast
+        v-if="rejectToastError"
+        :message="rejectToastError"
+        @dismiss="rejectToastError = null"
+      />
+
+      <RejectReasonSelector
+        :is-open="isRejectModalOpen"
+        @submit="handleSubmitRejection"
+        @cancel="isRejectModalOpen = false"
       />
     </main>
   </div>

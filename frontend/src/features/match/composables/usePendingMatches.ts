@@ -45,8 +45,33 @@ export function usePendingMatches() {
     })
   }
 
+  async function rejectMatch(matchId: string, reason: string, customReason?: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const res = await fetch(`/api/v1/matches/${matchId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `reject-${Date.now()}`
+        },
+        body: JSON.stringify({ reason, customReason: customReason || '' })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        await fetchPendingCount(true)
+        return { success: true, data }
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        return { success: false, error: errData.message || 'Failed to reject match' }
+      }
+    } catch (e: any) {
+      return { success: false, error: e.message || 'Network error' }
+    }
+  }
+
   return {
     pendingCount,
     fetchPendingCount,
+    rejectMatch,
   }
 }

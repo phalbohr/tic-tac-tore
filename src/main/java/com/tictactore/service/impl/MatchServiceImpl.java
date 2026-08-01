@@ -286,6 +286,40 @@ public class MatchServiceImpl implements MatchService {
         return mapToResponse(updatedMatch);
     }
 
+    @Override
+    public MatchResponse rejectMatch(UUID matchId, UUID userId, com.tictactore.dto.MatchRejectionRequest request, String idempotencyKey) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
+
+        if ("REJECTED".equals(match.getStatus())) {
+            if (userId.equals(match.getRejectedByUserId())) {
+                return mapToResponse(match);
+            }
+            throw new com.tictactore.exception.InvalidMatchStateException("Match is already rejected");
+        }
+
+        if ("CONFIRMED".equals(match.getStatus())) {
+            throw new com.tictactore.exception.InvalidMatchStateException("Match is already confirmed");
+        }
+
+        String reason = request != null ? request.reason() : null;
+        String customReason = request != null ? request.customReason() : null;
+
+        Match updatedMatch = matchOperation.rejectMatch(match, userId, reason, customReason);
+
+        try {
+            if (updatedMatch.getCreatorId() != null) {
+                userRepository.findById(updatedMatch.getCreatorId()).ifPresent(creator -> {
+                    pushNotificationService.sendRejectionNotification(updatedMatch, creator, updatedMatch.getRejectionReason());
+                });
+            }
+        } catch (Exception e) {
+            log.error("Failed to dispatch push notification for rejected match {}", updatedMatch.getId(), e);
+        }
+
+        return mapToResponse(updatedMatch);
+    }
+
     private MatchResponse mapToResponse(Match match) {
         Set<UUID> allUserIds = new HashSet<>();
         if (match.getCreatorId() != null) allUserIds.add(match.getCreatorId());
@@ -338,6 +372,9 @@ public class MatchServiceImpl implements MatchService {
                 match.getCreatedAt(),
                 match.getConfirmedByUserId(),
                 match.getConfirmedAt(),
+                match.getRejectedByUserId(),
+                match.getRejectedAt(),
+                match.getRejectionReason(),
                 userNicknameMap.get(match.getCreatorId()),
                 userNicknameMap.get(match.getTeamAAttackerId()),
                 userNicknameMap.get(match.getTeamADefenderId()),

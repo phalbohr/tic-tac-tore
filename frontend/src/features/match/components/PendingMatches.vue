@@ -26,6 +26,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'confirm', matchId: string, matchNumber: number): void
+  (e: 'reject', matchId: string, matchNumber: number): void
 }>()
 
 const { t } = useI18n()
@@ -116,16 +117,25 @@ function getMatchBadgeText(index: number): string {
       </div>
 
       <!-- Action Button / Confirmation State -->
-      <div class="w-full flex items-center justify-end mt-1">
-        <BaseButton
-          v-if="!isPendingConfirmation(match.id)"
-          variant="primary"
-          @click="emit('confirm', match.id, mIdx + 1)"
-          class="w-full !h-12 font-bold min-h-12"
-          :data-testid="`confirm-match-btn-${match.id}`"
-        >
-          {{ t('match.confirm') }}
-        </BaseButton>
+      <div class="w-full flex items-center gap-2 justify-end mt-1">
+        <template v-if="!isPendingConfirmation(match.id)">
+          <button
+            type="button"
+            class="flex-1 min-h-12 h-12 rounded-xl font-bold bg-surface-container hover:bg-neutral-800 text-red-400 border-none transition-colors"
+            :data-testid="`reject-match-btn-${match.id}`"
+            @click="emit('reject', match.id, mIdx + 1)"
+          >
+            {{ t('match.reject') }}
+          </button>
+          <BaseButton
+            variant="primary"
+            @click="emit('confirm', match.id, mIdx + 1)"
+            class="flex-1 !h-12 font-bold min-h-12"
+            :data-testid="`confirm-match-btn-${match.id}`"
+          >
+            {{ t('match.confirm') }}
+          </BaseButton>
+        </template>
         <span v-else class="text-xs italic text-primary font-medium w-full text-center py-2">
           {{ t('match.confirmedTapUndo') }}
         </span>

@@ -50,6 +50,15 @@ public class Match {
     @Column(name = "confirmed_at")
     private Instant confirmedAt;
 
+    @Column(name = "rejected_by_user_id")
+    private UUID rejectedByUserId;
+
+    @Column(name = "rejected_at")
+    private Instant rejectedAt;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Game> games = new ArrayList<>();
@@ -97,5 +106,25 @@ public class Match {
         this.status = "CONFIRMED";
         this.confirmedByUserId = opponentId;
         this.confirmedAt = Instant.now();
+    }
+
+    public void rejectByOpponent(UUID opponentId, String reason, String customReason) {
+        if (!"PENDING_APPROVAL".equals(this.status)) {
+            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new InvalidMatchStateException("Rejection reason is required");
+        }
+        if (this.creatorId.equals(opponentId) || !isOpponent(opponentId)) {
+            throw new UnauthorizedMatchActionException("User " + opponentId + " is not an opponent for match " + this.id);
+        }
+        String finalReason = reason.trim();
+        if (customReason != null && !customReason.trim().isEmpty()) {
+            finalReason = finalReason + ": " + customReason.trim();
+        }
+        this.status = "REJECTED";
+        this.rejectedByUserId = opponentId;
+        this.rejectedAt = Instant.now();
+        this.rejectionReason = finalReason;
     }
 }

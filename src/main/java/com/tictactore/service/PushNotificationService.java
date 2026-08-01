@@ -15,4 +15,6 @@ public interface PushNotificationService {
     void unsubscribe(UUID userId, String endpoint);
 
     void sendConfirmationRequest(Match match, List<User> opponents, boolean isDuplicateWarning);
+
+    void sendRejectionNotification(Match match, User creator, String rejectionReason);
 }

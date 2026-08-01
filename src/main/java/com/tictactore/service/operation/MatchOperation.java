@@ -25,4 +25,11 @@ public class MatchOperation {
         match.confirmByOpponent(opponentId);
         return matchRepository.save(match);
     }
+
+    @Idempotent
+    @Transactional
+    public Match rejectMatch(Match match, java.util.UUID opponentId, String reason, String customReason) {
+        match.rejectByOpponent(opponentId, reason, customReason);
+        return matchRepository.save(match);
+    }
 }

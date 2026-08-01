@@ -35,7 +35,17 @@
     "swapTeam2": "Team 2 tauschen",
     "teamA": "Team A",
     "teamB": "Team B",
-    "scores": "Ergebnisse"
+    "scores": "Ergebnisse",
+    "reject": "Ablehnen",
+    "rejectMatch": "Spiel ablehnen",
+    "submitRejection": "Ablehnung absenden",
+    "selectReason": "Grund für Ablehnung auswählen",
+    "reasonWrongScore": "Falscher Spielstand",
+    "reasonWrongPlayers": "Falsche Spieler",
+    "reasonDidNotPlay": "Nicht gespielt",
+    "reasonOther": "Sonstiges",
+    "customReasonPlaceholder": "Optionale Details (max. 200 Zeichen)",
+    "alreadyProcessed": "Spiel wurde bereits von einem anderen Gegner verarbeitet"
   },
   "leaderboard": {
     "title": "Rangliste",
