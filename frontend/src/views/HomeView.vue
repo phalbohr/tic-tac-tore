@@ -113,6 +113,11 @@ interface ApiMatchItem {
   id: string
   status?: string
   rejectionReason?: string
+  creatorId?: string
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
   creatorNickname?: string
   teamAAttackerNickname?: string
   teamADefenderNickname?: string
@@ -122,7 +127,14 @@ interface ApiMatchItem {
   teamBNames?: string[]
   teamAScore?: number
   teamBScore?: number
-  games?: Array<{ teamAScore: number; teamBScore: number }>
+  games?: Array<{
+    teamAScore: number;
+    teamBScore: number;
+    teamAAttackerId?: string;
+    teamADefenderId?: string;
+    teamBAttackerId?: string;
+    teamBDefenderId?: string;
+  }>
   createdAt?: string
 }
 
@@ -145,6 +157,10 @@ async function fetchPendingMatches() {
         const games = (m.games || []).map((g) => ({
           teamAScore: g.teamAScore,
           teamBScore: g.teamBScore,
+          teamAAttackerId: g.teamAAttackerId,
+          teamADefenderId: g.teamADefenderId,
+          teamBAttackerId: g.teamBAttackerId,
+          teamBDefenderId: g.teamBDefenderId,
         }))
 
         return {
@@ -152,6 +168,10 @@ async function fetchPendingMatches() {
           status: m.status,
           rejectionReason: m.rejectionReason,
           creatorNickname: m.creatorNickname || 'Opponent',
+          teamAAttackerId: m.teamAAttackerId,
+          teamADefenderId: m.teamADefenderId,
+          teamBAttackerId: m.teamBAttackerId,
+          teamBDefenderId: m.teamBDefenderId,
           teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
           teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
           teamAScore: games[0]?.teamAScore ?? m.teamAScore,

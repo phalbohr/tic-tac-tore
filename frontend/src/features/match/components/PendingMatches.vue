@@ -5,12 +5,20 @@ import BaseButton from '@/core/components/BaseButton.vue'
 export interface GameScoreItem {
   teamAScore: number
   teamBScore: number
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
 }
 
 export interface PendingMatchItem {
   id: string
   status?: string
   creatorNickname?: string
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
   teamANames?: string[]
   teamBNames?: string[]
   teamAScore?: number

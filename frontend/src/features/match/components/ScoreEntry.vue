@@ -86,7 +86,7 @@ watch(() => store.matchState, (newVal) => {
       >
         <button
           type="button"
-          class="flex-1 text-left flex items-center gap-2"
+          class="flex-1 text-left flex items-center justify-between gap-2"
           :disabled="idx > store.games.length"
           :data-testid="`select-game-btn-${idx}`"
           @click="store.selectGameToEdit(idx - 1)"
@@ -97,16 +97,6 @@ watch(() => store.matchState, (newVal) => {
           <span v-else class="opacity-50">
             Game {{ idx }}: -
           </span>
-        </button>
-
-        <button
-          v-if="idx <= store.games.length"
-          type="button"
-          class="px-3 py-1 text-xs font-bold bg-surface-container hover:bg-neutral-700 text-on-surface rounded-lg transition-colors ml-2"
-          :data-testid="`edit-game-btn-${idx}`"
-          @click="store.selectGameToEdit(idx - 1)"
-        >
-          Edit
         </button>
       </div>
     </div>
@@ -142,7 +132,7 @@ watch(() => store.matchState, (newVal) => {
         @click="store.completeCurrentGame()"
         class="w-full"
       >
-        {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
+        {{ (store.isMatchComplete && (store.activeGameIndex === -1 || store.activeGameIndex === store.games.length - 1)) ? 'Complete Match' : 'Next Game' }}
       </BaseButton>
 
       <BaseButton
