@@ -73,14 +73,41 @@ watch(() => store.matchState, (newVal) => {
       <BaseButton variant="secondary" @click="showCancelModal = true" class="!h-10 px-4 absolute right-0">Cancel</BaseButton>
     </div>
     
-    <div class="flex flex-col items-center mb-4 gap-1">
-      <div v-for="idx in (store.ruleConfig?.gameLimit || 1)" :key="idx" class="text-sm text-on-surface-variant h-5 flex items-center justify-center">
-        <span v-if="idx <= store.games.length">
-          Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
-        </span>
-        <span v-else class="opacity-50">
-          Game {{ idx }}: -
-        </span>
+    <div class="flex flex-col items-center mb-4 gap-2 w-full">
+      <div
+        v-for="idx in (store.ruleConfig?.gameLimit || 1)"
+        :key="idx"
+        class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-sm transition-colors"
+        :class="[
+          (idx - 1) === store.activeGameIndex
+            ? 'border-primary bg-primary/10 text-on-surface font-bold'
+            : 'border-white/5 bg-surface-container/40 text-on-surface-variant hover:bg-surface-container'
+        ]"
+      >
+        <button
+          type="button"
+          class="flex-1 text-left flex items-center gap-2"
+          :disabled="idx > store.games.length"
+          :data-testid="`select-game-btn-${idx}`"
+          @click="store.selectGameToEdit(idx - 1)"
+        >
+          <span v-if="idx <= store.games.length">
+            Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
+          </span>
+          <span v-else class="opacity-50">
+            Game {{ idx }}: -
+          </span>
+        </button>
+
+        <button
+          v-if="idx <= store.games.length"
+          type="button"
+          class="px-3 py-1 text-xs font-bold bg-surface-container hover:bg-neutral-700 text-on-surface rounded-lg transition-colors ml-2"
+          :data-testid="`edit-game-btn-${idx}`"
+          @click="store.selectGameToEdit(idx - 1)"
+        >
+          Edit
+        </button>
       </div>
     </div>
     

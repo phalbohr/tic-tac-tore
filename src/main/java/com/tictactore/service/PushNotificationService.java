@@ -1,5 +1,6 @@
 package com.tictactore.service;
 
+import com.tictactore.dto.NotificationLogDto;
 import com.tictactore.dto.PushSubscriptionRequest;
 
 import com.tictactore.model.Match;
@@ -17,4 +18,7 @@ public interface PushNotificationService {
     void sendConfirmationRequest(Match match, List<User> opponents, boolean isDuplicateWarning);
 
     void sendRejectionNotification(Match match, User creator, String rejectionReason);
+
+    List<NotificationLogDto> getUserNotifications(UUID userId);
 }
+

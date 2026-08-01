@@ -18,7 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
+
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -123,5 +125,38 @@ class NotificationControllerTest {
                     .param("endpoint", "https://push.services.mozilla.com/push/v1/gAAAAA..."))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @WithMockUser
+        @DisplayName("[P0] GET /api/v1/notifications should return 200 OK with list of notification logs")
+        void shouldReturnNotificationsForAuthenticatedUser() throws Exception {
+            var logDto = new com.tictactore.dto.NotificationLogDto(
+                    UUID.randomUUID(),
+                    UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                    UUID.randomUUID(),
+                    "MATCH_REJECTED",
+                    "{\"summary\":\"Opponent rejected your match\"}",
+                    "SKIPPED",
+                    "No push subscription registered",
+                    java.time.Instant.now()
+            );
+            org.mockito.Mockito.when(pushNotificationService.getUserNotifications(org.mockito.ArgumentMatchers.any(UUID.class)))
+                    .thenReturn(List.of(logDto));
+
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/notifications")
+                    .with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].type").value("MATCH_REJECTED"))
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].status").value("SKIPPED"));
+        }
+
+        @Test
+        @DisplayName("[P0] GET /api/v1/notifications should return 401 Unauthorized without authentication")
+        void shouldReturnUnauthorizedOnGetNotificationsWithoutAuth() throws Exception {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/notifications")
+                    .with(csrf()))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 }
+

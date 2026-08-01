@@ -406,4 +406,54 @@ describe('matchDraftStore', () => {
       expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
     })
   })
+
+  describe('Retrospective Editing & Rejected Match Loading Specs', () => {
+    it('loads rejected match into draft store positioned at the last game', () => {
+      const store = useMatchDraftStore()
+      const sampleRejected = {
+        teamAAttackerId: 'p1',
+        teamBAttackerId: 'p2',
+        games: [
+          { teamAScore: 10, teamBScore: 8 },
+          { teamAScore: 7, teamBScore: 10 }
+        ]
+      }
+
+      store.loadFromRejectedMatch(sampleRejected)
+
+      expect(store.matchType).toBe(MatchType.ONE_VS_ONE)
+      expect(store.selectedPlayers).toEqual(['p1', 'p2'])
+      expect(store.games.length).toBe(2)
+      expect(store.activeGameIndex).toBe(1)
+      expect(store.currentGame.team1Score).toBe(7)
+      expect(store.currentGame.team2Score).toBe(10)
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('allows editing an earlier game without resetting scores of other games', () => {
+      const store = useMatchDraftStore()
+      store.loadFromRejectedMatch({
+        teamAAttackerId: 'p1',
+        teamBAttackerId: 'p2',
+        games: [
+          { teamAScore: 5, teamBScore: 8 },
+          { teamAScore: 7, teamBScore: 10 }
+        ]
+      })
+
+      // Select Game 1 to edit (index 0)
+      store.selectGameToEdit(0)
+      expect(store.activeGameIndex).toBe(0)
+      expect(store.currentGame.team1Score).toBe(5)
+
+      // Modify Game 1 score from 5 to 6
+      store.incrementScore(1, 1)
+
+      expect(store.games[0]?.team1Score).toBe(6)
+      expect(store.games[0]?.team2Score).toBe(8)
+      // Game 2 remains unchanged
+      expect(store.games[1]?.team1Score).toBe(7)
+      expect(store.games[1]?.team2Score).toBe(10)
+    })
+  })
 })

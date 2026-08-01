@@ -27,7 +27,7 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount, fetchPendingCount, rejectMatch } = usePendingMatches()
+const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
@@ -166,11 +166,60 @@ async function fetchPendingMatches() {
   }
 }
 
+let pollInterval: ReturnType<typeof setInterval> | null = null
+
+function handleDismissRejection(matchId: string) {
+  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+}
+
+async function handleDeleteRejection(matchId: string) {
+  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+  await deleteMatch(matchId)
+  await fetchPendingCount(true)
+}
+
+async function handleEditRejection(matchItem: PendingMatchItem) {
+  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchItem.id)
+  await deleteMatch(matchItem.id)
+  await fetchPendingCount(true)
+  matchStore.loadFromRejectedMatch(matchItem)
+  showNewMatch.value = true
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible' && authStore.isAuthenticated) {
+    fetchPendingMatches()
+    fetchPendingCount(true)
+  }
+}
+
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
     await statsStore.fetchStats()
     await fetchPendingMatches()
+  }
+
+  pollInterval = setInterval(() => {
+    if (authStore.isAuthenticated) {
+      fetchPendingMatches()
+      fetchPendingCount(true)
+    }
+  }, 5000)
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  }
+})
+
+import { onUnmounted } from 'vue'
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+  }
+  if (typeof window !== 'undefined') {
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 })
 
@@ -181,6 +230,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
   }
 })
 </script>
+
 
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
@@ -261,7 +311,11 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
           @confirm="handleConfirmMatch"
           @reject="handleRejectMatch"
+          @dismiss-rejection="handleDismissRejection"
+          @edit-rejection="handleEditRejection"
+          @delete-rejection="handleDeleteRejection"
         />
+
 
         <template v-if="statsStore.isLoading">
           <div class="animate-pulse flex flex-col items-center w-full gap-4">

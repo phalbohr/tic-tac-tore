@@ -91,9 +91,36 @@ export function usePendingMatches() {
     }
   }
 
+  async function deleteMatch(matchId: string): Promise<{ success: boolean; error?: string }> {
+    const csrfToken = getCookie('XSRF-TOKEN')
+    const headers: Record<string, string> = {}
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken
+    }
+
+    try {
+      const res = await fetch(`/api/v1/matches/${matchId}`, {
+        method: 'DELETE',
+        headers
+      })
+
+      if (res.ok || res.status === 204) {
+        await fetchPendingCount(true)
+        return { success: true }
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        return { success: false, error: errData.message }
+      }
+    } catch (e: any) {
+      return { success: false, error: e.message }
+    }
+  }
+
   return {
     pendingCount,
     fetchPendingCount,
     rejectMatch,
+    deleteMatch
   }
 }
+

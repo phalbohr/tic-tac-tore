@@ -29,6 +29,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'confirm', matchId: string, matchNumber: number): void
   (e: 'reject', matchId: string, matchNumber: number): void
+  (e: 'dismiss-rejection', matchId: string): void
+  (e: 'edit-rejection', match: PendingMatchItem): void
+  (e: 'delete-rejection', matchId: string): void
 }>()
 
 const { t } = useI18n()
@@ -122,12 +125,31 @@ function getMatchBadgeText(index: number): string {
       <div class="w-full flex items-center gap-2 justify-end mt-1">
         <template v-if="match.status === 'REJECTED'">
           <div
-            class="w-full text-center text-xs text-red-400 font-medium bg-surface-container/60 p-2.5 rounded-xl border border-red-500/20"
+            class="w-full flex flex-col gap-2 text-xs text-red-400 font-medium bg-surface-container/60 p-3 rounded-xl border border-red-500/20"
             :data-testid="`rejection-reason-${match.id}`"
           >
-            {{ t('match.rejectionReasonLabel', 'Rejection reason') }}: {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}
+            <div>{{ t('match.rejectionReasonLabel', 'Rejection reason') }}: {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}</div>
+            <div class="flex items-center gap-2 justify-end mt-1">
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-bold bg-primary hover:bg-primary-hover text-on-primary rounded-lg transition-colors"
+                :data-testid="`edit-rejection-btn-${match.id}`"
+                @click="emit('edit-rejection', match)"
+              >
+                {{ t('match.editMatch', 'Edit Match') }}
+              </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-bold bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 rounded-lg transition-colors"
+                :data-testid="`delete-rejection-btn-${match.id}`"
+                @click="emit('delete-rejection', match.id)"
+              >
+                {{ t('match.deleteMatch', 'Delete Match') }}
+              </button>
+            </div>
           </div>
         </template>
+
         <template v-else-if="!isPendingConfirmation(match.id)">
           <button
             type="button"

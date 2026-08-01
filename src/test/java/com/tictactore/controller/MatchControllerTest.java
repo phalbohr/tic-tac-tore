@@ -312,4 +312,34 @@ class MatchControllerTest {
                     .andExpect(status().isUnauthorized());
         }
     }
+
+    @Nested
+    @DisplayName("DELETE /api/v1/matches/{id} Specs")
+    class DeleteMatchSpecs {
+
+        @Test
+        @DisplayName("[P0] Should return 204 No Content when match is successfully deleted by authorized user")
+        void shouldReturn204OnSuccessfulDeletion() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            org.mockito.Mockito.doNothing().when(matchService).deleteMatch(matchId, p1);
+
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/v1/matches/" + matchId)
+                            .principal(auth))
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated request to delete match")
+        void shouldReturn401WhenUnauthenticated() throws Exception {
+            var matchId = UUID.randomUUID();
+            SecurityContextHolder.clearContext();
+
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/v1/matches/" + matchId))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 }

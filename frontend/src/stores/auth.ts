@@ -11,11 +11,13 @@ const PROFILE_ENDPOINT = '/api/v1/profile/me'
 const METHOD_POST = 'POST'
 
 interface UserProfile {
+  id?: string
   nickname: string
   avatar: string
   language?: string
   tutorialCompleted?: boolean
 }
+
 
 export const useAuthStore = defineStore('auth', () => {
   const isMaybeAuthenticated = ref(!!getCookie(SESSION_COOKIE_NAME))

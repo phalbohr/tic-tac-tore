@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
 import { getCsrfHeaders } from '../../../utils/cookieUtils'
+import { useAuthStore } from '@/stores/auth'
 
 export enum MatchType {
   ONE_VS_ONE = '1v1',
@@ -32,7 +33,9 @@ export interface RuleConfig {
 }
 
 export const useMatchDraftStore = defineStore('matchDraft', () => {
+  const authStore = useAuthStore()
   const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
+
   const selectedPlayers = ref<string[]>([])
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
@@ -41,6 +44,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+  const activeGameIndex = ref<number>(-1)
   const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
   const submitError = ref<string | null>(null)
 
@@ -180,6 +184,15 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
   })
 
+  function selectGameToEdit(index: number) {
+    const targetGame = games.value[index]
+    if (index >= 0 && targetGame) {
+      activeGameIndex.value = index
+      currentGame.value = { ...targetGame }
+      matchState.value = 'score_entry'
+    }
+  }
+
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
     
@@ -195,6 +208,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         ? currentGame.value.team2Score + amount
         : Math.min(currentGame.value.team2Score + amount, limit)
     }
+
+    const activeGame = games.value[activeGameIndex.value]
+    if (activeGameIndex.value >= 0 && activeGame) {
+      activeGame.team1Score = currentGame.value.team1Score
+      activeGame.team2Score = currentGame.value.team2Score
+    }
   }
 
   function decrementScore(team: 1 | 2) {
@@ -204,14 +223,34 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     } else {
       currentGame.value.team2Score = Math.max(0, currentGame.value.team2Score - 1)
     }
+
+    const activeGame = games.value[activeGameIndex.value]
+    if (activeGameIndex.value >= 0 && activeGame) {
+      activeGame.team1Score = currentGame.value.team1Score
+      activeGame.team2Score = currentGame.value.team2Score
+    }
   }
 
   function completeCurrentGame() {
     if (!isGameComplete.value) return;
     
     const wasMatchComplete = isMatchComplete.value;
-    games.value.push({ ...currentGame.value });
-    
+    const activeGame = games.value[activeGameIndex.value]
+    if (activeGameIndex.value >= 0 && activeGame) {
+      games.value[activeGameIndex.value] = { ...currentGame.value };
+      if (activeGameIndex.value < games.value.length - 1) {
+        const nextIndex = activeGameIndex.value + 1;
+        const nextGame = games.value[nextIndex];
+        if (nextGame) {
+          activeGameIndex.value = nextIndex;
+          currentGame.value = { ...nextGame };
+          return;
+        }
+      }
+    } else {
+      games.value.push({ ...currentGame.value });
+    }
+
     const prevGame = currentGame.value;
     currentGame.value = {
       team1Score: 0,
@@ -221,6 +260,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamBAttackerId: prevGame.teamBAttackerId,
       teamBDefenderId: prevGame.teamBDefenderId
     };
+    activeGameIndex.value = -1;
 
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
@@ -229,6 +269,54 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         matchState.value = 'position_swap'
       }
     }
+  }
+
+  function loadFromRejectedMatch(matchItem: {
+    teamAAttackerId?: string;
+    teamADefenderId?: string;
+    teamBAttackerId?: string;
+    teamBDefenderId?: string;
+    games?: Array<{ teamAScore: number; teamBScore: number; teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string }>;
+  }) {
+    const teamAPlayers: string[] = []
+    if (matchItem.teamAAttackerId) teamAPlayers.push(matchItem.teamAAttackerId)
+    if (matchItem.teamADefenderId) teamAPlayers.push(matchItem.teamADefenderId)
+
+    const teamBPlayers: string[] = []
+    if (matchItem.teamBAttackerId) teamBPlayers.push(matchItem.teamBAttackerId)
+    if (matchItem.teamBDefenderId) teamBPlayers.push(matchItem.teamBDefenderId)
+
+    if (teamAPlayers.length > 1 || teamBPlayers.length > 1) {
+      matchType.value = MatchType.TWO_VS_TWO
+    } else {
+      matchType.value = MatchType.ONE_VS_ONE
+    }
+
+    selectedPlayers.value = [...teamAPlayers, ...teamBPlayers]
+    selectedPlayers.value.forEach(id => fetchPlayer(id))
+
+    if (matchItem.games && matchItem.games.length > 0) {
+      games.value = matchItem.games.map(g => ({
+        team1Score: g.teamAScore,
+        team2Score: g.teamBScore,
+        teamAAttackerId: g.teamAAttackerId,
+        teamADefenderId: g.teamADefenderId,
+        teamBAttackerId: g.teamBAttackerId,
+        teamBDefenderId: g.teamBDefenderId
+      }))
+      activeGameIndex.value = games.value.length - 1
+      const lastGame = games.value[activeGameIndex.value]
+      currentGame.value = lastGame ? { ...lastGame } : { team1Score: 0, team2Score: 0 }
+    } else {
+      games.value = []
+      activeGameIndex.value = -1
+      currentGame.value = { team1Score: 0, team2Score: 0 }
+    }
+
+    if (!ruleConfig.value) {
+      ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
+    }
+    matchState.value = 'score_entry'
   }
 
   function beginScoreEntry() {
@@ -334,14 +422,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : selectedPlayers.value[1]
     const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : undefined
 
+    const creatorId = authStore.profile?.id || teamAAttackerId
     const payload = {
       idempotencyKey,
-      creatorId: teamAAttackerId,
+      creatorId,
       teamAAttackerId,
       teamADefenderId,
       teamBAttackerId,
       teamBDefenderId,
       games: games.value.map(g => ({
+
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
         teamAAttackerId: g.teamAAttackerId,
@@ -392,6 +482,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     ruleConfig,
     games,
     currentGame,
+    activeGameIndex,
     matchState,
     submitError,
     clearSubmitError,
@@ -408,6 +499,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     removePlayer,
     incrementScore,
     decrementScore,
+    selectGameToEdit,
+    loadFromRejectedMatch,
     undoLastGame,
     beginScoreEntry,
     confirmPositions,

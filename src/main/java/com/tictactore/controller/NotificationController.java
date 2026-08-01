@@ -1,5 +1,6 @@
 package com.tictactore.controller;
 
+import com.tictactore.dto.NotificationLogDto;
 import com.tictactore.dto.PushSubscriptionRequest;
 import com.tictactore.model.User;
 import com.tictactore.service.PushNotificationService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +25,21 @@ public class NotificationController {
 
     private final PushNotificationService pushNotificationService;
 
+    @GetMapping
+    @Operation(summary = "Get user notifications", description = "Retrieves notification history log entries for the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "List of notification logs retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    public ResponseEntity<List<NotificationLogDto>> getNotifications(@AuthenticationPrincipal Object principal) {
+        UUID userId = resolveUserId(principal);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<NotificationLogDto> notifications = pushNotificationService.getUserNotifications(userId);
+        return ResponseEntity.ok(notifications);
+    }
+
     @PostMapping("/subscribe")
+
     @Operation(summary = "Subscribe to Web Push notifications", description = "Stores or updates a Web Push subscription endpoint and cryptographic keys for the authenticated user.")
     @ApiResponse(responseCode = "201", description = "Subscription saved successfully")
     @ApiResponse(responseCode = "400", description = "Invalid request payload")

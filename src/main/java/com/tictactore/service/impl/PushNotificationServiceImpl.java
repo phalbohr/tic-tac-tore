@@ -2,6 +2,7 @@ package com.tictactore.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tictactore.config.VapidProperties;
+import com.tictactore.dto.NotificationLogDto;
 import com.tictactore.dto.PushNotificationPayload;
 import com.tictactore.dto.PushSubscriptionRequest;
 import com.tictactore.model.NotificationLog;
@@ -19,11 +20,13 @@ import nl.martijndwars.webpush.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Security;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
 
 @Slf4j
 @Service
@@ -135,6 +138,27 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             dispatchPushNotification(sub, creator.getId(), match.getId(), "MATCH_REJECTED", jsonPayload);
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationLogDto> getUserNotifications(UUID userId) {
+        if (userId == null) {
+            return List.of();
+        }
+        return notificationOperation.getNotificationsForUser(userId).stream()
+                .map(logEntry -> new NotificationLogDto(
+                        logEntry.getId(),
+                        logEntry.getRecipientId(),
+                        logEntry.getMatchId(),
+                        logEntry.getType(),
+                        logEntry.getPayload(),
+                        logEntry.getStatus(),
+                        logEntry.getErrorMessage(),
+                        logEntry.getSentAt()
+                ))
+                .toList();
+    }
+
 
     private String resolveCreatorName(UUID creatorId) {
         if (creatorId == null) {

@@ -30,7 +30,7 @@ public class MatchController {
             @AuthenticationPrincipal User principal
     ) {
         CreateMatchRequest finalRequest = request;
-        if (principal != null && request.creatorId() == null) {
+        if (principal != null) {
             finalRequest = new CreateMatchRequest(
                     request.idempotencyKey(),
                     principal.getId(),
@@ -41,6 +41,7 @@ public class MatchController {
                     request.games()
             );
         }
+
         MatchResponse response = matchService.createMatch(finalRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -78,5 +79,17 @@ public class MatchController {
         }
         MatchResponse response = matchService.rejectMatch(id, principal.getId(), request, idempotencyHeader);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMatch(
+            @PathVariable("id") UUID id,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        matchService.deleteMatch(id, principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

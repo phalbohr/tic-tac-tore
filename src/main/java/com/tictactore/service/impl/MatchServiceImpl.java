@@ -67,9 +67,6 @@ public class MatchServiceImpl implements MatchService {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
         }
 
-        if (request.creatorId() != null && !uniqueIds.contains(request.creatorId())) {
-            throw new ParticipantNotFoundException("Creator must be a participant in the match");
-        }
 
         List<User> foundUsers = userRepository.findAllById(playerIds);
         if (foundUsers.size() != playerIds.size()) {
@@ -394,5 +391,10 @@ public class MatchServiceImpl implements MatchService {
                 userNicknameMap.get(match.getTeamBAttackerId()),
                 userNicknameMap.get(match.getTeamBDefenderId())
         );
+    }
+
+    @Override
+    public void deleteMatch(UUID matchId, UUID userId) {
+        matchOperation.deleteMatch(matchId, userId);
     }
 }

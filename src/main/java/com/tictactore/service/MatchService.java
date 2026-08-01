@@ -13,5 +13,6 @@ public interface MatchService {
     PendingMatchesResponse getPendingMatches(UUID currentUserId);
     MatchResponse confirmMatch(UUID matchId, UUID userId, String idempotencyKey);
     MatchResponse rejectMatch(UUID matchId, UUID userId, com.tictactore.dto.MatchRejectionRequest request, String idempotencyKey);
+    void deleteMatch(UUID matchId, UUID userId);
 }
 
