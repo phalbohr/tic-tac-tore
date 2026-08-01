@@ -109,4 +109,26 @@ describe('usePendingMatches', () => {
     expect(key2).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
     expect(key1).not.toBe(key2)
   })
+
+  it('should return error message when server responds with non-ok error payload or undefined if absent', async () => {
+    const mockFetchWithError = vi.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ message: 'Already processed' })
+    })
+    vi.stubGlobal('fetch', mockFetchWithError)
+
+    const { rejectMatch } = usePendingMatches()
+    const res1 = await rejectMatch('m1', 'Wrong score')
+    expect(res1.success).toBe(false)
+    expect(res1.error).toBe('Already processed')
+
+    const mockFetchWithoutMsg = vi.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.reject(new Error('SyntaxError'))
+    })
+    vi.stubGlobal('fetch', mockFetchWithoutMsg)
+    const res2 = await rejectMatch('m2', 'Wrong score')
+    expect(res2.success).toBe(false)
+    expect(res2.error).toBeUndefined()
+  })
 })

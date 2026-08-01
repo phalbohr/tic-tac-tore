@@ -118,4 +118,30 @@ describe('PendingMatches.vue', () => {
     const btn2 = wrapper.find('[data-testid="confirm-match-btn-match-2"]')
     expect(btn2.exists()).toBe(true)
   })
+
+  it('displays rejection reason text and hides action buttons when match status is REJECTED', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-rej',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong score',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const rejectionReasonEl = wrapper.find('[data-testid="rejection-reason-match-rej"]')
+    expect(rejectionReasonEl.exists()).toBe(true)
+    expect(rejectionReasonEl.text()).toContain('Wrong score')
+
+    const confirmBtn = wrapper.find('[data-testid="confirm-match-btn-match-rej"]')
+    const rejectBtn = wrapper.find('[data-testid="reject-match-btn-match-rej"]')
+    expect(confirmBtn.exists()).toBe(false)
+    expect(rejectBtn.exists()).toBe(false)
+  })
 })

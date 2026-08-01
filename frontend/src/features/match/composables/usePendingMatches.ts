@@ -77,10 +77,10 @@ export function usePendingMatches() {
         return { success: true, data }
       } else {
         const errData = await res.json().catch(() => ({}))
-        return { success: false, error: errData.message || 'Failed to reject match' }
+        return { success: false, error: errData.message }
       }
     } catch (e: any) {
-      return { success: false, error: e.message || 'Network error' }
+      return { success: false, error: e.message }
     }
   }
 

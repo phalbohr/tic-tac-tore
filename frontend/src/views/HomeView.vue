@@ -82,7 +82,7 @@ async function handleSubmitRejection(payload: { reason: string; customReason: st
 
     setTimeout(() => {
       if (rejectToastError.value === errorMsg) {
-        rejectToastError.value = ''
+        rejectToastError.value = null
       }
     }, 5000)
   }
@@ -109,6 +109,8 @@ watch(() => matchStore.submitError, (newVal) => {
 
 interface ApiMatchItem {
   id: string
+  status?: string
+  rejectionReason?: string
   creatorNickname?: string
   teamAAttackerNickname?: string
   teamADefenderNickname?: string
@@ -145,6 +147,8 @@ async function fetchPendingMatches() {
 
         return {
           id: m.id,
+          status: m.status,
+          rejectionReason: m.rejectionReason,
           creatorNickname: m.creatorNickname || 'Opponent',
           teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
           teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),

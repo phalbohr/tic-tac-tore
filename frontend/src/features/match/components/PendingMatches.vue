@@ -9,6 +9,7 @@ export interface GameScoreItem {
 
 export interface PendingMatchItem {
   id: string
+  status?: string
   creatorNickname?: string
   teamANames?: string[]
   teamBNames?: string[]
@@ -16,6 +17,7 @@ export interface PendingMatchItem {
   teamBScore?: number
   games?: GameScoreItem[]
   createdAt?: string
+  rejectionReason?: string
 }
 
 const props = defineProps<{
@@ -116,9 +118,17 @@ function getMatchBadgeText(index: number): string {
         </div>
       </div>
 
-      <!-- Action Button / Confirmation State -->
+      <!-- Action Button / Confirmation State / Rejection Reason -->
       <div class="w-full flex items-center gap-2 justify-end mt-1">
-        <template v-if="!isPendingConfirmation(match.id)">
+        <template v-if="match.status === 'REJECTED'">
+          <div
+            class="w-full text-center text-xs text-red-400 font-medium bg-surface-container/60 p-2.5 rounded-xl border border-red-500/20"
+            :data-testid="`rejection-reason-${match.id}`"
+          >
+            {{ t('match.rejectionReasonLabel', 'Rejection reason') }}: {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}
+          </div>
+        </template>
+        <template v-else-if="!isPendingConfirmation(match.id)">
           <button
             type="button"
             class="flex-1 min-h-12 h-12 rounded-xl font-bold bg-surface-container hover:bg-neutral-800 text-red-400 border-none transition-colors"
