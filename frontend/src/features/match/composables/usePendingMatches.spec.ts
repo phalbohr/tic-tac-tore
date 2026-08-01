@@ -64,13 +64,14 @@ describe('usePendingMatches', () => {
     expect(pendingCount.value).toBe(5)
   })
 
-  it('[P0] should send unique idempotency key when crypto.randomUUID is supported', async () => {
+  it('[P0] should send unique idempotency key and X-XSRF-TOKEN when crypto.randomUUID and cookie are present', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ id: 'match-1', status: 'REJECTED' }),
     })
     vi.stubGlobal('fetch', mockFetch)
     vi.stubGlobal('crypto', { randomUUID: () => '12345678-1234-4234-8234-1234567890ab' })
+    document.cookie = 'XSRF-TOKEN=test-csrf-token; path=/'
 
     const { rejectMatch } = usePendingMatches()
     const result = await rejectMatch('match-1', 'Wrong score', 'Detailed reason')
@@ -80,10 +81,12 @@ describe('usePendingMatches', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Idempotency-Key': '12345678-1234-4234-8234-1234567890ab'
+        'Idempotency-Key': '12345678-1234-4234-8234-1234567890ab',
+        'X-XSRF-TOKEN': 'test-csrf-token'
       },
       body: JSON.stringify({ reason: 'Wrong score', customReason: 'Detailed reason' })
     })
+    document.cookie = 'XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
   })
 
   it('[P0] should send unique generated idempotency key when crypto.randomUUID is not available', async () => {

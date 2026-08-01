@@ -69,6 +69,8 @@ async function handleSubmitRejection(payload: { reason: string; customReason: st
   isRejectModalOpen.value = false
   selectedRejectMatchId.value = null
 
+  confirmationStore.cancelConfirmationTimer(matchId)
+
   const res = await rejectMatch(matchId, payload.reason, payload.customReason)
   if (res.success) {
     pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)

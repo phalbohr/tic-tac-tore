@@ -1,4 +1,5 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { getCookie } from '../../../utils/cookieUtils'
 
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -60,14 +61,20 @@ export function usePendingMatches() {
     const trimmedReason = reason ? reason.trim() : ''
     const trimmedCustomReason = customReason ? customReason.trim() : ''
     const idempotencyKey = generateUUID()
+    const csrfToken = getCookie('XSRF-TOKEN')
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey
+    }
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken
+    }
 
     try {
       const res = await fetch(`/api/v1/matches/${matchId}/reject`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
-        },
+        headers,
         body: JSON.stringify({ reason: trimmedReason, customReason: trimmedCustomReason })
       })
 
