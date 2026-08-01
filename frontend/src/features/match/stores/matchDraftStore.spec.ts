@@ -370,7 +370,7 @@ describe('matchDraftStore', () => {
       store.startSubmissionTimer()
 
       expect(store.pendingSubmission).not.toBeNull()
-      const payload = store.pendingSubmission?.payload as any
+      const payload = store.pendingSubmission?.payload as { teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string; games: Array<Record<string, unknown>> }
       
       // The overall match attackers/defenders come from selectedPlayers
       expect(payload?.teamAAttackerId).toBe('p1')
@@ -379,10 +379,10 @@ describe('matchDraftStore', () => {
       expect(payload?.teamBDefenderId).toBe('p4')
 
       // The game-specific attackers/defenders come from the swapped current game state
-      expect(payload?.games[0].teamAAttackerId).toBe('p2')
-      expect(payload?.games[0].teamADefenderId).toBe('p1')
-      expect(payload?.games[0].teamBAttackerId).toBe('p4')
-      expect(payload?.games[0].teamBDefenderId).toBe('p3')
+      expect(payload?.games?.[0]?.teamAAttackerId).toBe('p2')
+      expect(payload?.games?.[0]?.teamADefenderId).toBe('p1')
+      expect(payload?.games?.[0]?.teamBAttackerId).toBe('p4')
+      expect(payload?.games?.[0]?.teamBDefenderId).toBe('p3')
     })
 
     it('aborts timer and restores score_entry state when cancelSubmissionTimer is called', () => {

@@ -16,6 +16,7 @@ const { t } = useI18n()
 <template>
   <Transition name="toast-slide">
     <div
+      v-if="!!message"
       class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto bg-error-container text-on-error-container rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
       role="alert"
       aria-live="assertive"

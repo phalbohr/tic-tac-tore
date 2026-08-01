@@ -11,7 +11,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
       outputArray[i] = rawData.charCodeAt(i)
     }
     return outputArray
-  } catch (e) {
+  } catch {
     return new Uint8Array(0)
   }
 }

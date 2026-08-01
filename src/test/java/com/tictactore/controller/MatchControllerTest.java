@@ -19,11 +19,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,6 +52,7 @@ class MatchControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.standaloneSetup(matchController)
+                .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
@@ -100,6 +105,111 @@ class MatchControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Same player selected in multiple positions"));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/v1/matches/{id}/confirm Specs")
+    class PostMatchConfirmSpecs {
+
+        @BeforeEach
+        void setUpContext() {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+
+        @Test
+        @DisplayName("[P0] Should return 200 OK when match confirmation succeeds")
+        void shouldReturn200OnSuccessfulConfirmation() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p2).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    matchId, "key-1", p1, p1, null, p2, null,
+                    "CONFIRMED", List.of(), Instant.now(), p2, Instant.now()
+            );
+
+            when(matchService.confirmMatch(eq(matchId), eq(p2), eq("idem-key-1"))).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .header("Idempotency-Key", "idem-key-1")
+                            .principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                    .andExpect(jsonPath("$.confirmedByUserId").value(p2.toString()));
+        }
+
+        @Test
+        @DisplayName("[P1] Should return 403 Forbidden when unauthorized user attempts confirmation")
+        void shouldReturn403OnUnauthorizedUser() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p1).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            when(matchService.confirmMatch(eq(matchId), eq(p1), any()))
+                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User is not an opponent"));
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .principal(auth))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value("User is not an opponent"));
+        }
+
+        @Test
+        @DisplayName("[P1] Should return 400 Bad Request when match is in invalid state")
+        void shouldReturn400OnInvalidState() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p2).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            when(matchService.confirmMatch(eq(matchId), eq(p2), any()))
+                    .thenThrow(new com.tictactore.exception.InvalidMatchStateException("Match is not in PENDING_APPROVAL status"));
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .principal(auth))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("Match is not in PENDING_APPROVAL status"));
+        }
+
+        @Test
+        @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated")
+        void shouldReturn401WhenUnauthenticated() throws Exception {
+            var matchId = UUID.randomUUID();
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("[P0] Should return 200 OK and list of pending matches when authenticated")
+        void shouldReturn200AndPendingMatches_whenUserAuthenticated() throws Exception {
+            var user = com.tictactore.model.User.builder().id(p1).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    UUID.randomUUID(), "key-1", p2, p2, null, p1, null,
+                    "PENDING_APPROVAL", java.util.List.of(new GameDto(10, 5)), java.time.Instant.now()
+            );
+            var pendingResponse = new com.tictactore.dto.PendingMatchesResponse(1, java.util.List.of(response));
+            when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
+
+            mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.count").value(1))
+                    .andExpect(jsonPath("$.matches[0].status").value("PENDING_APPROVAL"));
         }
     }
 }

@@ -10,10 +10,16 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class, InvalidPositionException.class, DuplicatePositionException.class})
+    @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class, InvalidPositionException.class, DuplicatePositionException.class, InvalidMatchStateException.class})
     public ResponseEntity<Map<String, String>> handleDomainValidation(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Invalid match data";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
+    }
+
+    @ExceptionHandler(UnauthorizedMatchActionException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedMatchAction(UnauthorizedMatchActionException e) {
+        var msg = e.getMessage() != null ? e.getMessage() : "Unauthorized match action";
+        return ResponseEntity.status(403).body(Map.of("message", msg));
     }
 
     @ExceptionHandler(ParticipantNotFoundException.class)

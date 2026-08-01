@@ -205,6 +205,7 @@ public class UserService {
         return new UserPreferencesDto("STANDARD");
     }
 
+    @Transactional
     public List<PlayerDto> getFrequentOpponents() {
         List<User> opponents = new ArrayList<>();
         for (int i = 1; i <= 4; i++) {

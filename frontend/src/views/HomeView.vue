@@ -10,12 +10,14 @@ import TutorialCarousel from '@/components/TutorialCarousel.vue'
 import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
+import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirmationStore'
 import { ref } from 'vue'
 
 const { t } = useI18n()
@@ -24,7 +26,19 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount } = usePendingMatches()
+const { pendingCount, fetchPendingCount } = usePendingMatches()
+const confirmationStore = useMatchConfirmationStore()
+
+const pendingMatches = ref<PendingMatchItem[]>([])
+
+watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
+  if (confirmedId) {
+    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== confirmedId)
+    await fetchPendingCount(true)
+    await statsStore.fetchStats()
+    await fetchPendingMatches()
+  }
+})
 
 function handleMatchComplete() {
   showNewMatch.value = false
@@ -34,6 +48,19 @@ function handleMatchComplete() {
 function handleUndo() {
   matchStore.cancelSubmissionTimer()
   showNewMatch.value = true
+}
+
+function handleConfirmMatch(matchId: string, matchNumber: number) {
+  confirmationStore.commitConfirmation(matchId, matchNumber)
+}
+
+function handleConfirmationUndo(matchId?: string) {
+  confirmationStore.cancelConfirmationTimer(matchId)
+}
+
+function getConfirmationToastMessage(matchNumber: number): string {
+  const msg = t('match.matchConfirmedTapUndo', { number: matchNumber })
+  return msg !== 'match.matchConfirmedTapUndo' ? msg : `Match ${matchNumber} confirmed. Tap to undo.`
 }
 
 function handleDismissError() {
@@ -46,16 +73,71 @@ watch(() => matchStore.submitError, (newVal) => {
   }
 })
 
+interface ApiMatchItem {
+  id: string
+  creatorNickname?: string
+  teamAAttackerNickname?: string
+  teamADefenderNickname?: string
+  teamBAttackerNickname?: string
+  teamBDefenderNickname?: string
+  teamANames?: string[]
+  teamBNames?: string[]
+  teamAScore?: number
+  teamBScore?: number
+  games?: Array<{ teamAScore: number; teamBScore: number }>
+  createdAt?: string
+}
+
+async function fetchPendingMatches() {
+  if (!authStore.isAuthenticated) return
+  try {
+    const res = await fetch('/api/v1/matches/pending')
+    if (res.ok) {
+      const data = await res.json()
+      const list: ApiMatchItem[] = Array.isArray(data) ? data : (data.matches || [])
+      pendingMatches.value = list.map((m) => {
+        const teamANames: string[] = []
+        if (m.teamAAttackerNickname) teamANames.push(m.teamAAttackerNickname)
+        if (m.teamADefenderNickname) teamANames.push(m.teamADefenderNickname)
+
+        const teamBNames: string[] = []
+        if (m.teamBAttackerNickname) teamBNames.push(m.teamBAttackerNickname)
+        if (m.teamBDefenderNickname) teamBNames.push(m.teamBDefenderNickname)
+
+        const games = (m.games || []).map((g) => ({
+          teamAScore: g.teamAScore,
+          teamBScore: g.teamBScore,
+        }))
+
+        return {
+          id: m.id,
+          creatorNickname: m.creatorNickname || 'Opponent',
+          teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
+          teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
+          teamAScore: games[0]?.teamAScore ?? m.teamAScore,
+          teamBScore: games[0]?.teamBScore ?? m.teamBScore,
+          games: games.length > 0 ? games : undefined,
+          createdAt: m.createdAt
+        }
+      })
+    }
+  } catch (e) {
+    console.warn('Failed to fetch pending matches', e)
+  }
+}
+
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
     await statsStore.fetchStats()
+    await fetchPendingMatches()
   }
 })
 
 watch(() => authStore.isAuthenticated, async (newVal) => {
   if (newVal && !authStore.profile) {
     await authStore.fetchProfile()
+    await fetchPendingMatches()
   }
 })
 </script>
@@ -133,6 +215,13 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
+        <PendingMatches
+          v-if="!showNewMatch && pendingMatches.length > 0"
+          :pending-matches="pendingMatches"
+          :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
+          @confirm="handleConfirmMatch"
+        />
+
         <template v-if="statsStore.isLoading">
           <div class="animate-pulse flex flex-col items-center w-full gap-4">
             <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
@@ -172,6 +261,43 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         @undo="handleUndo"
       />
 
+      <!-- Multi-Toast Stack for Pending Confirmations -->
+      <div
+        v-if="confirmationStore.activeConfirmations.length > 0"
+        class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto pointer-events-none flex flex-col gap-2.5 items-stretch"
+        data-testid="confirmation-toast-stack"
+      >
+        <TransitionGroup name="toast-list">
+          <div
+            v-for="item in confirmationStore.activeConfirmations"
+            :key="item.matchId"
+            class="pointer-events-auto w-full bg-surface-container-highest text-on-surface rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
+            role="status"
+            aria-live="polite"
+            :data-testid="`confirmation-toast-${item.matchId}`"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                {{ item.countdown }}s
+              </div>
+              <span class="text-sm font-medium">
+                {{ item.isOfflinePending ? t('match.willRetryOnline') : getConfirmationToastMessage(item.matchNumber) }}
+              </span>
+            </div>
+
+            <BaseButton
+              v-if="!item.isOfflinePending"
+              variant="primary"
+              @click="handleConfirmationUndo(item.matchId)"
+              class="!h-10 px-4 text-xs font-bold min-h-12 min-w-[48px]"
+              :data-testid="`undo-confirmation-btn-${item.matchId}`"
+            >
+              {{ t('match.undo') }}
+            </BaseButton>
+          </div>
+        </TransitionGroup>
+      </div>
+
       <ErrorToast
         v-if="matchStore.submitError"
         :message="matchStore.submitError"
@@ -190,5 +316,17 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.toast-list-move,
+.toast-list-enter-active,
+.toast-list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-list-enter-from,
+.toast-list-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>

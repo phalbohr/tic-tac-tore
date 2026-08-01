@@ -5,9 +5,9 @@ export function usePendingMatches() {
   let lastFetchTime = 0
   const THROTTLE_MS = 10000
 
-  async function fetchPendingCount(): Promise<number> {
+  async function fetchPendingCount(force = false): Promise<number> {
     const now = Date.now()
-    if (lastFetchTime > 0 && now - lastFetchTime < THROTTLE_MS) {
+    if (!force && lastFetchTime > 0 && now - lastFetchTime < THROTTLE_MS) {
       return pendingCount.value
     }
     lastFetchTime = now

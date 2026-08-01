@@ -469,13 +469,149 @@ class MatchServiceTest {
         }
     }
 
-    private void givenFourPlayersExist() {
-        when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
-        when(userRepository.findAllById(any())).thenReturn(List.of(
-                User.builder().id(p1).build(),
-                User.builder().id(p2).build(),
-                User.builder().id(p3).build(),
-                User.builder().id(p4).build()
-        ));
+    @Nested
+    @DisplayName("POST /api/v1/matches/{id}/confirm Specs")
+    class MatchConfirmationTests {
+
+        @Test
+        @DisplayName("[P0] Should confirm match when opponent confirms pending match")
+        void shouldConfirmMatch_whenOpponentConfirmsPendingMatch() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+
+            var confirmedMatch = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("CONFIRMED")
+                    .confirmedByUserId(p2)
+                    .confirmedAt(Instant.now())
+                    .createdAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p2))).thenReturn(confirmedMatch);
+
+            var response = matchService.confirmMatch(matchId, p2, "idem-1");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            assertThat(response.confirmedByUserId()).isEqualTo(p2);
+            verify(matchOperation).confirmMatch(match, p2);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw UnauthorizedMatchActionException when creator tries to confirm")
+        void shouldThrowUnauthorized_whenCreatorTriesToConfirm() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p1)))
+                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p1 + " is not an opponent for match " + matchId));
+
+            assertThatThrownBy(() -> matchService.confirmMatch(matchId, p1, null))
+                    .isInstanceOf(com.tictactore.exception.UnauthorizedMatchActionException.class);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw UnauthorizedMatchActionException when non-participant tries to confirm")
+        void shouldThrowUnauthorized_whenNonParticipantTriesToConfirm() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p3)))
+                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p3 + " is not an opponent for match " + matchId));
+
+            assertThatThrownBy(() -> matchService.confirmMatch(matchId, p3, null))
+                    .isInstanceOf(com.tictactore.exception.UnauthorizedMatchActionException.class);
+        }
+
+        @Test
+        @DisplayName("[P1] Should return confirmed match when already confirmed by same opponent (idempotency)")
+        void shouldReturnConfirmedMatch_whenAlreadyConfirmedBySameOpponent() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("CONFIRMED")
+                    .confirmedByUserId(p2)
+                    .confirmedAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            var response = matchService.confirmMatch(matchId, p2, "idem-1");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            assertThat(response.confirmedByUserId()).isEqualTo(p2);
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should throw InvalidMatchStateException when match is already confirmed by someone else")
+        void shouldThrowInvalidState_whenAlreadyConfirmedByOther() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("CONFIRMED")
+                    .confirmedByUserId(p2)
+                    .confirmedAt(Instant.now())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            assertThatThrownBy(() -> matchService.confirmMatch(matchId, p4, null))
+                    .isInstanceOf(com.tictactore.exception.InvalidMatchStateException.class);
+
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P0] Should return pending matches for participant user")
+        void shouldReturnPendingMatchesForParticipantUser() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findByStatus("PENDING_APPROVAL")).thenReturn(java.util.List.of(match));
+
+            var result = matchService.getPendingMatches(p2);
+
+            assertThat(result.count()).isEqualTo(1);
+            assertThat(result.matches().get(0).id()).isEqualTo(matchId);
+        }
     }
 }

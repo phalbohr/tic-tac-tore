@@ -43,12 +43,12 @@ test.describe('Story 2.4: Match Submission with Undo Window', () => {
   });
 
   test('[P0] Match submission flow displays Undo Toast and sends POST request upon timer expiration', async ({ page }) => {
-    let postReceived = false;
-    let postBody: any = null;
+    let _postReceived = false;
+    let postBody: Record<string, unknown> | null = null;
 
     await page.route('**/api/v1/matches', async (route) => {
       if (route.request().method() === 'POST') {
-        postReceived = true;
+        _postReceived = true;
         postBody = route.request().postDataJSON();
         await route.fulfill({
           status: 201,

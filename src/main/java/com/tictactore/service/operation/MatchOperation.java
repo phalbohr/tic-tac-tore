@@ -18,4 +18,11 @@ public class MatchOperation {
     public Match saveMatch(Match match) {
         return matchRepository.save(match);
     }
+
+    @Idempotent
+    @Transactional
+    public Match confirmMatch(Match match, java.util.UUID opponentId) {
+        match.confirmByOpponent(opponentId);
+        return matchRepository.save(match);
+    }
 }

@@ -39,6 +39,20 @@ describe('usePendingMatches', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
   })
 
+  it('[P1] should bypass throttle when force is true', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ count: 2, matches: [] }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const { fetchPendingCount } = usePendingMatches()
+    await fetchPendingCount()
+    await fetchPendingCount(true)
+
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
   it('[P1] should retain previous count when fetch fails', async () => {
     const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'))
     vi.stubGlobal('fetch', mockFetch)

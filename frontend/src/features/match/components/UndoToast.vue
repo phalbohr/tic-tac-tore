@@ -5,6 +5,7 @@ import BaseButton from '@/core/components/BaseButton.vue'
 defineProps<{
   countdown: number
   isOffline?: boolean
+  message?: string
 }>()
 
 const emit = defineEmits<{
@@ -17,6 +18,7 @@ const { t } = useI18n()
 <template>
   <Transition name="toast-slide">
     <div
+      v-if="countdown > 0"
       class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto bg-surface-container-highest text-on-surface rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
       role="status"
       aria-live="polite"
@@ -26,7 +28,7 @@ const { t } = useI18n()
           {{ countdown }}s
         </div>
         <span class="text-sm font-medium">
-          {{ isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo') }}
+          {{ message ? message : (isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo')) }}
         </span>
       </div>
 
@@ -34,7 +36,7 @@ const { t } = useI18n()
         v-if="!isOffline"
         variant="primary"
         @click="emit('undo')"
-        class="!h-10 px-4 text-xs font-bold"
+        class="!h-10 px-4 text-xs font-bold min-h-12 min-w-[48px]"
       >
         {{ t('match.undo') }}
       </BaseButton>
