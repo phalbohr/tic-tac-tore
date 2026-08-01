@@ -62,7 +62,7 @@ development_status:
   epic-2-retrospective: optional
   epic-3: in-progress
   3-1-confirmation-requests-and-push-notifications: done
-  3-2-single-tap-confirmation-with-undo-window: in-progress
+  3-2-single-tap-confirmation-with-undo-window: done
   3-3-match-rejection-with-reason: review
   3-4-context-aware-verification-rules: backlog
   3-5-publication-rules-and-24-hour-cooldown: backlog
