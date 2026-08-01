@@ -79,7 +79,7 @@ watch(() => store.matchState, (newVal) => {
         :key="idx"
         class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-sm transition-colors"
         :class="[
-          (idx - 1) === store.activeGameIndex
+          (idx - 1) === store.currentActiveIndex
             ? 'border-primary bg-primary/10 text-on-surface font-bold'
             : 'border-white/5 bg-surface-container/40 text-on-surface-variant hover:bg-surface-container'
         ]"
@@ -87,11 +87,14 @@ watch(() => store.matchState, (newVal) => {
         <button
           type="button"
           class="flex-1 text-left flex items-center justify-between gap-2"
-          :disabled="idx > store.games.length"
+          :disabled="(idx - 1) > store.games.length"
           :data-testid="`select-game-btn-${idx}`"
           @click="store.selectGameToEdit(idx - 1)"
         >
-          <span v-if="idx <= store.games.length">
+          <span v-if="(idx - 1) === store.currentActiveIndex">
+            Game {{ idx }}: {{ store.currentGame.team1Score }} - {{ store.currentGame.team2Score }}
+          </span>
+          <span v-else-if="(idx - 1) < store.games.length">
             Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
           </span>
           <span v-else class="opacity-50">

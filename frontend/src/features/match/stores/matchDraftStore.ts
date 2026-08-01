@@ -163,35 +163,68 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return true
   })
 
+  const savedNewGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+
   const isMatchComplete = computed(() => {
-    const winsNeeded = ruleConfig.value?.winsNeeded ?? 1
-    const gameLimit = ruleConfig.value?.gameLimit ?? 1
-    
-    let t1w = games.value.filter(g => g.team1Score > g.team2Score).length
-    let t2w = games.value.filter(g => g.team2Score > g.team1Score).length
-    
-    if (isGameComplete.value) {
-       if (currentGame.value.team1Score > currentGame.value.team2Score) t1w++;
-       else if (currentGame.value.team2Score > currentGame.value.team1Score) t2w++;
+    const winsNeeded = ruleConfig.value?.winsNeeded ?? 2
+    const gameLimit = ruleConfig.value?.gameLimit ?? 3
+    const limit = ruleConfig.value?.scoreLimit ?? 10
+    const winByTwo = ruleConfig.value?.winByTwo ?? false
+
+    let t1w = 0
+    let t2w = 0
+    let totalCompletedGames = 0
+
+    games.value.forEach((g, idx) => {
+      const s1 = idx === activeGameIndex.value ? currentGame.value.team1Score : g.team1Score
+      const s2 = idx === activeGameIndex.value ? currentGame.value.team2Score : g.team2Score
+      const reachedLimit = s1 >= limit || s2 >= limit
+      const gameComplete = reachedLimit && (!winByTwo || Math.abs(s1 - s2) >= 2)
+      if (gameComplete) {
+        totalCompletedGames++
+        if (s1 > s2) t1w++
+        else if (s2 > s1) t2w++
+      }
+    })
+
+    if (activeGameIndex.value === -1 && isGameComplete.value) {
+      totalCompletedGames++
+      if (currentGame.value.team1Score > currentGame.value.team2Score) t1w++
+      else if (currentGame.value.team2Score > currentGame.value.team1Score) t2w++
     }
-    
-    return t1w >= winsNeeded || t2w >= winsNeeded || (games.value.length + 1) >= gameLimit
+
+    return t1w >= winsNeeded || t2w >= winsNeeded || totalCompletedGames >= gameLimit
   })
+
+  const currentActiveIndex = computed(() => (activeGameIndex.value >= 0 ? activeGameIndex.value : games.value.length))
+
+  function selectGameToEdit(index: number) {
+    if (index < 0 || index > games.value.length) return
+    
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      games.value[activeGameIndex.value] = { ...currentGame.value }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value = { ...currentGame.value }
+    }
+
+    if (index < games.value.length) {
+      activeGameIndex.value = index
+      const targetGame = games.value[index]
+      if (targetGame) {
+        currentGame.value = { ...targetGame }
+      }
+    } else {
+      activeGameIndex.value = -1
+      currentGame.value = { ...savedNewGame.value }
+    }
+    matchState.value = 'score_entry'
+  }
 
   const canUndoLastGame = computed(() => {
     if (games.value.length === 0) return false
     if (matchState.value === 'ready_for_submission') return true
     return currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
   })
-
-  function selectGameToEdit(index: number) {
-    const targetGame = games.value[index]
-    if (index >= 0 && targetGame) {
-      activeGameIndex.value = index
-      currentGame.value = { ...targetGame }
-      matchState.value = 'score_entry'
-    }
-  }
 
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
@@ -209,10 +242,15 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         : Math.min(currentGame.value.team2Score + amount, limit)
     }
 
-    const activeGame = games.value[activeGameIndex.value]
-    if (activeGameIndex.value >= 0 && activeGame) {
-      activeGame.team1Score = currentGame.value.team1Score
-      activeGame.team2Score = currentGame.value.team2Score
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      const activeGame = games.value[activeGameIndex.value]
+      if (activeGame) {
+        activeGame.team1Score = currentGame.value.team1Score
+        activeGame.team2Score = currentGame.value.team2Score
+      }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value.team1Score = currentGame.value.team1Score
+      savedNewGame.value.team2Score = currentGame.value.team2Score
     }
   }
 
@@ -224,49 +262,59 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       currentGame.value.team2Score = Math.max(0, currentGame.value.team2Score - 1)
     }
 
-    const activeGame = games.value[activeGameIndex.value]
-    if (activeGameIndex.value >= 0 && activeGame) {
-      activeGame.team1Score = currentGame.value.team1Score
-      activeGame.team2Score = currentGame.value.team2Score
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      const activeGame = games.value[activeGameIndex.value]
+      if (activeGame) {
+        activeGame.team1Score = currentGame.value.team1Score
+        activeGame.team2Score = currentGame.value.team2Score
+      }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value.team1Score = currentGame.value.team1Score
+      savedNewGame.value.team2Score = currentGame.value.team2Score
     }
   }
 
   function completeCurrentGame() {
     if (!isGameComplete.value) return;
     
-    const wasMatchComplete = isMatchComplete.value;
-    const activeGame = games.value[activeGameIndex.value]
-    if (activeGameIndex.value >= 0 && activeGame) {
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
       games.value[activeGameIndex.value] = { ...currentGame.value };
+
       if (activeGameIndex.value < games.value.length - 1) {
         const nextIndex = activeGameIndex.value + 1;
+        activeGameIndex.value = nextIndex;
         const nextGame = games.value[nextIndex];
         if (nextGame) {
-          activeGameIndex.value = nextIndex;
           currentGame.value = { ...nextGame };
-          return;
         }
+        return;
+      }
+
+      if (isMatchComplete.value) {
+        matchState.value = 'ready_for_submission';
+        return;
       }
     } else {
+      const wasMatchComplete = isMatchComplete.value;
       games.value.push({ ...currentGame.value });
-    }
+      const prevGame = currentGame.value;
+      savedNewGame.value = {
+        team1Score: 0,
+        team2Score: 0,
+        teamAAttackerId: prevGame.teamAAttackerId,
+        teamADefenderId: prevGame.teamADefenderId,
+        teamBAttackerId: prevGame.teamBAttackerId,
+        teamBDefenderId: prevGame.teamBDefenderId
+      };
+      currentGame.value = { ...savedNewGame.value };
+      activeGameIndex.value = -1;
 
-    const prevGame = currentGame.value;
-    currentGame.value = {
-      team1Score: 0,
-      team2Score: 0,
-      teamAAttackerId: prevGame.teamAAttackerId,
-      teamADefenderId: prevGame.teamADefenderId,
-      teamBAttackerId: prevGame.teamBAttackerId,
-      teamBDefenderId: prevGame.teamBDefenderId
-    };
-    activeGameIndex.value = -1;
-
-    if (wasMatchComplete) {
-      matchState.value = 'ready_for_submission';
-    } else {
-      if (matchType.value === MatchType.TWO_VS_TWO) {
-        matchState.value = 'position_swap'
+      if (wasMatchComplete) {
+        matchState.value = 'ready_for_submission';
+      } else if (matchType.value === MatchType.TWO_VS_TWO) {
+        matchState.value = 'position_swap';
+      } else {
+        matchState.value = 'draft';
       }
     }
   }
@@ -312,6 +360,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       activeGameIndex.value = -1
       currentGame.value = { team1Score: 0, team2Score: 0 }
     }
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
 
     if (!ruleConfig.value) {
       ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
@@ -320,12 +369,17 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   }
 
   function beginScoreEntry() {
+    games.value = []
+    activeGameIndex.value = -1
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
+    currentGame.value = { team1Score: 0, team2Score: 0 }
     if (matchType.value === MatchType.TWO_VS_TWO) {
-      matchState.value = 'position_swap'
       currentGame.value.teamAAttackerId = selectedPlayers.value[0]
       currentGame.value.teamADefenderId = selectedPlayers.value[1]
       currentGame.value.teamBAttackerId = selectedPlayers.value[2]
       currentGame.value.teamBDefenderId = selectedPlayers.value[3]
+      savedNewGame.value = { ...currentGame.value }
+      matchState.value = 'position_swap'
     } else {
       matchState.value = 'score_entry'
     }
@@ -483,6 +537,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games,
     currentGame,
     activeGameIndex,
+    currentActiveIndex,
     matchState,
     submitError,
     clearSubmitError,
