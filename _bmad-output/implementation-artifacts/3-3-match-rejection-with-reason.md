@@ -129,6 +129,13 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 - [x] [Review][Defer] Positional Null Parameter Creep in MatchResponse.java Constructors [`src/main/java/com/tictactore/dto/MatchResponse.java`:1] — deferred, pre-existing
 - [x] [Review][Defer] Mock-Only Playwright Test Coverage [`frontend/e2e/tests/e2e/match-rejection.spec.ts`:1] — deferred, pre-existing
 
+- [x] [Review][Patch] Missing @Retryable Annotation on rejectMatch [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`:297]
+- [x] [Review][Patch] Code style violations: FQNs, magic strings, and explicit type declarations [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`:297]
+- [x] [Review][Patch] FQN in Controller method signature [`src/main/java/com/tictactore/controller/MatchController.java`:75]
+- [x] [Review][Patch] FQNs and AAA pattern formatting violations in tests [`src/test/java/com/tictactore/controller/MatchControllerTest.java`:216]
+- [x] [Review][Patch] Potential NPE in creatorId equality check and magic strings [`src/main/java/com/tictactore/model/Match.java`:118]
+- [x] [Review][Patch] Brittle CSS selector in Playwright E2E test [`frontend/e2e/tests/e2e/match-rejection.spec.ts`:74]
+
 ---
 
 ## 📁 File List
@@ -162,6 +169,7 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 - Extended `PushNotificationService` and `PushNotificationServiceImpl` to dispatch push notifications to match creators upon rejection.
 - Created `RejectReasonSelector.vue` modal component with predefined reason options, 200-char free-text area, `min-h-12` touch targets, and disabled submit button validation.
 - Updated `PendingMatches.vue` and `HomeView.vue` with "Reject" action button, modal invocation, `usePendingMatches` API integration, and error toast handling.
+- Addressed AI code review feedback: added `@Retryable` to `MatchServiceImpl.rejectMatch`, removed FQNs, introduced status constants in `Match.java`, enforced `Objects.equals` for NPE safety, cleaned up AAA test formatting, and updated Playwright E2E tests with accessible `getByRole` locators.
 - Added localization keys for match rejection in English (`en.json`) and German (`de.json`).
 - Written unit tests in `MatchServiceTest.java`, `MatchControllerTest.java`, `RejectReasonSelector.spec.ts`, and Playwright E2E tests in `match-rejection.spec.ts`.
 
@@ -175,9 +183,12 @@ Gemini 3.6 Flash
 ### Debug Log References
 - Fixed `RejectReasonSelector.spec.ts` Vue i18n global mock setup (`$t` proxy resolution).
 - Added `data-testid="error-toast"` to `ErrorToast.vue` for Playwright toast assertion.
+- Resolved `SecurityContextHolder` import in `MatchControllerTest.java`.
 
 ### Completion Notes List
 - All 151 backend Java tests passed (`./mvnw test`).
 - All 122 frontend Vitest unit tests passed (`npx vitest run`).
 - `npm run type-check` passed with 0 errors.
+- Production build `npm run build` passed with 0 errors.
 - All Playwright E2E tests for `match-rejection.spec.ts` passed across Chromium, Firefox, and Webkit.
+- Full local CI script `./scripts/ci-local.sh` passed 100%.

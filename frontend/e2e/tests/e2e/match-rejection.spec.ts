@@ -71,7 +71,7 @@ test.describe('Story 3.3: Match Rejection with Reason', () => {
     const rejectBtn = page.getByTestId('reject-match-btn-match-3-3-reject-test');
     await rejectBtn.click();
 
-    const wrongScoreRadio = page.locator('input[type="radio"][value="Wrong score"]');
+    const wrongScoreRadio = page.getByRole('radio', { name: 'Wrong score' });
     await wrongScoreRadio.check();
 
     const submitBtn = page.getByTestId('submit-rejection-btn');
@@ -104,7 +104,7 @@ test.describe('Story 3.3: Match Rejection with Reason', () => {
     const rejectBtn = page.getByTestId('reject-match-btn-match-3-3-reject-test');
     await rejectBtn.click();
 
-    const wrongScoreRadio = page.locator('input[type="radio"][value="Wrong score"]');
+    const wrongScoreRadio = page.getByRole('radio', { name: 'Wrong score' });
     await wrongScoreRadio.check();
 
     const submitBtn = page.getByTestId('submit-rejection-btn');

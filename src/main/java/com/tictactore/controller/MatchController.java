@@ -1,6 +1,8 @@
 package com.tictactore.controller;
 
 import com.tictactore.dto.CreateMatchRequest;
+import com.tictactore.dto.MatchConfirmationRequest;
+import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.dto.PendingMatchesResponse;
 import com.tictactore.model.User;
@@ -12,12 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.tictactore.dto.MatchConfirmationRequest;
-import com.tictactore.model.User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.util.UUID;
-
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/matches")
@@ -72,7 +70,7 @@ public class MatchController {
     public ResponseEntity<MatchResponse> rejectMatch(
             @PathVariable("id") UUID id,
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyHeader,
-            @Valid @RequestBody com.tictactore.dto.MatchRejectionRequest request,
+            @Valid @RequestBody MatchRejectionRequest request,
             @AuthenticationPrincipal User principal
     ) {
         if (principal == null) {

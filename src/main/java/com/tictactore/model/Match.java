@@ -69,6 +69,10 @@ public class Match {
     @Version
     private Long version;
 
+    public static final String STATUS_PENDING_APPROVAL = "PENDING_APPROVAL";
+    public static final String STATUS_CONFIRMED = "CONFIRMED";
+    public static final String STATUS_REJECTED = "REJECTED";
+
     public void addGame(Game game) {
         games.add(game);
         game.setMatch(this);
@@ -97,32 +101,32 @@ public class Match {
     }
 
     public void confirmByOpponent(UUID opponentId) {
-        if (!"PENDING_APPROVAL".equals(this.status)) {
+        if (!STATUS_PENDING_APPROVAL.equals(this.status)) {
             throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
         }
-        if (this.creatorId.equals(opponentId) || !isOpponent(opponentId)) {
+        if (java.util.Objects.equals(this.creatorId, opponentId) || !isOpponent(opponentId)) {
             throw new UnauthorizedMatchActionException("User " + opponentId + " is not an opponent for match " + this.id);
         }
-        this.status = "CONFIRMED";
+        this.status = STATUS_CONFIRMED;
         this.confirmedByUserId = opponentId;
         this.confirmedAt = Instant.now();
     }
 
     public void rejectByOpponent(UUID opponentId, String reason, String customReason) {
-        if (!"PENDING_APPROVAL".equals(this.status)) {
+        if (!STATUS_PENDING_APPROVAL.equals(this.status)) {
             throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
         }
         if (reason == null || reason.trim().isEmpty()) {
             throw new InvalidMatchStateException("Rejection reason is required");
         }
-        if (this.creatorId.equals(opponentId) || !isOpponent(opponentId)) {
+        if (java.util.Objects.equals(this.creatorId, opponentId) || !isOpponent(opponentId)) {
             throw new UnauthorizedMatchActionException("User " + opponentId + " is not an opponent for match " + this.id);
         }
         String finalReason = reason.trim();
         if (customReason != null && !customReason.trim().isEmpty()) {
             finalReason = finalReason + ": " + customReason.trim();
         }
-        this.status = "REJECTED";
+        this.status = STATUS_REJECTED;
         this.rejectedByUserId = opponentId;
         this.rejectedAt = Instant.now();
         this.rejectionReason = finalReason;

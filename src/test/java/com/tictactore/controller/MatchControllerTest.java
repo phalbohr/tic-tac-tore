@@ -15,7 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.tictactore.dto.MatchRejectionRequest;
+import com.tictactore.dto.PendingMatchesResponse;
+import com.tictactore.exception.UnauthorizedMatchActionException;
+import com.tictactore.model.User;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -189,21 +197,28 @@ class MatchControllerTest {
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm"))
                     .andExpect(status().isUnauthorized());
         }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/matches/pending Specs")
+    class GetPendingMatchesSpecs {
+
+        @BeforeEach
+        void setUpContext() {
+            SecurityContextHolder.clearContext();
+        }
 
         @Test
-        @DisplayName("[P0] Should return 200 OK and list of pending matches when authenticated")
-        void shouldReturn200AndPendingMatches_whenUserAuthenticated() throws Exception {
-            var user = com.tictactore.model.User.builder().id(p1).build();
-            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
-            );
-            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
-
+        @DisplayName("[P0] Should return 200 OK with pending matches list")
+        void shouldReturn200WithPendingMatches() throws Exception {
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
             var response = new MatchResponse(
                     UUID.randomUUID(), "key-1", p2, p2, null, p1, null,
-                    "PENDING_APPROVAL", java.util.List.of(new GameDto(10, 5)), java.time.Instant.now()
+                    "PENDING_APPROVAL", List.of(new GameDto(10, 5)), Instant.now()
             );
-            var pendingResponse = new com.tictactore.dto.PendingMatchesResponse(1, java.util.List.of(response));
+            var pendingResponse = new PendingMatchesResponse(1, List.of(response));
             when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
 
             mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
@@ -219,28 +234,23 @@ class MatchControllerTest {
 
         @BeforeEach
         void setUpContext() {
-            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            SecurityContextHolder.clearContext();
         }
 
         @Test
         @DisplayName("[P0] Should return 200 OK when match rejection succeeds with valid reason")
         void shouldReturn200OnSuccessfulRejection() throws Exception {
             var matchId = UUID.randomUUID();
-            var user = com.tictactore.model.User.builder().id(p2).build();
-            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
-            );
-            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
-
-            var rejectionRequest = new com.tictactore.dto.MatchRejectionRequest("Wrong score", "Game 1 was 10-5");
-
+            var user = User.builder().id(p2).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            var rejectionRequest = new MatchRejectionRequest("Wrong score", "Game 1 was 10-5");
             var response = new MatchResponse(
                     matchId, "key-1", p1, p1, null, p2, null,
                     "REJECTED", List.of(), Instant.now(), null, null,
                     p2, Instant.now(), "Wrong score: Game 1 was 10-5",
                     null, null, null, null, null
             );
-
             when(matchService.rejectMatch(eq(matchId), eq(p2), any(), eq("idem-reject-1"))).thenReturn(response);
 
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/reject")
@@ -258,13 +268,10 @@ class MatchControllerTest {
         @DisplayName("[P1] Should return 400 Bad Request when rejection reason is blank")
         void shouldReturn400OnBlankReason() throws Exception {
             var matchId = UUID.randomUUID();
-            var user = com.tictactore.model.User.builder().id(p2).build();
-            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
-            );
-            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
-
-            var blankRequest = new com.tictactore.dto.MatchRejectionRequest("", null);
+            var user = User.builder().id(p2).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            var blankRequest = new MatchRejectionRequest("", null);
 
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -277,16 +284,12 @@ class MatchControllerTest {
         @DisplayName("[P1] Should return 403 Forbidden when unauthorized user attempts rejection")
         void shouldReturn403OnUnauthorizedUser() throws Exception {
             var matchId = UUID.randomUUID();
-            var user = com.tictactore.model.User.builder().id(p1).build();
-            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
-            );
-            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
-
-            var rejectionRequest = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
-
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            var rejectionRequest = new MatchRejectionRequest("Wrong score", null);
             when(matchService.rejectMatch(eq(matchId), eq(p1), any(), any()))
-                    .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User is not an opponent"));
+                    .thenThrow(new UnauthorizedMatchActionException("User is not an opponent"));
 
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -300,8 +303,8 @@ class MatchControllerTest {
         @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated")
         void shouldReturn401WhenUnauthenticated() throws Exception {
             var matchId = UUID.randomUUID();
-            var rejectionRequest = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
-            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            var rejectionRequest = new MatchRejectionRequest("Wrong score", null);
+            SecurityContextHolder.clearContext();
 
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/reject")
                             .contentType(MediaType.APPLICATION_JSON)

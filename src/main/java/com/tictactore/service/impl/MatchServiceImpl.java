@@ -2,18 +2,22 @@ package com.tictactore.service.impl;
 
 import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.GameDto;
+import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.DuplicatePlayerException;
 import com.tictactore.exception.DuplicatePositionException;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.exception.InvalidMatchStateException;
 import com.tictactore.exception.InvalidPositionException;
 import com.tictactore.exception.ParticipantNotFoundException;
+import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.MatchService;
+import com.tictactore.service.PushNotificationService;
 import com.tictactore.service.operation.MatchOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +37,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchOperation matchOperation;
-    private final com.tictactore.service.PushNotificationService pushNotificationService;
+    private final PushNotificationService pushNotificationService;
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
@@ -278,41 +282,43 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Retryable
     public MatchResponse confirmMatch(UUID matchId, UUID userId, String idempotencyKey) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
+        var match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
 
-        if ("CONFIRMED".equals(match.getStatus())) {
+        if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
             if (userId.equals(match.getConfirmedByUserId())) {
                 return mapToResponse(match);
             }
-            throw new com.tictactore.exception.InvalidMatchStateException("Match is already confirmed");
+            throw new InvalidMatchStateException("Match is already confirmed");
         }
 
-        Match updatedMatch = matchOperation.confirmMatch(match, userId);
+        var updatedMatch = matchOperation.confirmMatch(match, userId);
         return mapToResponse(updatedMatch);
     }
 
     @Override
-    public MatchResponse rejectMatch(UUID matchId, UUID userId, com.tictactore.dto.MatchRejectionRequest request, String idempotencyKey) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
+    @Retryable
+    public MatchResponse rejectMatch(UUID matchId, UUID userId, MatchRejectionRequest request, String idempotencyKey) {
+        var match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
 
-        if ("REJECTED".equals(match.getStatus())) {
+        if (Match.STATUS_REJECTED.equals(match.getStatus())) {
             if (userId.equals(match.getRejectedByUserId())) {
                 return mapToResponse(match);
             }
-            throw new com.tictactore.exception.InvalidMatchStateException("Match is already rejected");
+            throw new InvalidMatchStateException("Match is already rejected");
         }
 
-        if ("CONFIRMED".equals(match.getStatus())) {
-            throw new com.tictactore.exception.InvalidMatchStateException("Match is already confirmed");
+        if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
+            throw new InvalidMatchStateException("Match is already confirmed");
         }
 
-        String reason = request != null ? request.reason() : null;
-        String customReason = request != null ? request.customReason() : null;
+        var reason = request != null ? request.reason() : null;
+        var customReason = request != null ? request.customReason() : null;
 
-        Match updatedMatch = matchOperation.rejectMatch(matchId, userId, reason, customReason);
+        var updatedMatch = matchOperation.rejectMatch(matchId, userId, reason, customReason);
 
         try {
             if (updatedMatch.getCreatorId() != null) {
