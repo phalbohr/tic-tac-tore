@@ -110,6 +110,25 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 - [x] **Task 3: End-to-End Verification** (AC: 1-9)
   - [x] Create Playwright E2E test `frontend/e2e/tests/e2e/match-rejection.spec.ts` verifying rejection dialog, submit validation, backend dispatch, toast error handling, and list update.
 
+### Review Findings
+
+- [x] [Review][Decision] Missing Creator Rejection Queue Endpoint and Display of Rejection Reason (AC 8) — AC 8 specifies that rejected matches return to creator's queue with rejection reason displayed. Currently getPendingMatches only filters PENDING_APPROVAL and excludes matches created by the user. Should getPendingMatches include REJECTED matches where user is creator, or should a separate endpoint/view be provided?
+- [x] [Review][Patch] Idempotency Key Parameter Detached from Execution and Missing @Retryable Annotation [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`:290]
+- [x] [Review][Patch] Push Notification Payload Message Format Violation and Audit Log Type Mismatch [`src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java`:1004]
+- [x] [Review][Patch] Hardcoded Raw English Rejection Reasons Bypassing i18n and Unimplemented RejectFreeTextField Component [`frontend/src/features/match/components/RejectReasonSelector.vue`:397]
+- [x] [Review][Patch] Flawed Submit Button Validation Logic and Custom Reason Handling in Rejection Dialog [`frontend/src/features/match/components/RejectReasonSelector.vue`:404]
+- [x] [Review][Patch] Race Condition Toast Overridden by Raw Backend Error and Stale Match Card Persistence [`frontend/src/views/HomeView.vue`:756]
+- [x] [Review][Patch] Stale Entity Mutation and Unhandled DB Race Condition in MatchOperation.rejectMatch [`src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`:291]
+- [x] [Review][Patch] Unbounded reason String Validation Risk Causing SQL DataTruncationException [`src/main/java/com/tictactore/dto/MatchRejectionRequest.java`:1]
+- [x] [Review][Patch] Stale State Persistence in RejectReasonSelector.vue Across Modal Open/Close Cycles [`frontend/src/features/match/components/RejectReasonSelector.vue`:390]
+- [x] [Review][Patch] Concurrent Double-Submission Vulnerability on Submit Rejection Button [`frontend/src/features/match/components/RejectReasonSelector.vue`:410]
+- [x] [Review][Patch] Missing Focus Trap, Escape Key Listener, and aria-label in Rejection Modal [`frontend/src/features/match/components/RejectReasonSelector.vue`:1]
+- [x] [Review][Patch] Non-Standard Fallback Idempotency-Key Format in Client Composable [`frontend/src/features/match/composables/usePendingMatches.ts`:1]
+- [x] [Review][Patch] Indefinite Error Toast Persistence on Rejection Failure [`frontend/src/views/HomeView.vue`:756]
+- [x] [Review][Patch] Missing Client-Side Whitespace Trimming in Rejection Composable [`frontend/src/features/match/composables/usePendingMatches.ts`:1]
+- [x] [Review][Defer] Positional Null Parameter Creep in MatchResponse.java Constructors [`src/main/java/com/tictactore/dto/MatchResponse.java`:1] — deferred, pre-existing
+- [x] [Review][Defer] Mock-Only Playwright Test Coverage [`frontend/e2e/tests/e2e/match-rejection.spec.ts`:1] — deferred, pre-existing
+
 ---
 
 ## 📁 File List

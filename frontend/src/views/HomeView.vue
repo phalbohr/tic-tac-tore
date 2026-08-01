@@ -74,7 +74,17 @@ async function handleSubmitRejection(payload: { reason: string; customReason: st
     pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
     await fetchPendingCount(true)
   } else {
-    rejectToastError.value = res.error || t('match.alreadyProcessed')
+    const errorMsg = res.error || t('match.alreadyProcessed', 'Match was already processed by another opponent')
+    rejectToastError.value = errorMsg
+    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+    await fetchPendingCount(true)
+    await fetchPendingMatches()
+
+    setTimeout(() => {
+      if (rejectToastError.value === errorMsg) {
+        rejectToastError.value = ''
+      }
+    }, 5000)
   }
 }
 

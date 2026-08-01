@@ -46,14 +46,18 @@ export function usePendingMatches() {
   }
 
   async function rejectMatch(matchId: string, reason: string, customReason?: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    const trimmedReason = reason ? reason.trim() : ''
+    const trimmedCustomReason = customReason ? customReason.trim() : ''
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'
+
     try {
       const res = await fetch(`/api/v1/matches/${matchId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `reject-${Date.now()}`
+          'Idempotency-Key': idempotencyKey
         },
-        body: JSON.stringify({ reason, customReason: customReason || '' })
+        body: JSON.stringify({ reason: trimmedReason, customReason: trimmedCustomReason })
       })
 
       if (res.ok) {

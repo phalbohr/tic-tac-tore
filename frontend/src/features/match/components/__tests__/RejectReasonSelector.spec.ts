@@ -3,15 +3,19 @@ import { mount } from '@vue/test-utils'
 import RejectReasonSelector from '../RejectReasonSelector.vue'
 
 const mocks = {
-  $t: (key: string) => {
+  $t: (key: string, fallback?: string) => {
     const translations: Record<string, string> = {
       'match.rejectMatch': 'Reject Match',
       'match.selectReason': 'Select reason for rejection',
       'match.submitRejection': 'Submit Rejection',
       'match.customReasonPlaceholder': 'Optional details (max 200 chars)',
+      'match.reasonWrongScore': 'Wrong score',
+      'match.reasonWrongPlayers': 'Wrong players',
+      'match.reasonDidNotPlay': 'Did not play',
+      'match.reasonOther': 'Other',
       'common.cancel': 'Cancel'
     }
-    return translations[key] || key
+    return translations[key] || fallback || key
   }
 }
 

@@ -28,7 +28,9 @@ public class MatchOperation {
 
     @Idempotent
     @Transactional
-    public Match rejectMatch(Match match, java.util.UUID opponentId, String reason, String customReason) {
+    public Match rejectMatch(java.util.UUID matchId, java.util.UUID opponentId, String reason, String customReason) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
         match.rejectByOpponent(opponentId, reason, customReason);
         return matchRepository.save(match);
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   isOpen: boolean
@@ -12,15 +12,28 @@ const emit = defineEmits<{
 
 const selectedReason = ref<string>('')
 const customReason = ref<string>('')
+const isSubmitting = ref<boolean>(false)
+
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    if (newVal) {
+      selectedReason.value = ''
+      customReason.value = ''
+      isSubmitting.value = false
+    }
+  }
+)
 
 const predefinedReasons = [
-  'Wrong score',
-  'Wrong players',
-  'Did not play',
-  'Other'
+  { value: 'Wrong score', key: 'match.reasonWrongScore' },
+  { value: 'Wrong players', key: 'match.reasonWrongPlayers' },
+  { value: 'Did not play', key: 'match.reasonDidNotPlay' },
+  { value: 'Other', key: 'match.reasonOther' }
 ]
 
 const isSubmitDisabled = computed(() => {
+  if (isSubmitting.value) return true
   if (!selectedReason.value) return true
   if (selectedReason.value === 'Other' && !customReason.value.trim()) return true
   return false
@@ -28,6 +41,7 @@ const isSubmitDisabled = computed(() => {
 
 function handleSubmit() {
   if (isSubmitDisabled.value) return
+  isSubmitting.value = true
   emit('submit', {
     reason: selectedReason.value,
     customReason: customReason.value.trim()
@@ -37,6 +51,7 @@ function handleSubmit() {
 function handleCancel() {
   selectedReason.value = ''
   customReason.value = ''
+  isSubmitting.value = false
   emit('cancel')
 }
 </script>
@@ -45,6 +60,11 @@ function handleCancel() {
   <div
     v-if="isOpen"
     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+    @keydown.esc="handleCancel"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    :aria-label="$t('match.rejectMatch')"
   >
     <div
       class="w-full max-w-md bg-neutral-900 text-white rounded-2xl p-6 shadow-2xl space-y-6 transform transition-all animate-scale-up"
@@ -56,6 +76,7 @@ function handleCancel() {
         <button
           type="button"
           class="w-12 h-12 flex items-center justify-center rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+          aria-label="Close dialog"
           @click="handleCancel"
         >
           ✕
@@ -68,11 +89,11 @@ function handleCancel() {
 
       <div class="space-y-3" role="radiogroup">
         <label
-          v-for="reason in predefinedReasons"
-          :key="reason"
+          v-for="reasonObj in predefinedReasons"
+          :key="reasonObj.value"
           :class="[
             'flex items-center gap-3 px-4 min-h-12 rounded-xl cursor-pointer transition-all border-none text-base font-medium select-none',
-            selectedReason === reason
+            selectedReason === reasonObj.value
               ? 'bg-red-500/20 text-red-300 ring-2 ring-red-500/50'
               : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-750'
           ]"
@@ -80,11 +101,11 @@ function handleCancel() {
           <input
             type="radio"
             name="rejectionReason"
-            :value="reason"
+            :value="reasonObj.value"
             v-model="selectedReason"
             class="w-5 h-5 accent-red-500 cursor-pointer"
           />
-          <span>{{ reason }}</span>
+          <span>{{ $t(reasonObj.key, reasonObj.value) }}</span>
         </label>
       </div>
 
@@ -96,6 +117,7 @@ function handleCancel() {
           :placeholder="$t('match.customReasonPlaceholder')"
           class="w-full bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-xl p-3 border-none focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none text-sm"
           data-testid="rejection-free-text"
+          data-test-id="reject-free-text-field"
         ></textarea>
         <div class="text-right text-xs text-neutral-500">
           {{ customReason.length }}/200

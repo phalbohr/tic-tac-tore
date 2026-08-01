@@ -179,9 +179,15 @@ public class MatchServiceImpl implements MatchService {
             return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
         }
         List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
-        List<Match> userPendingMatches = pendingMatches.stream()
+        List<Match> rejectedMatches = matchRepository.findByStatus("REJECTED");
+
+        List<Match> userPendingMatches = new ArrayList<>();
+        pendingMatches.stream()
                 .filter(m -> isUserPendingApprover(m, currentUserId))
-                .toList();
+                .forEach(userPendingMatches::add);
+        rejectedMatches.stream()
+                .filter(m -> currentUserId.equals(m.getCreatorId()))
+                .forEach(userPendingMatches::add);
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : userPendingMatches) {
@@ -190,6 +196,7 @@ public class MatchServiceImpl implements MatchService {
             if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
             if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
             if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
+            if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
         }
 
         Map<UUID, String> userNicknameMap = new HashMap<>();
@@ -305,7 +312,7 @@ public class MatchServiceImpl implements MatchService {
         String reason = request != null ? request.reason() : null;
         String customReason = request != null ? request.customReason() : null;
 
-        Match updatedMatch = matchOperation.rejectMatch(match, userId, reason, customReason);
+        Match updatedMatch = matchOperation.rejectMatch(matchId, userId, reason, customReason);
 
         try {
             if (updatedMatch.getCreatorId() != null) {

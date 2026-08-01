@@ -647,7 +647,7 @@ class MatchServiceTest {
             var creatorUser = User.builder().id(p1).nickname("CreatorPlayer").build();
 
             when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-            when(matchOperation.rejectMatch(eq(match), eq(p2), eq("Wrong score"), eq("Game 1 was 10-5"))).thenReturn(rejectedMatch);
+            when(matchOperation.rejectMatch(eq(matchId), eq(p2), eq("Wrong score"), eq("Game 1 was 10-5"))).thenReturn(rejectedMatch);
             when(userRepository.findById(p1)).thenReturn(Optional.of(creatorUser));
 
             var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", "Game 1 was 10-5");
@@ -657,7 +657,7 @@ class MatchServiceTest {
             assertThat(response.rejectedByUserId()).isEqualTo(p2);
             assertThat(response.rejectionReason()).isEqualTo("Wrong score: Game 1 was 10-5");
 
-            verify(matchOperation).rejectMatch(match, p2, "Wrong score", "Game 1 was 10-5");
+            verify(matchOperation).rejectMatch(matchId, p2, "Wrong score", "Game 1 was 10-5");
             verify(pushNotificationService).sendRejectionNotification(rejectedMatch, creatorUser, "Wrong score: Game 1 was 10-5");
         }
 
@@ -674,7 +674,7 @@ class MatchServiceTest {
                     .build();
 
             when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-            when(matchOperation.rejectMatch(any(Match.class), eq(p1), any(), any()))
+            when(matchOperation.rejectMatch(eq(matchId), eq(p1), any(), any()))
                     .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p1 + " is not an opponent for match " + matchId));
 
             var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
@@ -695,7 +695,7 @@ class MatchServiceTest {
                     .build();
 
             when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-            when(matchOperation.rejectMatch(any(Match.class), eq(p3), any(), any()))
+            when(matchOperation.rejectMatch(eq(matchId), eq(p3), any(), any()))
                     .thenThrow(new com.tictactore.exception.UnauthorizedMatchActionException("User " + p3 + " is not an opponent for match " + matchId));
 
             var request = new com.tictactore.dto.MatchRejectionRequest("Wrong score", null);
