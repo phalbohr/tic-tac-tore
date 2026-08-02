@@ -198,10 +198,7 @@ async function handleDeleteRejection(matchId: string) {
   await fetchPendingCount(true)
 }
 
-async function handleEditRejection(matchItem: PendingMatchItem) {
-  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchItem.id)
-  await deleteMatch(matchItem.id)
-  await fetchPendingCount(true)
+function handleEditRejection(matchItem: PendingMatchItem) {
   matchStore.loadFromRejectedMatch(matchItem)
   showNewMatch.value = true
 }

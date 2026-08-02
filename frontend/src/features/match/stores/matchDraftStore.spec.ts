@@ -251,53 +251,7 @@ describe('matchDraftStore', () => {
       expect(store.matchState).toBe('ready_for_submission')
     })
 
-    it('undos last game correctly', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
 
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
-
-      store.undoLastGame()
-      expect(store.games.length).toBe(0)
-      expect(store.currentGame.team1Score).toBe(5)
-      expect(store.matchState).toBe('score_entry')
-    })
-
-    it('undos last game from ready_for_submission state', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3, winByTwo: false }
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(2)
-      expect(store.matchState).toBe('ready_for_submission')
-
-      store.undoLastGame()
-      expect(store.games.length).toBe(1)
-      expect(store.currentGame.team1Score).toBe(5)
-      expect(store.matchState).toBe('score_entry')
-    })
-
-    it('prevents undo when points are already scored in current game', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(1)
-
-      store.incrementScore(2, 2)
-      expect(store.canUndoLastGame).toBe(false)
-      store.undoLastGame()
-      expect(store.games.length).toBe(1)
-      expect(store.currentGame.team2Score).toBe(2)
-    })
   })
 
   describe('Submission Timer & Undo Window', () => {
@@ -401,8 +355,7 @@ describe('matchDraftStore', () => {
       expect(store.isPendingSubmission).toBe(false)
       expect(store.pendingSubmission).toBeNull()
       expect(store.matchState).toBe('score_entry')
-      expect(store.games.length).toBe(0)
-      expect(store.currentGame.team1Score).toBe(5)
+      expect(store.games.length).toBe(1)
       expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
     })
   })

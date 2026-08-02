@@ -47,6 +47,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const activeGameIndex = ref<number>(-1)
   const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
   const submitError = ref<string | null>(null)
+  const editingMatchId = ref<string | null>(null)
 
   function clearSubmitError() {
     submitError.value = null
@@ -222,13 +223,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'score_entry'
   }
 
-  const canUndoLastGame = computed(() => {
-    if (games.value.length === 0) return false
-    if (matchState.value === 'ready_for_submission') return true
-    if (activeGameIndex.value > 0) return true
-    return activeGameIndex.value === -1 && currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
-  })
-
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
     
@@ -327,12 +321,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   }
 
   function loadFromRejectedMatch(matchItem: {
+    id?: string;
     teamAAttackerId?: string;
     teamADefenderId?: string;
     teamBAttackerId?: string;
     teamBDefenderId?: string;
     games?: Array<{ teamAScore: number; teamBScore: number; teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string }>;
   }) {
+    editingMatchId.value = matchItem.id || null
     const teamAPlayers: string[] = []
     if (matchItem.teamAAttackerId) teamAPlayers.push(matchItem.teamAAttackerId)
     if (matchItem.teamADefenderId) teamAPlayers.push(matchItem.teamADefenderId)
@@ -414,16 +410,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'draft'
   }
 
-  function undoLastGame() {
-    if (!canUndoLastGame.value) return
-    const popped = games.value.pop()
-    if (popped) {
-      currentGame.value = { ...popped }
-      activeGameIndex.value = games.value.length > 0 ? games.value.length - 1 : -1
-      matchState.value = 'score_entry'
-    }
-  }
-
   async function executeCommit(item: { idempotencyKey: string; payload: Record<string, unknown> }): Promise<SubmissionResult> {
     try {
       const res = await fetch('/api/v1/matches', {
@@ -436,6 +422,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         body: JSON.stringify(item.payload)
       })
       if (res.ok) {
+        if (editingMatchId.value) {
+          try {
+            await fetch(`/api/v1/matches/${editingMatchId.value}`, {
+              method: 'DELETE',
+              headers: { ...getCsrfHeaders() }
+            })
+          } catch {
+            // ignore delete error
+          }
+        }
         resetDraftStateOnly()
         return SubmissionResult.SUCCESS
       } else if (res.status >= 400 && res.status < 500) {
@@ -508,11 +504,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function cancelSubmissionTimer() {
     cancelTimer()
-    if (canUndoLastGame.value) {
-      undoLastGame()
-    } else {
-      matchState.value = 'score_entry'
-    }
+    matchState.value = 'score_entry'
   }
 
   function resetDraftStateOnly() {
@@ -523,6 +515,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
+    editingMatchId.value = null
     clearSubmitError()
   }
 
@@ -539,7 +532,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     fetchedPlayers,
     isGameComplete,
     isMatchComplete,
-    canUndoLastGame,
     completeCurrentGame,
     ruleConfig,
     games,
@@ -549,6 +541,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     activeGameIndex,
     currentActiveIndex,
     matchState,
+    editingMatchId,
     submitError,
     clearSubmitError,
     pendingSubmission,
@@ -566,7 +559,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     decrementScore,
     selectGameToEdit,
     loadFromRejectedMatch,
-    undoLastGame,
     beginScoreEntry,
     confirmPositions,
     swapPositions,
