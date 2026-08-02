@@ -97,6 +97,9 @@ watch(() => store.matchState, (newVal) => {
           <span v-else-if="(idx - 1) < store.games.length">
             Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
           </span>
+          <span v-else-if="(idx - 1) === store.games.length">
+            Game {{ idx }}: {{ store.savedNewGame.team1Score }} - {{ store.savedNewGame.team2Score }}
+          </span>
           <span v-else class="opacity-50">
             Game {{ idx }}: -
           </span>
@@ -131,11 +134,11 @@ watch(() => store.matchState, (newVal) => {
     
     <div class="flex flex-col gap-2 mt-6 w-full">
       <BaseButton
-        :disabled="!store.isGameComplete"
+        :disabled="store.activeGameIndex === store.games.length - 1 && !store.isGameComplete"
         @click="store.completeCurrentGame()"
         class="w-full"
       >
-        {{ (store.isMatchComplete && (store.activeGameIndex === -1 || store.activeGameIndex === store.games.length - 1)) ? 'Complete Match' : 'Next Game' }}
+        {{ (store.isMatchComplete && store.activeGameIndex === store.games.length - 1) ? 'Complete Match' : 'Next Game' }}
       </BaseButton>
 
       <BaseButton

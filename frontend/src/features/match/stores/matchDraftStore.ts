@@ -163,6 +163,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return true
   })
 
+  const uncommittedGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+
   const savedNewGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
 
   const isMatchComplete = computed(() => {
@@ -213,7 +215,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       if (targetGame) {
         currentGame.value = { ...targetGame }
       }
-    } else {
+    } else if (index === games.value.length) {
       activeGameIndex.value = -1
       currentGame.value = { ...savedNewGame.value }
     }
@@ -223,7 +225,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const canUndoLastGame = computed(() => {
     if (games.value.length === 0) return false
     if (matchState.value === 'ready_for_submission') return true
-    return currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
+    if (activeGameIndex.value > 0) return true
+    return activeGameIndex.value === -1 && currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
   })
 
   function incrementScore(team: 1 | 2, amount: number) {
@@ -276,7 +279,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function completeCurrentGame() {
     if (!isGameComplete.value) return;
-    
+
     if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
       games.value[activeGameIndex.value] = { ...currentGame.value };
 
@@ -294,28 +297,32 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         matchState.value = 'ready_for_submission';
         return;
       }
-    } else {
-      const wasMatchComplete = isMatchComplete.value;
-      games.value.push({ ...currentGame.value });
-      const prevGame = currentGame.value;
-      savedNewGame.value = {
-        team1Score: 0,
-        team2Score: 0,
-        teamAAttackerId: prevGame.teamAAttackerId,
-        teamADefenderId: prevGame.teamADefenderId,
-        teamBAttackerId: prevGame.teamBAttackerId,
-        teamBDefenderId: prevGame.teamBDefenderId
-      };
-      currentGame.value = { ...savedNewGame.value };
-      activeGameIndex.value = -1;
 
-      if (wasMatchComplete) {
-        matchState.value = 'ready_for_submission';
-      } else if (matchType.value === MatchType.TWO_VS_TWO) {
-        matchState.value = 'position_swap';
-      } else {
-        matchState.value = 'draft';
-      }
+      activeGameIndex.value = -1;
+      currentGame.value = { ...savedNewGame.value };
+      return;
+    }
+
+    const wasMatchComplete = isMatchComplete.value;
+    games.value.push({ ...currentGame.value });
+    const prevGame = currentGame.value;
+    savedNewGame.value = {
+      team1Score: 0,
+      team2Score: 0,
+      teamAAttackerId: prevGame.teamAAttackerId,
+      teamADefenderId: prevGame.teamADefenderId,
+      teamBAttackerId: prevGame.teamBAttackerId,
+      teamBDefenderId: prevGame.teamBDefenderId
+    };
+    currentGame.value = { ...savedNewGame.value };
+    activeGameIndex.value = -1;
+
+    if (wasMatchComplete) {
+      matchState.value = 'ready_for_submission';
+    } else if (matchType.value === MatchType.TWO_VS_TWO) {
+      matchState.value = 'position_swap';
+    } else {
+      matchState.value = 'draft';
     }
   }
 
@@ -409,9 +416,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function undoLastGame() {
     if (!canUndoLastGame.value) return
-    const lastGame = games.value.pop()
-    if (lastGame) {
-      currentGame.value = { ...lastGame }
+    const popped = games.value.pop()
+    if (popped) {
+      currentGame.value = { ...popped }
+      activeGameIndex.value = games.value.length > 0 ? games.value.length - 1 : -1
       matchState.value = 'score_entry'
     }
   }
@@ -536,6 +544,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     ruleConfig,
     games,
     currentGame,
+    savedNewGame,
+    uncommittedGame,
     activeGameIndex,
     currentActiveIndex,
     matchState,
