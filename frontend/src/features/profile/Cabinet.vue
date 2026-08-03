@@ -123,6 +123,11 @@ async function confirmDelete() {
     isDeleting.value = false
   }
 }
+
+async function handleLogout() {
+  await authStore.logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -247,6 +252,18 @@ async function confirmDelete() {
       </div>
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
+
+      <!-- Sign Out -->
+      <section class="pt-2">
+        <button 
+          @click="handleLogout"
+          data-testid="sign-out-button"
+          class="w-full py-3 rounded-lg bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
+        >
+          <span class="material-symbols-outlined text-sm">logout</span>
+          {{ t('auth.signOut') }}
+        </button>
+      </section>
 
       <!-- Danger Zone -->
       <section class="pt-6 space-y-3">

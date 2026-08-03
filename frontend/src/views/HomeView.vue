@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -19,7 +19,6 @@ import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
 import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirmationStore'
-import { ref } from 'vue'
 
 const { t } = useI18n()
 const showNewMatch = ref(false)
@@ -27,7 +26,7 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch } = usePendingMatches()
+const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch, collapsedMatchIds, collapseMatch, expandAllMatches, cleanupCollapsedMatches } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
@@ -35,6 +34,27 @@ const selectedRejectMatchId = ref<string | null>(null)
 const isRejectModalOpen = ref(false)
 const rejectToastError = ref<string | null>(null)
 const isRejecting = ref(false)
+const isPulsing = ref(false)
+let pulseTimeout: ReturnType<typeof setTimeout> | null = null
+
+const visiblePendingMatches = computed(() => {
+  return pendingMatches.value.filter((m) => !collapsedMatchIds.value.includes(m.id))
+})
+
+watch(pendingMatches, (newMatches) => {
+  cleanupCollapsedMatches(newMatches.map((m) => m.id))
+})
+
+watch(pendingCount, (newVal, oldVal) => {
+  if (newVal > oldVal) {
+    isPulsing.value = true
+    if (pulseTimeout) clearTimeout(pulseTimeout)
+    pulseTimeout = setTimeout(() => {
+      isPulsing.value = false
+      pulseTimeout = null
+    }, 3000)
+  }
+})
 
 watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
   if (confirmedId) {
@@ -238,9 +258,10 @@ onMounted(async () => {
   }
 })
 
-import { onUnmounted } from 'vue'
-
 onUnmounted(() => {
+  if (pulseTimeout) {
+    clearTimeout(pulseTimeout)
+  }
   if (pollInterval) {
     clearInterval(pollInterval)
   }
@@ -316,8 +337,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             <AvatarBase :avatar="authStore.profile.avatar" />
             <div
               v-if="pendingCount > 0"
-              class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none"
+              class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none cursor-pointer"
+              :class="{ 'animate-pulse': isPulsing }"
               data-testid="pending-badge-counter"
+              role="button"
+              tabindex="0"
+              aria-label="Pending notifications"
+              @click="expandAllMatches"
+              @keydown.enter.prevent="expandAllMatches"
+              @keydown.space.prevent="expandAllMatches"
             >
               {{ pendingCount }}
             </div>
@@ -331,16 +359,19 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <div class="h-8 w-48 bg-surface-container-highest rounded"></div>
         </div>
 
-        <PendingMatches
-          v-if="!showNewMatch && pendingMatches.length > 0"
-          :pending-matches="pendingMatches"
-          :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
-          @confirm="handleConfirmMatch"
-          @reject="handleRejectMatch"
-          @dismiss-rejection="handleDismissRejection"
-          @edit-rejection="handleEditRejection"
-          @delete-rejection="handleDeleteRejection"
-        />
+        <Transition name="fade">
+          <PendingMatches
+            v-if="!showNewMatch && visiblePendingMatches.length > 0"
+            :pending-matches="visiblePendingMatches"
+            :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
+            @confirm="handleConfirmMatch"
+            @reject="handleRejectMatch"
+            @dismiss-rejection="handleDismissRejection"
+            @edit-rejection="handleEditRejection"
+            @delete-rejection="handleDeleteRejection"
+            @close="collapseMatch"
+          />
+        </Transition>
 
 
         <template v-if="statsStore.isLoading">
@@ -366,13 +397,6 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 
           <NewMatchFlow v-else @cancel="showNewMatch = false" @complete="handleMatchComplete" />
         </template>
-        <button 
-          v-if="!showNewMatch"
-          @click="authStore.logout()" 
-          class="px-6 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium"
-        >
-          {{ t('auth.signOut') }}
-        </button>
       </div>
 
       <UndoToast

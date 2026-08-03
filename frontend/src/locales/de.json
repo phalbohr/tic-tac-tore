@@ -45,7 +45,10 @@
     "reasonDidNotPlay": "Nicht gespielt",
     "reasonOther": "Sonstiges",
     "customReasonPlaceholder": "Optionale Details (max. 200 Zeichen)",
-    "alreadyProcessed": "Spiel wurde bereits von einem anderen Gegner verarbeitet"
+    "alreadyProcessed": "Spiel wurde bereits von einem anderen Gegner verarbeitet",
+    "close": "Schließen",
+    "editMatch": "Spiel bearbeiten",
+    "deleteMatch": "Spiel löschen"
   },
   "leaderboard": {
     "title": "Rangliste",
