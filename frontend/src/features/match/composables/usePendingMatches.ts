@@ -116,11 +116,31 @@ export function usePendingMatches() {
     }
   }
 
+  const collapsedMatchIds = ref<string[]>([])
+
+  function collapseMatch(id: string) {
+    if (!collapsedMatchIds.value.includes(id)) {
+      collapsedMatchIds.value.push(id)
+    }
+  }
+
+  function expandAllMatches() {
+    collapsedMatchIds.value = []
+  }
+
+  function cleanupCollapsedMatches(activeIds: string[]) {
+    collapsedMatchIds.value = collapsedMatchIds.value.filter((id) => activeIds.includes(id))
+  }
+
   return {
     pendingCount,
     fetchPendingCount,
     rejectMatch,
-    deleteMatch
+    deleteMatch,
+    collapsedMatchIds,
+    collapseMatch,
+    expandAllMatches,
+    cleanupCollapsedMatches
   }
 }
 

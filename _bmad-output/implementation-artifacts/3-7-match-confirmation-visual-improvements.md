@@ -1,6 +1,6 @@
 # Story 3.7: Match Confirmation Visual Improvements
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -84,3 +84,10 @@ Gemini 3.1 Pro (High)
 ### Completion Notes List
 
 ### File List
+
+### Review Findings
+- [x] [Review][Patch] Unbounded Stale State Leak in collapsedMatchIds [frontend/src/features/match/composables/usePendingMatches.ts:119]
+- [x] [Review][Patch] Impure Timer and Missing Cleanup in watch(pendingCount) [frontend/src/views/HomeView.vue:44]
+- [x] [Review][Patch] Missing Unit Test Assertions for Button Hover States [frontend/src/features/match/components/__tests__/PendingMatches.spec.ts:200]
+- [x] [Review][Patch] Missing <Transition> Wrapper for PendingMatches Container in HomeView.vue [frontend/src/views/HomeView.vue:353]
+- [x] [Review][Patch] Inconsistent Button Text Sizes & Fallback Case Mismatch [frontend/src/features/match/components/PendingMatches.vue:143]
