@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
-import { getCookie } from '../../../utils/cookieUtils'
+import { getCookie, getCsrfHeaders } from '../../../utils/cookieUtils'
 
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -68,14 +68,11 @@ export function usePendingMatches() {
     const trimmedReason = reason ? reason.trim() : ''
     const trimmedCustomReason = customReason ? customReason.trim() : ''
     const idempotencyKey = generateUUID()
-    const csrfToken = getCookie('XSRF-TOKEN')
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Idempotency-Key': idempotencyKey
-    }
-    if (csrfToken) {
-      headers['X-XSRF-TOKEN'] = csrfToken
+      'Idempotency-Key': idempotencyKey,
+      ...getCsrfHeaders()
     }
 
     try {
@@ -99,11 +96,7 @@ export function usePendingMatches() {
   }
 
   async function deleteMatch(matchId: string): Promise<{ success: boolean; error?: string }> {
-    const csrfToken = getCookie('XSRF-TOKEN')
-    const headers: Record<string, string> = {}
-    if (csrfToken) {
-      headers['X-XSRF-TOKEN'] = csrfToken
-    }
+    const headers: Record<string, string> = { ...getCsrfHeaders() }
 
     try {
       const res = await fetch(`/api/v1/matches/${matchId}`, {

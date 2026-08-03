@@ -429,11 +429,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
               headers: { ...getCsrfHeaders() }
             })
             if (!delRes.ok) {
-              throw new Error(`Failed to delete editing match: ${delRes.status}`)
+              console.warn(`Failed to delete editing match: ${delRes.status}`)
             }
           } catch (e) {
-            submitError.value = 'Failed to remove old rejected match. Please try submitting again.'
-            return SubmissionResult.SERVER_OR_NETWORK_ERROR
+            console.warn('Failed to remove old rejected match.', e)
           }
         }
         resetDraftStateOnly()
@@ -518,6 +517,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     ruleConfig.value = null
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
+    activeGameIndex.value = -1
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
     editingMatchId.value = null
     clearSubmitError()
