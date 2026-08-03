@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   isOpen: boolean
-}>()
+  isSubmitting?: boolean
+}>(), {
+  isSubmitting: false
+})
 
 const emit = defineEmits<{
   (e: 'submit', payload: { reason: string; customReason: string }): void
@@ -12,15 +15,17 @@ const emit = defineEmits<{
 
 const selectedReason = ref<string>('')
 const customReason = ref<string>('')
-const isSubmitting = ref<boolean>(false)
+
+const rootRef = ref<HTMLElement | null>(null)
 
 watch(
   () => props.isOpen,
-  (newVal) => {
+  async (newVal) => {
     if (newVal) {
       selectedReason.value = ''
       customReason.value = ''
-      isSubmitting.value = false
+      await nextTick()
+      rootRef.value?.focus()
     }
   }
 )
@@ -33,7 +38,7 @@ const predefinedReasons = [
 ]
 
 const isSubmitDisabled = computed(() => {
-  if (isSubmitting.value) return true
+  if (props.isSubmitting) return true
   if (!selectedReason.value) return true
   if (selectedReason.value === 'Other' && !customReason.value.trim()) return true
   return false
@@ -41,7 +46,6 @@ const isSubmitDisabled = computed(() => {
 
 function handleSubmit() {
   if (isSubmitDisabled.value) return
-  isSubmitting.value = true
   emit('submit', {
     reason: selectedReason.value,
     customReason: customReason.value.trim()
@@ -51,7 +55,6 @@ function handleSubmit() {
 function handleCancel() {
   selectedReason.value = ''
   customReason.value = ''
-  isSubmitting.value = false
   emit('cancel')
 }
 </script>
@@ -59,6 +62,7 @@ function handleCancel() {
 <template>
   <div
     v-if="isOpen"
+    ref="rootRef"
     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
     @keydown.esc="handleCancel"
     tabindex="-1"

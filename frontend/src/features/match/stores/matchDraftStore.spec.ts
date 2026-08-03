@@ -214,7 +214,7 @@ describe('matchDraftStore', () => {
       expect(store.games.length).toBe(1)
       expect(store.games[0]?.team1Score).toBe(5)
       expect(store.currentGame.team1Score).toBe(0)
-      expect(store.matchState).toBe('draft') // Not ready for submission because winsNeeded = 2
+      expect(store.matchState).toBe('score_entry') // Not ready for submission because winsNeeded = 2
     })
 
     it('manually completes match when winsNeeded is reached', () => {
@@ -225,7 +225,7 @@ describe('matchDraftStore', () => {
       store.incrementScore(1, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
+      expect(store.matchState).toBe('score_entry')
       
       // Game 2
       store.incrementScore(1, 5)
@@ -242,7 +242,7 @@ describe('matchDraftStore', () => {
       store.incrementScore(2, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
+      expect(store.matchState).toBe('score_entry')
       
       // Game 2
       store.incrementScore(2, 5)

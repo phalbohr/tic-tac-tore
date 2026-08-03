@@ -316,7 +316,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     } else if (matchType.value === MatchType.TWO_VS_TWO) {
       matchState.value = 'position_swap';
     } else {
-      matchState.value = 'draft';
+      matchState.value = 'score_entry';
     }
   }
 
@@ -424,12 +424,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       if (res.ok) {
         if (editingMatchId.value) {
           try {
-            await fetch(`/api/v1/matches/${editingMatchId.value}`, {
+            const delRes = await fetch(`/api/v1/matches/${editingMatchId.value}`, {
               method: 'DELETE',
               headers: { ...getCsrfHeaders() }
             })
-          } catch {
-            // ignore delete error
+            if (!delRes.ok) {
+              throw new Error(`Failed to delete editing match: ${delRes.status}`)
+            }
+          } catch (e) {
+            submitError.value = 'Failed to remove old rejected match. Please try submitting again.'
+            return SubmissionResult.SERVER_OR_NETWORK_ERROR
           }
         }
         resetDraftStateOnly()

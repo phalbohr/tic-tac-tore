@@ -34,6 +34,7 @@ const pendingMatches = ref<PendingMatchItem[]>([])
 const selectedRejectMatchId = ref<string | null>(null)
 const isRejectModalOpen = ref(false)
 const rejectToastError = ref<string | null>(null)
+const isRejecting = ref(false)
 
 watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
   if (confirmedId) {
@@ -66,21 +67,29 @@ function handleRejectMatch(matchId: string) {
 async function handleSubmitRejection(payload: { reason: string; customReason: string }) {
   if (!selectedRejectMatchId.value) return
   const matchId = selectedRejectMatchId.value
-  isRejectModalOpen.value = false
-  selectedRejectMatchId.value = null
 
   confirmationStore.cancelConfirmationTimer(matchId)
 
+  isRejecting.value = true
   const res = await rejectMatch(matchId, payload.reason, payload.customReason)
+  isRejecting.value = false
+
   if (res.success) {
+    isRejectModalOpen.value = false
+    selectedRejectMatchId.value = null
     pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
     await fetchPendingCount(true)
   } else {
     const errorMsg = res.error || t('match.alreadyProcessed', 'Match was already processed by another opponent')
     rejectToastError.value = errorMsg
-    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
-    await fetchPendingCount(true)
-    await fetchPendingMatches()
+    
+    if (res.error === undefined || res.error.includes('already processed')) {
+       isRejectModalOpen.value = false
+       selectedRejectMatchId.value = null
+       pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+       await fetchPendingCount(true)
+       await fetchPendingMatches()
+    }
 
     setTimeout(() => {
       if (rejectToastError.value === errorMsg) {
@@ -424,6 +433,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 
       <RejectReasonSelector
         :is-open="isRejectModalOpen"
+        :is-submitting="isRejecting"
         @submit="handleSubmitRejection"
         @cancel="isRejectModalOpen = false"
       />
