@@ -58,6 +58,7 @@ development_status:
   2-3-score-entry-and-automatic-completion: done
   2-4-match-submission-with-undo-window: done
   2-5-position-swapping-between-games: in-progress
+  2-6-player-display-visual-improvements: ready-for-dev
 
   epic-2-retrospective: optional
   epic-3: in-progress
