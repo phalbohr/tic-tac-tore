@@ -45,7 +45,10 @@
     "reasonDidNotPlay": "Did not play",
     "reasonOther": "Other",
     "customReasonPlaceholder": "Optional details (max 200 chars)",
-    "alreadyProcessed": "Match was already processed by another opponent"
+    "alreadyProcessed": "Match was already processed by another opponent",
+    "close": "Close",
+    "editMatch": "Edit Match",
+    "deleteMatch": "Delete Match"
   },
   "leaderboard": {
     "title": "Leaderboard",

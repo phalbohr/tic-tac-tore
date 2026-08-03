@@ -174,7 +174,7 @@ describe('PendingMatches.vue', () => {
     expect(editEmitted?.[0]?.[0]).toEqual(sampleMatches[0])
   })
 
-  it('emits delete-rejection event when Delete Match button is clicked', async () => {
+  it('opens confirmation modal when Delete Match is clicked, and emits delete-rejection only after Confirm', async () => {
     const sampleMatches: PendingMatchItem[] = [
       {
         id: 'match-del-1',
@@ -193,8 +193,100 @@ describe('PendingMatches.vue', () => {
     const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-del-1"]')
     await deleteBtn.trigger('click')
 
+    // Modal should be visible
+    let modal = wrapper.find('[data-testid="delete-confirmation-modal"]')
+    expect(modal.exists()).toBe(true)
+    expect(modal.text()).toContain('Cancel Match')
+    expect(modal.text()).toContain('Are you sure you want to delete this match? All recorded scores will be lost.')
+    expect(wrapper.emitted('delete-rejection')).toBeFalsy()
+
+    // Test Keep Editing button
+    const keepEditingBtn = wrapper.find('[data-testid="keep-editing-btn"]')
+    await keepEditingBtn.trigger('click')
+
+    modal = wrapper.find('[data-testid="delete-confirmation-modal"]')
+    expect(modal.exists()).toBe(false)
+    expect(wrapper.emitted('delete-rejection')).toBeFalsy()
+
+    // Open modal again
+    await deleteBtn.trigger('click')
+    modal = wrapper.find('[data-testid="delete-confirmation-modal"]')
+    expect(modal.exists()).toBe(true)
+
+    // Click Confirm button
+    const confirmBtn = wrapper.find('[data-testid="confirm-delete-btn"]')
+    await confirmBtn.trigger('click')
+
+    modal = wrapper.find('[data-testid="delete-confirmation-modal"]')
+    expect(modal.exists()).toBe(false)
+
     const deleteEmitted = wrapper.emitted('delete-rejection')
     expect(deleteEmitted).toBeTruthy()
     expect(deleteEmitted?.[0]?.[0]).toBe('match-del-1')
+  })
+
+  it('renders 3 equal buttons for confirmation requests and emits close when close is clicked', async () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-close-1',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const rejectBtn = wrapper.find('[data-testid="reject-match-btn-match-close-1"]')
+    const confirmBtn = wrapper.find('[data-testid="confirm-match-btn-match-close-1"]')
+    const closeBtn = wrapper.find('[data-testid="close-match-btn-match-close-1"]')
+
+    expect(rejectBtn.exists()).toBe(true)
+    expect(confirmBtn.exists()).toBe(true)
+    expect(closeBtn.exists()).toBe(true)
+
+    expect(rejectBtn.classes()).toContain('hover:bg-red-950/40')
+    expect(closeBtn.classes()).toContain('hover:bg-neutral-700')
+
+    await closeBtn.trigger('click')
+    const closeEmitted = wrapper.emitted('close')
+    expect(closeEmitted).toBeTruthy()
+    expect(closeEmitted?.[0]?.[0]).toBe('match-close-1')
+  })
+
+  it('renders 3 equal buttons for rejected matches and emits close when close is clicked', async () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-close-2',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong players',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const editBtn = wrapper.find('[data-testid="edit-rejection-btn-match-close-2"]')
+    const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-close-2"]')
+    const closeBtn = wrapper.find('[data-testid="close-match-btn-match-close-2"]')
+
+    expect(editBtn.exists()).toBe(true)
+    expect(deleteBtn.exists()).toBe(true)
+    expect(closeBtn.exists()).toBe(true)
+
+    expect(editBtn.classes()).toContain('hover:opacity-90')
+    expect(deleteBtn.classes()).toContain('hover:bg-red-900')
+    expect(closeBtn.classes()).toContain('hover:bg-neutral-700')
+
+    await closeBtn.trigger('click')
+    const closeEmitted = wrapper.emitted('close')
+    expect(closeEmitted).toBeTruthy()
+    expect(closeEmitted?.[0]?.[0]).toBe('match-close-2')
   })
 })
