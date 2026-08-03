@@ -309,7 +309,40 @@ class PushNotificationServiceTest {
                 assertThat(payload.summary()).isEqualTo("0 games submitted");
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("[P0] getUserNotifications should return empty list when userId is null")
+        void getUserNotifications_shouldReturnEmptyList_whenUserIdIsNull() {
+            var result = pushNotificationService.getUserNotifications(null);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("[P0] getUserNotifications should return list of DTOs for valid userId")
+        void getUserNotifications_shouldReturnDtoList_whenUserIdIsValid() {
+            var userId = UUID.randomUUID();
+            var log1 = NotificationLog.builder()
+                    .id(UUID.randomUUID())
+                    .recipientId(userId)
+                    .matchId(UUID.randomUUID())
+                    .type("MATCH_REJECTED")
+                    .payload("{\"summary\":\"Match rejected\"}")
+                    .status("SKIPPED")
+                    .errorMessage("No push subscription registered")
+                    .sentAt(Instant.now())
+                    .build();
+
+            when(notificationOperation.getNotificationsForUser(userId)).thenReturn(List.of(log1));
+
+            var result = pushNotificationService.getUserNotifications(userId);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).type()).isEqualTo("MATCH_REJECTED");
+            assertThat(result.get(0).status()).isEqualTo("SKIPPED");
+            assertThat(result.get(0).recipientId()).isEqualTo(userId);
         }
     }
-}
 }

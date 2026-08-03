@@ -35,7 +35,17 @@
     "swapTeam2": "Swap Team 2",
     "teamA": "Team A",
     "teamB": "Team B",
-    "scores": "Scores"
+    "scores": "Scores",
+    "reject": "Reject",
+    "rejectMatch": "Reject Match",
+    "submitRejection": "Submit Rejection",
+    "selectReason": "Select reason for rejection",
+    "reasonWrongScore": "Wrong score",
+    "reasonWrongPlayers": "Wrong players",
+    "reasonDidNotPlay": "Did not play",
+    "reasonOther": "Other",
+    "customReasonPlaceholder": "Optional details (max 200 chars)",
+    "alreadyProcessed": "Match was already processed by another opponent"
   },
   "leaderboard": {
     "title": "Leaderboard",

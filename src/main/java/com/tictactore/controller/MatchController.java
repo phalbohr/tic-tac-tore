@@ -1,6 +1,8 @@
 package com.tictactore.controller;
 
 import com.tictactore.dto.CreateMatchRequest;
+import com.tictactore.dto.MatchConfirmationRequest;
+import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.dto.PendingMatchesResponse;
 import com.tictactore.model.User;
@@ -12,12 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.tictactore.dto.MatchConfirmationRequest;
-import com.tictactore.model.User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.util.UUID;
-
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/matches")
@@ -32,7 +30,7 @@ public class MatchController {
             @AuthenticationPrincipal User principal
     ) {
         CreateMatchRequest finalRequest = request;
-        if (principal != null && request.creatorId() == null) {
+        if (principal != null) {
             finalRequest = new CreateMatchRequest(
                     request.idempotencyKey(),
                     principal.getId(),
@@ -43,6 +41,7 @@ public class MatchController {
                     request.games()
             );
         }
+
         MatchResponse response = matchService.createMatch(finalRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -66,5 +65,31 @@ public class MatchController {
         String idempotencyKey = idempotencyHeader != null ? idempotencyHeader : (request != null ? request.idempotencyKey() : null);
         MatchResponse response = matchService.confirmMatch(id, principal.getId(), idempotencyKey);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<MatchResponse> rejectMatch(
+            @PathVariable("id") UUID id,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyHeader,
+            @Valid @RequestBody MatchRejectionRequest request,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        MatchResponse response = matchService.rejectMatch(id, principal.getId(), request, idempotencyHeader);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMatch(
+            @PathVariable("id") UUID id,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        matchService.deleteMatch(id, principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

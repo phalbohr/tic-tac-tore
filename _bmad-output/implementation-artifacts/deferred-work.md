@@ -251,4 +251,17 @@ location: `src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl
 reason: [x] [Review][Defer] Fragile Nickname Pseudonymization Logic [src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java:90-101] — deferred, pre-existing domain refinement.
 status: open
 
+### DW-38: Positional Null Parameter Creep in MatchResponse.java Record Constructors
+origin: code review of 3-3-match-rejection-with-reason.md (2026-08-01)
+location: `src/main/java/com/tictactore/dto/MatchResponse.java:1`
+reason: [x] [Review][Defer] Positional Null Parameter Creep in MatchResponse.java Constructors — deferred, pre-existing constructor chaining smell.
+status: open
+
+### DW-39: Mock-Only Playwright Test Coverage for Match Rejection
+origin: code review of 3-3-match-rejection-with-reason.md (2026-08-01)
+location: `frontend/e2e/tests/e2e/match-rejection.spec.ts:1`
+reason: [x] [Review][Defer] Mock-Only Playwright Test Coverage — deferred, pre-existing mock pattern in E2E suite.
+status: open
+
+
 

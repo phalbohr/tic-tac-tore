@@ -73,14 +73,37 @@ watch(() => store.matchState, (newVal) => {
       <BaseButton variant="secondary" @click="showCancelModal = true" class="!h-10 px-4 absolute right-0">Cancel</BaseButton>
     </div>
     
-    <div class="flex flex-col items-center mb-4 gap-1">
-      <div v-for="idx in (store.ruleConfig?.gameLimit || 1)" :key="idx" class="text-sm text-on-surface-variant h-5 flex items-center justify-center">
-        <span v-if="idx <= store.games.length">
-          Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
-        </span>
-        <span v-else class="opacity-50">
-          Game {{ idx }}: -
-        </span>
+    <div class="flex flex-col items-center mb-4 gap-2 w-full">
+      <div
+        v-for="idx in (store.ruleConfig?.gameLimit || 1)"
+        :key="idx"
+        class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-sm transition-colors"
+        :class="[
+          (idx - 1) === store.currentActiveIndex
+            ? 'border-primary bg-primary/10 text-on-surface font-bold'
+            : 'border-white/5 bg-surface-container/40 text-on-surface-variant hover:bg-surface-container'
+        ]"
+      >
+        <button
+          type="button"
+          class="flex-1 text-left flex items-center justify-between gap-2"
+          :disabled="(idx - 1) > store.games.length"
+          :data-testid="`select-game-btn-${idx}`"
+          @click="store.selectGameToEdit(idx - 1)"
+        >
+          <span v-if="(idx - 1) === store.currentActiveIndex">
+            Game {{ idx }}: {{ store.currentGame.team1Score }} - {{ store.currentGame.team2Score }}
+          </span>
+          <span v-else-if="(idx - 1) < store.games.length">
+            Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
+          </span>
+          <span v-else-if="(idx - 1) === store.games.length">
+            Game {{ idx }}: {{ store.savedNewGame.team1Score }} - {{ store.savedNewGame.team2Score }}
+          </span>
+          <span v-else class="opacity-50">
+            Game {{ idx }}: -
+          </span>
+        </button>
       </div>
     </div>
     
@@ -116,15 +139,6 @@ watch(() => store.matchState, (newVal) => {
         class="w-full"
       >
         {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
-      </BaseButton>
-
-      <BaseButton
-        v-if="store.canUndoLastGame"
-        variant="secondary"
-        @click="store.undoLastGame()"
-        class="w-full"
-      >
-        Undo Last Game
       </BaseButton>
     </div>
 

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-07-29"
+last_updated: "2026-08-01"
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -62,8 +62,8 @@ development_status:
   epic-2-retrospective: optional
   epic-3: in-progress
   3-1-confirmation-requests-and-push-notifications: done
-  3-2-single-tap-confirmation-with-undo-window: in-progress
-  3-3-match-rejection-with-reason: backlog
+  3-2-single-tap-confirmation-with-undo-window: done
+  3-3-match-rejection-with-reason: review
   3-4-context-aware-verification-rules: backlog
   3-5-publication-rules-and-24-hour-cooldown: backlog
   3-6-submission-rate-limiting-anti-spam: backlog

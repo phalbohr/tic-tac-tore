@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
 import { getCsrfHeaders } from '../../../utils/cookieUtils'
+import { useAuthStore } from '@/stores/auth'
 
 export enum MatchType {
   ONE_VS_ONE = '1v1',
@@ -32,7 +33,9 @@ export interface RuleConfig {
 }
 
 export const useMatchDraftStore = defineStore('matchDraft', () => {
+  const authStore = useAuthStore()
   const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
+
   const selectedPlayers = ref<string[]>([])
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
@@ -41,8 +44,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+  const activeGameIndex = ref<number>(-1)
   const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
   const submitError = ref<string | null>(null)
+  const editingMatchId = ref<string | null>(null)
 
   function clearSubmitError() {
     submitError.value = null
@@ -159,26 +164,64 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return true
   })
 
+  const uncommittedGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+
+  const savedNewGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
+
   const isMatchComplete = computed(() => {
-    const winsNeeded = ruleConfig.value?.winsNeeded ?? 1
-    const gameLimit = ruleConfig.value?.gameLimit ?? 1
-    
-    let t1w = games.value.filter(g => g.team1Score > g.team2Score).length
-    let t2w = games.value.filter(g => g.team2Score > g.team1Score).length
-    
-    if (isGameComplete.value) {
-       if (currentGame.value.team1Score > currentGame.value.team2Score) t1w++;
-       else if (currentGame.value.team2Score > currentGame.value.team1Score) t2w++;
+    const winsNeeded = ruleConfig.value?.winsNeeded ?? 2
+    const gameLimit = ruleConfig.value?.gameLimit ?? 3
+    const limit = ruleConfig.value?.scoreLimit ?? 10
+    const winByTwo = ruleConfig.value?.winByTwo ?? false
+
+    let t1w = 0
+    let t2w = 0
+    let totalCompletedGames = 0
+
+    games.value.forEach((g, idx) => {
+      const s1 = idx === activeGameIndex.value ? currentGame.value.team1Score : g.team1Score
+      const s2 = idx === activeGameIndex.value ? currentGame.value.team2Score : g.team2Score
+      const reachedLimit = s1 >= limit || s2 >= limit
+      const gameComplete = reachedLimit && (!winByTwo || Math.abs(s1 - s2) >= 2)
+      if (gameComplete) {
+        totalCompletedGames++
+        if (s1 > s2) t1w++
+        else if (s2 > s1) t2w++
+      }
+    })
+
+    if (activeGameIndex.value === -1 && isGameComplete.value) {
+      totalCompletedGames++
+      if (currentGame.value.team1Score > currentGame.value.team2Score) t1w++
+      else if (currentGame.value.team2Score > currentGame.value.team1Score) t2w++
     }
-    
-    return t1w >= winsNeeded || t2w >= winsNeeded || (games.value.length + 1) >= gameLimit
+
+    return t1w >= winsNeeded || t2w >= winsNeeded || totalCompletedGames >= gameLimit
   })
 
-  const canUndoLastGame = computed(() => {
-    if (games.value.length === 0) return false
-    if (matchState.value === 'ready_for_submission') return true
-    return currentGame.value.team1Score === 0 && currentGame.value.team2Score === 0
-  })
+  const currentActiveIndex = computed(() => (activeGameIndex.value >= 0 ? activeGameIndex.value : games.value.length))
+
+  function selectGameToEdit(index: number) {
+    if (index < 0 || index > games.value.length) return
+    
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      games.value[activeGameIndex.value] = { ...currentGame.value }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value = { ...currentGame.value }
+    }
+
+    if (index < games.value.length) {
+      activeGameIndex.value = index
+      const targetGame = games.value[index]
+      if (targetGame) {
+        currentGame.value = { ...targetGame }
+      }
+    } else if (index === games.value.length) {
+      activeGameIndex.value = -1
+      currentGame.value = { ...savedNewGame.value }
+    }
+    matchState.value = 'score_entry'
+  }
 
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
@@ -195,6 +238,17 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         ? currentGame.value.team2Score + amount
         : Math.min(currentGame.value.team2Score + amount, limit)
     }
+
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      const activeGame = games.value[activeGameIndex.value]
+      if (activeGame) {
+        activeGame.team1Score = currentGame.value.team1Score
+        activeGame.team2Score = currentGame.value.team2Score
+      }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value.team1Score = currentGame.value.team1Score
+      savedNewGame.value.team2Score = currentGame.value.team2Score
+    }
   }
 
   function decrementScore(team: 1 | 2) {
@@ -204,16 +258,49 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     } else {
       currentGame.value.team2Score = Math.max(0, currentGame.value.team2Score - 1)
     }
+
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      const activeGame = games.value[activeGameIndex.value]
+      if (activeGame) {
+        activeGame.team1Score = currentGame.value.team1Score
+        activeGame.team2Score = currentGame.value.team2Score
+      }
+    } else if (activeGameIndex.value === -1) {
+      savedNewGame.value.team1Score = currentGame.value.team1Score
+      savedNewGame.value.team2Score = currentGame.value.team2Score
+    }
   }
 
   function completeCurrentGame() {
     if (!isGameComplete.value) return;
-    
+
+    if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
+      games.value[activeGameIndex.value] = { ...currentGame.value };
+
+      if (activeGameIndex.value < games.value.length - 1) {
+        const nextIndex = activeGameIndex.value + 1;
+        activeGameIndex.value = nextIndex;
+        const nextGame = games.value[nextIndex];
+        if (nextGame) {
+          currentGame.value = { ...nextGame };
+        }
+        return;
+      }
+
+      if (isMatchComplete.value) {
+        matchState.value = 'ready_for_submission';
+        return;
+      }
+
+      activeGameIndex.value = -1;
+      currentGame.value = { ...savedNewGame.value };
+      return;
+    }
+
     const wasMatchComplete = isMatchComplete.value;
     games.value.push({ ...currentGame.value });
-    
     const prevGame = currentGame.value;
-    currentGame.value = {
+    savedNewGame.value = {
       team1Score: 0,
       team2Score: 0,
       teamAAttackerId: prevGame.teamAAttackerId,
@@ -221,23 +308,81 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamBAttackerId: prevGame.teamBAttackerId,
       teamBDefenderId: prevGame.teamBDefenderId
     };
+    currentGame.value = { ...savedNewGame.value };
+    activeGameIndex.value = -1;
 
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
+    } else if (matchType.value === MatchType.TWO_VS_TWO) {
+      matchState.value = 'position_swap';
     } else {
-      if (matchType.value === MatchType.TWO_VS_TWO) {
-        matchState.value = 'position_swap'
-      }
+      matchState.value = 'score_entry';
     }
   }
 
+  function loadFromRejectedMatch(matchItem: {
+    id?: string;
+    teamAAttackerId?: string;
+    teamADefenderId?: string;
+    teamBAttackerId?: string;
+    teamBDefenderId?: string;
+    games?: Array<{ teamAScore: number; teamBScore: number; teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string }>;
+  }) {
+    editingMatchId.value = matchItem.id || null
+    const teamAPlayers: string[] = []
+    if (matchItem.teamAAttackerId) teamAPlayers.push(matchItem.teamAAttackerId)
+    if (matchItem.teamADefenderId) teamAPlayers.push(matchItem.teamADefenderId)
+
+    const teamBPlayers: string[] = []
+    if (matchItem.teamBAttackerId) teamBPlayers.push(matchItem.teamBAttackerId)
+    if (matchItem.teamBDefenderId) teamBPlayers.push(matchItem.teamBDefenderId)
+
+    if (teamAPlayers.length > 1 || teamBPlayers.length > 1) {
+      matchType.value = MatchType.TWO_VS_TWO
+    } else {
+      matchType.value = MatchType.ONE_VS_ONE
+    }
+
+    selectedPlayers.value = [...teamAPlayers, ...teamBPlayers]
+    selectedPlayers.value.forEach(id => fetchPlayer(id))
+
+    if (matchItem.games && matchItem.games.length > 0) {
+      games.value = matchItem.games.map(g => ({
+        team1Score: g.teamAScore,
+        team2Score: g.teamBScore,
+        teamAAttackerId: g.teamAAttackerId,
+        teamADefenderId: g.teamADefenderId,
+        teamBAttackerId: g.teamBAttackerId,
+        teamBDefenderId: g.teamBDefenderId
+      }))
+      activeGameIndex.value = games.value.length - 1
+      const lastGame = games.value[activeGameIndex.value]
+      currentGame.value = lastGame ? { ...lastGame } : { team1Score: 0, team2Score: 0 }
+    } else {
+      games.value = []
+      activeGameIndex.value = -1
+      currentGame.value = { team1Score: 0, team2Score: 0 }
+    }
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
+
+    if (!ruleConfig.value) {
+      ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
+    }
+    matchState.value = 'score_entry'
+  }
+
   function beginScoreEntry() {
+    games.value = []
+    activeGameIndex.value = -1
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
+    currentGame.value = { team1Score: 0, team2Score: 0 }
     if (matchType.value === MatchType.TWO_VS_TWO) {
-      matchState.value = 'position_swap'
       currentGame.value.teamAAttackerId = selectedPlayers.value[0]
       currentGame.value.teamADefenderId = selectedPlayers.value[1]
       currentGame.value.teamBAttackerId = selectedPlayers.value[2]
       currentGame.value.teamBDefenderId = selectedPlayers.value[3]
+      savedNewGame.value = { ...currentGame.value }
+      matchState.value = 'position_swap'
     } else {
       matchState.value = 'score_entry'
     }
@@ -265,15 +410,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'draft'
   }
 
-  function undoLastGame() {
-    if (!canUndoLastGame.value) return
-    const lastGame = games.value.pop()
-    if (lastGame) {
-      currentGame.value = { ...lastGame }
-      matchState.value = 'score_entry'
-    }
-  }
-
   async function executeCommit(item: { idempotencyKey: string; payload: Record<string, unknown> }): Promise<SubmissionResult> {
     try {
       const res = await fetch('/api/v1/matches', {
@@ -286,6 +422,19 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         body: JSON.stringify(item.payload)
       })
       if (res.ok) {
+        if (editingMatchId.value) {
+          try {
+            const delRes = await fetch(`/api/v1/matches/${editingMatchId.value}`, {
+              method: 'DELETE',
+              headers: { ...getCsrfHeaders() }
+            })
+            if (!delRes.ok) {
+              console.warn(`Failed to delete editing match: ${delRes.status}`)
+            }
+          } catch (e) {
+            console.warn('Failed to remove old rejected match.', e)
+          }
+        }
         resetDraftStateOnly()
         return SubmissionResult.SUCCESS
       } else if (res.status >= 400 && res.status < 500) {
@@ -334,14 +483,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : selectedPlayers.value[1]
     const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : undefined
 
+    const creatorId = authStore.profile?.id || teamAAttackerId
     const payload = {
       idempotencyKey,
-      creatorId: teamAAttackerId,
+      creatorId,
       teamAAttackerId,
       teamADefenderId,
       teamBAttackerId,
       teamBDefenderId,
       games: games.value.map(g => ({
+
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
         teamAAttackerId: g.teamAAttackerId,
@@ -356,11 +507,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function cancelSubmissionTimer() {
     cancelTimer()
-    if (canUndoLastGame.value) {
-      undoLastGame()
-    } else {
-      matchState.value = 'score_entry'
-    }
+    matchState.value = 'score_entry'
   }
 
   function resetDraftStateOnly() {
@@ -370,7 +517,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     ruleConfig.value = null
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
+    activeGameIndex.value = -1
+    savedNewGame.value = { team1Score: 0, team2Score: 0 }
     matchState.value = 'draft'
+    editingMatchId.value = null
     clearSubmitError()
   }
 
@@ -387,12 +537,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     fetchedPlayers,
     isGameComplete,
     isMatchComplete,
-    canUndoLastGame,
     completeCurrentGame,
     ruleConfig,
     games,
     currentGame,
+    savedNewGame,
+    uncommittedGame,
+    activeGameIndex,
+    currentActiveIndex,
     matchState,
+    editingMatchId,
     submitError,
     clearSubmitError,
     pendingSubmission,
@@ -408,7 +562,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     removePlayer,
     incrementScore,
     decrementScore,
-    undoLastGame,
+    selectGameToEdit,
+    loadFromRejectedMatch,
     beginScoreEntry,
     confirmPositions,
     swapPositions,

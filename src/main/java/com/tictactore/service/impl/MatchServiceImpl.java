@@ -2,18 +2,22 @@ package com.tictactore.service.impl;
 
 import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.GameDto;
+import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.exception.DuplicatePlayerException;
 import com.tictactore.exception.DuplicatePositionException;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.exception.InvalidMatchStateException;
 import com.tictactore.exception.InvalidPositionException;
 import com.tictactore.exception.ParticipantNotFoundException;
+import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.MatchService;
+import com.tictactore.service.PushNotificationService;
 import com.tictactore.service.operation.MatchOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +37,7 @@ public class MatchServiceImpl implements MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchOperation matchOperation;
-    private final com.tictactore.service.PushNotificationService pushNotificationService;
+    private final PushNotificationService pushNotificationService;
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
@@ -63,9 +67,6 @@ public class MatchServiceImpl implements MatchService {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
         }
 
-        if (request.creatorId() != null && !uniqueIds.contains(request.creatorId())) {
-            throw new ParticipantNotFoundException("Creator must be a participant in the match");
-        }
 
         List<User> foundUsers = userRepository.findAllById(playerIds);
         if (foundUsers.size() != playerIds.size()) {
@@ -179,9 +180,15 @@ public class MatchServiceImpl implements MatchService {
             return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
         }
         List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
-        List<Match> userPendingMatches = pendingMatches.stream()
+        List<Match> rejectedMatches = matchRepository.findByStatusAndCreatorId("REJECTED", currentUserId);
+
+        List<Match> userPendingMatches = new ArrayList<>();
+        pendingMatches.stream()
                 .filter(m -> isUserPendingApprover(m, currentUserId))
-                .toList();
+                .forEach(userPendingMatches::add);
+        if (rejectedMatches != null) {
+            userPendingMatches.addAll(rejectedMatches);
+        }
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : userPendingMatches) {
@@ -190,6 +197,7 @@ public class MatchServiceImpl implements MatchService {
             if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
             if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
             if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
+            if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
         }
 
         Map<UUID, String> userNicknameMap = new HashMap<>();
@@ -271,18 +279,54 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Retryable
     public MatchResponse confirmMatch(UUID matchId, UUID userId, String idempotencyKey) {
-        Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
+        var match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
 
-        if ("CONFIRMED".equals(match.getStatus())) {
+        if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
             if (userId.equals(match.getConfirmedByUserId())) {
                 return mapToResponse(match);
             }
-            throw new com.tictactore.exception.InvalidMatchStateException("Match is already confirmed");
+            throw new InvalidMatchStateException("Match is already confirmed");
         }
 
-        Match updatedMatch = matchOperation.confirmMatch(match, userId);
+        var updatedMatch = matchOperation.confirmMatch(match, userId);
+        return mapToResponse(updatedMatch);
+    }
+
+    @Override
+    @Retryable
+    public MatchResponse rejectMatch(UUID matchId, UUID userId, MatchRejectionRequest request, String idempotencyKey) {
+        var match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
+
+        if (Match.STATUS_REJECTED.equals(match.getStatus())) {
+            if (userId.equals(match.getRejectedByUserId())) {
+                return mapToResponse(match);
+            }
+            throw new InvalidMatchStateException("Match is already rejected");
+        }
+
+        if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
+            throw new InvalidMatchStateException("Match is already confirmed");
+        }
+
+        var reason = request != null ? request.reason() : null;
+        var customReason = request != null ? request.customReason() : null;
+
+        var updatedMatch = matchOperation.rejectMatch(matchId, userId, reason, customReason);
+
+        try {
+            if (updatedMatch.getCreatorId() != null) {
+                userRepository.findById(updatedMatch.getCreatorId()).ifPresent(creator -> {
+                    pushNotificationService.sendRejectionNotification(updatedMatch, creator, updatedMatch.getRejectionReason());
+                });
+            }
+        } catch (Exception e) {
+            log.error("Failed to dispatch push notification for rejected match {}", updatedMatch.getId(), e);
+        }
+
         return mapToResponse(updatedMatch);
     }
 
@@ -338,11 +382,19 @@ public class MatchServiceImpl implements MatchService {
                 match.getCreatedAt(),
                 match.getConfirmedByUserId(),
                 match.getConfirmedAt(),
+                match.getRejectedByUserId(),
+                match.getRejectedAt(),
+                match.getRejectionReason(),
                 userNicknameMap.get(match.getCreatorId()),
                 userNicknameMap.get(match.getTeamAAttackerId()),
                 userNicknameMap.get(match.getTeamADefenderId()),
                 userNicknameMap.get(match.getTeamBAttackerId()),
                 userNicknameMap.get(match.getTeamBDefenderId())
         );
+    }
+
+    @Override
+    public void deleteMatch(UUID matchId, UUID userId) {
+        matchOperation.deleteMatch(matchId, userId);
     }
 }

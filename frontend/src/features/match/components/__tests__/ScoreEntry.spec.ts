@@ -94,4 +94,37 @@ describe('ScoreEntry.vue', () => {
     expect(headings[0]!.text()).toBe('P1 & P2 & P3')
     expect(headings[1]!.text()).toBe('P4 & P5 & P6')
   })
+
+  it('disables Next Game button when game is incomplete and enables when complete', async () => {
+    const store = useMatchDraftStore()
+    store.ruleConfig = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
+    store.selectedPlayers = ['p1', 'p2']
+    store.matchState = 'score_entry'
+
+    const wrapper = mount(ScoreEntry)
+    const actionBtn = wrapper.findAll('button').find(w => w.text().includes('Next Game') || w.text().includes('Complete Match'))
+    expect(actionBtn).toBeDefined()
+    expect(actionBtn!.attributes('disabled')).toBeDefined()
+
+    store.currentGame.team1Score = 10
+    await wrapper.vm.$nextTick()
+    expect(actionBtn!.attributes('disabled')).toBeUndefined()
+  })
+
+  it('shows Complete Match when completing final game', async () => {
+    const store = useMatchDraftStore()
+    store.ruleConfig = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
+    store.selectedPlayers = ['p1', 'p2']
+    store.games = [
+      { team1Score: 10, team2Score: 5 },
+      { team1Score: 5, team2Score: 10 }
+    ]
+    store.activeGameIndex = -1
+    store.currentGame = { team1Score: 10, team2Score: 2 }
+    store.matchState = 'score_entry'
+
+    const wrapper = mount(ScoreEntry)
+    const actionBtn = wrapper.findAll('button').find(w => w.text().includes('Complete Match'))
+    expect(actionBtn).toBeDefined()
+  })
 })

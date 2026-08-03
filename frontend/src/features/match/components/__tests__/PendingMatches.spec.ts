@@ -118,4 +118,83 @@ describe('PendingMatches.vue', () => {
     const btn2 = wrapper.find('[data-testid="confirm-match-btn-match-2"]')
     expect(btn2.exists()).toBe(true)
   })
+
+  it('displays rejection reason text and hides action buttons when match status is REJECTED', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-rej',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong score',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const rejectionReasonEl = wrapper.find('[data-testid="rejection-reason-match-rej"]')
+    expect(rejectionReasonEl.exists()).toBe(true)
+    expect(rejectionReasonEl.text()).toContain('Wrong score')
+
+    const confirmBtn = wrapper.find('[data-testid="confirm-match-btn-match-rej"]')
+    const rejectBtn = wrapper.find('[data-testid="reject-match-btn-match-rej"]')
+    expect(confirmBtn.exists()).toBe(false)
+    expect(rejectBtn.exists()).toBe(false)
+
+    const editBtn = wrapper.find('[data-testid="edit-rejection-btn-match-rej"]')
+    const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-rej"]')
+    expect(editBtn.exists()).toBe(true)
+    expect(deleteBtn.exists()).toBe(true)
+  })
+
+  it('emits edit-rejection event when Edit Match button is clicked', async () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-edit-1',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong score',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const editBtn = wrapper.find('[data-testid="edit-rejection-btn-match-edit-1"]')
+    await editBtn.trigger('click')
+
+    const editEmitted = wrapper.emitted('edit-rejection')
+    expect(editEmitted).toBeTruthy()
+    expect(editEmitted?.[0]?.[0]).toEqual(sampleMatches[0])
+  })
+
+  it('emits delete-rejection event when Delete Match button is clicked', async () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-del-1',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong score',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-del-1"]')
+    await deleteBtn.trigger('click')
+
+    const deleteEmitted = wrapper.emitted('delete-rejection')
+    expect(deleteEmitted).toBeTruthy()
+    expect(deleteEmitted?.[0]?.[0]).toBe('match-del-1')
+  })
 })

@@ -5,17 +5,27 @@ import BaseButton from '@/core/components/BaseButton.vue'
 export interface GameScoreItem {
   teamAScore: number
   teamBScore: number
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
 }
 
 export interface PendingMatchItem {
   id: string
+  status?: string
   creatorNickname?: string
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
   teamANames?: string[]
   teamBNames?: string[]
   teamAScore?: number
   teamBScore?: number
   games?: GameScoreItem[]
   createdAt?: string
+  rejectionReason?: string
 }
 
 const props = defineProps<{
@@ -26,6 +36,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'confirm', matchId: string, matchNumber: number): void
+  (e: 'reject', matchId: string, matchNumber: number): void
+  (e: 'dismiss-rejection', matchId: string): void
+  (e: 'edit-rejection', match: PendingMatchItem): void
+  (e: 'delete-rejection', matchId: string): void
 }>()
 
 const { t } = useI18n()
@@ -115,17 +129,53 @@ function getMatchBadgeText(index: number): string {
         </div>
       </div>
 
-      <!-- Action Button / Confirmation State -->
-      <div class="w-full flex items-center justify-end mt-1">
-        <BaseButton
-          v-if="!isPendingConfirmation(match.id)"
-          variant="primary"
-          @click="emit('confirm', match.id, mIdx + 1)"
-          class="w-full !h-12 font-bold min-h-12"
-          :data-testid="`confirm-match-btn-${match.id}`"
-        >
-          {{ t('match.confirm') }}
-        </BaseButton>
+      <!-- Action Button / Confirmation State / Rejection Reason -->
+      <div class="w-full flex items-center gap-2 justify-end mt-1">
+        <template v-if="match.status === 'REJECTED'">
+          <div
+            class="w-full flex flex-col gap-2 text-xs text-red-400 font-medium bg-surface-container/60 p-3 rounded-xl border border-red-500/20"
+            :data-testid="`rejection-reason-${match.id}`"
+          >
+            <div>{{ t('match.rejectionReasonLabel', 'Rejection reason') }}: {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}</div>
+            <div class="flex items-center gap-2 justify-end mt-1">
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-bold bg-primary hover:bg-primary-hover text-on-primary rounded-lg transition-colors"
+                :data-testid="`edit-rejection-btn-${match.id}`"
+                @click="emit('edit-rejection', match)"
+              >
+                {{ t('match.editMatch', 'Edit Match') }}
+              </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-bold bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 rounded-lg transition-colors"
+                :data-testid="`delete-rejection-btn-${match.id}`"
+                @click="emit('delete-rejection', match.id)"
+              >
+                {{ t('match.deleteMatch', 'Delete Match') }}
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <template v-else-if="!isPendingConfirmation(match.id)">
+          <button
+            type="button"
+            class="flex-1 min-h-12 h-12 rounded-xl font-bold bg-surface-container hover:bg-neutral-800 text-red-400 border-none transition-colors"
+            :data-testid="`reject-match-btn-${match.id}`"
+            @click="emit('reject', match.id, mIdx + 1)"
+          >
+            {{ t('match.reject') }}
+          </button>
+          <BaseButton
+            variant="primary"
+            @click="emit('confirm', match.id, mIdx + 1)"
+            class="flex-1 !h-12 font-bold min-h-12"
+            :data-testid="`confirm-match-btn-${match.id}`"
+          >
+            {{ t('match.confirm') }}
+          </BaseButton>
+        </template>
         <span v-else class="text-xs italic text-primary font-medium w-full text-center py-2">
           {{ t('match.confirmedTapUndo') }}
         </span>

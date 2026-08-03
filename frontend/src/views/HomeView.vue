@@ -10,6 +10,7 @@ import TutorialCarousel from '@/components/TutorialCarousel.vue'
 import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
+import RejectReasonSelector from '@/features/match/components/RejectReasonSelector.vue'
 import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
@@ -26,10 +27,14 @@ const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount, fetchPendingCount } = usePendingMatches()
+const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
+const selectedRejectMatchId = ref<string | null>(null)
+const isRejectModalOpen = ref(false)
+const rejectToastError = ref<string | null>(null)
+const isRejecting = ref(false)
 
 watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
   if (confirmedId) {
@@ -54,6 +59,46 @@ function handleConfirmMatch(matchId: string, matchNumber: number) {
   confirmationStore.commitConfirmation(matchId, matchNumber)
 }
 
+function handleRejectMatch(matchId: string) {
+  selectedRejectMatchId.value = matchId
+  isRejectModalOpen.value = true
+}
+
+async function handleSubmitRejection(payload: { reason: string; customReason: string }) {
+  if (!selectedRejectMatchId.value) return
+  const matchId = selectedRejectMatchId.value
+
+  confirmationStore.cancelConfirmationTimer(matchId)
+
+  isRejecting.value = true
+  const res = await rejectMatch(matchId, payload.reason, payload.customReason)
+  isRejecting.value = false
+
+  if (res.success) {
+    isRejectModalOpen.value = false
+    selectedRejectMatchId.value = null
+    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+    await fetchPendingCount(true)
+  } else {
+    const errorMsg = res.error || t('match.alreadyProcessed', 'Match was already processed by another opponent')
+    rejectToastError.value = errorMsg
+    
+    if (res.error === undefined || res.error.includes('already processed')) {
+       isRejectModalOpen.value = false
+       selectedRejectMatchId.value = null
+       pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+       await fetchPendingCount(true)
+       await fetchPendingMatches()
+    }
+
+    setTimeout(() => {
+      if (rejectToastError.value === errorMsg) {
+        rejectToastError.value = null
+      }
+    }, 5000)
+  }
+}
+
 function handleConfirmationUndo(matchId?: string) {
   confirmationStore.cancelConfirmationTimer(matchId)
 }
@@ -75,6 +120,13 @@ watch(() => matchStore.submitError, (newVal) => {
 
 interface ApiMatchItem {
   id: string
+  status?: string
+  rejectionReason?: string
+  creatorId?: string
+  teamAAttackerId?: string
+  teamADefenderId?: string
+  teamBAttackerId?: string
+  teamBDefenderId?: string
   creatorNickname?: string
   teamAAttackerNickname?: string
   teamADefenderNickname?: string
@@ -84,7 +136,14 @@ interface ApiMatchItem {
   teamBNames?: string[]
   teamAScore?: number
   teamBScore?: number
-  games?: Array<{ teamAScore: number; teamBScore: number }>
+  games?: Array<{
+    teamAScore: number;
+    teamBScore: number;
+    teamAAttackerId?: string;
+    teamADefenderId?: string;
+    teamBAttackerId?: string;
+    teamBDefenderId?: string;
+  }>
   createdAt?: string
 }
 
@@ -107,11 +166,21 @@ async function fetchPendingMatches() {
         const games = (m.games || []).map((g) => ({
           teamAScore: g.teamAScore,
           teamBScore: g.teamBScore,
+          teamAAttackerId: g.teamAAttackerId,
+          teamADefenderId: g.teamADefenderId,
+          teamBAttackerId: g.teamBAttackerId,
+          teamBDefenderId: g.teamBDefenderId,
         }))
 
         return {
           id: m.id,
+          status: m.status,
+          rejectionReason: m.rejectionReason,
           creatorNickname: m.creatorNickname || 'Opponent',
+          teamAAttackerId: m.teamAAttackerId,
+          teamADefenderId: m.teamADefenderId,
+          teamBAttackerId: m.teamBAttackerId,
+          teamBDefenderId: m.teamBDefenderId,
           teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
           teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
           teamAScore: games[0]?.teamAScore ?? m.teamAScore,
@@ -126,11 +195,57 @@ async function fetchPendingMatches() {
   }
 }
 
+let pollInterval: ReturnType<typeof setInterval> | null = null
+
+function handleDismissRejection(matchId: string) {
+  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+}
+
+async function handleDeleteRejection(matchId: string) {
+  pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+  await deleteMatch(matchId)
+  await fetchPendingCount(true)
+}
+
+function handleEditRejection(matchItem: PendingMatchItem) {
+  matchStore.loadFromRejectedMatch(matchItem)
+  showNewMatch.value = true
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible' && authStore.isAuthenticated) {
+    fetchPendingMatches()
+    fetchPendingCount(true)
+  }
+}
+
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
     await statsStore.fetchStats()
     await fetchPendingMatches()
+  }
+
+  pollInterval = setInterval(() => {
+    if (authStore.isAuthenticated) {
+      fetchPendingMatches()
+      fetchPendingCount(true)
+    }
+  }, 5000)
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  }
+})
+
+import { onUnmounted } from 'vue'
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+  }
+  if (typeof window !== 'undefined') {
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 })
 
@@ -141,6 +256,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
   }
 })
 </script>
+
 
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
@@ -220,7 +336,12 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           :pending-matches="pendingMatches"
           :pending-confirmation-ids="confirmationStore.pendingConfirmationIds"
           @confirm="handleConfirmMatch"
+          @reject="handleRejectMatch"
+          @dismiss-rejection="handleDismissRejection"
+          @edit-rejection="handleEditRejection"
+          @delete-rejection="handleDeleteRejection"
         />
+
 
         <template v-if="statsStore.isLoading">
           <div class="animate-pulse flex flex-col items-center w-full gap-4">
@@ -302,6 +423,19 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         v-if="matchStore.submitError"
         :message="matchStore.submitError"
         @dismiss="handleDismissError"
+      />
+
+      <ErrorToast
+        v-if="rejectToastError"
+        :message="rejectToastError"
+        @dismiss="rejectToastError = null"
+      />
+
+      <RejectReasonSelector
+        :is-open="isRejectModalOpen"
+        :is-submitting="isRejecting"
+        @submit="handleSubmitRejection"
+        @cancel="isRejectModalOpen = false"
       />
     </main>
   </div>

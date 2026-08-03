@@ -59,9 +59,15 @@ public class NotificationOperation {
         return pushSubscriptionRepository.findByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public List<NotificationLog> getNotificationsForUser(UUID recipientId) {
+        return notificationLogRepository.findByRecipientId(recipientId);
+    }
+
     @Idempotent
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public NotificationLog saveNotificationLog(NotificationLog log) {
         return notificationLogRepository.save(log);
     }
 }
+

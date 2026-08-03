@@ -214,7 +214,7 @@ describe('matchDraftStore', () => {
       expect(store.games.length).toBe(1)
       expect(store.games[0]?.team1Score).toBe(5)
       expect(store.currentGame.team1Score).toBe(0)
-      expect(store.matchState).toBe('draft') // Not ready for submission because winsNeeded = 2
+      expect(store.matchState).toBe('score_entry') // Not ready for submission because winsNeeded = 2
     })
 
     it('manually completes match when winsNeeded is reached', () => {
@@ -225,7 +225,7 @@ describe('matchDraftStore', () => {
       store.incrementScore(1, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
+      expect(store.matchState).toBe('score_entry')
       
       // Game 2
       store.incrementScore(1, 5)
@@ -242,7 +242,7 @@ describe('matchDraftStore', () => {
       store.incrementScore(2, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
+      expect(store.matchState).toBe('score_entry')
       
       // Game 2
       store.incrementScore(2, 5)
@@ -251,53 +251,7 @@ describe('matchDraftStore', () => {
       expect(store.matchState).toBe('ready_for_submission')
     })
 
-    it('undos last game correctly', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
 
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(1)
-      expect(store.matchState).toBe('draft')
-
-      store.undoLastGame()
-      expect(store.games.length).toBe(0)
-      expect(store.currentGame.team1Score).toBe(5)
-      expect(store.matchState).toBe('score_entry')
-    })
-
-    it('undos last game from ready_for_submission state', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3, winByTwo: false }
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(2)
-      expect(store.matchState).toBe('ready_for_submission')
-
-      store.undoLastGame()
-      expect(store.games.length).toBe(1)
-      expect(store.currentGame.team1Score).toBe(5)
-      expect(store.matchState).toBe('score_entry')
-    })
-
-    it('prevents undo when points are already scored in current game', () => {
-      const store = useMatchDraftStore()
-      store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
-
-      store.incrementScore(1, 5)
-      store.completeCurrentGame()
-      expect(store.games.length).toBe(1)
-
-      store.incrementScore(2, 2)
-      expect(store.canUndoLastGame).toBe(false)
-      store.undoLastGame()
-      expect(store.games.length).toBe(1)
-      expect(store.currentGame.team2Score).toBe(2)
-    })
   })
 
   describe('Submission Timer & Undo Window', () => {
@@ -401,9 +355,122 @@ describe('matchDraftStore', () => {
       expect(store.isPendingSubmission).toBe(false)
       expect(store.pendingSubmission).toBeNull()
       expect(store.matchState).toBe('score_entry')
-      expect(store.games.length).toBe(0)
-      expect(store.currentGame.team1Score).toBe(5)
+      expect(store.games.length).toBe(1)
       expect(fetchMock).not.toHaveBeenCalledWith('/api/v1/matches', expect.anything())
     })
   })
+
+  describe('Retrospective Editing & Rejected Match Loading Specs', () => {
+    it('loads rejected match into draft store positioned at the last game', () => {
+      const store = useMatchDraftStore()
+      const sampleRejected = {
+        teamAAttackerId: 'p1',
+        teamBAttackerId: 'p2',
+        games: [
+          { teamAScore: 10, teamBScore: 8 },
+          { teamAScore: 7, teamBScore: 10 }
+        ]
+      }
+
+      store.loadFromRejectedMatch(sampleRejected)
+
+      expect(store.matchType).toBe(MatchType.ONE_VS_ONE)
+      expect(store.selectedPlayers).toEqual(['p1', 'p2'])
+      expect(store.games.length).toBe(2)
+      expect(store.activeGameIndex).toBe(1)
+      expect(store.currentGame.team1Score).toBe(7)
+      expect(store.currentGame.team2Score).toBe(10)
+      expect(store.matchState).toBe('score_entry')
+    })
+
+    it('allows editing an earlier game without resetting scores of other games', () => {
+      const store = useMatchDraftStore()
+      store.loadFromRejectedMatch({
+        teamAAttackerId: 'p1',
+        teamBAttackerId: 'p2',
+        games: [
+          { teamAScore: 5, teamBScore: 8 },
+          { teamAScore: 7, teamBScore: 10 }
+        ]
+      })
+
+      // Select Game 1 to edit (index 0)
+      store.selectGameToEdit(0)
+      expect(store.activeGameIndex).toBe(0)
+      expect(store.currentGame.team1Score).toBe(5)
+
+      // Modify Game 1 score from 5 to 6
+      store.incrementScore(1, 1)
+
+      expect(store.games[0]?.team1Score).toBe(6)
+      expect(store.games[0]?.team2Score).toBe(8)
+      // Game 2 remains unchanged
+      expect(store.games[1]?.team1Score).toBe(7)
+      expect(store.games[1]?.team2Score).toBe(10)
+    })
+
+    it('preserves uncommitted game score when jumping to an earlier game during new match creation', () => {
+      const store = useMatchDraftStore()
+      store.addPlayer('p1')
+      store.addPlayer('p2')
+      store.ruleConfig = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
+      store.beginScoreEntry()
+
+      // Game 1: 10 - 5
+      store.incrementScore(1, 10)
+      store.incrementScore(2, 5)
+      store.completeCurrentGame()
+
+      expect(store.games.length).toBe(1)
+      expect(store.games[0]).toEqual({ team1Score: 10, team2Score: 5 })
+
+      // Game 2 (uncommitted): 4 - 2
+      store.incrementScore(1, 4)
+      store.incrementScore(2, 2)
+      expect(store.currentGame).toEqual({ team1Score: 4, team2Score: 2 })
+
+      // Jump back to Game 1
+      store.selectGameToEdit(0)
+      expect(store.activeGameIndex).toBe(0)
+      expect(store.currentGame).toEqual({ team1Score: 10, team2Score: 5 })
+
+      // Jump back to Game 2 (uncommitted, index 1)
+      store.selectGameToEdit(1)
+      expect(store.activeGameIndex).toBe(-1)
+      expect(store.currentGame).toEqual({ team1Score: 4, team2Score: 2 })
+      expect(store.isGameComplete).toBe(false)
+      expect(store.isMatchComplete).toBe(false)
+    })
+
+    it('does not submit match when pressing next game on non-last game of rejected match', () => {
+      const store = useMatchDraftStore()
+      store.loadFromRejectedMatch({
+        teamAAttackerId: 'p1',
+        teamBAttackerId: 'p2',
+        games: [
+          { teamAScore: 10, teamBScore: 5 },
+          { teamAScore: 10, teamBScore: 8 }
+        ]
+      })
+
+      // Select Game 1 to edit (index 0)
+      store.selectGameToEdit(0)
+      expect(store.activeGameIndex).toBe(0)
+      expect(store.currentGame.team1Score).toBe(10)
+
+      // Edit Game 1 score to 10 - 6
+      store.incrementScore(2, 1) // 10 - 6
+
+      // Press Next Game
+      store.completeCurrentGame()
+
+      // Should advance to Game 2 (index 1) and NOT enter ready_for_submission
+      expect(store.activeGameIndex).toBe(1)
+      expect(store.currentGame.team1Score).toBe(10)
+      expect(store.currentGame.team2Score).toBe(8)
+      expect(store.matchState).toBe('score_entry')
+    })
+  })
 })
+
+
