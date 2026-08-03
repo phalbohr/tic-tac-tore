@@ -261,6 +261,10 @@ function getMatchBadgeText(index: number): string {
   transition: all 0.3s ease;
 }
 
+.list-leave-active {
+  position: absolute;
+}
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;

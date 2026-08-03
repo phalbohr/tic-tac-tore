@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -19,7 +19,6 @@ import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
 import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirmationStore'
-import { ref, computed } from 'vue'
 
 const { t } = useI18n()
 const showNewMatch = ref(false)
@@ -258,8 +257,6 @@ onMounted(async () => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
   }
 })
-
-import { onUnmounted } from 'vue'
 
 onUnmounted(() => {
   if (pulseTimeout) {
