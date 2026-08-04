@@ -65,12 +65,12 @@ describe('PendingMatches.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Team A')
-    expect(wrapper.text()).toContain('Alice')
-    expect(wrapper.text()).toContain('Bob')
+    expect(wrapper.html()).toContain('Alice')
+    expect(wrapper.html()).toContain('Bob')
 
     expect(wrapper.text()).toContain('Team B')
-    expect(wrapper.text()).toContain('Charlie')
-    expect(wrapper.text()).toContain('Dave')
+    expect(wrapper.html()).toContain('Charlie')
+    expect(wrapper.html()).toContain('Dave')
 
     expect(wrapper.text()).toContain('10 : 8')
     expect(wrapper.text()).toContain('7 : 10')

@@ -5,11 +5,13 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 # Story 3.3: Match Rejection with Reason
 
 ## 📖 Story Foundation
+
 **User Story:** As an opponent, I want to reject an incorrect match entry with a mandatory reason, so that stats remain accurate and the creator is notified of the correction needed.  
 **Epic:** Epic 3: Data Verification & Trust  
-**Status:** review  
+**Status:** done
 
 **Acceptance Criteria:**
+
 1. **Given** an opponent views a pending match confirmation request (in `PendingMatches.vue` / `HomeView.vue` or via deep link)
 2. **When** they tap the "Reject" button
 3. **Then** the UI opens the `RejectReasonSelector.vue` dialog/drawer displaying predefined rejection reasons ("Wrong score", "Wrong players", "Did not play", "Other") and an optional free-text field (`RejectFreeTextField`, plain text `<textarea>` max 200 chars) (UX Flow 2b)
@@ -25,10 +27,12 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 ## 🎯 Developer Context & Guardrails
 
 ### 1. Goal & Sequencing
+
 - **Goal:** Implement opponent match rejection with mandatory reason selection, atomic backend rejection API (`POST /api/v1/matches/{id}/reject`), `PushNotificationService` notification dispatch to the match creator (FR17), and frontend `RejectReasonSelector.vue` modal integration.
 - **Sequencing & Dependency Context:** Story 3.1 established initial match creation & push notifications. Story 3.2 implemented single-tap match confirmation with 15s undo. Story 3.3 handles match rejection with mandatory reason. Story 3.4 will evaluate verification rules, and Story 3.5 manages publication & cooldown.
 
 ### 2. Architecture & Data Integrity Guardrails (Backend `code-1-guide` Compliance)
+
 - **Three-Layer Transaction Architecture:**
   - **Outer Service (`MatchServiceImpl.java`):** `@Retryable` ONLY. Validates user participation, checks for duplicate/idempotent requests, handles rejection flow, and triggers `PushNotificationService.sendRejectionNotification(...)`. NEVER combine `@Retryable` and `@Transactional`.
   - **Inner Operation (`MatchOperation.java`):** `@Idempotent` + `@Transactional`. Performs atomic state updates on `Match` entity, updating status from `PENDING_APPROVAL` to `REJECTED`.
@@ -70,6 +74,7 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
   - Response DTO: `MatchResponse` updated with `rejectedByUserId`, `rejectedAt`, and `rejectionReason`.
 
 ### 3. Frontend State & Optimistic UI Guardrails
+
 - **Dialog & Reason Selector:**
   - Create `RejectReasonSelector.vue` in `src/features/match/components/`.
   - Predefined radio options: `"Wrong score"`, `"Wrong players"`, `"Did not play"`, `"Other"`.
@@ -82,6 +87,7 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
   - Add rejection strings to `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
 
 ### 4. UI/UX & Design System Compliance
+
 - **No-Line Rule (UX-DR3):** Dialog and card surfaces must use background color shifts (`bg-surface-container-highest`, `bg-surface-container-high`) without 1px border lines.
 - **Touch Targets:** Rejection options and action buttons must satisfy minimum 48px touch target height (`min-h-12`).
 
@@ -139,6 +145,7 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 ---
 
 ## 📁 File List
+
 - `src/main/java/com/tictactore/model/Match.java`
 - `src/main/java/com/tictactore/dto/MatchResponse.java`
 - `src/main/java/com/tictactore/dto/MatchRejectionRequest.java`
@@ -163,6 +170,7 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 ---
 
 ## 📝 Change Log
+
 - Implemented match rejection backend API `POST /api/v1/matches/{id}/reject` with Spring Security user extraction, atomic `@Idempotent` + `@Transactional` state update to `REJECTED`, and push notification dispatch to creator (FR17).
 - Added `rejectedByUserId`, `rejectedAt`, `rejectionReason` columns and domain logic method `rejectByOpponent` on `Match` entity.
 - Created `MatchRejectionRequest` DTO and updated `MatchResponse` DTO with rejection metadata.
@@ -178,14 +186,17 @@ baseline_commit: e1dd8ba631cb9ca9f9ae398d74be91e7a705412f
 ## Dev Agent Record
 
 ### Agent Model Used
+
 Gemini 3.6 Flash
 
 ### Debug Log References
+
 - Fixed `RejectReasonSelector.spec.ts` Vue i18n global mock setup (`$t` proxy resolution).
 - Added `data-testid="error-toast"` to `ErrorToast.vue` for Playwright toast assertion.
 - Resolved `SecurityContextHolder` import in `MatchControllerTest.java`.
 
 ### Completion Notes List
+
 - All 151 backend Java tests passed (`./mvnw test`).
 - All 122 frontend Vitest unit tests passed (`npx vitest run`).
 - `npm run type-check` passed with 0 errors.

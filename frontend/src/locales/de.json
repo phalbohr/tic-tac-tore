@@ -48,7 +48,11 @@
     "alreadyProcessed": "Spiel wurde bereits von einem anderen Gegner verarbeitet",
     "close": "Schließen",
     "editMatch": "Spiel bearbeiten",
-    "deleteMatch": "Spiel löschen"
+    "deleteMatch": "Spiel löschen",
+    "teamAScores": "Team A Punkte",
+    "defender": "Abwehr",
+    "attacker": "Angriff",
+    "vs": "VS"
   },
   "leaderboard": {
     "title": "Rangliste",
