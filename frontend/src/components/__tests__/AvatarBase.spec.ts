@@ -68,5 +68,18 @@ describe('AvatarBase', () => {
     })
     expect(squareWrapper.classes()).toContain('rounded-xl')
   })
+
+  it('renders an img element when a valid HTTP/HTTPS URL is provided as avatar', () => {
+    const avatarUrl = 'https://lh3.googleusercontent.com/a/default-user'
+    const wrapper = mount(AvatarBase, {
+      props: { avatar: avatarUrl, name: 'John Doe' }
+    })
+
+    const img = wrapper.find('[data-testid="avatar-img"]')
+    expect(img.exists()).toBe(true)
+    expect(img.attributes('src')).toBe(avatarUrl)
+    expect(wrapper.find('[data-testid="avatar-svg"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="avatar-initials"]').exists()).toBe(false)
+  })
 })
 

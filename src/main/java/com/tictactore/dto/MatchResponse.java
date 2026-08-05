@@ -24,7 +24,12 @@ public record MatchResponse(
     String teamAAttackerNickname,
     String teamADefenderNickname,
     String teamBAttackerNickname,
-    String teamBDefenderNickname
+    String teamBDefenderNickname,
+    String creatorAvatar,
+    String teamAAttackerAvatar,
+    String teamADefenderAvatar,
+    String teamBAttackerAvatar,
+    String teamBDefenderAvatar
 ) {
     public MatchResponse(
         UUID id,
@@ -38,7 +43,7 @@ public record MatchResponse(
         List<GameDto> games,
         Instant createdAt
     ) {
-        this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt, null, null, null, null, null, null, null, null, null, null);
+        this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public MatchResponse(
@@ -55,6 +60,31 @@ public record MatchResponse(
         UUID confirmedByUserId,
         Instant confirmedAt
     ) {
-        this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt, confirmedByUserId, confirmedAt, null, null, null, null, null, null, null, null);
+        this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt, confirmedByUserId, confirmedAt, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    public MatchResponse(
+        UUID id,
+        String idempotencyKey,
+        UUID creatorId,
+        UUID teamAAttackerId,
+        UUID teamADefenderId,
+        UUID teamBAttackerId,
+        UUID teamBDefenderId,
+        String status,
+        List<GameDto> games,
+        Instant createdAt,
+        UUID confirmedByUserId,
+        Instant confirmedAt,
+        UUID rejectedByUserId,
+        Instant rejectedAt,
+        String rejectionReason,
+        String creatorNickname,
+        String teamAAttackerNickname,
+        String teamADefenderNickname,
+        String teamBAttackerNickname,
+        String teamBDefenderNickname
+    ) {
+        this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt, confirmedByUserId, confirmedAt, rejectedByUserId, rejectedAt, rejectionReason, creatorNickname, teamAAttackerNickname, teamADefenderNickname, teamBAttackerNickname, teamBDefenderNickname, null, null, null, null, null);
     }
 }

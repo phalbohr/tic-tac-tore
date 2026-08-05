@@ -29,6 +29,11 @@ export interface PendingMatchItem {
   teamADefenderNickname?: string
   teamBAttackerNickname?: string
   teamBDefenderNickname?: string
+  creatorAvatar?: string
+  teamAAttackerAvatar?: string
+  teamADefenderAvatar?: string
+  teamBAttackerAvatar?: string
+  teamBDefenderAvatar?: string
   teamANames?: string[]
   teamBNames?: string[]
   teamAScore?: number
@@ -76,12 +81,35 @@ function getMatchBadgeText(index: number): string {
 }
 
 function getPlayerDisplayInfo(
-  gameName?: string,
-  matchName?: string,
-  fallbackName?: string
-): { name: string } | undefined {
-  const name = gameName || matchName || fallbackName
-  return name ? { name } : undefined
+  match: PendingMatchItem,
+  playerId?: string,
+  fallbackMatchRoleName?: string
+): { name: string, avatar?: string } | undefined {
+  if (playerId) {
+    if (playerId === match.teamAAttackerId) return { name: match.teamAAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamAAttackerAvatar }
+    if (playerId === match.teamADefenderId) return { name: match.teamADefenderNickname || fallbackMatchRoleName || '', avatar: match.teamADefenderAvatar }
+    if (playerId === match.teamBAttackerId) return { name: match.teamBAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamBAttackerAvatar }
+    if (playerId === match.teamBDefenderId) return { name: match.teamBDefenderNickname || fallbackMatchRoleName || '', avatar: match.teamBDefenderAvatar }
+  }
+  return fallbackMatchRoleName ? { name: fallbackMatchRoleName } : undefined
+}
+
+function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
+  if (match.games && match.games.length > 0) {
+    return match.games
+  }
+  return [{
+    teamAScore: match.teamAScore ?? 0,
+    teamBScore: match.teamBScore ?? 0,
+    teamAAttackerId: match.teamAAttackerId,
+    teamADefenderId: match.teamADefenderId,
+    teamBAttackerId: match.teamBAttackerId,
+    teamBDefenderId: match.teamBDefenderId,
+    teamAAttackerNickname: match.teamAAttackerNickname,
+    teamADefenderNickname: match.teamADefenderNickname,
+    teamBAttackerNickname: match.teamBAttackerNickname,
+    teamBDefenderNickname: match.teamBDefenderNickname
+  }]
 }
 </script>
 
@@ -118,12 +146,12 @@ function getPlayerDisplayInfo(
             </div>
             <div class="flex flex-col gap-2 w-full">
               <MatchGameRow
-                v-for="(game, gIdx) in (match.games && match.games.length > 0 ? match.games : ([{ teamAScore: match.teamAScore ?? 0, teamBScore: match.teamBScore ?? 0 }] as GameScoreItem[]))"
+                v-for="(game, gIdx) in getMatchGames(match)"
                 :key="gIdx"
-                :team-a-defender="getPlayerDisplayInfo(game.teamADefenderNickname, match.teamADefenderNickname, match.teamANames?.[1])"
-                :team-a-attacker="getPlayerDisplayInfo(game.teamAAttackerNickname, match.teamAAttackerNickname, match.teamANames?.[0])"
-                :team-b-defender="getPlayerDisplayInfo(game.teamBDefenderNickname, match.teamBDefenderNickname, match.teamBNames?.[1])"
-                :team-b-attacker="getPlayerDisplayInfo(game.teamBAttackerNickname, match.teamBAttackerNickname, match.teamBNames?.[0])"
+                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
+                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
+                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
+                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
                 :team-a-score="game.teamAScore"
                 :team-b-score="game.teamBScore"
                 :show-score="true"
@@ -202,12 +230,12 @@ function getPlayerDisplayInfo(
             </div>
             <div class="flex flex-col gap-2 w-full">
               <MatchGameRow
-                v-for="(game, gIdx) in (match.games && match.games.length > 0 ? match.games : ([{ teamAScore: match.teamAScore ?? 0, teamBScore: match.teamBScore ?? 0 }] as GameScoreItem[]))"
+                v-for="(game, gIdx) in getMatchGames(match)"
                 :key="gIdx"
-                :team-a-defender="getPlayerDisplayInfo(game.teamADefenderNickname, match.teamADefenderNickname, match.teamANames?.[1])"
-                :team-a-attacker="getPlayerDisplayInfo(game.teamAAttackerNickname, match.teamAAttackerNickname, match.teamANames?.[0])"
-                :team-b-defender="getPlayerDisplayInfo(game.teamBDefenderNickname, match.teamBDefenderNickname, match.teamBNames?.[1])"
-                :team-b-attacker="getPlayerDisplayInfo(game.teamBAttackerNickname, match.teamBAttackerNickname, match.teamBNames?.[0])"
+                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
+                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
+                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
+                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
                 :team-a-score="game.teamAScore"
                 :team-b-score="game.teamBScore"
                 :show-score="true"

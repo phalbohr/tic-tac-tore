@@ -20,6 +20,9 @@ public class AvatarValidator implements ConstraintValidator<ValidAvatar, String>
         if (value == null) {
             return true;
         }
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            return true;
+        }
         return ALLOWED_AVATARS.contains(value);
     }
 }

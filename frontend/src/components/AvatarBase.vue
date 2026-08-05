@@ -14,8 +14,12 @@ const props = withDefaults(
   }
 )
 
+const isUrl = computed(() => {
+  return !!(props.avatar && (props.avatar.startsWith('http://') || props.avatar.startsWith('https://')))
+})
+
 const hasCustomAvatar = computed(() => {
-  return !!(props.avatar && props.avatar !== 'anonymous' && (AVATAR_KEYS as readonly string[]).includes(props.avatar))
+  return !!(props.avatar && props.avatar !== 'anonymous' && (isUrl.value || (AVATAR_KEYS as readonly string[]).includes(props.avatar)))
 })
 
 const initials = computed(() => {
@@ -46,11 +50,18 @@ const shapeClass = computed(() => {
     class="avatar-base relative w-full h-full flex items-center justify-center overflow-hidden shrink-0 select-none"
     :class="shapeClass"
   >
-    <svg class="w-full h-full absolute inset-0 z-0" aria-hidden="true" data-testid="avatar-svg">
+    <img
+      v-if="isUrl"
+      :src="props.avatar!"
+      :alt="props.name || 'User avatar'"
+      class="w-full h-full absolute inset-0 z-0 object-cover"
+      data-testid="avatar-img"
+    />
+    <svg v-else class="w-full h-full absolute inset-0 z-0" aria-hidden="true" data-testid="avatar-svg">
       <use :href="`/avatars.svg#${resolvedAvatar}`" />
     </svg>
     <span
-      v-if="initials"
+      v-if="initials && !isUrl"
       class="text-xs font-bold tracking-wider leading-none z-10 text-white"
       style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);"
       data-testid="avatar-initials"

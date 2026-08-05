@@ -13,8 +13,7 @@ test.describe('Automatic Profile Generation E2E (ATDD)', () => {
     // Then
     await expect(page.getByText(new RegExp(nickname))).toBeVisible();
     
-    const avatarSvg = page.getByTestId('avatar-svg').first();
-    await expect(avatarSvg).toBeVisible();
-    await expect(avatarSvg.locator('use')).toHaveAttribute('href', /^\/avatars\.svg#/);
+    const avatarImgOrSvg = page.locator('[data-testid="avatar-img"], [data-testid="avatar-svg"]').first();
+    await expect(avatarImgOrSvg).toBeVisible();
   });
 });

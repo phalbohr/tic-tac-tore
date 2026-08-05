@@ -103,12 +103,16 @@ watch(() => store.matchState, (newVal) => {
             : 'border-white/5 bg-surface-container/40 text-on-surface-variant hover:bg-surface-container'
         ]"
       >
-        <button
-          type="button"
+        <div
+          role="button"
+          :tabindex="(idx - 1) > store.games.length ? -1 : 0"
+          :aria-disabled="(idx - 1) > store.games.length"
           class="w-full text-left p-1"
-          :disabled="(idx - 1) > store.games.length"
+          :class="{ 'opacity-50 cursor-not-allowed': (idx - 1) > store.games.length }"
           :data-testid="`select-game-btn-${idx}`"
-          @click="store.selectGameToEdit(idx - 1)"
+          @click="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
+          @keydown.enter.prevent="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
+          @keydown.space.prevent="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
         >
           <MatchGameRow
             :team-a-defender="getGamePlayerInfo(idx - 1).teamADefender"
@@ -121,7 +125,7 @@ watch(() => store.matchState, (newVal) => {
             :allow-swap="(idx - 1) === store.currentActiveIndex"
             @swap="store.swapPositions($event, idx - 1)"
           />
-        </button>
+        </div>
       </div>
     </div>
     
