@@ -510,13 +510,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamBAttackerId,
       teamBDefenderId,
       games: games.value.map(g => ({
-
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
-        teamAAttackerId: g.teamAAttackerId,
-        teamADefenderId: g.teamADefenderId,
-        teamBAttackerId: g.teamBAttackerId,
-        teamBDefenderId: g.teamBDefenderId
+        teamAAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamAAttackerId : undefined,
+        teamADefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamADefenderId : undefined,
+        teamBAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBAttackerId : undefined,
+        teamBDefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBDefenderId : undefined
       }))
     }
 
