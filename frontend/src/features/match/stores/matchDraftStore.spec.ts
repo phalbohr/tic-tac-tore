@@ -46,7 +46,7 @@ describe('matchDraftStore', () => {
   })
 
   describe('Position Swapping', () => {
-    it('sets state to position_swap for 2v2 games on beginScoreEntry', () => {
+    it('sets state to score_entry for 2v2 games on beginScoreEntry', () => {
       const store = useMatchDraftStore()
       store.setMatchType(MatchType.TWO_VS_TWO)
       store.addPlayer('p1')
@@ -55,7 +55,7 @@ describe('matchDraftStore', () => {
       store.addPlayer('p4')
 
       store.beginScoreEntry()
-      expect(store.matchState).toBe('position_swap')
+      expect(store.matchState).toBe('score_entry')
       expect(store.currentGame.teamADefenderId).toBe('p1')
       expect(store.currentGame.teamAAttackerId).toBe('p2')
       expect(store.currentGame.teamBDefenderId).toBe('p3')
@@ -72,7 +72,7 @@ describe('matchDraftStore', () => {
       expect(store.matchState).toBe('score_entry')
     })
 
-    it('swaps positions and confirms correctly', () => {
+    it('swaps positions correctly', () => {
       const store = useMatchDraftStore()
       store.setMatchType(MatchType.TWO_VS_TWO)
       store.addPlayer('p1')
@@ -87,9 +87,6 @@ describe('matchDraftStore', () => {
       store.swapPositions(1)
       expect(store.currentGame.teamADefenderId).toBe('p2')
       expect(store.currentGame.teamAAttackerId).toBe('p1')
-
-      store.confirmPositions()
-      expect(store.matchState).toBe('score_entry')
     })
 
     it('swaps positions for team 2', () => {
@@ -345,7 +342,6 @@ describe('matchDraftStore', () => {
       store.beginScoreEntry()
       store.swapPositions(1) // swap team 1 (p1/p2 -> p2/p1)
       store.swapPositions(2) // swap team 2 (p3/p4 -> p4/p3)
-      store.confirmPositions()
 
       store.incrementScore(1, 5)
       store.completeCurrentGame()

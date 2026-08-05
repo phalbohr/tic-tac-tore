@@ -18,9 +18,11 @@ withDefaults(
     showScore?: boolean
     teamALabel?: string
     teamBLabel?: string
+    allowSwap?: boolean
   }>(),
   {
-    showScore: true
+    showScore: true,
+    allowSwap: false
   }
 )
 
@@ -43,7 +45,7 @@ const emit = defineEmits<{
           </div>
         </div>
         <button
-          v-if="teamADefender && teamAAttacker"
+          v-if="allowSwap && teamADefender && teamAAttacker"
           type="button"
           @click.stop="emit('swap', 1)"
           class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-4 h-8"
@@ -79,7 +81,7 @@ const emit = defineEmits<{
           </div>
         </div>
         <button
-          v-if="teamBDefender && teamBAttacker"
+          v-if="allowSwap && teamBDefender && teamBAttacker"
           type="button"
           @click.stop="emit('swap', 2)"
           class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-4 h-8"

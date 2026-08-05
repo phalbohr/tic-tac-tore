@@ -45,7 +45,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
   const activeGameIndex = ref<number>(-1)
-  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
+  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission'>('draft')
   const submitError = ref<string | null>(null)
   const editingMatchId = ref<string | null>(null)
 
@@ -313,8 +313,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
-    } else if (matchType.value === MatchType.TWO_VS_TWO) {
-      matchState.value = 'position_swap';
     } else {
       matchState.value = 'score_entry';
     }
@@ -382,13 +380,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       currentGame.value.teamBDefenderId = selectedPlayers.value[2]
       currentGame.value.teamBAttackerId = selectedPlayers.value[3]
       savedNewGame.value = { ...currentGame.value }
-      matchState.value = 'position_swap'
-    } else {
-      matchState.value = 'score_entry'
     }
-  }
-
-  function confirmPositions() {
     matchState.value = 'score_entry'
   }
 
@@ -588,7 +580,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectGameToEdit,
     loadFromRejectedMatch,
     beginScoreEntry,
-    confirmPositions,
     swapPositions,
     returnToDraft,
     reset

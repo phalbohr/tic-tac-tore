@@ -42,4 +42,31 @@ describe('MatchGameRow', () => {
 
     expect(wrapper.find('[data-testid="score-vs-display"]').text()).toBe('VS')
   })
+
+  it('does not render swap buttons when allowSwap is false', () => {
+    const wrapper = mount(MatchGameRow, {
+      props: {
+        teamADefender: { name: 'Defender A' },
+        teamAAttacker: { name: 'Attacker A' },
+        allowSwap: false
+      }
+    })
+
+    expect(wrapper.find('[data-testid="swap-team-a-btn"]').exists()).toBe(false)
+  })
+
+  it('renders swap buttons and emits swap event when allowSwap is true', async () => {
+    const wrapper = mount(MatchGameRow, {
+      props: {
+        teamADefender: { name: 'Defender A' },
+        teamAAttacker: { name: 'Attacker A' },
+        allowSwap: true
+      }
+    })
+
+    const swapBtn = wrapper.find('[data-testid="swap-team-a-btn"]')
+    expect(swapBtn.exists()).toBe(true)
+    await swapBtn.trigger('click')
+    expect(wrapper.emitted('swap')?.[0]).toEqual([1])
+  })
 })

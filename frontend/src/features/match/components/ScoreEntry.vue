@@ -3,7 +3,6 @@ import { computed, watch, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMatchDraftStore, type PlayerDto, type GameScore } from '../stores/matchDraftStore'
 import ScoreStepper from './ScoreStepper.vue'
-import PositionSwapDialog from './PositionSwapDialog.vue'
 import MatchGameRow, { type PlayerDisplayInfo } from './MatchGameRow.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
@@ -119,6 +118,7 @@ watch(() => store.matchState, (newVal) => {
             :team-a-score="getGamePlayerInfo(idx - 1).teamAScore"
             :team-b-score="getGamePlayerInfo(idx - 1).teamBScore"
             :show-score="(idx - 1) <= store.games.length"
+            :allow-swap="(idx - 1) === store.currentActiveIndex"
             @swap="store.swapPositions($event, idx - 1)"
           />
         </button>
@@ -162,10 +162,6 @@ watch(() => store.matchState, (newVal) => {
         {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
       </BaseButton>
     </div>
-
-    <Transition name="ch-fade">
-      <PositionSwapDialog v-if="store.matchState === 'position_swap'" />
-    </Transition>
 
     <Transition name="ch-fade">
       <div
