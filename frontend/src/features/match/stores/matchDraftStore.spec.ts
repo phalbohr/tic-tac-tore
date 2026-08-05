@@ -144,14 +144,14 @@ describe('matchDraftStore', () => {
       store.incrementScore(1, 5)
       store.completeCurrentGame()
 
-      // Game 2 should be initialized with default positions (p1 = Defender, p2 = Attacker)
-      expect(store.currentGame.teamADefenderId).toBe('p1')
-      expect(store.currentGame.teamAAttackerId).toBe('p2')
+      // Game 2 should inherit positions from just-completed Game 1 (p2 = Defender, p1 = Attacker)
+      expect(store.currentGame.teamADefenderId).toBe('p2')
+      expect(store.currentGame.teamAAttackerId).toBe('p1')
 
       // Swapping Game 1 again via explicit index should NOT change Game 2
       store.swapPositions(1, 0)
       expect(store.games[0]?.teamADefenderId).toBe('p1')
-      expect(store.currentGame.teamADefenderId).toBe('p1')
+      expect(store.currentGame.teamADefenderId).toBe('p2')
     })
   })
 
@@ -447,7 +447,7 @@ describe('matchDraftStore', () => {
       store.completeCurrentGame()
 
       expect(store.games.length).toBe(1)
-      expect(store.games[0]).toEqual({ team1Score: 10, team2Score: 5 })
+      expect(store.games[0]).toMatchObject({ team1Score: 10, team2Score: 5 })
 
       // Game 2 (uncommitted): 4 - 2
       store.incrementScore(1, 4)
@@ -457,7 +457,7 @@ describe('matchDraftStore', () => {
       // Jump back to Game 1
       store.selectGameToEdit(0)
       expect(store.activeGameIndex).toBe(0)
-      expect(store.currentGame).toEqual({ team1Score: 10, team2Score: 5 })
+      expect(store.currentGame).toMatchObject({ team1Score: 10, team2Score: 5 })
 
       // Jump back to Game 2 (uncommitted, index 1)
       store.selectGameToEdit(1)

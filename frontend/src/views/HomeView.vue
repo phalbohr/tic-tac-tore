@@ -183,14 +183,31 @@ async function fetchPendingMatches() {
         if (m.teamBAttackerNickname) teamBNames.push(m.teamBAttackerNickname)
         if (m.teamBDefenderNickname) teamBNames.push(m.teamBDefenderNickname)
 
-        const games = (m.games || []).map((g) => ({
-          teamAScore: g.teamAScore,
-          teamBScore: g.teamBScore,
-          teamAAttackerId: g.teamAAttackerId,
-          teamADefenderId: g.teamADefenderId,
-          teamBAttackerId: g.teamBAttackerId,
-          teamBDefenderId: g.teamBDefenderId,
-        }))
+        const idToNickname = new Map<string, string>()
+        if (m.teamAAttackerId && m.teamAAttackerNickname) idToNickname.set(m.teamAAttackerId, m.teamAAttackerNickname)
+        if (m.teamADefenderId && m.teamADefenderNickname) idToNickname.set(m.teamADefenderId, m.teamADefenderNickname)
+        if (m.teamBAttackerId && m.teamBAttackerNickname) idToNickname.set(m.teamBAttackerId, m.teamBAttackerNickname)
+        if (m.teamBDefenderId && m.teamBDefenderNickname) idToNickname.set(m.teamBDefenderId, m.teamBDefenderNickname)
+
+        const games = (m.games || []).map((g) => {
+          const aAttId = g.teamAAttackerId || m.teamAAttackerId
+          const aDefId = g.teamADefenderId || m.teamADefenderId
+          const bAttId = g.teamBAttackerId || m.teamBAttackerId
+          const bDefId = g.teamBDefenderId || m.teamBDefenderId
+
+          return {
+            teamAScore: g.teamAScore,
+            teamBScore: g.teamBScore,
+            teamAAttackerId: aAttId,
+            teamADefenderId: aDefId,
+            teamBAttackerId: bAttId,
+            teamBDefenderId: bDefId,
+            teamAAttackerNickname: aAttId ? idToNickname.get(aAttId) || m.teamAAttackerNickname : undefined,
+            teamADefenderNickname: aDefId ? idToNickname.get(aDefId) || m.teamADefenderNickname : undefined,
+            teamBAttackerNickname: bAttId ? idToNickname.get(bAttId) || m.teamBAttackerNickname : undefined,
+            teamBDefenderNickname: bDefId ? idToNickname.get(bDefId) || m.teamBDefenderNickname : undefined,
+          }
+        })
 
         return {
           id: m.id,

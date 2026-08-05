@@ -17,8 +17,8 @@ const emit = defineEmits<{
 
 const showCancelModal = ref(false)
 
-const getPlayerInfo = (id?: string): PlayerDisplayInfo => {
-  if (!id) return { name: 'Unknown', avatar: null }
+const getPlayerInfo = (id?: string): PlayerDisplayInfo | undefined => {
+  if (!id) return undefined
   const opp = store.frequentOpponents.find((o: PlayerDto) => o.id === id)
   if (opp) return { name: opp.nickname, avatar: opp.avatar }
   const fetched = store.fetchedPlayers[id]

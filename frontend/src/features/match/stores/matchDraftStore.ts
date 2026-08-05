@@ -303,10 +303,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     savedNewGame.value = {
       team1Score: 0,
       team2Score: 0,
-      teamAAttackerId: matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : selectedPlayers.value[0],
-      teamADefenderId: matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[0] : undefined,
-      teamBAttackerId: matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : selectedPlayers.value[1],
-      teamBDefenderId: matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : undefined
+      teamAAttackerId: prevGame.teamAAttackerId,
+      teamADefenderId: prevGame.teamADefenderId,
+      teamBAttackerId: prevGame.teamBAttackerId,
+      teamBDefenderId: prevGame.teamBDefenderId
     };
     currentGame.value = { ...savedNewGame.value };
     activeGameIndex.value = -1;
@@ -379,8 +379,11 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       currentGame.value.teamAAttackerId = selectedPlayers.value[1]
       currentGame.value.teamBDefenderId = selectedPlayers.value[2]
       currentGame.value.teamBAttackerId = selectedPlayers.value[3]
-      savedNewGame.value = { ...currentGame.value }
+    } else {
+      currentGame.value.teamAAttackerId = selectedPlayers.value[0]
+      currentGame.value.teamBAttackerId = selectedPlayers.value[1]
     }
+    savedNewGame.value = { ...currentGame.value }
     matchState.value = 'score_entry'
   }
 
