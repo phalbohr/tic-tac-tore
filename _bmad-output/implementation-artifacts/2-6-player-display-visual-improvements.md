@@ -21,7 +21,7 @@ so that I can easily identify who played in which position during score entry an
 2. **Retrospective Score Entry Screen - Game Rows**:
    - **Given** the user is viewing the game rows in the retrospective score entry screen
    - **When** a game row is displayed
-   - **Then** the row must show: 
+   - **Then** the row must show:
      - Team A: 2 avatars (Defender first on left, then Attacker)
      - The text "VS" centered
      - Team B: 2 avatars (Defender first on left, then Attacker)
@@ -59,17 +59,21 @@ so that I can easily identify who played in which position during score entry an
 ## Developer Context & Guardrails
 
 ### Technical Requirements
+
 - **Avatar Initials Generation Helper**: Implement a robust `getInitials(name: string): string` utility or composable to handle empty strings, single words, and multi-word names (e.g., "John Doe" -> "JD", "Alice" -> "A"). Max 2 characters, capitalized.
 - **Shared UI Component Strategy**: To satisfy AC 5 without code duplication, abstract the game row rendering logic into a reusable sub-component (e.g., `MatchGameRow.vue`) that can be imported by both `ScoreEntry.vue` (Epic 2) and `PendingMatches.vue` (Epic 3). Do NOT duplicate the complex flex/grid layout for the avatars and labels.
 - **i18n Localization**: Ensure all new textual labels ("VS", "Team A Scores", "Team B", "Defender", "Attacker", "Swap Team 1", "Swap Team 2") use Vue i18n `$t()` or `t()` methods and are properly added to `src/locales/en.json`.
 - **Responsive Layout**: Use Tailwind CSS v4 to ensure the mobile-first layouts (particularly displaying 4 avatars and the "VS" text inline) scale gracefully and do not wrap incorrectly on narrow screens (e.g., 360px width).
 
 ### Architecture Compliance
+
 - **Styling**: Use Tailwind CSS v4 with the established `ch-` prefix isolation.
 - **State Management**: Access match state from `useMatchStore` or props passed from parents. No direct modification of global state inside purely visual display components.
 
 ### File Structure Requirements
+
 The following files are explicitly targeted for updates:
+
 - `frontend/src/components/AvatarBase.vue` (Target for AC 1 initials logic)
 - `frontend/src/features/match/components/ScoreEntry.vue` (Target for AC 2 & 3 layout updates)
 - `frontend/src/features/match/components/PositionSwapDialog.vue` (Target for AC 4 layout updates)
@@ -78,6 +82,7 @@ The following files are explicitly targeted for updates:
 - `frontend/src/locales/en.json` (Target for i18n keys)
 
 ### Testing Requirements
+
 - **Unit Tests for Initials Logic**: Write Vitest unit tests for the `getInitials` helper. Test cases MUST cover: empty string, null/undefined (if applicable), single word, two words, three+ words, and leading/trailing whitespace.
 - **Component Tests**: Ensure Vue Test Utils are used to verify that the `AvatarBase.vue` component correctly renders the initials circle when no image URL is provided.
 - **Visual/Layout Validation**: Visually verify mobile layout responsiveness.
@@ -85,16 +90,20 @@ The following files are explicitly targeted for updates:
 ## Dev Agent Record
 
 ### Agent Model Used
+
 Gemini 3.1 Pro (High)
 
 ### Debug Log References
+
 - Original story validated and optimized via bmad-create-story:validate checklist.
 
 ### Completion Notes List
+
 - Comprehensive developer context injected to prevent duplication between Epic 2 and Epic 3 notification interfaces.
 - Exact file paths and testing guardrails provided.
 
 ### File List
+
 - frontend/src/components/AvatarBase.vue
 - frontend/src/features/match/components/ScoreEntry.vue
 - frontend/src/features/match/components/PositionSwapDialog.vue

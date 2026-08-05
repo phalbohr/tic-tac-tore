@@ -158,7 +158,7 @@ async function handleLogout() {
           data-testid="change-avatar-button"
         >
           <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center">
-            <AvatarBase :avatar="authStore.profile?.avatar" />
+            <AvatarBase :avatar="authStore.profile?.avatar" :name="authStore.profile?.nickname" shape="square" />
           </div>
           <!-- Edit Overlay Icon -->
           <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">

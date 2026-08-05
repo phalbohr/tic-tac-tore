@@ -92,18 +92,25 @@ function getMatchBadgeText(index: number): string {
         </div>
 
         <!-- Shared Game Row Layout -->
-        <div class="flex flex-col gap-2 w-full">
-          <MatchGameRow
-            v-for="(game, gIdx) in (match.games && match.games.length > 0 ? match.games : [{ teamAScore: match.teamAScore ?? 0, teamBScore: match.teamBScore ?? 0 }])"
-            :key="gIdx"
-            :team-a-defender="{ name: match.teamADefenderNickname || (match.teamANames && match.teamANames[1]) || (match.teamANames && match.teamANames[0]) || 'Team A Defender' }"
-            :team-a-attacker="{ name: match.teamAAttackerNickname || (match.teamANames && match.teamANames[0]) || 'Team A Attacker' }"
-            :team-b-defender="{ name: match.teamBDefenderNickname || (match.teamBNames && match.teamBNames[1]) || (match.teamBNames && match.teamBNames[0]) || 'Team B Defender' }"
-            :team-b-attacker="{ name: match.teamBAttackerNickname || (match.teamBNames && match.teamBNames[0]) || 'Team B Attacker' }"
-            :team-a-score="game.teamAScore"
-            :team-b-score="game.teamBScore"
-            :show-score="true"
-          />
+        <div class="flex flex-col w-full">
+          <div class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+            <span>{{ t('match.teamA', 'Team A') }}</span>
+            <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
+            <span>{{ t('match.teamB', 'Team B') }}</span>
+          </div>
+          <div class="flex flex-col gap-2 w-full">
+            <MatchGameRow
+              v-for="(game, gIdx) in (match.games && match.games.length > 0 ? match.games : [{ teamAScore: match.teamAScore ?? 0, teamBScore: match.teamBScore ?? 0 }])"
+              :key="gIdx"
+              :team-a-defender="{ name: match.teamADefenderNickname || (match.teamANames && match.teamANames[1]) || (match.teamANames && match.teamANames[0]) || 'Team A Defender' }"
+              :team-a-attacker="{ name: match.teamAAttackerNickname || (match.teamANames && match.teamANames[0]) || 'Team A Attacker' }"
+              :team-b-defender="{ name: match.teamBDefenderNickname || (match.teamBNames && match.teamBNames[1]) || (match.teamBNames && match.teamBNames[0]) || 'Team B Defender' }"
+              :team-b-attacker="{ name: match.teamBAttackerNickname || (match.teamBNames && match.teamBNames[0]) || 'Team B Attacker' }"
+              :team-a-score="game.teamAScore"
+              :team-b-score="game.teamBScore"
+              :show-score="true"
+            />
+          </div>
         </div>
 
         <!-- Action Button / Confirmation State / Rejection Reason -->

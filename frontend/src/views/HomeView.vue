@@ -295,7 +295,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
       <RouterLink to="/cabinet" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <div class="w-8 h-8 rounded-lg overflow-hidden bg-white">
-          <AvatarBase :avatar="authStore.profile.avatar" />
+          <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
         </div>
       </RouterLink>
     </header>
@@ -338,7 +338,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <div v-else class="flex flex-col items-center gap-6 mt-12 w-full">
         <div v-if="authStore.profile" class="flex flex-col items-center gap-3">
           <div class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden relative">
-            <AvatarBase :avatar="authStore.profile.avatar" />
+            <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
             <div
               v-if="pendingCount > 0"
               class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none cursor-pointer"

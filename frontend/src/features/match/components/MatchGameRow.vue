@@ -61,10 +61,6 @@ const { t } = useI18n()
       </div>
     </div>
 
-    <!-- Labels line -->
-    <div class="flex items-center justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-0.5">
-      <span>{{ teamALabel || t('match.teamA', 'Team A') }}</span>
-      <span>{{ teamBLabel || t('match.teamB', 'Team B') }}</span>
-    </div>
+    <!-- Labels moved to header outside of row component -->
   </div>
 </template>

@@ -49,7 +49,7 @@ describe('ScoreEntry.vue', () => {
     expect(wrapper.emitted()).toHaveProperty('back')
   })
 
-  it('renders team avatar containers for active game', () => {
+  it('renders game rows for games', () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = [
       { id: 'p1', nickname: 'Alice', avatar: '' },
@@ -59,8 +59,7 @@ describe('ScoreEntry.vue', () => {
     store.matchType = MatchType.ONE_VS_ONE
 
     const wrapper = mount(ScoreEntry)
-    expect(wrapper.find('[data-testid="team-a-avatars"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="team-b-avatars"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="select-game-btn-1"]').exists()).toBe(true)
   })
 
   it('disables Next Game button when game is incomplete and enables when complete', async () => {

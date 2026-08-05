@@ -173,15 +173,21 @@ public class UserService {
         throw new IllegalStateException("Failed to generate unique nickname after fallback attempts");
     }
 
+    private static final String[] PRESET_AVATARS = {
+        "ball-classic", "ball-cork", "player-red-1", "player-red-2",
+        "player-blue-1", "player-blue-2", "table-classic", "table-top",
+        "beer-mug", "beer-bottle", "trophy-gold", "trophy-silver",
+        "glove-red", "glove-blue", "whistle-gold", "foosball-rod",
+        "handle-wood", "handle-rubber", "score-counter", "snack-pretzel",
+        "snack-pizza", "jersey-red", "jersey-blue", "crown"
+    };
+
     private String generateDeterministicAvatar(String email) {
-        try {
-            var digest = MessageDigest.getInstance("SHA-256");
-            var input = email.trim().toLowerCase() + properties.getAvatar().getSalt();
-            var hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            return properties.getAvatar().getApiUrl() + HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 algorithm not found", e);
+        if (email == null || email.isBlank()) {
+            return PRESET_AVATARS[0];
         }
+        int hash = Math.abs(email.trim().toLowerCase().hashCode());
+        return PRESET_AVATARS[hash % PRESET_AVATARS.length];
     }
 
     @Retryable(
@@ -208,24 +214,36 @@ public class UserService {
     @Transactional
     public List<PlayerDto> getFrequentOpponents() {
         List<User> opponents = new ArrayList<>();
+        String[] mockAvatars = {"player-red-1", "player-blue-1", "trophy-gold", "glove-red"};
         for (int i = 1; i <= 4; i++) {
             String email = "mock" + i + "@example.com";
             String nickname = "Mock Player " + i;
+            String defaultAvatar = mockAvatars[(i - 1) % mockAvatars.length];
 
             Optional<User> existing = userRepository.findByEmail(email);
             if (existing.isPresent()) {
-                opponents.add(existing.get());
+                User u = existing.get();
+                if (u.getAvatar() == null || u.getAvatar().startsWith("http") || u.getAvatar().equals("anonymous")) {
+                    u.setAvatar(defaultAvatar);
+                    userRepository.save(u);
+                }
+                opponents.add(u);
             } else {
                 Optional<User> existingByNick = userRepository.findByNickname(nickname);
                 if (existingByNick.isPresent()) {
-                    opponents.add(existingByNick.get());
+                    User u = existingByNick.get();
+                    if (u.getAvatar() == null || u.getAvatar().startsWith("http") || u.getAvatar().equals("anonymous")) {
+                        u.setAvatar(defaultAvatar);
+                        userRepository.save(u);
+                    }
+                    opponents.add(u);
                 } else {
                     try {
                         User mockUser = User.builder()
                                 .email(email)
                                 .nickname(nickname)
                                 .providerId("mock-provider-" + i)
-                                .avatar(generateDeterministicAvatar(email))
+                                .avatar(defaultAvatar)
                                 .language("en")
                                 .tutorialCompleted(true)
                                 .build();

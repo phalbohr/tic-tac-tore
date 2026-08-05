@@ -83,6 +83,12 @@ watch(() => store.matchState, (newVal) => {
     </div>
     
     <div class="flex flex-col items-center mb-4 gap-2 w-full">
+      <!-- Header for the game rows -->
+      <div class="flex items-center justify-between w-full px-4 mb-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+        <span>{{ t('match.teamA', 'Team A') }}</span>
+        <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
+        <span>{{ t('match.teamB', 'Team B') }}</span>
+      </div>
       <div
         v-for="idx in (store.ruleConfig?.gameLimit || 1)"
         :key="idx"
@@ -138,34 +144,7 @@ watch(() => store.matchState, (newVal) => {
         </div>
       </div>
 
-      <!-- Labels and Avatars below score on a single line left/right -->
-      <div class="flex items-center justify-between w-full px-3 py-2.5 bg-surface-container/60 rounded-xl">
-        <!-- Team A -->
-        <div class="flex flex-col items-start gap-1">
-          <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{{ t('match.teamAScores', 'Team A Scores') }}</span>
-          <div class="flex items-center gap-1.5" data-testid="team-a-avatars">
-            <div class="w-7 h-7 rounded-full overflow-hidden" title="Defender">
-              <AvatarBase :name="getPlayerInfo(store.currentGame.teamADefenderId).name" :avatar="getPlayerInfo(store.currentGame.teamADefenderId).avatar" />
-            </div>
-            <div class="w-7 h-7 rounded-full overflow-hidden" title="Attacker">
-              <AvatarBase :name="getPlayerInfo(store.currentGame.teamAAttackerId).name" :avatar="getPlayerInfo(store.currentGame.teamAAttackerId).avatar" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Team B -->
-        <div class="flex flex-col items-end gap-1">
-          <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{{ t('match.teamB', 'Team B') }}</span>
-          <div class="flex items-center gap-1.5" data-testid="team-b-avatars">
-            <div class="w-7 h-7 rounded-full overflow-hidden" title="Defender">
-              <AvatarBase :name="getPlayerInfo(store.currentGame.teamBDefenderId).name" :avatar="getPlayerInfo(store.currentGame.teamBDefenderId).avatar" />
-            </div>
-            <div class="w-7 h-7 rounded-full overflow-hidden" title="Attacker">
-              <AvatarBase :name="getPlayerInfo(store.currentGame.teamBAttackerId).name" :avatar="getPlayerInfo(store.currentGame.teamBAttackerId).avatar" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Labels and Avatars moved to the top of the game list -->
     </div>
     
     <div class="flex flex-col gap-2 mt-6 w-full">
