@@ -965,6 +965,15 @@ All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level re
 
 #### Tier 1 — Full Specs (6 critical-path components)
 
+##### MatchGameRow
+
+**Purpose:** Display and manage the state of a single game within a match, integrating score entry and inline position swapping.
+**Usage:** Rendered within the Score Entry screen (one per game).
+**Anatomy:** Game number label · Team 1 slot (Avatar + Name, with swap button for 2v2) · Scoresteppers for Team 1 and Team 2 · Team 2 slot (Avatar + Name, with swap button for 2v2).
+**States:** `active` (currently being edited) · `completed` (scores finalized) · `upcoming` (disabled).
+**Interaction:** In 2v2 matches, tapping the swap button directly switches the Attacker and Defender positions for that team for this specific game, eliminating the need for a separate swap screen.
+
+
 ##### ScoreStepper
 
 **Purpose:** Capture per-game score per team in ≤2 taps to common values (≤5 goals).
@@ -1036,12 +1045,12 @@ All 37 components in the inventory are **custom Vue 3 SFCs**. No widget-level re
 
 - **Purpose:** Render player avatar with optional rank badge and team-color outline.
 - **Usage:** Used inside wrappers; not used directly by feature views.
-- **Anatomy:** Circular SVG avatar · optional rank badge slot · optional team-color outline.
-- **States:** `default` · `pressed` · `loading` (async deleted-player check pending — neutral skeleton) · `default-error` (deleted-player resolved → grey placeholder, no PII).
-- **Variants:** Sizes `sm` (24px), `md` (40px), `lg` (64px).
+- **Anatomy:** Circular avatar (SVG preset, uploaded image, or pixelated generated placeholder) · optional rank badge slot · optional team-color outline · optional initials overlay (used in matches).
+- **States:** `default` · `pressed` · `loading` (async deleted-player check pending — neutral skeleton) · `default-error` (deleted-player resolved → grey placeholder, no PII) · `generated` (pixelated generated icon for players without selected avatar).
+- **Variants:** Sizes `sm` (24px), `md` (40px), `lg` (64px) · `with-initials` (overlays player initials to distinguish players in match screens).
 - **Responsive:** Size invariant across breakpoints; chosen by parent.
 - **Accessibility:** Renders as `<span>` (no interactivity). Decorative `aria-hidden="true"` on SVG; alt text exposed by parent wrapper.
-- **Content:** SVG emoji from preset grid.
+- **Content:** SVG emoji, uploaded image, or generated pixelated icon. In match context, displays initials on top of the avatar for easy identification.
 - **Interaction:** None (pure visual). Wrappers add behavior.
 
 **`AvatarSelfHub`** — Hub-header only, opens Personal Cabinet.
