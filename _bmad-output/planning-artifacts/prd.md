@@ -639,7 +639,7 @@ Flexible scheduling
 - **FR4:** Player can record a live match in real-time by tapping screen quadrants to attribute goals to specific players during play (Phase 1.5)
 - **FR5:** Third-party observer (referee) can record a match they are not participating in, with adapted UI for their viewing position (Phase 1.5)
 - **FR6:** System requires manual completion when a team reaches the score limit or when the match win condition is met. A "Complete Game" or "Complete Match" button must appear/become active while disabling further score increments to allow undoing misclicks.
-- **FR7:** Player can swap teammate positions between games (mandatory or free, per rule system) in both retrospective and live entry modes
+- **FR7:** Player can swap teammate positions between games (mandatory or free, per rule system) in both retrospective (inline within the game score row) and live entry modes
 - **FR8:** Player can swap teammate positions within a game during live match mode via a per-team swap button, if the active rule system permits within-game swaps (Phase 1.5). In retrospective entry, within-game swaps cannot be tracked — this is an accepted limitation per KD-03 (Speed over Precision)
 - **FR9:** Player can undo the last recorded goal during live match entry (Phase 1.5)
 - **FR10:** System displays a live activity timeline showing goal sequence with scorer identification during live match mode (Phase 1.5)
@@ -671,7 +671,7 @@ Flexible scheduling
 ### Player Identity & Profile
 
 - **FR29:** User can sign up and log in via Google OAuth2
-- **FR30:** Player can set a nickname and avatar image in their personal cabinet
+- **FR30:** Player can set a nickname and avatar image in their personal cabinet. Default is a pixelated generated avatar. During matches, player initials are overlaid on avatars for easier identification.
 - **FR31:** Player can change their nickname at most once per month
 - **FR32:** Player can select interface language (English or German)
 - **FR33:** Player can delete their account; system removes all personal data and replaces identity with an anonymized placeholder ("boots on a nail" avatar) while preserving match history

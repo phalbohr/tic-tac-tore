@@ -289,9 +289,11 @@ As a user, I want to be able to delete my account, So that my personal data is r
 ### Story 1.6: Avatar Selection & Management
 As a player, I want to select an avatar, so that I can personalize my profile.
 **Acceptance Criteria:**
-- **Given** the player is logged into their personal cabinet
-- **When** they click to edit their avatar and upload/select an image
-- **Then** the system saves the new avatar and updates their identity globally across all app views (FR30)
+- **Given** a new player without an avatar
+- **Then** a pixelated generated avatar is displayed by default
+- **When** the player uploads/selects an image in their personal cabinet
+- **Then** the system saves the new avatar and displays it globally across all app views (FR30)
+- **And** during matches, player initials are overlaid on the avatar to make them easier to distinguish
 
 ### Story 1.7: Onboarding Tutorial
 As a new user, I want an onboarding tutorial, so that I can learn how to use the app.
@@ -338,11 +340,11 @@ As a player, I want to submit and have a short undo window, So that I can correc
 - **Note:** This story is sequenced before position swapping to accelerate end-to-end testing of the verification pipeline (Epic 3), but the MVP release is blocked until position swapping (Story 2.5) is also integrated.
 
 ### Story 2.5: Position Swapping Between Games
-As a 2v2 participant, I want to indicate positions, So that stats remain accurate.
+As a 2v2 participant, I want to indicate positions inline when entering scores, So that stats remain accurate without breaking the input flow.
 **Acceptance Criteria:**
-- **Given** a 2v2 match is being recorded
-- **When** new game starts
-- **Then** prompt to confirm/swap Attacker/Defender
+- **Given** a 2v2 match is being recorded in retrospective mode
+- **When** entering scores for a game
+- **Then** users can swap Attacker/Defender positions inline within the game row (no separate prompt or screen)
 - **And** data persisted for each game
 - **And** the match submission payload (Story 2.4) correctly includes positional data
 
