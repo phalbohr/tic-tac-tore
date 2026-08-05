@@ -206,7 +206,7 @@ function getPlayerDisplayInfo(
                 :key="gIdx"
                 :team-a-defender="getPlayerDisplayInfo(game.teamADefenderNickname, match.teamADefenderNickname, match.teamANames?.[1])"
                 :team-a-attacker="getPlayerDisplayInfo(game.teamAAttackerNickname, match.teamAAttackerNickname, match.teamANames?.[0])"
-                :team-b-defender="getPlayerDisplayInfo(game.teamBDefenderNickname, match.teamBDefenderNickname, match.teamBNames?.[0])"
+                :team-b-defender="getPlayerDisplayInfo(game.teamBDefenderNickname, match.teamBDefenderNickname, match.teamBNames?.[1])"
                 :team-b-attacker="getPlayerDisplayInfo(game.teamBAttackerNickname, match.teamBAttackerNickname, match.teamBNames?.[0])"
                 :team-a-score="game.teamAScore"
                 :team-b-score="game.teamBScore"
