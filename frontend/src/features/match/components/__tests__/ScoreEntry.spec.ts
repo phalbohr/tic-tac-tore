@@ -5,6 +5,16 @@ import { createTestingPinia } from '@pinia/testing'
 import ScoreEntry from '../ScoreEntry.vue'
 import { useMatchDraftStore, MatchType } from '../../stores/matchDraftStore'
 
+vi.mock('vue-i18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-i18n')>()
+  return {
+    ...actual,
+    useI18n: () => ({
+      t: (key: string, fallback?: string) => fallback || key
+    })
+  }
+})
+
 describe('ScoreEntry.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -39,7 +49,7 @@ describe('ScoreEntry.vue', () => {
     expect(wrapper.emitted()).toHaveProperty('back')
   })
 
-  it('renders correctly for 1v1', () => {
+  it('renders game rows for games', () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = [
       { id: 'p1', nickname: 'Alice', avatar: '' },
@@ -49,50 +59,7 @@ describe('ScoreEntry.vue', () => {
     store.matchType = MatchType.ONE_VS_ONE
 
     const wrapper = mount(ScoreEntry)
-    const headings = wrapper.findAll('h3')
-
-    expect(headings.length).toBe(2)
-    expect(headings[0]!.text()).toBe('Alice')
-    expect(headings[1]!.text()).toBe('Bob')
-  })
-
-  it('renders correctly for 2v2', () => {
-    const store = useMatchDraftStore()
-    store.frequentOpponents = [
-      { id: 'p1', nickname: 'Alice', avatar: '' },
-      { id: 'p2', nickname: 'Bob', avatar: '' },
-      { id: 'p3', nickname: 'Charlie', avatar: '' },
-      { id: 'p4', nickname: 'Dave', avatar: '' }
-    ]
-
-    store.selectedPlayers = ['p1', 'p2', 'p3', 'p4']
-
-    store.matchType = MatchType.TWO_VS_TWO
-
-    const wrapper = mount(ScoreEntry)
-    const headings = wrapper.findAll('h3')
-
-    expect(headings[0]!.text()).toBe('Alice & Bob')
-    expect(headings[1]!.text()).toBe('Charlie & Dave')
-  })
-
-  it('renders correctly for 3v3 (6 players)', () => {
-    const store = useMatchDraftStore()
-    store.frequentOpponents = [
-      { id: 'p1', nickname: 'P1', avatar: '' },
-      { id: 'p2', nickname: 'P2', avatar: '' },
-      { id: 'p3', nickname: 'P3', avatar: '' },
-      { id: 'p4', nickname: 'P4', avatar: '' },
-      { id: 'p5', nickname: 'P5', avatar: '' },
-      { id: 'p6', nickname: 'P6', avatar: '' }
-    ]
-    store.selectedPlayers = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
-
-    const wrapper = mount(ScoreEntry)
-    const headings = wrapper.findAll('h3')
-
-    expect(headings[0]!.text()).toBe('P1 & P2 & P3')
-    expect(headings[1]!.text()).toBe('P4 & P5 & P6')
+    expect(wrapper.find('[data-testid="select-game-btn-1"]').exists()).toBe(true)
   })
 
   it('disables Next Game button when game is incomplete and enables when complete', async () => {

@@ -29,35 +29,43 @@ export const useAuthStore = defineStore('auth', () => {
     isMaybeAuthenticated.value = status
   }
 
+  let fetchProfilePromise: Promise<void> | null = null
+
   async function fetchProfile() {
     if (!isMaybeAuthenticated.value) return
-    try {
-      const response = await fetch(PROFILE_ENDPOINT)
-      if (response.ok) {
-        const contentType = response.headers.get('content-type')
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Invalid server response format')
-        }
-        const data = await response.json()
-        profile.value = data
-        if (data.language) {
-          const localeStore = useLocaleStore()
-          const lang = data.language.toLowerCase()
-          if (lang === 'en' || lang === 'de') {
-            localeStore.setLocale(lang)
+    if (fetchProfilePromise) return fetchProfilePromise
+    fetchProfilePromise = (async () => {
+      try {
+        const response = await fetch(PROFILE_ENDPOINT)
+        if (response.ok) {
+          const contentType = response.headers.get('content-type')
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Invalid server response format')
           }
+          const data = await response.json()
+          profile.value = data
+          if (data.language) {
+            const localeStore = useLocaleStore()
+            const lang = data.language.toLowerCase()
+            if (lang === 'en' || lang === 'de') {
+              localeStore.setLocale(lang)
+            }
+          }
+        } else {
+          isMaybeAuthenticated.value = false
+          profile.value = null
+          deleteCookie(SESSION_COOKIE_NAME)
         }
-      } else {
+      } catch (e) {
+        console.error('Failed to fetch profile', e)
         isMaybeAuthenticated.value = false
         profile.value = null
         deleteCookie(SESSION_COOKIE_NAME)
+      } finally {
+        fetchProfilePromise = null
       }
-    } catch (e) {
-      console.error('Failed to fetch profile', e)
-      isMaybeAuthenticated.value = false
-      profile.value = null
-      deleteCookie(SESSION_COOKIE_NAME)
-    }
+    })()
+    return fetchProfilePromise
   }
 
   async function updateProfile(options: {
@@ -66,6 +74,12 @@ export const useAuthStore = defineStore('auth', () => {
     avatar?: string
     tutorialCompleted?: boolean
   }) {
+    if (fetchProfilePromise) {
+      await fetchProfilePromise
+    }
+    if (!profile.value) {
+      await fetchProfile()
+    }
     if (!profile.value) return
 
     const { nickname, language, avatar, tutorialCompleted } = options

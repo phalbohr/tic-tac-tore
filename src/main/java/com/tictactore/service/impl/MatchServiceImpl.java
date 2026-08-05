@@ -200,27 +200,21 @@ public class MatchServiceImpl implements MatchService {
             if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
         }
 
-        Map<UUID, String> userNicknameMap = new HashMap<>();
+        Map<UUID, User> userMap = new HashMap<>();
         if (userRepository != null && !allUserIds.isEmpty()) {
             try {
                 for (User u : userRepository.findAllById(allUserIds)) {
                     if (u != null && u.getId() != null) {
-                        String name = u.getNickname();
-                        if (name == null || name.isBlank()) {
-                            name = u.getEmail();
-                        }
-                        if (name != null) {
-                            userNicknameMap.put(u.getId(), name);
-                        }
+                        userMap.put(u.getId(), u);
                     }
                 }
             } catch (Exception e) {
-                log.warn("Failed to resolve user nicknames for pending matches", e);
+                log.warn("Failed to resolve users for pending matches", e);
             }
         }
 
         List<MatchResponse> userPendingResponses = userPendingMatches.stream()
-                .map(m -> mapToResponseWithUserMap(m, userNicknameMap))
+                .map(m -> mapToResponseWithUserMap(m, userMap))
                 .toList();
 
         return new com.tictactore.dto.PendingMatchesResponse(userPendingResponses.size(), userPendingResponses);
@@ -338,29 +332,23 @@ public class MatchServiceImpl implements MatchService {
         if (match.getTeamBAttackerId() != null) allUserIds.add(match.getTeamBAttackerId());
         if (match.getTeamBDefenderId() != null) allUserIds.add(match.getTeamBDefenderId());
 
-        Map<UUID, String> userNicknameMap = new HashMap<>();
+        Map<UUID, User> userMap = new HashMap<>();
         if (userRepository != null && !allUserIds.isEmpty()) {
             try {
                 for (User u : userRepository.findAllById(allUserIds)) {
                     if (u != null && u.getId() != null) {
-                        String name = u.getNickname();
-                        if (name == null || name.isBlank()) {
-                            name = u.getEmail();
-                        }
-                        if (name != null) {
-                            userNicknameMap.put(u.getId(), name);
-                        }
+                        userMap.put(u.getId(), u);
                     }
                 }
             } catch (Exception e) {
-                log.warn("Failed to resolve user nicknames", e);
+                log.warn("Failed to resolve users", e);
             }
         }
 
-        return mapToResponseWithUserMap(match, userNicknameMap);
+        return mapToResponseWithUserMap(match, userMap);
     }
 
-    private MatchResponse mapToResponseWithUserMap(Match match, Map<UUID, String> userNicknameMap) {
+    private MatchResponse mapToResponseWithUserMap(Match match, Map<UUID, User> userMap) {
         List<GameDto> gameDtos = match.getGames().stream()
                 .map(g -> new GameDto(
                     g.getTeamAScore(), g.getTeamBScore(),
@@ -385,12 +373,30 @@ public class MatchServiceImpl implements MatchService {
                 match.getRejectedByUserId(),
                 match.getRejectedAt(),
                 match.getRejectionReason(),
-                userNicknameMap.get(match.getCreatorId()),
-                userNicknameMap.get(match.getTeamAAttackerId()),
-                userNicknameMap.get(match.getTeamADefenderId()),
-                userNicknameMap.get(match.getTeamBAttackerId()),
-                userNicknameMap.get(match.getTeamBDefenderId())
+                getDisplayName(userMap.get(match.getCreatorId())),
+                getDisplayName(userMap.get(match.getTeamAAttackerId())),
+                getDisplayName(userMap.get(match.getTeamADefenderId())),
+                getDisplayName(userMap.get(match.getTeamBAttackerId())),
+                getDisplayName(userMap.get(match.getTeamBDefenderId())),
+                getAvatar(userMap.get(match.getCreatorId())),
+                getAvatar(userMap.get(match.getTeamAAttackerId())),
+                getAvatar(userMap.get(match.getTeamADefenderId())),
+                getAvatar(userMap.get(match.getTeamBAttackerId())),
+                getAvatar(userMap.get(match.getTeamBDefenderId()))
         );
+    }
+
+    private String getDisplayName(User user) {
+        if (user == null) return null;
+        String name = user.getNickname();
+        if (name == null || name.isBlank()) {
+            name = user.getEmail();
+        }
+        return name;
+    }
+
+    private String getAvatar(User user) {
+        return user != null ? user.getAvatar() : null;
     }
 
     @Override

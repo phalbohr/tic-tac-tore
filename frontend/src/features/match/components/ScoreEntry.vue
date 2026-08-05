@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMatchDraftStore, type PlayerDto, type GameScore } from '../stores/matchDraftStore'
 import ScoreStepper from './ScoreStepper.vue'
-import PositionSwapDialog from './PositionSwapDialog.vue'
+import MatchGameRow, { type PlayerDisplayInfo } from './MatchGameRow.vue'
+import AvatarBase from '@/components/AvatarBase.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 
+const { t } = useI18n()
 const store = useMatchDraftStore()
 const emit = defineEmits<{
   (e: 'complete'): void
@@ -14,24 +17,34 @@ const emit = defineEmits<{
 
 const showCancelModal = ref(false)
 
-const getPlayerName = (id?: string) => {
-  if (!id) return 'Unknown'
+const getPlayerInfo = (id?: string): PlayerDisplayInfo | undefined => {
+  if (!id) return undefined
   const opp = store.frequentOpponents.find((o: PlayerDto) => o.id === id)
-  if (opp) return opp.nickname
+  if (opp) return { name: opp.nickname, avatar: opp.avatar }
   const fetched = store.fetchedPlayers[id]
-  if (fetched) return fetched.nickname
-  return `Player ${id.substring(0, 4)}`
+  if (fetched) return { name: fetched.nickname, avatar: fetched.avatar }
+  return { name: `Player ${id.substring(0, 4)}`, avatar: null }
 }
 
-const team1Name = computed(() => {
-  const half = Math.ceil(store.selectedPlayers.length / 2)
-  return store.selectedPlayers.slice(0, half).map((id: string) => getPlayerName(id)).join(' & ') || 'Team 1'
-})
+const getGamePlayerInfo = (gameIndex: number) => {
+  let game
+  if (gameIndex === store.currentActiveIndex) {
+    game = store.currentGame
+  } else if (gameIndex < store.games.length) {
+    game = store.games[gameIndex]
+  } else {
+    game = store.savedNewGame
+  }
 
-const team2Name = computed(() => {
-  const half = Math.ceil(store.selectedPlayers.length / 2)
-  return store.selectedPlayers.slice(half).map((id: string) => getPlayerName(id)).join(' & ') || 'Team 2'
-})
+  return {
+    teamADefender: getPlayerInfo(game?.teamADefenderId),
+    teamAAttacker: getPlayerInfo(game?.teamAAttackerId),
+    teamBDefender: getPlayerInfo(game?.teamBDefenderId),
+    teamBAttacker: getPlayerInfo(game?.teamBAttackerId),
+    teamAScore: game?.team1Score ?? (game as any)?.teamAScore,
+    teamBScore: game?.team2Score ?? (game as any)?.teamBScore
+  }
+}
 
 const team1Wins = computed(() => {
   return store.games.filter((g: GameScore) => g.team1Score > g.team2Score).length
@@ -74,62 +87,74 @@ watch(() => store.matchState, (newVal) => {
     </div>
     
     <div class="flex flex-col items-center mb-4 gap-2 w-full">
+      <!-- Header for the game rows -->
+      <div class="flex items-center justify-between w-full px-4 mb-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+        <span>{{ t('match.teamA', 'Team A') }}</span>
+        <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
+        <span>{{ t('match.teamB', 'Team B') }}</span>
+      </div>
       <div
         v-for="idx in (store.ruleConfig?.gameLimit || 1)"
         :key="idx"
-        class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-sm transition-colors"
+        class="w-full rounded-xl border text-sm transition-colors overflow-hidden"
         :class="[
           (idx - 1) === store.currentActiveIndex
             ? 'border-primary bg-primary/10 text-on-surface font-bold'
             : 'border-white/5 bg-surface-container/40 text-on-surface-variant hover:bg-surface-container'
         ]"
       >
-        <button
-          type="button"
-          class="flex-1 text-left flex items-center justify-between gap-2"
-          :disabled="(idx - 1) > store.games.length"
+        <div
+          role="button"
+          :tabindex="(idx - 1) > store.games.length ? -1 : 0"
+          :aria-disabled="(idx - 1) > store.games.length"
+          class="w-full text-left p-1"
+          :class="{ 'opacity-50 cursor-not-allowed': (idx - 1) > store.games.length }"
           :data-testid="`select-game-btn-${idx}`"
-          @click="store.selectGameToEdit(idx - 1)"
+          @click="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
+          @keydown.enter.prevent="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
+          @keydown.space.prevent="(idx - 1) <= store.games.length && store.selectGameToEdit(idx - 1)"
         >
-          <span v-if="(idx - 1) === store.currentActiveIndex">
-            Game {{ idx }}: {{ store.currentGame.team1Score }} - {{ store.currentGame.team2Score }}
-          </span>
-          <span v-else-if="(idx - 1) < store.games.length">
-            Game {{ idx }}: {{ store.games[idx - 1]?.team1Score }} - {{ store.games[idx - 1]?.team2Score }}
-          </span>
-          <span v-else-if="(idx - 1) === store.games.length">
-            Game {{ idx }}: {{ store.savedNewGame.team1Score }} - {{ store.savedNewGame.team2Score }}
-          </span>
-          <span v-else class="opacity-50">
-            Game {{ idx }}: -
-          </span>
-        </button>
+          <MatchGameRow
+            :team-a-defender="getGamePlayerInfo(idx - 1).teamADefender"
+            :team-a-attacker="getGamePlayerInfo(idx - 1).teamAAttacker"
+            :team-b-defender="getGamePlayerInfo(idx - 1).teamBDefender"
+            :team-b-attacker="getGamePlayerInfo(idx - 1).teamBAttacker"
+            :team-a-score="getGamePlayerInfo(idx - 1).teamAScore"
+            :team-b-score="getGamePlayerInfo(idx - 1).teamBScore"
+            :show-score="(idx - 1) <= store.games.length"
+            :allow-swap="(idx - 1) === store.currentActiveIndex"
+            @swap="store.swapPositions($event, idx - 1)"
+          />
+        </div>
       </div>
     </div>
     
-    <div class="flex justify-between gap-4">
+    <!-- Active Game Score Steppers & Avatar Display -->
+    <div class="flex flex-col gap-4 w-full">
+      <!-- Steppers -->
+      <div class="flex justify-between gap-4">
+        <div class="flex-1 flex flex-col items-center">
+          <ScoreStepper 
+            :score="store.currentGame.team1Score"
+            :score-limit="store.ruleConfig?.scoreLimit || 10"
+            :win-by-two="store.ruleConfig?.winByTwo || false"
+            @increment="onTeam1Increment"
+            @decrement="onTeam1Decrement"
+          />
+        </div>
+        
+        <div class="flex-1 flex flex-col items-center">
+          <ScoreStepper 
+            :score="store.currentGame.team2Score"
+            :score-limit="store.ruleConfig?.scoreLimit || 10"
+            :win-by-two="store.ruleConfig?.winByTwo || false"
+            @increment="onTeam2Increment"
+            @decrement="onTeam2Decrement"
+          />
+        </div>
+      </div>
 
-      <div class="flex-1 flex flex-col items-center">
-        <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team1Name }}</h3>
-        <ScoreStepper 
-          :score="store.currentGame.team1Score"
-          :score-limit="store.ruleConfig?.scoreLimit || 10"
-          :win-by-two="store.ruleConfig?.winByTwo || false"
-          @increment="onTeam1Increment"
-          @decrement="onTeam1Decrement"
-        />
-      </div>
-      
-      <div class="flex-1 flex flex-col items-center">
-        <h3 class="text-on-surface font-bold text-center mb-4 h-12 w-full block overflow-hidden text-ellipsis line-clamp-2 break-words">{{ team2Name }}</h3>
-        <ScoreStepper 
-          :score="store.currentGame.team2Score"
-          :score-limit="store.ruleConfig?.scoreLimit || 10"
-          :win-by-two="store.ruleConfig?.winByTwo || false"
-          @increment="onTeam2Increment"
-          @decrement="onTeam2Decrement"
-        />
-      </div>
+      <!-- Labels and Avatars moved to the top of the game list -->
     </div>
     
     <div class="flex flex-col gap-2 mt-6 w-full">
@@ -141,10 +166,6 @@ watch(() => store.matchState, (newVal) => {
         {{ store.isMatchComplete ? 'Complete Match' : 'Next Game' }}
       </BaseButton>
     </div>
-
-    <Transition name="ch-fade">
-      <PositionSwapDialog v-if="store.matchState === 'position_swap'" />
-    </Transition>
 
     <Transition name="ch-fade">
       <div

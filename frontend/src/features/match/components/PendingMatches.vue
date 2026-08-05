@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseButton from '@/core/components/BaseButton.vue'
+import MatchGameRow from './MatchGameRow.vue'
 
 export interface GameScoreItem {
   teamAScore: number
@@ -10,6 +11,10 @@ export interface GameScoreItem {
   teamADefenderId?: string
   teamBAttackerId?: string
   teamBDefenderId?: string
+  teamAAttackerNickname?: string
+  teamADefenderNickname?: string
+  teamBAttackerNickname?: string
+  teamBDefenderNickname?: string
 }
 
 export interface PendingMatchItem {
@@ -20,6 +25,15 @@ export interface PendingMatchItem {
   teamADefenderId?: string
   teamBAttackerId?: string
   teamBDefenderId?: string
+  teamAAttackerNickname?: string
+  teamADefenderNickname?: string
+  teamBAttackerNickname?: string
+  teamBDefenderNickname?: string
+  creatorAvatar?: string
+  teamAAttackerAvatar?: string
+  teamADefenderAvatar?: string
+  teamBAttackerAvatar?: string
+  teamBDefenderAvatar?: string
   teamANames?: string[]
   teamBNames?: string[]
   teamAScore?: number
@@ -48,6 +62,9 @@ const { t } = useI18n()
 
 const matchIdToDelete = ref<string | null>(null)
 
+const pendingApprovalMatches = computed(() => props.pendingMatches.filter((m) => m.status !== 'REJECTED'))
+const rejectedMatches = computed(() => props.pendingMatches.filter((m) => m.status === 'REJECTED'))
+
 function isPendingConfirmation(matchId: string): boolean {
   if (props.pendingConfirmationIds && props.pendingConfirmationIds.includes(matchId)) {
     return true
@@ -62,81 +79,172 @@ function getMatchBadgeText(index: number): string {
   const res = t('match.pendingMatch', { number: index + 1 })
   return res !== 'match.pendingMatch' ? res : `Match ${index + 1}`
 }
+
+function getPlayerDisplayInfo(
+  match: PendingMatchItem,
+  playerId?: string,
+  fallbackMatchRoleName?: string
+): { name: string, avatar?: string } | undefined {
+  if (playerId) {
+    if (playerId === match.teamAAttackerId) return { name: match.teamAAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamAAttackerAvatar }
+    if (playerId === match.teamADefenderId) return { name: match.teamADefenderNickname || fallbackMatchRoleName || '', avatar: match.teamADefenderAvatar }
+    if (playerId === match.teamBAttackerId) return { name: match.teamBAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamBAttackerAvatar }
+    if (playerId === match.teamBDefenderId) return { name: match.teamBDefenderNickname || fallbackMatchRoleName || '', avatar: match.teamBDefenderAvatar }
+  }
+  return fallbackMatchRoleName ? { name: fallbackMatchRoleName } : undefined
+}
+
+function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
+  if (match.games && match.games.length > 0) {
+    return match.games
+  }
+  return [{
+    teamAScore: match.teamAScore ?? 0,
+    teamBScore: match.teamBScore ?? 0,
+    teamAAttackerId: match.teamAAttackerId,
+    teamADefenderId: match.teamADefenderId,
+    teamBAttackerId: match.teamBAttackerId,
+    teamBDefenderId: match.teamBDefenderId,
+    teamAAttackerNickname: match.teamAAttackerNickname,
+    teamADefenderNickname: match.teamADefenderNickname,
+    teamBAttackerNickname: match.teamBAttackerNickname,
+    teamBDefenderNickname: match.teamBDefenderNickname
+  }]
+}
 </script>
 
 <template>
-  <div v-if="pendingMatches.length > 0" class="w-full flex flex-col gap-3 my-4">
-    <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-left">
-      {{ t('match.pending') }}
-    </h2>
+  <div v-if="pendingMatches.length > 0" class="w-full flex flex-col gap-6 my-4">
+    <!-- Pending Approvals Section -->
+    <div v-if="pendingApprovalMatches.length > 0" class="w-full flex flex-col gap-3">
+      <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-left">
+        {{ t('match.pending') }}
+      </h2>
 
-    <TransitionGroup name="list" tag="div" class="flex flex-col gap-3 w-full">
-      <div
-        v-for="(match, mIdx) in pendingMatches"
-        :key="match.id"
-        class="w-full bg-surface-container-highest rounded-2xl p-4 flex flex-col gap-3 shadow-md border-0"
-        :data-testid="`pending-match-card-${match.id}`"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning/20 text-warning">
-            {{ getMatchBadgeText(mIdx) }}
-          </span>
-          <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
-            {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-          </span>
-        </div>
-
-        <!-- 3-Column Table Layout -->
-        <div class="grid grid-cols-3 gap-2 items-center bg-surface-container/60 p-3 rounded-xl">
-          <!-- Team A Column -->
-          <div class="flex flex-col text-left font-medium text-sm text-on-surface">
-            <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
-              {{ t('match.teamA') }}
+      <TransitionGroup name="list" tag="div" class="flex flex-col gap-3 w-full">
+        <div
+          v-for="(match, mIdx) in pendingApprovalMatches"
+          :key="match.id"
+          class="w-full bg-surface-container-highest rounded-2xl p-4 flex flex-col gap-3 shadow-md border-0"
+          :data-testid="`pending-match-card-${match.id}`"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning/20 text-warning">
+              {{ getMatchBadgeText(mIdx) }}
             </span>
-            <template v-if="match.teamANames && match.teamANames.length > 0">
-              <span v-for="(name, idx) in match.teamANames" :key="idx" class="truncate font-semibold">
-                {{ name }}
-              </span>
-            </template>
-            <span v-else class="truncate font-semibold">Team A</span>
+            <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
+              {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </span>
           </div>
 
-          <!-- Scores Column (Center) -->
-          <div class="flex flex-col items-center justify-center text-center">
-            <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
-              {{ t('match.scores') }}
-            </span>
-            <template v-if="match.games && match.games.length > 0">
-              <div
-                v-for="(game, gIdx) in match.games"
+          <!-- Shared Game Row Layout -->
+          <div class="flex flex-col w-full">
+            <div class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+              <span>{{ t('match.teamA', 'Team A') }}</span>
+              <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
+              <span>{{ t('match.teamB', 'Team B') }}</span>
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+              <MatchGameRow
+                v-for="(game, gIdx) in getMatchGames(match)"
                 :key="gIdx"
-                class="font-headline font-bold text-base text-primary leading-tight"
-              >
-                {{ game.teamAScore }} : {{ game.teamBScore }}
-              </div>
-            </template>
-            <div v-else-if="match.teamAScore !== undefined && match.teamBScore !== undefined" class="font-headline font-bold text-base text-primary leading-tight">
-              {{ match.teamAScore }} : {{ match.teamBScore }}
+                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
+                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
+                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
+                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
+                :team-a-score="game.teamAScore"
+                :team-b-score="game.teamBScore"
+                :show-score="true"
+              />
             </div>
           </div>
 
-          <!-- Team B Column -->
-          <div class="flex flex-col text-right font-medium text-sm text-on-surface">
-            <span class="text-xs text-on-surface-variant font-bold uppercase mb-1">
-              {{ t('match.teamB') }}
-            </span>
-            <template v-if="match.teamBNames && match.teamBNames.length > 0">
-              <span v-for="(name, idx) in match.teamBNames" :key="idx" class="truncate font-semibold">
-                {{ name }}
-              </span>
+          <!-- Action Button / Confirmation State -->
+          <div class="w-full flex items-center gap-2 justify-end mt-1">
+            <template v-if="!isPendingConfirmation(match.id)">
+              <div class="grid grid-cols-3 gap-2 w-full">
+                <button
+                  type="button"
+                  class="min-h-[48px] h-12 rounded-xl font-bold bg-surface-container-low hover:bg-red-950/40 text-red-400 border border-red-500/30 transition-colors flex items-center justify-center text-sm"
+                  :data-testid="`reject-match-btn-${match.id}`"
+                  @click="emit('reject', match.id, mIdx + 1)"
+                >
+                  {{ t('match.reject') }}
+                </button>
+                <BaseButton
+                  variant="primary"
+                  @click="emit('confirm', match.id, mIdx + 1)"
+                  class="!h-12 min-h-[48px] font-bold text-sm"
+                  :data-testid="`confirm-match-btn-${match.id}`"
+                >
+                  {{ t('match.confirm') }}
+                </BaseButton>
+                <button
+                  type="button"
+                  class="min-h-[48px] h-12 rounded-xl font-bold bg-surface-container-low hover:bg-neutral-700 text-on-surface border border-neutral-600/50 transition-colors flex items-center justify-center text-sm"
+                  :data-testid="`close-match-btn-${match.id}`"
+                  @click="emit('close', match.id)"
+                >
+                  {{ t('match.close', 'Close') }}
+                </button>
+              </div>
             </template>
-            <span v-else class="truncate font-semibold">Team B</span>
+            <div v-else class="min-h-[48px] h-12 flex items-center justify-center w-full">
+              <span class="text-xs italic text-primary font-medium text-center">
+                {{ t('match.confirmedTapUndo') }}
+              </span>
+            </div>
           </div>
         </div>
+      </TransitionGroup>
+    </div>
 
-        <!-- Action Button / Confirmation State / Rejection Reason -->
-        <div class="w-full flex items-center gap-2 justify-end mt-1">
-          <template v-if="match.status === 'REJECTED'">
+    <!-- Rejected Matches Section -->
+    <div v-if="rejectedMatches.length > 0" class="w-full flex flex-col gap-3">
+      <h2 class="text-sm font-bold text-error uppercase tracking-wider text-left">
+        {{ t('match.rejected') }}
+      </h2>
+
+      <TransitionGroup name="list" tag="div" class="flex flex-col gap-3 w-full">
+        <div
+          v-for="(match, mIdx) in rejectedMatches"
+          :key="match.id"
+          class="w-full bg-surface-container-highest rounded-2xl p-4 flex flex-col gap-3 shadow-md border border-error/30"
+          :data-testid="`rejected-match-card-${match.id}`"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-error/20 text-error">
+              {{ t('match.rejected') }} {{ mIdx + 1 }}
+            </span>
+            <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
+              {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </span>
+          </div>
+
+          <!-- Shared Game Row Layout -->
+          <div class="flex flex-col w-full">
+            <div class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+              <span>{{ t('match.teamA', 'Team A') }}</span>
+              <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
+              <span>{{ t('match.teamB', 'Team B') }}</span>
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+              <MatchGameRow
+                v-for="(game, gIdx) in getMatchGames(match)"
+                :key="gIdx"
+                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
+                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
+                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
+                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
+                :team-a-score="game.teamAScore"
+                :team-b-score="game.teamBScore"
+                :show-score="true"
+              />
+            </div>
+          </div>
+
+          <!-- Rejection Reason & Action Buttons -->
+          <div class="w-full flex items-center gap-2 justify-end mt-1">
             <div
               class="w-full flex flex-col gap-2 text-xs text-red-400 font-medium bg-surface-container/60 p-3 rounded-xl border border-red-500/20"
               :data-testid="`rejection-reason-${match.id}`"
@@ -169,44 +277,10 @@ function getMatchBadgeText(index: number): string {
                 </button>
               </div>
             </div>
-          </template>
-
-          <template v-else-if="!isPendingConfirmation(match.id)">
-            <div class="grid grid-cols-3 gap-2 w-full">
-              <button
-                type="button"
-                class="min-h-[48px] h-12 rounded-xl font-bold bg-surface-container-low hover:bg-red-950/40 text-red-400 border border-red-500/30 transition-colors flex items-center justify-center text-sm"
-                :data-testid="`reject-match-btn-${match.id}`"
-                @click="emit('reject', match.id, mIdx + 1)"
-              >
-                {{ t('match.reject') }}
-              </button>
-              <BaseButton
-                variant="primary"
-                @click="emit('confirm', match.id, mIdx + 1)"
-                class="!h-12 min-h-[48px] font-bold text-sm"
-                :data-testid="`confirm-match-btn-${match.id}`"
-              >
-                {{ t('match.confirm') }}
-              </BaseButton>
-              <button
-                type="button"
-                class="min-h-[48px] h-12 rounded-xl font-bold bg-surface-container-low hover:bg-neutral-700 text-on-surface border border-neutral-600/50 transition-colors flex items-center justify-center text-sm"
-                :data-testid="`close-match-btn-${match.id}`"
-                @click="emit('close', match.id)"
-              >
-                {{ t('match.close', 'Close') }}
-              </button>
-            </div>
-          </template>
-          <div v-else class="min-h-[48px] h-12 flex items-center justify-center w-full">
-            <span class="text-xs italic text-primary font-medium text-center">
-              {{ t('match.confirmedTapUndo') }}
-            </span>
           </div>
         </div>
-      </div>
-    </TransitionGroup>
+      </TransitionGroup>
+    </div>
 
     <!-- Confirmation Modal for Match Deletion -->
     <Transition name="ch-fade">

@@ -48,7 +48,11 @@
     "alreadyProcessed": "Match was already processed by another opponent",
     "close": "Close",
     "editMatch": "Edit Match",
-    "deleteMatch": "Delete Match"
+    "deleteMatch": "Delete Match",
+    "teamAScores": "Team A Scores",
+    "defender": "Defender",
+    "attacker": "Attacker",
+    "vs": "VS"
   },
   "leaderboard": {
     "title": "Leaderboard",

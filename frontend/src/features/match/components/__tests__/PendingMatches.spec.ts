@@ -65,12 +65,12 @@ describe('PendingMatches.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Team A')
-    expect(wrapper.text()).toContain('Alice')
-    expect(wrapper.text()).toContain('Bob')
+    expect(wrapper.html()).toContain('Alice')
+    expect(wrapper.html()).toContain('Bob')
 
     expect(wrapper.text()).toContain('Team B')
-    expect(wrapper.text()).toContain('Charlie')
-    expect(wrapper.text()).toContain('Dave')
+    expect(wrapper.html()).toContain('Charlie')
+    expect(wrapper.html()).toContain('Dave')
 
     expect(wrapper.text()).toContain('10 : 8')
     expect(wrapper.text()).toContain('7 : 10')
@@ -148,6 +148,28 @@ describe('PendingMatches.vue', () => {
     const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-rej"]')
     expect(editBtn.exists()).toBe(true)
     expect(deleteBtn.exists()).toBe(true)
+  })
+
+  it('correctly passes defender fallback name (teamBNames[1]) to MatchGameRow in rejected matches', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-rej-names',
+        status: 'REJECTED',
+        rejectionReason: 'Wrong score',
+        teamANames: ['Attacker A', 'Defender A'],
+        teamBNames: ['Attacker B', 'Defender B'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const gameRow = wrapper.findComponent({ name: 'MatchGameRow' })
+    expect(gameRow.exists()).toBe(true)
+    expect(gameRow.props('teamBDefender')).toEqual({ name: 'Defender B' })
+    expect(gameRow.props('teamBAttacker')).toEqual({ name: 'Attacker B' })
   })
 
   it('emits edit-rejection event when Edit Match button is clicked', async () => {

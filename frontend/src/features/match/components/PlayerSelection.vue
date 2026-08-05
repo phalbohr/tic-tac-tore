@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useMatchDraftStore, MatchType, type PlayerDto } from '../stores/matchDraftStore'
+import AvatarBase from '@/components/AvatarBase.vue'
 
 defineOptions({
   name: 'PlayerSelection'
@@ -24,10 +25,17 @@ function getPlayer(id?: string) {
       :key="index"
       class="player-slot h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2"
     >
+      <div v-if="maxPlayers === 4" class="w-4 text-center font-bold text-on-surface-variant text-sm">
+        {{ index % 2 !== 0 ? 'D' : 'A' }}
+      </div>
       <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
         <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{ index }}</span>
-        <img v-else-if="getPlayer(store.selectedPlayers[index - 1])?.avatar" :src="getPlayer(store.selectedPlayers[index - 1])?.avatar" class="w-full h-full object-cover" />
-        <span v-else class="text-on-surface-variant font-bold">{{ getPlayer(store.selectedPlayers[index - 1])?.nickname?.charAt(0)?.toUpperCase() || '?' }}</span>
+        <AvatarBase
+          v-else
+          :avatar="getPlayer(store.selectedPlayers[index - 1])?.avatar"
+          :name="getPlayer(store.selectedPlayers[index - 1])?.nickname"
+          shape="circle"
+        />
       </div>
       <span class="text-on-surface flex-1">
         {{ store.selectedPlayers[index - 1] ? (getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
@@ -46,7 +54,11 @@ function getPlayer(id?: string) {
           class="flex flex-col items-center gap-1 min-w-[72px] opacity-100 disabled:opacity-50"
         >
           <div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden">
-             <img v-if="opponent.avatar" :src="opponent.avatar" class="w-full h-full object-cover" />
+            <AvatarBase
+              :avatar="opponent.avatar"
+              :name="opponent.nickname"
+              shape="circle"
+            />
           </div>
           <span class="text-xs text-on-surface truncate w-full text-center">{{ opponent.nickname }}</span>
         </button>

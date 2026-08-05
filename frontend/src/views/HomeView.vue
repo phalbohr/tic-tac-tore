@@ -152,6 +152,11 @@ interface ApiMatchItem {
   teamADefenderNickname?: string
   teamBAttackerNickname?: string
   teamBDefenderNickname?: string
+  creatorAvatar?: string
+  teamAAttackerAvatar?: string
+  teamADefenderAvatar?: string
+  teamBAttackerAvatar?: string
+  teamBDefenderAvatar?: string
   teamANames?: string[]
   teamBNames?: string[]
   teamAScore?: number
@@ -183,14 +188,38 @@ async function fetchPendingMatches() {
         if (m.teamBAttackerNickname) teamBNames.push(m.teamBAttackerNickname)
         if (m.teamBDefenderNickname) teamBNames.push(m.teamBDefenderNickname)
 
-        const games = (m.games || []).map((g) => ({
-          teamAScore: g.teamAScore,
-          teamBScore: g.teamBScore,
-          teamAAttackerId: g.teamAAttackerId,
-          teamADefenderId: g.teamADefenderId,
-          teamBAttackerId: g.teamBAttackerId,
-          teamBDefenderId: g.teamBDefenderId,
-        }))
+        const idToNickname = new Map<string, string>()
+        const idToAvatar = new Map<string, string>()
+        
+        if (m.teamAAttackerId && m.teamAAttackerNickname) idToNickname.set(m.teamAAttackerId, m.teamAAttackerNickname)
+        if (m.teamADefenderId && m.teamADefenderNickname) idToNickname.set(m.teamADefenderId, m.teamADefenderNickname)
+        if (m.teamBAttackerId && m.teamBAttackerNickname) idToNickname.set(m.teamBAttackerId, m.teamBAttackerNickname)
+        if (m.teamBDefenderId && m.teamBDefenderNickname) idToNickname.set(m.teamBDefenderId, m.teamBDefenderNickname)
+
+        if (m.teamAAttackerId && m.teamAAttackerAvatar) idToAvatar.set(m.teamAAttackerId, m.teamAAttackerAvatar)
+        if (m.teamADefenderId && m.teamADefenderAvatar) idToAvatar.set(m.teamADefenderId, m.teamADefenderAvatar)
+        if (m.teamBAttackerId && m.teamBAttackerAvatar) idToAvatar.set(m.teamBAttackerId, m.teamBAttackerAvatar)
+        if (m.teamBDefenderId && m.teamBDefenderAvatar) idToAvatar.set(m.teamBDefenderId, m.teamBDefenderAvatar)
+
+        const games = (m.games || []).map((g) => {
+          const aAttId = g.teamAAttackerId || m.teamAAttackerId
+          const aDefId = g.teamADefenderId || m.teamADefenderId
+          const bAttId = g.teamBAttackerId || m.teamBAttackerId
+          const bDefId = g.teamBDefenderId || m.teamBDefenderId
+
+          return {
+            teamAScore: g.teamAScore,
+            teamBScore: g.teamBScore,
+            teamAAttackerId: aAttId,
+            teamADefenderId: aDefId,
+            teamBAttackerId: bAttId,
+            teamBDefenderId: bDefId,
+            teamAAttackerNickname: aAttId ? idToNickname.get(aAttId) || m.teamAAttackerNickname : undefined,
+            teamADefenderNickname: aDefId ? idToNickname.get(aDefId) || m.teamADefenderNickname : undefined,
+            teamBAttackerNickname: bAttId ? idToNickname.get(bAttId) || m.teamBAttackerNickname : undefined,
+            teamBDefenderNickname: bDefId ? idToNickname.get(bDefId) || m.teamBDefenderNickname : undefined,
+          }
+        })
 
         return {
           id: m.id,
@@ -201,6 +230,15 @@ async function fetchPendingMatches() {
           teamADefenderId: m.teamADefenderId,
           teamBAttackerId: m.teamBAttackerId,
           teamBDefenderId: m.teamBDefenderId,
+          teamAAttackerNickname: m.teamAAttackerNickname,
+          teamADefenderNickname: m.teamADefenderNickname,
+          teamBAttackerNickname: m.teamBAttackerNickname,
+          teamBDefenderNickname: m.teamBDefenderNickname,
+          creatorAvatar: m.creatorAvatar,
+          teamAAttackerAvatar: m.teamAAttackerAvatar,
+          teamADefenderAvatar: m.teamADefenderAvatar,
+          teamBAttackerAvatar: m.teamBAttackerAvatar,
+          teamBDefenderAvatar: m.teamBDefenderAvatar,
           teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
           teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
           teamAScore: games[0]?.teamAScore ?? m.teamAScore,
@@ -291,7 +329,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
       <RouterLink to="/cabinet" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <div class="w-8 h-8 rounded-lg overflow-hidden bg-white">
-          <AvatarBase :avatar="authStore.profile.avatar" />
+          <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
         </div>
       </RouterLink>
     </header>
@@ -334,7 +372,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       <div v-else class="flex flex-col items-center gap-6 mt-12 w-full">
         <div v-if="authStore.profile" class="flex flex-col items-center gap-3">
           <div class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden relative">
-            <AvatarBase :avatar="authStore.profile.avatar" />
+            <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
             <div
               v-if="pendingCount > 0"
               class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none cursor-pointer"

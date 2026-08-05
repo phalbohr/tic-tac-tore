@@ -45,7 +45,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
   const activeGameIndex = ref<number>(-1)
-  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission' | 'position_swap'>('draft')
+  const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission'>('draft')
   const submitError = ref<string | null>(null)
   const editingMatchId = ref<string | null>(null)
 
@@ -313,8 +313,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
     if (wasMatchComplete) {
       matchState.value = 'ready_for_submission';
-    } else if (matchType.value === MatchType.TWO_VS_TWO) {
-      matchState.value = 'position_swap';
     } else {
       matchState.value = 'score_entry';
     }
@@ -377,30 +375,50 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     savedNewGame.value = { team1Score: 0, team2Score: 0 }
     currentGame.value = { team1Score: 0, team2Score: 0 }
     if (matchType.value === MatchType.TWO_VS_TWO) {
-      currentGame.value.teamAAttackerId = selectedPlayers.value[0]
-      currentGame.value.teamADefenderId = selectedPlayers.value[1]
-      currentGame.value.teamBAttackerId = selectedPlayers.value[2]
-      currentGame.value.teamBDefenderId = selectedPlayers.value[3]
-      savedNewGame.value = { ...currentGame.value }
-      matchState.value = 'position_swap'
+      currentGame.value.teamADefenderId = selectedPlayers.value[0]
+      currentGame.value.teamAAttackerId = selectedPlayers.value[1]
+      currentGame.value.teamBDefenderId = selectedPlayers.value[2]
+      currentGame.value.teamBAttackerId = selectedPlayers.value[3]
     } else {
-      matchState.value = 'score_entry'
+      currentGame.value.teamAAttackerId = selectedPlayers.value[0]
+      currentGame.value.teamBAttackerId = selectedPlayers.value[1]
     }
-  }
-
-  function confirmPositions() {
+    savedNewGame.value = { ...currentGame.value }
     matchState.value = 'score_entry'
   }
 
-  function swapPositions(team: 1 | 2) {
-    if (team === 1) {
-      const temp = currentGame.value.teamAAttackerId
-      currentGame.value.teamAAttackerId = currentGame.value.teamADefenderId
-      currentGame.value.teamADefenderId = temp
-    } else {
-      const temp = currentGame.value.teamBAttackerId
-      currentGame.value.teamBAttackerId = currentGame.value.teamBDefenderId
-      currentGame.value.teamBDefenderId = temp
+  function swapPositions(team: 1 | 2, gameIndex?: number) {
+    const targetIndex = gameIndex !== undefined ? gameIndex : currentActiveIndex.value
+
+    if (targetIndex >= 0 && targetIndex < games.value.length) {
+      const targetGame = games.value[targetIndex]
+      if (targetGame) {
+        if (team === 1) {
+          const temp = targetGame.teamAAttackerId
+          targetGame.teamAAttackerId = targetGame.teamADefenderId
+          targetGame.teamADefenderId = temp
+        } else {
+          const temp = targetGame.teamBAttackerId
+          targetGame.teamBAttackerId = targetGame.teamBDefenderId
+          targetGame.teamBDefenderId = temp
+        }
+        if (targetIndex === activeGameIndex.value) {
+          currentGame.value.teamAAttackerId = targetGame.teamAAttackerId
+          currentGame.value.teamADefenderId = targetGame.teamADefenderId
+          currentGame.value.teamBAttackerId = targetGame.teamBAttackerId
+          currentGame.value.teamBDefenderId = targetGame.teamBDefenderId
+        }
+      }
+    } else if (targetIndex === games.value.length) {
+      if (team === 1) {
+        const temp = currentGame.value.teamAAttackerId
+        currentGame.value.teamAAttackerId = currentGame.value.teamADefenderId
+        currentGame.value.teamADefenderId = temp
+      } else {
+        const temp = currentGame.value.teamBAttackerId
+        currentGame.value.teamBAttackerId = currentGame.value.teamBDefenderId
+        currentGame.value.teamBDefenderId = temp
+      }
     }
   }
 
@@ -478,10 +496,10 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
     const idempotencyKey = crypto.randomUUID()
     
-    const teamAAttackerId = selectedPlayers.value[0]
-    const teamADefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : undefined
-    const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : selectedPlayers.value[1]
-    const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : undefined
+    const teamAAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : selectedPlayers.value[0]
+    const teamADefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[0] : undefined
+    const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : selectedPlayers.value[1]
+    const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : undefined
 
     const creatorId = authStore.profile?.id || teamAAttackerId
     const payload = {
@@ -492,13 +510,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamBAttackerId,
       teamBDefenderId,
       games: games.value.map(g => ({
-
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
-        teamAAttackerId: g.teamAAttackerId,
-        teamADefenderId: g.teamADefenderId,
-        teamBAttackerId: g.teamBAttackerId,
-        teamBDefenderId: g.teamBDefenderId
+        teamAAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamAAttackerId : undefined,
+        teamADefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamADefenderId : undefined,
+        teamBAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBAttackerId : undefined,
+        teamBDefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBDefenderId : undefined
       }))
     }
 
@@ -565,7 +582,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectGameToEdit,
     loadFromRejectedMatch,
     beginScoreEntry,
-    confirmPositions,
     swapPositions,
     returnToDraft,
     reset

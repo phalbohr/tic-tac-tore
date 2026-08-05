@@ -171,8 +171,7 @@ class UserServiceTest {
 
         var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
 
-        var expectedHash = "19d7f5455ecc3199ffa0f29a6755a288fceb6b88ec694e053c5aa24b4317771c";
-        assertThat(user.getAvatar()).isEqualTo("https://api.dicebear.com/7.x/identicon/svg?seed=" + expectedHash);
+        assertThat(user.getAvatar()).isEqualTo("player-blue-2");
     }
 
     @Test
