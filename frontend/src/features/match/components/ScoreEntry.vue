@@ -28,9 +28,14 @@ const getPlayerInfo = (id?: string): PlayerDisplayInfo => {
 }
 
 const getGamePlayerInfo = (gameIndex: number) => {
-  const game = (gameIndex < store.games.length) 
-    ? store.games[gameIndex]
-    : (gameIndex === store.games.length ? store.savedNewGame : store.currentGame)
+  let game
+  if (gameIndex === store.currentActiveIndex) {
+    game = store.currentGame
+  } else if (gameIndex < store.games.length) {
+    game = store.games[gameIndex]
+  } else {
+    game = store.savedNewGame
+  }
 
   return {
     teamADefender: getPlayerInfo(game?.teamADefenderId),
@@ -114,6 +119,7 @@ watch(() => store.matchState, (newVal) => {
             :team-a-score="getGamePlayerInfo(idx - 1).teamAScore"
             :team-b-score="getGamePlayerInfo(idx - 1).teamBScore"
             :show-score="(idx - 1) <= store.games.length"
+            @swap="store.swapPositions($event, idx - 1)"
           />
         </button>
       </div>

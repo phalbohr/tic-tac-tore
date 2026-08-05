@@ -25,6 +25,9 @@ function getPlayer(id?: string) {
       :key="index"
       class="player-slot h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2"
     >
+      <div v-if="maxPlayers === 4" class="w-4 text-center font-bold text-on-surface-variant text-sm">
+        {{ index % 2 !== 0 ? 'D' : 'A' }}
+      </div>
       <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
         <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{ index }}</span>
         <AvatarBase
