@@ -1,0 +1,3 @@
+ALTER TABLE "match" ADD COLUMN IF NOT EXISTS entry_mode VARCHAR(20);
+ALTER TABLE "match" ADD COLUMN IF NOT EXISTS match_format VARCHAR(20);
+ALTER TABLE "match" ADD COLUMN IF NOT EXISTS confirmed_by_opponent_ids TEXT;

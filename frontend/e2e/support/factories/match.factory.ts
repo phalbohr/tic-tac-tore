@@ -11,7 +11,11 @@ export interface Match {
     team1: number;
     team2: number;
   };
-  status: 'PENDING' | 'CONFIRMED' | 'REJECTED';
+  status: 'PENDING_APPROVAL' | 'PARTIALLY_CONFIRMED' | 'CONFIRMED' | 'REJECTED';
+  entryMode?: 'PARTICIPANT' | 'REFEREE';
+  matchFormat?: 'STANDARD' | 'RANDOM';
+  confirmedByOpponentIds?: string[];
+  requiredConfirmations?: number;
   recordedAt: Date;
   tableId?: string;
 }
@@ -30,7 +34,11 @@ export class MatchFactory {
         team1: faker.number.int({ min: 0, max: 10 }),
         team2: faker.number.int({ min: 0, max: 10 }),
       },
-      status: 'PENDING',
+      status: 'PENDING_APPROVAL',
+      entryMode: 'PARTICIPANT',
+      matchFormat: 'STANDARD',
+      confirmedByOpponentIds: [],
+      requiredConfirmations: 2,
       recordedAt: new Date(),
       tableId: faker.string.alphanumeric(5).toUpperCase(),
       ...overrides,

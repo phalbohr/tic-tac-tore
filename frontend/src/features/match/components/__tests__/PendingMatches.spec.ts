@@ -6,8 +6,9 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       if (key === 'match.pendingMatch') return `Match ${params?.number ?? 1}`
-      if (key === 'match.matchConfirmedTapUndo') return `Match ${params?.number ?? 1} confirmed. Tap to undo.`
-      const translations: Record<string, string> = {
+       if (key === 'match.matchConfirmedTapUndo') return `Match ${params?.number ?? 1} confirmed. Tap to undo.`
+       if (key === 'match.partialConfirmation') return `${params?.confirmed ?? 1} of ${params?.required ?? 2} confirmed`
+       const translations: Record<string, string> = {
         'match.pending': 'Pending Confirmation',
         'match.confirm': 'Confirm',
         'match.confirmedTapUndo': 'Match confirmed. Tap to undo.',
@@ -117,6 +118,28 @@ describe('PendingMatches.vue', () => {
 
     const btn2 = wrapper.find('[data-testid="confirm-match-btn-match-2"]')
     expect(btn2.exists()).toBe(true)
+  })
+
+  it('displays partial confirmation progress text for PARTIALLY_CONFIRMED matches', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-partial',
+        status: 'PARTIALLY_CONFIRMED',
+        confirmedByOpponentIds: ['opp-1'],
+        requiredConfirmations: 2,
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const badge = wrapper.find('[data-testid="partially-confirmed-badge-match-partial"]')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toContain('1 of 2 confirmed')
   })
 
   it('displays rejection reason text and hides action buttons when match status is REJECTED', () => {

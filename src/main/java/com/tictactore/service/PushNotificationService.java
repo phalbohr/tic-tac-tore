@@ -19,6 +19,8 @@ public interface PushNotificationService {
 
     void sendRejectionNotification(Match match, User creator, String rejectionReason);
 
+    void sendPartialConfirmationNotification(Match match, List<User> remainingOpponents, String firstConfirmerName);
+
     List<NotificationLogDto> getUserNotifications(UUID userId);
 }
 

@@ -1,6 +1,13 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import { getCookie, getCsrfHeaders } from '../../../utils/cookieUtils'
 
+interface PendingMatchItem {
+  id: string
+  status?: string
+  confirmedByOpponentIds?: string[]
+  requiredConfirmations?: number
+}
+
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -21,6 +28,7 @@ function generateUUID(): string {
 
 export function usePendingMatches() {
   const pendingCount = ref(0)
+  const partiallyConfirmedMatches = ref<PendingMatchItem[]>([])
   let lastFetchTime = 0
   const THROTTLE_MS = 10000
 
@@ -36,11 +44,44 @@ export function usePendingMatches() {
       if (res.ok) {
         const data = await res.json()
         pendingCount.value = typeof data.count === 'number' ? data.count : (data.matches?.length || 0)
+        partiallyConfirmedMatches.value =
+          data.matches?.filter((m: PendingMatchItem) => m.status === 'PARTIALLY_CONFIRMED') || []
       }
     } catch (e) {
       console.warn('Failed to fetch pending matches count:', e)
     }
     return pendingCount.value
+  }
+
+  function getPartiallyConfirmedCount(): number {
+    return partiallyConfirmedMatches.value.length
+  }
+
+  async function confirmOpponent(matchId: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    const idempotencyKey = generateUUID()
+    const headers: Record<string, string> = {
+      'Idempotency-Key': idempotencyKey,
+      ...getCsrfHeaders()
+    }
+
+    try {
+      const res = await fetch(`/api/v1/matches/${matchId}/confirm`, {
+        method: 'POST',
+        headers,
+        credentials: 'include'
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        await fetchPendingCount(true)
+        return { success: true, data }
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        return { success: false, error: errData.message }
+      }
+    } catch (e: any) {
+      return { success: false, error: e.message }
+    }
   }
 
   function handleVisibilityChange() {
@@ -134,7 +175,10 @@ export function usePendingMatches() {
 
   return {
     pendingCount,
+    partiallyConfirmedMatches,
+    getPartiallyConfirmedCount,
     fetchPendingCount,
+    confirmOpponent,
     rejectMatch,
     deleteMatch,
     collapsedMatchIds,

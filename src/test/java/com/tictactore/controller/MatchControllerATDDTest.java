@@ -73,7 +73,7 @@ class MatchControllerATDDTest {
             );
             when(matchService.createMatch(any())).thenReturn(response);
 
-            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 5)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 5)), null, null);
 
             mockMvc.perform(post("/api/v1/matches")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +85,7 @@ class MatchControllerATDDTest {
         @Test
         @DisplayName("[P1] Should return 400 Bad Request when request body violates @Valid constraints")
         void shouldReturn400OnInvalidBody() throws Exception {
-            var request = new CreateMatchRequest("key-123", null, null, p2, p3, p4, List.of());
+            var request = new CreateMatchRequest("key-123", null, null, p2, p3, p4, List.of(), null, null);
 
             mockMvc.perform(post("/api/v1/matches")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +102,7 @@ class MatchControllerATDDTest {
             );
             when(matchService.createMatch(any())).thenReturn(response);
 
-            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 5)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 5)), null, null);
 
             mockMvc.perform(post("/api/v1/matches")
                             .header("Idempotency-Key", "key-123")

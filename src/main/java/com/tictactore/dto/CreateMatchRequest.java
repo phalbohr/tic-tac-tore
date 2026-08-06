@@ -13,5 +13,7 @@ public record CreateMatchRequest(
     UUID teamADefenderId,
     @NotNull UUID teamBAttackerId,
     UUID teamBDefenderId,
-    @NotEmpty List<@Valid GameDto> games
+    @NotEmpty List<@Valid GameDto> games,
+    String entryMode,
+    String matchFormat
 ) {}

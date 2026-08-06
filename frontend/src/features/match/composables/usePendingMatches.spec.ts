@@ -25,6 +25,28 @@ describe('usePendingMatches', () => {
     expect(pendingCount.value).toBe(3)
   })
 
+  it('[P1] should populate partiallyConfirmedMatches when fetch includes PARTIALLY_CONFIRMED status', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        count: 2,
+        matches: [
+          { id: 'm1', status: 'PENDING_APPROVAL' },
+          { id: 'm2', status: 'PARTIALLY_CONFIRMED' },
+          { id: 'm3', status: 'PARTIALLY_CONFIRMED' }
+        ]
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const { fetchPendingCount, partiallyConfirmedMatches, getPartiallyConfirmedCount } = usePendingMatches()
+    await fetchPendingCount()
+
+    expect(partiallyConfirmedMatches.value).toHaveLength(2)
+    expect(partiallyConfirmedMatches.value.map((m: any) => m.id)).toEqual(['m2', 'm3'])
+    expect(getPartiallyConfirmedCount()).toBe(2)
+  })
+
   it('[P1] should throttle visibility change refresh with a 10-second debounce', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -133,5 +155,29 @@ describe('usePendingMatches', () => {
     const res2 = await rejectMatch('m2', 'Wrong score')
     expect(res2.success).toBe(false)
     expect(res2.error).toBeUndefined()
+  })
+
+  it('[P1] should send POST to /api/v1/matches/{id}/confirm with Idempotency-Key header and refresh count', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ id: 'match-1', status: 'CONFIRMED' }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('crypto', { randomUUID: () => 'confirm-uuid-123' })
+
+    const { confirmOpponent, pendingCount } = usePendingMatches()
+    pendingCount.value = 2
+    const result = await confirmOpponent('match-1')
+
+    expect(result.success).toBe(true)
+    expect(result.data.status).toBe('CONFIRMED')
+
+    const confirmCall = mockFetch.mock.calls.find(
+      (call) => typeof call[0] === 'string' && call[0].includes('/confirm')
+    )
+    expect(confirmCall).toBeDefined()
+    expect(confirmCall![0]).toBe('/api/v1/matches/match-1/confirm')
+    expect(confirmCall![1].method).toBe('POST')
+    expect(confirmCall![1].headers['Idempotency-Key']).toBe('confirm-uuid-123')
   })
 })
