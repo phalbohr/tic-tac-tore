@@ -48,4 +48,5 @@ test-results/
 .bmad-loop/runs/
 .bmad-loop/cache/
 .bmad-loop/policy.toml
+.bmad-loop/marker-guard.log
 _bmad/render/
