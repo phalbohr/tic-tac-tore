@@ -44,6 +44,7 @@
 
 import { existsSync, appendFileSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, basename, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const MARKER_RE = /^bmad-(?:dev|build)-auto-result-.+\.md$/;
 // Exactly bmad_loop.devcontract's terminal set for a workflow marker. Anything
@@ -65,17 +66,26 @@ function splitFrontmatter(text) {
   return null; // an unclosed `---` is not a frontmatter block
 }
 
+// Indices of every `status:` line in the block, in order.
+function statusLines(block) {
+  return block.reduce((acc, line, i) => (/^status:/.test(line.trim()) ? [...acc, i] : acc), []);
+}
+
 // The block's terminal status, "" when the block carries none, null when there
 // is no frontmatter block at all.
+//
+// Reads the LAST `status:` line, not the first: YAML resolves a duplicate key to
+// its last occurrence, so `status: done` followed by `status: in-progress` is
+// `in-progress` to bmad-loop's parser. Judging by the first would let the guard
+// approve a marker the orchestrator reads as non-terminal — the very livelock
+// this file exists to prevent.
 function terminalStatusOf(split) {
   if (split === null) return null;
-  for (const line of split.block) {
-    const m = /^status:\s*(.*)$/.exec(line.trim());
-    if (!m) continue;
-    const value = m[1].trim().replace(/^['"]|['"]$/g, "").toLowerCase();
-    return TERMINAL.has(value) ? value : "";
-  }
-  return "";
+  const at = statusLines(split.block);
+  if (!at.length) return "";
+  const m = /^status:\s*(.*)$/.exec(split.block[at[at.length - 1]].trim());
+  const value = (m?.[1] ?? "").trim().replace(/^['"]|['"]$/g, "").toLowerCase();
+  return TERMINAL.has(value) ? value : "";
 }
 
 // Candidate project roots, most trustworthy first. Kilo hands the plugin a
@@ -86,7 +96,10 @@ function terminalStatusOf(split) {
 // are stronger signals. Only the sweep and the log location depend on this — the
 // tool-hook repair works off the written path and needs no root at all.
 function candidateRoots(input) {
-  const fromSelf = dirname(dirname(new URL(import.meta.url).pathname));
+  // fileURLToPath, not `new URL(...).pathname`: the raw pathname keeps spaces
+  // percent-encoded (a repo cloned under "My Projects" would never resolve) and
+  // on Windows keeps a leading slash before the drive letter.
+  const fromSelf = dirname(dirname(fileURLToPath(import.meta.url)));
   const seen = new Set();
   return [process.cwd(), fromSelf, input?.worktree, input?.directory].filter(
     (r) => typeof r === "string" && r.length > 1 && !seen.has(r) && (seen.add(r), true),
@@ -141,15 +154,16 @@ export const BmadMarkerGuard = async (input, options = {}) => {
       // No frontmatter at all: prepend a block.
       repaired = `---\nstatus: ${status}\nbmad_marker_guard: repaired\n---\n\n${text}`;
     } else {
-      // A block exists but its status is missing or non-terminal. REPLACE the
-      // existing `status:` line rather than prepending a second one: YAML lets
-      // the LAST duplicate key win, so an injected line above the original
-      // would be silently overridden by the very value we are repairing.
+      // A block exists but its status is missing or non-terminal. Drop EVERY
+      // existing `status:` line and write exactly one: YAML lets the last
+      // duplicate key win, so leaving any behind risks the parser resolving to
+      // a line we did not write. The replacement sits where the first one was,
+      // preserving the author's field order.
       const block = [...split.block];
-      const at = block.findIndex((line) => /^status:/.test(line.trim()));
+      const at = statusLines(block);
       const injected = `status: ${status}\nbmad_marker_guard: repaired\n`;
-      if (at >= 0) block.splice(at, 1, injected);
-      else block.unshift(injected);
+      for (const i of [...at].reverse()) block.splice(i, 1);
+      block.splice(at.length ? at[0] : 0, 0, injected);
       repaired = split.open + block.join("") + split.rest.join("");
     }
     try {
