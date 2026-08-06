@@ -173,6 +173,39 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendCooldownReminderNotification(Match match, List<User> recipients) {
+        String summary = "Match " + match.getId() + " is awaiting final confirmation. It will be auto-published when the cooldown expires.";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                match.getId(),
+                "System",
+                summary,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize cooldown reminder push notification payload for match {}", match.getId(), e);
+            return;
+        }
+
+        for (User recipient : recipients) {
+            List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+            if (subscriptions.isEmpty()) {
+                recordNotificationLog(recipient.getId(), match.getId(), "COOLDOWN_REMINDER", jsonPayload, "SKIPPED", "No push subscription registered");
+                continue;
+            }
+            for (PushSubscription sub : subscriptions) {
+                dispatchPushNotification(sub, recipient.getId(), match.getId(), "COOLDOWN_REMINDER", jsonPayload);
+            }
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {

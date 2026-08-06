@@ -142,6 +142,51 @@ describe('PendingMatches.vue', () => {
     expect(badge.text()).toContain('1 of 2 confirmed')
   })
 
+  it('displays cooldown countdown timer for PARTIALLY_CONFIRMED matches with future expiry', () => {
+    const futureExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000 + 15 * 60 * 1000).toISOString()
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-cooldown',
+        status: 'PARTIALLY_CONFIRMED',
+        confirmedByOpponentIds: ['opp-1'],
+        requiredConfirmations: 2,
+        cooldownExpiresAt: futureExpiry,
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const timer = wrapper.find('[data-testid="cooldown-timer-match-cooldown"]')
+    expect(timer.exists()).toBe(true)
+    expect(timer.text()).toContain('Auto-publish in 2h')
+  })
+
+  it('does not display cooldown timer when PARTIALLY_CONFIRMED match has no cooldownExpiresAt', () => {
+    const sampleMatches: PendingMatchItem[] = [
+      {
+        id: 'match-no-cooldown',
+        status: 'PARTIALLY_CONFIRMED',
+        confirmedByOpponentIds: ['opp-1'],
+        requiredConfirmations: 2,
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 5 }]
+      }
+    ]
+
+    const wrapper = mount(PendingMatches, {
+      props: { pendingMatches: sampleMatches }
+    })
+
+    const timer = wrapper.find('[data-testid="cooldown-timer-match-no-cooldown"]')
+    expect(timer.exists()).toBe(false)
+  })
+
   it('displays rejection reason text and hides action buttons when match status is REJECTED', () => {
     const sampleMatches: PendingMatchItem[] = [
       {

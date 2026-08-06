@@ -1,74 +1,75 @@
 ---
 stepsCompleted: ['step-01-load-context', 'step-02-discover-tests', 'step-03-quality-evaluation', 'step-03f-aggregate-scores', 'step-04-generate-report']
 lastStep: 'step-04-generate-report'
-lastSaved: '2026-07-25'
+lastSaved: '2026-08-06'
 workflowType: 'testarch-test-review'
 inputDocuments:
-  - '_bmad-output/implementation-artifacts/2-4-match-submission-with-undo-window.md'
-  - '_bmad-output/test-artifacts/atdd-checklist-2-4-match-submission-with-undo-window.md'
-  - 'src/test/java/com/tictactore/service/MatchServiceTest.java'
+  - '_bmad-output/implementation-artifacts/spec-3-5-publication-rules-and-24-hour-cooldown.md'
+  - '_bmad-output/test-artifacts/automation-summary.md'
   - 'src/test/java/com/tictactore/controller/MatchControllerTest.java'
-  - 'src/test/java/com/tictactore/service/MatchServiceATDDTest.java'
-  - 'src/test/java/com/tictactore/controller/MatchControllerATDDTest.java'
-  - 'frontend/src/features/match/stores/matchDraftStore.spec.ts'
-  - 'frontend/e2e/tests/e2e/match-submission-undo.spec.ts'
+  - 'src/test/java/com/tictactore/service/MatchCooldownRedPhaseTest.java'
+  - 'src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java'
+  - 'frontend/e2e/fixtures/cooldown-fixtures.ts'
+  - 'frontend/e2e/tests/e2e/cooldown-countdown.spec.ts'
+  - 'frontend/src/features/match/components/__tests__/CooldownTimer.spec.ts'
 ---
 
-# Test Quality Review: Story 2.4 (Match Submission with Undo Window)
+# Test Quality Review: Story 3.5 — Publication Rules & 24-hour Cooldown
 
-**Quality Score**: 85/100 (Grade B - Good with Comments)  
-**Review Date**: 2026-07-25  
-**Review Scope**: Story 2.4 Test Suite (Backend Unit/ATDD, Frontend Store, E2E)  
-**Reviewer**: Master Test Architect (Pavel)  
-
----
-
-> **Note**: This review audits existing test files for Story 2.4; it does not generate tests. Coverage mapping and coverage gates are out of scope here. Use `trace` for coverage decisions.
+**Quality Score**: 89/100 (B - Good quality with minor concerns)
+**Review Date**: 2026-08-06
+**Review Scope**: suite (all changed/added test files in working tree for Story 3.5)
+**Reviewer**: TEA Agent (Master Test Architect)
 
 ---
+
+Note: This review audits existing tests; it does not generate tests.
+Coverage mapping and coverage gates are out of scope here. Use `trace` for coverage decisions.
 
 ## Executive Summary
 
-**Overall Assessment**: Good (Unit & Store tests are robust; E2E spec has placeholder assertions)  
+**Overall Assessment**: Good
 
-**Recommendation**: Approve with Comments (Fix E2E spec before final merge)  
+**Recommendation**: Approve with Comments
 
 ### Key Strengths
 
-✅ **Robust Fake Timers & Teardown**: `matchDraftStore.spec.ts` cleanly tests the 15-second undo timer using Vitest fake timers and strictly restores `fetch` and mocks in `afterEach`.  
-✅ **Clean Backend Layering**: `MatchServiceTest.java` and `MatchControllerTest.java` adhere to AAA patterns, `@DisplayName`, and strict `GlobalExceptionHandler` error mappings.  
-✅ **Idempotency & Retry Test Coverage**: Backend tests verify key domain invariants including `PENDING_APPROVAL` status and `idempotencyKey` handling.  
+✅ Excellent test isolation — no shared state, no order dependencies, integration tests use `@Transactional` rollback.
+✅ Strong use of network-first interception in Playwright E2E (`page.route` before `page.goto`).
+✅ Proper test-level selection: controller unit tests with MockMvc, integration test with H2, component tests with Vitest, E2E with Playwright.
+✅ All new tests follow priority tagging convention (`[P0]`, `[P1]`) and use `data-testid` selectors.
 
 ### Key Weaknesses
 
-❌ **Placeholder E2E Assertions**: `frontend/e2e/tests/e2e/match-submission-undo.spec.ts` contains empty/placeholder tests that do not drive match creation, undo timer, or network interception.  
-❌ **Duplicate ATDD Test Files**: `MatchServiceATDDTest.java` and `MatchControllerATDDTest.java` duplicate unit test assertions line-by-line without providing additional integration depth.  
+❌ One E2E assertion couples pass/fail to exact time-formatting text (`Auto-publish in 2h`).
+❌ `MatchControllerTest.java` exceeds 300-line guidance (552 lines).
+❌ `MatchCooldownRedPhaseTest.java` is a 357-line disabled scaffold that could be relocated.
 
 ### Summary
 
-The test suite for Story 2.4 shows strong unit testing discipline across both backend Spring Boot services/controllers and frontend Pinia stores. The 15-second undo window timer and state restoration are thoroughly tested with fake timers and clean isolation practices in Vitest. However, the E2E Playwright test suite (`match-submission-undo.spec.ts`) contains incomplete placeholder assertions that check page load but never trigger the actual undo flow or POST network request. Addressing the Playwright E2E spec and consolidating duplicate ATDD test scaffolds will bring the test quality to Grade A.
+The test suite for Story 3.5 is well-structured and follows TEA best practices across determinism, isolation, and performance. The main concerns are maintainability (oversized files) and one brittle E2E text assertion that depends on time-formatting behavior. No critical or high-severity violations were found. The tests are production-ready with minor improvements recommended for follow-up.
 
 ---
 
 ## Quality Criteria Assessment
 
-| Criterion | Status | Violations | Notes |
-| --------- | ------ | ---------- | ----- |
-| BDD Format (Given-When-Then) | ✅ PASS | 0 | Used consistently in backend and frontend unit tests |
-| Test IDs | ✅ PASS | 0 | Test titles contain `[P0]`, `[P1]` markers |
-| Priority Markers (P0/P1/P2/P3) | ✅ PASS | 0 | Correctly assigned across specs |
-| Hard Waits (sleep, waitForTimeout) | ✅ PASS | 0 | No hardcoded sleeps found; fake timers used in Vitest |
-| Determinism (no conditionals) | ⚠️ WARN | 1 | Playwright E2E spec has conditional branch inside route intercept |
-| Isolation (cleanup, no shared state) | ✅ PASS | 0 | Perfect Pinia reset & `afterEach` fetch/mock restoration |
-| Fixture Patterns | ✅ PASS | 0 | Unit setup in `@BeforeEach` / `beforeEach` |
-| Data Factories | ⚠️ WARN | 1 | Ad-hoc request objects; data factories recommended for complex DTOs |
-| Network-First Pattern | ✅ PASS | 0 | `page.route` setup before navigation in E2E spec |
-| Explicit Assertions | ❌ FAIL | 1 | E2E spec lacks assertions driving the 15s undo timer or POST call |
-| Test Length (≤300 lines) | ✅ PASS | 0 | All test files are well below 300 lines |
-| Test Duration (≤1.5 min) | ✅ PASS | 0 | Unit tests execute in under 2 seconds |
-| Flakiness Patterns | ✅ PASS | 0 | No unhandled floating promises |
+| Criterion                            | Status                          | Violations | Notes        |
+| ------------------------------------ | ------------------------------- | ---------- | ------------ |
+| BDD Format (Given-When-Then)         | ⚠️ WARN                         | 0          | Test names use priority tags and clear intent, but not strict GWT structure. |
+| Test IDs                             | ✅ PASS                         | 0          | All tests carry `[P0]`/`[P1]` priority markers. |
+| Priority Markers (P0/P1/P2/P3)       | ✅ PASS                         | 0          | Consistent priority tagging on all new tests. |
+| Hard Waits (sleep, waitForTimeout)   | ✅ PASS                         | 0          | No `waitForTimeout` or arbitrary delays found. |
+| Determinism (no conditionals)        | ⚠️ WARN                         | 1          | E2E asserts exact formatted countdown text derived from `Date.now()`. |
+| Isolation (cleanup, no shared state) | ✅ PASS                         | 0          | `@Transactional` rollback, fresh component mounts, network interception per test. |
+| Fixture Patterns                     | ✅ PASS                         | 0          | `cooldown-fixtures.ts` provides pure factory functions with overrides. |
+| Data Factories                       | ✅ PASS                         | 0          | Fixtures use override pattern (`buildCooldownMatch(overrides)`). |
+| Network-First Pattern                | ✅ PASS                         | 0          | All Playwright routes registered before `page.goto`. |
+| Explicit Assertions                  | ✅ PASS                         | 0          | Assertions are visible in test bodies; no hidden validation helpers. |
+| Test Length (≤300 lines)             | ⚠️ WARN                         | 2          | `MatchControllerTest.java` (552 lines) and `MatchCooldownRedPhaseTest.java` (357 lines). |
+| Test Duration (≤1.5 min)             | ✅ PASS                         | 0          | No slow setup or excessive navigation detected. |
+| Flakiness Patterns                   | ✅ PASS                         | 0          | No brittle CSS selectors, no arbitrary waits, no test-order dependencies. |
 
-**Total Violations**: 1 High (Critical gap in E2E), 2 Medium (ATDD duplication & missing E2E assertions), 1 Low
+**Total Violations**: 0 Critical, 0 High, 1 Medium, 3 Low
 
 ---
 
@@ -76,141 +77,270 @@ The test suite for Story 2.4 shows strong unit testing discipline across both ba
 
 ```
 Starting Score:          100
-Critical / High Violations:  -15 (Placeholder E2E assertions)
-Medium Violations:            -5 (Duplicate ATDD test files)
-Low Violations:               -2 (Ad-hoc request objects without factory)
+Critical Violations:     -0 × 10 = -0
+High Violations:         -0 × 5 = -0
+Medium Violations:       -1 × 2 = -2
+Low Violations:          -3 × 1 = -3
 
 Bonus Points:
-  Excellent BDD Format:      +2
-  Fake Timers Determinism:   +3
-  Perfect Isolation:         +2
-                             --------
-Total Deductions & Bonus:    -15
+  Excellent BDD:         +0
+  Comprehensive Fixtures: +5
+  Data Factories:        +5
+  Network-First:         +5
+  Perfect Isolation:     +5
+  All Test IDs:          +5
+                          --------
+Total Bonus:             +25
 
-Final Score:                 85/100
-Grade:                       B (Good with Comments)
+Final Score:             89/100
+Grade:                   B
 ```
 
 ---
 
 ## Critical Issues (Must Fix)
 
-### 1. Incomplete Playwright E2E Test Suite for Undo Window Flow
-
-**Severity**: P0 (High)  
-**Location**: `frontend/e2e/tests/e2e/match-submission-undo.spec.ts:13-70`  
-**Criterion**: Explicit Assertions & End-to-End Functional Verification  
-**Knowledge Base**: [test-quality.md](file:///Users/ppolukhin/Projects/tic-tac-tore/.agent/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)  
-
-**Issue Description**:  
-The Playwright E2E test file `match-submission-undo.spec.ts` claims to verify Story 2.4 acceptance criteria. However, tests `[P0] Match submission flow displays Undo Toast upon completion` and `[P1] Intercepting POST /api/v1/matches payload integrity` only navigate to `/` and check container visibility. They do not click "New Match", fill player selections, complete a game, click "Complete Match", verify the 15s `<UndoToast>` countdown, or test the "Undo" button click.
-
-**Current Code**:
-
-```typescript
-// ❌ Bad (Current placeholder implementation in match-submission-undo.spec.ts)
-test('[P1] Intercepting POST /api/v1/matches payload integrity', async ({ page }) => {
-  let postRequestReceived = false;
-  await page.route('**/api/v1/matches', async (route) => {
-    if (route.request().method() === 'POST') {
-      postRequestReceived = true;
-      await route.fulfill({ status: 201, ... });
-    }
-  });
-
-  await page.goto('/');
-  const main = page.locator('main');
-  await expect(main).toBeVisible(); // Does not trigger POST request!
-});
-```
-
-**Recommended Fix**:
-
-```typescript
-// ✅ Good (Real E2E match submission & undo verification)
-test('[P0] Match submission flow displays 15s Undo Toast and sends POST request upon expiration', async ({ page }) => {
-  let postPayload: any = null;
-  await page.route('**/api/v1/matches', async (route) => {
-    if (route.request().method() === 'POST') {
-      postPayload = route.request().postDataJSON();
-      await route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({ id: 'match-1', status: 'PENDING_APPROVAL', idempotencyKey: postPayload.idempotencyKey })
-      });
-    }
-  });
-
-  await page.goto('/');
-  await page.getByRole('button', { name: /New Match/i }).click();
-  // ... Select 1v1 players & complete game scores ...
-  await page.getByRole('button', { name: /Complete Match/i }).click();
-
-  // Verify Undo Toast appears
-  const toast = page.locator('[role="status"]');
-  await expect(toast).toContainText('Match submitted. Tap to undo.');
-
-  // Wait for 15s timer expiration and verify network POST request
-  await expect.poll(() => postPayload).not.toBeNull();
-  expect(postPayload.idempotencyKey).toBeTruthy();
-});
-```
+No critical issues detected. ✅
 
 ---
 
 ## Recommendations (Should Fix)
 
-### 1. Consolidate or Differentiate Duplicate ATDD Test Files
+### 1. Relax brittle E2E countdown text assertion
 
-**Severity**: P2 (Medium)  
-**Location**: `src/test/java/com/tictactore/service/MatchServiceATDDTest.java` & `src/test/java/com/tictactore/controller/MatchControllerATDDTest.java`  
-**Criterion**: Maintainability & DRY Principle  
-**Knowledge Base**: [selective-testing.md](file:///Users/ppolukhin/Projects/tic-tac-tore/.agent/skills/bmad-testarch-test-review/resources/knowledge/selective-testing.md)  
+**Severity**: P2 (Medium)
+**Location**: `frontend/e2e/tests/e2e/cooldown-countdown.spec.ts:28`
+**Criterion**: Determinism
+**Knowledge Base**: [test-quality.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)
 
-**Issue Description**:  
-`MatchServiceATDDTest.java` and `MatchControllerATDDTest.java` repeat the exact same unit test cases as `MatchServiceTest.java` and `MatchControllerTest.java`. Keeping identical tests in two separate files creates maintenance friction during refactoring.
+**Issue Description**:
+The test asserts the exact string `Auto-publish in 2h`. Because the expiry is computed from `Date.now() + 2h15m`, the rendered text depends on the component's rounding/formatting logic. Any change to that logic (e.g., showing `2h 15m` or `135m`) will break the test even though behavior is correct.
 
-**Recommended Improvement**:  
-Merge ATDD red-phase specs into the main `MatchServiceTest.java` and `MatchControllerTest.java` suites or mark ATDD files as `@Disabled("Merged into MatchServiceTest")` to avoid redundant execution.
+**Current Code**:
+
+```typescript
+const futureExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000 + 15 * 60 * 1000).toISOString()
+// ...
+await expect(timer).toContainText('Auto-publish in 2h')
+```
+
+**Recommended Improvement**:
+
+```typescript
+await expect(timer).toContainText('Auto-publish in')
+// Optionally assert remaining minutes via a data attribute if exact validation is required:
+// await expect(timer).toHaveAttribute('data-remaining-minutes', '135')
+```
+
+**Benefits**:
+Removes coupling between test pass/fail and presentation-layer formatting decisions.
+
+**Priority**:
+P2 — does not block merge, but should be fixed to prevent flaky CI.
+
+---
+
+### 2. Split `MatchControllerTest` into endpoint-focused classes
+
+**Severity**: P3 (Low)
+**Location**: `src/test/java/com/tictactore/controller/MatchControllerTest.java:1`
+**Criterion**: Test Length
+**Knowledge Base**: [test-quality.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)
+
+**Issue Description**:
+The file is 552 lines. While organized with `@Nested` groups, it mixes five endpoint groups in one class. Splitting by endpoint reduces merge-conflict surface and improves readability.
+
+**Current Code**:
+
+```java
+class MatchControllerTest {
+  @Nested class PostMatchesSpecs { ... }
+  @Nested class PostMatchConfirmSpecs { ... }
+  @Nested class GetPendingMatchesSpecs { ... }
+  @Nested class PostMatchRejectSpecs { ... }
+  @Nested class DeleteMatchSpecs { ... }
+}
+```
+
+**Recommended Improvement**:
+
+```java
+// MatchControllerCreateTest.java
+// MatchControllerConfirmTest.java
+// MatchControllerPendingTest.java
+// MatchControllerRejectTest.java
+// MatchControllerDeleteTest.java
+```
+
+**Benefits**:
+Easier navigation, smaller diffs, and clearer ownership per endpoint.
+
+**Priority**:
+P3 — follow-up refactor, not blocking.
+
+---
+
+### 3. Remove duplicate static import in `MatchControllerTest`
+
+**Severity**: P3 (Low)
+**Location**: `src/test/java/com/tictactore/controller/MatchControllerTest.java:41`
+**Criterion**: Maintainability
+**Knowledge Base**: [test-quality.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)
+
+**Issue Description**:
+`MockMvcRequestBuilders.post` is imported twice.
+
+**Recommended Improvement**:
+Delete the duplicate import on line 41.
+
+**Priority**:
+P3 — trivial cleanup.
+
+---
+
+### 4. Relocate or prune disabled RedPhase scaffold
+
+**Severity**: P3 (Low)
+**Location**: `src/test/java/com/tictactore/service/MatchCooldownRedPhaseTest.java:1`
+**Criterion**: Maintainability
+**Knowledge Base**: [test-quality.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)
+
+**Issue Description**:
+357 lines of `@Disabled` red-phase tests live in the main test tree. They are useful scaffolds but could be moved to a dedicated `redphase/` source set or deleted once green-phase coverage is stable.
+
+**Recommended Improvement**:
+Move to `src/test/java/com/tictactore/service/redphase/MatchCooldownRedPhaseTest.java` or remove when no longer needed.
+
+**Priority**:
+P3 — organizational cleanup.
 
 ---
 
 ## Best Practices Found
 
-### 1. Pinia Store Fake Timers & Strict Teardown
+### 1. Network-first route interception in Playwright E2E
 
-**Location**: `frontend/src/features/match/stores/matchDraftStore.spec.ts:220-287`  
-**Pattern**: Deterministic Async Timer Testing & Global Cleanup  
+**Location**: `frontend/e2e/tests/e2e/cooldown-countdown.spec.ts:13`
+**Pattern**: Network-first
+**Knowledge Base**: [network-first.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/network-first.md)
 
-**Why This Is Good**:  
-The test suite isolates Pinia store state using `setActivePinia(createPinia())` in `beforeEach`, advances the 15-second undo timer using `vi.useFakeTimers()` and `vi.advanceTimersByTime(15000)`, and restores global `fetch` and mocks in `afterEach`.
+**Why This Is Good**:
+`page.route` is registered before `page.goto('/')`, eliminating the most common source of E2E race conditions.
 
 ```typescript
-// ✅ Excellent fake timer testing pattern
-it('executes HTTP POST and resets store when 15 seconds timer expires', async () => {
-  const store = useMatchDraftStore()
-  // ... setup store state ...
-  store.startSubmissionTimer()
-  expect(store.isPendingSubmission).toBe(true)
-
-  vi.advanceTimersByTime(15000)
-  await Promise.resolve() // Flush microtasks
-
-  expect(fetchMock).toHaveBeenCalledWith('/api/v1/matches', expect.objectContaining({ method: 'POST' }))
-  expect(store.isPendingSubmission).toBe(false)
+await page.route('**/api/v1/matches/pending', (route) => {
+  route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(buildPendingResponse([match])) })
 })
+await page.goto('/')
 ```
+
+**Use as Reference**:
+All new E2E tests should follow this intercept-before-navigate pattern.
+
+---
+
+### 2. Pure factory functions with overrides for test data
+
+**Location**: `frontend/e2e/fixtures/cooldown-fixtures.ts:16`
+**Pattern**: Data Factories
+**Knowledge Base**: [data-factories.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/data-factories.md)
+
+**Why This Is Good**:
+`buildCooldownMatch(overrides)` returns a complete payload with sensible defaults and explicit override points. This keeps tests deterministic and parallel-safe.
+
+```typescript
+export function buildCooldownMatch(overrides: Partial<CooldownMatchPayload> = {}): CooldownMatchPayload {
+  const now = Date.now()
+  return {
+    id: overrides.id ?? `match-${now}`,
+    status: overrides.status ?? 'PARTIALLY_CONFIRMED',
+    // ...
+  }
+}
+```
+
+**Use as Reference**:
+Reuse this fixture pattern for future E2E match scenarios.
+
+---
+
+### 3. `@Transactional` integration tests with real repository queries
+
+**Location**: `src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java:19`
+**Pattern**: Integration test isolation
+**Knowledge Base**: [test-levels-framework.md](.claude/skills/bmad-testarch-test-review/resources/knowledge/test-levels-framework.md)
+
+**Why This Is Good**:
+`@SpringBootTest` + `@ActiveProfiles("test")` + `@Transactional` gives a real database interaction (H2) with automatic rollback, providing confidence without state leakage.
+
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+class MatchCooldownServiceIntegrationTest {
+  @Test
+  @Transactional
+  void shouldAutoPublishExpiredCooldowns_viaRepositoryQuery() { ... }
+}
+```
+
+**Use as Reference**:
+Use this pattern for future repository- or scheduled-job-level integration tests.
 
 ---
 
 ## Test File Analysis
 
-### File Metadata & Structure
+### Files Reviewed
 
-- **`MatchServiceTest.java`**: 172 lines, JUnit 5 + Mockito, 4 test cases.
-- **`MatchControllerTest.java`**: 106 lines, JUnit 5 + MockMvc, 2 test cases.
-- **`matchDraftStore.spec.ts`**: 289 lines, Vitest + Pinia, 16 test cases.
-- **`match-submission-undo.spec.ts`**: 72 lines, Playwright E2E, 4 test cases (3 placeholders).
+| File | Lines | Framework | Level | New/Modified |
+|------|-------|-----------|-------|--------------|
+| `src/test/java/com/tictactore/controller/MatchControllerTest.java` | 552 | JUnit 5 + MockMvc | Unit | Modified |
+| `src/test/java/com/tictactore/service/MatchCooldownRedPhaseTest.java` | 357 | JUnit 5 + Mockito | Unit (scaffold) | New |
+| `src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java` | 137 | JUnit 5 + Spring Boot | Integration | New |
+| `frontend/e2e/fixtures/cooldown-fixtures.ts` | 39 | TypeScript | Fixture | New |
+| `frontend/e2e/tests/e2e/cooldown-countdown.spec.ts` | 104 | Playwright | E2E | New |
+| `frontend/src/features/match/components/__tests__/CooldownTimer.spec.ts` | 117 | Vitest | Component | New |
+
+### Test Structure Summary
+
+- **Describe Blocks**: 6 (backend `@Nested` + frontend `test.describe`)
+- **Test Cases**: 23 total across all files
+  - Backend unit: 13
+  - Backend integration: 4
+  - Frontend component: 4
+  - Frontend E2E: 4
+- **Priority Distribution**: P0: 14, P1: 9, P2/P3: 0
+- **Fixtures Used**: 1 (`cooldown-fixtures.ts`)
+- **Data Factories Used**: 1 (`buildCooldownMatch`)
+
+---
+
+## Context and Integration
+
+### Related Artifacts
+
+- **Story File**: [spec-3-5-publication-rules-and-24-hour-cooldown.md](../implementation-artifacts/spec-3-5-publication-rules-and-24-hour-cooldown.md)
+- **Test Automation Summary**: [automation-summary.md](automation-summary.md)
+- **Traceability**: [trace-3-5-publication-rules-and-24-hour-cooldown.md](../traceability/trace-3-5-publication-rules-and-24-hour-cooldown.md)
+
+---
+
+## Knowledge Base References
+
+This review consulted the following knowledge base fragments:
+
+- **[test-quality.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/test-quality.md)** - Definition of Done for tests (no hard waits, <300 lines, <1.5 min, self-cleaning)
+- **[network-first.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/network-first.md)** - Route intercept before navigate (race condition prevention)
+- **[data-factories.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/data-factories.md)** - Factory functions with overrides, API-first setup
+- **[test-levels-framework.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/test-levels-framework.md)** - E2E vs API vs Component vs Unit appropriateness
+- **[selector-resilience.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/selector-resilience.md)** - data-testid hierarchy and robust selectors
+- **[component-tdd.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/component-tdd.md)** - Red-Green-Refactor patterns
+- **[timing-debugging.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/timing-debugging.md)** - Race condition identification and deterministic wait fixes
+- **[playwright-config.md](../../.claude/skills/bmad-testarch-test-review/resources/knowledge/playwright-config.md)** - Environment switching, timeout standards, artifact outputs
+
+For coverage mapping, consult `trace` workflow outputs.
+
+See [tea-index.csv](../../.claude/skills/bmad-testarch-test-review/resources/tea-index.csv) for complete knowledge base.
 
 ---
 
@@ -218,18 +348,73 @@ it('executes HTTP POST and resets store when 15 seconds timer expires', async ()
 
 ### Immediate Actions (Before Merge)
 
-1. **Complete Playwright E2E Scenarios** (`frontend/e2e/tests/e2e/match-submission-undo.spec.ts`)
-   - Priority: P0 (High)
-   - Implement real user interactions for player selection, game completion, undo toast assertion, and POST route verification.
-2. **Clean Up Duplicate ATDD Files** (`src/test/java/com/tictactore/...`)
-   - Priority: P2 (Medium)
-   - Consolidate ATDD scaffold files into unit test suites.
+1. **Relax E2E countdown text assertion** — change `toContainText('Auto-publish in 2h')` to `toContainText('Auto-publish in')`.
+   - Priority: P2
+   - Owner: Frontend QA / Dev
+   - Estimated Effort: 5 minutes
+
+2. **Remove duplicate static import in `MatchControllerTest`**.
+   - Priority: P3
+   - Owner: Backend Dev
+   - Estimated Effort: 1 minute
+
+### Follow-up Actions (Future PRs)
+
+1. **Split `MatchControllerTest` into endpoint-focused classes** to keep files under 300 lines.
+   - Priority: P3
+   - Target: Next sprint or backlog
+
+2. **Relocate or prune `MatchCooldownRedPhaseTest`** once green-phase equivalents are verified stable.
+   - Priority: P3
+   - Target: Next sprint or backlog
+
+### Re-Review Needed?
+
+⚠️ Re-review after P2 fix — request changes, then re-review
 
 ---
 
 ## Decision
 
-**Recommendation**: Approve with Comments  
+**Recommendation**: Approve with Comments
 
-**Rationale**:  
-Unit tests in Spring Boot (`MatchServiceTest`, `MatchControllerTest`) and Pinia (`matchDraftStore.spec.ts`) provide excellent coverage for core business logic, status transitions, and the 15-second undo timer. The only blocking item is updating `match-submission-undo.spec.ts` to execute real Playwright E2E interactions instead of placeholder assertions.
+**Rationale**:
+The test suite scores 89/100 (Grade B) with zero critical or high-severity violations. Isolation, fixture design, network-first E2E patterns, and test-level appropriateness are all strong. The one medium-severity issue (time-dependent E2E assertion) and three low-severity maintainability nits do not block merge but should be addressed promptly to prevent flakiness and keep the test tree maintainable.
+
+**For Approve with Comments**:
+
+> Test quality is acceptable with 89/100 score. The one medium-severity recommendation (relax E2E countdown text assertion) should be addressed soon to prevent flaky CI. The remaining items are low-priority maintainability improvements suitable for follow-up work. Tests are production-ready and follow best practices.
+
+---
+
+## Appendix
+
+### Violation Summary by Location
+
+| Line   | Severity      | Criterion        | Issue                          | Fix                                  |
+| ------ | ------------- | ---------------- | ------------------------------ | ------------------------------------ |
+| 28     | P2 (Medium)   | Determinism      | Exact text assertion on countdown | Relax to `toContainText('Auto-publish in')` |
+| 1      | P3 (Low)      | Test Length      | `MatchControllerTest.java` 552 lines | Split by endpoint                    |
+| 1      | P3 (Low)      | Test Length      | `MatchCooldownRedPhaseTest.java` 357 lines | Move to redphase/ or delete when stable |
+| 41     | P3 (Low)      | Maintainability  | Duplicate static import        | Remove duplicate import              |
+
+### Review Metadata
+
+**Generated By**: BMad TEA Agent (Test Architect)
+**Workflow**: testarch-test-review v4.0
+**Review ID**: test-review-3-5-publication-rules-and-24-hour-cooldown-20260806
+**Timestamp**: 2026-08-06 22:03:31
+**Version**: 1.0
+
+---
+
+## Feedback on This Review
+
+If you have questions or feedback on this review:
+
+1. Review patterns in knowledge base: `../../../agents/bmad-tea/resources/knowledge/`
+2. Consult tea-index.csv for detailed guidance
+3. Request clarification on specific violations
+4. Pair with QA engineer to apply patterns
+
+This review is guidance, not rigid rules. Context matters - if a pattern is justified, document it with a comment.

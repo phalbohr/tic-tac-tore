@@ -424,7 +424,8 @@ public class MatchServiceImpl implements MatchService {
                 match.getEntryMode(),
                 match.getMatchFormat(),
                 match.getConfirmedByOpponentIdsList(),
-                VerificationRules.getRequiredConfirmations(match)
+                VerificationRules.getRequiredConfirmations(match),
+                match.getCooldownExpiresAt()
         );
     }
 

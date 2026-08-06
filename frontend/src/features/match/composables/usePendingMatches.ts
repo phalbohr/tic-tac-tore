@@ -6,6 +6,7 @@ interface PendingMatchItem {
   status?: string
   confirmedByOpponentIds?: string[]
   requiredConfirmations?: number
+  cooldownExpiresAt?: string
 }
 
 function generateUUID(): string {

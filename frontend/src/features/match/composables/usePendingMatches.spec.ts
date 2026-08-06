@@ -47,6 +47,26 @@ describe('usePendingMatches', () => {
     expect(getPartiallyConfirmedCount()).toBe(2)
   })
 
+  it('[P1] should carry cooldownExpiresAt on partially confirmed matches from API response', async () => {
+    const futureExpiry = new Date(Date.now() + 3600_000).toISOString()
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        count: 1,
+        matches: [
+          { id: 'm-cooldown', status: 'PARTIALLY_CONFIRMED', cooldownExpiresAt: futureExpiry }
+        ]
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const { fetchPendingCount, partiallyConfirmedMatches } = usePendingMatches()
+    await fetchPendingCount()
+
+    expect(partiallyConfirmedMatches.value).toHaveLength(1)
+    expect(partiallyConfirmedMatches.value[0]!.cooldownExpiresAt).toBe(futureExpiry)
+  })
+
   it('[P1] should throttle visibility change refresh with a 10-second debounce', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,

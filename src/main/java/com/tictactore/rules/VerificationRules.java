@@ -33,6 +33,16 @@ public final class VerificationRules {
             && Match.MATCH_FORMAT_STANDARD.equals(match.getMatchFormat());
     }
 
+    public static boolean requiresCooldown(Match match) {
+        if (match == null) {
+            return false;
+        }
+        boolean isDoubles = match.getTeamADefenderId() != null;
+        return isDoubles
+            && isParticipantEntered(match)
+            && Match.MATCH_FORMAT_STANDARD.equals(match.getMatchFormat());
+    }
+
     public static boolean isFullyConfirmed(Match match) {
         if (match == null) {
             return false;

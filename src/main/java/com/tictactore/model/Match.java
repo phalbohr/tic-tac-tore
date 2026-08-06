@@ -71,6 +71,9 @@ public class Match {
     @Column(name = "confirmed_by_opponent_ids")
     private String confirmedByOpponentIds;
 
+    @Column(name = "cooldown_expires_at")
+    private Instant cooldownExpiresAt;
+
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Game> games = new ArrayList<>();
@@ -135,8 +138,12 @@ public class Match {
             this.status = STATUS_CONFIRMED;
             this.confirmedByUserId = opponentId;
             this.confirmedAt = Instant.now();
+            this.cooldownExpiresAt = null;
         } else if (VerificationRules.supportsPartialConfirmation(this)) {
             this.status = STATUS_PARTIALLY_CONFIRMED;
+            if (VerificationRules.requiresCooldown(this)) {
+                this.cooldownExpiresAt = Instant.now().plusSeconds(24 * 60 * 60);
+            }
         }
     }
 
@@ -159,6 +166,27 @@ public class Match {
         this.rejectedByUserId = opponentId;
         this.rejectedAt = Instant.now();
         this.rejectionReason = finalReason;
+        this.cooldownExpiresAt = null;
+    }
+
+    public boolean isInCooldown() {
+        return cooldownExpiresAt != null && cooldownExpiresAt.isAfter(Instant.now());
+    }
+
+    public boolean isCooldownExpired() {
+        return cooldownExpiresAt != null && !cooldownExpiresAt.isAfter(Instant.now());
+    }
+
+    public void publishAfterCooldown() {
+        if (!STATUS_PARTIALLY_CONFIRMED.equals(this.status)) {
+            throw new InvalidMatchStateException("Match is not in PARTIALLY_CONFIRMED status");
+        }
+        if (!isCooldownExpired()) {
+            throw new InvalidMatchStateException("Cooldown has not expired yet");
+        }
+        this.status = STATUS_CONFIRMED;
+        this.confirmedAt = Instant.now();
+        this.cooldownExpiresAt = null;
     }
 
     public boolean hasConfirmed(UUID userId) {

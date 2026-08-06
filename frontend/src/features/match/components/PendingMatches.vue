@@ -43,6 +43,7 @@ export interface PendingMatchItem {
   rejectionReason?: string
   confirmedByOpponentIds?: string[]
   requiredConfirmations?: number
+  cooldownExpiresAt?: string
 }
 
 const props = defineProps<{
@@ -86,6 +87,17 @@ function getPartialConfirmationText(match: PendingMatchItem): string {
   const confirmedCount = match.confirmedByOpponentIds?.length ?? 0
   const required = match.requiredConfirmations ?? 2
   return `${confirmedCount} of ${required} confirmed`
+}
+
+function getCooldownRemaining(match: PendingMatchItem): string {
+  if (!match.cooldownExpiresAt) return ''
+  const now = Date.now()
+  const expires = new Date(match.cooldownExpiresAt).getTime()
+  const diff = expires - now
+  if (diff <= 0) return 'Auto-publishing soon'
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  return `Auto-publish in ${hours}h ${minutes}m`
 }
 
 function getPlayerDisplayInfo(
@@ -150,9 +162,18 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
             >
               {{ getMatchBadgeText(mIdx) }}
             </span>
-            <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
-              {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </span>
+            <div class="flex flex-col items-end gap-1">
+              <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
+                {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              </span>
+              <span
+                v-if="match.status === 'PARTIALLY_CONFIRMED' && match.cooldownExpiresAt"
+                class="text-[10px] text-on-surface-variant"
+                :data-testid="`cooldown-timer-${match.id}`"
+              >
+                {{ getCooldownRemaining(match) }}
+              </span>
+            </div>
           </div>
 
           <!-- Shared Game Row Layout -->

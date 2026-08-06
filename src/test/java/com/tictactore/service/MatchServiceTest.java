@@ -751,6 +751,129 @@ class MatchServiceTest {
         }
 
         @Test
+        @DisplayName("[P0] AC1: Should set cooldownExpiresAt when 2v2 standard first opponent confirms")
+        void shouldSetCooldown_when2v2StandardFirstOpponentConfirms() {
+            var matchId = UUID.randomUUID();
+            var beforeCooldown = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PENDING_APPROVAL")
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(beforeCooldown));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p3))).thenAnswer(invocation -> {
+                Match m = invocation.getArgument(0);
+                m.confirmByOpponent(p3);
+                return m;
+            });
+
+            var response = matchService.confirmMatch(matchId, p3, "idem-cooldown-set");
+
+            assertThat(response.status()).isEqualTo("PARTIALLY_CONFIRMED");
+            assertThat(response.cooldownExpiresAt()).isNotNull();
+            assertThat(response.cooldownExpiresAt()).isAfter(Instant.now());
+        }
+
+        @Test
+        @DisplayName("[P0] AC2: Should clear cooldownExpiresAt when second opponent confirms before expiry")
+        void shouldClearCooldown_whenSecondOpponentConfirmsBeforeExpiry() {
+            var matchId = UUID.randomUUID();
+            var cooldownExpiresAt = Instant.now().plusSeconds(60);
+            var partiallyConfirmed = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PARTIALLY_CONFIRMED")
+                    .confirmedByOpponentIds(p3.toString())
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .cooldownExpiresAt(cooldownExpiresAt)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(partiallyConfirmed));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p4))).thenAnswer(invocation -> {
+                Match m = invocation.getArgument(0);
+                m.confirmByOpponent(p4);
+                return m;
+            });
+
+            var response = matchService.confirmMatch(matchId, p4, "idem-cooldown-clear");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            assertThat(response.cooldownExpiresAt()).isNull();
+        }
+
+        @Test
+        @DisplayName("[P0] AC4: Should not set cooldown for 1v1 participant match")
+        void shouldNotSetCooldown_when1v1ParticipantConfirms() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(null)
+                    .teamBAttackerId(p2)
+                    .teamBDefenderId(null)
+                    .status("PENDING_APPROVAL")
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p2))).thenAnswer(invocation -> {
+                Match m = invocation.getArgument(0);
+                m.confirmByOpponent(p2);
+                return m;
+            });
+
+            var response = matchService.confirmMatch(matchId, p2, "idem-1v1");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            assertThat(response.cooldownExpiresAt()).isNull();
+        }
+
+        @Test
+        @DisplayName("[P0] AC5: Should not modify cooldownExpiresAt when already confirmed")
+        void shouldNotModifyCooldown_whenAlreadyConfirmed() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .status("CONFIRMED")
+                    .confirmedByUserId(p2)
+                    .confirmedAt(Instant.now())
+                    .cooldownExpiresAt(Instant.now().plusSeconds(60))
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            var response = matchService.confirmMatch(matchId, p2, "idem-idempotent");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            assertThat(response.cooldownExpiresAt()).isNotNull();
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
         @DisplayName("[P0] Should return rejected matches created by current user")
         void shouldReturnRejectedMatches_whenUserIsCreator() {
             var matchId = UUID.randomUUID();

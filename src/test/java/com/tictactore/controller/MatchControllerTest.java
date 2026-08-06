@@ -86,7 +86,9 @@ class MatchControllerTest {
 
             MatchResponse response = new MatchResponse(
                     UUID.randomUUID(), "key-1", p1, p1, p2, p3, p4,
-                    "PENDING_APPROVAL", List.of(new GameDto(10, 8)), Instant.now()
+                    "PENDING_APPROVAL", List.of(new GameDto(10, 8)), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null, null, null, null, null, null
             );
 
             when(matchService.createMatch(any(CreateMatchRequest.class))).thenReturn(response);
@@ -169,7 +171,7 @@ class MatchControllerTest {
                     null, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, null,
                     Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
-                    java.util.List.of(p3), 2
+                    java.util.List.of(p3), 2, null
             );
 
             when(matchService.confirmMatch(eq(matchId), eq(p3), any(String.class))).thenReturn(response);
@@ -201,7 +203,7 @@ class MatchControllerTest {
                     null, null, null, null, null, null, null, null, null, null,
                     null, null, null,
                     Match.ENTRY_MODE_REFEREE, Match.MATCH_FORMAT_STANDARD,
-                    java.util.List.of(p2, p3), 2
+                    java.util.List.of(p2, p3), 2, null
             );
 
             when(matchService.confirmMatch(eq(matchId), eq(p2), any(String.class))).thenReturn(response);
@@ -262,6 +264,65 @@ class MatchControllerTest {
             mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm"))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @DisplayName("[P0] AC1: Should return cooldownExpiresAt in JSON when 2v2 standard first opponent confirms")
+        void shouldReturnCooldownExpiresAt_whenFirst2v2StandardConfirm() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p3).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var cooldownExpiresAt = Instant.now().plusSeconds(24 * 60 * 60);
+            var response = new MatchResponse(
+                    matchId, "key-cooldown-api", p1, p1, p2, p3, p4,
+                    "PARTIALLY_CONFIRMED", List.of(), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
+                    List.of(p3), 2, cooldownExpiresAt
+            );
+
+            when(matchService.confirmMatch(eq(matchId), eq(p3), any(String.class))).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .header("Idempotency-Key", "idem-cooldown-api")
+                            .principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("PARTIALLY_CONFIRMED"))
+                    .andExpect(jsonPath("$.cooldownExpiresAt").exists());
+        }
+
+        @Test
+        @DisplayName("[P0] AC2: Should return null cooldownExpiresAt when second opponent confirms and match becomes CONFIRMED")
+        void shouldReturnNullCooldown_whenSecondConfirmClearsCooldown() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p4).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    matchId, "key-cooldown-clear", p1, p1, p2, p3, p4,
+                    "CONFIRMED", List.of(), Instant.now(),
+                    p4, Instant.now(), null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
+                    List.of(p3, p4), 2, null
+            );
+
+            when(matchService.confirmMatch(eq(matchId), eq(p4), any(String.class))).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .header("Idempotency-Key", "idem-cooldown-clear")
+                            .principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                    .andExpect(jsonPath("$.cooldownExpiresAt").doesNotExist());
+        }
     }
 
     @Nested
@@ -281,7 +342,9 @@ class MatchControllerTest {
             SecurityContextHolder.getContext().setAuthentication(auth);
             var response = new MatchResponse(
                     UUID.randomUUID(), "key-1", p2, p2, null, p1, null,
-                    "PENDING_APPROVAL", List.of(new GameDto(10, 5)), Instant.now()
+                    "PENDING_APPROVAL", List.of(new GameDto(10, 5)), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null, null, null, null, null, null
             );
             var pendingResponse = new PendingMatchesResponse(1, List.of(response));
             when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
@@ -305,7 +368,7 @@ class MatchControllerTest {
                     null, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, null,
                     Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
-                    java.util.List.of(p2), 2
+                    java.util.List.of(p2), 2, null
             );
             var pendingResponse = new PendingMatchesResponse(1, List.of(partialResponse));
             when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
@@ -316,7 +379,58 @@ class MatchControllerTest {
                     .andExpect(jsonPath("$.matches[0].status").value("PARTIALLY_CONFIRMED"))
                     .andExpect(jsonPath("$.matches[0].entryMode").value("PARTICIPANT"))
                     .andExpect(jsonPath("$.matches[0].matchFormat").value("STANDARD"))
-                    .andExpect(jsonPath("$.matches[0].requiredConfirmations").value(2));
+                     .andExpect(jsonPath("$.matches[0].requiredConfirmations").value(2));
+        }
+
+        @Test
+        @DisplayName("[P0] AC1: Should include cooldownExpiresAt in pending list for PARTIALLY_CONFIRMED 2v2 standard match")
+        void shouldIncludeCooldownExpiresAt_forPartiallyConfirmed2v2Standard() throws Exception {
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(
+                    user, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var cooldownExpiresAt = Instant.now().plusSeconds(24 * 60 * 60);
+            var partialResponse = new MatchResponse(
+                    UUID.randomUUID(), "key-cooldown-pending", p1, p1, p2, p3, p4,
+                    "PARTIALLY_CONFIRMED", new java.util.ArrayList<GameDto>(), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
+                    java.util.List.of(p3), 2, cooldownExpiresAt
+            );
+            var pendingResponse = new PendingMatchesResponse(1, List.of(partialResponse));
+            when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
+
+            mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.matches[0].cooldownExpiresAt").exists());
+        }
+
+        @Test
+        @DisplayName("[P1] Should not include cooldownExpiresAt for PENDING_APPROVAL matches")
+        void shouldNotIncludeCooldownExpiresAt_forPendingApproval() throws Exception {
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(
+                    user, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var pendingMatch = new MatchResponse(
+                    UUID.randomUUID(), "key-pending-no-cooldown", p2, p2, null, p1, null,
+                    "PENDING_APPROVAL", List.of(), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    null, null,
+                    List.of(), 1, null
+            );
+            var pendingResponse = new PendingMatchesResponse(1, List.of(pendingMatch));
+            when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
+
+            mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.matches[0].cooldownExpiresAt").doesNotExist());
         }
     }
 
@@ -341,7 +455,8 @@ class MatchControllerTest {
                     matchId, "key-1", p1, p1, null, p2, null,
                     "REJECTED", List.of(), Instant.now(), null, null,
                     p2, Instant.now(), "Wrong score: Game 1 was 10-5",
-                    null, null, null, null, null
+                    null, null, null, null, null,
+                    null, null, null, null, null, null, null, null, null, null
             );
             when(matchService.rejectMatch(eq(matchId), eq(p2), any(), eq("idem-reject-1"))).thenReturn(response);
 
