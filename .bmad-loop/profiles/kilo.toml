@@ -1,0 +1,24 @@
+# Kilo CLI (@kilocode/cli) — a fork of OpenCode, driven over its local HTTP
+# server exactly like the built-in opencode-http profile: hookless, so bmad-loop
+# routes it to OpencodeHttpAdapter (any profile with hooks.dialect = "none"), which
+# owns `<binary> serve` and observes turn completion over SSE + polling.
+#
+# API compatibility verified against kilo 7.3.46 (2026-08-06): GET/POST /session,
+# POST /session/:id/prompt_async (204), POST /session/:id/abort, GET /session/status,
+# GET /session/:id/message, GET /event (text/event-stream) all behave as the
+# adapter expects, and KILO_CONFIG_CONTENT applies `permission: allow` + the
+# skills path.
+#
+# binary is the shim (scripts/kilo-bmad-shim.sh, symlinked onto PATH), NOT `kilo`
+# itself: the adapter speaks OpenCode's OPENCODE_* env contract, which Kilo ignores.
+# Install it once per machine:
+#   ln -s "$PWD/scripts/kilo-bmad-shim.sh" ~/.local/bin/kilo-bmad-serve
+name = "kilo"
+binary = "kilo-bmad-serve"
+prompt_template = "Use the {skill} skill now: {args}"
+usage_parser = "none"
+skill_tree = ".claude/skills"
+first_run_note = "run `kilo auth login` once on this machine, and symlink scripts/kilo-bmad-shim.sh to kilo-bmad-serve on PATH; headless servers reuse the stored credentials"
+
+[hooks]
+dialect = "none"
