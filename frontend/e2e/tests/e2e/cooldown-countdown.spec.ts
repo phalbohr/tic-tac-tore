@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { buildCooldownMatch, buildPendingResponse } from '../fixtures/cooldown-fixtures'
+import { buildCooldownMatch, buildPendingResponse } from '../../fixtures/cooldown-fixtures'
 
 test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
   test.beforeEach(async ({ page }) => {
