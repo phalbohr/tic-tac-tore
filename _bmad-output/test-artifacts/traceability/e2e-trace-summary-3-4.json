@@ -1,0 +1,126 @@
+{
+  "schema_version": "0.1.0",
+  "snapshot_at": "2026-08-06T19:20:21+02:00",
+  "repo": "tic-tac-tore",
+  "collection_mode": "formal_requirements",
+  "collection_status": "COLLECTED",
+  "inventory_basis": "acceptance_criteria",
+  "gate_basis": "priority_thresholds",
+  "source_sha": "",
+  "target": {
+    "type": "story",
+    "id": "3-4-context-aware-verification-rules",
+    "label": "Story 3.4 - Context-Aware Verification Rules"
+  },
+  "decision_mode": "deterministic",
+  "evaluator": "Pavel",
+  "confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-3-4-context-aware-verification-rules.md",
+      "_bmad-output/test-artifacts/test-design-epic-3.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "coverage": {
+    "inventory": {
+      "covered": 7,
+      "total": 7,
+      "pct": 100
+    },
+    "priority_breakdown": {
+      "P0": {
+        "total": 7,
+        "covered": 7,
+        "pct": 100
+      },
+      "P1": {
+        "total": 0,
+        "covered": 0,
+        "pct": 100
+      },
+      "P2": {
+        "total": 0,
+        "covered": 0,
+        "pct": 100
+      },
+      "P3": {
+        "total": 0,
+        "covered": 0,
+        "pct": 100
+      }
+    },
+    "by_level": {
+      "e2e": {
+        "tests": 4,
+        "criteria_covered": 3
+      },
+      "api": {
+        "tests": 8,
+        "criteria_covered": 3
+      },
+      "component": {
+        "tests": 1,
+        "criteria_covered": 1
+      },
+      "unit": {
+        "tests": 13,
+        "criteria_covered": 7
+      },
+      "other": {
+        "tests": 0,
+        "criteria_covered": 0
+      }
+    }
+  },
+  "tests": {
+    "files": 6,
+    "cases": 26,
+    "skipped_cases": 0,
+    "fixme_cases": 0,
+    "pending_cases": 0
+  },
+  "risk_summary": {
+    "critical_open": 0,
+    "high_open": 0,
+    "medium_open": 0,
+    "low_open": 0
+  },
+  "heuristics": {
+    "endpoint_gaps": 0,
+    "auth_negative_path_status": "present",
+    "error_path_status": "present",
+    "ui_journey_status": "not_applicable",
+    "ui_state_status": "not_applicable"
+  },
+  "blockers": [],
+  "recommendations": [
+    {
+      "priority": "LOW",
+      "action": "Run /bmad:tea:test-review to assess test quality",
+      "requirements": []
+    }
+  ],
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-3-4-context-aware-verification-rules.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  },
+  "gate_status": "PASS",
+  "gate_criteria": {
+    "p0_coverage_required": "100%",
+    "p0_coverage_actual": "100%",
+    "p0_status": "MET",
+    "p1_coverage_target": "90%",
+    "p1_coverage_minimum": "80%",
+    "p1_coverage_actual": "100%",
+    "p1_status": "MET",
+    "overall_coverage_minimum": "80%",
+    "overall_coverage_actual": "100%",
+    "overall_status": "MET"
+  }
+}

@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.PendingMatchesResponse;
 import com.tictactore.exception.UnauthorizedMatchActionException;
+import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -79,7 +80,8 @@ class MatchControllerTest {
         void shouldReturn201CreatedOnValidSubmission() throws Exception {
             CreateMatchRequest request = new CreateMatchRequest(
                     "key-1", p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8))
+                    List.of(new GameDto(10, 8)),
+                    null, null
             );
 
             MatchResponse response = new MatchResponse(
@@ -102,7 +104,8 @@ class MatchControllerTest {
         void shouldReturn400OnDuplicatePlayers() throws Exception {
             CreateMatchRequest request = new CreateMatchRequest(
                     "key-2", p1, p1, p1, p3, p4,
-                    List.of(new GameDto(10, 8))
+                    List.of(new GameDto(10, 8)),
+                    null, null
             );
 
             when(matchService.createMatch(any(CreateMatchRequest.class)))
@@ -148,6 +151,68 @@ class MatchControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("CONFIRMED"))
                     .andExpect(jsonPath("$.confirmedByUserId").value(p2.toString()));
+        }
+
+        @Test
+        @DisplayName("[P0] AC3: Should return PARTIALLY_CONFIRMED with context fields for 2v2 standard first confirmation")
+        void shouldReturnPartiallyConfirmedWithContextFields() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p3).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    matchId, "key-partial", p1, p1, p2, p3, p4,
+                    "PARTIALLY_CONFIRMED", new java.util.ArrayList<GameDto>(), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
+                    java.util.List.of(p3), 2
+            );
+
+            when(matchService.confirmMatch(eq(matchId), eq(p3), any(String.class))).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .header("Idempotency-Key", "idem-partial")
+                            .principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("PARTIALLY_CONFIRMED"))
+                    .andExpect(jsonPath("$.entryMode").value("PARTICIPANT"))
+                    .andExpect(jsonPath("$.matchFormat").value("STANDARD"))
+                    .andExpect(jsonPath("$.requiredConfirmations").value(2))
+                    .andExpect(jsonPath("$.confirmedByOpponentIds").exists());
+        }
+
+        @Test
+        @DisplayName("[P0] AC5: Should return CONFIRMED with referee entryMode when 2v2 referee has 1 per team")
+        void shouldReturnConfirmedFor2v2RefereeWithOnePerTeam() throws Exception {
+            var matchId = UUID.randomUUID();
+            var user = com.tictactore.model.User.builder().id(p2).build();
+            var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    user, null, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+            );
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var response = new MatchResponse(
+                    matchId, "key-referee", p1, p2, p2, p3, p3,
+                    "CONFIRMED", new java.util.ArrayList<GameDto>(), Instant.now(), p2, Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null,
+                    Match.ENTRY_MODE_REFEREE, Match.MATCH_FORMAT_STANDARD,
+                    java.util.List.of(p2, p3), 2
+            );
+
+            when(matchService.confirmMatch(eq(matchId), eq(p2), any(String.class))).thenReturn(response);
+
+            mockMvc.perform(post("/api/v1/matches/" + matchId + "/confirm")
+                            .header("Idempotency-Key", "idem-referee")
+                            .principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                    .andExpect(jsonPath("$.entryMode").value("REFEREE"))
+                    .andExpect(jsonPath("$.requiredConfirmations").value(2));
         }
 
         @Test
@@ -225,6 +290,33 @@ class MatchControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.count").value(1))
                     .andExpect(jsonPath("$.matches[0].status").value("PENDING_APPROVAL"));
+        }
+
+        @Test
+        @DisplayName("[P0] AC3: Should include PARTIALLY_CONFIRMED matches with context fields in pending list")
+        void shouldReturnPartiallyConfirmedWithContextFieldsInPending() throws Exception {
+            var user = User.builder().id(p1).build();
+            var auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            var partialResponse = new MatchResponse(
+                    UUID.randomUUID(), "key-partial", p1, p1, null, p2, null,
+                    "PARTIALLY_CONFIRMED", new java.util.ArrayList<GameDto>(), Instant.now(),
+                    null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    Match.ENTRY_MODE_PARTICIPANT, Match.MATCH_FORMAT_STANDARD,
+                    java.util.List.of(p2), 2
+            );
+            var pendingResponse = new PendingMatchesResponse(1, List.of(partialResponse));
+            when(matchService.getPendingMatches(p1)).thenReturn(pendingResponse);
+
+            mockMvc.perform(get("/api/v1/matches/pending").principal(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.count").value(1))
+                    .andExpect(jsonPath("$.matches[0].status").value("PARTIALLY_CONFIRMED"))
+                    .andExpect(jsonPath("$.matches[0].entryMode").value("PARTICIPANT"))
+                    .andExpect(jsonPath("$.matches[0].matchFormat").value("STANDARD"))
+                    .andExpect(jsonPath("$.matches[0].requiredConfirmations").value(2));
         }
     }
 

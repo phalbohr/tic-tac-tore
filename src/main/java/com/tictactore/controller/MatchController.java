@@ -38,7 +38,9 @@ public class MatchController {
                     request.teamADefenderId(),
                     request.teamBAttackerId(),
                     request.teamBDefenderId(),
-                    request.games()
+                    request.games(),
+                    request.entryMode(),
+                    request.matchFormat()
             );
         }
 

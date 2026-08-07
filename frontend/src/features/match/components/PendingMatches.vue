@@ -41,6 +41,8 @@ export interface PendingMatchItem {
   games?: GameScoreItem[]
   createdAt?: string
   rejectionReason?: string
+  confirmedByOpponentIds?: string[]
+  requiredConfirmations?: number
 }
 
 const props = defineProps<{
@@ -78,6 +80,12 @@ function isPendingConfirmation(matchId: string): boolean {
 function getMatchBadgeText(index: number): string {
   const res = t('match.pendingMatch', { number: index + 1 })
   return res !== 'match.pendingMatch' ? res : `Match ${index + 1}`
+}
+
+function getPartialConfirmationText(match: PendingMatchItem): string {
+  const confirmedCount = match.confirmedByOpponentIds?.length ?? 0
+  const required = match.requiredConfirmations ?? 2
+  return `${confirmedCount} of ${required} confirmed`
 }
 
 function getPlayerDisplayInfo(
@@ -129,7 +137,17 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
           :data-testid="`pending-match-card-${match.id}`"
         >
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning/20 text-warning">
+            <span
+              v-if="match.status === 'PARTIALLY_CONFIRMED'"
+              class="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary"
+              :data-testid="`partially-confirmed-badge-${match.id}`"
+            >
+              {{ getPartialConfirmationText(match) }}
+            </span>
+            <span
+              v-else
+              class="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning/20 text-warning"
+            >
               {{ getMatchBadgeText(mIdx) }}
             </span>
             <span v-if="match.createdAt" class="text-xs text-on-surface-variant">

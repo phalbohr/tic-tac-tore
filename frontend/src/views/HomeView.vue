@@ -170,6 +170,10 @@ interface ApiMatchItem {
     teamBDefenderId?: string;
   }>
   createdAt?: string
+  entryMode?: string
+  matchFormat?: string
+  confirmedByOpponentIds?: string[]
+  requiredConfirmations?: number
 }
 
 async function fetchPendingMatches() {
@@ -244,7 +248,11 @@ async function fetchPendingMatches() {
           teamAScore: games[0]?.teamAScore ?? m.teamAScore,
           teamBScore: games[0]?.teamBScore ?? m.teamBScore,
           games: games.length > 0 ? games : undefined,
-          createdAt: m.createdAt
+          createdAt: m.createdAt,
+          entryMode: m.entryMode,
+          matchFormat: m.matchFormat,
+          confirmedByOpponentIds: m.confirmedByOpponentIds,
+          requiredConfirmations: m.requiredConfirmations
         }
       })
     }

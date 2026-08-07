@@ -2,13 +2,16 @@ package com.tictactore.model;
 
 import com.tictactore.exception.InvalidMatchStateException;
 import com.tictactore.exception.UnauthorizedMatchActionException;
+import com.tictactore.rules.VerificationRules;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "match")
@@ -59,6 +62,15 @@ public class Match {
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
+    @Column(name = "entry_mode")
+    private String entryMode;
+
+    @Column(name = "match_format")
+    private String matchFormat;
+
+    @Column(name = "confirmed_by_opponent_ids")
+    private String confirmedByOpponentIds;
+
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Game> games = new ArrayList<>();
@@ -70,8 +82,15 @@ public class Match {
     private Long version;
 
     public static final String STATUS_PENDING_APPROVAL = "PENDING_APPROVAL";
+    public static final String STATUS_PARTIALLY_CONFIRMED = "PARTIALLY_CONFIRMED";
     public static final String STATUS_CONFIRMED = "CONFIRMED";
     public static final String STATUS_REJECTED = "REJECTED";
+
+    public static final String ENTRY_MODE_PARTICIPANT = "PARTICIPANT";
+    public static final String ENTRY_MODE_REFEREE = "REFEREE";
+
+    public static final String MATCH_FORMAT_STANDARD = "STANDARD";
+    public static final String MATCH_FORMAT_RANDOM = "RANDOM";
 
     public void addGame(Game game) {
         games.add(game);
@@ -101,20 +120,30 @@ public class Match {
     }
 
     public void confirmByOpponent(UUID opponentId) {
-        if (!STATUS_PENDING_APPROVAL.equals(this.status)) {
-            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
+        if (!STATUS_PENDING_APPROVAL.equals(this.status)
+                && !STATUS_PARTIALLY_CONFIRMED.equals(this.status)) {
+            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL or PARTIALLY_CONFIRMED status");
         }
         if (java.util.Objects.equals(this.creatorId, opponentId) || !isOpponent(opponentId)) {
             throw new UnauthorizedMatchActionException("User " + opponentId + " is not an opponent for match " + this.id);
         }
-        this.status = STATUS_CONFIRMED;
-        this.confirmedByUserId = opponentId;
-        this.confirmedAt = Instant.now();
+        if (hasConfirmed(opponentId)) {
+            return;
+        }
+        addConfirmation(opponentId);
+        if (VerificationRules.isFullyConfirmed(this)) {
+            this.status = STATUS_CONFIRMED;
+            this.confirmedByUserId = opponentId;
+            this.confirmedAt = Instant.now();
+        } else if (VerificationRules.supportsPartialConfirmation(this)) {
+            this.status = STATUS_PARTIALLY_CONFIRMED;
+        }
     }
 
     public void rejectByOpponent(UUID opponentId, String reason, String customReason) {
-        if (!STATUS_PENDING_APPROVAL.equals(this.status)) {
-            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL status");
+        if (!STATUS_PENDING_APPROVAL.equals(this.status)
+                && !STATUS_PARTIALLY_CONFIRMED.equals(this.status)) {
+            throw new InvalidMatchStateException("Match is not in PENDING_APPROVAL or PARTIALLY_CONFIRMED status");
         }
         if (reason == null || reason.trim().isEmpty()) {
             throw new InvalidMatchStateException("Rejection reason is required");
@@ -130,5 +159,60 @@ public class Match {
         this.rejectedByUserId = opponentId;
         this.rejectedAt = Instant.now();
         this.rejectionReason = finalReason;
+    }
+
+    public boolean hasConfirmed(UUID userId) {
+        if (userId == null) return false;
+        if (confirmedByOpponentIds != null && !confirmedByOpponentIds.isBlank()) {
+            return Arrays.stream(confirmedByOpponentIds.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(UUID::fromString)
+                    .anyMatch(id -> id.equals(userId));
+        }
+        return userId.equals(this.confirmedByUserId);
+    }
+
+    public List<UUID> getConfirmedByOpponentIdsList() {
+        if (confirmedByOpponentIds == null || confirmedByOpponentIds.isBlank()) {
+            return new ArrayList<>();
+        }
+        return Arrays.stream(confirmedByOpponentIds.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(UUID::fromString)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public int getConfirmedByOpponentCount() {
+        return getConfirmedByOpponentIdsList().size();
+    }
+
+    public void addConfirmation(UUID opponentId) {
+        if (confirmedByOpponentIds == null || confirmedByOpponentIds.isBlank()) {
+            confirmedByOpponentIds = opponentId.toString();
+        } else if (!hasConfirmed(opponentId)) {
+            confirmedByOpponentIds = confirmedByOpponentIds + "," + opponentId.toString();
+        }
+    }
+
+    public List<UUID> getOpponentIds() {
+        List<UUID> opponents = new ArrayList<>();
+        boolean creatorInTeamA = creatorId != null && (creatorId.equals(teamAAttackerId) || creatorId.equals(teamADefenderId));
+        boolean creatorInTeamB = creatorId != null && (creatorId.equals(teamBAttackerId) || creatorId.equals(teamBDefenderId));
+
+        if (creatorInTeamA) {
+            if (teamBAttackerId != null) opponents.add(teamBAttackerId);
+            if (teamBDefenderId != null) opponents.add(teamBDefenderId);
+        } else if (creatorInTeamB) {
+            if (teamAAttackerId != null) opponents.add(teamAAttackerId);
+            if (teamADefenderId != null) opponents.add(teamADefenderId);
+        } else {
+            if (teamAAttackerId != null) opponents.add(teamAAttackerId);
+            if (teamADefenderId != null) opponents.add(teamADefenderId);
+            if (teamBAttackerId != null) opponents.add(teamBAttackerId);
+            if (teamBDefenderId != null) opponents.add(teamBDefenderId);
+        }
+        return opponents;
     }
 }

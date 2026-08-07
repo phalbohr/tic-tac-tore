@@ -73,7 +73,8 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-123",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, p3, p4), new GameDto(10, 6, p1, p2, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4), new GameDto(10, 6, p1, p2, p3, p4)),
+                    null, null
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-123")).thenReturn(Optional.empty());
@@ -115,7 +116,8 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-456",
                     p1, p1, p1, p3, p4, // p1 duplicated
-                    List.of(new GameDto(10, 8, p1, p1, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p1, p3, p4)),
+                    null, null
             );
 
             // When / Then
@@ -133,7 +135,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-789",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(101, 8, p1, p2, p3, p4)) // score > 100
+                    List.of(new GameDto(101, 8, p1, p2, p3, p4)), null, null
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-789")).thenReturn(Optional.empty());
@@ -159,7 +161,8 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "idempotency-999",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4)),
+                    null, null
             );
 
             when(matchRepository.findByIdempotencyKey("idempotency-999")).thenReturn(Optional.empty());
@@ -179,7 +182,7 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-pos-1",
                     p1, p1, null, p3, null,
-                    List.of(new GameDto(10, 8, p1, null, null, null))
+                    List.of(new GameDto(10, 8, p1, null, null, null)),                    null, null
             );
 
             when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
@@ -201,7 +204,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-null-attacker",
                     p1, null, p2, p3, p4,
-                    List.of(new GameDto(10, 8, null, p2, p3, p4))
+                    List.of(new GameDto(10, 8, null, p2, p3, p4)),
+                    null, null
             );
 
             assertThatThrownBy(() -> matchService.createMatch(request))
@@ -217,7 +221,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-pos-2",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, null, p4))
+                    List.of(new GameDto(10, 8, p1, p2, null, p4)),
+                    null, null
             );
 
             givenFourPlayersExist();
@@ -235,7 +240,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-pos-3",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p1, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p1, p3, p4)),
+                    null, null
             );
 
             givenFourPlayersExist();
@@ -254,7 +260,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-1000",
                     nonParticipantCreator, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4)),
+                    null, null
             );
 
             when(userRepository.findAllById(any())).thenReturn(List.of(
@@ -279,7 +286,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-pos-4",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, p3, p5))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p5)),
+                    null, null
             );
 
             givenFourPlayersExist();
@@ -297,7 +305,8 @@ class MatchServiceTest {
             var request = new CreateMatchRequest(
                     "idempotency-pos-5",
                     p1, p1, p2, p3, p4,
-                    List.of(new GameDto(10, 8, p1, p3, p2, p4))
+                    List.of(new GameDto(10, 8, p1, p3, p2, p4)),
+                    null, null
             );
 
             givenFourPlayersExist();
@@ -319,7 +328,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "dup-1",
                     p1, p1, null, p3, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             Match savedMatch = Match.builder()
@@ -360,7 +369,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "dup-2",
                     p1, p1, null, p3, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             Match savedMatch = Match.builder()
@@ -394,7 +403,8 @@ class MatchServiceTest {
                     p1,
                     p1, p2,
                     p3, p4,
-                    List.of(new GameDto(10, 8, p1, p2, p3, p4))
+                    List.of(new GameDto(10, 8, p1, p2, p3, p4)),
+                    null, null
             );
 
             when(matchRepository.findByIdempotencyKey("dup-3")).thenReturn(Optional.empty());
@@ -442,7 +452,7 @@ class MatchServiceTest {
             CreateMatchRequest request = new CreateMatchRequest(
                     "dup-4",
                     p1, p1, null, p3, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             when(matchRepository.findByIdempotencyKey("dup-4")).thenReturn(Optional.empty());
@@ -614,12 +624,130 @@ class MatchServiceTest {
                     .games(java.util.List.of())
                     .build();
 
-            when(matchRepository.findByStatus("PENDING_APPROVAL")).thenReturn(java.util.List.of(match));
+            when(matchRepository.findByStatusIn(List.of(Match.STATUS_PENDING_APPROVAL, Match.STATUS_PARTIALLY_CONFIRMED))).thenReturn(java.util.List.of(match));
 
             var result = matchService.getPendingMatches(p2);
 
             assertThat(result.count()).isEqualTo(1);
             assertThat(result.matches().get(0).id()).isEqualTo(matchId);
+        }
+
+        @Test
+        @DisplayName("[P1] Should return pending match when user already confirmed in PARTIALLY_CONFIRMED match (idempotency)")
+        void shouldReturnPartiallyConfirmedMatch_whenAlreadyConfirmedBySameOpponent() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PARTIALLY_CONFIRMED")
+                    .confirmedByOpponentIds(p2.toString())
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+
+            var response = matchService.confirmMatch(matchId, p2, "idem-partial-1");
+
+            assertThat(response.status()).isEqualTo("PARTIALLY_CONFIRMED");
+            verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P1] Should confirm 2v2 standard match and notify remaining opponent when first opponent confirms")
+        void shouldEnterPartiallyConfirmedAndNotify_whenFirstDoublesStandardOpponentConfirms() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PENDING_APPROVAL")
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            var partiallyConfirmed = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PARTIALLY_CONFIRMED")
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .confirmedByOpponentIds(p3.toString())
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p3))).thenReturn(partiallyConfirmed);
+            when(userRepository.findAllById(List.of(p4))).thenReturn(
+                    List.of(User.builder().id(p4).build()));
+            when(userRepository.findById(p3)).thenReturn(
+                    Optional.of(User.builder().id(p3).build()));
+
+            var response = matchService.confirmMatch(matchId, p3, "idem-2v2-partial");
+
+            assertThat(response.status()).isEqualTo("PARTIALLY_CONFIRMED");
+            assertThat(response.confirmedByOpponentIds()).containsExactly(p3);
+            verify(matchOperation).confirmMatch(match, p3);
+            verify(pushNotificationService).sendPartialConfirmationNotification(any(Match.class), anyList(), anyString());
+        }
+
+        @Test
+        @DisplayName("[P1] Should confirm 2v2 standard match when second opponent confirms from PARTIALLY_CONFIRMED")
+        void shouldConfirmMatch_whenSecondOpponentConfirmsFromPartiallyConfirmed() {
+            var matchId = UUID.randomUUID();
+            var match = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("PARTIALLY_CONFIRMED")
+                    .confirmedByOpponentIds(p3.toString())
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            var confirmedMatch = Match.builder()
+                    .id(matchId)
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .status("CONFIRMED")
+                    .confirmedByOpponentIds(p3.toString() + "," + p4.toString())
+                    .confirmedByUserId(p4)
+                    .confirmedAt(Instant.now())
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .createdAt(Instant.now())
+                    .games(java.util.List.of())
+                    .build();
+
+            when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+            when(matchOperation.confirmMatch(any(Match.class), eq(p4))).thenReturn(confirmedMatch);
+
+            var response = matchService.confirmMatch(matchId, p4, "idem-2v2-final");
+
+            assertThat(response.status()).isEqualTo("CONFIRMED");
+            verify(matchOperation).confirmMatch(match, p4);
         }
 
         @Test
@@ -639,7 +767,7 @@ class MatchServiceTest {
                     .games(List.of())
                     .build();
 
-            when(matchRepository.findByStatus("PENDING_APPROVAL")).thenReturn(List.of());
+            when(matchRepository.findByStatusIn(List.of(Match.STATUS_PENDING_APPROVAL, Match.STATUS_PARTIALLY_CONFIRMED))).thenReturn(List.of());
             when(matchRepository.findByStatusAndCreatorId("REJECTED", p1)).thenReturn(List.of(match));
 
             var result = matchService.getPendingMatches(p1);

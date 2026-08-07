@@ -66,7 +66,7 @@ class MatchServiceATDDTest {
         @Test
         @DisplayName("[P0] Should save match with PENDING_APPROVAL status when 4 distinct players and valid game scores provided")
         void shouldCreateMatchSuccessfully() {
-            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 8, p1, p2, p3, p4)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 8, p1, p2, p3, p4)), null, null);
             when(matchRepository.findByIdempotencyKey("key-123")).thenReturn(Optional.empty());
             when(userRepository.findAllById(any())).thenReturn(List.of(
                     User.builder().id(p1).build(),
@@ -97,7 +97,7 @@ class MatchServiceATDDTest {
         @Test
         @DisplayName("[P1] Should throw DuplicatePlayerException when same player selected in multiple positions")
         void shouldRejectDuplicatePlayers() {
-            var request = new CreateMatchRequest("key-123", p1, p1, p1, p3, p4, List.of(new GameDto(10, 8, p1, p1, p3, p4)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p1, p3, p4, List.of(new GameDto(10, 8, p1, p1, p3, p4)), null, null);
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(DuplicatePlayerException.class);
         }
@@ -105,7 +105,7 @@ class MatchServiceATDDTest {
         @Test
         @DisplayName("[P1] Should throw InvalidMatchScoreException when game scores exceed limits or have negative numbers")
         void shouldRejectInvalidGameScores() {
-            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(-1, 8, p1, p2, p3, p4)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(-1, 8, p1, p2, p3, p4)), null, null);
             when(userRepository.findAllById(any())).thenReturn(List.of(
                     User.builder().id(p1).build(),
                     User.builder().id(p2).build(),
@@ -119,7 +119,7 @@ class MatchServiceATDDTest {
         @Test
         @DisplayName("[P1] Should throw ParticipantNotFoundException when player ID does not exist in database")
         void shouldRejectNonExistentParticipant() {
-            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 8, p1, p2, p3, p4)));
+            var request = new CreateMatchRequest("key-123", p1, p1, p2, p3, p4, List.of(new GameDto(10, 8, p1, p2, p3, p4)), null, null);
             when(userRepository.findAllById(any())).thenReturn(List.of(User.builder().id(p1).build()));
             assertThatThrownBy(() -> matchService.createMatch(request))
                     .isInstanceOf(ParticipantNotFoundException.class);

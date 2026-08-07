@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-06T19:20:21+02:00",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "3-4-context-aware-verification-rules",
+    "label": "Story 3.4 - Context-Aware Verification Rules"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "PASS",
+  "rationale": "All P0 criteria met with 100% coverage and pass rates across all critical tests. All 7 acceptance criteria (AC1-AC7) have complete test coverage at unit, service, controller, and frontend levels. No security issues detected. No flaky tests in validation. Feature is ready for production deployment with standard monitoring.",
+  "p0_status": "MET",
+  "p1_status": "MET",
+  "overall_status": "MET",
+  "critical_open": 0,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-3-4-context-aware-verification-rules.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

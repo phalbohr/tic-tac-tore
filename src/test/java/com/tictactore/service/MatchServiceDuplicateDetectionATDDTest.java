@@ -98,7 +98,7 @@ class MatchServiceDuplicateDetectionATDDTest {
                     playerA,
                     playerA, null,
                     playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             matchService.createMatch(request);
@@ -135,7 +135,7 @@ class MatchServiceDuplicateDetectionATDDTest {
                     playerA,
                     playerA, null,
                     playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             matchService.createMatch(request);
@@ -182,7 +182,7 @@ class MatchServiceDuplicateDetectionATDDTest {
                     playerA,
                     playerA, null,
                     playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null))
+                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
             );
 
             matchService.createMatch(request);
@@ -242,7 +242,8 @@ class MatchServiceDuplicateDetectionATDDTest {
                     playerA,
                     playerA, playerB,
                     playerC, playerD,
-                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD))
+                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
+                    null, null
             );
 
             matchService.createMatch(request);
@@ -296,7 +297,8 @@ class MatchServiceDuplicateDetectionATDDTest {
                     playerA,
                     playerA, playerB,
                     playerC, playerD,
-                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD))
+                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
+                    null, null
             );
 
             matchService.createMatch(request);

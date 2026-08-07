@@ -16,6 +16,7 @@ import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
+import com.tictactore.rules.VerificationRules;
 import com.tictactore.service.MatchService;
 import com.tictactore.service.PushNotificationService;
 import com.tictactore.service.operation.MatchOperation;
@@ -88,6 +89,15 @@ public class MatchServiceImpl implements MatchService {
 
         UUID creator = request.creatorId() != null ? request.creatorId() : request.teamAAttackerId();
 
+        boolean isParticipant = creator != null && (
+                creator.equals(request.teamAAttackerId())
+                        || creator.equals(request.teamADefenderId())
+                        || creator.equals(request.teamBAttackerId())
+                        || creator.equals(request.teamBDefenderId()));
+        String entryMode = request.entryMode() != null ? request.entryMode() :
+                (isParticipant ? Match.ENTRY_MODE_PARTICIPANT : Match.ENTRY_MODE_REFEREE);
+        String matchFormat = request.matchFormat() != null ? request.matchFormat() : Match.MATCH_FORMAT_STANDARD;
+
         Match match = Match.builder()
                 .idempotencyKey(request.idempotencyKey())
                 .creatorId(creator)
@@ -96,6 +106,8 @@ public class MatchServiceImpl implements MatchService {
                 .teamBAttackerId(request.teamBAttackerId())
                 .teamBDefenderId(request.teamBDefenderId())
                 .status("PENDING_APPROVAL")
+                .entryMode(entryMode)
+                .matchFormat(matchFormat)
                 .createdAt(Instant.now())
                 .build();
 
@@ -179,7 +191,8 @@ public class MatchServiceImpl implements MatchService {
         if (currentUserId == null) {
             return new com.tictactore.dto.PendingMatchesResponse(0, List.of());
         }
-        List<Match> pendingMatches = matchRepository.findByStatus("PENDING_APPROVAL");
+        List<Match> pendingMatches = matchRepository.findByStatusIn(
+                List.of(Match.STATUS_PENDING_APPROVAL, Match.STATUS_PARTIALLY_CONFIRMED));
         List<Match> rejectedMatches = matchRepository.findByStatusAndCreatorId("REJECTED", currentUserId);
 
         List<Match> userPendingMatches = new ArrayList<>();
@@ -222,6 +235,9 @@ public class MatchServiceImpl implements MatchService {
 
     private boolean isUserPendingApprover(Match match, UUID userId) {
         if (userId == null || userId.equals(match.getCreatorId())) {
+            return false;
+        }
+        if (match.hasConfirmed(userId)) {
             return false;
         }
         UUID creatorId = match.getCreatorId();
@@ -279,13 +295,35 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
 
         if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
-            if (userId.equals(match.getConfirmedByUserId())) {
+            if (match.hasConfirmed(userId)) {
                 return mapToResponse(match);
             }
             throw new InvalidMatchStateException("Match is already confirmed");
         }
 
+        if (Match.STATUS_PARTIALLY_CONFIRMED.equals(match.getStatus())) {
+            if (match.hasConfirmed(userId)) {
+                return mapToResponse(match);
+            }
+        }
+
         var updatedMatch = matchOperation.confirmMatch(match, userId);
+
+        if (Match.STATUS_PARTIALLY_CONFIRMED.equals(updatedMatch.getStatus())) {
+            try {
+                List<UUID> remaining = updatedMatch.getOpponentIds().stream()
+                        .filter(oppId -> !updatedMatch.hasConfirmed(oppId))
+                        .toList();
+                if (!remaining.isEmpty()) {
+                    List<User> remainingUsers = userRepository.findAllById(remaining);
+                    String confirmerName = resolveDisplayName(userId);
+                    pushNotificationService.sendPartialConfirmationNotification(updatedMatch, remainingUsers, confirmerName);
+                }
+            } catch (Exception e) {
+                log.error("Failed to dispatch partial confirmation notification for match {}", updatedMatch.getId(), e);
+            }
+        }
+
         return mapToResponse(updatedMatch);
     }
 
@@ -382,7 +420,11 @@ public class MatchServiceImpl implements MatchService {
                 getAvatar(userMap.get(match.getTeamAAttackerId())),
                 getAvatar(userMap.get(match.getTeamADefenderId())),
                 getAvatar(userMap.get(match.getTeamBAttackerId())),
-                getAvatar(userMap.get(match.getTeamBDefenderId()))
+                getAvatar(userMap.get(match.getTeamBDefenderId())),
+                match.getEntryMode(),
+                match.getMatchFormat(),
+                match.getConfirmedByOpponentIdsList(),
+                VerificationRules.getRequiredConfirmations(match)
         );
     }
 
@@ -397,6 +439,18 @@ public class MatchServiceImpl implements MatchService {
 
     private String getAvatar(User user) {
         return user != null ? user.getAvatar() : null;
+    }
+
+    private String resolveDisplayName(UUID userId) {
+        if (userId == null) return "A player";
+        return userRepository.findById(userId)
+                .map(u -> {
+                    if (u.getNickname() != null && u.getNickname().startsWith("ex-player-")) {
+                        return "A retired player";
+                    }
+                    return u.getNickname() != null ? u.getNickname() : "A player";
+                })
+                .orElse("A player");
     }
 
     @Override

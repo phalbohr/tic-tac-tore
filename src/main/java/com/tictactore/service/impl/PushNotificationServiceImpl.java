@@ -140,6 +140,39 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendPartialConfirmationNotification(Match match, List<User> remainingOpponents, String firstConfirmerName) {
+        String summary = firstConfirmerName + " confirmed your match. Waiting for " + remainingOpponents.size() + " more opponent" + (remainingOpponents.size() == 1 ? "" : "s") + " to confirm.";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                match.getId(),
+                firstConfirmerName,
+                summary,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize partial confirmation push notification payload for match {}", match.getId(), e);
+            return;
+        }
+
+        for (User opponent : remainingOpponents) {
+            List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(opponent.getId());
+            if (subscriptions.isEmpty()) {
+                recordNotificationLog(opponent.getId(), match.getId(), "PARTIAL_CONFIRMATION", jsonPayload, "SKIPPED", "No push subscription registered");
+                continue;
+            }
+            for (PushSubscription sub : subscriptions) {
+                dispatchPushNotification(sub, opponent.getId(), match.getId(), "PARTIAL_CONFIRMATION", jsonPayload);
+            }
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {
