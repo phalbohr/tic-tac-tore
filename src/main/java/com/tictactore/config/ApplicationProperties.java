@@ -13,6 +13,16 @@ public class ApplicationProperties {
     private final OAuth2 oauth2 = new OAuth2();
     private final BloomFilter bloomFilter = new BloomFilter();
     private final Avatar avatar = new Avatar();
+    private final RateLimit rateLimit = new RateLimit();
+
+    @Getter
+    @Setter
+    public static class RateLimit {
+        private long standaloneSubmissionsPerHour = 10;
+        private long rejectionThreshold = 5;
+        private long rejectionWindowHours = 24;
+        private long tournamentSubmissionsPerHour = 30;
+    }
 
     @Getter
     @Setter

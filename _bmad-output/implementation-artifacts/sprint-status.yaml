@@ -67,7 +67,7 @@ development_status:
   3-3-match-rejection-with-reason: done
   3-4-context-aware-verification-rules: done
   3-5-publication-rules-and-24-hour-cooldown: done
-  3-6-submission-rate-limiting-anti-spam: backlog
+  3-6-submission-rate-limiting-anti-spam: done
   3-7-match-confirmation-visual-improvements: done
   epic-3-retrospective: optional
   epic-4: in-progress

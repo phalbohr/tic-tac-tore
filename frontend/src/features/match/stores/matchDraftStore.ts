@@ -455,6 +455,21 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         }
         resetDraftStateOnly()
         return SubmissionResult.SUCCESS
+      } else if (res.status === 429) {
+        let retryAfter = 0
+        let msg = 'Rate limit exceeded. Please try again later.'
+        try {
+          const data = await res.json()
+          if (data.message) msg = data.message
+          if (data.details?.retryAfter) retryAfter = Number(data.details.retryAfter)
+        } catch {
+          // ignore parsing error
+        }
+        if (retryAfter > 0) {
+          msg = `${msg} Try again in ${retryAfter} seconds.`
+        }
+        submitError.value = msg
+        return SubmissionResult.CLIENT_ERROR
       } else if (res.status >= 400 && res.status < 500) {
         let msg = 'Failed to submit match'
         try {
@@ -466,6 +481,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
         submitError.value = msg
         return SubmissionResult.CLIENT_ERROR
       } else {
+        let msg = 'Server error. Please try again later.'
+        try {
+          const data = await res.json()
+          if (data.message) msg = data.message
+        } catch {
+          // ignore parsing error
+        }
+        submitError.value = msg
         return SubmissionResult.SERVER_OR_NETWORK_ERROR
       }
     } catch {
