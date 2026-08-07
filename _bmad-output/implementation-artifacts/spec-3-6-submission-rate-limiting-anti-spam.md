@@ -145,3 +145,9 @@ The `tournament-submissions-per-hour` property is reserved for Epic 8; no code b
 - Reject 5 matches, then submit a new one; verify 429
 - Inspect Redis keys: `rl:submissions:{userId}:{hour}` and `rl:rejections:{userId}` with expected TTLs
 
+## Auto Run Result
+
+Status: done
+Blocking condition: none
+Commit: f490f0fc48c21e8c4efc55df4c626babb90ccb3d
+
