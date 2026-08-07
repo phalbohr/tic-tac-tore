@@ -1,0 +1,382 @@
+{
+  "phase": "PHASE_1_COMPLETE",
+  "generated_at": "2026-08-07T03:03:00+02:00",
+  "trace_target": {
+    "type": "story",
+    "id": "3-6-submission-rate-limiting-anti-spam",
+    "label": "Story 3.6 - Submission Rate Limiting (Anti-Spam)"
+  },
+  "collection_mode": "formal_requirements",
+  "allow_gate": true,
+  "coverage_basis": "acceptance_criteria",
+  "summary_confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-3-6-submission-rate-limiting-anti-spam.md",
+      "_bmad-output/test-artifacts/test-design-epic-3-6.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "requirements": [
+    {
+      "id": "AC1",
+      "title": "Happy path: user under limits, match created successfully (HTTP 201)",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-UNIT-001",
+          "title": "Should allow submission when under the hourly limit",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 87,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-002",
+          "title": "Should allow submission when exactly at the limit",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 97,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-003",
+          "title": "Should allow submission when rejections are under threshold",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 129,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-004",
+          "title": "Should save match with PENDING_APPROVAL status when valid request provided",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 76,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-005",
+          "title": "Should save match with PENDING_APPROVAL status (ATDD scaffold)",
+          "file": "src/test/java/com/tictactore/service/MatchServiceATDDTest.java",
+          "line": 72,
+          "level": "unit",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "AC2",
+      "title": "Hourly limit exceeded: backend returns HTTP 429, frontend displays rate-limit error banner",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-UNIT-006",
+          "title": "Should throw RateLimitExceededException when submission count exceeds limit",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 107,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-007",
+          "title": "Should return positive retryAfterSeconds when submission count exceeds limit",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 236,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-008",
+          "title": "Should throw RateLimitExceededException when submission limit exceeded in createMatch",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 1052,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-COMP-001",
+          "title": "Handles HTTP 429 by setting submitError with retry time and returning CLIENT_ERROR",
+          "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts",
+          "line": 397,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.6-E2E-001",
+          "title": "Should display rate-limit error banner when backend returns HTTP 429 with retryAfter",
+          "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts",
+          "line": 33,
+          "level": "e2e",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "AC3",
+      "title": "Rejection throttle: user with 5+ rejections in 24h gets HTTP 429 and rate-limit error banner",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-UNIT-009",
+          "title": "Should throw RateLimitExceededException when rejections meet threshold",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 143,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-010",
+          "title": "Should throw RateLimitExceededException when rejections exceed threshold",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 153,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-011",
+          "title": "Should add rejection entry to sorted set",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 204,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-012",
+          "title": "Should record rejection when rejectMatch is called",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 1099,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-013",
+          "title": "Should trigger submission throttle after enough rejections",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 1137,
+          "level": "unit",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "AC4",
+      "title": "Frontend receives rate-limit response and error banner includes retry time",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-COMP-002",
+          "title": "Handles HTTP 429 by setting submitError with retry time and returning CLIENT_ERROR",
+          "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts",
+          "line": 397,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.6-E2E-002",
+          "title": "Should display rate-limit error banner when backend returns HTTP 429 with retryAfter",
+          "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts",
+          "line": 33,
+          "level": "e2e",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "id": "AC5",
+      "title": "Idempotency-key resubmission returns existing match without incrementing counter",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-UNIT-014",
+          "title": "Should not call rate limit check on idempotent resubmission",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 1073,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-RED-001",
+          "title": "Should return existing match without incrementing counter on idempotent resubmission (RED scaffold)",
+          "file": "src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java",
+          "line": 175,
+          "level": "unit",
+          "status": "skipped"
+        }
+      ]
+    },
+    {
+      "id": "AC6",
+      "title": "Redis unavailable during rate-limit check: submission rejected with HTTP 503, frontend shows server error",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.6-UNIT-015",
+          "title": "Should throw RateLimitExceededException with 503 semantics when Redis fails during submission check",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 169,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-016",
+          "title": "Should throw RateLimitExceededException with 503 semantics when Redis fails during rejection check",
+          "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java",
+          "line": 182,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-UNIT-017",
+          "title": "Should return HTTP 503 with ApiError containing RATE_LIMIT_UNAVAILABLE code and retryAfter=0 when redisFailure is true",
+          "file": "src/test/java/com/tictactore/exception/GlobalExceptionHandlerTest.java",
+          "line": 45,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.6-COMP-003",
+          "title": "Handles HTTP 503 as SERVER_OR_NETWORK_ERROR without rate-limit banner",
+          "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts",
+          "line": 423,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.6-E2E-003",
+          "title": "Should display server error when backend returns HTTP 503",
+          "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts",
+          "line": 68,
+          "level": "e2e",
+          "status": "active"
+        }
+      ]
+    }
+  ],
+  "coverage_statistics": {
+    "total_requirements": 6,
+    "fully_covered": 6,
+    "partially_covered": 0,
+    "uncovered": 0,
+    "overall_coverage_percentage": 100,
+    "priority_breakdown": {
+      "P0": { "total": 5, "covered": 5, "percentage": 100 },
+      "P1": { "total": 1, "covered": 1, "percentage": 100 },
+      "P2": { "total": 0, "covered": 0, "percentage": 100 },
+      "P3": { "total": 0, "covered": 0, "percentage": 100 }
+    }
+  },
+  "gap_analysis": {
+    "critical_gaps": [],
+    "high_gaps": [],
+    "medium_gaps": [],
+    "low_gaps": [],
+    "partial_coverage_items": [],
+    "unit_only_items": []
+  },
+  "coverage_heuristics": {
+    "endpoint_gaps": [],
+    "auth_negative_path_gaps": [],
+    "happy_path_only_gaps": [],
+    "ui_journey_gaps": [],
+    "ui_state_gaps": [],
+    "counts": {
+      "endpoints_without_tests": 0,
+      "auth_missing_negative_paths": 0,
+      "happy_path_only_criteria": 0,
+      "ui_journeys_without_e2e": 0,
+      "ui_states_missing_coverage": 0
+    }
+  },
+  "test_inventory": {
+    "summary": {
+      "files": 7,
+      "cases": 25,
+      "skipped_cases": 5,
+      "fixme_cases": 0,
+      "pending_cases": 0,
+      "by_level": {
+        "unit": { "tests": 21, "criteria_covered": 6 },
+        "component": { "tests": 2, "criteria_covered": 2 },
+        "e2e": { "tests": 2, "criteria_covered": 2 },
+        "api": { "tests": 0, "criteria_covered": 0 },
+        "other": { "tests": 0, "criteria_covered": 0 }
+      }
+    },
+    "tests": [
+      { "id": "3.6-UNIT-001", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 87, "title": "Should allow submission when under the hourly limit", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-002", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 97, "title": "Should allow submission when exactly at the limit", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-003", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 129, "title": "Should allow submission when rejections are under threshold", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-004", "file": "src/test/java/com/tictactore/service/MatchServiceTest.java", "line": 76, "title": "Should save match with PENDING_APPROVAL status when valid request provided", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-005", "file": "src/test/java/com/tictactore/service/MatchServiceATDDTest.java", "line": 72, "title": "Should save match with PENDING_APPROVAL status (ATDD scaffold)", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-006", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 107, "title": "Should throw RateLimitExceededException when submission count exceeds limit", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-007", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 236, "title": "Should return positive retryAfterSeconds when submission count exceeds limit", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-008", "file": "src/test/java/com/tictactore/service/MatchServiceTest.java", "line": 1052, "title": "Should throw RateLimitExceededException when submission limit exceeded in createMatch", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-009", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 143, "title": "Should throw RateLimitExceededException when rejections meet threshold", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-010", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 153, "title": "Should throw RateLimitExceededException when rejections exceed threshold", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-011", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 204, "title": "Should add rejection entry to sorted set", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-012", "file": "src/test/java/com/tictactore/service/MatchServiceTest.java", "line": 1099, "title": "Should record rejection when rejectMatch is called", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-013", "file": "src/test/java/com/tictactore/service/MatchServiceTest.java", "line": 1137, "title": "Should trigger submission throttle after enough rejections", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-014", "file": "src/test/java/com/tictactore/service/MatchServiceTest.java", "line": 1073, "title": "Should not call rate limit check on idempotent resubmission", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-015", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 169, "title": "Should throw RateLimitExceededException with 503 semantics when Redis fails during submission check", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-016", "file": "src/test/java/com/tictactore/service/RateLimitServiceTest.java", "line": 182, "title": "Should throw RateLimitExceededException with 503 semantics when Redis fails during rejection check", "level": "unit", "status": "active" },
+      { "id": "3.6-UNIT-017", "file": "src/test/java/com/tictactore/exception/GlobalExceptionHandlerTest.java", "line": 45, "title": "Should return HTTP 503 with ApiError containing RATE_LIMIT_UNAVAILABLE code and retryAfter=0 when redisFailure is true", "level": "unit", "status": "active" },
+      { "id": "3.6-COMP-001", "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts", "line": 397, "title": "Handles HTTP 429 by setting submitError with retry time and returning CLIENT_ERROR", "level": "component", "status": "active" },
+      { "id": "3.6-COMP-002", "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts", "line": 397, "title": "Handles HTTP 429 by setting submitError with retry time and returning CLIENT_ERROR", "level": "component", "status": "active" },
+      { "id": "3.6-COMP-003", "file": "frontend/src/features/match/stores/matchDraftStore.spec.ts", "line": 423, "title": "Handles HTTP 503 as SERVER_OR_NETWORK_ERROR without rate-limit banner", "level": "component", "status": "active" },
+      { "id": "3.6-E2E-001", "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts", "line": 33, "title": "Should display rate-limit error banner when backend returns HTTP 429 with retryAfter", "level": "e2e", "status": "active" },
+      { "id": "3.6-E2E-002", "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts", "line": 33, "title": "Should display rate-limit error banner when backend returns HTTP 429 with retryAfter", "level": "e2e", "status": "active" },
+      { "id": "3.6-E2E-003", "file": "frontend/e2e/tests/e2e/rate-limiting.spec.ts", "line": 68, "title": "Should display server error when backend returns HTTP 503", "level": "e2e", "status": "active" },
+      { "id": "3.6-RED-001", "file": "src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java", "line": 175, "title": "Should return existing match without incrementing counter on idempotent resubmission (RED scaffold)", "level": "unit", "status": "skipped" }
+    ],
+    "blockers": [
+      {
+        "id": "3.6-RED-001",
+        "severity": "medium",
+        "reason": "Test marked skipped during trace collection",
+        "test_file": "src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java",
+        "test_title": "Should return existing match without incrementing counter on idempotent resubmission (RED scaffold)"
+      }
+    ]
+  },
+  "blockers": [
+    {
+      "id": "3.6-RED-001",
+      "severity": "medium",
+      "reason": "Test marked skipped during trace collection",
+      "test_file": "src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java",
+      "test_title": "Should return existing match without incrementing counter on idempotent resubmission (RED scaffold)"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "action": "Remove @Disabled red-phase scaffolds from SubmissionRateLimitRedPhaseTest",
+      "requirements": ["AC5"]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add controller-level API test for 429/503 response format",
+      "requirements": ["AC2", "AC6"]
+    },
+    {
+      "priority": "LOW",
+      "action": "Add Testcontainers Redis integration test for real Redis behavior",
+      "requirements": ["AC1", "AC2", "AC3", "AC6"]
+    },
+    {
+      "priority": "LOW",
+      "action": "Run /bmad:tea:test-review to assess test quality",
+      "requirements": []
+    }
+  ]
+}

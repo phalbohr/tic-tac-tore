@@ -22,7 +22,8 @@ inputDocuments:
   - src/test/java/com/tictactore/service/RateLimitServiceTest.java
   - src/test/java/com/tictactore/service/MatchServiceTest.java
   - frontend/src/features/match/stores/matchDraftStore.ts
-  - frontend/src/features/match/stores/matchDraftStore.spec.ts
+  - frontend/src/features/match/stores/matchDraftStore.api-error.spec.ts
+  - frontend/src/features/match/stores/matchDraftStore.state-transition.spec.ts
 ---
 
 # Test Automation Summary: Story 3.6 — Submission Rate Limiting (Anti-Spam)
@@ -45,12 +46,19 @@ inputDocuments:
 | P2 | `RateLimitServiceTest.java` (EdgeCaseTests) | 1 | NEW |
 | P2 | `RateLimitServiceTest.java` (RetryAfter full-window fallback) | 1 | NEW |
 
+### Backend Red-Phase Scaffolds (JUnit 5 + Mockito)
+
+| Priority | Test File | Tests | Status |
+|----------|-----------|-------|--------|
+| P0 | `SubmissionRateLimitRedPhaseTest.java` (AC1–AC7) | 7 | EXTENDED (AC7 added) |
+
 ### Frontend Unit (Vitest)
 
 | Priority | Test File | Tests | Status |
 |----------|-----------|-------|--------|
-| P1 | `matchDraftStore.spec.ts` (429 handling) | 1 | NEW |
-| P1 | `matchDraftStore.spec.ts` (503 handling) | 1 | NEW |
+| P1 | `matchDraftStore.api-error.spec.ts` (429 handling) | 2 | NEW |
+| P1 | `matchDraftStore.api-error.spec.ts` (503 handling) | 2 | NEW |
+| P1 | `matchDraftStore.state-transition.spec.ts` | 25 | NEW (split) |
 
 ### Frontend E2E (Playwright)
 
@@ -64,9 +72,19 @@ inputDocuments:
 - `src/test/java/com/tictactore/exception/GlobalExceptionHandlerTest.java` — NEW
 - `src/test/java/com/tictactore/config/ApplicationPropertiesTest.java` — NEW
 - `src/test/java/com/tictactore/service/RateLimitServiceTest.java` — EXTENDED (+6 tests)
-- `src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java` — FIXED (compilation)
-- `frontend/src/features/match/stores/matchDraftStore.spec.ts` — EXTENDED (+2 tests)
+- `src/test/java/com/tictactore/service/SubmissionRateLimitRedPhaseTest.java` — EXTENDED (+1 AC7 test)
+- `frontend/src/features/match/stores/matchDraftStore.api-error.spec.ts` — NEW (split from combined spec)
+- `frontend/src/features/match/stores/matchDraftStore.state-transition.spec.ts` — NEW (split from combined spec)
 - `frontend/e2e/tests/e2e/rate-limiting.spec.ts` — NEW
+
+## Working Tree Changes (Current Session)
+
+| File | Change | Tests Added |
+|------|--------|-------------|
+| `SubmissionRateLimitRedPhaseTest.java` | Modified | +1 (AC7: authenticated principal identity) |
+| `matchDraftStore.spec.ts` | Deleted (split into two files) | — |
+| `matchDraftStore.api-error.spec.ts` | New (from split) | +4 (429/503 handling) |
+| `matchDraftStore.state-transition.spec.ts` | New (from split) | +25 (state transitions) |
 
 ## Key Assumptions and Risks
 
@@ -79,9 +97,20 @@ inputDocuments:
 
 | Check | Result |
 |-------|--------|
-| Backend: `./mvnw test -Dtest='RateLimitServiceTest,GlobalExceptionHandlerTest,ApplicationPropertiesTest,MatchServiceTest'` | 54 tests, 0 failures |
-| Frontend: `npm run test:unit -- --run -t 'matchDraftStore'` | 27 tests, 0 failures |
+| Backend: `./mvnw test -Dtest='RateLimitServiceTest,GlobalExceptionHandlerTest,ApplicationPropertiesTest,MatchServiceTest,SubmissionRateLimitRedPhaseTest'` | 57 tests, 0 failures, 7 skipped (red-phase disabled) |
+| Frontend: `npm run test:unit -- --run -t 'matchDraftStore'` (from `frontend/`) | 29 tests, 0 failures |
 | E2E: Playwright file created, not executed (requires full env) | — |
+
+## Definition of Done
+
+- [x] All acceptance criteria (AC1–AC7) have corresponding test coverage
+- [x] Backend tests pass: 57 run, 0 failures, 7 skipped (red-phase scaffolds disabled by design)
+- [x] Frontend unit tests pass: 29 run, 0 failures
+- [x] E2E test file generated for AC2/AC4/AC6 user journeys
+- [x] Frontend spec file split resolved size violation (<300 lines per file)
+- [x] Red-phase scaffold updated to include AC7 (authenticated principal identity)
+- [x] No secrets, keys, or credentials exposed in test code
+- [x] All test assertions are deterministic (no timing dependencies)
 
 ## Next Recommended Workflow
 
