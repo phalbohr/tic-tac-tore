@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { buildCooldownMatch, buildPendingResponse } from '../fixtures/cooldown-fixtures'
+import { buildCooldownMatch, buildPendingResponse } from '../../fixtures/cooldown-fixtures'
 
 test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
   test.beforeEach(async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
     await page.goto('/')
 
     const timer = page.getByTestId(`cooldown-timer-${match.id}`)
-    await expect(timer).not.toBeVisible()
+    await expect(timer).toBeHidden()
   })
 
   test('[P0] AC2: Should confirm match when second opponent confirms during cooldown', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
     await expect(confirmBtn).toBeVisible()
     await confirmBtn.click()
 
-    await expect(card).not.toBeVisible()
+    await expect(card).toBeHidden()
   })
 
   test('[P1] Should display "Auto-publishing soon" when cooldownExpiresAt is in the past', async ({ page }) => {

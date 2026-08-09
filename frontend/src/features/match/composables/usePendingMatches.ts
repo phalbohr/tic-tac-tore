@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
-import { getCookie, getCsrfHeaders } from '../../../utils/cookieUtils'
+import { getCsrfHeaders } from '../../../utils/cookieUtils'
 
 interface PendingMatchItem {
   id: string

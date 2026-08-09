@@ -1,6 +1,6 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest'
-import { useMatchDraftStore, MatchType } from './matchDraftStore'
+import { useMatchDraftStore } from './matchDraftStore'
 
 describe('matchDraftStore API error handling', () => {
   let fetchMock: Mock
