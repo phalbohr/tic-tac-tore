@@ -348,6 +348,17 @@ As a 2v2 participant, I want to indicate positions inline when entering scores, 
 - **And** data persisted for each game
 - **And** the match submission payload (Story 2.4) correctly includes positional data
 
+### Story 2.7: Global Player Search & Selection
+As a player, I want to search and select any registered user for a match, So that I am not limited to frequent opponents.
+**Acceptance Criteria:**
+- **Given** I am selecting a player for a match
+- **When** I tap to add a player
+- **Then** I see an overlay with a search input (`FrequencyOrderedPlayerList`)
+- **And** the list is initially sorted by frequent opponents (включая временных mock-игроков для тестирования)
+- **And** searching filters the entire database of active users (who have logged in and not deleted accounts)
+- **And** the "frequent opponents" quick list dynamically updates based on the most frequently/recently added players
+- **Note:** Full removal of mock players is deferred until development is complete.
+
 ## Epic 3: Data Verification & Trust
 
 Implementation of the match verification pipeline.
