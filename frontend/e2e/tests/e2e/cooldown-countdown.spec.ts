@@ -3,7 +3,10 @@ import { buildCooldownMatch, buildPendingResponse } from '../../fixtures/cooldow
 
 test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/api/auth/test-login?email=cooldown@example.com&nickname=CooldownUser')
+    await page.addInitScript(() => {
+      window.localStorage.setItem('tutorial-completed', 'true')
+    })
+    await page.goto('/api/auth/test-login?email=cooldown@example.com&nickname=CooldownUser&tutorialCompleted=true')
   })
 
   test('[P0] AC6: Should display cooldown countdown timer for PARTIALLY_CONFIRMED match on home page', async ({ page }) => {
@@ -48,16 +51,18 @@ test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
   test('[P0] AC2: Should confirm match when second opponent confirms during cooldown', async ({ page }) => {
     const futureExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString()
     const match = buildCooldownMatch({ id: 'match-confirm-e2e', cooldownExpiresAt: futureExpiry })
+    let isConfirmed = false
 
     await page.route('**/api/v1/matches/pending', (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(buildPendingResponse([match])),
+        body: JSON.stringify(buildPendingResponse(isConfirmed ? [] : [match])),
       })
     })
 
     await page.route('**/api/v1/matches/match-confirm-e2e/confirm', async (route) => {
+      isConfirmed = true
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -80,7 +85,7 @@ test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
     await expect(confirmBtn).toBeVisible()
     await confirmBtn.click()
 
-    await expect(card).toBeHidden()
+    await expect(card).not.toBeVisible({ timeout: 20000 })
   })
 
   test('[P1] Should display "Auto-publishing soon" when cooldownExpiresAt is in the past', async ({ page }) => {

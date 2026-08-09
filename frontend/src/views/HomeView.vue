@@ -174,6 +174,7 @@ interface ApiMatchItem {
   matchFormat?: string
   confirmedByOpponentIds?: string[]
   requiredConfirmations?: number
+  cooldownExpiresAt?: string
 }
 
 async function fetchPendingMatches() {
@@ -252,7 +253,8 @@ async function fetchPendingMatches() {
           entryMode: m.entryMode,
           matchFormat: m.matchFormat,
           confirmedByOpponentIds: m.confirmedByOpponentIds,
-          requiredConfirmations: m.requiredConfirmations
+          requiredConfirmations: m.requiredConfirmations,
+          cooldownExpiresAt: m.cooldownExpiresAt
         }
       })
     }
