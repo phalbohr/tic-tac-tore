@@ -44,6 +44,11 @@ application:
     avatar:
       api-url: ${TTT_AVATAR_API_URL:https://api.dicebear.com/7.x/identicon/svg?seed=}
       salt: ${TTT_AVATAR_SALT:default-avatar-salt-for-privacy}
+    rate-limit:
+      standalone-submissions-per-hour: ${TTT_RATE_LIMIT_STANDALONE_PER_HOUR:10}
+      rejection-threshold: ${TTT_RATE_LIMIT_REJECTION_THRESHOLD:5}
+      rejection-window-hours: ${TTT_RATE_LIMIT_REJECTION_WINDOW_HOURS:24}
+      tournament-submissions-per-hour: ${TTT_RATE_LIMIT_TOURNAMENT_PER_HOUR:30}
 
 server:
   forward-headers-strategy: native

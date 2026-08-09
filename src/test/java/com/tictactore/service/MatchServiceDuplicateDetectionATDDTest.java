@@ -43,6 +43,9 @@ class MatchServiceDuplicateDetectionATDDTest {
     @Mock
     private PushNotificationService pushNotificationService;
 
+    @Mock
+    private RateLimitService rateLimitService;
+
     private MatchServiceImpl matchService;
 
     @BeforeEach
@@ -51,7 +54,8 @@ class MatchServiceDuplicateDetectionATDDTest {
                 matchRepository,
                 userRepository,
                 matchOperation,
-                pushNotificationService
+                pushNotificationService,
+                rateLimitService
         );
     }
 

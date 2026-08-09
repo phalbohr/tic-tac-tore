@@ -12,6 +12,7 @@ import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
+import com.tictactore.service.RateLimitService;
 import com.tictactore.service.impl.MatchServiceImpl;
 import com.tictactore.service.operation.MatchOperation;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +49,9 @@ class MatchServiceTest {
 
     @Mock
     private PushNotificationService pushNotificationService;
+
+    @Mock
+    private RateLimitService rateLimitService;
 
     @InjectMocks
     private MatchServiceImpl matchService;

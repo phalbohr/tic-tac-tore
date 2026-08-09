@@ -19,6 +19,7 @@ import com.tictactore.repository.UserRepository;
 import com.tictactore.rules.VerificationRules;
 import com.tictactore.service.MatchService;
 import com.tictactore.service.PushNotificationService;
+import com.tictactore.service.RateLimitService;
 import com.tictactore.service.operation.MatchOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class MatchServiceImpl implements MatchService {
     private final UserRepository userRepository;
     private final MatchOperation matchOperation;
     private final PushNotificationService pushNotificationService;
+    private final RateLimitService rateLimitService;
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
@@ -48,6 +50,8 @@ public class MatchServiceImpl implements MatchService {
                 return mapToResponse(existing.get());
             }
         }
+
+        rateLimitService.checkSubmissionLimit(request.creatorId() != null ? request.creatorId() : request.teamAAttackerId());
 
         if (request.teamAAttackerId() == null || request.teamBAttackerId() == null) {
             throw new InvalidPositionException("Attacker IDs must not be null");
@@ -348,6 +352,8 @@ public class MatchServiceImpl implements MatchService {
         var customReason = request != null ? request.customReason() : null;
 
         var updatedMatch = matchOperation.rejectMatch(matchId, userId, reason, customReason);
+
+        rateLimitService.recordRejection(userId);
 
         try {
             if (updatedMatch.getCreatorId() != null) {

@@ -1,5 +1,7 @@
 package com.tictactore.exception;
 
+import com.tictactore.exception.ApiError;
+import com.tictactore.exception.RateLimitExceededException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,6 +11,22 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimitExceeded(RateLimitExceededException e) {
+        if (e.isRedisFailure()) {
+            return ResponseEntity.status(503).body(new ApiError(
+                    "RATE_LIMIT_UNAVAILABLE",
+                    e.getMessage() != null ? e.getMessage() : "Rate limit service unavailable",
+                    Map.of("retryAfter", e.getRetryAfterSeconds())
+            ));
+        }
+        return ResponseEntity.status(429).body(new ApiError(
+                "RATE_LIMIT_EXCEEDED",
+                e.getMessage() != null ? e.getMessage() : "Rate limit exceeded",
+                Map.of("retryAfter", e.getRetryAfterSeconds())
+        ));
+    }
 
     @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class, InvalidPositionException.class, DuplicatePositionException.class, InvalidMatchStateException.class})
     public ResponseEntity<Map<String, String>> handleDomainValidation(RuntimeException e) {

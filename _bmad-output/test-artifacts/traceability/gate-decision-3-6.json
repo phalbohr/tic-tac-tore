@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-07T03:03:00+02:00",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "3-6-submission-rate-limiting-anti-spam",
+    "label": "Story 3.6 - Submission Rate Limiting (Anti-Spam)"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "PASS",
+  "rationale": "All P0 criteria met with 100% coverage and 100% pass rates across all 6 acceptance criteria (AC1-AC6). All ACs have complete test coverage at unit, component, and E2E levels. No security issues. No flaky tests. The 5 @Disabled red-phase scaffolds in SubmissionRateLimitRedPhaseTest are intentional TDD artifacts with equivalent active coverage in RateLimitServiceTest and MatchServiceTest. Frontend E2E suite for rate-limiting passes (2/2 tests). Full backend test suite passes (235/235 active, 0 failures).",
+  "p0_status": "MET",
+  "p1_status": "MET",
+  "overall_status": "MET",
+  "critical_open": 0,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-3-6-submission-rate-limiting-anti-spam.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

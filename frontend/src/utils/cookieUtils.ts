@@ -1,10 +1,7 @@
-const COOKIE_SEPARATOR = '; '
-const EQUALS_SIGN = '='
-
 export function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
   const matches = document.cookie.match(new RegExp(
-    '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
+    '(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'
   ))
   const val = matches?.[1]
   return val !== undefined ? decodeURIComponent(val) : undefined

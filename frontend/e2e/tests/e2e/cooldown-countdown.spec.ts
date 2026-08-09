@@ -45,7 +45,7 @@ test.describe('Story 3.5: Publication Rules & 24-hour Cooldown E2E', () => {
     await page.goto('/')
 
     const timer = page.getByTestId(`cooldown-timer-${match.id}`)
-    await expect(timer).not.toBeVisible()
+    await expect(timer).toBeHidden()
   })
 
   test('[P0] AC2: Should confirm match when second opponent confirms during cooldown', async ({ page }) => {
