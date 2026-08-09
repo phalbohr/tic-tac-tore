@@ -173,6 +173,79 @@ class VerificationRulesTest {
     }
 
     @Nested
+    @DisplayName("requiresCooldown")
+    class RequiresCooldown {
+
+        @Test
+        @DisplayName("[P0] 2v2 standard participant-entered requires cooldown")
+        void shouldReturnTrueForDoublesStandardParticipant() {
+            Match match = Match.builder()
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .build();
+
+            assertThat(VerificationRules.requiresCooldown(match)).isTrue();
+        }
+
+        @Test
+        @DisplayName("[P0] 2v2 random participant-entered does NOT require cooldown")
+        void shouldReturnFalseForDoublesRandomParticipant() {
+            Match match = Match.builder()
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_RANDOM)
+                    .build();
+
+            assertThat(VerificationRules.requiresCooldown(match)).isFalse();
+        }
+
+        @Test
+        @DisplayName("[P0] 1v1 always does NOT require cooldown")
+        void shouldReturnFalseForSingles() {
+            Match match1v1 = Match.builder()
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p2)
+                    .entryMode(Match.ENTRY_MODE_PARTICIPANT)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .build();
+
+            assertThat(VerificationRules.requiresCooldown(match1v1)).isFalse();
+        }
+
+        @Test
+        @DisplayName("[P0] 2v2 referee-entered does NOT require cooldown")
+        void shouldReturnFalseForDoublesReferee() {
+            Match match = Match.builder()
+                    .creatorId(UUID.randomUUID())
+                    .teamAAttackerId(p1)
+                    .teamADefenderId(p2)
+                    .teamBAttackerId(p3)
+                    .teamBDefenderId(p4)
+                    .entryMode(Match.ENTRY_MODE_REFEREE)
+                    .matchFormat(Match.MATCH_FORMAT_STANDARD)
+                    .build();
+
+            assertThat(VerificationRules.requiresCooldown(match)).isFalse();
+        }
+
+        @Test
+        @DisplayName("[P1] null match returns false")
+        void shouldReturnFalseForNullMatch() {
+            assertThat(VerificationRules.requiresCooldown(null)).isFalse();
+        }
+    }
+
+    @Nested
     @DisplayName("isFullyConfirmed")
     class IsFullyConfirmed {
 

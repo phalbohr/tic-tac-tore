@@ -21,6 +21,8 @@ public interface PushNotificationService {
 
     void sendPartialConfirmationNotification(Match match, List<User> remainingOpponents, String firstConfirmerName);
 
+    void sendCooldownReminderNotification(Match match, List<User> recipients);
+
     List<NotificationLogDto> getUserNotifications(UUID userId);
 }
 

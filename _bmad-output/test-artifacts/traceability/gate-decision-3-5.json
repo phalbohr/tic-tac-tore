@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-06T23:42:00+02:00",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "3-5-publication-rules-and-24-hour-cooldown",
+    "label": "Story 3.5 - Publication Rules & 24-hour Cooldown"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "PASS",
+  "rationale": "All P0 criteria met with 100% coverage and 100% pass rates across all 6 acceptance criteria (AC1-AC6). All ACs have complete test coverage at unit, API/controller, integration, component, and E2E levels. No security issues. No flaky tests. The 3 uncovered items are test-design enhancement scenarios (P1 edge cases: rejection-during-cooldown, expiry boundary, timezone offset), not gaps in formal acceptance criteria. 6 @Disabled red-phase scaffolds and 4 red-phase duplicate tests are intentional TDD artifacts, flagged for cleanup but do not affect gate.",
+  "p0_status": "MET",
+  "p1_status": "MET",
+  "overall_status": "MET",
+  "critical_open": 0,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/trace-3-5-publication-rules-and-24-hour-cooldown.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

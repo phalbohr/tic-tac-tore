@@ -33,7 +33,8 @@ public record MatchResponse(
     String entryMode,
     String matchFormat,
     List<UUID> confirmedByOpponentIds,
-    Integer requiredConfirmations
+    Integer requiredConfirmations,
+    Instant cooldownExpiresAt
 ) {
     public MatchResponse(
         UUID id,
@@ -49,7 +50,7 @@ public record MatchResponse(
     ) {
         this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt,
              null, null, null, null, null, null, null, null, null, null,
-             null, null, null, null, null, null, null, null, null);
+             null, null, null, null, null, null, null, null, null, null);
     }
 
     public MatchResponse(
@@ -69,7 +70,7 @@ public record MatchResponse(
         this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt,
              confirmedByUserId, confirmedAt,
              null, null, null, null, null, null, null, null, null,
-             null, null, null, null, null, null, null, null);
+             null, null, null, null, null, null, null, null, null);
     }
 
     public MatchResponse(
@@ -96,6 +97,6 @@ public record MatchResponse(
     ) {
         this(id, idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, status, games, createdAt,
              confirmedByUserId, confirmedAt, rejectedByUserId, rejectedAt, rejectionReason, creatorNickname, teamAAttackerNickname, teamADefenderNickname, teamBAttackerNickname, teamBDefenderNickname,
-             null, null, null, null, null, null, null, null, null);
+             null, null, null, null, null, null, null, null, null, null);
     }
 }

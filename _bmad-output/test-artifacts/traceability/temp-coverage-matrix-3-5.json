@@ -1,0 +1,408 @@
+{
+  "phase": "PHASE_1_COMPLETE",
+  "generated_at": "2026-08-06T23:42:00+02:00",
+  "trace_target": {
+    "type": "story",
+    "id": "3-5-publication-rules-and-24-hour-cooldown",
+    "label": "Story 3.5 - Publication Rules & 24-hour Cooldown"
+  },
+  "collection_mode": "formal_requirements",
+  "allow_gate": "true",
+  "coverage_basis": "acceptance_criteria",
+  "summary_confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-3-5-publication-rules-and-24-hour-cooldown.md",
+      "_bmad-output/test-artifacts/test-design-story-3-5.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "requirements": [
+    {
+      "id": "AC1",
+      "description": "Given a standard 2v2 participant-entered match in PENDING_APPROVAL, when the first opponent confirms, then the match transitions to PARTIALLY_CONFIRMED and cooldownExpiresAt is set to 24 hours from confirmation time in UTC",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-UNIT-001",
+          "title": "shouldSetCooldown_when2v2StandardFirstOpponentConfirms",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 754,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-API-001",
+          "title": "shouldReturnCooldownExpiresAt_whenFirst2v2StandardConfirm",
+          "file": "src/test/java/com/tictactore/controller/MatchControllerTest.java",
+          "line": 266,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "3.5-API-002",
+          "title": "shouldIncludeCooldownExpiresAt_forPartiallyConfirmed2v2Standard",
+          "file": "src/test/java/com/tictactore/controller/MatchControllerTest.java",
+          "line": 387,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-002",
+          "title": "2v2 standard participant-entered requires cooldown",
+          "file": "src/test/java/com/tictactore/rules/VerificationRulesTest.java",
+          "line": 180,
+          "level": "unit",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    },
+    {
+      "id": "AC2",
+      "description": "Given a match in PARTIALLY_CONFIRMED with an active cooldown, when the second opponent confirms before the cooldown expires, then the match transitions to CONFIRMED immediately and cooldownExpiresAt is cleared",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-UNIT-003",
+          "title": "shouldClearCooldown_whenSecondOpponentConfirmsBeforeExpiry",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 786,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-004",
+          "title": "shouldConfirmMatch_whenSecondOpponentConfirmsFromPartiallyConfirmed",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 709,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-API-003",
+          "title": "shouldReturnNullCooldown_whenSecondConfirmClearsCooldown",
+          "file": "src/test/java/com/tictactore/controller/MatchControllerTest.java",
+          "line": 300,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "3.5-E2E-001",
+          "title": "AC2: Should confirm match when second opponent confirms during cooldown",
+          "file": "frontend/e2e/tests/e2e/cooldown-countdown.spec.ts",
+          "line": 48,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    },
+    {
+      "id": "AC3",
+      "description": "Given a match in PARTIALLY_CONFIRMED with an expired cooldown, when the scheduled job scans for expired cooldowns, then the match transitions to CONFIRMED automatically",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-UNIT-005",
+          "title": "shouldAutoPublish_whenCooldownExpired",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceTest.java",
+          "line": 38,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-006",
+          "title": "shouldSkip_whenMatchNotPartiallyConfirmed",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceTest.java",
+          "line": 64,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-007",
+          "title": "shouldSkip_whenCooldownNotExpired",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceTest.java",
+          "line": 86,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-008",
+          "title": "shouldContinue_whenOneMatchFails",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceTest.java",
+          "line": 118,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-009",
+          "title": "shouldHandleEmptyResultSet",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceTest.java",
+          "line": 109,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-INT-001",
+          "title": "shouldAutoPublishExpiredCooldowns_viaRepositoryQuery",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java",
+          "line": 43,
+          "level": "integration",
+          "status": "active"
+        },
+        {
+          "id": "3.5-INT-002",
+          "title": "shouldNotTransition_whenCooldownNotExpired",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java",
+          "line": 72,
+          "level": "integration",
+          "status": "active"
+        },
+        {
+          "id": "3.5-INT-003",
+          "title": "shouldSkip_whenMatchNotPartiallyConfirmed",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java",
+          "line": 100,
+          "level": "integration",
+          "status": "active"
+        },
+        {
+          "id": "3.5-INT-004",
+          "title": "shouldHandleEmptyResultSet",
+          "file": "src/test/java/com/tictactore/service/MatchCooldownServiceIntegrationTest.java",
+          "line": 128,
+          "level": "integration",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    },
+    {
+      "id": "AC4",
+      "description": "Given any non-standard match context (1v1, 2v2 random, 2v2 referee), when the first confirmation occurs, then no cooldown is set and the match follows its normal confirmation rules",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-UNIT-010",
+          "title": "shouldNotSetCooldown_when1v1ParticipantConfirms",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 820,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-011",
+          "title": "2v2 random participant-entered does NOT require cooldown",
+          "file": "src/test/java/com/tictactore/rules/VerificationRulesTest.java",
+          "line": 196,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-012",
+          "title": "1v1 always does NOT require cooldown",
+          "file": "src/test/java/com/tictactore/rules/VerificationRulesTest.java",
+          "line": 212,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-013",
+          "title": "2v2 referee-entered does NOT require cooldown",
+          "file": "src/test/java/com/tictactore/rules/VerificationRulesTest.java",
+          "line": 226,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-014",
+          "title": "requiresCooldown(null) returns false",
+          "file": "src/test/java/com/tictactore/rules/VerificationRulesTest.java",
+          "line": 244,
+          "level": "unit",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    },
+    {
+      "id": "AC5",
+      "description": "Given a match already in CONFIRMED state, when an opponent attempts to confirm again, then the system returns the current state without error and does not modify cooldownExpiresAt",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-UNIT-015",
+          "title": "shouldNotModifyCooldown_whenAlreadyConfirmed",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 851,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "3.5-UNIT-016",
+          "title": "shouldReturnPartiallyConfirmedMatch_whenAlreadyConfirmedBySameOpponent",
+          "file": "src/test/java/com/tictactore/service/MatchServiceTest.java",
+          "line": 635,
+          "level": "unit",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    },
+    {
+      "id": "AC6",
+      "description": "Given a partially confirmed match in cooldown, when the creator views the match in the UI, then they see a formatted countdown timer showing remaining hours and minutes until automatic publication",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "3.5-COMP-001",
+          "title": "displays cooldown countdown timer for PARTIALLY_CONFIRMED matches with future expiry",
+          "file": "frontend/src/features/match/components/__tests__/PendingMatches.spec.ts",
+          "line": 145,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.5-COMP-002",
+          "title": "does not display cooldown timer when PARTIALLY_CONFIRMED match has no cooldownExpiresAt",
+          "file": "frontend/src/features/match/components/__tests__/PendingMatches.spec.ts",
+          "line": 169,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.5-COMP-003",
+          "title": "should carry cooldownExpiresAt on partially confirmed matches from API response",
+          "file": "frontend/src/features/match/composables/usePendingMeasures.spec.ts",
+          "line": 50,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "3.5-E2E-002",
+          "title": "AC6: Should display cooldown countdown timer for PARTIALLY_CONFIRMED match on home page",
+          "file": "frontend/e2e/tests/e2e/cooldown-countdown.spec.ts",
+          "line": 9,
+          "level": "e2e",
+          "status": "active"
+        },
+        {
+          "id": "3.5-E2E-003",
+          "title": "Should not display cooldown timer for PENDING_APPROVAL match",
+          "file": "frontend/e2e/tests/e2e/cooldown-countdown.spec.ts",
+          "line": 31,
+          "level": "e2e",
+          "status": "active"
+        },
+        {
+          "id": "3.5-E2E-004",
+          "title": "Should display Auto-publishing soon when cooldownExpiresAt is in the past",
+          "file": "frontend/e2e/tests/e2e/cooldown-countdown.spec.ts",
+          "line": 86,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gap": "none"
+    }
+  ],
+  "coverage_statistics": {
+    "total_requirements": 6,
+    "fully_covered": 6,
+    "partially_covered": 0,
+    "uncovered": 0,
+    "overall_coverage_percentage": 100,
+    "priority_breakdown": {
+      "P0": { "total": 6, "covered": 6, "percentage": 100 },
+      "P1": { "total": 0, "covered": 0, "percentage": 100 },
+      "P2": { "total": 0, "covered": 0, "percentage": 100 },
+      "P3": { "total": 0, "covered": 0, "percentage": 100 }
+    }
+  },
+  "gap_analysis": {
+    "critical_gaps": [],
+    "high_gaps": [],
+    "medium_gaps": [
+      {
+        "id": "P1-001",
+        "description": "Rejection during cooldown clears cooldownExpiresAt (test-design scenario) has no active test",
+        "priority": "P1",
+        "recommendation": "Add unit test for rejectByOpponent() clearing cooldownExpiresAt on a PARTIALLY_CONFIRMED match"
+      },
+      {
+        "id": "P1-002",
+        "description": "Cooldown expiry boundary (exactly at expiry instant) not tested",
+        "priority": "P1",
+        "recommendation": "Add unit test for isCooldownExpired() boundary at exact expiry instant"
+      },
+      {
+        "id": "P1-003",
+        "description": "Frontend timezone offset handling for countdown not tested",
+        "priority": "P1",
+        "recommendation": "Add component test mocking different client timezone offsets"
+      }
+    ],
+    "low_gaps": [],
+    "partial_coverage_items": [],
+    "unit_only_items": []
+  },
+  "coverage_heuristics": {
+    "endpoints_without_tests": [],
+    "auth_missing_negative_paths": [],
+    "happy_path_only_criteria": [],
+    "ui_journeys_without_e2e": [],
+    "ui_states_missing_coverage": [],
+    "counts": {
+      "endpoints_without_tests": 0,
+      "auth_missing_negative_paths": 0,
+      "happy_path_only_criteria": 0,
+      "ui_journeys_without_e2e": 0,
+      "ui_states_missing_coverage": 0
+    }
+  },
+  "test_inventory": {
+    "summary": {
+      "files": 8,
+      "cases": 29,
+      "skipped_cases": 6,
+      "fixme_cases": 0,
+      "pending_cases": 0,
+      "by_level": {
+        "e2e": { "tests": 4, "criteria_covered": 2 },
+        "api": { "tests": 4, "criteria_covered": 3 },
+        "component": { "tests": 3, "criteria_covered": 1 },
+        "integration": { "tests": 4, "criteria_covered": 1 },
+        "unit": { "tests": 14, "criteria_covered": 5 },
+        "other": { "tests": 0, "criteria_covered": 0 }
+      }
+    },
+    "tests": [],
+    "blockers": [
+      {
+        "id": "MatchCooldownRedPhaseTest.*",
+        "severity": "medium",
+        "reason": "6 red-phase scaffold tests marked @Disabled to avoid duplicate coverage with active tests (intentional)",
+        "test_file": "src/test/java/com/tictactore/service/MatchCooldownRedPhaseTest.java",
+        "test_title": "MatchCooldown Red-Phase Scaffolds"
+      }
+    ]
+  },
+  "blockers": [],
+  "recommendations": [
+    { "priority": "MEDIUM", "action": "Add P1 rejection-during-cooldown unit test (clears cooldownExpiresAt)", "requirements": ["P1-001"] },
+    { "priority": "MEDIUM", "action": "Add P1 cooldown expiry-boundary unit test (isCooldownExpired at exact instant)", "requirements": ["P1-002"] },
+    { "priority": "MEDIUM", "action": "Add P1 frontend timezone-offset component test for countdown", "requirements": ["P1-003"] },
+    { "priority": "LOW", "action": "Run /bmad:tea:test-review to assess test quality", "requirements": [] },
+    { "priority": "LOW", "action": "Remove or gate red-phase scaffold CooldownTimer.spec.ts (4 tests duplicate PendingMatches.spec.ts coverage)", "requirements": [] }
+  ]
+}

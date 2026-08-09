@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 
 @WebMvcTest(UserController.class)
 @Import({com.tictactore.config.SecurityConfig.class, JwtAuthenticationFilter.class})
@@ -278,6 +279,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("DELETE /me - should return 401 when unauthenticated")
+    @WithAnonymousUser
     void deleteAccount_shouldReturn401_whenUnauthenticated() throws Exception {
         var result = mockMvc.perform(delete("/api/v1/profile/me")
                         .with(csrf()));

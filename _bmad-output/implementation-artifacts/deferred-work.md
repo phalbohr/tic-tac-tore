@@ -263,5 +263,28 @@ location: `frontend/e2e/tests/e2e/match-rejection.spec.ts:1`
 reason: [x] [Review][Defer] Mock-Only Playwright Test Coverage — deferred, pre-existing mock pattern in E2E suite.
 status: open
 
+### DW-40: Unused `sendCooldownReminderNotification` method
+origin: code review of 3-5-publication-rules-and-24-hour-cooldown.md (2026-08-06)
+location: `src/main/java/com/tictactore/service/PushNotificationService.java:24` and `src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java:176`
+reason: [x] [Review][Defer] `sendCooldownReminderNotification` is fully implemented but never called — dead code from optional cooldown reminder feature.
+status: open
+
+### DW-41: Hardcoded 24-hour cooldown duration
+origin: code review of 3-5-publication-rules-and-24-hour-cooldown.md (2026-08-06)
+location: `src/main/java/com/tictactore/model/Match.java:141`
+reason: [x] [Review][Defer] 24-hour cooldown is a magic number inline in `Match.confirmByOpponent()` — cannot be changed without code change and redeploy.
+status: open
+
+### DW-42: Scheduled job error swallowing without dead-letter
+origin: code review of 3-5-publication-rules-and-24-hour-cooldown.md (2026-08-06)
+location: `src/main/java/com/tictactore/service/MatchCooldownService.java:33-35`
+reason: [x] [Review][Defer] `processExpiredCooldowns()` catches and logs per-match failures with no dead-letter, alerting, or max-retry counter.
+status: open
+
+### DW-43: `requiresCooldown` duplicates `supportsPartialConfirmation` logic
+origin: code review of 3-5-publication-rules-and-24-hour-cooldown.md (2026-08-06)
+location: `src/main/java/com/tictactore/rules/VerificationRules.java:36-44`
+reason: [x] [Review][Defer] `requiresCooldown()` checks `isDoubles && isParticipantEntered && STANDARD`, identical to `supportsPartialConfirmation()` — silent divergence risk if rules change.
+status: open
 
 
