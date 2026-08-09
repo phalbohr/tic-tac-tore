@@ -74,25 +74,29 @@ resolution: already resolved: V2__add_profile_fields.sql:3-6 adds migration logi
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: frontend/e2e/profile-generation.spec.ts:409-418
 reason: [ ] Complete API Mocking in E2E Tests [frontend/e2e/profile-generation.spec.ts:409-418] — Playwright E2E tests mock the profile API entirely, reducing integration validation quality.
-status: open
+status: done 2026-08-09
+resolution: already resolved: Commit 56ca00e removed E2E API mocking for profile generation; current frontend/e2e/profile-generation.spec.ts uses real backend navigation with no route/mock/fulfill patterns.
 
 ### DW-11: Potential Nickname Length Overflow: 64-char email prefix plus UUID can exceed 73 chars.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: Potential Nickname Length Overflow: 64-char email prefix plus UUID can exceed 73 chars.
-status: open
+status: done 2026-08-09
+resolution: already resolved: UserService.java:142 truncates email prefix to 40 chars; suffixes are 8 chars (line 151 numeric, line 163 hex); max nickname = 48 chars, well within 255-char default column (commit 53a3f27).
 
 ### DW-12: Inefficient Nickname Collision Resolution: loop does 10 sync queries on creation.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: Inefficient Nickname Collision Resolution: loop does 10 sync queries on creation.
-status: open
+status: done 2026-08-09
+resolution: already resolved: UserService.java:154 and :166 use batch UserRepository.findExistingNicknames(List) queries instead of 10 individual sync queries per loop iteration (commit 05d115a, merged in PR #123).
 
 ### DW-13: Redundant Database Query on Profile Fetch: hits DB to fetch avatar/language when they could be deterministic/client-side.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: Redundant Database Query on Profile Fetch: hits DB to fetch avatar/language when they could be deterministic/client-side.
-status: open
+status: done 2026-08-09
+resolution: already resolved: UserController.java:27-41 builds ProfileDto directly from @AuthenticationPrincipal User principal with no DB call; JwtService.java:40-52 embeds avatar/language/tutorialCompleted in JWT claims (commit 7616595).
 
 ### DW-14: Semantic Mismatch in JWT Claims: old 'name' claim might inject spaces into nickname.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -105,7 +109,8 @@ resolution: already resolved: JwtService.java:41 uses sanitized nickname from us
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: Unused and Unnecessary Versioning: @Version added to User but not utilized.
-status: open
+status: done 2026-08-09
+resolution: already resolved: User.java:40-41 @Version is now utilized: JPA optimistic locking triggers ObjectOptimisticLockingFailureException on version mismatch, caught by @Retryable on UserService.updateProfile (UserService.java:193-197, commits 6d21262 and 38dadc3).
 
 ### DW-16: Over-engineered Transaction Boundaries: REQUIRES_NEW used without active parent transaction.
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -117,7 +122,8 @@ status: open
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: [ ] [Review][Defer] Improper Exception Type for Missing User
-status: open
+status: done 2026-08-09
+resolution: already resolved: UserService.java:92 throws UserNotFoundException; UserOperation.java:53 throws UserNotFoundException which extends ResourceNotFoundException (commits 1a2f792 and f51f61e, merged in PR #126).
 
 ### DW-18: Missing Null Check in generateUniqueNickname
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
@@ -130,7 +136,8 @@ resolution: already resolved: src/main/java/com/tictactore/service/UserService.j
 origin: migrated from legacy ledger ("Deferred from: code review of 1-3-automatic-profile-generation-and-first-entry.md (2026-05-24)"), 2026-07-19
 location: n/a
 reason: [ ] [Review][Defer] High Collision Probability in Nickname Suffix
-status: open
+status: done 2026-08-09
+resolution: already resolved: UserService.java:151 generates suffix via random.nextInt(100_000_000) formatted as %08d — 100M possible values; UUID fallback at line 163 provides 4B possible values (commit 7e63c72, merged in PR #127).
 
 ### DW-20: Unhandled OptimisticLockingFailureException on concurrent updates [UserService.java]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-4-profile-management-in-personal-cabinet (2026-05-30)"), 2026-07-19
@@ -150,13 +157,15 @@ resolution: already resolved: frontend/src/stores/auth.ts:70 uses JSON.parse(JSO
 origin: migrated from legacy ledger ("Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Nickname passed as empty or whitespace string silently dropped [frontend/src/stores/auth.ts] — deferred, pre-existing
-status: open
+status: done 2026-08-09
+resolution: already resolved: frontend/src/stores/auth.ts:94-97 throws 'Nickname cannot be empty' for empty or whitespace strings instead of silently dropping them (commit debdb08).
 
 ### DW-23: Brittle Optimistic Rollbacks in auth.ts [frontend/src/stores/auth.ts]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-6-avatar-selection-and-management.md (2026-06-13)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Brittle Optimistic Rollbacks in auth.ts [frontend/src/stores/auth.ts] — deferred, pre-existing limitation for flat state
-status: open
+status: done 2026-08-09
+resolution: already resolved: frontend/src/stores/auth.ts rollback at line 86,157-158 uses { ...profile.value } shallow copy, which is sufficient for the flat UserProfile state and avoids JSON serialization brittleness (commit b41c777).
 
 ### DW-24: Hardcoded and Unmanaged Z-Index [TutorialCarousel.vue]
 origin: migrated from legacy ledger ("Deferred from: code review of 1-7-onboarding-tutorial (2026-06-17)"), 2026-07-19
@@ -169,7 +178,8 @@ resolution: already resolved: frontend/src/components/TutorialCarousel.vue:114 u
 origin: migrated from legacy ledger ("Deferred from: code review of 1-7-onboarding-tutorial.md (2026-06-21)"), 2026-07-19
 location: n/a
 reason: [x] [Review][Defer] Concurrency Blindspot in Profile Updates — deferred, pre-existing. The updateProfile method reads the user, mutates the state, and saves it without any explicit optimistic locking mechanism handling, silently overwriting concurrent updates.
-status: open
+status: done 2026-08-09
+resolution: already resolved: User.java:40-41 @Version enables JPA optimistic locking; UserService.updateProfile (UserService.java:193-197) is @Retryable for ObjectOptimisticLockingFailureException with maxAttempts=3, backoff=100ms (commits 6d21262 and 38dadc3).
 
 ### DW-26: Hardcoded team names in Pinia store [`frontend/src/stores/match.ts:14`]
 origin: migrated from legacy ledger ("Deferred from: code review of 5-1-real-time-scoring-interface-landscape.md (2026-07-05)"), 2026-07-19
