@@ -241,7 +241,9 @@ resolution: fixed in PR #138 (dynamic team names and tests for 1v1, 2v2, 3v3)
 origin: code review of story 2-4-match-submission-with-undo-window.md (2026-07-25)
 location: `_bmad-output/implementation-artifacts/bmad-dev-auto-result-2-3-*.md`
 reason: Unrelated TEA artifact files were deleted during story execution. Pre-existing cleanup noise.
-status: open
+status: done 2026-08-09
+resolution: closed by human decision: TEA result files are build artifacts, not source code; their absence does not affect functionality, and git history preserves the original content if ever needed.
+decision: 2026-08-09 Close — TEA result files are build artifacts, not source code; their absence does not affect functionality, and git history preserves the original content if ever needed.
 
 ### DW-35: Non-atomic idempotency key check outside `MatchOperation` transaction
 origin: code review of 2-5-position-swapping-between-games.md (2026-07-26)
