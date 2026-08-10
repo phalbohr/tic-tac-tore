@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
 import { getCsrfHeaders } from '../../../utils/cookieUtils'
@@ -40,7 +40,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
   const fetchedPlayers = ref<Record<string, PlayerDto>>({})
-  
+
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
@@ -48,6 +48,95 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const matchState = ref<'draft' | 'score_entry' | 'ready_for_submission'>('draft')
   const submitError = ref<string | null>(null)
   const editingMatchId = ref<string | null>(null)
+
+  const searchQuery = ref<string>('')
+  const searchResults = ref<PlayerDto[]>([])
+  const searchLoading = ref<boolean>(false)
+  const searchError = ref<string | null>(null)
+  const isSearchOpen = ref<boolean>(false)
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+  let searchAbortController: AbortController | null = null
+
+  function openSearch() {
+    if (isSearchOpen.value) return
+    searchQuery.value = ''
+    searchResults.value = []
+    searchError.value = null
+    searchLoading.value = false
+    isSearchOpen.value = true
+  }
+
+  function closeSearch() {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+    if (searchAbortController) {
+      searchAbortController.abort()
+      searchAbortController = null
+    }
+    searchQuery.value = ''
+    searchResults.value = []
+    searchError.value = null
+    searchLoading.value = false
+    isSearchOpen.value = false
+  }
+
+  async function searchPlayers(query: string) {
+    if (!query.trim()) {
+      searchResults.value = []
+      searchError.value = null
+      searchLoading.value = false
+      return
+    }
+
+    searchQuery.value = query
+    searchLoading.value = true
+    searchError.value = null
+
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+    }
+
+    debounceTimer = setTimeout(async () => {
+      searchAbortController = new AbortController()
+      try {
+        const res = await fetch(`/api/users/me/players/search?q=${encodeURIComponent(query.trim())}`, {
+          signal: searchAbortController.signal
+        })
+        if (res.ok) {
+          try {
+            searchResults.value = await res.json()
+          } catch {
+            searchResults.value = []
+          }
+          searchError.value = null
+        } else {
+          searchError.value = 'Search service unavailable. Please try again later.'
+          searchResults.value = []
+        }
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return
+        searchError.value = 'Network error. Please check your connection.'
+        searchResults.value = []
+      } finally {
+        searchLoading.value = false
+        searchAbortController = null
+      }
+    }, 300)
+  }
+
+  onUnmounted(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+    if (searchAbortController) {
+      searchAbortController.abort()
+      searchAbortController = null
+    }
+  })
 
   function clearSubmitError() {
     submitError.value = null
@@ -607,6 +696,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     beginScoreEntry,
     swapPositions,
     returnToDraft,
-    reset
+    reset,
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchError,
+    isSearchOpen,
+    openSearch,
+    closeSearch,
+    searchPlayers
   }
 })

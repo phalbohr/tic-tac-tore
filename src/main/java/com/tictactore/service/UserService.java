@@ -207,6 +207,16 @@ public class UserService {
     public void deleteAccount(UUID userId) {
         userOperation.deleteAccount(userId);
     }
+    @Transactional(readOnly = true)
+    public List<PlayerDto> searchActiveUsers(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        return userRepository.searchActiveUsers(query.trim()).stream()
+                .map(u -> new PlayerDto(u.getId().toString(), u.getNickname(), u.getAvatar()))
+                .collect(Collectors.toList());
+    }
+
     public UserPreferencesDto getLastRuleSystem() {
         return new UserPreferencesDto("STANDARD");
     }

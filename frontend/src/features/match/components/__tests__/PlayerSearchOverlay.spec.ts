@@ -4,18 +4,27 @@ import { createTestingPinia } from '@pinia/testing'
 import PlayerSearchOverlay from '../PlayerSearchOverlay.vue'
 import { useMatchDraftStore } from '../../stores/matchDraftStore'
 
-describe('PlayerSearchOverlay.vue (ATDD)', () => {
-  let store: ReturnType<typeof useMatchDraftStore>
+function createTestPlayer(overrides: Partial<{ id: string; nickname: string; avatar: string }> = {}) {
+  return {
+    id: overrides.id ?? 'test-player-id',
+    nickname: overrides.nickname ?? 'Test Player',
+    avatar: overrides.avatar ?? 'test-avatar'
+  }
+}
 
+describe('PlayerSearchOverlay.vue (ATDD)', () => {
   let testingPinia: ReturnType<typeof createTestingPinia>
 
   beforeEach(() => {
     testingPinia = createTestingPinia({ createSpy: vi.fn })
-    store = useMatchDraftStore()
   })
 
   afterEach(() => {
-    store.closeSearch()
+    try {
+      useMatchDraftStore().closeSearch()
+    } catch {
+      // no active store to clean up
+    }
   })
 
   it('[P0] renders overlay when isOpen is true', () => {
@@ -63,14 +72,17 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.searchResults = [
-      { id: 'player-1', nickname: 'Alice', avatar: 'avatar-1' }
+      createTestPlayer({ id: 'player-1', nickname: 'Alice' })
     ]
 
     await wrapper.vm.$nextTick()
 
-    const row = wrapper.find('[data-testid="search-result-row"]')
-    await row.trigger('click')
+    const rows = wrapper.findAll('[data-testid="search-result-row"]')
+    const aliceRow = rows.find((r) => r.text().includes('Alice'))
+    expect(aliceRow).toBeDefined()
+    await aliceRow!.trigger('click')
 
     expect(store.isSearchOpen).toBe(false)
   })
@@ -83,6 +95,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     const backdrop = wrapper.find('[data-testid="player-search-overlay"]')
     await backdrop.trigger('click')
 
@@ -97,6 +110,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     await wrapper.trigger('keydown.escape')
 
     expect(store.isSearchOpen).toBe(false)
@@ -110,6 +124,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.searchLoading = true
     store.searchQuery = 'ali'
     await wrapper.vm.$nextTick()
@@ -125,6 +140,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.searchError = 'Search service unavailable. Please try again later.'
     store.searchQuery = 'ali'
     await wrapper.vm.$nextTick()
@@ -141,6 +157,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.searchQuery = 'xyznonexistent'
     store.searchResults = []
     await wrapper.vm.$nextTick()
@@ -157,19 +174,20 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.frequentOpponents = [
-      { id: 'frequent-1', nickname: 'Frank', avatar: 'avatar-f' }
+      createTestPlayer({ id: 'frequent-1', nickname: 'Frank' })
     ]
     store.searchResults = [
-      { id: 'other-1', nickname: 'Alice', avatar: 'avatar-a' }
+      createTestPlayer({ id: 'other-1', nickname: 'Alice' })
     ]
     store.searchQuery = ''
     await wrapper.vm.$nextTick()
 
     const rows = wrapper.findAll('[data-testid="search-result-row"]')
-    expect(rows.length).toBe(2)
-    expect(rows.at(0).text()).toContain('Frank')
-    expect(rows.at(1).text()).toContain('Alice')
+    expect(rows).toHaveLength(2)
+    expect(rows.at(0)!.text()).toContain('Frank')
+    expect(rows.at(1)!.text()).toContain('Alice')
   })
 
   it('[P1] does not add player when all slots are filled', async () => {
@@ -180,17 +198,18 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
       props: { isOpen: true }
     })
 
+    const store = useMatchDraftStore()
     store.selectedPlayers = ['player-1', 'player-2']
     store.searchResults = [
-      { id: 'player-3', nickname: 'Charlie', avatar: 'avatar-c' }
+      createTestPlayer({ id: 'player-3', nickname: 'Charlie' })
     ]
     store.searchQuery = ''
     await wrapper.vm.$nextTick()
 
     const rows = wrapper.findAll('[data-testid="search-result-row"]')
-    expect(rows.length).toBe(1)
+    expect(rows).toHaveLength(1)
 
-    await rows.at(0).trigger('click')
+    await rows.at(0)!.trigger('click')
 
     expect(store.selectedPlayers).toHaveLength(2)
   })

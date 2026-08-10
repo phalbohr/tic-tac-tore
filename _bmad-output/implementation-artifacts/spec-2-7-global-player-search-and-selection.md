@@ -2,12 +2,12 @@
 title: 'Story 2.7: Global Player Search & Selection'
 type: 'feature'
 created: '2026-08-09T17:52:38+02:00'
-status: 'ready-for-dev'
+status: 'in-review'
 review_loop_iteration: 0
 followup_review_recommended: false
 context: []
 warnings: []
-baseline_revision: '92ce6ee1c4d014116e89809d5bdcd1d4e79770bf'
+baseline_revision: '0a18a25f5c076ba952cf1606576920c571992c19'
 ---
 
 <intent-contract>
@@ -87,6 +87,19 @@ The test suite for this story was vetoed by the TEA plugin due to critical test 
 ## Review Triage Log
 
 <!-- Append-only. Populated by step-04 on EVERY review pass. -->
+
+### 2026-08-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (2 high, 2 medium, 1 low)
+- defer: 5
+- reject: 7
+- addressed_findings:
+  - `medium` `patch` Replaced `createTestingPinia({ createSpy: vi.fn })` with `createPinia()` in `PlayerSelection.spec.ts` so actions execute during tests instead of becoming no-op spies.
+  - `medium` `patch` Added `onUnmounted` cleanup in `matchDraftStore.ts` to clear the debounce timer and abort in-flight fetches when the component unmounts.
+  - `medium` `patch` Added `AbortController` to `searchPlayers` and cleared it in `closeSearch` to prevent stale results overwriting cleared state.
+  - `medium` `patch` Wrapped `await res.json()` in a try-catch inside `searchPlayers` to handle non-JSON responses gracefully.
+  - `low` `patch` Added early-return guard in `openSearch()` so clicking the search button while the overlay is already open does not reset in-progress query state.
 
 ## Design Notes
 

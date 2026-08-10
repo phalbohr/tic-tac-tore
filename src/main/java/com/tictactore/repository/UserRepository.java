@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u.nickname FROM User u WHERE u.nickname IN :nicknames")
     List<String> findExistingNicknames(@Param("nicknames") List<String> nicknames);
+
+    @Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE LOWER(CONCAT('%', :query, '%')) AND u.email NOT LIKE 'deleted-%' AND u.nickname NOT LIKE 'ex-player-%'")
+    List<User> searchActiveUsers(@Param("query") String query);
 }

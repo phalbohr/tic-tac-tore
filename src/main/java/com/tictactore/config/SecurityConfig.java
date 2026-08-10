@@ -30,7 +30,8 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/api/auth/test-login",
             "/api/users/me/frequent-opponents",
-            "/api/users/me/preferences/last-rule-system"
+            "/api/users/me/preferences/last-rule-system",
+            "/api/users/me/players/search"
     };
     private static final String ERR_UNAUTHORIZED = "Unauthorized";
 
