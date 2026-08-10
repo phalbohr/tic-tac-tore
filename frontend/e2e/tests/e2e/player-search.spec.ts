@@ -8,7 +8,7 @@ interface PlayerSearchResult {
 }
 
 function mockSearchApi(page: Page) {
-  return page.route('**/api/users/me/players/search', async (route) => {
+  return page.route('**/api/users/me/players/search*', async (route) => {
     const url = new URL(route.request().url());
     const query = url.searchParams.get('q') || '';
 
@@ -55,7 +55,7 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
-    await emptySlot.getByRole('button', name: /search/i).click();
+    await emptySlot.getByRole('button', { name: /search/i }).click();
 
     const overlay = page.locator('[data-testid="player-search-overlay"]');
     await expect(overlay).toBeVisible();
@@ -78,12 +78,12 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
-    await emptySlot.getByRole('button', name: /search/i).click();
+    await emptySlot.getByRole('button', { name: /search/i }).click();
 
     const searchInput = page.locator('[data-testid="player-search-input"]');
     await searchInput.fill('Ali');
 
-    const aliceRow = page.locator('[data-testid="search-result-row"]').filter({ hasText: 'Alice' });
+    const aliceRow = page.locator('[data-testid="search-result-row"]').filter({ hasText: 'Alice' }).first();
     await aliceRow.click();
 
     await expect(page.locator('[data-testid="player-search-overlay"]')).not.toBeVisible();
@@ -109,10 +109,10 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
-    await emptySlot.getByRole('button', name: /search/i).click();
+    await emptySlot.getByRole('button', { name: /search/i }).click();
 
     const searchInput = page.locator('[data-testid="player-search-input"]');
-    await searchInput.fill('A');
+    await searchInput.fill('Alice');
 
     const rows = page.locator('[data-testid="search-result-row"]');
     await expect(rows).toHaveCount(2);
@@ -122,7 +122,7 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
   });
 
   test('[P0] AC6: Should display error when search API returns 500', async ({ page }) => {
-    await page.route('**/api/users/me/players/search', async (route) => {
+    await page.route('**/api/users/me/players/search*', async (route) => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
@@ -136,7 +136,7 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
-    await emptySlot.getByRole('button', name: /search/i).click();
+    await emptySlot.getByRole('button', { name: /search/i }).click();
 
     const searchInput = page.locator('[data-testid="player-search-input"]');
     await searchInput.fill('Ali');
@@ -153,7 +153,7 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
-    await emptySlot.getByRole('button', name: /search/i).click();
+    await emptySlot.getByRole('button', { name: /search/i }).click();
 
     await expect(page.locator('[data-testid="player-search-overlay"]')).toBeVisible();
 

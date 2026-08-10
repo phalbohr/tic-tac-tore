@@ -1,4 +1,4 @@
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, getCurrentInstance } from 'vue'
 import { defineStore } from 'pinia'
 import { useSubmissionTimer, SubmissionResult } from '../composables/useSubmissionTimer'
 import { getCsrfHeaders } from '../../../utils/cookieUtils'
@@ -127,16 +127,18 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }, 300)
   }
 
-  onUnmounted(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer)
-      debounceTimer = null
-    }
-    if (searchAbortController) {
-      searchAbortController.abort()
-      searchAbortController = null
-    }
-  })
+  if (getCurrentInstance()) {
+    onUnmounted(() => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        debounceTimer = null
+      }
+      if (searchAbortController) {
+        searchAbortController.abort()
+        searchAbortController = null
+      }
+    })
+  }
 
   function clearSubmitError() {
     submitError.value = null

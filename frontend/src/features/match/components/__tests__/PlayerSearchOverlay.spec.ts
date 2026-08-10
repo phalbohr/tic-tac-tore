@@ -186,8 +186,8 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
 
     const rows = wrapper.findAll('[data-testid="search-result-row"]')
     expect(rows).toHaveLength(2)
-    expect(rows.at(0)!.text()).toContain('Frank')
-    expect(rows.at(1)!.text()).toContain('Alice')
+    expect(rows[0]!.text()).toContain('Frank')
+    expect(rows[1]!.text()).toContain('Alice')
   })
 
   it('[P1] does not add player when all slots are filled', async () => {
@@ -209,7 +209,7 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
     const rows = wrapper.findAll('[data-testid="search-result-row"]')
     expect(rows).toHaveLength(1)
 
-    await rows.at(0)!.trigger('click')
+    await rows[0]!.trigger('click')
 
     expect(store.selectedPlayers).toHaveLength(2)
   })

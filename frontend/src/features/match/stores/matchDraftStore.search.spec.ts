@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useMatchDraftStore } from '../matchDraftStore'
+import { useMatchDraftStore } from './matchDraftStore'
 
 describe('matchDraftStore search (ATDD)', () => {
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('matchDraftStore search (ATDD)', () => {
 
     vi.advanceTimersByTime(300)
 
-    expect(fetchSpy).toHaveBeenCalledWith('/api/users/me/players/search?q=ali')
+    expect(fetchSpy).toHaveBeenCalledWith('/api/users/me/players/search?q=ali', expect.objectContaining({ signal: expect.any(AbortSignal) }))
   })
 
   it('[P0] searchPlayers clears results when query is empty', async () => {

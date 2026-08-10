@@ -24,6 +24,10 @@ watch(() => props.isOpen, async (newVal) => {
   }
 })
 
+watch(() => store.searchQuery, (newQuery) => {
+  store.searchPlayers(newQuery)
+})
+
 const displayResults = computed(() => {
   const frequent = store.frequentOpponents || []
   const others = store.searchResults || []
