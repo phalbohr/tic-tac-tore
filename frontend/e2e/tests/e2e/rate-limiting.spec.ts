@@ -5,6 +5,13 @@ test.describe('Story 3.6: Rate Limiting (Anti-Spam) E2E', () => {
   test.use({ viewport: { width: 375, height: 667 } });
 
   test.beforeEach(async ({ page }) => {
+    // Speed up the 15-second undo timer by making 1000ms intervals run in 10ms
+    await page.addInitScript(() => {
+      const originalSetInterval = window.setInterval;
+      window.setInterval = function(cb: any, ms?: number) {
+        return originalSetInterval(cb, ms === 1000 ? 10 : ms);
+      };
+    });
     await loginAsTestUser(page);
   });
 
@@ -38,7 +45,7 @@ test.describe('Story 3.6: Rate Limiting (Anti-Spam) E2E', () => {
     }
     await page.getByRole('button', { name: /Complete Match/i }).click();
 
-    const errorToast = page.locator('[role="status"]').filter({ hasText: /Rate limit exceeded|Try again in 42 seconds/i });
+    const errorToast = page.locator('[role="alert"]').filter({ hasText: /Rate limit exceeded|Try again in 42 seconds/i });
     await expect(errorToast).toBeVisible();
     await expect(errorToast).toContainText('Try again in 42 seconds');
   });
@@ -73,7 +80,7 @@ test.describe('Story 3.6: Rate Limiting (Anti-Spam) E2E', () => {
     }
     await page.getByRole('button', { name: /Complete Match/i }).click();
 
-    const errorToast = page.locator('[role="status"]');
+    const errorToast = page.locator('[role="alert"]');
     await expect(errorToast).toBeVisible();
     await expect(errorToast).toContainText('Redis unavailable');
   });
