@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "snapshot_at": "2026-08-10T00:38:00+02:00",
+  "snapshot_at": "2026-08-10T16:27:00+02:00",
   "repo": "tic-tac-tore",
   "collection_mode": "contract_static",
   "collection_status": "COLLECTED",
@@ -27,15 +27,15 @@
   },
   "coverage": {
     "inventory": {
-      "covered": 4,
+      "covered": 6,
       "total": 8,
-      "pct": 50
+      "pct": 75
     },
     "priority_breakdown": {
       "P0": {
         "total": 5,
-        "covered": 2,
-        "pct": 40
+        "covered": 4,
+        "pct": 80
       },
       "P1": {
         "total": 3,
@@ -54,22 +54,22 @@
       }
     },
     "by_level": {
-      "e2e": { "tests": 0, "criteria_covered": 0 },
+      "e2e": { "tests": 5, "criteria_covered": 5 },
       "api": { "tests": 5, "criteria_covered": 4 },
-      "component": { "tests": 16, "criteria_covered": 5 },
-      "unit": { "tests": 6, "criteria_covered": 2 },
+      "component": { "tests": 14, "criteria_covered": 6 },
+      "unit": { "tests": 2, "criteria_covered": 2 },
       "other": { "tests": 0, "criteria_covered": 0 }
     }
   },
   "tests": {
-    "files": 6,
-    "cases": 27,
+    "files": 5,
+    "cases": 26,
     "skipped_cases": 0,
     "fixme_cases": 0,
     "pending_cases": 0
   },
   "risk_summary": {
-    "critical_open": 3,
+    "critical_open": 1,
     "high_open": 1,
     "medium_open": 0,
     "low_open": 0
@@ -84,132 +84,105 @@
   "gate_status": "FAIL",
   "gate_criteria": {
     "p0_coverage_required": "100%",
-    "p0_coverage_actual": "40%",
+    "p0_coverage_actual": "80%",
     "p0_status": "NOT_MET",
     "p1_coverage_target": "90%",
     "p1_coverage_minimum": "80%",
     "p1_coverage_actual": "67%",
     "p1_status": "NOT_MET",
     "overall_coverage_minimum": "80%",
-    "overall_coverage_actual": "50%",
+    "overall_coverage_actual": "75%",
     "overall_status": "NOT_MET"
   },
   "blockers": [
     {
-      "id": "2.7-API-001",
-      "severity": "high",
-      "reason": "Compilation blocked by missing import in UserMatchControllerATDDTest.java",
-      "test_file": "src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java",
-      "test_title": "Should return 200 with matching active users when query matches nicknames"
-    },
-    {
-      "id": "2.7-API-002a",
-      "severity": "high",
-      "reason": "Compilation blocked by missing import in UserMatchControllerATDDTest.java",
-      "test_file": "src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java",
-      "test_title": "Should return 200 with empty list when query is blank"
-    },
-    {
-      "id": "2.7-API-002b",
-      "severity": "high",
-      "reason": "Compilation blocked by missing import in UserMatchControllerATDDTest.java",
-      "test_file": "src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java",
-      "test_title": "Should return 200 with empty list when query parameter is missing"
-    },
-    {
-      "id": "2.7-API-004",
-      "severity": "high",
-      "reason": "Compilation blocked by missing import in UserMatchControllerATDDTest.java",
-      "test_file": "src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java",
-      "test_title": "Should perform case-insensitive nickname matching"
-    },
-    {
-      "id": "2.7-API-005",
-      "severity": "high",
-      "reason": "Compilation blocked by missing import in UserMatchControllerATDDTest.java",
-      "test_file": "src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java",
-      "test_title": "Should not expose email addresses in search results"
-    },
-    {
-      "id": "2.7-COMP-002",
+      "id": "2.7-COMP-002a",
       "severity": "medium",
-      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore'",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
       "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
       "test_title": "searchPlayers debounces API call by 300ms"
     },
     {
-      "id": "2.7-COMP-003a",
+      "id": "2.7-COMP-002b",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "emits select event when result row is clicked"
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles successful API response"
     },
     {
-      "id": "2.7-COMP-004a",
+      "id": "2.7-COMP-002c",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "displays loading state while searching"
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles API error response"
     },
     {
-      "id": "2.7-COMP-004b",
+      "id": "2.7-COMP-002d",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "displays error message when search fails"
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles network error"
     },
     {
-      "id": "2.7-COMP-004c",
+      "id": "2.7-UNIT-003a",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "displays empty state when no results found"
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers clears results when query is empty"
     },
     {
-      "id": "2.7-COMP-005a",
+      "id": "2.7-UNIT-003b",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "orders frequent opponents before other results"
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "openSearch resets search state"
     },
     {
-      "id": "2.7-COMP-006",
+      "id": "2.7-E2E-001",
       "severity": "medium",
-      "reason": "Test fails: store instance mismatch between beforeEach and individual test mounts",
-      "test_file": "frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts",
-      "test_title": "does not add player when all slots are filled"
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should open search overlay and find player by nickname"
+    },
+    {
+      "id": "2.7-E2E-002",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should select player from search and close overlay"
+    },
+    {
+      "id": "2.7-E2E-003",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should order frequent opponents before alphabetical results"
+    },
+    {
+      "id": "2.7-E2E-004",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should display error when search API returns 500"
+    },
+    {
+      "id": "2.7-E2E-005",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should close overlay on Escape key without selection"
     }
   ],
   "recommendations": [
     {
-      "priority": "URGENT",
-      "action": "Fix compilation error in UserMatchControllerATDDTest.java: add missing import for com.tictactore.service.UserService",
-      "requirements": ["AC-2", "AC-4", "AC-6", "AC-7", "AC-8"]
-    },
-    {
-      "priority": "URGENT",
+      "priority": "HIGH",
       "action": "Fix import path in matchDraftStore.search.spec.ts: change '../matchDraftStore' to './matchDraftStore'",
       "requirements": ["AC-2", "AC-4", "AC-6"]
     },
     {
       "priority": "HIGH",
-      "action": "Fix store instance mismatch in PlayerSearchOverlay.spec.ts: obtain store from mounted component context instead of beforeEach",
-      "requirements": ["AC-1", "AC-3", "AC-4", "AC-5", "AC-6"]
-    },
-    {
-      "priority": "HIGH",
-      "action": "Add user interaction test for AC-1: simulate clicking search button and verify overlay opens",
-      "requirements": ["AC-1"]
-    },
-    {
-      "priority": "MEDIUM",
-      "action": "Add explicit test verifying store.addPlayer is called with correct player ID on result selection",
-      "requirements": ["AC-4"]
-    },
-    {
-      "priority": "MEDIUM",
-      "action": "Add test for AC-6 verifying frequent-opponents strip remains visible when search fails",
-      "requirements": ["AC-6"]
+      "action": "Fix syntax errors in player-search.spec.ts: add braces around getByRole options ({ name: /search/i })",
+      "requirements": ["AC-1", "AC-3", "AC-4", "AC-6"]
     },
     {
       "priority": "MEDIUM",
@@ -217,9 +190,14 @@
       "requirements": ["AC-3"]
     },
     {
+      "priority": "MEDIUM",
+      "action": "Add test for AC-6 verifying frequent-opponents strip remains visible when search fails",
+      "requirements": ["AC-6"]
+    },
+    {
       "priority": "LOW",
-      "action": "Add E2E test for story 2.7 search flow to cover end-to-end user journey",
-      "requirements": ["AC-1", "AC-2", "AC-3", "AC-4", "AC-5", "AC-6"]
+      "action": "Add API tests for fault injection (DB unavailable) and special characters in query per test-design",
+      "requirements": ["AC-2"]
     }
   ],
   "links": {

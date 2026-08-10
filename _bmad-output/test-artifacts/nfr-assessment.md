@@ -6,20 +6,23 @@ stepsCompleted:
   - step-04e-aggregate-nfr
   - step-05-generate-report
 lastStep: step-05-generate-report
-lastSaved: '2026-08-09T22:45:04.000Z'
+lastSaved: '2026-08-10T16:31:50.000Z'
 workflowType: testarch-nfr-assess
 inputDocuments:
   - _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
   - _bmad-output/test-artifacts/test-design/test-design-epic-2-7.md
   - _bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md
-  - frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts
+  - _bmad-output/test-artifacts/automation-summary-2-7.md
+  - _bmad-output/test-artifacts/definition-of-done-2-7.md
+  - frontend/e2e/tests/e2e/player-search.spec.ts
+  - frontend/e2e/support/factories/player-search.factory.ts
   - frontend/src/features/match/stores/matchDraftStore.search.spec.ts
   - src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
 ---
 
 # NFR Evidence Audit - Story 2.7: Global Player Search & Selection
 
-**Date:** 2026-08-09
+**Date:** 2026-08-10
 **Story:** 2-7-global-player-search-and-selection
 **Overall Status:** FAIL ❌
 
@@ -29,7 +32,7 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ## Executive Summary
 
-**Assessment:** 10 PASS, 7 CONCERNS, 0 FAIL (17/29 criteria assessed, 12 N/A)
+**Assessment:** 11 PASS, 7 CONCERNS, 0 FAIL (18/29 criteria assessed, 11 N/A)
 
 **Blockers:** 2 HIGH risk domains (Performance, Scalability) with unmitigated R-001 and R-002
 
@@ -48,7 +51,7 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 - **Status:** CONCERN ⚠️
 - **Threshold:** < 200ms (from test-design-epic-2-7.md)
 - **Actual:** NOT ASSESSED - No load tests executed
-- **Evidence:** No k6, JMeter, or APM latency data available
+- **Evidence:** No k6, JMeter, or APM latency data available in working tree
 - **Findings:** p95 latency target of 200ms is defined in test-design but completely unvalidated. No performance tests exist in working tree.
 
 ### Throughput
@@ -189,9 +192,9 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 - **Status:** CONCERN ⚠️
 - **Threshold:** >= 80%
-- **Actual:** 50% overall coverage (4/8 acceptance criteria fully covered)
-- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md
-- **Findings:** P0 coverage 40%, P1 coverage 67%. 16 of 27 tests blocked by compilation/import errors.
+- **Actual:** ~75% overall coverage (6/8 acceptance criteria fully covered)
+- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md; automation-summary-2-7.md
+- **Findings:** P0 coverage 80%, P1 coverage 67%. E2E tests added in working tree but contain syntax errors and cannot execute. 12 of 26 mapped tests blocked by infrastructure issues (import path + E2E syntax errors).
 
 ### Code Quality
 
@@ -199,6 +202,7 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 - **Threshold:** >= 85/100
 - **Actual:** N/A
 - **Evidence:** No SonarQube or similar analysis available
+- **Findings:** No static analysis evidence collected.
 
 ### Technical Debt
 
@@ -212,16 +216,16 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 - **Status:** PASS ✅
 - **Threshold:** >= 90%
 - **Actual:** 100%
-- **Evidence:** spec-2-7-global-player-search-and-selection.md contains complete acceptance criteria, design notes, and verification commands
-- **Findings:** Documentation is complete and comprehensive.
+- **Evidence:** spec-2-7-global-player-search-and-selection.md, test-design-epic-2-7.md, automation-summary-2-7.md, definition-of-done-2-7.md contain complete acceptance criteria, design notes, verification commands, and test plans
+- **Findings:** Documentation is complete and comprehensive. New test artifacts (automation summary, definition-of-done, E2E factory) improve evidence trail.
 
 ### Test Quality
 
 - **Status:** CONCERN ⚠️
 - **Threshold:** All P0 tests pass
-- **Actual:** 0% P0 test pass rate (all backend tests blocked by compilation errors; 6 of 11 frontend tests failing)
-- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md; local test run 2026-08-10
-- **Findings:** Test infrastructure issues prevent validation of implemented features.
+- **Actual:** 0% P0 test pass rate for new E2E tests (syntax errors prevent execution); backend unit tests pass (262 passed per spec)
+- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md; E2E syntax errors in player-search.spec.ts lines 58, 81, 112, 139
+- **Findings:** Test infrastructure issues prevent validation of new E2E tests. Store tests may have import path issues. Backend tests pass but frontend E2E and some store tests are blocked.
 
 ---
 
@@ -233,7 +237,7 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 - **Threshold:** >= 26/29 (90%+) for strong foundation
 - **Actual:** 10/29 PASS, 7/29 CONCERN, 0/29 FAIL, 12/29 N/A
 - **Evidence:** ADR Quality Readiness Checklist assessment
-- **Findings:** 17 criteria assessed. Key gaps: no load testing (3.2), no rate limiting (7.2), no metrics for new endpoint (6.3), missing sample requests (1.4), no state control/seeding APIs (1.3).
+- **Findings:** 17 criteria assessed. Key gaps: no load testing (3.2), no rate limiting (7.2), no metrics for new endpoint (6.3), missing sample requests (1.4), no state control/seeding APIs (1.3). E2E tests added but blocked by syntax errors.
 
 ---
 
@@ -257,11 +261,13 @@ Note: This audit summarizes existing implementation evidence; it does not run te
    - Add maxResults parameter with validation (max 100)
    - Validation: API returns max 100 results; p95 < 200ms with 10k users
 
-3. **Fix test infrastructure blockers** - HIGH - 2 hours - DEV
-   - Fix missing import in UserMatchControllerATDDTest.java
-   - Fix import path in matchDraftStore.search.spec.ts
-   - Fix store instance mismatch in PlayerSearchOverlay.spec.ts
-   - Validation: All 27 tests compile and execute
+3. **Fix E2E test syntax errors** - HIGH - 30 minutes - DEV
+   - Fix missing braces around `getByRole` options in player-search.spec.ts lines 58, 81, 112, 139
+   - Validation: E2E tests compile and execute
+
+4. **Verify store test import path** - HIGH - 15 minutes - DEV
+   - Confirm matchDraftStore.search.spec.ts import path is correct
+   - Validation: Store tests execute without import errors
 
 ### Short-term (Next Milestone) - MEDIUM Priority
 
@@ -285,8 +291,9 @@ Note: This audit summarizes existing implementation evidence; it does not run te
    - Replace LIKE query with full-text search for better relevance and performance
    - Consider PostgreSQL full-text search or Elasticsearch
 
-2. **Add E2E test for search flow** - LOW - 4 hours - QA
-   - Cover end-to-end journey from empty slot to selected player
+2. **Add monitoring and alerting** - LOW - 4 hours - Ops
+   - Add metrics for request count, latency, error rate
+   - Set up 5xx alerting for /players/search
 
 ---
 
@@ -404,7 +411,7 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ```yaml
 nfr_assessment:
-  date: '2026-08-09'
+  date: '2026-08-10'
   story_id: '2-7-global-player-search-and-selection'
   feature_name: 'Story 2.7 - Global Player Search & Selection'
   adr_checklist_score: '10/29' # ADR Quality Readiness Checklist
@@ -430,7 +437,7 @@ nfr_assessment:
     - 'Implement server-side pagination (LIMIT 50 + maxResults parameter) (R-002 mitigation)'
     - 'Execute k6 load test with p95 < 200ms validation'
     - 'Add database index on nickname column'
-    - 'Fix test infrastructure blockers (compilation/import errors)'
+    - 'Fix E2E test syntax errors in player-search.spec.ts'
 ```
 
 ---
@@ -443,8 +450,9 @@ nfr_assessment:
 - **Traceability Matrix:** _bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md
 - **Gate Decision:** _bmad-output/test-artifacts/traceability/gate-decision-2-7.json
 - **Evidence Sources:**
-  - Test Files: frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts, frontend/src/features/match/stores/matchDraftStore.search.spec.ts, src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
+  - Test Files: frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts, frontend/src/features/match/stores/matchDraftStore.search.spec.ts, frontend/e2e/tests/e2e/player-search.spec.ts, src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
   - Test Results: local run (2026-08-10)
+  - Automation Summary: _bmad-output/test-artifacts/automation-summary-2-7.md
 
 ---
 
@@ -452,7 +460,7 @@ nfr_assessment:
 
 **Release Blocker:** R-001 (no rate limiting) and R-002 (no pagination) mitigations are planned but NOT implemented. Performance evidence (p95 < 200ms) is completely absent.
 
-**High Priority:** Fix 3 test infrastructure blockers (compilation error, import path, store mismatch) to enable test execution.
+**High Priority:** Fix E2E test syntax errors and store test import issues to enable test execution.
 
 **Medium Priority:** Add missing test coverage for AC-1, AC-3, AC-4, AC-6. Execute k6 load test.
 
@@ -478,7 +486,7 @@ nfr_assessment:
 - If CONCERNS ⚠️: Address HIGH/CRITICAL issues, re-run `*nfr-assess`
 - If FAIL ❌: Resolve FAIL status NFRs, re-run `*nfr-assess`
 
-**Generated:** 2026-08-09T22:45:04.000Z
+**Generated:** 2026-08-10T16:31:50.000Z
 **Workflow:** testarch-nfr v5.0
 
 ---

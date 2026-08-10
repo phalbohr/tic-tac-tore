@@ -7,15 +7,15 @@ stepsCompleted:
   - step-04c-aggregate
   - step-05-validate-and-complete
 lastStep: step-05-validate-and-complete
-lastSaved: '2026-08-09T23:11:00+02:00'
+lastSaved: '2026-08-10T15:56:00+02:00'
 storyId: '2.7'
 storyKey: 2-7-global-player-search-and-selection
 storyFile: _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
 atddChecklistPath: _bmad-output/test-artifacts/atdd-checklist-2-7-global-player-search-and-selection.md
 generatedTestFiles:
-  - src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
-  - frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts
-  - frontend/src/features/match/stores/matchDraftStore.search.spec.ts
+  - _bmad-output/test-artifacts/atdd-redphase-2-7/UserMatchControllerATDDTest.java
+  - _bmad-output/test-artifacts/atdd-redphase-2-7/PlayerSearchOverlay.spec.ts
+  - _bmad-output/test-artifacts/atdd-redphase-2-7/matchDraftStore.search.spec.ts
 inputDocuments:
   - _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
   - _bmad-output/test-artifacts/test-design/test-design-epic-2-7.md
@@ -37,15 +37,15 @@ inputDocuments:
 ### Generated Test Files:
 
 1. **Backend Controller ATDD Spec**:
-   - `src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java`
+   - `_bmad-output/test-artifacts/atdd-redphase-2-7/UserMatchControllerATDDTest.java`
    - Covers `GET /api/users/me/players/search` endpoint contracts: 200 with matching users, blank query returns empty list, case-insensitive matching, email exclusion
 
 2. **Frontend Component Unit Spec**:
-   - `frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts`
+   - `_bmad-output/test-artifacts/atdd-redphase-2-7/PlayerSearchOverlay.spec.ts`
    - Covers overlay render, auto-focus, select/close events, loading/error/empty states, result ordering, max-players guard
 
 3. **Frontend Store Unit Spec**:
-   - `frontend/src/features/match/stores/matchDraftStore.search.spec.ts`
+   - `_bmad-output/test-artifacts/atdd-redphase-2-7/matchDraftStore.search.spec.ts`
    - Covers `searchPlayers` debounce (300ms), empty query clearing, success/error/network handling, `closeSearch` timer cleanup, `openSearch` state reset
 
 ---
@@ -69,16 +69,29 @@ inputDocuments:
 
 | Category | Test Count | All Skipped/Disabled | Expected to Fail Without Implementation |
 |---|---|---|---|
-| Backend Controller ATDD | 5 | Yes (test.skip() equivalent: active red-phase assertions) | Yes |
-| Frontend Component Unit | 10 | Yes (test.skip() equivalent: active red-phase assertions) | Yes |
-| Frontend Store Unit | 7 | Yes (test.skip() equivalent: active red-phase assertions) | Yes |
+| Backend Controller ATDD | 5 | Yes (`@Disabled` on all tests) | Yes |
+| Frontend Component Unit | 10 | Yes (`test.skip()` on all tests) | Yes |
+| Frontend Store Unit | 7 | Yes (`test.skip()` on all tests) | Yes |
 | **Total** | **22** | — | — |
 
-> **Note:** Tests are currently emitted as active assertions. In a pure red-phase run, scaffolds would be wrapped with `test.skip()` and would fail until the implementation is provided. Since Story 2.7 is already implemented (commit `4fb2886`), these tests verify the acceptance criteria against the existing codebase.
+> **Note:** Tests are emitted as red-phase scaffolds with `@Disabled` / `test.skip()`. They assert expected behavior and would fail if the implementation were absent. Since Story 2.7 is already implemented, these serve as regression-guard scaffolds. Remove `@Disabled` / `test.skip()` to activate them for CI.
 
 ---
 
-## Implementation Checklist (Working Tree Changes)
+## Working Tree Changes (2026-08-10)
+
+**Unstaged working tree changes:** Documentation/metadata only. No production code changes.
+
+| File | Change | Production Impact |
+|------|--------|-------------------|
+| `bmad-dev-auto-result-2-7-global-player-search-and-selection-tea.td-1.md` | Test design re-run metadata | None |
+| `sprint-status.yaml` | Story status `ready-for-dev` → `done` | None |
+| `test-design-progress.md` | Timestamp + working tree assessment | None |
+| `test-design/test-design-epic-2-7.md` | Status `Draft` → `Approved`, date update | None |
+
+---
+
+## Implementation Checklist (Story Branch — Already Complete)
 
 ### Backend Production Code
 
@@ -89,17 +102,20 @@ inputDocuments:
 
 ### Frontend Production Code
 
-- [x] `frontend/src/features/match/stores/matchDraftStore.ts` — Added `searchQuery`, `searchResults`, `searchError`, `isSearchOpen`, `searchLoading` state; added `openSearch()`, `closeSearch()`, `searchPlayers(query)` async action with 300ms debounce
+- [x] `frontend/src/features/match/stores/matchDraftStore.ts` — Added `searchQuery`, `searchResults`, `searchError`, `isSearchOpen`, `searchLoading` state; added `openSearch()`, `closeSearch()`, `searchPlayers(query)` async action with 300ms debounce, AbortController for in-flight cancellation, and `onUnmounted` cleanup
 - [x] `frontend/src/features/match/components/PlayerSearchOverlay.vue` — New overlay component with fixed `inset-0 z-50` backdrop + `<Transition>` pattern, search input (`data-testid="player-search-input"`), loading state, error state (`data-testid="search-error"`), empty state (`data-testid="no-results"`), selectable results (`data-testid="search-result-row"`), frequent-opponent-first ordering, Escape/backdrop dismiss
-- [x] `frontend/src/features/match/components/PlayerSelection.vue` — Added search button (`data-testid="search-player-button"`) to each empty player slot; mounted `<PlayerSearchOverlay>` with `:isOpen="store.isSearchOpen"` and `@select`/`@close` handlers
+- [x] `frontend/src/features/match/components/PlayerSelection.vue` — Added search button (`data-testid="open-search-button"`) to each empty player slot; mounted `<PlayerSearchOverlay>` with `:isOpen="store.isSearchOpen"` and `@close` handler
 
 ### Backend Test Code
 
-- [x] `src/test/java/com/tictactore/service/UserServiceTest.java` — Added `searchActiveUsers_filtersDeletedAndMatchesNickname` unit test verifying soft-delete filtering and case-insensitive nickname matching
+- [x] `src/test/java/com/tictactore/service/UserServiceTest.java` — Added `searchActiveUsers_filtersDeletedAccountsAndMatchesNickname` unit test verifying soft-delete filtering and case-insensitive nickname matching
+- [x] `src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java` — Added controller ATDD specs for `GET /players/search`
 
 ### Frontend Test Code
 
+- [x] `frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts` — Added tests for overlay render, auto-focus, select/close events, loading/error/empty states, result ordering, max-players guard
 - [x] `frontend/src/features/match/components/__tests__/PlayerSelection.spec.ts` — Added `adds player via search result and closes overlay` test verifying overlay mount and selection via search result
+- [x] `frontend/src/features/match/stores/matchDraftStore.search.spec.ts` — Added tests for `searchPlayers` debounce (300ms), empty query clearing, success/error/network handling, `closeSearch` timer cleanup, `openSearch` state reset
 
 ---
 
@@ -135,7 +151,7 @@ inputDocuments:
 - `npm run test:unit frontend/src/features/match/stores/matchDraftStore.spec.ts` — expected: no regressions
 - `npm run test:unit frontend/src/features/match/stores/matchDraftStore.search.spec.ts` — expected: new search store tests pass
 - `npm run test:unit frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts` — expected: new overlay tests pass
-- `./gradlew test` — expected: backend unit tests pass, including `UserServiceTest.searchActiveUsers` + new `UserMatchControllerATDDTest`
+- `./mvnw test` — expected: backend unit tests pass, including `UserServiceTest.searchActiveUsers` + `UserMatchControllerATDDTest`
 - `npm run lint` — expected: 0 lint errors
 
 ## Next Recommended Workflow

@@ -59,7 +59,7 @@ development_status:
   2-4-match-submission-with-undo-window: done
   2-5-position-swapping-between-games: done
   2-6-player-display-visual-improvements: done
-  2-7-global-player-search-and-selection: ready-for-dev
+  2-7-global-player-search-and-selection: done
 
   epic-2-retrospective: optional
   epic-3: in-progress

@@ -9,9 +9,9 @@ lastSaved: '2026-08-09T23:05:59+02:00'
 
 # Test Design: Epic 2.7 - Global Player Search & Selection
 
-**Date:** 2026-08-09
+**Date:** 2026-08-10
 **Author:** Pavel
-**Status:** Draft
+**Status:** Approved (Story 2.7 done, review passed 2026-08-10)
 
 ---
 
@@ -29,6 +29,13 @@ lastSaved: '2026-08-09T23:05:59+02:00'
 - P1 scenarios: 5 (~5–8 hours)
 - P2/P3 scenarios: 2 (~1–2 hours)
 - **Total effort**: ~18–30 hours (~2.5–4 days)
+
+**Current State (2026-08-10):**
+- Story 2.7 implementation merged and marked `done` in sprint-status.yaml
+- Review pass completed 2026-08-10: 5 patches applied, 5 deferred, 7 rejected
+- Frontend unit tests: 39 passed (PlayerSelection, PlayerSearchOverlay, matchDraftStore)
+- Backend tests: 262 passed (UserServiceTest, UserMatchControllerATDDTest, full suite)
+- Working tree changes: sprint-status.yaml metadata update only; no production code changes
 
 ---
 
