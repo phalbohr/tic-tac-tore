@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-09T22:45:04.000Z",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "2-7-global-player-search-and-selection",
+    "label": "Story 2.7 - Global Player Search & Selection"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "FAIL",
+  "rationale": "NFR assessment: Performance and Scalability are HIGH risk. R-001 (no rate limiting) and R-002 (no pagination) mitigations are planned but NOT implemented. No performance testing evidence exists (p95 < 200ms unvalidated). 16 of 27 tests blocked by compilation/import errors. ADR checklist: 10/29 criteria met (34%), 7 CONCERNS, 0 FAIL, 12 N/A. Release MUST BE BLOCKED until mitigations are implemented and evidence gathered.",
+  "nfr_assessment": {
+    "overall_status": "FAIL",
+    "overall_risk": "HIGH",
+    "domain_risks": {
+      "security": "MEDIUM",
+      "performance": "HIGH",
+      "reliability": "MEDIUM",
+      "scalability": "HIGH"
+    },
+    "adr_checklist_score": "10/29",
+    "criteria_met": 10,
+    "criteria_concerns": 7,
+    "criteria_fail": 0,
+    "criteria_na": 12,
+    "evidence_gaps": 4,
+    "high_priority_issues": 2,
+    "blockers": true
+  },
+  "p0_status": "NOT_MET",
+  "p1_status": "NOT_MET",
+  "overall_status": "NOT_MET",
+  "critical_open": 0,
+  "high_open": 2,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": "",
+    "nfr_assessment_path": "_bmad-output/test-artifacts/nfr-assessment.md"
+  }
+}
