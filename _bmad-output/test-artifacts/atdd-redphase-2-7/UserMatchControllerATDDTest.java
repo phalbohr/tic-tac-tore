@@ -1,9 +1,9 @@
 package com.tictactore.controller;
 
 import com.tictactore.controller.UserMatchController.PlayerDto;
+import com.tictactore.service.RateLimitService;
 import com.tictactore.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +51,9 @@ class UserMatchControllerATDDTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private RateLimitService rateLimitService;
+
     @InjectMocks
     private UserMatchController userMatchController;
 
@@ -64,7 +68,6 @@ class UserMatchControllerATDDTest {
 
         @Test
         @DisplayName("[P0] Should return 200 with matching active users when query matches nicknames")
-        @Disabled("RED PHASE — endpoint not yet implemented")
         void shouldReturn200WithMatchingActiveUsers() throws Exception {
             var user1 = new com.tictactore.model.User();
             user1.setId(UUID.randomUUID());
@@ -93,7 +96,6 @@ class UserMatchControllerATDDTest {
 
         @Test
         @DisplayName("[P0] Should return 200 with empty list when query is blank")
-        @Disabled("RED PHASE — endpoint not yet implemented")
         void shouldReturnEmptyListForBlankQuery() throws Exception {
             mockMvc.perform(get("/api/users/me/players/search")
                             .param("q", "   ")
@@ -104,7 +106,6 @@ class UserMatchControllerATDDTest {
 
         @Test
         @DisplayName("[P0] Should return 200 with empty list when query parameter is missing")
-        @Disabled("RED PHASE — endpoint not yet implemented")
         void shouldReturnEmptyListWhenQueryMissing() throws Exception {
             mockMvc.perform(get("/api/users/me/players/search")
                             .accept(MediaType.APPLICATION_JSON))
@@ -114,7 +115,6 @@ class UserMatchControllerATDDTest {
 
         @Test
         @DisplayName("[P1] Should perform case-insensitive nickname matching")
-        @Disabled("RED PHASE — endpoint not yet implemented")
         void shouldMatchNicknameCaseInsensitively() throws Exception {
             var user = new com.tictactore.model.User();
             user.setId(UUID.randomUUID());
@@ -134,7 +134,6 @@ class UserMatchControllerATDDTest {
 
         @Test
         @DisplayName("[P1] Should not expose email addresses in search results")
-        @Disabled("RED PHASE — endpoint not yet implemented")
         void shouldNotExposeEmailAddresses() throws Exception {
             var user = new com.tictactore.model.User();
             user.setId(UUID.randomUUID());
@@ -150,6 +149,17 @@ class UserMatchControllerATDDTest {
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].email").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("[P0] Should enforce rate limit check when searching players")
+        void shouldEnforceRateLimitCheck() throws Exception {
+            mockMvc.perform(get("/api/users/me/players/search")
+                            .param("q", "test")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(rateLimitService).checkSearchLimit(any());
         }
     }
 }

@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createPinia } from 'pinia'
-import PlayerSearchOverlay from '../frontend/src/features/match/components/PlayerSearchOverlay.vue'
-import { useMatchDraftStore } from '../frontend/src/features/match/stores/matchDraftStore'
+import PlayerSearchOverlay from '../../../frontend/src/features/match/components/PlayerSearchOverlay.vue'
+import { useMatchDraftStore } from '../../../frontend/src/features/match/stores/matchDraftStore'
 
 function createTestPlayer(overrides: Partial<{ id: string; nickname: string; avatar: string }> = {}) {
   return {
@@ -27,7 +27,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     }
   })
 
-  it.skip('[P0] renders overlay when isOpen is true', () => {
+  it('[P0] renders overlay when isOpen is true', () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -38,7 +38,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(wrapper.find('[data-testid="player-search-overlay"]').exists()).toBe(true)
   })
 
-  it.skip('[P0] does not render overlay when isOpen is false', () => {
+  it('[P0] does not render overlay when isOpen is false', () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -49,7 +49,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(wrapper.find('[data-testid="player-search-overlay"]').exists()).toBe(false)
   })
 
-  it.skip('[P0] auto-focuses search input when overlay opens', async () => {
+  it('[P0] auto-focuses search input when overlay opens', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -64,7 +64,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(input.exists()).toBe(true)
   })
 
-  it.skip('[P0] emits select event when result row is clicked', async () => {
+  it('[P0] emits select event when result row is clicked', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -87,7 +87,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(store.isSearchOpen).toBe(false)
   })
 
-  it.skip('[P0] emits close event when backdrop is clicked', async () => {
+  it('[P0] emits close event when backdrop is clicked', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -102,7 +102,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(store.isSearchOpen).toBe(false)
   })
 
-  it.skip('[P0] emits close event when Escape key is pressed', async () => {
+  it('[P0] emits close event when Escape key is pressed', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -116,7 +116,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(store.isSearchOpen).toBe(false)
   })
 
-  it.skip('[P1] displays loading state while searching', async () => {
+  it('[P1] displays loading state while searching', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -132,7 +132,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(wrapper.text()).toContain('Searching...')
   })
 
-  it.skip('[P1] displays error message when search fails', async () => {
+  it('[P1] displays error message when search fails', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -149,7 +149,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(wrapper.find('[data-testid="search-error"]').text()).toBe('Search service unavailable. Please try again later.')
   })
 
-  it.skip('[P1] displays empty state when no results found', async () => {
+  it('[P1] displays empty state when no results found', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -166,7 +166,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(wrapper.find('[data-testid="no-results"]').text()).toBe('No players found')
   })
 
-  it.skip('[P1] orders frequent opponents before other results', async () => {
+  it('[P1] orders frequent opponents before other results', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]
@@ -190,7 +190,7 @@ describe('PlayerSearchOverlay.vue (ATDD RED PHASE)', () => {
     expect(rows.at(1)!.text()).toContain('Alice')
   })
 
-  it.skip('[P1] does not add player when all slots are filled', async () => {
+  it('[P1] does not add player when all slots are filled', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
         plugins: [pinia]

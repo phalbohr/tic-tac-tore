@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useMatchDraftStore } from '../frontend/src/features/match/stores/matchDraftStore'
+import { useMatchDraftStore } from '../../../frontend/src/features/match/stores/matchDraftStore'
 
 describe('matchDraftStore search (ATDD RED PHASE)', () => {
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     vi.useRealTimers()
   })
 
-  it.skip('[P0] searchPlayers debounces API call by 300ms', async () => {
+  it('[P0] searchPlayers debounces API call by 300ms', async () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
@@ -30,7 +30,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(fetchSpy).toHaveBeenCalledWith('/api/users/me/players/search?q=ali')
   })
 
-  it.skip('[P0] searchPlayers clears results when query is empty', async () => {
+  it('[P0] searchPlayers clears results when query is empty', async () => {
     const store = useMatchDraftStore()
     store.searchResults = [{ id: '1', nickname: 'Alice', avatar: 'a' }]
     store.searchError = 'some error'
@@ -43,7 +43,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(store.searchLoading).toBe(false)
   })
 
-  it.skip('[P0] searchPlayers handles successful API response', async () => {
+  it('[P0] searchPlayers handles successful API response', async () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
@@ -65,7 +65,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(store.searchLoading).toBe(false)
   })
 
-  it.skip('[P0] searchPlayers handles API error response', async () => {
+  it('[P0] searchPlayers handles API error response', async () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
@@ -83,7 +83,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(store.searchLoading).toBe(false)
   })
 
-  it.skip('[P0] searchPlayers handles network error', async () => {
+  it('[P0] searchPlayers handles network error', async () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
@@ -98,7 +98,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(store.searchLoading).toBe(false)
   })
 
-  it.skip('[P0] closeSearch clears debounce timer', async () => {
+  it('[P0] closeSearch clears debounce timer', async () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
@@ -118,7 +118,7 @@ describe('matchDraftStore search (ATDD RED PHASE)', () => {
     expect(store.isSearchOpen).toBe(false)
   })
 
-  it.skip('[P1] openSearch resets search state', () => {
+  it('[P1] openSearch resets search state', () => {
     const store = useMatchDraftStore()
 
     store.searchQuery = 'previous'

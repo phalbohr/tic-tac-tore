@@ -1,6 +1,7 @@
 package com.tictactore.controller;
 
 import com.tictactore.controller.UserMatchController.PlayerDto;
+import com.tictactore.service.RateLimitService;
 import com.tictactore.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,6 +50,9 @@ class UserMatchControllerATDDTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private RateLimitService rateLimitService;
 
     @InjectMocks
     private UserMatchController userMatchController;
@@ -144,6 +149,17 @@ class UserMatchControllerATDDTest {
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].email").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("[P0] Should enforce rate limit check when searching players")
+        void shouldEnforceRateLimitCheck() throws Exception {
+            mockMvc.perform(get("/api/users/me/players/search")
+                            .param("q", "test")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(rateLimitService).checkSearchLimit(any());
         }
     }
 }

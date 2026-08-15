@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginAsTestUser } from './helpers/auth';
 
 interface PlayerSearchResult {
@@ -51,7 +51,9 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
   test('[P0] AC2: Should open search overlay and find player by nickname', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByRole('button', { name: /New Match/i }).click();
+    const newMatchBtn = page.getByRole('button', { name: /New Match/i });
+    await expect(newMatchBtn).toBeVisible();
+    await newMatchBtn.click();
     await page.getByRole('button', { name: /2v2/i }).click();
 
     const emptySlot = page.locator('.player-slot').first();
@@ -86,7 +88,7 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
     const aliceRow = page.locator('[data-testid="search-result-row"]').filter({ hasText: 'Alice' }).first();
     await aliceRow.click();
 
-    await expect(page.locator('[data-testid="player-search-overlay"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="player-search-overlay"]')).toBeHidden();
 
     const firstSlot = page.locator('.player-slot').first();
     await expect(firstSlot).toContainText('Alice');
@@ -159,6 +161,6 @@ test.describe('Story 2.7: Global Player Search & Selection E2E', () => {
 
     await page.keyboard.press('Escape');
 
-    await expect(page.locator('[data-testid="player-search-overlay"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="player-search-overlay"]')).toBeHidden();
   });
 });

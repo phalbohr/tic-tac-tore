@@ -22,6 +22,7 @@ public class ApplicationProperties {
         private long rejectionThreshold = 5;
         private long rejectionWindowHours = 24;
         private long tournamentSubmissionsPerHour = 30;
+        private long searchQueriesPerMinute = 10;
     }
 
     @Getter

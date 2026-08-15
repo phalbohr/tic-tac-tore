@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.tictactore.dto.UpdateProfileRequest;
@@ -297,7 +298,7 @@ class UserServiceTest {
                 .avatar("avatar-3")
                 .build();
 
-        when(userRepository.searchActiveUsers("ali")).thenReturn(List.of(activeUser));
+        when(userRepository.searchActiveUsers(eq("ali"), any(Pageable.class))).thenReturn(List.of(activeUser));
 
         var results = userService.searchActiveUsers("ali");
 
@@ -311,7 +312,7 @@ class UserServiceTest {
         var results = userService.searchActiveUsers("   ");
 
         assertThat(results).isEmpty();
-        verify(userRepository, never()).searchActiveUsers(anyString());
+        verify(userRepository, never()).searchActiveUsers(anyString(), any(Pageable.class));
     }
 }
 

@@ -6,4 +6,6 @@ public interface RateLimitService {
     void checkSubmissionLimit(UUID userId);
 
     void recordRejection(UUID userId);
+
+    void checkSearchLimit(String clientIp);
 }
