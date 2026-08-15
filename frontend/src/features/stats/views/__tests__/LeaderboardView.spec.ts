@@ -80,7 +80,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(wrapper.find('.animate-pulse').exists()).toBe(false)
-    expect(wrapper.text()).toContain('No players match the current filters.')
+    expect(wrapper.text()).toContain('Failed to load leaderboard')
   })
 
   it('[P1] should call getLeaderboard with matchFormat (ruleSystem) when changed', async () => {

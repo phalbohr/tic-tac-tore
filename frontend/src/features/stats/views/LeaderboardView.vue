@@ -8,6 +8,7 @@ const totalElements = ref(0)
 const currentPage = ref(0)
 const pageSize = ref(20)
 const isLoading = ref(false)
+const error = ref('')
 
 const filters = ref({
   matchFormat: '',
@@ -17,6 +18,7 @@ const filters = ref({
 
 async function loadLeaderboard() {
   isLoading.value = true
+  error.value = ''
   try {
     const params: LeaderboardParams = {
       page: currentPage.value,
@@ -31,7 +33,7 @@ async function loadLeaderboard() {
     totalPages.value = response.totalPages
     totalElements.value = response.totalElements
   } catch (e) {
-    console.error('Failed to load leaderboard', e)
+    error.value = 'Failed to load leaderboard'
   } finally {
     isLoading.value = false
   }
@@ -72,6 +74,10 @@ onMounted(() => {
 
     <div v-if="isLoading" class="animate-pulse w-full max-w-2xl space-y-2">
       <div v-for="i in 5" :key="i" class="h-12 bg-surface-container-highest rounded-lg"></div>
+    </div>
+
+    <div v-else-if="error" class="text-red-400 text-center py-8">
+      {{ error }}
     </div>
 
     <div v-else-if="entries.length === 0" class="text-on-surface-variant text-center py-8">

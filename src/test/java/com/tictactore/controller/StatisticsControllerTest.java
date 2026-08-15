@@ -272,5 +272,15 @@ class StatisticsControllerTest {
 
             verify(leaderboardService).getLeaderboard(eq("ATTACKER"), isNull(), eq(5), isNull(), isNull(), eq(0), eq(20));
         }
+
+        @Test
+        @WithMockUser
+        @DisplayName("[P1] Should reject invalid type parameter with 400")
+        void shouldRejectInvalidType() throws Exception {
+            mockMvc.perform(get("/api/v1/statistics/leaderboard")
+                            .param("type", "INVALID")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
     }
 }

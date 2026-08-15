@@ -21,7 +21,7 @@ public class StatisticsController {
 
     @GetMapping("/leaderboard")
     public ResponseEntity<PageResponse<LeaderboardEntry>> getLeaderboard(
-            @RequestParam(required = false) String type,
+            @RequestParam(required = false) @Pattern(regexp = "OVERALL|ATTACKER|DEFENDER", message = "type must be OVERALL, ATTACKER, or DEFENDER") String type,
             @RequestParam(required = false) @Pattern(regexp = "WEEKLY|MONTHLY|YEARLY|ALL_TIME", message = "period must be WEEKLY, MONTHLY, YEARLY, or ALL_TIME") String period,
             @RequestParam(defaultValue = "5") @Min(0) int minMatches,
             @RequestParam(required = false) @Pattern(regexp = "STANDARD|RANDOM", message = "matchFormat must be STANDARD or RANDOM") String matchFormat,

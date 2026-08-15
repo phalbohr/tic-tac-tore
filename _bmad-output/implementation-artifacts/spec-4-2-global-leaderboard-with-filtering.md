@@ -2,7 +2,7 @@
 title: '4-2-global-leaderboard-with-filtering'
 type: 'feature'
 created: '2026-08-15'
-status: 'done'
+status: in-review
 review_loop_iteration: 0
 followup_review_recommended: false
 context: []
@@ -83,6 +83,19 @@ baseline_revision: '71d7133c2a5864b19e0a4414e69e246383974a24'
 - addressed_findings:
   - `medium` `patch` Tied-match handling silently dropped players from stats — added `recordDraw` to count tied matches as `totalMatches` without wins/losses
 
+### 2026-08-16 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2
+- defer: 2
+- reject: 8
+- addressed_findings:
+  - `medium` `patch` Error state in LeaderboardView.vue displayed empty-state text instead of an error message — added `error` ref and error branch in template
+  - `medium` `patch` `type` query parameter accepted arbitrary strings and silently fell through to DEFENDER semantics — added `@Pattern` validation in StatisticsController
+- defer:
+  - Redundant service-layer filtering in LeaderboardServiceImpl (lines 40-50) — repository already applies these filters; defensive duplication is tolerable for MVP scale
+  - N+1 `userRepository.findById` inside aggregation loop — pre-existing in-memory aggregation pattern, deferred to Epic 4.6 DB-level migration
+
 ## Design Notes
 
 The leaderboard aggregates in-memory for MVP scale (10–20 active players). Match type is inferred: if `teamADefenderId` and `teamBDefenderId` are both null, the match is 1v1; otherwise 2v2. Win determination sums game scores per team across all games in the match. Tied matches count as `totalMatches` but contribute no wins or losses. The minimum games threshold defaults to 5 (per UX spec), validated via query parameter with a server-side floor of 0.
@@ -97,35 +110,3 @@ The leaderboard aggregates in-memory for MVP scale (10–20 active players). Mat
 **Manual checks (if no CLI):**
 - Start backend and frontend, navigate to `/leaderboard`, verify sortable columns, filter chips, and pagination controls render and function.
 
-## Auto Run Result
-
-Status: done
-
-### Summary
-Implemented the Global Leaderboard with Filtering feature (Story 4.2). Backend aggregates CONFIRMED match data into per-player statistics with support for rule system, match type, time period, and minimum games threshold filters, plus pagination. Frontend provides a sortable leaderboard view with filter chips and pagination controls.
-
-### Files Changed
-- `src/main/java/com/tictactore/dto/LeaderboardEntry.java` — new DTO
-- `src/main/java/com/tictactore/dto/PageResponse.java` — new pagination wrapper
-- `src/main/java/com/tictactore/repository/LeaderboardRepository.java` — new custom repository
-- `src/main/java/com/tictactore/service/LeaderboardService.java` — new service interface
-- `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java` — new service implementation with in-memory aggregation, filtering, and tie handling
-- `src/main/java/com/tictactore/controller/StatisticsController.java` — new REST controller
-- `frontend/src/features/stats/views/LeaderboardView.vue` — new Vue view
-- `frontend/src/router/index.ts` — added leaderboard route
-- `frontend/src/services/statisticsService.ts` — extended with matchType and ruleSystem params
-- `src/test/java/com/tictactore/service/LeaderboardServiceTest.java` — unit tests (12 tests)
-
-### Review Findings
-- 1 patch applied: tied-match handling now counts matches as `totalMatches` without wins/losses
-- 9 findings rejected as invalid or already handled by existing code
-
-### Verification
-- `./mvnw test` — 277 backend tests passed (20 skipped)
-- `npm run test:unit -- --run` — 203 frontend tests passed
-- `npm run type-check` — no TypeScript errors
-- `npm run build` — production bundle built successfully
-
-### Residual Risks
-- Leaderboard aggregation is in-memory, suitable for MVP scale (10–20 players). Growth beyond ~100 active players would require database-level aggregation.
-- Match type inference relies on null defender IDs; partial or corrupted data could misclassify match types.
