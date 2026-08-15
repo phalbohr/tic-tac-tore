@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.tictactore.dto.UpdateProfileRequest;
@@ -19,6 +20,7 @@ import com.tictactore.exception.UserNotFoundException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -272,6 +274,45 @@ class UserServiceTest {
         userService.deleteAccount(userId);
 
         verify(userOperation).deleteAccount(userId);
+    }
+
+    @Test
+    @DisplayName("Search Active Users - should filter deleted accounts and match nickname case-insensitively")
+    void searchActiveUsers_filtersDeletedAccountsAndMatchesNickname() {
+        var activeUser = User.builder()
+                .id(UUID.randomUUID())
+                .email("active@example.com")
+                .nickname("Alice")
+                .avatar("avatar-1")
+                .build();
+        var deletedUser = User.builder()
+                .id(UUID.randomUUID())
+                .email("deleted-user@example.com")
+                .nickname("DeletedPlayer")
+                .avatar("avatar-2")
+                .build();
+        var exPlayer = User.builder()
+                .id(UUID.randomUUID())
+                .email("ex@example.com")
+                .nickname("ex-player-1")
+                .avatar("avatar-3")
+                .build();
+
+        when(userRepository.searchActiveUsers(eq("ali"), any(Pageable.class))).thenReturn(List.of(activeUser));
+
+        var results = userService.searchActiveUsers("ali");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).nickname()).isEqualTo("Alice");
+    }
+
+    @Test
+    @DisplayName("Search Active Users - should return empty list for blank query")
+    void searchActiveUsers_returnsEmptyListForBlankQuery() {
+        var results = userService.searchActiveUsers("   ");
+
+        assertThat(results).isEmpty();
+        verify(userRepository, never()).searchActiveUsers(anyString(), any(Pageable.class));
     }
 }
 

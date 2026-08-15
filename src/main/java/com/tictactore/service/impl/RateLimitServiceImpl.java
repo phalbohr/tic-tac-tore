@@ -28,7 +28,9 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     private static final String SUBMISSIONS_KEY_PREFIX = "rl:submissions:";
     private static final String REJECTIONS_KEY_PREFIX = "rl:rejections:";
+    private static final String SEARCH_KEY_PREFIX = "rl:search:";
     private static final String HOUR_FORMATTER = "yyyy-MM-dd-HH";
+    private static final String MINUTE_FORMATTER = "yyyy-MM-dd-HH-mm";
     private static final int SUBMISSION_TTL_HOURS = 2;
 
     private final RedissonClient redissonClient;
@@ -126,6 +128,40 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     private String getCurrentHourKey() {
         return ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(HOUR_FORMATTER));
+    }
+
+    @Override
+    public void checkSearchLimit(String clientIp) {
+        var rateLimitProps = properties.getRateLimit();
+        long threshold = rateLimitProps.getSearchQueriesPerMinute();
+
+        String minuteKey = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(MINUTE_FORMATTER));
+        String key = SEARCH_KEY_PREFIX + clientIp + ":" + minuteKey;
+
+        try {
+            RAtomicLong counter = redissonClient.getAtomicLong(key);
+            long count = counter.incrementAndGet();
+            counter.expire(Duration.ofMinutes(2));
+
+            if (count > threshold) {
+                int retryAfter = computeSearchRetryAfter();
+                throw new RateLimitExceededException(
+                        retryAfter,
+                        "Rate limit exceeded: too many search queries. Please try again later."
+                );
+            }
+        } catch (RedisException e) {
+            log.error("Redis unavailable during search rate-limit check for IP {}", clientIp, e);
+            throw new RateLimitExceededException(
+                    "Redis unavailable during rate-limit check", e
+            );
+        }
+    }
+
+    private int computeSearchRetryAfter() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime startOfNextMinute = now.plusMinutes(1).withSecond(0).withNano(0);
+        return (int) Duration.between(now, startOfNextMinute).getSeconds();
     }
 
     @Override

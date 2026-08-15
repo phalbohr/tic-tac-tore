@@ -10,20 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.tictactore.dto.UpdateProfileRequest;
-import com.tictactore.exception.UserNotFoundException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HexFormat;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.UUID;
@@ -116,10 +110,12 @@ public class UserService {
                 if (existingUser != null) {
                     return existingUser;
                 }
-                // If findByEmail is empty, it's a nickname collision. Retry to generate a new nickname.
+                // If findByEmail is empty, it's a nickname collision. Retry to generate a new
+                // nickname.
             }
         }
-        throw new IllegalStateException("Failed to create user after retries due to database constraints", lastException);
+        throw new IllegalStateException("Failed to create user after retries due to database constraints",
+                lastException);
     }
 
     public String sanitizeNickname(String nickname) {
@@ -160,7 +156,8 @@ public class UserService {
 
         List<String> fallbackCandidates = new ArrayList<>();
         for (int i = 0; i < MAX_NICKNAME_ATTEMPTS; i++) {
-            fallbackCandidates.add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
+            fallbackCandidates
+                    .add(baseNickname + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8));
         }
 
         List<String> existingFallbacks = userRepository.findExistingNicknames(fallbackCandidates);
@@ -174,12 +171,12 @@ public class UserService {
     }
 
     private static final String[] PRESET_AVATARS = {
-        "ball-classic", "ball-cork", "player-red-1", "player-red-2",
-        "player-blue-1", "player-blue-2", "table-classic", "table-top",
-        "beer-mug", "beer-bottle", "trophy-gold", "trophy-silver",
-        "glove-red", "glove-blue", "whistle-gold", "foosball-rod",
-        "handle-wood", "handle-rubber", "score-counter", "snack-pretzel",
-        "snack-pizza", "jersey-red", "jersey-blue", "crown"
+            "ball-classic", "ball-cork", "player-red-1", "player-red-2",
+            "player-blue-1", "player-blue-2", "table-classic", "table-top",
+            "beer-mug", "beer-bottle", "trophy-gold", "trophy-silver",
+            "glove-red", "glove-blue", "whistle-gold", "foosball-rod",
+            "handle-wood", "handle-rubber", "score-counter", "snack-pretzel",
+            "snack-pizza", "jersey-red", "jersey-blue", "crown"
     };
 
     private String generateDeterministicAvatar(String email) {
@@ -190,23 +187,29 @@ public class UserService {
         return PRESET_AVATARS[hash % PRESET_AVATARS.length];
     }
 
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100)
-    )
+    @Retryable(retryFor = {
+            ObjectOptimisticLockingFailureException.class }, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
-        return userOperation.updateProfile(userId, request.getNickname(), request.getLanguage(), request.getAvatar(), request.getTutorialCompleted());
+        return userOperation.updateProfile(userId, request.getNickname(), request.getLanguage(), request.getAvatar(),
+                request.getTutorialCompleted());
     }
 
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100)
-    )
+    @Retryable(retryFor = {
+            ObjectOptimisticLockingFailureException.class }, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public void deleteAccount(UUID userId) {
         userOperation.deleteAccount(userId);
     }
+
+    @Transactional(readOnly = true)
+    public List<PlayerDto> searchActiveUsers(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        return userRepository.searchActiveUsers(query.trim(), PageRequest.of(0, 50)).stream()
+                .map(u -> new PlayerDto(u.getId().toString(), u.getNickname(), u.getAvatar()))
+                .collect(Collectors.toList());
+    }
+
     public UserPreferencesDto getLastRuleSystem() {
         return new UserPreferencesDto("STANDARD");
     }
@@ -214,7 +217,7 @@ public class UserService {
     @Transactional
     public List<PlayerDto> getFrequentOpponents() {
         List<User> opponents = new ArrayList<>();
-        String[] mockAvatars = {"player-red-1", "player-blue-1", "trophy-gold", "glove-red"};
+        String[] mockAvatars = { "player-red-1", "player-blue-1", "trophy-gold", "glove-red" };
         for (int i = 1; i <= 4; i++) {
             String email = "mock" + i + "@example.com";
             String nickname = "Mock Player " + i;
@@ -232,7 +235,8 @@ public class UserService {
                 Optional<User> existingByNick = userRepository.findByNickname(nickname);
                 if (existingByNick.isPresent()) {
                     User u = existingByNick.get();
-                    if (u.getAvatar() == null || u.getAvatar().startsWith("http") || u.getAvatar().equals("anonymous")) {
+                    if (u.getAvatar() == null || u.getAvatar().startsWith("http")
+                            || u.getAvatar().equals("anonymous")) {
                         u.setAvatar(defaultAvatar);
                         userRepository.save(u);
                     }

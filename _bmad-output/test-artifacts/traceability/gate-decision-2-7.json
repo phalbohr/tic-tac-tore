@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-10T16:27:00.000Z",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "2-7-global-player-search-and-selection",
+    "label": "Story 2.7 - Global Player Search & Selection"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "FAIL",
+  "rationale": "P0 coverage is 80% (required: 100%). AC-6 lacks full test coverage: missing frequent-opponents fallback test during search failure. 7 store tests blocked by import path error, 5 E2E tests blocked by syntax errors. P1 coverage is 67% (minimum: 80%). Release MUST BE BLOCKED until remaining gaps are addressed.",
+  "nfr_assessment": {
+    "overall_status": "CONCERNS",
+    "overall_risk": "MEDIUM",
+    "domain_risks": {
+      "security": "LOW",
+      "performance": "MEDIUM",
+      "reliability": "MEDIUM",
+      "scalability": "MEDIUM"
+    },
+    "adr_checklist_score": "not_assessed",
+    "criteria_met": 0,
+    "criteria_concerns": 0,
+    "criteria_fail": 0,
+    "criteria_na": 0,
+    "evidence_gaps": 2,
+    "high_priority_issues": 1,
+    "blockers": false
+  },
+  "p0_status": "NOT_MET",
+  "p1_status": "NOT_MET",
+  "overall_status": "NOT_MET",
+  "critical_open": 0,
+  "high_open": 1,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

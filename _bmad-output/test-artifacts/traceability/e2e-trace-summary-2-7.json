@@ -1,0 +1,209 @@
+{
+  "schema_version": "0.1.0",
+  "snapshot_at": "2026-08-10T16:27:00+02:00",
+  "repo": "tic-tac-tore",
+  "collection_mode": "contract_static",
+  "collection_status": "COLLECTED",
+  "inventory_basis": "acceptance_criteria",
+  "gate_basis": "priority_thresholds",
+  "source_sha": "",
+  "target": {
+    "type": "story",
+    "id": "2-7-global-player-search-and-selection",
+    "label": "Story 2.7 - Global Player Search & Selection"
+  },
+  "decision_mode": "deterministic",
+  "evaluator": "Pavel",
+  "confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md",
+      "_bmad-output/test-artifacts/test-design/test-design-epic-2-7.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "coverage": {
+    "inventory": {
+      "covered": 6,
+      "total": 8,
+      "pct": 75
+    },
+    "priority_breakdown": {
+      "P0": {
+        "total": 5,
+        "covered": 4,
+        "pct": 80
+      },
+      "P1": {
+        "total": 3,
+        "covered": 2,
+        "pct": 67
+      },
+      "P2": {
+        "total": 0,
+        "covered": 0,
+        "pct": 100
+      },
+      "P3": {
+        "total": 0,
+        "covered": 0,
+        "pct": 100
+      }
+    },
+    "by_level": {
+      "e2e": { "tests": 5, "criteria_covered": 5 },
+      "api": { "tests": 5, "criteria_covered": 4 },
+      "component": { "tests": 14, "criteria_covered": 6 },
+      "unit": { "tests": 2, "criteria_covered": 2 },
+      "other": { "tests": 0, "criteria_covered": 0 }
+    }
+  },
+  "tests": {
+    "files": 5,
+    "cases": 26,
+    "skipped_cases": 0,
+    "fixme_cases": 0,
+    "pending_cases": 0
+  },
+  "risk_summary": {
+    "critical_open": 1,
+    "high_open": 1,
+    "medium_open": 0,
+    "low_open": 0
+  },
+  "heuristics": {
+    "endpoint_gaps": 0,
+    "auth_negative_path_status": "present",
+    "error_path_status": "partial",
+    "ui_journey_status": "not_applicable",
+    "ui_state_status": "partial"
+  },
+  "gate_status": "FAIL",
+  "gate_criteria": {
+    "p0_coverage_required": "100%",
+    "p0_coverage_actual": "80%",
+    "p0_status": "NOT_MET",
+    "p1_coverage_target": "90%",
+    "p1_coverage_minimum": "80%",
+    "p1_coverage_actual": "67%",
+    "p1_status": "NOT_MET",
+    "overall_coverage_minimum": "80%",
+    "overall_coverage_actual": "75%",
+    "overall_status": "NOT_MET"
+  },
+  "blockers": [
+    {
+      "id": "2.7-COMP-002a",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers debounces API call by 300ms"
+    },
+    {
+      "id": "2.7-COMP-002b",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles successful API response"
+    },
+    {
+      "id": "2.7-COMP-002c",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles API error response"
+    },
+    {
+      "id": "2.7-COMP-002d",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers handles network error"
+    },
+    {
+      "id": "2.7-UNIT-003a",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "searchPlayers clears results when query is empty"
+    },
+    {
+      "id": "2.7-UNIT-003b",
+      "severity": "medium",
+      "reason": "Import error: '../matchDraftStore' should be './matchDraftStore' in matchDraftStore.search.spec.ts",
+      "test_file": "frontend/src/features/match/stores/matchDraftStore.search.spec.ts",
+      "test_title": "openSearch resets search state"
+    },
+    {
+      "id": "2.7-E2E-001",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should open search overlay and find player by nickname"
+    },
+    {
+      "id": "2.7-E2E-002",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should select player from search and close overlay"
+    },
+    {
+      "id": "2.7-E2E-003",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should order frequent opponents before alphabetical results"
+    },
+    {
+      "id": "2.7-E2E-004",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should display error when search API returns 500"
+    },
+    {
+      "id": "2.7-E2E-005",
+      "severity": "medium",
+      "reason": "Syntax error in E2E test: missing braces around getByRole options object",
+      "test_file": "frontend/e2e/tests/e2e/player-search.spec.ts",
+      "test_title": "Should close overlay on Escape key without selection"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "action": "Fix import path in matchDraftStore.search.spec.ts: change '../matchDraftStore' to './matchDraftStore'",
+      "requirements": ["AC-2", "AC-4", "AC-6"]
+    },
+    {
+      "priority": "HIGH",
+      "action": "Fix syntax errors in player-search.spec.ts: add braces around getByRole options ({ name: /search/i })",
+      "requirements": ["AC-1", "AC-3", "AC-4", "AC-6"]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add test for AC-3 verifying alphabetical sorting of non-frequent results",
+      "requirements": ["AC-3"]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add test for AC-6 verifying frequent-opponents strip remains visible when search fails",
+      "requirements": ["AC-6"]
+    },
+    {
+      "priority": "LOW",
+      "action": "Add API tests for fault injection (DB unavailable) and special characters in query per test-design",
+      "requirements": ["AC-2"]
+    }
+  ],
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

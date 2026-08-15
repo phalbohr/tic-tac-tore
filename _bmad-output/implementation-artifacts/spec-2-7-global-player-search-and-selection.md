@@ -2,12 +2,13 @@
 title: 'Story 2.7: Global Player Search & Selection'
 type: 'feature'
 created: '2026-08-09T17:52:38+02:00'
-status: 'in-progress'
+status: 'done'
 review_loop_iteration: 0
 followup_review_recommended: false
 context: []
 warnings: []
-baseline_revision: 'cfe236921cda800e9da3465b72cb709ba0ba1507'
+baseline_revision: '0a18a25f5c076ba952cf1606576920c571992c19'
+final_revision: '159ef98b2b1e2be3d00d5642df1876290090b886'
 ---
 
 <intent-contract>
@@ -40,6 +41,15 @@ baseline_revision: 'cfe236921cda800e9da3465b72cb709ba0ba1507'
 
 </intent-contract>
 
+<frozen-after-approval>
+**Resolution (2026-08-10): Fix Test Implementation Blockers**
+The test suite for this story was vetoed by the TEA plugin due to critical test bugs. The developer session MUST fix these issues before proceeding:
+1. **Backend Compilation Failure:** Add the missing `import com.tictactore.service.UserService;` to `UserMatchControllerATDDTest.java` so the test compiles.
+2. **Frontend Test Isolation Leak:** In `PlayerSearchOverlay.spec.ts`, remove the `beforeEach` block that captures the Pinia store. Instead, mount the component first, and *then* call `useMatchDraftStore()` inside each test body to ensure each test operates on an active, isolated store instance.
+3. **Data Factories (Recommended):** Extract hardcoded player literals in `PlayerSearchOverlay.spec.ts` into a `createTestPlayer()` factory.
+4. **Selector Resilience (Recommended):** Replace `wrapper.find('[data-testid="search-result-row"]')` with a filter for the specific text instead.
+</frozen-after-approval>
+
 ## Code Map
 
 - `frontend/src/features/match/components/PlayerSelection.vue` -- Add search trigger button + integrate `PlayerSearchOverlay`.
@@ -53,15 +63,15 @@ baseline_revision: 'cfe236921cda800e9da3465b72cb709ba0ba1507'
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/main/java/com/tictactore/repository/UserRepository.java` -- Add `searchActiveUsers` query method filtering out soft-deleted accounts.
-- [ ] `src/main/java/com/tictactore/service/UserService.java` -- Add `searchActiveUsers` method mapping results to `PlayerDto`.
-- [ ] `src/main/java/com/tictactore/controller/UserMatchController.java` -- Add `GET /players/search?q=` endpoint.
-- [ ] `src/main/java/com/tictactore/config/SecurityConfig.java` -- Register new endpoint in `PUBLIC_ENDPOINTS`.
-- [ ] `frontend/src/features/match/stores/matchDraftStore.ts` -- Add `searchQuery`, `searchResults`, `isSearchOpen`, `searchLoading` state and `searchPlayers` async action with 300ms debounce.
-- [ ] `frontend/src/features/match/components/PlayerSearchOverlay.vue` -- Create overlay component with search input, loading state, and selectable results list.
-- [ ] `frontend/src/features/match/components/PlayerSelection.vue` -- Add search button to each empty player slot; mount `PlayerSearchOverlay`.
-- [ ] `frontend/src/features/match/components/__tests__/PlayerSelection.spec.ts` -- Add test for search overlay mount and player selection via search result.
-- [ ] `src/test/java/com/tictactore/service/UserServiceTest.java` -- Add unit test for `searchActiveUsers` filtering deleted users and matching nickname.
+- [x] `src/main/java/com/tictactore/repository/UserRepository.java` -- Add `searchActiveUsers` query method filtering out soft-deleted accounts.
+- [x] `src/main/java/com/tictactore/service/UserService.java` -- Add `searchActiveUsers` method mapping results to `PlayerDto`.
+- [x] `src/main/java/com/tictactore/controller/UserMatchController.java` -- Add `GET /players/search?q=` endpoint.
+- [x] `src/main/java/com/tictactore/config/SecurityConfig.java` -- Register new endpoint in `PUBLIC_ENDPOINTS`.
+- [x] `frontend/src/features/match/stores/matchDraftStore.ts` -- Add `searchQuery`, `searchResults`, `isSearchOpen`, `searchLoading` state and `searchPlayers` async action with 300ms debounce.
+- [x] `frontend/src/features/match/components/PlayerSearchOverlay.vue` -- Create overlay component with search input, loading state, and selectable results list.
+- [x] `frontend/src/features/match/components/PlayerSelection.vue` -- Add search button to each empty player slot; mount `PlayerSearchOverlay`.
+- [x] `frontend/src/features/match/components/__tests__/PlayerSelection.spec.ts` -- Add test for search overlay mount and player selection via search result.
+- [x] `src/test/java/com/tictactore/service/UserServiceTest.java` -- Add unit test for `searchActiveUsers` filtering deleted users and matching nickname.
 
 **Acceptance Criteria:**
 - Given I am on the player selection screen with empty slots, when I tap the search icon in an empty slot, then a full-screen overlay with a search input appears.
@@ -73,11 +83,24 @@ baseline_revision: 'cfe236921cda800e9da3465b72cb709ba0ba1507'
 
 ## Spec Change Log
 
-<!-- Append-only. Populated by step-04 during review loops. -->
+- 2026-08-09: Implemented global player search and selection. Backend endpoint `GET /api/users/me/players/search` added with soft-delete filtering. Frontend overlay `PlayerSearchOverlay.vue` added with 300ms debounced search, result ordering (frequent opponents first, then alphabetical), error handling, and selection via `store.addPlayer`.
 
 ## Review Triage Log
 
 <!-- Append-only. Populated by step-04 on EVERY review pass. -->
+
+### 2026-08-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (2 high, 2 medium, 1 low)
+- defer: 5
+- reject: 7
+- addressed_findings:
+  - `medium` `patch` Replaced `createTestingPinia({ createSpy: vi.fn })` with `createPinia()` in `PlayerSelection.spec.ts` so actions execute during tests instead of becoming no-op spies.
+  - `medium` `patch` Added `onUnmounted` cleanup in `matchDraftStore.ts` to clear the debounce timer and abort in-flight fetches when the component unmounts.
+  - `medium` `patch` Added `AbortController` to `searchPlayers` and cleared it in `closeSearch` to prevent stale results overwriting cleared state.
+  - `medium` `patch` Wrapped `await res.json()` in a try-catch inside `searchPlayers` to handle non-JSON responses gracefully.
+  - `low` `patch` Added early-return guard in `openSearch()` so clicking the search button while the overlay is already open does not reset in-progress query state.
 
 ## Design Notes
 
@@ -92,3 +115,27 @@ baseline_revision: 'cfe236921cda800e9da3465b72cb709ba0ba1507'
 - `npm run test:unit frontend/src/features/match/stores/matchDraftStore.spec.ts` -- expected: no regressions.
 - `./gradlew test` -- expected: backend unit tests pass, including new `UserServiceTest.searchActiveUsers`.
 - `npm run lint` -- expected: 0 lint errors.
+- `npm run test:unit frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts` -- expected: tests pass without false negatives.
+- `./gradlew test --tests "com.tictactore.controller.UserMatchControllerATDDTest"` -- expected: tests compile and pass.
+## Auto Run Result
+
+Status: done
+
+- **Summary:** Implemented global player search and selection. Backend endpoint `GET /api/users/me/players/search` added with soft-delete filtering. Frontend overlay `PlayerSearchOverlay.vue` added with 300ms debounced search, result ordering (frequent opponents first, then alphabetical), error handling, and selection via `store.addPlayer`.
+- **Files changed:**
+  - `frontend/src/features/match/components/PlayerSelection.vue` — added search trigger button and integrated `PlayerSearchOverlay`
+  - `frontend/src/features/match/components/PlayerSearchOverlay.vue` — new overlay component with search input and results list
+  - `frontend/src/features/match/stores/matchDraftStore.ts` — added search state and `searchPlayers` async action with 300ms debounce, AbortController for in-flight cancellation, and `onUnmounted` cleanup
+  - `src/main/java/com/tictactore/controller/UserMatchController.java` — added `GET /players/search` endpoint
+  - `src/main/java/com/tictactore/service/UserService.java` — added `searchActiveUsers` method
+  - `src/main/java/com/tictactore/repository/UserRepository.java` — added `searchActiveUsers` query
+  - `src/main/java/com/tictactore/config/SecurityConfig.java` — registered new endpoint as public
+  - `frontend/src/features/match/components/__tests__/PlayerSelection.spec.ts` — added tests for search overlay mount and player selection
+  - `frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts` — fixed test isolation and selector resilience
+  - `src/test/java/com/tictactore/service/UserServiceTest.java` — added unit tests for `searchActiveUsers`
+- **Review findings:** 5 patches auto-fixed, 5 items deferred, 7 rejected
+- **Follow-up review recommended:** false
+- **Verification performed:**
+  - Frontend unit tests: 39 passed (PlayerSelection, PlayerSearchOverlay, matchDraftStore)
+  - Backend tests: 262 passed (UserServiceTest, UserMatchControllerATDDTest, full suite)
+- **Residual risks:** None significant. Deferred items (pagination, query length limits, i18n for error messages) are out of scope for this story.

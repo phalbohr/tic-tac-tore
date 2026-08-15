@@ -91,7 +91,7 @@ test.describe('Story 3.4: Context-Aware Verification Rules E2E', () => {
     await expect(card).toBeVisible();
 
     const partialBadge = page.getByTestId(`partially-confirmed-badge-${pendingMatch.id}`);
-    await expect(partialBadge).not.toBeVisible();
+    await expect(partialBadge).toBeHidden();
 
     const matchBadge = card.locator('span').first();
     await expect(matchBadge).toHaveText(/Match 1/);

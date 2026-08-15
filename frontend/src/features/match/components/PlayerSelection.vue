@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useMatchDraftStore, MatchType, type PlayerDto } from '../stores/matchDraftStore'
 import AvatarBase from '@/components/AvatarBase.vue'
+import PlayerSearchOverlay from './PlayerSearchOverlay.vue'
 
 defineOptions({
   name: 'PlayerSelection'
@@ -14,14 +15,13 @@ function getPlayer(id?: string) {
   if (!id) return undefined
   return store.frequentOpponents.find((p: PlayerDto) => p.id === id)
 }
-
 </script>
 
 <template>
   <div class="flex flex-col gap-2 w-full mt-6">
     <h2 class="text-on-surface font-headline font-bold text-lg mb-2">Players</h2>
-    <div 
-      v-for="index in maxPlayers" 
+    <div
+      v-for="index in maxPlayers"
       :key="index"
       class="player-slot h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2"
     >
@@ -41,13 +41,22 @@ function getPlayer(id?: string) {
         {{ store.selectedPlayers[index - 1] ? (getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`) : 'Select Player' }}
       </span>
       <button v-if="store.selectedPlayers[index - 1]" @click="store.removePlayer(store.selectedPlayers[index - 1]!)" class="text-error font-bold px-2">X</button>
+      <button
+        v-else
+        @click="store.openSearch()"
+        class="text-on-surface-variant hover:text-primary transition-colors px-2"
+        data-testid="open-search-button"
+        aria-label="Search for player"
+      >
+        <span class="material-symbols-outlined">search</span>
+      </button>
     </div>
-    
+
     <div v-if="store.frequentOpponents.length > 0 && store.selectedPlayers.length < maxPlayers" class="mt-4">
       <h3 class="text-on-surface-variant font-bold text-sm mb-2">Frequent Opponents</h3>
       <div class="flex gap-2 overflow-x-auto pb-2">
-        <button 
-          v-for="opponent in store.frequentOpponents" 
+        <button
+          v-for="opponent in store.frequentOpponents"
           :key="opponent.id"
           @click="store.addPlayer(opponent.id)"
           :disabled="store.selectedPlayers.includes(opponent.id)"
@@ -64,5 +73,8 @@ function getPlayer(id?: string) {
         </button>
       </div>
     </div>
+
+    <PlayerSearchOverlay :isOpen="store.isSearchOpen" @close="store.closeSearch()" />
   </div>
 </template>
+

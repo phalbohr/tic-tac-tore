@@ -85,7 +85,7 @@ test.describe('Story 3.3: Match Rejection with Reason', () => {
     });
 
     const card = page.getByTestId('pending-match-card-match-3-3-reject-test');
-    await expect(card).not.toBeVisible();
+    await expect(card).toBeHidden();
   });
 
   test('[P1] Server 400/409 race condition displays alert toast', async ({ page }) => {

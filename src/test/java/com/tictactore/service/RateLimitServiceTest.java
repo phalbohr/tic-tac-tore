@@ -270,4 +270,47 @@ class RateLimitServiceTest {
             assertThat(ex.getMessage()).contains("rejected matches");
         }
     }
+
+    @Nested
+    @DisplayName("Search Rate Limit Tests")
+    class SearchRateLimitTests {
+
+        private static final int DEFAULT_SEARCH_LIMIT = 10;
+        private static final String CLIENT_IP = "192.168.1.100";
+
+        @BeforeEach
+        void setUpSearchMocks() {
+            when(rateLimitConfig.getSearchQueriesPerMinute()).thenReturn((long) DEFAULT_SEARCH_LIMIT);
+            when(redissonClient.getAtomicLong(anyString())).thenReturn(submissionCounter);
+        }
+
+        @Test
+        @DisplayName("[P0] Should allow search query when counter does not exceed threshold")
+        void shouldAllowSearchQueryWhenUnderThreshold() {
+            when(submissionCounter.incrementAndGet()).thenReturn(1L);
+
+            assertDoesNotThrow(() -> service.checkSearchLimit(CLIENT_IP));
+            verify(submissionCounter).expire(Duration.ofMinutes(2));
+        }
+
+        @Test
+        @DisplayName("[P0] Should throw RateLimitExceededException when search limit is exceeded")
+        void shouldThrowWhenSearchLimitExceeded() {
+            when(submissionCounter.incrementAndGet()).thenReturn((long) (DEFAULT_SEARCH_LIMIT + 1));
+
+            RateLimitExceededException ex = assertThrows(RateLimitExceededException.class,
+                    () -> service.checkSearchLimit(CLIENT_IP));
+            assertThat(ex.getMessage()).contains("too many search queries");
+        }
+
+        @Test
+        @DisplayName("[P0] Should throw RateLimitExceededException with redisFailure=true when Redis throws exception")
+        void shouldThrowRedisFailureWhenRedisThrowsException() {
+            when(redissonClient.getAtomicLong(anyString())).thenThrow(new RedisException("Connection refused"));
+
+            RateLimitExceededException ex = assertThrows(RateLimitExceededException.class,
+                    () -> service.checkSearchLimit(CLIENT_IP));
+            assertThat(ex.isRedisFailure()).isTrue();
+        }
+    }
 }

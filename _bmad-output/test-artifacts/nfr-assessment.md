@@ -3,34 +3,28 @@ stepsCompleted:
   - step-01-load-context
   - step-02-define-thresholds
   - step-03-gather-evidence
-  - step-04-evaluate-and-score
+  - step-04e-aggregate-nfr
   - step-05-generate-report
 lastStep: step-05-generate-report
-lastSaved: '2026-08-07'
+lastSaved: '2026-08-10T16:31:50.000Z'
 workflowType: testarch-nfr-assess
 inputDocuments:
-  - _bmad-output/implementation-artifacts/spec-3-6-submission-rate-limiting-anti-spam.md
-  - _bmad-output/test-artifacts/test-design-epic-3-6.md
-  - _bmad/tea/config.yaml
-  - src/main/java/com/tictactore/service/RateLimitService.java
-  - src/main/java/com/tictactore/service/impl/RateLimitServiceImpl.java
-  - src/main/java/com/tictactore/exception/RateLimitExceededException.java
-  - src/main/java/com/tictactore/exception/ApiError.java
-  - src/main/java/com/tictactore/exception/GlobalExceptionHandler.java
-  - src/main/java/com/tictactore/service/impl/MatchServiceImpl.java
-  - src/main/java/com/tictactore/config/ApplicationProperties.java
-  - src/main/resources/application.yml
-  - src/test/java/com/tictactore/service/RateLimitServiceTest.java
-  - src/test/java/com/tictactore/service/MatchServiceTest.java
-  - frontend/src/features/match/stores/matchDraftStore.ts
-  - frontend/src/features/match/stores/matchDraftStore.spec.ts
+  - _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
+  - _bmad-output/test-artifacts/test-design/test-design-epic-2-7.md
+  - _bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md
+  - _bmad-output/test-artifacts/automation-summary-2-7.md
+  - _bmad-output/test-artifacts/definition-of-done-2-7.md
+  - frontend/e2e/tests/e2e/player-search.spec.ts
+  - frontend/e2e/support/factories/player-search.factory.ts
+  - frontend/src/features/match/stores/matchDraftStore.search.spec.ts
+  - src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
 ---
 
-# NFR Evidence Audit - Story 3.6 Submission Rate Limiting (Anti-Spam)
+# NFR Evidence Audit - Story 2.7: Global Player Search & Selection
 
-**Date:** 2026-08-07
-**Story:** 3-6-submission-rate-limiting-anti-spam
-**Overall Status:** CONCERNS ⚠️
+**Date:** 2026-08-10
+**Story:** 2-7-global-player-search-and-selection
+**Overall Status:** FAIL ❌
 
 ---
 
@@ -38,13 +32,15 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ## Executive Summary
 
-**Assessment:** 12 PASS, 10 CONCERNS, 0 FAIL (7 criteria N/A to this feature scope)
+**Assessment:** 11 PASS, 7 CONCERNS, 0 FAIL (18/29 criteria assessed, 11 N/A)
 
-**Blockers:** 0
+**Blockers:** 2 HIGH risk domains (Performance, Scalability) with unmitigated R-001 and R-002
 
-**High Priority Issues:** 0
+**High Priority Issues:** 2
+- No performance testing evidence (p95 < 200ms unvalidated)
+- No pagination/rate limiting implemented on public search endpoint
 
-**Recommendation:** Proceed to release with operational follow-up. All acceptance criteria verified. Known limitations (fixed-window burst, fail-closed Redis outage) are documented and accepted for initial deployment. Monitoring and circuit-breaker improvements planned for next milestone.
+**Recommendation:** FAIL - Release must be blocked until R-001 and R-002 mitigations are implemented and validated with evidence.
 
 ---
 
@@ -52,41 +48,41 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ### Response Time (p95)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** <2ms latency per rate-limit check under normal Redis connectivity (from test-design NFR plan)
-- **Actual:** Not measured — no k6/JMH benchmark executed
-- **Evidence:** `RateLimitServiceImpl` uses O(1) `RAtomicLong.incrementAndGet()` for submissions and O(log N) sorted-set range removal for rejections. Algorithmic complexity supports <2ms target, but no profiling evidence collected.
-- **Findings:** Implementation is efficient, but P3-02 performance benchmark from test-design was not executed. Risk is low given Redisson operation characteristics, but unvalidated.
+- **Status:** CONCERN ⚠️
+- **Threshold:** < 200ms (from test-design-epic-2-7.md)
+- **Actual:** NOT ASSESSED - No load tests executed
+- **Evidence:** No k6, JMeter, or APM latency data available in working tree
+- **Findings:** p95 latency target of 200ms is defined in test-design but completely unvalidated. No performance tests exist in working tree.
 
 ### Throughput
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** N/A (no throughput SLO defined)
-- **Actual:** N/A (no load test executed)
-- **Evidence:** No concurrent load testing performed. Test-design explicitly deferred load testing to platform team.
-- **Findings:** Redis-backed counters are horizontally scalable by Redis cluster design. Application layer introduces no per-request blocking beyond single Redis round-trip.
+- **Status:** CONCERN ⚠️
+- **Threshold:** Server-side pagination (LIMIT 50-100)
+- **Actual:** Unbounded result set - no LIMIT clause in UserRepository.searchActiveUsers
+- **Evidence:** UserRepository.searchActiveUsers has no LIMIT; test-design R-002 Score 6 HIGH risk
+- **Findings:** Large user base will cause slow responses and potential UI freeze. Mitigation planned but NOT implemented.
 
 ### Resource Usage
 
 - **CPU Usage**
-  - **Status:** PASS ✅
+  - **Status:** N/A
   - **Threshold:** N/A
   - **Actual:** N/A
-  - **Evidence:** No CPU-intensive operations. Single Redis call per submission/rejection check.
+  - **Evidence:** No load testing performed
 
 - **Memory Usage**
-  - **Status:** PASS ✅
+  - **Status:** N/A
   - **Threshold:** N/A
   - **Actual:** N/A
-  - **Evidence:** No new in-memory caches. Redis state is externalized.
+  - **Evidence:** No load testing performed
 
 ### Scalability
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Fixed-window hourly keys should not grow unbounded
-- **Actual:** TTL of 2 hours applied to submission keys; rejection keys expire with window hours
-- **Evidence:** `RateLimitServiceImpl` sets `counter.expire(Duration.ofHours(2))` and `sortedSet.expire(Duration.ofHours(windowHours))`. Test-design notes fixed-window burst at hour boundaries (R-002, score 6).
-- **Findings:** Memory footprint is bounded by TTLs. Known burst limitation documented in spec and code comments.
+- **Status:** CONCERN ⚠️
+- **Threshold:** 10K users supported without degradation
+- **Actual:** Will degrade without pagination, rate limiting, and database indexing
+- **Evidence:** No database index on nickname column; LIKE query without index
+- **Findings:** Acceptable for MVP with small user base, but critical blockers for production.
 
 ---
 
@@ -94,43 +90,43 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ### Authentication Strength
 
-- **Status:** PASS ✅
-- **Threshold:** Existing Spring Security/OAuth2 configuration inherited
-- **Actual:** Rate-limit endpoint uses same security context as existing match endpoints
-- **Evidence:** `MatchController` inherits global security config. `MatchServiceImpl` derives `creator` from authenticated request. No new auth code introduced.
-- **Findings:** Authentication boundary unchanged.
+- **Status:** N/A
+- **Threshold:** N/A
+- **Actual:** Public endpoint by design (consistent with frequent-opponents)
+- **Evidence:** SecurityConfig.java registers /api/users/me/players/search in PUBLIC_ENDPOINTS
+- **Findings:** Endpoint is intentionally public. No authentication required.
 
 ### Authorization Controls
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Rate limiting must enforce per-user limits using authenticated principal's identity
-- **Actual:** `creator = request.creatorId() != null ? request.creatorId() : request.teamAAttackerId()` — client-supplied `creatorId` is used directly
-- **Evidence:** `MatchServiceImpl.createMatch()` line 54. R-006 in test-design flags this: "If the backend doesn't validate creatorId against the authenticated principal, a user could bypass per-user rate limiting by cycling creatorIds." This is a pre-existing issue, not introduced by Story 3.6, but it undermines the anti-spam purpose.
-- **Findings:** Rate-limit key derivation trusts client input. Mitigation: validate `creatorId` against authenticated principal or always use the authenticated user's ID for rate-limiting.
+- **Status:** N/A
+- **Threshold:** N/A
+- **Actual:** Public access
+- **Evidence:** Same as Authentication - endpoint is public by design
+- **Findings:** No RBAC needed for this endpoint.
 
 ### Data Protection
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Redis data-at-rest encryption enabled at platform level
-- **Actual:** Application code does not configure Redis encryption; depends on platform/Redis cluster settings
-- **Evidence:** `application.yml` configures Redisson connection via standard Spring Data Redis properties. No `ssl` or encryption settings in app config.
-- **Findings:** Acceptable for initial deployment if platform enforces Redis encryption. Should be verified in staging.
+- **Status:** PASS ✅
+- **Threshold:** No email addresses exposed; soft-deleted accounts excluded
+- **Actual:** PlayerDto contains only id, nickname, avatar; soft-delete filter implemented
+- **Evidence:** UserService.searchActiveUsers filters email NOT LIKE 'deleted-%'; UserMatchControllerATDDTest.shouldNotExposeEmailAddresses verifies exclusion
+- **Findings:** Data protection properly implemented.
 
 ### Vulnerability Management
 
 - **Status:** PASS ✅
-- **Threshold:** 0 critical/high vulnerabilities in changed code
-- **Actual:** 0 critical/high vulnerabilities identified
-- **Evidence:** No new SQL injection vectors (no raw queries). No XSS exposure (backend returns JSON error objects). CSRF protection via existing `getCsrfHeaders()` in frontend. Rate-limit thresholds are config-bound, not hardcoded.
-- **Findings:** Standard Spring Boot validation and existing security posture preserved.
+- **Threshold:** SQL injection blocked; XSS sanitized
+- **Actual:** JPA parameterized queries used; no string concatenation
+- **Evidence:** UserRepository.searchActiveUsers uses @Query with named parameter :query
+- **Findings:** Input validation properly implemented.
 
 ### Compliance
 
-- **Status:** N/A
-- **Standards:** No regulated compliance standards specific to this feature
-- **Actual:** N/A
-- **Evidence:** N/A
-- **Findings:** Feature-level rate limiting; compliance scope is system-level.
+- **Status:** PARTIAL ⚠️
+- **Standards:** OWASP Top 10, GDPR
+- **Actual:** GDPR PASS; OWASP Top 10 PARTIAL (missing rate limiting for public endpoint)
+- **Evidence:** No rate limiting configured; R-001 Score 6 HIGH risk
+- **Findings:** Rate limiting mitigation planned but not implemented.
 
 ---
 
@@ -138,51 +134,55 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ### Availability (Uptime)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Fail-closed Redis unavailability blocks ALL match submissions with HTTP 503 (documented behavior)
-- **Actual:** Verified: `RateLimitServiceImpl` catches `RedisException` and throws `RateLimitExceededException` with `redisFailure=true`, which `GlobalExceptionHandler` maps to 503
-- **Evidence:** R-001 in test-design (score 6): "With a shared Redis instance, a network blip or restart during peak hours causes complete submission outage for all users." Mitigation: documented as intentional design choice; monitoring on RedisException frequency planned.
-- **Findings:** Single point of failure. No circuit breaker or fallback allow-list. Acceptable for launch if Redis SLA is high and monitoring alerts are configured.
+- **Status:** N/A
+- **Threshold:** N/A
+- **Actual:** N/A
+- **Evidence:** No SLA changes for this feature
+- **Findings:** New endpoint on existing service.
 
 ### Error Rate
 
-- **Status:** PASS ✅
-- **Threshold:** 0 unhandled exceptions in rate-limit flows
-- **Actual:** 0 unhandled exceptions in test execution (243 backend tests pass)
-- **Evidence:** `RateLimitServiceTest` covers Redis failure paths. `MatchServiceTest` verifies exception propagation. `GlobalExceptionHandler` returns structured `ApiError` for both 429 and 503.
-- **Findings:** All error paths return controlled HTTP responses with standard error format.
+- **Status:** CONCERN ⚠️
+- **Threshold:** < 0.1%
+- **Actual:** NOT ASSESSED - No error rate monitoring for new endpoint
+- **Evidence:** No APM or error tracking configured for /players/search
+- **Findings:** Backend error handling exists but frontend error rates not monitored.
 
 ### MTTR (Mean Time To Recovery)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Redis recovery should restore rate-limit service without application restart
-- **Actual:** No health-check-driven recovery. Application retries Redis on next request after recovery.
-- **Evidence:** Redisson uses lazy connection; no startup-time Redis validation. Test-design notes "Verify Redis connection at startup via health check" as contingency.
-- **Findings:** Recovery is passive (wait for next request). No active health check or automatic reconnection validation.
+- **Status:** N/A
+- **Threshold:** N/A
+- **Actual:** N/A
+- **Evidence:** No incident response changes
 
 ### Fault Tolerance
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Submission checks fail-closed; rejection recording is fire-and-forget
-- **Actual:** `checkSubmissionLimit` throws 503 on Redis failure. `recordRejection` catches `RedisException`, logs warning, and continues.
-- **Evidence:** R-003 in test-design (score 4): "Rejected matches are not counted toward the rejection throttle, allowing spammy users to bypass anti-rejection protection during outages."
-- **Findings:** Partial fault tolerance. Submission path is fail-closed (safe). Rejection path is best-effort (acceptable gap documented).
+- **Status:** CONCERN ⚠️
+- **Threshold:** Graceful degradation + retry
+- **Actual:** Frontend shows friendly errors; no retry or circuit breaker
+- **Evidence:** matchDraftStore.searchPlayers handles errors gracefully; no retry logic
+- **Findings:** Degraded mode works but no automatic recovery mechanisms.
 
 ### CI Burn-In (Stability)
 
-- **Status:** PASS ✅
-- **Threshold:** All tests deterministic; no flaky failures
-- **Actual:** 243 backend tests pass; 154 frontend tests pass
-- **Evidence:** `./mvnw test` and `npm run test:unit -- --run` complete without failures. New tests use mocked Redisson (no external Redis dependency in unit tests).
-- **Findings:** Test suite is stable. No hard waits or conditional test flow in new code.
+- **Status:** NOT ASSESSED ℹ️
+- **Threshold:** 100 consecutive successful runs
+- **Actual:** N/A
+- **Evidence:** No burn-in tests executed for this story
 
 ### Disaster Recovery
 
-- **Status:** CONCERN ⚠️
-- **Threshold:** RTO/RPO defined for Redis-backed rate-limit state
-- **Actual:** No RTO/RPO defined. Rate-limit state is ephemeral (TTL-based). Worst case: users can resubmit after TTL expires or Redis recovers.
-- **Evidence:** Test-design notes "runbook for Redis recovery" as planned for R-001 mitigation. Not yet implemented.
-- **Findings:** Acceptable because rate-limit state is transient and reconstructable from user behavior. No permanent data loss risk.
+- **RTO (Recovery Time Objective)**
+  - **Status:** N/A
+  - **Threshold:** N/A
+  - **Actual:** N/A
+  - **Evidence:** No DR changes
+
+- **RPO (Recovery Point Objective)**
+  - **Status:** N/A
+  - **Threshold:** N/A
+  - **Actual:** N/A
+  - **Evidence:** No DR changes
 
 ---
 
@@ -190,73 +190,60 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ### Test Coverage
 
-- **Status:** PASS ✅
-- **Threshold:** RateLimitServiceImpl >=80% line coverage; GlobalExceptionHandler rate-limit handlers 100%; matchDraftStore 429/503 paths 100%
-- **Actual:** 10 RateLimitService unit tests + 4 MatchService rate-limiting tests + 2 frontend 429/503 tests = 16 new tests. Full backend suite (243) and frontend suite (154) pass.
-- **Evidence:** `RateLimitServiceTest` covers submission counter, rejection sliding window, Redis failures, retry-after computation, and edge cases. `MatchServiceTest` covers createMatch propagation, idempotency skip, and rejectMatch recording. `matchDraftStore.spec.ts` covers HTTP 429 retry-time banner and HTTP 503 server-error path.
-- **Findings:** Coverage targets from test-design met.
+- **Status:** CONCERN ⚠️
+- **Threshold:** >= 80%
+- **Actual:** ~75% overall coverage (6/8 acceptance criteria fully covered)
+- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md; automation-summary-2-7.md
+- **Findings:** P0 coverage 80%, P1 coverage 67%. E2E tests added in working tree but contain syntax errors and cannot execute. 12 of 26 mapped tests blocked by infrastructure issues (import path + E2E syntax errors).
 
 ### Code Quality
 
-- **Status:** PASS ✅
-- **Threshold:** Clean separation; no hardcoded thresholds in production code
-- **Actual:** All thresholds read from `ApplicationProperties.RateLimit` which binds to `application.yml` with `${ENV_VAR:default}` fallbacks
-- **Evidence:** `ApplicationProperties.RateLimit` nested class with defaults (10, 5, 24, 30). `application.yml` lines 47-51. No hardcoded magic numbers in `RateLimitServiceImpl`.
-- **Findings:** Configuration management follows project conventions.
+- **Status:** N/A
+- **Threshold:** >= 85/100
+- **Actual:** N/A
+- **Evidence:** No SonarQube or similar analysis available
+- **Findings:** No static analysis evidence collected.
 
 ### Technical Debt
 
-- **Status:** PASS ✅
-- **Threshold:** No orphaned imports, dead code, or unused properties
-- **Actual:** New files are referenced. `tournamentSubmissionsPerHour` property is added as config placeholder (explicitly documented as unused until Epic 8).
-- **Evidence:** `ApplicationPropertiesTest` verifies config binding. `GlobalExceptionHandler` integrates new handler without modifying existing ones.
-- **Findings:** No technical debt introduced.
+- **Status:** N/A
+- **Threshold:** < 5% debt ratio
+- **Actual:** N/A
+- **Evidence:** No code quality analysis available
 
 ### Documentation Completeness
 
 - **Status:** PASS ✅
-- **Threshold:** Story spec with ACs, design notes, and verification commands
-- **Actual:** `spec-3-6-submission-rate-limiting-anti-spam.md` contains intent-contract, code map, tasks, 6 ACs, design notes, and verification commands
-- **Evidence:** Spec documents fixed-window design, sliding-window rejections, fail-closed behavior, idempotency interaction, and threshold configuration.
-- **Findings:** Documentation complete.
+- **Threshold:** >= 90%
+- **Actual:** 100%
+- **Evidence:** spec-2-7-global-player-search-and-selection.md, test-design-epic-2-7.md, automation-summary-2-7.md, definition-of-done-2-7.md contain complete acceptance criteria, design notes, verification commands, and test plans
+- **Findings:** Documentation is complete and comprehensive. New test artifacts (automation summary, definition-of-done, E2E factory) improve evidence trail.
 
 ### Test Quality
 
-- **Status:** PASS ✅
-- **Threshold:** Deterministic, isolated, explicit assertions, <300 lines, <1.5 min
-- **Actual:** All new tests meet quality criteria
-- **Evidence:** `RateLimitServiceTest` uses Mockito with mocked Redisson. `MatchServiceTest` uses `@InjectMocks` with mocked `RateLimitService`. Frontend tests use Vitest with mocked fetch. No hard waits, no conditional test flow.
-- **Findings:** Tests are fast, deterministic, and maintainable.
+- **Status:** CONCERN ⚠️
+- **Threshold:** All P0 tests pass
+- **Actual:** 0% P0 test pass rate for new E2E tests (syntax errors prevent execution); backend unit tests pass (262 passed per spec)
+- **Evidence:** traceability-matrix-2-7-global-player-search-and-selection.md; E2E syntax errors in player-search.spec.ts lines 58, 81, 112, 139
+- **Findings:** Test infrastructure issues prevent validation of new E2E tests. Store tests may have import path issues. Backend tests pass but frontend E2E and some store tests are blocked.
 
 ---
 
 ## Custom NFR Evidence Audits
 
-### Anti-Spam Rate Limiting (Feature-Specific)
+### ADR Quality Readiness Checklist (8 categories, 29 criteria)
 
-- **Status:** PASS ✅
-- **Threshold:** 10 submissions/hour, 5 rejections/24h per user; 429 with `retryAfter`; 503 on Redis failure
-- **Actual:** All thresholds implemented and tested
-- **Evidence:** `RateLimitServiceImpl` — RAtomicLong fixed-window counter (submissions), RScoredSortedSet sliding window (rejections). `GlobalExceptionHandler` — 429 with `RATE_LIMIT_EXCEEDED`, 503 with `RATE_LIMIT_UNAVAILABLE`. Frontend `matchDraftStore.ts` — 429 banner with retry time.
-- **Findings:** All 6 acceptance criteria verified.
-
-### Idempotency Interaction
-
-- **Status:** PASS ✅
-- **Threshold:** Idempotent resubmission must not increment submission counter
-- **Actual:** Rate-limit check runs AFTER idempotency check in `MatchServiceImpl.createMatch()`
-- **Evidence:** `MatchServiceTest.shouldNotCheckRateLimit_onIdempotentResubmission()` verifies `verifyNoInteractions(rateLimitService)` when existing match is returned.
-- **Findings:** AC5 satisfied.
+- **Status:** CONCERN ⚠️
+- **Threshold:** >= 26/29 (90%+) for strong foundation
+- **Actual:** 10/29 PASS, 7/29 CONCERN, 0/29 FAIL, 12/29 N/A
+- **Evidence:** ADR Quality Readiness Checklist assessment
+- **Findings:** 17 criteria assessed. Key gaps: no load testing (3.2), no rate limiting (7.2), no metrics for new endpoint (6.3), missing sample requests (1.4), no state control/seeding APIs (1.3). E2E tests added but blocked by syntax errors.
 
 ---
 
 ## Quick Wins
 
-1 quick win identified for immediate implementation:
-
-1. **Validate creatorId against authenticated principal** (Security) - P1 - 1 hour
-   - In `MatchServiceImpl.createMatch()`, replace `request.creatorId()` with `securityContext.getCurrentUserId()` for rate-limit keying.
-   - Minimal code change; closes R-006 spoofing gap.
+0 quick wins identified - all findings require code changes or test execution.
 
 ---
 
@@ -264,66 +251,87 @@ Note: This audit summarizes existing implementation evidence; it does not run te
 
 ### Immediate (Before Release) - CRITICAL/HIGH Priority
 
-None required.
+1. **Implement R-001 mitigation: IP-based rate limiting** - CRITICAL - 4 hours - Backend
+   - Add rate limiting (10 req/min per IP) on /api/users/me/players/search
+   - Add monitoring for request volume anomalies
+   - Validation: Load test confirms rate limit enforced; monitoring dashboard shows metrics
+
+2. **Implement R-002 mitigation: Server-side pagination** - CRITICAL - 4 hours - Backend
+   - Add LIMIT 50 to searchActiveUsers query
+   - Add maxResults parameter with validation (max 100)
+   - Validation: API returns max 100 results; p95 < 200ms with 10k users
+
+3. **Fix E2E test syntax errors** - HIGH - 30 minutes - DEV
+   - Fix missing braces around `getByRole` options in player-search.spec.ts lines 58, 81, 112, 139
+   - Validation: E2E tests compile and execute
+
+4. **Verify store test import path** - HIGH - 15 minutes - DEV
+   - Confirm matchDraftStore.search.spec.ts import path is correct
+   - Validation: Store tests execute without import errors
 
 ### Short-term (Next Milestone) - MEDIUM Priority
 
-1. **Add Micrometer counter for RedisException in RateLimitServiceImpl** - P2 - 2 hours - Backend
-   - Instrument `RedisException` catch blocks with `Counter.builder("rate_limit.redis.errors").register(meterRegistry).increment()`.
-   - Alert when error rate exceeds 5/minute.
-   - Validation: Prometheus/Datadog metric visible; alert fires in staging test.
+1. **Execute k6 load test** - MEDIUM - 4 hours - QA
+   - Validate p95 < 200ms under expected load
+   - Identify bottlenecks and resource limits
 
-2. **Add circuit breaker for Redis calls in RateLimitServiceImpl** - P2 - 4 hours - Backend
-   - Implement fallback allow + warning log when Redis is unavailable for submission checks (instead of hard 503).
-   - Validation: Redis failure simulation shows degraded mode (allow submissions with warning) instead of total outage.
+2. **Add missing test coverage** - MEDIUM - 4 hours - DEV/QA
+   - User interaction test for AC-1 (search button tap)
+   - Explicit addPlayer verification for AC-4
+   - Frequent-opponents fallback test for AC-6
+   - Alphabetical sort test for AC-3
 
-3. **Execute P3-02 performance benchmark** - P3 - 2 hours - QA
-   - JMH or JUnit timing assertion on `checkSubmissionLimit` with mocked Redisson.
-   - Validation: p95 < 2ms over 1000 iterations.
+3. **Add database index on nickname** - MEDIUM - 2 hours - Backend
+   - Create migration adding index on nickname column
+   - Validation: Query plan shows index usage
 
 ### Long-term (Backlog) - LOW Priority
 
-1. **Replace fixed-window counter with sliding-window log for submissions** - P3 - 4 hours - Backend
-   - Eliminates hour-boundary burst (R-002). Uses Redis sorted set with timestamps instead of RAtomicLong.
-   - Validation: No burst possible; 10 submissions in last 60 minutes always enforced.
+1. **Implement full-text search** - LOW - 8 hours - Backend
+   - Replace LIKE query with full-text search for better relevance and performance
+   - Consider PostgreSQL full-text search or Elasticsearch
 
-2. **Add Testcontainers Redis integration test** - P3 - 3 hours - QA
-   - Validates real Redis behavior (TTL, sorted set eviction) vs mock divergence.
-   - Validation: `RateLimitServiceIT` passes against embedded Redis.
+2. **Add monitoring and alerting** - LOW - 4 hours - Ops
+   - Add metrics for request count, latency, error rate
+   - Set up 5xx alerting for /players/search
 
 ---
 
 ## Monitoring Hooks
 
-4 monitoring hooks recommended to detect issues before failures:
+3 monitoring hooks recommended to detect issues before failures:
 
 ### Performance Monitoring
 
-- [ ] Rate-limit check latency p95/p99 - Track via Micrometer timer or Actuator metrics endpoint
-  - **Owner:** Backend
-  - **Deadline:** 2026-08-14
+- [ ] k6 load test in CI pipeline - Execute nightly load test against /players/search
+  - **Owner:** QA
+  - **Deadline:** 2026-08-17
+
+- [ ] p95 latency alert - Alert when p95 > 200ms for 5 minutes
+  - **Owner:** Ops
+  - **Deadline:** 2026-08-17
 
 ### Security Monitoring
 
-- [ ] Rate-limit 429 hit frequency by user - Alert on spike indicating abuse or misconfigured threshold
-  - **Owner:** Backend / DevOps
-  - **Deadline:** 2026-08-14
+- [ ] Rate limit monitoring - Track request volume per IP; alert on spikes
+  - **Owner:** Ops
+  - **Deadline:** 2026-08-17
 
 ### Reliability Monitoring
 
-- [ ] RedisException frequency in RateLimitServiceImpl - Alert when >5 errors/minute (R-001 mitigation)
-  - **Owner:** Backend
-  - **Deadline:** 2026-08-14
-
-- [ ] HTTP 503 rate-limit-unavailable count - Alert on any 503 responses (indicates Redis outage)
-  - **Owner:** Backend / DevOps
-  - **Deadline:** 2026-08-14
+- [ ] Error rate tracking - Monitor 5xx rate for /players/search
+  - **Owner:** Ops
+  - **Deadline:** 2026-08-17
 
 ### Alerting Thresholds
 
-- [ ] Rate-limit 429 rate > 10% of submissions - Notify on-call (possible abuse or threshold too low)
-  - **Owner:** DevOps
-  - **Deadline:** 2026-08-14
+- [ ] p95 latency > 200ms - Notify backend team
+  - **Owner:** Ops
+  - **Deadline:** 2026-08-17
+
+- [ ] 5xx error rate > 1% - Notify backend team
+  - **Owner:** Ops
+  - **Deadline:** 2026-08-17
 
 ---
 
@@ -331,35 +339,47 @@ None required.
 
 2 fail-fast mechanisms recommended to prevent failures:
 
-### Circuit Breakers (Reliability)
+### Rate Limiting (Performance/Security)
 
-- [ ] Circuit breaker for Redis calls in RateLimitServiceImpl — fallback to allow + warning log instead of hard 503 on transient Redis failures
+- [ ] Implement IP-based rate limiting (10 req/min) on /players/search
   - **Owner:** Backend
   - **Estimated Effort:** 4 hours
 
-### Rate Limiting (Performance)
+### Validation Gates (Security)
 
-- [ ] Rate limiting already implemented (this feature). Ensure Redis cluster sizing matches expected peak QPS.
-  - **Owner:** DevOps
-  - **Estimated Effort:** Infrastructure review
+- [ ] Add integration test verifying rate limiting enforcement
+  - **Owner:** QA
+  - **Estimated Effort:** 2 hours
 
 ---
 
 ## Evidence Gaps
 
-2 evidence gaps identified — action required:
+4 evidence gaps identified - action required:
 
-- [ ] **Rate-limit check latency benchmark** (Performance)
+- [ ] **Performance baseline for /players/search** (Performance)
   - **Owner:** QA
-  - **Deadline:** 2026-08-14
-  - **Suggested Evidence:** JMH benchmark or JUnit timing assertion (P3-02 from test-design)
-  - **Impact:** <2ms target is unvalidated; low risk but unmeasured
+  - **Deadline:** 2026-08-17
+  - **Suggested Evidence:** k6 load test results, APM metrics
+  - **Impact:** Cannot validate p95 < 200ms target; release blocked
 
-- [ ] **Concurrent load test under rate-limit contention** (Scalability)
-  - **Owner:** QA / Platform
-  - **Deadline:** 2026-08-21
-  - **Suggested Evidence:** k6 test with 50-100 concurrent users submitting matches
-  - **Impact:** Fixed-window burst behavior (R-002) and Redis contention behavior unknown under load
+- [ ] **Rate limiting implementation** (Security)
+  - **Owner:** Backend
+  - **Deadline:** 2026-08-17
+  - **Suggested Evidence:** Load test confirming 10 req/min limit; monitoring dashboard
+  - **Impact:** Public endpoint vulnerable to scraping/DDoS; R-001 unmitigated
+
+- [ ] **Pagination implementation** (Scalability)
+  - **Owner:** Backend
+  - **Deadline:** 2026-08-17
+  - **Suggested Evidence:** API response with LIMIT 50; maxResults parameter validation
+  - **Impact:** Unbounded results cause performance degradation; R-002 unmitigated
+
+- [ ] **Database index on nickname** (Scalability)
+  - **Owner:** Backend
+  - **Deadline:** 2026-08-17
+  - **Suggested Evidence:** Database migration; EXPLAIN plan showing index usage
+  - **Impact:** Query performance degrades as user base grows
 
 ---
 
@@ -369,21 +389,21 @@ None required.
 
 | Category                                         | Criteria Met       | PASS             | CONCERNS             | FAIL             | Overall Status                      |
 | ------------------------------------------------ | ------------------ | ---------------- | -------------------- | ---------------- | ----------------------------------- |
-| 1. Testability & Automation                      | 2/4          | 2         | 2             | 0         | CONCERNS ⚠️                 |
-| 2. Test Data Strategy                            | 2/3         | 2        | 1             | 0        | CONCERNS ⚠️               |
-| 3. Scalability & Availability                    | 1/4         | 1        | 3             | 0        | CONCERNS ⚠️               |
-| 4. Disaster Recovery                             | 0/3         | 0        | 1             | 0        | CONCERNS ⚠️               |
-| 5. Security                                      | 3/4        | 3       | 1             | 0       | CONCERNS ⚠️             |
-| 6. Monitorability, Debuggability & Manageability | 1/4        | 1       | 1             | 0       | CONCERNS ⚠️             |
-| 7. QoS & QoE                                     | 2/4        | 2       | 1             | 0       | CONCERNS ⚠️             |
-| 8. Deployability                                 | 1/3        | 1       | 0             | 0        | N/A ℹ️               |
-| **Total**                                        | **12/29** | **12** | **10** | **0** | **CONCERNS ⚠️** |
+| 1. Testability & Automation                      | 2/4                | 2                | 2                    | 0                | ⚠️ CONCERNS                         |
+| 2. Test Data Strategy                            | 2/3                | 2                | 0                    | 0                | ✅ PASS                             |
+| 3. Scalability & Availability                    | 1/4                | 1                | 2                    | 0                | ⚠️ CONCERNS                         |
+| 4. Disaster Recovery                             | 0/3                | 0                | 0                    | 0                | ⬜ NOT ASSESSED                     |
+| 5. Security                                      | 2/4                | 2                | 0                    | 0                | ✅ PASS                             |
+| 6. Monitorability, Debuggability & Manageability | 0/4                | 0                | 1                    | 0                | ⚠️ CONCERNS                         |
+| 7. QoS & QoE                                     | 2/4                | 2                | 2                    | 0                | ⚠️ CONCERNS                         |
+| 8. Deployability                                 | 1/3                | 1                | 0                    | 0                | ✅ PASS                             |
+| **Total**                                        | **10/29**          | **10**           | **7**                | **0**            | **⚠️ CONCERNS**                     |
 
 **Criteria Met Scoring:**
 
-- 12/29 (41%) = Room for improvement
-- All CONCERNS have documented mitigations or are pre-existing gaps
-- 0 FAIL criteria
+- >=26/29 (90%+) = Strong foundation
+- 20-25/29 (69-86%) = Room for improvement
+- <20/29 (<69%) = Significant gaps
 
 ---
 
@@ -391,56 +411,60 @@ None required.
 
 ```yaml
 nfr_assessment:
-  date: '2026-08-07'
-  story_id: '3-6-submission-rate-limiting-anti-spam'
-  feature_name: 'Submission Rate Limiting (Anti-Spam)'
-  adr_checklist_score: '12/29' # ADR Quality Readiness Checklist
+  date: '2026-08-10'
+  story_id: '2-7-global-player-search-and-selection'
+  feature_name: 'Story 2.7 - Global Player Search & Selection'
+  adr_checklist_score: '10/29' # ADR Quality Readiness Checklist
   categories:
     testability_automation: 'CONCERNS'
-    test_data_strategy: 'CONCERNS'
+    test_data_strategy: 'PASS'
     scalability_availability: 'CONCERNS'
-    disaster_recovery: 'CONCERNS'
-    security: 'CONCERNS'
+    disaster_recovery: 'NOT_ASSESSED'
+    security: 'PASS'
     monitorability: 'CONCERNS'
     qos_qoe: 'CONCERNS'
-    deployability: 'N/A'
-  overall_status: 'CONCERNS'
+    deployability: 'PASS'
+  overall_status: 'FAIL'
   critical_issues: 0
-  high_priority_issues: 0
-  medium_priority_issues: 4
-  concerns: 10
-  blockers: false
-  quick_wins: 1
-  evidence_gaps: 2
+  high_priority_issues: 2
+  medium_priority_issues: 2
+  concerns: 7
+  blockers: true # true/false
+  quick_wins: 0
+  evidence_gaps: 4
   recommendations:
-    - 'Proceed to release with operational follow-up'
-    - 'Validate creatorId against authenticated principal (closes R-006)'
-    - 'Add Micrometer RedisException counter and alerting'
-    - 'Implement circuit breaker for Redis fallback'
-    - 'Execute P3-02 latency benchmark and concurrent load test'
+    - 'Implement IP-based rate limiting on /api/users/me/players/search (R-001 mitigation)'
+    - 'Implement server-side pagination (LIMIT 50 + maxResults parameter) (R-002 mitigation)'
+    - 'Execute k6 load test with p95 < 200ms validation'
+    - 'Add database index on nickname column'
+    - 'Fix E2E test syntax errors in player-search.spec.ts'
 ```
 
 ---
 
 ## Related Artifacts
 
-- **Story File:** _bmad-output/implementation-artifacts/spec-3-6-submission-rate-limiting-anti-spam.md
-- **Test Design:** _bmad-output/test-artifacts/test-design-epic-3-6.md
+- **Story File:** _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
+- **Tech Spec:** _bmad-output/implementation-artifacts/spec-2-7-global-player-search-and-selection.md
+- **Test Design:** _bmad-output/test-artifacts/test-design/test-design-epic-2-7.md
+- **Traceability Matrix:** _bmad-output/test-artifacts/traceability/traceability-matrix-2-7-global-player-search-and-selection.md
+- **Gate Decision:** _bmad-output/test-artifacts/traceability/gate-decision-2-7.json
 - **Evidence Sources:**
-  - Test Results: Backend 243/243 pass; Frontend 154/154 pass
-  - Code Review: RateLimitServiceImpl.java, GlobalExceptionHandler.java, MatchServiceImpl.java, ApplicationProperties.java, application.yml, matchDraftStore.ts
+  - Test Files: frontend/src/features/match/components/__tests__/PlayerSearchOverlay.spec.ts, frontend/src/features/match/stores/matchDraftStore.search.spec.ts, frontend/e2e/tests/e2e/player-search.spec.ts, src/test/java/com/tictactore/controller/UserMatchControllerATDDTest.java
+  - Test Results: local run (2026-08-10)
+  - Automation Summary: _bmad-output/test-artifacts/automation-summary-2-7.md
 
 ---
 
 ## Recommendations Summary
 
-**Release Blocker:** None
+**Release Blocker:** R-001 (no rate limiting) and R-002 (no pagination) mitigations are planned but NOT implemented. Performance evidence (p95 < 200ms) is completely absent.
 
-**High Priority:** None
+**High Priority:** Fix E2E test syntax errors and store test import issues to enable test execution.
 
-**Medium Priority:** Add RedisException metrics, implement circuit breaker for Redis fallback, validate creatorId against authenticated principal.
+**Medium Priority:** Add missing test coverage for AC-1, AC-3, AC-4, AC-6. Execute k6 load test.
 
-**Next Steps:** Merge PR, deploy to staging, monitor rate-limit 429/503 rates and Redis health for 24-48 hours. Address CONCERNS in next sprint.
+**Next Steps:** Implement R-001 and R-002 mitigations, fix test infrastructure, re-run test suite, then re-run NFR assessment.
 
 ---
 
@@ -448,13 +472,13 @@ nfr_assessment:
 
 **NFR Evidence Audit:**
 
-- Overall Status: CONCERNS ⚠️
+- Overall Status: FAIL ❌
 - Critical Issues: 0
-- High Priority Issues: 0
-- Concerns: 10
-- Evidence Gaps: 2
+- High Priority Issues: 2
+- Concerns: 7
+- Evidence Gaps: 4
 
-**Gate Status:** CONCERNS ⚠️ — APPROVED WITH CONDITIONS
+**Gate Status:** FAIL ❌
 
 **Next Actions:**
 
@@ -462,7 +486,7 @@ nfr_assessment:
 - If CONCERNS ⚠️: Address HIGH/CRITICAL issues, re-run `*nfr-assess`
 - If FAIL ❌: Resolve FAIL status NFRs, re-run `*nfr-assess`
 
-**Generated:** 2026-08-07
+**Generated:** 2026-08-10T16:31:50.000Z
 **Workflow:** testarch-nfr v5.0
 
 ---
