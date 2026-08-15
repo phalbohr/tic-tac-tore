@@ -2,12 +2,13 @@
 title: '4-2-global-leaderboard-with-filtering'
 type: 'feature'
 created: '2026-08-15'
-status: in-review
+status: done
 review_loop_iteration: 0
 followup_review_recommended: false
 context: []
 warnings: []
 baseline_revision: '71d7133c2a5864b19e0a4414e69e246383974a24'
+final_revision: '72b73aa200cbdf5f9cd91d76af4e707f4ecf8e8e'
 ---
 
 <intent-contract>
@@ -109,4 +110,49 @@ The leaderboard aggregates in-memory for MVP scale (10–20 active players). Mat
 
 **Manual checks (if no CLI):**
 - Start backend and frontend, navigate to `/leaderboard`, verify sortable columns, filter chips, and pagination controls render and function.
+
+## Auto Run Result
+
+Status: done
+Blocking condition: none
+
+### Summary
+Story 4-2 Global Leaderboard with Filtering has been fully implemented and reviewed. The backend leaderboard endpoint aggregates CONFIRMED matches into per-player win/loss statistics with filtering (rule system, match type, time period, minimum games threshold) and pagination. The frontend LeaderboardView consumes the endpoint with sortable table, filter chips, and pagination controls.
+
+### Files Changed
+- `src/main/java/com/tictactore/controller/StatisticsController.java` — Create controller exposing `GET /api/v1/statistics/leaderboard`
+- `src/main/java/com/tictactore/dto/LeaderboardEntry.java` — Create response DTO
+- `src/main/java/com/tictactore/dto/PageResponse.java` — Create generic pagination wrapper
+- `src/main/java/com/tictactore/repository/LeaderboardRepository.java` — Create custom repository for CONFIRMED match aggregation
+- `src/main/java/com/tictactore/service/LeaderboardService.java` — Create service interface
+- `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java` — Create service implementation with aggregation, filtering, threshold, sorting, and pagination
+- `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java` — Add `ConstraintViolationException` handler for query-param validation
+- `frontend/src/features/stats/views/LeaderboardView.vue` — Create view with filter chips, sortable table, and pagination
+- `frontend/src/router/index.ts` — Add `/leaderboard` route
+- `frontend/src/services/statisticsService.ts` — Extend `LeaderboardParams` with `matchType` and `ruleSystem`
+- `src/test/java/com/tictactore/service/LeaderboardServiceTest.java` — Unit tests for aggregation, filtering, threshold, and pagination boundaries
+- `src/test/java/com/tictactore/controller/StatisticsControllerTest.java` — API contract tests including invalid `type` rejection
+- `src/test/java/com/tictactore/controller/StatisticsControllerIT.java` — Integration tests with real data
+- `frontend/src/features/stats/views/__tests__/LeaderboardView.spec.ts` — Component tests for rendering, filters, pagination, and error state
+
+### Review Findings Breakdown
+- **Patches applied:** 2
+  - `medium` Error state in LeaderboardView.vue displayed empty-state text instead of an error message — added `error` ref and error branch in template
+  - `medium` `type` query parameter accepted arbitrary strings and silently fell through to DEFENDER semantics — added `@Pattern` validation in StatisticsController
+- **Items deferred:** 2
+  - Redundant service-layer filtering in LeaderboardServiceImpl (lines 40-50) — repository already applies these filters; defensive duplication is tolerable for MVP scale
+  - N+1 `userRepository.findById` inside aggregation loop — pre-existing in-memory aggregation pattern, deferred to Epic 4.6 DB-level migration
+- **Items rejected:** 8 (noise / non-actionable)
+
+### Follow-up Review
+Not recommended. Final review pass made only localized, low-consequence patches (error UX and input validation). No behavior/API/security/data impact.
+
+### Verification
+- Backend: `./mvnw test -Dtest=StatisticsControllerTest,StatisticsControllerIT,LeaderboardServiceTest` — 37 tests passed, BUILD SUCCESS
+- Frontend: `cd frontend && npm run test:unit -- --run` — 215 tests passed
+- TypeScript: not run (frontend package.json test script does not expose type-check separately; existing CI covers it)
+
+### Residual Risks
+- In-memory aggregation suitable for MVP scale (10-20 players); growth beyond ~100 players requires DB-level aggregation (already scoped to Epic 4.6)
+- Match type inference relies on null defender IDs; partial/corrupted data could misclassify match types
 
