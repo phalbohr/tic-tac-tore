@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import jakarta.validation.ConstraintViolationException;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -62,5 +63,14 @@ public class GlobalExceptionHandler {
         var error = e.getBindingResult().getFieldError();
         var msg = error != null ? error.getDefaultMessage() : "Validation error";
         return ResponseEntity.badRequest().body(Map.of("message", msg != null ? msg : "Validation error"));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException e) {
+        var message = e.getConstraintViolations().stream()
+                .findFirst()
+                .map(v -> v.getMessage() != null ? v.getMessage() : v.toString())
+                .orElse("Validation error");
+        return ResponseEntity.badRequest().body(new ApiError("BAD_REQUEST", message, Map.of()));
     }
 }

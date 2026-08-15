@@ -1,0 +1,154 @@
+{
+  "schema_version": "0.1.0",
+  "snapshot_at": "2026-08-15T20:39:42+02:00",
+  "repo": "tic-tac-tore",
+  "collection_mode": "contract_static",
+  "collection_status": "COLLECTED",
+  "inventory_basis": "acceptance_criteria",
+  "gate_basis": "priority_thresholds",
+  "source_sha": "",
+  "target": {
+    "type": "story",
+    "id": "4-2-global-leaderboard-with-filtering",
+    "label": "4-2-global-leaderboard-with-filtering"
+  },
+  "decision_mode": "deterministic",
+  "evaluator": "Pavel",
+  "confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-4-2-global-leaderboard-with-filtering.md",
+      "_bmad-output/test-artifacts/atdd-checklist-4-2-global-leaderboard-with-filtering.md",
+      "_bmad-output/test-artifacts/definition-of-done-4-2-global-leaderboard-with-filtering.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "coverage": {
+    "inventory": {
+      "covered": 5,
+      "total": 5,
+      "pct": 100
+    },
+    "priority_breakdown": {
+      "P0": {
+        "total": 5,
+        "covered": 5,
+        "pct": 100
+      },
+      "P1": {
+        "total": 0,
+        "covered": 0,
+        "pct": 0
+      },
+      "P2": {
+        "total": 0,
+        "covered": 0,
+        "pct": 0
+      },
+      "P3": {
+        "total": 0,
+        "covered": 0,
+        "pct": 0
+      }
+    },
+    "by_level": {
+      "e2e": {
+        "tests": 5,
+        "criteria_covered": 4
+      },
+      "api": {
+        "tests": 15,
+        "criteria_covered": 5
+      },
+      "component": {
+        "tests": 12,
+        "criteria_covered": 4
+      },
+      "unit": {
+        "tests": 12,
+        "criteria_covered": 3
+      },
+      "integration": {
+        "tests": 9,
+        "criteria_covered": 5
+      },
+      "other": {
+        "tests": 0,
+        "criteria_covered": 0
+      }
+    }
+  },
+  "tests": {
+    "files": 6,
+    "cases": 53,
+    "skipped_cases": 0,
+    "fixme_cases": 0,
+    "pending_cases": 0
+  },
+  "risk_summary": {
+    "critical_open": 0,
+    "high_open": 0,
+    "medium_open": 0,
+    "low_open": 0
+  },
+  "heuristics": {
+    "endpoint_gaps": 0,
+    "auth_negative_path_status": "present",
+    "error_path_status": "present",
+    "ui_journey_status": "not_applicable",
+    "ui_state_status": "not_applicable"
+  },
+  "blockers": [],
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "action": "Activate ATDD red-phase scaffolds to add 22 regression-guard tests to CI",
+      "requirements": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5"
+      ]
+    },
+    {
+      "priority": "LOW",
+      "action": "Add E2E coverage for matchType and period filters",
+      "requirements": [
+        "AC-2"
+      ]
+    },
+    {
+      "priority": "LOW",
+      "action": "Promote frontend component tests to project test directory",
+      "requirements": []
+    },
+    {
+      "priority": "LOW",
+      "action": "Run /bmad:tea:test-review to assess test quality",
+      "requirements": []
+    }
+  ],
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability-matrix.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  },
+  "gate_status": "PASS",
+  "gate_criteria": {
+    "p0_coverage_required": "100%",
+    "p0_coverage_actual": "100%",
+    "p0_status": "MET",
+    "p1_coverage_target": "90%",
+    "p1_coverage_minimum": "80%",
+    "p1_coverage_actual": "N/A",
+    "p1_status": "MET",
+    "overall_coverage_minimum": "80%",
+    "overall_coverage_actual": "100%",
+    "overall_status": "MET"
+  }
+}

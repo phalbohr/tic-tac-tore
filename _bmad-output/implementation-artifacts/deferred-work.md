@@ -299,4 +299,32 @@ location: `src/main/java/com/tictactore/rules/VerificationRules.java:36-44`
 reason: [x] [Review][Defer] `requiresCooldown()` checks `isDoubles && isParticipantEntered && STANDARD`, identical to `supportsPartialConfirmation()` — silent divergence risk if rules change.
 status: open
 
+### DW-44: No quantitative latency baseline for the leaderboard endpoint
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: medium
+reason: In-memory aggregation iterates all matches and games on every request with no caching, and no load test exists, so p95 latency and throughput are unknown; the DB-level `GROUP BY` migration that would replace this is already scoped to Epic 4.6, so measuring the interim implementation was deferred rather than blocking the story.
+status: open
+
+### DW-45: JaCoCo coverage report not generated for the leaderboard code
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `pom.xml` (JaCoCo report goal) and `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: low
+reason: 36 backend and 215 frontend tests pass but no coverage percentage is produced, so the maintainability NFR has no quantitative evidence; wiring the report is a build-configuration task independent of this story's scope.
+status: open
+
+### DW-46: No rate limiting on `/api/v1/statistics/leaderboard`
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/controller/StatisticsController.java`
+severity: medium
+reason: The endpoint recomputes the full aggregation per request and is unthrottled, which is a cheap amplification target; documented as risk R-001 in the epic 4 test design and deferred to the platform-wide rate-limiting effort rather than adding a one-off limiter here.
+status: open
+
+### DW-47: No metrics, structured logging or alerting on the leaderboard endpoint
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/controller/StatisticsController.java` and `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: medium
+reason: Neither the controller nor the service emits Micrometer timings or correlated structured logs and no alerts or SLA are defined, so production request rate, latency and error rate are invisible; observability is a platform-wide concern deferred out of this story.
+status: open
+
 

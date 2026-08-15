@@ -1,5 +1,7 @@
 export type LeaderboardType = 'OVERALL' | 'ATTACKER' | 'DEFENDER'
 export type TimePeriod = 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'ALL_TIME'
+export type MatchTypeFilter = '1v1' | '2v2'
+export type RuleSystemFilter = 'STANDARD' | 'RANDOM'
 
 export interface LeaderboardEntry {
   rank: number
@@ -23,6 +25,8 @@ export interface LeaderboardParams {
   type?: LeaderboardType
   period?: TimePeriod
   minMatches?: number
+  matchType?: MatchTypeFilter
+  ruleSystem?: RuleSystemFilter
   page?: number
   size?: number
   signal?: AbortSignal
@@ -102,6 +106,8 @@ export async function getLeaderboard(params: LeaderboardParams): Promise<Page<Le
     type: params.type,
     period: params.period,
     minMatches: params.minMatches,
+    matchFormat: params.ruleSystem,
+    matchType: params.matchType,
     page: params.page,
     size: params.size
   }, params)
