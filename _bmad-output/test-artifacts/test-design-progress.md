@@ -4,58 +4,61 @@ totalSteps: 5
 stepsCompleted: ['step-01-detect-mode', 'step-02-load-context', 'step-03-risk-and-testability', 'step-04-coverage-plan', 'step-05-generate-output']
 lastStep: 'step-05-generate-output'
 nextStep: ''
-lastSaved: '2026-08-15T18:43:37+02:00'
+lastSaved: '2026-08-16T01:38:52+02:00'
+inputDocuments:
+  - '_bmad-output/implementation-artifacts/spec-4-3-positional-statistics-attack-vs-defense.md'
+  - '_bmad-output/implementation-artifacts/sprint-status.yaml'
+  - '_bmad/tea/config.yaml'
+  - 'src/main/java/com/tictactore/controller/StatisticsController.java'
+  - 'src/main/java/com/tictactore/dto/PlayerStatsResponse.java'
+  - 'src/main/java/com/tictactore/service/LeaderboardService.java'
+  - 'src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java'
+  - 'src/main/java/com/tictactore/config/SecurityConfig.java'
+  - 'src/main/java/com/tictactore/security/JwtAuthenticationFilter.java'
+  - 'src/main/java/com/tictactore/model/Match.java'
+  - 'src/main/java/com/tictactore/model/Game.java'
+  - 'src/main/java/com/tictactore/repository/LeaderboardRepository.java'
+  - 'src/test/java/com/tictactore/controller/StatisticsControllerTest.java'
+  - 'src/test/java/com/tictactore/controller/StatisticsControllerIT.java'
+  - 'src/test/java/com/tictactore/service/LeaderboardServiceTest.java'
+  - 'frontend/src/services/statisticsService.ts'
+  - 'frontend/src/features/stats/stores/useStatsStore.ts'
+  - 'frontend/src/features/stats/components/StatsDashboard.vue'
+  - 'frontend/src/features/stats/utils/demoDataGenerator.ts'
+  - 'frontend/src/services/__tests__/statisticsService.spec.ts'
+  - 'frontend/tests/unit/useStatsStore.spec.ts'
+  - 'resources/knowledge/risk-governance.md'
+  - 'resources/knowledge/probability-impact.md'
+  - 'resources/knowledge/test-levels-framework.md'
+  - 'resources/knowledge/test-priorities-matrix.md'
+  - 'resources/knowledge/nfr-criteria.md'
 ---
 
-# Step 5: Generate Outputs & Validate
+# Step 1: Detect Mode & Prerequisites
 
-## Output Generated
+**Mode: Epic-Level** (single story, Story 4.3). Confirmed via `sprint-status.yaml` presence (epic-4 active) and the story spec file with acceptance criteria. Prerequisites met: story spec with I/O & edge-case matrix + acceptance criteria, architecture context from implementation code, and existing test coverage baseline (`LeaderboardServiceTest`, `StatisticsControllerTest`, `StatisticsControllerIT`, `LeaderboardView.spec.ts`, `useStatsStore.spec.ts`, `statisticsService.spec.ts`).
 
-**File**: `_bmad-output/test-artifacts/test-design/test-design-epic-4.md`
+# Step 2: Load Context & Knowledge Base
 
-**Mode:** Epic-Level (Phase 4) — Story 4.2 — Global Leaderboard with Filtering
+Config: `test_artifacts = _bmad-output/test-artifacts`; `test_design_output = .../test-design`; `risk_threshold = p1`; `tea_use_playwright_utils = true`; `tea_execution_mode = auto`. Stack auto-detected as `fullstack` (pom.xml + package.json + Vue 3 + Playwright). Loaded core knowledge fragments: `risk-governance.md`, `probability-impact.md`, `test-levels-framework.md`, `test-priorities-matrix.md`; extended `nfr-criteria.md` (NFRs in scope: Security, Performance, Reliability, Maintainability).
 
-**Input documents loaded:**
-- Spec: `_bmad-output/implementation-artifacts/spec-4-2-global-leaderboard-with-filtering.md`
-- Epic Context: `_bmad-output/implementation-artifacts/epic-4-context.md`
-- TEA Config: `_bmad/tea/config.yaml`
-- Knowledge fragments: `risk-governance.md`, `probability-impact.md`, `test-levels-framework.md`, `test-priorities-matrix.md`, `nfr-criteria.md`
-- Existing test: `src/test/java/com/tictactore/service/LeaderboardServiceTest.java` (12 unit tests)
-- Working tree code: `StatisticsController.java`, `LeaderboardServiceImpl.java`, `LeaderboardRepository.java`, `LeaderboardEntry.java`, `PageResponse.java`, `LeaderboardView.vue`, `statisticsService.ts`, `router/index.ts`
+# Step 3: Testability & Risk Assessment
 
-## Completion Report
+Testability review (Epic-level): backend aggregation is isolated in `LeaderboardServiceImpl.getPersonalStats` and testable via Mockito (good). However the `/me` controller endpoint is NOT independently testable with the existing `@WithMockUser` harness because it expects `com.tictactore.model.User` principal (the JWT filter sets this type), while `@WithMockUser` injects `org.springframework.security.core.userdetails.User` → principal resolves to null → 401. A custom `SecurityContext` test helper is required. Frontend `StatsDashboard.vue` has no component test at all.
 
-**Mode used:** Epic-Level
-**Output file paths:**
-- `_bmad-output/test-artifacts/test-design/test-design-epic-4.md` — final test design document
-- `_bmad-output/test-artifacts/test-design-progress.md` — workflow progress tracker (this file)
+Risk register (P×I): R-001 SEC 6, R-002 PERF 6, R-003 DATA 6, R-004 DATA 4, R-005 BUS 4, R-006 TECH 2, R-007 OPS 2. No score-9 blockers.
 
-**Key risks and gate thresholds:**
-- R-001 (SEC, Score 6): No explicit auth annotation on StatisticsController — requires Spring Security verification + integration test for 401
-- R-002 (DATA, Score 6): Redundant dual filtering between repository and service — requires consolidation + integration test
-- R-003 (PERF, Score 6): In-memory aggregation doesn't scale — requires database-level aggregation for >100 players
-- Gate: P0 pass rate = 100%; P1 pass rate ≥ 95%; R-001/R-002/R-003 mitigated or waived
+# Step 4: Coverage Plan
 
-**Open assumptions:**
-- Spring Security config protects `/api/v1/statistics/**` (to be verified)
-- p95 latency target not defined in spec; 500ms used as planning assumption
-- Test database can be seeded with CONFIRMED matches for integration tests
+See final artifact `test-design/test-design-epic-4-3.md`. P0=9, P1=6, P2=6, P3=3 (24 scenarios). Execution: functional tests in every PR (~5-10 min), E2E/perf nightly.
 
-**Working tree changes assessed:**
-- New backend files: `StatisticsController`, `LeaderboardService` interface + impl, `LeaderboardRepository`, `LeaderboardEntry`, `PageResponse` DTOs
-- New test: `LeaderboardServiceTest` (12 unit tests) — covers aggregation, filtering, threshold, sorting, pagination, ties
-- New frontend: `LeaderboardView.vue`, route `/leaderboard`, extended `statisticsService.ts`
-- Modified: `sprint-status.yaml` (4-2 marked done)
-- Coverage gaps: no API/integration tests for HTTP endpoint, no security test for 401, no frontend component tests for LeaderboardView, no E2E test
+# Step 5: Generate Outputs
 
-## Validation
+**Output:** `_bmad-output/test-artifacts/test-design/test-design-epic-4-3.md`
 
-- [x] Risk assessment matrix created (8 risks: 3 high, 3 medium, 2 low)
-- [x] Coverage matrix created (7 P0, 8 P1, 5 P2, 2 P3 = 22 scenarios)
-- [x] Execution order documented (PR + Nightly)
-- [x] Resource estimates calculated (ranges: ~24–46 hours)
-- [x] Quality gate criteria defined
-- [x] NFR planning summary included (Security, Performance, Reliability, Maintainability)
-- [x] Output file written to correct location
-- [x] Output file uses template structure
-- [x] Mitigation plans for all high-priority risks (R-001, R-002, R-003)
+**Completion Report**
+- Mode used: Epic-Level (Phase 4) — Story 4.3 — Positional Statistics (Attack vs Defense)
+- Output: `test-design/test-design-epic-4-3.md`
+- Key risks: R-001 (SEC, `/me` auth+principal untested; `@WithMockUser` incompatible) · R-002 (PERF, loads all matches) · R-003 (DATA, `period` param silently ignored)
+- Gate thresholds: P0=100% pass, P1≥95%, no unmitigated ≥6 risks, backend coverage ≥80% on `getPersonalStats`
+- No production code was modified by this workflow.

@@ -2,14 +2,20 @@ package com.tictactore.controller;
 
 import com.tictactore.dto.LeaderboardEntry;
 import com.tictactore.dto.PageResponse;
+import com.tictactore.dto.PlayerStatsResponse;
+import com.tictactore.model.User;
 import com.tictactore.service.LeaderboardService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/statistics")
@@ -30,5 +36,14 @@ public class StatisticsController {
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
     ) {
         return ResponseEntity.ok(leaderboardService.getLeaderboard(type, period, minMatches, matchType, matchFormat, page, size));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PlayerStatsResponse> getPersonalStats(@AuthenticationPrincipal User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(leaderboardService.getPersonalStats(principal.getId()));
     }
 }

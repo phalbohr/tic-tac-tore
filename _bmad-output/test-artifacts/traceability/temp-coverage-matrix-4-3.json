@@ -1,0 +1,1044 @@
+{
+  "phase": "PHASE_1_COMPLETE",
+  "generated_at": "2026-08-16T03:06:10+02:00",
+  "trace_target": {
+    "type": "story",
+    "id": "4-3-positional-statistics-attack-vs-defense",
+    "label": "Story 4.3: Positional Statistics (Attack vs. Defense)"
+  },
+  "collection_mode": "contract_static",
+  "allow_gate": true,
+  "coverage_basis": "acceptance_criteria",
+  "summary_confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-4-3-positional-statistics-attack-vs-defense.md",
+      "_bmad-output/test-artifacts/test-design/test-design-epic-4-3.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "requirements": [
+    {
+      "id": "4.3-UNIT-001",
+      "title": "getPersonalStats computes correct per-position wins/losses from CONFIRMED matches; winRate 0\u2013100; overall == attacker+defender in 1v1",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-001a",
+          "title": "Should compute correct per-position wins/losses from CONFIRMED matches; winRate on 0-100 scale",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 64,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-001b",
+          "title": "Should compute correct per-position stats from CONFIRMED 1v1 matches",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 123,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-UNIT-002",
+      "title": "0-match user \u2192 all positions empty() with winRate 0.0, playerName resolved from userRepository",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-002a",
+          "title": "Should return empty stats when no matches",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 104,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-002b",
+          "title": "0-match user -> all positions empty with winRate 0.0",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 153,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-UNIT-003",
+      "title": "Fully-tied match counts as totalMatches only, no win/loss increment",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-003a",
+          "title": "Should count tied match as total matches only",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 123,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-003b",
+          "title": "Fully-tied match counts as totalMatches only, no win/loss increment",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 172,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-UNIT-004",
+      "title": "userIsAttacker/userIsDefender/userOnTeamA flags correct across 1v1 and 2v2",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-004a",
+          "title": "2v2 match: user as attacker gets attacker stats; as defender gets defender stats",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 195,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-004b",
+          "title": "Should track attacker and defender stats in twoVTwo",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 153,
+          "level": "unit",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-API-001",
+      "title": "GET /me without JWT \u2192 401 (Spring Security global rule)",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-API-001a",
+          "title": "Should return 401 when unauthenticated",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 85,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "4.3-API-001b",
+          "title": "Should return 401 when unauthenticated",
+          "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+          "line": 34,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-API-002",
+      "title": "GET /me with com.tictactore.model.User principal \u2192 200 + PlayerStatsResponse shape",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-API-002a",
+          "title": "Should return 200 with PlayerStatsResponse shape when authenticated with app User principal",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 93,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "4.3-API-002b",
+          "title": "Should return 200 with PlayerStatsResponse shape when authenticated",
+          "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+          "line": 44,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-API-003",
+      "title": "getPersonalStats excludes PENDING/PARTIALLY_CONFIRMED/REJECTED matches (only CONFIRMED)",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-API-003a",
+          "title": "Excludes PENDING matches; only CONFIRMED matches counted",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 233,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-001",
+      "title": "StatsDashboard renders Overall/Attacker/Defender cards with matches, W/L, and proportional win-rate bar",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-001a",
+          "title": "Should render Overall, Attacker, Defender stat cards with matches, W/L, win-rate bar, and percentage label",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 24,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-001b",
+          "title": "Should display Overall, Attacker, Defender cards with matches, W/L, and proportional win-rate bars",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 58,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-002",
+      "title": "StatsDashboard 0-match state renders zeroed cards, no NaN, bars at 0%",
+      "priority": "P0",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-002a",
+          "title": "Should render zeroed stat cards with 0% bars and no NaN when no matches",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 40,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-002b",
+          "title": "Should show zeroed stat cards with 0% bars and no NaN for 0-match user",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 80,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-API-004",
+      "title": "GET /me returns playerName from userRepository for authenticated user with matches",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-API-004a",
+          "title": "Should return 200 with PlayerStatsResponse shape when authenticated with app User principal",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 93,
+          "level": "api",
+          "status": "active"
+        },
+        {
+          "id": "4.3-API-004b",
+          "title": "Should return only the authenticated user own stats (no cross-user data)",
+          "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+          "line": 77,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-API-005",
+      "title": "GET /me database/repository failure \u2192 500 with generic error message",
+      "priority": "P1",
+      "coverage": "NONE",
+      "tests": [],
+      "gaps": [
+        "Missing backend test asserting 500 response when repository throws during getPersonalStats"
+      ]
+    },
+    {
+      "id": "4.3-API-006",
+      "title": "Repository + service filter consistency: /me never returns PENDING/REJECTED matches",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-API-006a",
+          "title": "Excludes PENDING matches; only CONFIRMED matches counted",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 233,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-003",
+      "title": "StatsDashboard loading state shows skeleton (.animate-pulse), no crash",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-003a",
+          "title": "Should render loading skeleton when statsStore.isLoading is true",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 85,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-003b",
+          "title": "Should show loading skeleton while fetching stats",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 144,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-004",
+      "title": "StatsDashboard error state (Unable to load statistics.) when stats is null & not loading",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-004a",
+          "title": "Should render error message when stats is null and not loading",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 98,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-004b",
+          "title": "Should show error message when stats API fails",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 153,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-005",
+      "title": "Bar width = min(winRate, 100)% proportionality + toFixed(1) formatting; attacker bar uses bg-secondary, defender/overall bg-primary",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-005a",
+          "title": "Should cap bar width at 100% when winRate exceeds 100",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 57,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-005b",
+          "title": "Should render attacker bar with bg-secondary and overall/defender bars with bg-primary",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 71,
+          "level": "component",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-005c",
+          "title": "Should cap bar width at 100% when winRate exceeds 100",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 98,
+          "level": "e2e",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-005d",
+          "title": "Should apply bg-secondary to attacker bar and bg-primary to overall/defender bars",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 115,
+          "level": "e2e",
+          "status": "active"
+        },
+        {
+          "id": "4.3-COMP-005e",
+          "title": "Should display win-rate percentage with one decimal place",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 127,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-UNIT-005",
+      "title": "2v2 match: user is defender \u2192 defender stats increment, attacker stays 0; user is attacker \u2192 attacker increments",
+      "priority": "P2",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-005a",
+          "title": "Should track attacker and defender stats in twoVTwo",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 153,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-005b",
+          "title": "2v2 match: user as attacker gets attacker stats; as defender gets defender stats",
+          "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+          "line": 195,
+          "level": "api",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-UNIT-006",
+      "title": "Asymmetric team data (one defender null, other set) \u2014 participant detection & 1v1 inference unchanged",
+      "priority": "P2",
+      "coverage": "NONE",
+      "tests": [],
+      "gaps": [
+        "Missing unit test with teamADefenderId=null in 1v1 match",
+        "Missing test ensuring null defender doesn't break participant detection"
+      ]
+    },
+    {
+      "id": "4.3-COMP-006",
+      "title": "Demo-data path renders scaled bars (0\u2013100) in StatsDashboard without NaN",
+      "priority": "P2",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-COMP-006a",
+          "title": "Should render demo data when user has fewer than 5 matches and demo mode is enabled",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 169,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-COMP-007",
+      "title": "useStatsStore.fetchStats error path sets stats=null, error set, demo fallback only when demo-enabled",
+      "priority": "P2",
+      "coverage": "PARTIAL",
+      "tests": [
+        {
+          "id": "4.3-COMP-007a",
+          "title": "Should render error message when stats is null and not loading",
+          "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+          "line": 98,
+          "level": "component",
+          "status": "active"
+        }
+      ],
+      "gaps": [
+        "Missing direct test for useStatsStore.fetchStats() rejection path"
+      ]
+    },
+    {
+      "id": "4.3-API-007",
+      "title": "getPersonalStats user is neither team A nor B attacker/defender but is participant \u2014 assert defensive correctness",
+      "priority": "P2",
+      "coverage": "NONE",
+      "tests": [],
+      "gaps": [
+        "Missing defensive test for impossible-by-contract participant state"
+      ]
+    },
+    {
+      "id": "4.3-UNIT-008",
+      "title": "winRate rounding: 2/3 \u2192 66.7% (verified by withRate); 0 matches \u2192 0.0% not NaN",
+      "priority": "P2",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-UNIT-008a",
+          "title": "winRate 0-100 scale: 2 wins out of 3 matches = 66.7",
+          "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+          "line": 246,
+          "level": "unit",
+          "status": "active"
+        },
+        {
+          "id": "4.3-UNIT-008b",
+          "title": "Should return winRate on 0-100 scale (not 0-1 like leaderboard)",
+          "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+          "line": 67,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "4.3-PERF-001",
+      "title": "/me p95 < 500 ms at 10k-seed-match scale (R-002 perf cliff validation)",
+      "priority": "P3",
+      "coverage": "NONE",
+      "tests": [],
+      "gaps": [
+        "Missing k6/perf test or JUnit timing assertion"
+      ]
+    },
+    {
+      "id": "4.3-SEC-001",
+      "title": "SecurityConfig.PUBLIC_ENDPOINTS never includes /api/v1/statistics/** (regression guard for R-001 leak)",
+      "priority": "P3",
+      "coverage": "NONE",
+      "tests": [],
+      "gaps": [
+        "Missing CI grep rule or static check asserting PUBLIC_ENDPOINTS does not contain /api/v1/statistics"
+      ]
+    },
+    {
+      "id": "4.3-E2E-001",
+      "title": "Authenticated user navigates to stats dashboard; sees Overall/Attacker/Defender cards with real (non-demo) data",
+      "priority": "P3",
+      "coverage": "FULL",
+      "tests": [
+        {
+          "id": "4.3-E2E-001a",
+          "title": "Should navigate to home page and display stats dashboard for authenticated user",
+          "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+          "line": 178,
+          "level": "e2e",
+          "status": "active"
+        }
+      ],
+      "gaps": []
+    }
+  ],
+  "coverage_statistics": {
+    "total_requirements": 24,
+    "fully_covered": 18,
+    "partially_covered": 1,
+    "uncovered": 5,
+    "overall_coverage_percentage": 75,
+    "priority_breakdown": {
+      "P0": {
+        "total": 9,
+        "covered": 9,
+        "percentage": 100
+      },
+      "P1": {
+        "total": 6,
+        "covered": 5,
+        "percentage": 83
+      },
+      "P2": {
+        "total": 6,
+        "covered": 3,
+        "percentage": 50
+      },
+      "P3": {
+        "total": 3,
+        "covered": 1,
+        "percentage": 33
+      }
+    }
+  },
+  "gap_analysis": {
+    "critical_gaps": [],
+    "high_gaps": [
+      {
+        "id": "4.3-API-005",
+        "title": "GET /me database/repository failure \u2192 500 with generic error message",
+        "priority": "P1",
+        "coverage": "NONE",
+        "tests": [],
+        "gaps": [
+          "Missing backend test asserting 500 response when repository throws during getPersonalStats"
+        ]
+      }
+    ],
+    "medium_gaps": [
+      {
+        "id": "4.3-UNIT-006",
+        "title": "Asymmetric team data (one defender null, other set) \u2014 participant detection & 1v1 inference unchanged",
+        "priority": "P2",
+        "coverage": "NONE",
+        "tests": [],
+        "gaps": [
+          "Missing unit test with teamADefenderId=null in 1v1 match",
+          "Missing test ensuring null defender doesn't break participant detection"
+        ]
+      },
+      {
+        "id": "4.3-API-007",
+        "title": "getPersonalStats user is neither team A nor B attacker/defender but is participant \u2014 assert defensive correctness",
+        "priority": "P2",
+        "coverage": "NONE",
+        "tests": [],
+        "gaps": [
+          "Missing defensive test for impossible-by-contract participant state"
+        ]
+      }
+    ],
+    "low_gaps": [
+      {
+        "id": "4.3-PERF-001",
+        "title": "/me p95 < 500 ms at 10k-seed-match scale (R-002 perf cliff validation)",
+        "priority": "P3",
+        "coverage": "NONE",
+        "tests": [],
+        "gaps": [
+          "Missing k6/perf test or JUnit timing assertion"
+        ]
+      },
+      {
+        "id": "4.3-SEC-001",
+        "title": "SecurityConfig.PUBLIC_ENDPOINTS never includes /api/v1/statistics/** (regression guard for R-001 leak)",
+        "priority": "P3",
+        "coverage": "NONE",
+        "tests": [],
+        "gaps": [
+          "Missing CI grep rule or static check asserting PUBLIC_ENDPOINTS does not contain /api/v1/statistics"
+        ]
+      }
+    ],
+    "partial_coverage_items": [
+      {
+        "id": "4.3-UNIT-004",
+        "title": "userIsAttacker/userIsDefender/userOnTeamA flags correct across 1v1 and 2v2",
+        "priority": "P0",
+        "coverage": "PARTIAL",
+        "tests": [
+          {
+            "id": "4.3-UNIT-004a",
+            "title": "2v2 match: user as attacker gets attacker stats; as defender gets defender stats",
+            "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+            "line": 195,
+            "level": "api",
+            "status": "active"
+          }
+        ],
+        "gaps": [
+          "Missing direct unit test for isPlayerInPosition flag logic across all 1v1/2v2 permutations",
+          "Missing explicit branch coverage for userOnTeamA vs userOnTeamB paths"
+        ]
+      },
+      {
+        "id": "4.3-COMP-007",
+        "title": "useStatsStore.fetchStats error path sets stats=null, error set, demo fallback only when demo-enabled",
+        "priority": "P2",
+        "coverage": "PARTIAL",
+        "tests": [
+          {
+            "id": "4.3-COMP-007a",
+            "title": "Should render error message when stats is null and not loading",
+            "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+            "line": 98,
+            "level": "component",
+            "status": "active"
+          }
+        ],
+        "gaps": [
+          "Missing direct test for useStatsStore.fetchStats() rejection path"
+        ]
+      }
+    ],
+    "unit_only_items": []
+  },
+  "coverage_heuristics": {
+    "endpoint_gaps": [
+      {
+        "id": "4.3-API-005",
+        "endpoint": "/api/v1/statistics/me",
+        "gap": "500 error path untested"
+      }
+    ],
+    "auth_negative_path_gaps": [],
+    "happy_path_only_gaps": [
+      {
+        "id": "4.3-API-005",
+        "gap": "No error-path test for /me backend failure"
+      }
+    ],
+    "ui_journey_gaps": [],
+    "ui_state_gaps": [],
+    "counts": {
+      "endpoints_without_tests": 1,
+      "auth_missing_negative_paths": 0,
+      "happy_path_only_criteria": 1,
+      "ui_journeys_without_e2e": 0,
+      "ui_states_missing_coverage": 0
+    }
+  },
+  "test_inventory": {
+    "summary": {
+      "files": 5,
+      "cases": 36,
+      "skipped_cases": 0,
+      "fixme_cases": 0,
+      "pending_cases": 0,
+      "by_level": {
+        "e2e": {
+          "tests": 13,
+          "criteria_covered": 11
+        },
+        "api": {
+          "tests": 10,
+          "criteria_covered": 10
+        },
+        "component": {
+          "tests": 7,
+          "criteria_covered": 6
+        },
+        "unit": {
+          "tests": 6,
+          "criteria_covered": 6
+        },
+        "other": {
+          "tests": 0,
+          "criteria_covered": 0
+        }
+      }
+    },
+    "tests": [
+      {
+        "id": "4.3-UNIT-001a",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 64,
+        "title": "Should compute correct per-position wins/losses from CONFIRMED matches; winRate on 0-100 scale",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-001b",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 123,
+        "title": "Should compute correct per-position stats from CONFIRMED 1v1 matches",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-002a",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 104,
+        "title": "Should return empty stats when no matches",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-002b",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 153,
+        "title": "0-match user -> all positions empty with winRate 0.0",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-003a",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 123,
+        "title": "Should count tied match as total matches only",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-003b",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 172,
+        "title": "Fully-tied match counts as totalMatches only, no win/loss increment",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-004a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 195,
+        "title": "2v2 match: user as attacker gets attacker stats; as defender gets defender stats",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-004b",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 153,
+        "title": "Should track attacker and defender stats in twoVTwo",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-001a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 85,
+        "title": "Should return 401 when unauthenticated",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-001b",
+        "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+        "line": 34,
+        "title": "Should return 401 when unauthenticated",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-002a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 93,
+        "title": "Should return 200 with PlayerStatsResponse shape when authenticated with app User principal",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-002b",
+        "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+        "line": 44,
+        "title": "Should return 200 with PlayerStatsResponse shape when authenticated",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-003a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 233,
+        "title": "Excludes PENDING matches; only CONFIRMED matches counted",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-001a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 24,
+        "title": "Should render Overall, Attacker, Defender stat cards with matches, W/L, win-rate bar, and percentage label",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-001b",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 58,
+        "title": "Should display Overall, Attacker, Defender cards with matches, W/L, and proportional win-rate bars",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-002a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 40,
+        "title": "Should render zeroed stat cards with 0% bars and no NaN when no matches",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-002b",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 80,
+        "title": "Should show zeroed stat cards with 0% bars and no NaN for 0-match user",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-004a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 93,
+        "title": "Should return 200 with PlayerStatsResponse shape when authenticated with app User principal",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-004b",
+        "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+        "line": 77,
+        "title": "Should return only the authenticated user own stats (no cross-user data)",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-API-006a",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 233,
+        "title": "Excludes PENDING matches; only CONFIRMED matches counted",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-003a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 85,
+        "title": "Should render loading skeleton when statsStore.isLoading is true",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-003b",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 144,
+        "title": "Should show loading skeleton while fetching stats",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-004a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 98,
+        "title": "Should render error message when stats is null and not loading",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-004b",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 153,
+        "title": "Should show error message when stats API fails",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-005a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 57,
+        "title": "Should cap bar width at 100% when winRate exceeds 100",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-005b",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 71,
+        "title": "Should render attacker bar with bg-secondary and overall/defender bars with bg-primary",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-005c",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 98,
+        "title": "Should cap bar width at 100% when winRate exceeds 100",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-005d",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 115,
+        "title": "Should apply bg-secondary to attacker bar and bg-primary to overall/defender bars",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-005e",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 127,
+        "title": "Should display win-rate percentage with one decimal place",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-005a",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 153,
+        "title": "Should track attacker and defender stats in twoVTwo",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-005b",
+        "file": "src/test/java/com/tictactore/controller/StatisticsControllerPersonalStatsIT.java",
+        "line": 195,
+        "title": "2v2 match: user as attacker gets attacker stats; as defender gets defender stats",
+        "level": "api",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-006a",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 169,
+        "title": "Should render demo data when user has fewer than 5 matches and demo mode is enabled",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-COMP-007a",
+        "file": "frontend/src/features/stats/components/__tests__/StatsDashboard.spec.ts",
+        "line": 98,
+        "title": "Should render error message when stats is null and not loading",
+        "level": "component",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-008a",
+        "file": "src/test/java/com/tictactore/service/LeaderboardServicePersonalStatsTest.java",
+        "line": 246,
+        "title": "winRate 0-100 scale: 2 wins out of 3 matches = 66.7",
+        "level": "unit",
+        "status": "active"
+      },
+      {
+        "id": "4.3-UNIT-008b",
+        "file": "frontend/e2e/tests/api/personal-stats.spec.ts",
+        "line": 67,
+        "title": "Should return winRate on 0-100 scale (not 0-1 like leaderboard)",
+        "level": "e2e",
+        "status": "active"
+      },
+      {
+        "id": "4.3-E2E-001a",
+        "file": "frontend/e2e/tests/e2e/stats-dashboard.spec.ts",
+        "line": 178,
+        "title": "Should navigate to home page and display stats dashboard for authenticated user",
+        "level": "e2e",
+        "status": "active"
+      }
+    ],
+    "blockers": []
+  },
+  "blockers": [],
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "action": "Complete coverage for 1 partially covered requirements",
+      "requirements": [
+        "4.3-COMP-007"
+      ]
+    },
+    {
+      "priority": "HIGH",
+      "action": "Add API tests for 1 uncovered endpoint(s)",
+      "requirements": [
+        "4.3-API-005"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add error/edge scenario tests for 1 happy-path-only criterion/criteria",
+      "requirements": [
+        "4.3-API-005"
+      ]
+    },
+    {
+      "priority": "LOW",
+      "action": "Run /bmad:tea:test-review to assess test quality",
+      "requirements": []
+    }
+  ]
+}
