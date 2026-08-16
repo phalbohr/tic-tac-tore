@@ -145,6 +145,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         if (user.getNickname() != null && !user.getNickname().isBlank()) {
             return user.getNickname();
         }
-        return user.getEmail() != null ? user.getEmail() : "A player";
+        return "A player";
     }
 }

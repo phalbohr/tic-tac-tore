@@ -4,7 +4,7 @@ baseline_commit: 6c246b0bba29c1cf2f77484b53aee970450fc7a1
 
 # Story 4.4: Team (Pair) Statistics
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -44,6 +44,14 @@ so that I can find the best synergy.
   - [x] Implement controls for pagination, specific player filter, rule system filter, and time period filter.
   - [x] Present the data visually following the "No-Line" rule (UX-DR3).
   - [x] Use `ch-` prefixed utility classes for custom SCSS styling.
+
+### Review Findings
+
+- [x] [Review][Defer] AC2 Player & Rule System Filter UI Controls and schema link in TeamStatsView.vue [frontend/src/features/stats/components/TeamStatsView.vue:65] — deferred, basic filters (Period & Min Matches) sufficient for MVP pair stats
+- [x] [Review][Patch] Remove email fallback in resolveDisplayName to prevent PII exposure (AD-04) [src/main/java/com/tictactore/service/impl/StatisticsServiceImpl.java:148]
+- [x] [Review][Patch] Fix realTeamPairPage state synchronization and restoration in toggleDemoMode [frontend/src/features/stats/stores/useStatsStore.ts:83]
+- [x] [Review][Patch] Replace hardcoded English strings with i18n translation keys in TeamStatsView.vue [frontend/src/features/stats/components/TeamStatsView.vue:106]
+- [x] [Review][Defer] Aggregate team pair synergy across intra-game position swaps from Story 2.5 [src/main/java/com/tictactore/repository/MatchRepository.java:63] — deferred, future enhancement
 
 ## Dev Notes
 

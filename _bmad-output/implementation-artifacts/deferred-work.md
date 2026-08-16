@@ -299,4 +299,18 @@ location: `src/main/java/com/tictactore/rules/VerificationRules.java:36-44`
 reason: [x] [Review][Defer] `requiresCooldown()` checks `isDoubles && isParticipantEntered && STANDARD`, identical to `supportsPartialConfirmation()` — silent divergence risk if rules change.
 status: open
 
+### DW-44: Aggregate team pair synergy across intra-game position swaps
+origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
+location: `src/main/java/com/tictactore/repository/MatchRepository.java:63`
+reason: [x] [Review][Defer] Aggregate team pair synergy across intra-game position swaps from Story 2.5 — deferred, future enhancement for game-level positional synergy breakdown.
+status: open
+
+### DW-45: Player and Rule System filter UI controls in TeamStatsView.vue
+origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
+location: `frontend/src/features/stats/components/TeamStatsView.vue:65`
+reason: [x] [Review][Defer] AC2 Player & Rule System Filter UI Controls in TeamStatsView.vue — deferred, basic filters (Period & Min Matches) sufficient for MVP pair stats, full player/rule UI controls deferred.
+status: open
+
+
+
 

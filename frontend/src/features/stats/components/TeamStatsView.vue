@@ -103,7 +103,7 @@ function nextPage() {
       <!-- Demo mode indicator -->
       <div v-if="statsStore.isDemoModeEnabled" class="flex items-center gap-2">
         <span class="text-xs text-orange-400 font-headline uppercase tracking-widest font-bold bg-orange-400/10 px-2.5 py-1 rounded-full">
-          Demo Data
+          {{ t('teamStats.demoData', 'Demo Data') }}
         </span>
       </div>
     </div>
@@ -125,7 +125,7 @@ function nextPage() {
         {{ t('teamStats.noData', 'No team pair statistics found') }}
       </h3>
       <p class="text-sm text-on-surface-variant max-w-md">
-        Try adjusting your filters or record more 2v2 matches to see synergy insights.
+        {{ t('teamStats.noDataDescription', 'Try adjusting your filters or record more 2v2 matches to see synergy insights.') }}
       </p>
     </div>
 
@@ -146,9 +146,9 @@ function nextPage() {
 
           <div class="flex flex-col gap-0.5">
             <div class="flex flex-wrap items-center gap-1.5 text-sm font-bold text-on-surface">
-              <span class="text-primary">{{ pair.attackerName }} (Attacker)</span>
+              <span class="text-primary">{{ pair.attackerName }} ({{ t('teamStats.attacker', 'Attacker') }})</span>
               <span class="text-on-surface-variant font-normal">&amp;</span>
-              <span class="text-secondary">{{ pair.defenderName }} (Defender)</span>
+              <span class="text-secondary">{{ pair.defenderName }} ({{ t('teamStats.defender', 'Defender') }})</span>
             </div>
             <div class="text-xs text-on-surface-variant">
               {{ pair.matches }} {{ t('teamStats.matches', 'Matches') }} ({{ pair.wins }}W - {{ pair.losses }}L)

@@ -117,6 +117,8 @@
     "filterPeriod": "Period",
     "filterMinMatches": "Min Matches",
     "noData": "No team pair statistics found",
+    "noDataDescription": "Try adjusting your filters or record more 2v2 matches to see synergy insights.",
+    "demoData": "Demo Data",
     "previous": "Previous",
     "next": "Next",
     "page": "Page {current} of {total}"

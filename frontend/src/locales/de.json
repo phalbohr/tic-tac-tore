@@ -117,6 +117,8 @@
     "filterPeriod": "Zeitraum",
     "filterMinMatches": "Min. Spiele",
     "noData": "Keine Team-Paar-Statistiken gefunden",
+    "noDataDescription": "Passen Sie die Filter an oder erfassen Sie weitere 2v2-Spiele, um Synergien zu sehen.",
+    "demoData": "Demo-Daten",
     "previous": "Zurück",
     "next": "Weiter",
     "page": "Seite {current} von {total}"

@@ -22,6 +22,7 @@ export const useStatsStore = defineStore('stats', () => {
   const teamPairStats = ref<TeamPairStats[]>([])
   const realTeamPairStats = ref<TeamPairStats[]>([])
   const teamPairPage = ref<Page<TeamPairStats> | null>(null)
+  const realTeamPairPage = ref<Page<TeamPairStats> | null>(null)
   const isLoading = ref(false)
   const isTeamPairsLoading = ref(false)
   const error = ref<string | null>(null)
@@ -80,6 +81,7 @@ export const useStatsStore = defineStore('stats', () => {
     try {
       const pagedResult = await getTeamPairStats(params)
       realTeamPairStats.value = pagedResult.content || []
+      realTeamPairPage.value = pagedResult
       teamPairPage.value = pagedResult
 
       if (shouldShowDemoData.value && (!pagedResult.content || pagedResult.content.length === 0)) {
@@ -100,6 +102,7 @@ export const useStatsStore = defineStore('stats', () => {
       } else {
         teamPairStats.value = []
         teamPairPage.value = null
+        realTeamPairPage.value = null
       }
     } finally {
       isTeamPairsLoading.value = false
@@ -118,6 +121,7 @@ export const useStatsStore = defineStore('stats', () => {
     } else {
       stats.value = realStats.value
       teamPairStats.value = realTeamPairStats.value
+      teamPairPage.value = realTeamPairPage.value
     }
   }
 
