@@ -100,5 +100,25 @@
       "title": "Finde deine Stärke",
       "description": "Klimme die Rangliste hinauf und sieh zu, wie sich deine Statistiken verbessern."
     }
+  },
+  "teamStats": {
+    "title": "Team-Statistiken",
+    "subtitle": "Analysieren Sie Ihre Synergie mit verschiedenen Teamkollegen über Positionen hinweg",
+    "attacker": "Angreifer",
+    "defender": "Verteidiger",
+    "matches": "Spiele",
+    "wins": "Siege",
+    "losses": "Niederlagen",
+    "winRate": "Siegquote",
+    "allTime": "Gesamte Zeit",
+    "lastWeek": "Letzte Woche",
+    "lastMonth": "Letzter Monat",
+    "lastYear": "Letztes Jahr",
+    "filterPeriod": "Zeitraum",
+    "filterMinMatches": "Min. Spiele",
+    "noData": "Keine Team-Paar-Statistiken gefunden",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {current} von {total}"
   }
 }

@@ -57,22 +57,14 @@ inputDocuments:
 | **AC 3** | Pagination and minMatches threshold | API / Integration | Backend `StatisticsController` | P1 | 1. `page` and `size` parameters return paginated slice<br>2. Pairs with matches < `minMatches` are filtered out |
 | **AC 3** | Empty result when below threshold or no data | API / Unit | Backend & Frontend | P2 | 1. Returns empty page when threshold excludes all pairs |
 
-## TDD Red Phase (Current)
+## TDD Green Phase (Completed)
 
-✅ **Red-phase test scaffolds generated and verified:**
-- **Backend API Tests:** `src/test/java/com/tictactore/controller/StatisticsControllerATDDTest.java` (4 test cases, `@Disabled` red-phase scaffolds)
-- **Frontend E2E Tests:** `frontend/e2e/team-pair-statistics.spec.ts` (3 test cases, `test.skip()` red-phase scaffolds)
-- **Frontend Unit Tests:** `frontend/tests/unit/teamPairStats.spec.ts` (2 test cases)
+✅ **All test suites implemented and passing 100%:**
+- **Backend API Tests:** `src/test/java/com/tictactore/controller/StatisticsControllerATDDTest.java` (4 test cases enabled & passed)
+- **Backend Unit & Integration Tests:** `src/test/java/com/tictactore/service/StatisticsServiceTest.java`, `src/test/java/com/tictactore/controller/StatisticsControllerTest.java`, `src/test/java/com/tictactore/service/StatisticsServiceIntegrationTest.java` (all passed)
+- **Frontend Unit Tests:** `frontend/tests/unit/teamPairStats.spec.ts` (2 test cases passed)
+- **Frontend E2E Tests:** `frontend/e2e/team-pair-statistics.spec.ts` (3 test cases across all browsers passed)
 
-## Next Steps (Task-by-Task Activation)
-
-During implementation of each task in Story 4.4:
-1. Enable / unskip tests corresponding to the task being implemented:
-   - Task 1 & 2: Enable tests in `StatisticsControllerATDDTest.java`
-   - Task 3: Run `teamPairStats.spec.ts` with `npm test`
-   - Task 4: Unskip E2E tests in `frontend/e2e/team-pair-statistics.spec.ts`
-2. Run tests to verify they transition from RED to GREEN.
-3. Commit passing tests alongside implementation.
 
 
 

@@ -20,7 +20,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 4.4] Team (Pair) Statistics E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] should display team pair statistics with positional synergies (attacker/defender)', async ({ page }) => {
+  test('[P0] should display team pair statistics with positional synergies (attacker/defender)', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/statistics/team-pairs*', async (route) => {
@@ -67,7 +67,7 @@ test.describe('[Story 4.4] Team (Pair) Statistics E2E User Journey (ATDD)', () =
     await expect(page.getByText('70%')).toBeVisible();
   });
 
-  test.skip('[P1] should filter team pair statistics by player, rule system, and period', async ({ page }) => {
+  test('[P1] should filter team pair statistics by player, rule system, and period', async ({ page }) => {
     await loginUser(page);
 
     let requestedUrl = '';
@@ -90,15 +90,14 @@ test.describe('[Story 4.4] Team (Pair) Statistics E2E User Journey (ATDD)', () =
 
     // Select time period filter
     const periodSelect = page.getByTestId('stats-period-select');
-    if (await periodSelect.isVisible()) {
-      await periodSelect.selectOption('LAST_MONTH');
-    }
+    await expect(periodSelect).toBeVisible();
+    await periodSelect.selectOption('LAST_MONTH');
 
     // Expect query params updated in request
     expect(requestedUrl).toContain('period=LAST_MONTH');
   });
 
-  test.skip('[P1] should paginate results and respect minimum matches threshold', async ({ page }) => {
+  test('[P1] should paginate results and respect minimum matches threshold', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/statistics/team-pairs*', async (route) => {

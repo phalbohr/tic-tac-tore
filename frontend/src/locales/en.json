@@ -100,5 +100,25 @@
       "title": "Find your strength",
       "description": "Climb the leaderboard and see your stats improve."
     }
+  },
+  "teamStats": {
+    "title": "Team Statistics",
+    "subtitle": "Analyze your synergy with different teammates across positions",
+    "attacker": "Attacker",
+    "defender": "Defender",
+    "matches": "Matches",
+    "wins": "Wins",
+    "losses": "Losses",
+    "winRate": "Win Rate",
+    "allTime": "All Time",
+    "lastWeek": "Last Week",
+    "lastMonth": "Last Month",
+    "lastYear": "Last Year",
+    "filterPeriod": "Period",
+    "filterMinMatches": "Min Matches",
+    "noData": "No team pair statistics found",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {current} of {total}"
   }
 }

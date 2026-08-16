@@ -45,7 +45,6 @@ class StatisticsControllerATDDTest {
     class TeamPairsEndpointSpecs {
 
         @Test
-        @Disabled("ATDD Red Phase — awaiting Story 4.4 endpoint implementation")
         @WithMockUser
         @DisplayName("[P0] GET /api/v1/statistics/team-pairs should return 200 OK with paginated team pair statistics")
         void shouldReturn200WithTeamPairStats() throws Exception {
@@ -59,7 +58,6 @@ class StatisticsControllerATDDTest {
         }
 
         @Test
-        @Disabled("ATDD Red Phase — awaiting Story 4.4 endpoint implementation")
         @WithMockUser
         @DisplayName("[P0] GET /api/v1/statistics/team-pairs should differentiate positional synergies (attacker vs defender)")
         void shouldDifferentiatePositionalSynergies() throws Exception {
@@ -74,7 +72,6 @@ class StatisticsControllerATDDTest {
         }
 
         @Test
-        @Disabled("ATDD Red Phase — awaiting Story 4.4 endpoint implementation")
         @WithMockUser
         @DisplayName("[P1] GET /api/v1/statistics/team-pairs should filter by period, ruleConfigId, and minMatches")
         void shouldFilterByPeriodRuleAndMinMatches() throws Exception {
@@ -90,7 +87,6 @@ class StatisticsControllerATDDTest {
         }
 
         @Test
-        @Disabled("ATDD Red Phase — awaiting Story 4.4 endpoint implementation")
         @WithMockUser
         @DisplayName("[P1] GET /api/v1/statistics/team-pairs should support pagination parameters")
         void shouldSupportPagination() throws Exception {
