@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-15T20:39:42+02:00",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "4-2-global-leaderboard-with-filtering",
+    "label": "4-2-global-leaderboard-with-filtering"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "PASS",
+  "rationale": "All P0 acceptance criteria are fully covered with 100% coverage and 100% test pass rates. The endpoint contract is verified at API, Integration, Component, and E2E levels. Authentication, validation, filtering, aggregation, sorting, pagination, and error paths are all tested. No critical gaps, high-priority gaps, or security issues were identified.",
+  "p0_status": "MET",
+  "p1_status": "MET",
+  "overall_status": "MET",
+  "critical_open": 0,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability-matrix.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

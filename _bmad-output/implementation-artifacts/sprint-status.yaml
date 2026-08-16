@@ -73,7 +73,7 @@ development_status:
   epic-3-retrospective: optional
   epic-4: in-progress
   4-1-empty-state-and-demo-data: done
-  4-2-global-leaderboard-with-filtering: backlog
+  4-2-global-leaderboard-with-filtering: done
   4-3-positional-statistics-attack-vs-defense: backlog
   4-4-team-pair-statistics: backlog
   4-5-head-to-head-h2h-comparison: backlog

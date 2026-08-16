@@ -40,6 +40,11 @@ const router = createRouter({
       name: 'matches',
       component: () => import('@/views/HomeView.vue'),
     },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('@/features/stats/views/LeaderboardView.vue'),
+    },
   ],
 })
 
