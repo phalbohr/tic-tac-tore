@@ -152,7 +152,18 @@ Not recommended. Final review pass made only localized, low-consequence patches 
 - Frontend: `cd frontend && npm run test:unit -- --run` — 215 tests passed
 - TypeScript: not run (frontend package.json test script does not expose type-check separately; existing CI covers it)
 
+### Manual Completion Verification (2026-08-16)
+- Backend full suite: `./mvnw test` — 301 passed, 0 failures
+- Frontend unit suite: `npm run test:unit -- --run` — 221 passed, 0 failures
+- Frontend type check: `npm run type-check` — 0 errors (clean)
+- Playwright E2E: `tests/e2e/leaderboard.spec.ts` (5 tests), `tests/e2e/stats-dashboard.spec.ts` (9 tests), `tests/api/personal-stats.spec.ts` (7 tests) — 21/21 passed on Chromium
+- Fixes applied:
+  - Added explicit parameter casts to `LeaderboardRepository` JPQL query for PostgreSQL 42P18 compatibility
+  - Fixed E2E test bar width regex and locator strictness in `stats-dashboard.spec.ts`
+  - Fixed `waitForBackend` in `personal-stats.spec.ts` to poll `/actuator/health` instead of test-login endpoint
+
 ### Residual Risks
-- In-memory aggregation suitable for MVP scale (10-20 players); growth beyond ~100 players requires DB-level aggregation (already scoped to Epic 4.6)
-- Match type inference relies on null defender IDs; partial/corrupted data could misclassify match types
+- In-memory aggregation suitable for MVP scale (10-20 players); growth beyond ~100 players requires DB-level aggregation (already scoped to Epic 4.6, DW-44)
+- Match type inference relies on null defender IDs; partial/corrupted data could misclassify match types (deferred as DW-54)
+
 

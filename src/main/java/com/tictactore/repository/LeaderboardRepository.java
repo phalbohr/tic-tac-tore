@@ -13,13 +13,13 @@ public interface LeaderboardRepository extends JpaRepository<Match, UUID> {
     @Query("""
         SELECT m FROM Match m
         WHERE m.status = 'CONFIRMED'
-        AND (:matchFormat IS NULL OR m.matchFormat = :matchFormat)
-        AND (:matchType IS NULL OR
+        AND (cast(:matchFormat as string) IS NULL OR m.matchFormat = :matchFormat)
+        AND (cast(:matchType as string) IS NULL OR
             (:matchType = '1v1' AND m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL)
             OR (:matchType = '2v2' AND m.teamADefenderId IS NOT NULL AND m.teamBDefenderId IS NOT NULL)
         )
-        AND (:startDate IS NULL OR m.createdAt >= :startDate)
-        AND (:endDate IS NULL OR m.createdAt <= :endDate)
+        AND (cast(:startDate as java.time.Instant) IS NULL OR m.createdAt >= :startDate)
+        AND (cast(:endDate as java.time.Instant) IS NULL OR m.createdAt <= :endDate)
         """)
     List<Match> findConfirmedMatchesWithFilters(
             @Param("matchFormat") String matchFormat,
