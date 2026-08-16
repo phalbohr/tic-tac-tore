@@ -53,6 +53,13 @@ so that I can find the best synergy.
 - **Previous Story Context (4-1 Empty State):**
   - If `tictactore.demoModeEnabled` is true or the user has < 1 confirmed match, reuse the existing `EmptyState` component or demo data patterns established in Story 4.1 rather than building new fallbacks.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-4-4-team-pair-statistics.md`
+- **Backend API tests:** `src/test/java/com/tictactore/controller/StatisticsControllerATDDTest.java`
+- **Frontend E2E tests:** `frontend/e2e/team-pair-statistics.spec.ts`
+- **Frontend Unit tests:** `frontend/tests/unit/teamPairStats.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md] - FR23: Team statistics showing pair-level performance.
