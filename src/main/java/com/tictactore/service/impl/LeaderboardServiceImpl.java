@@ -2,6 +2,7 @@ package com.tictactore.service.impl;
 
 import com.tictactore.dto.LeaderboardEntry;
 import com.tictactore.dto.PageResponse;
+import com.tictactore.dto.PlayerStatsResponse;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.Position;
@@ -176,6 +177,77 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         } else {
             return playerId.equals(match.getTeamADefenderId()) || playerId.equals(match.getTeamBDefenderId());
         }
+    }
+
+    @Override
+    public PlayerStatsResponse getPersonalStats(UUID userId) {
+        List<Match> matches = leaderboardRepository.findConfirmedMatchesWithFilters(null, null, null, null);
+
+        PlayerStatsResponse.PositionStatsResponse overall = PlayerStatsResponse.PositionStatsResponse.empty();
+        PlayerStatsResponse.PositionStatsResponse attacker = PlayerStatsResponse.PositionStatsResponse.empty();
+        PlayerStatsResponse.PositionStatsResponse defender = PlayerStatsResponse.PositionStatsResponse.empty();
+
+        String playerName = userRepository.findById(userId)
+                .map(u -> u.getNickname())
+                .orElse("Unknown");
+
+        for (Match match : matches) {
+            if (!match.isParticipant(userId)) continue;
+
+            int teamAGames = 0;
+            int teamBGames = 0;
+            for (Game game : match.getGames()) {
+                if (game.getTeamAScore() > game.getTeamBScore()) {
+                    teamAGames++;
+                } else if (game.getTeamBScore() > game.getTeamAScore()) {
+                    teamBGames++;
+                }
+            }
+
+            boolean teamAWon = teamAGames > teamBGames;
+            boolean teamBWon = teamBGames > teamAGames;
+            boolean isTied = !teamAWon && !teamBWon;
+
+            boolean userIsAttacker = userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamBAttackerId());
+            boolean userIsDefender = userId.equals(match.getTeamADefenderId()) || userId.equals(match.getTeamBDefenderId());
+            boolean userOnTeamA = userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId());
+
+            overall = increment(overall, userOnTeamA, teamAWon, teamBWon, isTied);
+            if (userIsAttacker) {
+                attacker = increment(attacker, userOnTeamA, teamAWon, teamBWon, isTied);
+            }
+            if (userIsDefender) {
+                defender = increment(defender, userOnTeamA, teamAWon, teamBWon, isTied);
+            }
+        }
+
+        return new PlayerStatsResponse(
+                userId,
+                playerName,
+                withRate(overall),
+                withRate(attacker),
+                withRate(defender)
+        );
+    }
+
+    private PlayerStatsResponse.PositionStatsResponse increment(
+            PlayerStatsResponse.PositionStatsResponse stats,
+            boolean userOnTeamA, boolean teamAWon, boolean teamBWon, boolean isTied
+    ) {
+        int matches = stats.matches() + 1;
+        int wins = stats.wins();
+        int losses = stats.losses();
+        if (!isTied) {
+            boolean userWon = (userOnTeamA && teamAWon) || (!userOnTeamA && teamBWon);
+            if (userWon) wins++;
+            else losses++;
+        }
+        return new PlayerStatsResponse.PositionStatsResponse(matches, wins, losses, 0.0);
+    }
+
+    private PlayerStatsResponse.PositionStatsResponse withRate(PlayerStatsResponse.PositionStatsResponse stats) {
+        double rate = stats.matches() > 0 ? (double) stats.wins() / stats.matches() * 100.0 : 0.0;
+        return new PlayerStatsResponse.PositionStatsResponse(stats.matches(), stats.wins(), stats.losses(), rate);
     }
 
     private static class PlayerStats {
