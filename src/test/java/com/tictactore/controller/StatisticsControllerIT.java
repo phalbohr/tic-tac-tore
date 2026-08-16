@@ -53,6 +53,12 @@ class StatisticsControllerIT {
     @Autowired
     private UserRepository userRepository;
 
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private org.redisson.api.RedissonClient redissonClient;
+
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.tictactore.service.TokenRevocationService tokenRevocationService;
+
     private UUID p1, p2, p3, p4;
 
     @BeforeEach
