@@ -8,8 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -38,9 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * in isolation from the aggregation logic, which is covered by the real-data
  * {@link StatisticsControllerIT} and the unit-level {@link com.tictactore.service.LeaderboardServiceTest}.
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(StatisticsController.class)
+@Import({com.tictactore.config.SecurityConfig.class, com.tictactore.security.JwtAuthenticationFilter.class})
 @DisplayName("StatisticsController API Contract Tests")
 class StatisticsControllerTest {
 
@@ -49,6 +48,15 @@ class StatisticsControllerTest {
 
     @MockBean
     private LeaderboardService leaderboardService;
+
+    @MockBean
+    private com.tictactore.service.JwtService jwtService;
+
+    @MockBean
+    private com.tictactore.service.TokenRevocationService tokenRevocationService;
+
+    @MockBean
+    private com.tictactore.security.CustomOAuth2SuccessHandler oAuth2SuccessHandler;
 
     private UUID p1, p2;
 
