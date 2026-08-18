@@ -99,4 +99,62 @@ class StatisticsControllerATDDTest {
                     .andExpect(jsonPath("$.size").value(5));
         }
     }
+
+    @Nested
+    @DisplayName("GET /api/v1/statistics/head-to-head Endpoint Specs (Story 4.5)")
+    class HeadToHeadEndpointSpecs {
+
+        @Test
+        @WithMockUser
+        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
+        @DisplayName("[P0] GET /api/v1/statistics/head-to-head should return 200 OK with opponent profile and 3 cross-tab matrices (Matches, Games, Goals)")
+        void shouldReturn200WithHeadToHeadStats() throws Exception {
+            UUID opponentId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/statistics/head-to-head")
+                            .param("opponentId", opponentId.toString())
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.opponent.id").value(opponentId.toString()))
+                    .andExpect(jsonPath("$.opponent.nickname").isString())
+                    .andExpect(jsonPath("$.matches.with").isMap())
+                    .andExpect(jsonPath("$.matches.vs").isMap())
+                    .andExpect(jsonPath("$.games.with").isMap())
+                    .andExpect(jsonPath("$.games.vs").isMap())
+                    .andExpect(jsonPath("$.goals.attackerVsDefender").isMap())
+                    .andExpect(jsonPath("$.goals.attackerVsAttacker").isMap())
+                    .andExpect(jsonPath("$.goals.defenderVsAttacker").isMap())
+                    .andExpect(jsonPath("$.goals.defenderVsDefender").isMap());
+        }
+
+        @Test
+        @WithMockUser
+        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
+        @DisplayName("[P1] GET /api/v1/statistics/head-to-head should filter by period, ruleConfigId, and matchType")
+        void shouldFilterHeadToHeadStats() throws Exception {
+            UUID opponentId = UUID.randomUUID();
+            UUID ruleConfigId = UUID.randomUUID();
+
+            mockMvc.perform(get("/api/v1/statistics/head-to-head")
+                            .param("opponentId", opponentId.toString())
+                            .param("period", "WEEKLY")
+                            .param("ruleConfigId", ruleConfigId.toString())
+                            .param("matchType", "2v2")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.opponent.id").value(opponentId.toString()))
+                    .andExpect(jsonPath("$.matches").exists());
+        }
+
+        @Test
+        @WithMockUser
+        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
+        @DisplayName("[P2] GET /api/v1/statistics/head-to-head should return 400 Bad Request when opponentId is missing or equals current user")
+        void shouldReturn400WhenInvalidOpponentId() throws Exception {
+            mockMvc.perform(get("/api/v1/statistics/head-to-head")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+    }
 }
+
