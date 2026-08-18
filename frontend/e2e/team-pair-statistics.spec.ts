@@ -91,7 +91,11 @@ test.describe('[Story 4.4] Team (Pair) Statistics E2E User Journey (ATDD)', () =
     // Select time period filter
     const periodSelect = page.getByTestId('stats-period-select');
     await expect(periodSelect).toBeVisible();
+    const responsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/api/v1/statistics/team-pairs') && resp.url().includes('period=LAST_MONTH')
+    );
     await periodSelect.selectOption('LAST_MONTH');
+    await responsePromise;
 
     // Expect query params updated in request
     expect(requestedUrl).toContain('period=LAST_MONTH');
