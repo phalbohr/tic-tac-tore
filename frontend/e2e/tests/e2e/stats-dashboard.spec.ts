@@ -71,7 +71,7 @@ test.describe('Story 4.3: Stats Dashboard — Positional Statistics E2E', () => 
       await expect(overallCard.getByText('75.0%')).toBeVisible();
 
       const bars = page.locator('.ch-stat-bar-fill');
-      expect(await bars.count()).toBe(3);
+      await expect(bars).toHaveCount(3);
       await expect(bars.nth(0)).toHaveAttribute('style', /width: 75%/);
       await expect(bars.nth(1)).toHaveAttribute('style', /width: 75%/);
       await expect(bars.nth(2)).toHaveAttribute('style', /width: 0%/);
@@ -87,7 +87,7 @@ test.describe('Story 4.3: Stats Dashboard — Positional Statistics E2E', () => 
       await expect(overallCard.getByText('0.0%')).toBeVisible();
 
       const bars = page.locator('.ch-stat-bar-fill');
-      expect(await bars.count()).toBe(3);
+      await expect(bars).toHaveCount(3);
       for (let i = 0; i < 3; i++) {
         const style = await bars.nth(i).getAttribute('style');
         expect(style).toContain('width: 0%');
@@ -106,7 +106,7 @@ test.describe('Story 4.3: Stats Dashboard — Positional Statistics E2E', () => 
       await page.reload({ waitUntil: 'networkidle' });
 
       const bars = page.locator('.ch-stat-bar-fill');
-      expect(await bars.count()).toBe(3);
+      await expect(bars).toHaveCount(3);
       for (let i = 0; i < 3; i++) {
         const style = await bars.nth(i).getAttribute('style');
         expect(style).toContain('width: 100%');
@@ -119,7 +119,7 @@ test.describe('Story 4.3: Stats Dashboard — Positional Statistics E2E', () => 
       await page.reload({ waitUntil: 'networkidle' });
 
       const bars = page.locator('.ch-stat-bar-fill');
-      expect(await bars.count()).toBe(3);
+      await expect(bars).toHaveCount(3);
       expect(await bars.nth(0).evaluate((el) => el.classList.contains('bg-primary'))).toBe(true);
       expect(await bars.nth(1).evaluate((el) => el.classList.contains('bg-secondary'))).toBe(true);
       expect(await bars.nth(2).evaluate((el) => el.classList.contains('bg-primary'))).toBe(true);

@@ -3,13 +3,16 @@ import { ref, computed, watch } from 'vue'
 import {
   getPersonalStats,
   getTeamPairStats,
+  getHeadToHeadStats,
   type PlayerStats,
   type PersonalStatsParams,
   type TeamPairStats,
   type TeamPairStatsParams,
+  type H2HStatsResponse,
+  type H2HParams,
   type Page
 } from '@/services/statisticsService'
-import { generateDemoData, generateDemoTeamPairStats } from '../utils/demoDataGenerator'
+import { generateDemoData, generateDemoTeamPairStats, generateDemoH2HStats } from '../utils/demoDataGenerator'
 import { useAuthStore } from '@/stores/auth'
 
 export const useStatsStore = defineStore('stats', () => {
@@ -23,9 +26,14 @@ export const useStatsStore = defineStore('stats', () => {
   const realTeamPairStats = ref<TeamPairStats[]>([])
   const teamPairPage = ref<Page<TeamPairStats> | null>(null)
   const realTeamPairPage = ref<Page<TeamPairStats> | null>(null)
+  const h2hStats = ref<H2HStatsResponse | null>(null)
+  const realH2HStats = ref<H2HStatsResponse | null>(null)
+  const selectedOpponentId = ref<string | null>(null)
   const isLoading = ref(false)
   const isTeamPairsLoading = ref(false)
+  const isH2HLoading = ref(false)
   const error = ref<string | null>(null)
+  const h2hError = ref<string | null>(null)
   const confirmedMatchesCount = ref<number | null>(null)
 
   const rawDemoModeSetting = ref<string | null>(localStorage.getItem(getDemoModeKey()))
@@ -109,6 +117,34 @@ export const useStatsStore = defineStore('stats', () => {
     }
   }
 
+  async function fetchH2HStats(opponentId: string, params: H2HParams = {}) {
+    isH2HLoading.value = true
+    h2hError.value = null
+    selectedOpponentId.value = opponentId
+
+    try {
+      const fetchedStats = await getHeadToHeadStats(opponentId, params)
+      realH2HStats.value = fetchedStats
+
+      if (shouldShowDemoData.value) {
+        h2hStats.value = generateDemoH2HStats(opponentId)
+      } else {
+        h2hStats.value = fetchedStats
+      }
+      return fetchedStats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      h2hError.value = err.message || 'Failed to fetch head-to-head statistics'
+      if (shouldShowDemoData.value) {
+        h2hStats.value = generateDemoH2HStats(opponentId)
+      } else {
+        h2hStats.value = null
+      }
+    } finally {
+      isH2HLoading.value = false
+    }
+  }
+
   function toggleDemoMode(enabled: boolean) {
     const stringVal = String(enabled)
     localStorage.setItem(getDemoModeKey(), stringVal)
@@ -118,10 +154,12 @@ export const useStatsStore = defineStore('stats', () => {
       const demoPairs = generateDemoTeamPairStats()
       teamPairStats.value = demoPairs.content
       teamPairPage.value = demoPairs
+      h2hStats.value = generateDemoH2HStats(selectedOpponentId.value || undefined)
     } else {
       stats.value = realStats.value
       teamPairStats.value = realTeamPairStats.value
       teamPairPage.value = realTeamPairPage.value
+      h2hStats.value = realH2HStats.value
     }
   }
 
@@ -129,14 +167,20 @@ export const useStatsStore = defineStore('stats', () => {
     stats,
     teamPairStats,
     teamPairPage,
+    h2hStats,
+    selectedOpponentId,
     isLoading,
     isTeamPairsLoading,
+    isH2HLoading,
     error,
+    h2hError,
     confirmedMatchesCount,
     shouldShowDemoData,
     isDemoModeEnabled: shouldShowDemoData,
     fetchStats,
     fetchTeamPairStats,
+    fetchH2HStats,
     toggleDemoMode
   }
 })
+

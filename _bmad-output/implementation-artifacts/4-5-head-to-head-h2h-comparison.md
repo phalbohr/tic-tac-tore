@@ -4,7 +4,7 @@ baseline_commit: 3e74d8f
 
 # Story 4.5: Head-to-Head (H2H) Comparison
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -34,34 +34,54 @@ so that I know our historical matchup across matches, games, and positions.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend Domain DTOs & Projections (AC1, AC2)
-  - [ ] Create `H2HStatsResponse.java`, `H2HMatchStatsDto.java`, `H2HGameStatsDto.java`, `H2HGoalStatsDto.java`, `PositionalGoalMatrixDto.java`, and `PlayerSummaryDto.java` in `com.tictactore.dto`.
-  - [ ] Create repository projections/interfaces for cross-tabulation query aggregation results.
-- [ ] Task 2: Backend Database Aggregations & Service Layer (AC1, AC2, AC3)
-  - [ ] Implement JPA native/JPQL aggregation queries in `MatchRepository` (and/or `GameRepository` / `MatchEventRepository`) querying strictly `CONFIRMED` and `PUBLISHED` matches (`AD-02`).
-  - [ ] Calculate "With" (same team in 2v2) and "Vs" (opposite teams in 1v1 and 2v2) metrics for matches and games.
-  - [ ] Calculate positional goal cross-tabulation (Attacker vs Defender, Attacker vs Attacker, Defender vs Attacker, Defender vs Defender).
-  - [ ] Add `H2HStatsResponse getHeadToHeadStats(UUID playerId, UUID opponentId, TimePeriod period, UUID ruleConfigId, String matchType)` to `StatisticsService` and `StatisticsServiceImpl`.
-  - [ ] Apply safe player profile resolution via `resolveDisplayName` without email fallback (`AD-04`) and support deleted/anonymous accounts.
-- [ ] Task 3: Backend REST Controller & Validation (AC1, AC2)
-  - [ ] Add `GET /api/v1/statistics/head-to-head` endpoint in `StatisticsController`.
-  - [ ] Support query parameters: `opponentId` (required UUID), `period` (TimePeriod enum, default `ALL_TIME`), `ruleConfigId` (optional UUID), `matchType` (optional string `1v1|2v2`).
-  - [ ] Inject `@AuthenticationPrincipal User principal` to resolve current authenticated user as `playerId`.
-- [ ] Task 4: Frontend Service & Pinia Store Integration (AC1, AC2, AC4)
-  - [ ] Update `frontend/src/services/statisticsService.ts` with `getHeadToHeadStats(...)` API call.
-  - [ ] Update `frontend/src/features/stats/stores/useStatsStore.ts` with `h2hStats`, `selectedOpponentId`, `fetchH2HStats(...)`, and reactive filters.
-  - [ ] Update `frontend/src/features/stats/utils/demoDataGenerator.ts` to generate realistic H2H demo matrices (matches, games, positional goals).
-- [ ] Task 5: Frontend UI Component Implementation (AC1, AC2, AC3, AC4)
-  - [ ] Create `frontend/src/features/stats/components/H2HCrossTabMatrix.vue` displaying the 3 cross-tabulated tables following the "No-Line" rule (UX-DR3) with `ch-` SCSS classes.
-  - [ ] Add Opponent Selector supporting player search/autocomplete and integration with `AvatarInteractive`.
-  - [ ] Integrate `EmptyStateCTA.vue` for 0 shared matches with action to initiate a new match.
-  - [ ] Add H2H tab in `StatsDashboard.vue` and support deep-linking via route query (`/statistics?tab=h2h&opponentId=...`).
-  - [ ] Add i18n translation keys in `en.json` and `de.json` for all matrix labels, tooltips, and empty states.
-- [ ] Task 6: Testing & Quality Verification (ATDD & CI)
-  - [ ] Implement backend unit and integration tests: `StatisticsControllerTest.java`, `StatisticsServiceTest.java`, `StatisticsServiceIntegrationTest.java`, and `StatisticsControllerATDDTest.java`.
-  - [ ] Implement frontend unit tests in `frontend/tests/unit/h2hCrossTabMatrix.spec.ts`.
-  - [ ] Implement Playwright E2E test in `frontend/e2e/head-to-head-statistics.spec.ts`.
-  - [ ] Run `./scripts/ci-local.sh` and verify all tests pass.
+- [x] Task 1: Backend Domain DTOs & Projections (AC1, AC2)
+  - [x] Create `H2HStatsResponse.java`, `H2HMatchStatsDto.java`, `H2HGameStatsDto.java`, `H2HGoalStatsDto.java`, `PositionalGoalMatrixDto.java`, and `PlayerSummaryDto.java` in `com.tictactore.dto`.
+  - [x] Create repository projections/interfaces for cross-tabulation query aggregation results.
+- [x] Task 2: Backend Database Aggregations & Service Layer (AC1, AC2, AC3)
+  - [x] Implement JPA native/JPQL aggregation queries in `MatchRepository` (and/or `GameRepository` / `MatchEventRepository`) querying strictly `CONFIRMED` and `PUBLISHED` matches (`AD-02`).
+  - [x] Calculate "With" (same team in 2v2) and "Vs" (opposite teams in 1v1 and 2v2) metrics for matches and games.
+  - [x] Calculate positional goal cross-tabulation (Attacker vs Defender, Attacker vs Attacker, Defender vs Attacker, Defender vs Defender).
+  - [x] Add `H2HStatsResponse getHeadToHeadStats(UUID playerId, UUID opponentId, TimePeriod period, UUID ruleConfigId, String matchType)` to `StatisticsService` and `StatisticsServiceImpl`.
+  - [x] Apply safe player profile resolution via `resolveDisplayName` without email fallback (`AD-04`) and support deleted/anonymous accounts.
+- [x] Task 3: Backend REST Controller & Validation (AC1, AC2)
+  - [x] Add `GET /api/v1/statistics/head-to-head` endpoint in `StatisticsController`.
+  - [x] Support query parameters: `opponentId` (required UUID), `period` (TimePeriod enum, default `ALL_TIME`), `ruleConfigId` (optional UUID), `matchType` (optional string `1v1|2v2`).
+  - [x] Inject `@AuthenticationPrincipal User principal` to resolve current authenticated user as `playerId`.
+- [x] Task 4: Frontend Service & Pinia Store Integration (AC1, AC2, AC4)
+  - [x] Update `frontend/src/services/statisticsService.ts` with `getHeadToHeadStats(...)` API call.
+  - [x] Update `frontend/src/features/stats/stores/useStatsStore.ts` with `h2hStats`, `selectedOpponentId`, `fetchH2HStats(...)`, and reactive filters.
+  - [x] Update `frontend/src/features/stats/utils/demoDataGenerator.ts` to generate realistic H2H demo matrices (matches, games, positional goals).
+- [x] Task 5: Frontend UI Component Implementation (AC1, AC2, AC3, AC4)
+  - [x] Create `frontend/src/features/stats/components/H2HCrossTabMatrix.vue` displaying the 3 cross-tabulated tables following the "No-Line" rule (UX-DR3) with `ch-` SCSS classes.
+  - [x] Add Opponent Selector supporting player search/autocomplete and integration with `AvatarInteractive`.
+  - [x] Integrate `EmptyStateCTA.vue` for 0 shared matches with action to initiate a new match.
+  - [x] Add H2H tab in `StatsDashboard.vue` and support deep-linking via route query (`/statistics?tab=h2h&opponentId=...`).
+  - [x] Add i18n translation keys in `en.json` and `de.json` for all matrix labels, tooltips, and empty states.
+- [x] Task 6: Testing & Quality Verification (ATDD & CI)
+  - [x] Implement backend unit and integration tests: `StatisticsControllerTest.java`, `StatisticsServiceTest.java`, `StatisticsServiceIntegrationTest.java`, and `StatisticsControllerATDDTest.java`.
+  - [x] Implement frontend unit tests in `frontend/tests/unit/h2hCrossTabMatrix.spec.ts`.
+  - [x] Implement Playwright E2E test in `frontend/e2e/head-to-head-statistics.spec.ts`.
+  - [x] Run `./scripts/ci-local.sh` and verify all tests pass.
+
+## Dev Record
+
+### Implementation Summary
+- **Backend**:
+  - DTOs: `PlayerSummaryDto`, `H2HMatchStatsDto`, `H2HMatchTableDto`, `H2HGameStatsDto`, `H2HGameTableDto`, `PositionalGoalMatrixDto`, `H2HGoalStatsDto`, `H2HStatsResponse`.
+  - Repository: Added `findHeadToHeadMatches` in `MatchRepository` filtering by confirmed/published status, participants, time periods, and match formats.
+  - Service: Implemented `getHeadToHeadStats` in `StatisticsServiceImpl` computing cross-tabulation for "With" and "Vs" (matches and games) as well as 4-way positional goal breakdowns (Attacker vs Defender, Attacker vs Attacker, Defender vs Attacker, Defender vs Defender) with privacy-safe display name resolution.
+  - Controller: Added `GET /api/v1/statistics/head-to-head` in `StatisticsController` supporting parameter validation and authenticated principal extraction.
+- **Frontend**:
+  - Service: Added `getHeadToHeadStats` and TypeScript interfaces in `statisticsService.ts`.
+  - Store: Added H2H state and actions in `useStatsStore.ts` with demo mode support.
+  - Component: Created `H2HCrossTabMatrix.vue` displaying opponent profile header, filters, 3 cross-tabulated tables (Matches, Games, Goals) following the No-Line rule (`UX-DR3`), and empty state integration with `EmptyStateCTA.vue`.
+  - Translations: Added keys to `en.json` and `de.json`.
+  - Routing: Added `/statistics` route and tab switching in `StatsDashboard.vue`.
+- **Testing**:
+  - Backend: `StatisticsControllerATDDTest` (enabled and passing), `StatisticsServiceTest` (passing), `StatisticsControllerTest` (passing), `StatisticsServiceIntegrationTest` (passing).
+  - Frontend: `h2hCrossTabMatrix.spec.ts` (passing), `StatsDashboard.spec.ts` (passing).
+  - E2E: `head-to-head-statistics.spec.ts` (enabled and all 9 tests passing).
+  - Verification: Ran `./scripts/ci-local.sh` successfully with all tests passing.
 
 ## Dev Notes
 

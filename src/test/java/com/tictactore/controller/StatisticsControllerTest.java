@@ -329,4 +329,48 @@ class StatisticsControllerTest {
             verify(statisticsService).getTeamPairStats(playerId, TimePeriod.LAST_MONTH, ruleConfigId, 0, 10, 3);
         }
     }
+
+    @Nested
+    @DisplayName("Head to Head Endpoint Specs")
+    class HeadToHeadSpecs {
+
+        @Test
+        @WithMockUser
+        @DisplayName("Should delegate to service and return 200 OK with H2HStatsResponse")
+        void shouldDelegateToService_whenGetHeadToHeadCalled() throws Exception {
+            UUID opponentId = UUID.randomUUID();
+            UUID ruleConfigId = UUID.randomUUID();
+            com.tictactore.dto.H2HStatsResponse expected = new com.tictactore.dto.H2HStatsResponse(
+                    new com.tictactore.dto.PlayerSummaryDto(opponentId, "Opponent", null),
+                    com.tictactore.dto.H2HMatchTableDto.empty(),
+                    com.tictactore.dto.H2HGameTableDto.empty(),
+                    com.tictactore.dto.H2HGoalStatsDto.empty()
+            );
+
+            when(statisticsService.getHeadToHeadStats(any(), eq(opponentId), eq(TimePeriod.WEEKLY), eq(ruleConfigId), eq("2v2")))
+                    .thenReturn(expected);
+
+            mockMvc.perform(get("/api/v1/statistics/head-to-head")
+                            .param("opponentId", opponentId.toString())
+                            .param("period", "WEEKLY")
+                            .param("ruleConfigId", ruleConfigId.toString())
+                            .param("matchType", "2v2")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.opponent.id").value(opponentId.toString()))
+                    .andExpect(jsonPath("$.opponent.nickname").value("Opponent"));
+        }
+
+        @Test
+        @WithMockUser
+        @DisplayName("Should return 400 when matchType is invalid")
+        void shouldReturn400_whenInvalidMatchType() throws Exception {
+            UUID opponentId = UUID.randomUUID();
+            mockMvc.perform(get("/api/v1/statistics/head-to-head")
+                            .param("opponentId", opponentId.toString())
+                            .param("matchType", "3v3")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+    }
 }

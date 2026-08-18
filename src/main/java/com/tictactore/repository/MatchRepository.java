@@ -42,6 +42,29 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             @Param("p4") UUID p4
     );
 
+    @Query("""
+        SELECT DISTINCT m FROM Match m
+        LEFT JOIN FETCH m.games g
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+        AND (
+            (m.teamAAttackerId = :playerId OR m.teamADefenderId = :playerId OR m.teamBAttackerId = :playerId OR m.teamBDefenderId = :playerId)
+            AND
+            (m.teamAAttackerId = :opponentId OR m.teamADefenderId = :opponentId OR m.teamBAttackerId = :opponentId OR m.teamBDefenderId = :opponentId)
+        )
+        AND (cast(:startDate as java.time.Instant) IS NULL OR m.createdAt >= :startDate)
+        AND (cast(:matchType as string) IS NULL OR
+            (:matchType = '1v1' AND m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL)
+            OR (:matchType = '2v2' AND m.teamADefenderId IS NOT NULL AND m.teamBDefenderId IS NOT NULL)
+        )
+        ORDER BY m.createdAt DESC
+        """)
+    List<Match> findHeadToHeadMatches(
+            @Param("playerId") UUID playerId,
+            @Param("opponentId") UUID opponentId,
+            @Param("startDate") Instant startDate,
+            @Param("matchType") String matchType
+    );
+
     @Query(value = """
         WITH match_results AS (
             SELECT

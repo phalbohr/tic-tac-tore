@@ -15,4 +15,12 @@ public interface StatisticsService {
             int size,
             int minMatches
     );
+
+    com.tictactore.dto.H2HStatsResponse getHeadToHeadStats(
+            UUID playerId,
+            UUID opponentId,
+            TimePeriod period,
+            UUID ruleConfigId,
+            String matchType
+    );
 }

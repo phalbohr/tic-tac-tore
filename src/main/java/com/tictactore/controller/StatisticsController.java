@@ -74,4 +74,54 @@ public class StatisticsController {
         );
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/head-to-head")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<com.tictactore.dto.H2HStatsResponse> getHeadToHeadStats(
+            @AuthenticationPrincipal Object principal,
+            @RequestParam UUID opponentId,
+            @RequestParam(required = false, defaultValue = "ALL_TIME") TimePeriod period,
+            @RequestParam(required = false) UUID ruleConfigId,
+            @RequestParam(required = false) @Pattern(regexp = "1v1|2v2", message = "matchType must be 1v1 or 2v2") String matchType
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UUID playerId = resolveUserId(principal);
+        if (playerId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (playerId.equals(opponentId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        com.tictactore.dto.H2HStatsResponse response = statisticsService.getHeadToHeadStats(
+                playerId,
+                opponentId,
+                period,
+                ruleConfigId,
+                matchType
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    private UUID resolveUserId(Object principal) {
+        if (principal instanceof User user) {
+            return user.getId();
+        }
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            try {
+                return UUID.fromString(userDetails.getUsername());
+            } catch (Exception ignored) {
+                return UUID.nameUUIDFromBytes(userDetails.getUsername().getBytes());
+            }
+        }
+        if (principal instanceof String str) {
+            try {
+                return UUID.fromString(str);
+            } catch (Exception ignored) {
+                return UUID.nameUUIDFromBytes(str.getBytes());
+            }
+        }
+        return null;
+    }
 }

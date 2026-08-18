@@ -21,7 +21,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 4.5] Head-to-Head (H2H) Comparison E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] should display opponent profile and three cross-tabulated tables (Matches, Games, Goals)', async ({ page }) => {
+  test('[P0] should display opponent profile and three cross-tabulated tables (Matches, Games, Goals)', async ({ page }) => {
     await loginUser(page);
 
     const opponentId = 'opp-user-456';
@@ -68,7 +68,7 @@ test.describe('[Story 4.5] Head-to-Head (H2H) Comparison E2E User Journey (ATDD)
     await expect(page.getByText('58.3%')).toBeVisible();
   });
 
-  test.skip('[P1] should filter H2H statistics by period, ruleConfigId, and matchType', async ({ page }) => {
+  test('[P1] should filter H2H statistics by period, ruleConfigId, and matchType', async ({ page }) => {
     await loginUser(page);
 
     const opponentId = 'opp-user-456';
@@ -101,14 +101,13 @@ test.describe('[Story 4.5] Head-to-Head (H2H) Comparison E2E User Journey (ATDD)
 
     // Select match type filter
     const matchTypeSelect = page.getByTestId('stats-match-type-select');
-    if (await matchTypeSelect.isVisible()) {
-      await matchTypeSelect.selectOption('2v2');
-    }
+    await expect(matchTypeSelect).toBeVisible();
+    await matchTypeSelect.selectOption('2v2');
 
     expect(requestedUrl).toContain('opponentId=' + opponentId);
   });
 
-  test.skip('[P1] should show empty state CTA when 0 shared matches and navigate to new match', async ({ page }) => {
+  test('[P1] should show empty state CTA when 0 shared matches and navigate to new match', async ({ page }) => {
     await loginUser(page);
 
     const opponentId = 'opp-user-empty';

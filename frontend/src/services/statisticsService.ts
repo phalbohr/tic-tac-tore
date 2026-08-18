@@ -173,4 +173,67 @@ export async function getTeamPairStats(params: TeamPairStatsParams = {}): Promis
   }, params)
 }
 
+export interface H2HOpponent {
+  id: string
+  nickname: string
+  avatarUrl?: string | null
+}
+
+export interface H2HMatchStats {
+  matches: number
+  wins: number
+  losses: number
+  draws: number
+  winRate: number
+}
+
+export interface H2HGameStats {
+  gamesWon: number
+  gamesLost: number
+  totalGames: number
+  winRate: number
+}
+
+export interface PositionalGoals {
+  scored: number
+  conceded: number
+}
+
+export interface H2HGoalStats {
+  attackerVsDefender: PositionalGoals
+  attackerVsAttacker: PositionalGoals
+  defenderVsAttacker: PositionalGoals
+  defenderVsDefender: PositionalGoals
+}
+
+export interface H2HStatsResponse {
+  opponent: H2HOpponent
+  matches: {
+    with: H2HMatchStats
+    vs: H2HMatchStats
+  }
+  games: {
+    with: H2HGameStats
+    vs: H2HGameStats
+  }
+  goals: H2HGoalStats
+}
+
+export interface H2HParams {
+  period?: TimePeriod
+  ruleConfigId?: string
+  matchType?: MatchTypeFilter
+  token?: string
+  signal?: AbortSignal
+}
+
+export async function getHeadToHeadStats(opponentId: string, params: H2HParams = {}): Promise<H2HStatsResponse> {
+  return apiFetch<H2HStatsResponse>('/statistics/head-to-head', {
+    opponentId,
+    period: params.period,
+    ruleConfigId: params.ruleConfigId,
+    matchType: params.matchType,
+  }, params)
+}
+
 

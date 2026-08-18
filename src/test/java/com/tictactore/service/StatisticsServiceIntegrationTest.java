@@ -173,4 +173,56 @@ class StatisticsServiceIntegrationTest {
         assertThat(result.content()).isEmpty();
         assertThat(result.totalElements()).isEqualTo(0);
     }
+
+    @Test
+    @DisplayName("Should aggregate real database matches for Head to Head statistics")
+    void shouldAggregateRealDatabaseMatchesForHeadToHead() {
+        // Match 1 (Vs): A & B vs C & D (A Attacker, B Defender; C Attacker, D Defender) -> A&B wins 10-5
+        Match m1 = Match.builder()
+                .creatorId(playerA.getId())
+                .teamAAttackerId(playerA.getId())
+                .teamADefenderId(playerB.getId())
+                .teamBAttackerId(playerC.getId())
+                .teamBDefenderId(playerD.getId())
+                .status(Match.STATUS_CONFIRMED)
+                .createdAt(Instant.now())
+                .build();
+        m1.addGame(Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build());
+        matchRepository.save(m1);
+
+        // Match 2 (With): A & C vs B & D (A Attacker, C Defender; B Attacker, D Defender) -> A&C wins 10-8
+        Match m2 = Match.builder()
+                .creatorId(playerA.getId())
+                .teamAAttackerId(playerA.getId())
+                .teamADefenderId(playerC.getId())
+                .teamBAttackerId(playerB.getId())
+                .teamBDefenderId(playerD.getId())
+                .status(Match.STATUS_CONFIRMED)
+                .createdAt(Instant.now())
+                .build();
+        m2.addGame(Game.builder().gameOrder(1).teamAScore(10).teamBScore(8).build());
+        matchRepository.save(m2);
+
+        // Fetch H2H for Player A vs Player C
+        com.tictactore.dto.H2HStatsResponse h2h = statisticsService.getHeadToHeadStats(
+                playerA.getId(), playerC.getId(), TimePeriod.ALL_TIME, null, null
+        );
+
+        assertThat(h2h.opponent().id()).isEqualTo(playerC.getId());
+        assertThat(h2h.opponent().nickname()).isEqualTo("Charlie");
+
+        // With (m2): 1 match, 1 win
+        assertThat(h2h.matches().with().matches()).isEqualTo(1);
+        assertThat(h2h.matches().with().wins()).isEqualTo(1);
+        assertThat(h2h.matches().with().winRate()).isEqualTo(100.0);
+
+        // Vs (m1): 1 match, 1 win
+        assertThat(h2h.matches().vs().matches()).isEqualTo(1);
+        assertThat(h2h.matches().vs().wins()).isEqualTo(1);
+        assertThat(h2h.matches().vs().winRate()).isEqualTo(100.0);
+
+        // Goals in Vs (m1): Player A is Attacker, Player C is Attacker => Attacker vs Attacker scored: 10, conceded: 5
+        assertThat(h2h.goals().attackerVsAttacker().scored()).isEqualTo(10);
+        assertThat(h2h.goals().attackerVsAttacker().conceded()).isEqualTo(5);
+    }
 }

@@ -106,7 +106,6 @@ class StatisticsControllerATDDTest {
 
         @Test
         @WithMockUser
-        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
         @DisplayName("[P0] GET /api/v1/statistics/head-to-head should return 200 OK with opponent profile and 3 cross-tab matrices (Matches, Games, Goals)")
         void shouldReturn200WithHeadToHeadStats() throws Exception {
             UUID opponentId = UUID.randomUUID();
@@ -129,7 +128,6 @@ class StatisticsControllerATDDTest {
 
         @Test
         @WithMockUser
-        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
         @DisplayName("[P1] GET /api/v1/statistics/head-to-head should filter by period, ruleConfigId, and matchType")
         void shouldFilterHeadToHeadStats() throws Exception {
             UUID opponentId = UUID.randomUUID();
@@ -148,7 +146,6 @@ class StatisticsControllerATDDTest {
 
         @Test
         @WithMockUser
-        @Disabled("ATDD Red Phase - Story 4.5: Head-to-Head Comparison")
         @DisplayName("[P2] GET /api/v1/statistics/head-to-head should return 400 Bad Request when opponentId is missing or equals current user")
         void shouldReturn400WhenInvalidOpponentId() throws Exception {
             mockMvc.perform(get("/api/v1/statistics/head-to-head")
