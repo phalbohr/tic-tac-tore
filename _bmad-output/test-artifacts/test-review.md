@@ -1,3 +1,42 @@
+# Test Review — Story 4.2: Global Leaderboard with Filtering
+
+| Field | Value |
+|---|---|
+| **Test Review ID** | `test-review-4-2-global-leaderboard-with-filtering` |
+| **Story** | 4-2-global-leaderboard-with-filtering |
+| **Status** | PASS |
+| **Reviewed By** | bmad-testarch-test-review (autonomous / `steps-c` workflow) |
+| **Reviewed At** | 2026-08-15T21:12:00+02:00 |
+| **Artifacts Version** | 1.0 |
+| **Overall Score** | 91 |
+| **Overall Grade** | A |
+| **Risk Threshold** | p1 |
+
+### Dimension Scores
+
+| Dimension | Score | Grade | Weight | Key Finding |
+|---|---|---|---|---|
+| **Determinism** | 90 | A | 30% | Two `waitForLoadState('networkidle')` calls in `leaderboard.spec.ts` are a MEDIUM race pattern; mitigated by mocked routes. |
+| **Isolation** | 98 | A | 30% | Fresh fixtures per test; real-DB tests clean via `@Rollback`. One latent counter in a factory (LOW). |
+| **Maintainability** | 78 | C | 25% | One HIGH item: duplicated stubs across specs. Structural organisation (`@Nested`, `@DisplayName`, helpers) offsets it. |
+| **Performance** | 98 | A | 15% | Mock-based; no real I/O beyond fast H2. |
+| **Aggregate** | **91** | **A** | — | — |
+
+### Decision
+
+**Recommendation: Approve with Comments.**
+
+All 5 acceptance criteria are covered at the correct test levels (unit / API / integration / component / E2E) across 7 files and ~1,834 lines. No flakiness or correctness defects were found. The single HIGH item (M-1, duplicated stubs) is a maintainability defect that does not make tests fail or flake; it is filed as a P1 follow-up. The two MEDIUM determinism items should convert `waitForLoadState('networkidle')` to `waitForResponse` per `network-first.md`.
+
+**Follow-ups (advisory, do not gate this story):**
+1. M-1 — extract the duplicated stubs shared by `LeaderboardServiceTest` and `StatisticsControllerTest` into `StatsTestDataFactory`.
+2. D-1 / D-2 — replace both `networkidle` waits in `leaderboard.spec.ts` with predicate `waitForResponse` calls.
+3. Activate the 12 ATDD red-phase scaffolds so they act as a CI regression guard.
+
+**Full report**: `_bmad-output/test-artifacts/test-reviews/4-2-global-leaderboard-with-filtering-test-review.md`
+
+---
+
 # Test Review — Story 3.6: Submission Rate Limiting & Anti-Spam
 
 | Field | Value |
@@ -55,7 +94,7 @@
 
 **Status: PASS.** All 6 acceptance criteria for Story 3.6 (rate limiting + anti-spam) are covered. The suite is highly deterministic (98/A), fully isolated (100/A), and performant (100/A). Primary improvement area is maintainability (76/C) — the 562-line TS store spec exceeds the DoD size guideline. **No blocking issues.** See full report at `_bmad-output/test-artifacts/test-reviews/test-review-3-6-submission-rate-limiting-anti-spam.md`.
 
-**Recommendations (non-blocking):**
+**Recommendations (advisory, do not gate the story):**
 1. Split `matchDraftStore.spec.ts` into API-error + state-transition specs.
 2. Extract rate-limit group from `MatchServiceTest.java` into `MatchServiceRateLimitTest.java`.
 3. DRY up `rate-limiting.spec.ts` E2E setup via PageObject/helper.

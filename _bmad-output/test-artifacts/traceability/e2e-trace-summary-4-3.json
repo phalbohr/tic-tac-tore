@@ -1,0 +1,147 @@
+{
+  "schema_version": "0.1.0",
+  "snapshot_at": "2026-08-16T03:17:56+02:00",
+  "repo": "tic-tac-tore",
+  "collection_mode": "contract_static",
+  "collection_status": "COLLECTED",
+  "inventory_basis": "acceptance_criteria",
+  "gate_basis": "priority_thresholds",
+  "source_sha": "",
+  "target": {
+    "type": "story",
+    "id": "4-3-positional-statistics-attack-vs-defense",
+    "label": "Story 4.3: Positional Statistics (Attack vs. Defense)"
+  },
+  "decision_mode": "deterministic",
+  "evaluator": "Pavel",
+  "confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "_bmad-output/implementation-artifacts/spec-4-3-positional-statistics-attack-vs-defense.md",
+      "_bmad-output/test-artifacts/test-design/test-design-epic-4-3.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "coverage": {
+    "inventory": {
+      "covered": 18,
+      "total": 24,
+      "pct": 75
+    },
+    "priority_breakdown": {
+      "P0": {
+        "total": 9,
+        "covered": 9,
+        "pct": 100
+      },
+      "P1": {
+        "total": 6,
+        "covered": 5,
+        "pct": 83
+      },
+      "P2": {
+        "total": 6,
+        "covered": 3,
+        "pct": 50
+      },
+      "P3": {
+        "total": 3,
+        "covered": 1,
+        "pct": 33
+      }
+    },
+    "by_level": {
+      "e2e": {
+        "tests": 13,
+        "criteria_covered": 11
+      },
+      "api": {
+        "tests": 10,
+        "criteria_covered": 10
+      },
+      "component": {
+        "tests": 7,
+        "criteria_covered": 6
+      },
+      "unit": {
+        "tests": 6,
+        "criteria_covered": 6
+      },
+      "other": {
+        "tests": 0,
+        "criteria_covered": 0
+      }
+    }
+  },
+  "tests": {
+    "files": 5,
+    "cases": 36,
+    "skipped_cases": 0,
+    "fixme_cases": 0,
+    "pending_cases": 0
+  },
+  "risk_summary": {
+    "critical_open": 0,
+    "high_open": 1,
+    "medium_open": 2,
+    "low_open": 2
+  },
+  "heuristics": {
+    "endpoint_gaps": 1,
+    "auth_negative_path_status": "present",
+    "error_path_status": "partial",
+    "ui_journey_status": "not_applicable",
+    "ui_state_status": "not_applicable"
+  },
+  "blockers": [],
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "action": "Complete coverage for 1 partially covered requirements",
+      "requirements": [
+        "4.3-COMP-007"
+      ]
+    },
+    {
+      "priority": "HIGH",
+      "action": "Add API tests for 1 uncovered endpoint(s)",
+      "requirements": [
+        "4.3-API-005"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add error/edge scenario tests for 1 happy-path-only criterion/criteria",
+      "requirements": [
+        "4.3-API-005"
+      ]
+    },
+    {
+      "priority": "LOW",
+      "action": "Run /bmad:tea:test-review to assess test quality",
+      "requirements": []
+    }
+  ],
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/traceability-matrix-4-3-positional-statistics-attack-vs-defense.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  },
+  "gate_status": "FAIL",
+  "gate_criteria": {
+    "p0_coverage_required": "100%",
+    "p0_coverage_actual": "100%",
+    "p0_status": "MET",
+    "p1_coverage_target": "90%",
+    "p1_coverage_minimum": "80%",
+    "p1_coverage_actual": "83%",
+    "p1_status": "PARTIAL",
+    "overall_coverage_minimum": "80%",
+    "overall_coverage_actual": "75%",
+    "overall_status": "NOT_MET"
+  }
+}

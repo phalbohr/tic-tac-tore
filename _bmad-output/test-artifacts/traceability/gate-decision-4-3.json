@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "evaluated_at": "2026-08-16T03:17:56+02:00",
+  "repo": "tic-tac-tore",
+  "target": {
+    "type": "story",
+    "id": "4-3-positional-statistics-attack-vs-defense",
+    "label": "Story 4.3: Positional Statistics (Attack vs. Defense)"
+  },
+  "collection_status": "COLLECTED",
+  "gate_basis": "priority_thresholds",
+  "gate_status": "FAIL",
+  "rationale": "Overall coverage is 75% (minimum: 80%). Significant gaps exist.",
+  "p0_status": "MET",
+  "p1_status": "PARTIAL",
+  "overall_status": "NOT_MET",
+  "critical_open": 0,
+  "links": {
+    "trace_report_path": "_bmad-output/test-artifacts/traceability/traceability-matrix-4-3-positional-statistics-attack-vs-defense.md",
+    "trace_report_url": "",
+    "artifact_url": "",
+    "journey_evidence_url": ""
+  }
+}

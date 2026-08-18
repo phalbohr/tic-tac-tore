@@ -299,18 +299,96 @@ location: `src/main/java/com/tictactore/rules/VerificationRules.java:36-44`
 reason: [x] [Review][Defer] `requiresCooldown()` checks `isDoubles && isParticipantEntered && STANDARD`, identical to `supportsPartialConfirmation()` — silent divergence risk if rules change.
 status: open
 
-### DW-44: Aggregate team pair synergy across intra-game position swaps
+### DW-44: No quantitative latency baseline for the leaderboard endpoint
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: medium
+reason: In-memory aggregation iterates all matches and games on every request with no caching, and no load test exists, so p95 latency and throughput are unknown; the DB-level `GROUP BY` migration that would replace this is already scoped to Epic 4.6, so measuring the interim implementation was deferred rather than blocking the story.
+status: open
+
+### DW-45: JaCoCo coverage report not generated for the leaderboard code
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `pom.xml` (JaCoCo report goal) and `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: low
+reason: 36 backend and 215 frontend tests pass but no coverage percentage is produced, so the maintainability NFR has no quantitative evidence; wiring the report is a build-configuration task independent of this story's scope. Root cause: `maven-surefire-plugin` in `pom.xml:144-150` hardcodes `<argLine>`, overwriting the `-javaagent` set by `prepare-agent`, so `jacoco.exec` is not created. Fix is `<argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>`.
+status: open
+
+### DW-46: No rate limiting on `/api/v1/statistics/leaderboard`
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/controller/StatisticsController.java`
+severity: medium
+reason: The endpoint recomputes the full aggregation per request and is unthrottled, which is a cheap amplification target; documented as risk R-001 in the epic 4 test design and deferred to the platform-wide rate-limiting effort rather than adding a one-off limiter here.
+status: open
+
+### DW-47: No metrics, structured logging or alerting on the leaderboard endpoint
+origin: NFR assessment of 4-2-global-leaderboard-with-filtering (2026-08-15)
+location: `src/main/java/com/tictactore/controller/StatisticsController.java` and `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java`
+severity: medium
+reason: Neither the controller nor the service emits Micrometer timings or correlated structured logs and no alerts or SLA are defined, so production request rate, latency and error rate are invisible; observability is a platform-wide concern deferred out of this story.
+status: open
+
+### DW-48: Unbounded match load in `getPersonalStats`
+origin: NFR assessment of 4-3-positional-statistics-attack-vs-defense (2026-08-16)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java` (`getPersonalStats`)
+severity: medium
+reason: `getPersonalStats` calls `findConfirmedMatchesWithFilters(null, null, null, null)` and filters to a single user in memory, so response time and heap grow linearly with total match volume. This is the same pattern already tracked as DW-44 for `/leaderboard`; the DB-scoped `findConfirmedMatchesForPlayer(UUID)` query is scoped to Epic 4.6, so it was deferred rather than duplicated here. Acceptable at MVP scale (≤50 active players, ≤5k matches).
+status: open
+
+### DW-49: Frontend sends `period`/`myPosition`/`opponentPosition` that `/statistics/me` ignores
+origin: NFR assessment of 4-3-positional-statistics-attack-vs-defense (2026-08-16)
+location: `frontend/src/services/statisticsService.ts` (`PersonalStatsParams`) and `src/main/java/com/tictactore/controller/StatisticsController.java` (`getPersonalStats`)
+severity: medium
+reason: `PersonalStatsParams` types filter params the backend endpoint does not accept, so a caller passing `period` silently receives all-time data. Resolving it requires either date-scoped repository overloads or trimming the frontend contract — a decision belonging with the Epic 4.6 query rework, so it was deferred (risk R-003 in the epic 4 test design).
+status: open
+
+### DW-50: No JaCoCo coverage evidence for `getPersonalStats`
+origin: NFR assessment of 4-3-positional-statistics-attack-vs-defense (2026-08-16)
+location: `pom.xml` (JaCoCo report goal)
+severity: low
+reason: 14 new tests (7 unit + 7 integration) pass, but `./mvnw test` reports "Skipping JaCoCo execution due to missing execution data file", so the ≥80% line-coverage threshold has no quantitative evidence. Same build-configuration gap as DW-45 (`maven-surefire-plugin` argLine override).
+status: open
+
+### DW-51: No observability or fault tolerance on `/api/v1/statistics/me`
+origin: NFR assessment of 4-3-positional-statistics-attack-vs-defense (2026-08-16)
+location: `src/main/java/com/tictactore/controller/StatisticsController.java` (`getPersonalStats`)
+severity: medium
+reason: The endpoint emits no Micrometer timings or structured logs, and has no retry, circuit breaker or fallback path — unhandled failures surface as a generic 500. MTTR and availability are therefore unmeasurable. Same platform-wide observability concern as DW-47.
+status: open
+
+### DW-52: Redundant service-layer filtering in LeaderboardServiceImpl
+origin: code review of 4-2-global-leaderboard-with-filtering (2026-08-16)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java:40-50`
+severity: low
+reason: [x] [Review][Defer] Redundant service-layer filtering in LeaderboardServiceImpl duplicates filters already applied by the repository query; defensive duplication is tolerable for MVP scale.
+status: open
+
+### DW-53: N+1 `userRepository.findById` inside aggregation loop
+origin: code review of 4-2-global-leaderboard-with-filtering (2026-08-16)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java:119,140,152`
+severity: medium
+reason: [x] [Review][Defer] N+1 `userRepository.findById` inside aggregation loop fetches nicknames individually during in-memory aggregation; deferred to Epic 4.6 DB-level migration.
+status: open
+
+### DW-54: Match type inference relies on null defender ID
+origin: residual risk of 4-2-global-leaderboard-with-filtering (2026-08-16)
+location: `src/main/java/com/tictactore/service/impl/LeaderboardServiceImpl.java:48-51`
+severity: low
+reason: [x] [Review][Defer] Match type (1v1 vs 2v2) inference relies on null defender IDs; corrupted or partial legacy data could misclassify match types.
+status: open
+
+### DW-55: Aggregate team pair synergy across intra-game position swaps
 origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
 location: `src/main/java/com/tictactore/repository/MatchRepository.java:63`
 reason: [x] [Review][Defer] Aggregate team pair synergy across intra-game position swaps from Story 2.5 — deferred, future enhancement for game-level positional synergy breakdown.
 status: open
 
-### DW-45: Player and Rule System filter UI controls in TeamStatsView.vue
+### DW-56: Player and Rule System filter UI controls in TeamStatsView.vue
 origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
 location: `frontend/src/features/stats/components/TeamStatsView.vue:65`
 reason: [x] [Review][Defer] AC2 Player & Rule System Filter UI Controls in TeamStatsView.vue — deferred, basic filters (Period & Min Matches) sufficient for MVP pair stats, full player/rule UI controls deferred.
 status: open
 
+## Unrecoverable Triage & Review Summaries Note
 
-
-
+- **Story 4-3 Review Triage:** The review triage log references 6 + 4 deferred findings from initial and follow-up passes. These items were consolidated into DW-48 through DW-51 (unbounded load, ignored query params, JaCoCo build config, observability). Detailed itemized logs were collapsed without individual names preserved.
+- **Story 4-2 Rejected Findings:** 17 review findings (9 on 2026-08-15, 8 on 2026-08-16) were evaluated as noise/non-actionable and rejected per spec logs.
