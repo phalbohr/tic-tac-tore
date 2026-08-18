@@ -41,6 +41,11 @@ const router = createRouter({
       component: () => import('@/views/HomeView.vue'),
     },
     {
+      path: '/statistics/teams',
+      name: 'team-statistics',
+      component: () => import('@/features/stats/components/TeamStatsView.vue'),
+    },
+    {
       path: '/leaderboard',
       name: 'leaderboard',
       component: () => import('@/features/stats/views/LeaderboardView.vue'),

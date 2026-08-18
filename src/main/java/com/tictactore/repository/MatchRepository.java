@@ -4,6 +4,9 @@ import com.tictactore.model.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import com.tictactore.repository.projection.TeamPairStatsProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -37,5 +40,97 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             @Param("p2") UUID p2,
             @Param("p3") UUID p3,
             @Param("p4") UUID p4
+    );
+
+    @Query(value = """
+        WITH match_results AS (
+            SELECT
+                m.id AS match_id,
+                m.team_a_attacker_id AS a_attacker,
+                m.team_a_defender_id AS a_defender,
+                m.team_b_attacker_id AS b_attacker,
+                m.team_b_defender_id AS b_defender,
+                CASE
+                    WHEN SUM(CASE WHEN g.team_a_score > g.team_b_score THEN 1 ELSE 0 END) >
+                         SUM(CASE WHEN g.team_b_score > g.team_a_score THEN 1 ELSE 0 END) THEN 1
+                    ELSE 0
+                END AS team_a_won,
+                CASE
+                    WHEN SUM(CASE WHEN g.team_b_score > g.team_a_score THEN 1 ELSE 0 END) >
+                         SUM(CASE WHEN g.team_a_score > g.team_b_score THEN 1 ELSE 0 END) THEN 1
+                    ELSE 0
+                END AS team_b_won
+            FROM match m
+            JOIN game g ON g.match_id = m.id
+            WHERE m.status = 'CONFIRMED'
+              AND m.team_a_defender_id IS NOT NULL
+              AND m.team_b_defender_id IS NOT NULL
+              AND (:startDate IS NULL OR m.created_at >= :startDate)
+            GROUP BY m.id, m.created_at, m.team_a_attacker_id, m.team_a_defender_id, m.team_b_attacker_id, m.team_b_defender_id
+        ),
+        pair_matches AS (
+            SELECT
+                a_attacker AS attacker_id,
+                a_defender AS defender_id,
+                team_a_won AS is_win,
+                team_b_won AS is_loss
+            FROM match_results
+            UNION ALL
+            SELECT
+                b_attacker AS attacker_id,
+                b_defender AS defender_id,
+                team_b_won AS is_win,
+                team_a_won AS is_loss
+            FROM match_results
+        )
+        SELECT
+            CAST(attacker_id AS VARCHAR) AS attackerId,
+            CAST(defender_id AS VARCHAR) AS defenderId,
+            COUNT(*) AS matches,
+            SUM(is_win) AS wins,
+            SUM(is_loss) AS losses,
+            ROUND((SUM(is_win) * 100.0) / COUNT(*), 2) AS winRate
+        FROM pair_matches
+        WHERE (:playerId IS NULL OR attacker_id = :playerId OR defender_id = :playerId)
+        GROUP BY attacker_id, defender_id
+        HAVING COUNT(*) >= :minMatches
+        ORDER BY winRate DESC, matches DESC, wins DESC
+        """,
+        countQuery = """
+        SELECT COUNT(*) FROM (
+            WITH match_results AS (
+                SELECT
+                    m.id AS match_id,
+                    m.team_a_attacker_id AS a_attacker,
+                    m.team_a_defender_id AS a_defender,
+                    m.team_b_attacker_id AS b_attacker,
+                    m.team_b_defender_id AS b_defender
+                FROM match m
+                JOIN game g ON g.match_id = m.id
+                WHERE m.status = 'CONFIRMED'
+                  AND m.team_a_defender_id IS NOT NULL
+                  AND m.team_b_defender_id IS NOT NULL
+                  AND (:startDate IS NULL OR m.created_at >= :startDate)
+                GROUP BY m.id, m.created_at, m.team_a_attacker_id, m.team_a_defender_id, m.team_b_attacker_id, m.team_b_defender_id
+            ),
+            pair_matches AS (
+                SELECT a_attacker AS attacker_id, a_defender AS defender_id FROM match_results
+                UNION ALL
+                SELECT b_attacker AS attacker_id, b_defender AS defender_id FROM match_results
+            )
+            SELECT attacker_id, defender_id
+            FROM pair_matches
+            WHERE (:playerId IS NULL OR attacker_id = :playerId OR defender_id = :playerId)
+            GROUP BY attacker_id, defender_id
+            HAVING COUNT(*) >= :minMatches
+        ) sub
+        """,
+        nativeQuery = true)
+    Page<TeamPairStatsProjection> aggregateTeamPairStats(
+            @Param("playerId") UUID playerId,
+            @Param("startDate") Instant startDate,
+            @Param("ruleConfigId") UUID ruleConfigId,
+            @Param("minMatches") int minMatches,
+            Pageable pageable
     );
 }

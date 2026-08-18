@@ -18,7 +18,8 @@ export interface Page<T> {
   totalPages: number
   totalElements: number
   size: number
-  number: number
+  number?: number
+  page?: number
 }
 
 export interface LeaderboardParams {
@@ -113,6 +114,30 @@ export async function getLeaderboard(params: LeaderboardParams): Promise<Page<Le
   }, params)
 }
 
+export interface TeamPairStats {
+  attackerId: string
+  attackerName: string
+  attackerAvatar?: string
+  defenderId: string
+  defenderName: string
+  defenderAvatar?: string
+  matches: number
+  wins: number
+  losses: number
+  winRate: number
+}
+
+export interface TeamPairStatsParams {
+  playerId?: string
+  period?: TimePeriod
+  ruleConfigId?: string
+  minMatches?: number
+  page?: number
+  size?: number
+  token?: string
+  signal?: AbortSignal
+}
+
 export async function getH2HStats(params: PersonalStatsParams): Promise<Page<H2HStats>> {
   const res = await apiFetch<Page<H2HStats> | H2HStats[]>('/statistics/h2h', { 
     period: params.period,
@@ -136,3 +161,16 @@ export async function getH2HStats(params: PersonalStatsParams): Promise<Page<H2H
     number: 0
   }
 }
+
+export async function getTeamPairStats(params: TeamPairStatsParams = {}): Promise<Page<TeamPairStats>> {
+  return apiFetch<Page<TeamPairStats>>('/statistics/team-pairs', {
+    playerId: params.playerId,
+    period: params.period,
+    ruleConfigId: params.ruleConfigId,
+    minMatches: params.minMatches,
+    page: params.page,
+    size: params.size
+  }, params)
+}
+
+

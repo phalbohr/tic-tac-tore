@@ -2,9 +2,13 @@ package com.tictactore.controller;
 
 import com.tictactore.dto.LeaderboardEntry;
 import com.tictactore.dto.PageResponse;
+import com.tictactore.dto.PagedResponse;
 import com.tictactore.dto.PlayerStatsResponse;
+import com.tictactore.dto.TeamPairStatsResponse;
+import com.tictactore.dto.TimePeriod;
 import com.tictactore.model.User;
 import com.tictactore.service.LeaderboardService;
+import com.tictactore.service.StatisticsService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -13,7 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -24,6 +31,7 @@ import java.util.UUID;
 public class StatisticsController {
 
     private final LeaderboardService leaderboardService;
+    private final StatisticsService statisticsService;
 
     @GetMapping("/leaderboard")
     public ResponseEntity<PageResponse<LeaderboardEntry>> getLeaderboard(
@@ -45,5 +53,25 @@ public class StatisticsController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(leaderboardService.getPersonalStats(principal.getId()));
+    }
+
+    @GetMapping("/team-pairs")
+    public ResponseEntity<PagedResponse<TeamPairStatsResponse>> getTeamPairStats(
+            @RequestParam(required = false) UUID playerId,
+            @RequestParam(required = false, defaultValue = "ALL_TIME") TimePeriod period,
+            @RequestParam(required = false) UUID ruleConfigId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "1") int minMatches
+    ) {
+        PagedResponse<TeamPairStatsResponse> response = statisticsService.getTeamPairStats(
+                playerId,
+                period,
+                ruleConfigId,
+                page,
+                size,
+                minMatches
+        );
+        return ResponseEntity.ok(response);
     }
 }

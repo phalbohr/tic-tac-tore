@@ -2,18 +2,21 @@ package com.tictactore.controller;
 
 import com.tictactore.dto.LeaderboardEntry;
 import com.tictactore.dto.PageResponse;
+import com.tictactore.dto.PagedResponse;
+import com.tictactore.dto.TeamPairStatsResponse;
+import com.tictactore.dto.TimePeriod;
 import com.tictactore.service.LeaderboardService;
+import com.tictactore.service.StatisticsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -31,12 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * API contract tests for {@link StatisticsController} — GET /api/v1/statistics/leaderboard.
- *
- * <p>Story 4.2: Global Leaderboard with Filtering.
- * Verifies the HTTP contract (auth, response shape, validation, parameter delegation)
- * in isolation from the aggregation logic, which is covered by the real-data
- * {@link StatisticsControllerIT} and the unit-level {@link com.tictactore.service.LeaderboardServiceTest}.
+ * API contract tests for {@link StatisticsController} — GET /api/v1/statistics/leaderboard,
+ * GET /api/v1/statistics/team-pairs.
  */
 @WebMvcTest(StatisticsController.class)
 @Import({com.tictactore.config.SecurityConfig.class, com.tictactore.security.JwtAuthenticationFilter.class})
@@ -50,6 +49,9 @@ class StatisticsControllerTest {
     private LeaderboardService leaderboardService;
 
     @MockBean
+    private StatisticsService statisticsService;
+
+    @MockBean
     private com.tictactore.service.JwtService jwtService;
 
     @MockBean
@@ -58,7 +60,8 @@ class StatisticsControllerTest {
     @MockBean
     private com.tictactore.security.CustomOAuth2SuccessHandler oAuth2SuccessHandler;
 
-    private UUID p1, p2;
+    private UUID p1;
+    private UUID p2;
 
     @BeforeEach
     void setUp() {
@@ -289,6 +292,41 @@ class StatisticsControllerTest {
                             .param("type", "INVALID")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("Team Pairs Endpoint Specs")
+    class TeamPairsSpecs {
+
+        @Test
+        @WithMockUser
+        @DisplayName("Should delegate to service and return 200 OK with PagedResponse")
+        void shouldDelegateToService_whenGetTeamPairsCalled() throws Exception {
+            UUID playerId = UUID.randomUUID();
+            UUID ruleConfigId = UUID.randomUUID();
+            PagedResponse<TeamPairStatsResponse> expectedResponse = new PagedResponse<>(
+                    List.of(), 0, 10, 0L, 0
+            );
+
+            when(statisticsService.getTeamPairStats(playerId, TimePeriod.LAST_MONTH, ruleConfigId, 0, 10, 3))
+                    .thenReturn(expectedResponse);
+
+            mockMvc.perform(get("/api/v1/statistics/team-pairs")
+                            .param("playerId", playerId.toString())
+                            .param("period", "LAST_MONTH")
+                            .param("ruleConfigId", ruleConfigId.toString())
+                            .param("page", "0")
+                            .param("size", "10")
+                            .param("minMatches", "3")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.page").value(0))
+                    .andExpect(jsonPath("$.size").value(10))
+                    .andExpect(jsonPath("$.totalElements").value(0));
+
+            verify(statisticsService).getTeamPairStats(playerId, TimePeriod.LAST_MONTH, ruleConfigId, 0, 10, 3);
         }
     }
 }

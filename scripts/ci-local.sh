@@ -7,6 +7,8 @@ if command -v /usr/libexec/java_home >/dev/null 2>&1; then
   export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 fi
 
+export CI=true
+
 echo "🚀 Simulating CI environment locally..."
 
 echo "📦 Backend: Compiling and running tests..."

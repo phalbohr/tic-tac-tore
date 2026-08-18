@@ -41,6 +41,14 @@ const statsStore = useStatsStore()
       <div v-if="statsStore.isDemoModeEnabled" class="mt-3 text-center">
         <span class="text-[10px] text-orange-400 font-headline uppercase tracking-widest font-bold">Demo Data Active</span>
       </div>
+      <div class="mt-4 flex justify-end">
+        <RouterLink
+          to="/statistics/teams"
+          class="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+        >
+          Team (Pair) Statistics &rarr;
+        </RouterLink>
+      </div>
     </div>
     <div v-else-if="statsStore.isLoading" class="animate-pulse flex flex-col items-center w-full gap-4">
       <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>

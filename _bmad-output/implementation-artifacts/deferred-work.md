@@ -352,7 +352,7 @@ status: open
 origin: NFR assessment of 4-3-positional-statistics-attack-vs-defense (2026-08-16)
 location: `src/main/java/com/tictactore/controller/StatisticsController.java` (`getPersonalStats`)
 severity: medium
-reason: The endpoint emits no Micrometer metrics or structured logs, and has no retry, circuit breaker or fallback path — unhandled failures surface as a generic 500. MTTR and availability are therefore unmeasurable. Same platform-wide observability concern as DW-47.
+reason: The endpoint emits no Micrometer timings or structured logs, and has no retry, circuit breaker or fallback path — unhandled failures surface as a generic 500. MTTR and availability are therefore unmeasurable. Same platform-wide observability concern as DW-47.
 status: open
 
 ### DW-52: Redundant service-layer filtering in LeaderboardServiceImpl
@@ -376,10 +376,19 @@ severity: low
 reason: [x] [Review][Defer] Match type (1v1 vs 2v2) inference relies on null defender IDs; corrupted or partial legacy data could misclassify match types.
 status: open
 
+### DW-55: Aggregate team pair synergy across intra-game position swaps
+origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
+location: `src/main/java/com/tictactore/repository/MatchRepository.java:63`
+reason: [x] [Review][Defer] Aggregate team pair synergy across intra-game position swaps from Story 2.5 — deferred, future enhancement for game-level positional synergy breakdown.
+status: open
+
+### DW-56: Player and Rule System filter UI controls in TeamStatsView.vue
+origin: code review of 4-4-team-pair-statistics.md (2026-08-16)
+location: `frontend/src/features/stats/components/TeamStatsView.vue:65`
+reason: [x] [Review][Defer] AC2 Player & Rule System Filter UI Controls in TeamStatsView.vue — deferred, basic filters (Period & Min Matches) sufficient for MVP pair stats, full player/rule UI controls deferred.
+status: open
+
 ## Unrecoverable Triage & Review Summaries Note
 
 - **Story 4-3 Review Triage:** The review triage log references 6 + 4 deferred findings from initial and follow-up passes. These items were consolidated into DW-48 through DW-51 (unbounded load, ignored query params, JaCoCo build config, observability). Detailed itemized logs were collapsed without individual names preserved.
 - **Story 4-2 Rejected Findings:** 17 review findings (9 on 2026-08-15, 8 on 2026-08-16) were evaluated as noise/non-actionable and rejected per spec logs.
-
-
-

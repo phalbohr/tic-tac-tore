@@ -22,14 +22,14 @@
 ./mvnw spring-boot:run
 ```
 
-Backend starts on **http://localhost:8080**.
+Backend starts on **http://localhost:8090**.
 
-H2 Console: **http://localhost:8080/h2-console**
+H2 Console: **http://localhost:8090/h2-console**
 - JDBC URL: `jdbc:h2:mem:testdb`
 - Username: `sa`
 - Password: `password`
 
-Swagger UI: **http://localhost:8080/swagger-ui.html**
+Swagger UI: **http://localhost:8090/swagger-ui.html**
 
 ### 2. Frontend
 
@@ -67,7 +67,7 @@ Since Google OAuth2 requires credentials, use the dev seed endpoint:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `VITE_API_BASE_URL` | No | `http://localhost:8080/api/v1` | Backend API base URL |
+| `VITE_API_BASE_URL` | No | `http://localhost:8090/api/v1` | Backend API base URL |
 
 ---
 
@@ -227,6 +227,6 @@ spring:
 
 | Service | Dev Port | Notes |
 |---------|----------|-------|
-| Backend | 8080 | Spring Boot default |
+| Backend | 8090 | Spring Boot default |
 | Frontend | 3000 | Vite dev server |
-| H2 Console | 8080/h2-console | Dev only |
+| H2 Console | 8090/h2-console | Dev only |

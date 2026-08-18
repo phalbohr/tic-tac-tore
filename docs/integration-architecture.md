@@ -191,7 +191,7 @@ Frontend (LeaderboardView)          Backend (StatisticsController)
 
 | Service  | Port | Config                           |
 | -------- | ---- | -------------------------------- |
-| Backend  | 8080 | Spring Boot default              |
+| Backend  | 8090 | Spring Boot `server.port`        |
 | Frontend | 3000 | `vite.config.ts` → `server.port` |
 
 ### CORS (Backend → Frontend)
@@ -209,7 +209,7 @@ allowCredentials: true
 ```typescript
 // statisticsService.ts
 API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8090/api/v1";
 ```
 
 ---

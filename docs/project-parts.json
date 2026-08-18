@@ -28,7 +28,7 @@
       "to": "backend",
       "type": "REST API",
       "protocol": "HTTP/JSON",
-      "details": "All data flows via REST endpoints on port 8080"
+      "details": "All data flows via REST endpoints on port 8090"
     },
     {
       "from": "backend",

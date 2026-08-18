@@ -36,11 +36,11 @@ const handleKeydown = (e: KeyboardEvent) => {
 
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null
 const handleScroll = () => {
-  if (!carouselRef.value) return
+  if (!carouselRef.value || isScrolling.value) return
   if (scrollTimeout) return
   scrollTimeout = setTimeout(() => {
     scrollTimeout = null
-    if (!carouselRef.value) return
+    if (!carouselRef.value || isScrolling.value) return
     const scrollLeft = carouselRef.value.scrollLeft
     const width = carouselRef.value.clientWidth
     if (width === 0) return
@@ -51,17 +51,23 @@ const handleScroll = () => {
 const isScrolling = ref(false)
 
 const scrollToSlide = (index: number) => {
-  if (!carouselRef.value || isScrolling.value) return
+  if (!carouselRef.value) return
   isScrolling.value = true
+  currentSlide.value = Math.max(0, Math.min(totalSlides - 1, index))
   
-  const targetScrollLeft = carouselRef.value.clientWidth * index
+  const targetScrollLeft = carouselRef.value.clientWidth * currentSlide.value
   carouselRef.value.scrollTo({
     left: targetScrollLeft,
     behavior: 'smooth',
   })
   
+  let frameCount = 0
   const checkScroll = () => {
-    if (!carouselRef.value) return
+    frameCount++
+    if (!carouselRef.value || frameCount > 60) {
+      isScrolling.value = false
+      return
+    }
     if (Math.abs(carouselRef.value.scrollLeft - targetScrollLeft) < 5) {
       isScrolling.value = false
     } else {
