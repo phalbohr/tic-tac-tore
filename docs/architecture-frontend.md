@@ -108,7 +108,7 @@ beforeEach:
 
 ### statisticsService.ts
 
-**Base URL:** `VITE_API_BASE_URL` or `http://localhost:8080/api/v1`
+**Base URL:** `VITE_API_BASE_URL` or `http://localhost:8090/api/v1`
 
 **Generic Wrapper:** `apiFetch<T>(endpoint, params, options)`
 - Builds query string from params

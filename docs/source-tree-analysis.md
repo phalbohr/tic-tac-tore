@@ -180,7 +180,7 @@ tic-tac-tore/
 ## Integration Points
 
 ```
-Frontend (port 3000)  ──── REST API ────►  Backend (port 8080)
+Frontend (port 3000)  ──── REST API ────►  Backend (port 8090)
      │                                          │
      ├── GET /statistics/*                      ├── Spring Security
      ├── POST /matches                          ├── OAuth2 (Google)

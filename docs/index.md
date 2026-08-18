@@ -93,9 +93,9 @@
 
 ```bash
 ./mvnw spring-boot:run
-# Starts on http://localhost:8080
-# Swagger UI: http://localhost:8080/swagger-ui.html
-# H2 Console: http://localhost:8080/h2-console
+# Starts on http://localhost:8090
+# Swagger UI: http://localhost:8090/swagger-ui.html
+# H2 Console: http://localhost:8090/h2-console
 ```
 
 ### Frontend

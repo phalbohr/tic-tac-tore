@@ -183,7 +183,7 @@ Defined in [DESIGN.md](../_project-spec/DESIGN/DESIGN.md):
 
 ## Getting Started
 
-1. **Backend:** `./mvnw spring-boot:run` (starts on port 8080)
+1. **Backend:** `./mvnw spring-boot:run` (starts on port 8090)
 2. **Frontend:** `cd frontend && npm install && npm run dev` (starts on port 3000)
 3. **Login:** Use dev buttons in navigation bar, or set up Google OAuth2 credentials
-4. **Explore API:** Visit `http://localhost:8080/swagger-ui.html`
+4. **Explore API:** Visit `http://localhost:8090/swagger-ui.html`
