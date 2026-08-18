@@ -45,8 +45,8 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
 
-    /* Only on CI systems run the tests headless */
-    headless: !!process.env.CI,
+    /* Run tests headless by default unless HEADED=true is explicitly set */
+    headless: !process.env.HEADED,
 
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
