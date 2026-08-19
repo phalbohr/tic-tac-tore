@@ -63,7 +63,17 @@
   },
   "stats": {
     "winRate": "Win Rate",
-    "matchesPlayed": "Matches Played"
+    "matchesPlayed": "Matches Played",
+    "myStatistics": "My Statistics",
+    "overall": "Overall",
+    "attacker": "Attacker",
+    "defender": "Defender",
+    "noMatchesYet": "No Matches Yet",
+    "emptyStateDescription": "Record your first match to start tracking your statistics and climb the leaderboard!",
+    "recordFirstMatch": "Record First Match",
+    "toggleDemoData": "Toggle Demo Data",
+    "demoDataActive": "Demo Data Active",
+    "errorLoading": "Unable to load statistics."
   },
   "cabinet": {
     "title": "Personal Cabinet",
@@ -127,6 +137,8 @@
     "title": "Head-to-Head Comparison",
     "subtitle": "Compare your historical matchup against a specific opponent",
     "selectOpponent": "Select Opponent",
+    "changeOpponent": "Change Opponent",
+    "noOpponentSelected": "Select an opponent to view head-to-head matchup statistics",
     "searchPlaceholder": "Search player...",
     "matchesTitle": "Matches",
     "gamesTitle": "Games",
@@ -160,6 +172,8 @@
     "allTypes": "All Types",
     "type1v1": "1v1",
     "type2v2": "2v2",
+    "ruleConfig": "Rules",
+    "allRules": "All Rules",
     "demoData": "Demo Data"
   }
 }

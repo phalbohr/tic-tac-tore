@@ -36,7 +36,7 @@ function recordMatch() {
       
       <div>
         <h2 class="font-headline text-xl font-bold text-on-surface mb-2">
-          {{ props.title || (props.opponentNickname ? t('h2h.title', 'Head-to-Head') : 'No Matches Yet') }}
+          {{ props.title || (props.opponentNickname ? t('h2h.title', 'Head-to-Head') : t('stats.noMatchesYet', 'No Matches Yet')) }}
         </h2>
         <p class="text-sm text-on-surface-variant leading-relaxed">
           <template v-if="props.opponentNickname">
@@ -46,7 +46,7 @@ function recordMatch() {
             {{ props.message }}
           </template>
           <template v-else>
-            Record your first match to start tracking your statistics and climb the leaderboard!
+            {{ t('stats.emptyStateDescription', 'Record your first match to start tracking your statistics and climb the leaderboard!') }}
           </template>
         </p>
       </div>
@@ -57,7 +57,7 @@ function recordMatch() {
           class="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-background font-headline font-extrabold uppercase tracking-wider shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <span class="material-symbols-outlined font-bold">add_circle</span>
-          {{ props.opponentId ? t('h2h.startMatch', 'Start a match') : 'Record First Match' }}
+          {{ props.opponentId ? t('h2h.startMatch', 'Start a match') : t('stats.recordFirstMatch', 'Record First Match') }}
         </button>
         
         <button 
@@ -65,7 +65,7 @@ function recordMatch() {
           class="w-full py-3.5 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface font-headline font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           <span class="material-symbols-outlined text-sm">visibility</span>
-          Toggle Demo Data
+          {{ t('stats.toggleDemoData', 'Toggle Demo Data') }}
         </button>
       </div>
     </div>

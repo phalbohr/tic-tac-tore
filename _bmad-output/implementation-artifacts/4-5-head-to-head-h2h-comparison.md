@@ -63,25 +63,42 @@ so that I know our historical matchup across matches, games, and positions.
   - [x] Implement Playwright E2E test in `frontend/e2e/head-to-head-statistics.spec.ts`.
   - [x] Run `./scripts/ci-local.sh` and verify all tests pass.
 
+### Review Findings
+
+- [x] [Review][Patch] Support ruleConfigId filter parameter in repository and service [src/main/java/com/tictactore/service/impl/StatisticsServiceImpl.java:90]
+- [x] [Review][Patch] Add Opponent Selector and remove invalid fallback opp-user-456 [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:18]
+- [x] [Review][Patch] Add Rule Configuration filter dropdown in H2H filter bar [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:97]
+- [x] [Review][Patch] Add defensive null check for match.getGames() during statistics aggregation [src/main/java/com/tictactore/service/impl/StatisticsServiceImpl.java:134]
+- [x] [Review][Patch] Add watcher for props.opponentId to refresh data when prop changes [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:56]
+- [x] [Review][Patch] Replace hardcoded English strings with i18n translation keys in EmptyStateCTA and StatsDashboard [frontend/src/features/stats/components/EmptyStateCTA.vue:60]
+- [x] [Review][Patch] Fix German translation for startMatch in de.json [frontend/src/locales/de.json:1]
+
 ## Dev Record
 
 ### Implementation Summary
 - **Backend**:
   - DTOs: `PlayerSummaryDto`, `H2HMatchStatsDto`, `H2HMatchTableDto`, `H2HGameStatsDto`, `H2HGameTableDto`, `PositionalGoalMatrixDto`, `H2HGoalStatsDto`, `H2HStatsResponse`.
-  - Repository: Added `findHeadToHeadMatches` in `MatchRepository` filtering by confirmed/published status, participants, time periods, and match formats.
-  - Service: Implemented `getHeadToHeadStats` in `StatisticsServiceImpl` computing cross-tabulation for "With" and "Vs" (matches and games) as well as 4-way positional goal breakdowns (Attacker vs Defender, Attacker vs Attacker, Defender vs Attacker, Defender vs Defender) with privacy-safe display name resolution.
+  - Repository: Added `findHeadToHeadMatches` in `MatchRepository` filtering by confirmed/published status, participants, time periods, `ruleConfigId`, and match formats.
+  - Service: Implemented `getHeadToHeadStats` in `StatisticsServiceImpl` computing cross-tabulation for "With" and "Vs" (matches and games) as well as 4-way positional goal breakdowns (Attacker vs Defender, Attacker vs Attacker, Defender vs Defender, Defender vs Attacker) with privacy-safe display name resolution and defensive null checks on match games.
   - Controller: Added `GET /api/v1/statistics/head-to-head` in `StatisticsController` supporting parameter validation and authenticated principal extraction.
 - **Frontend**:
   - Service: Added `getHeadToHeadStats` and TypeScript interfaces in `statisticsService.ts`.
   - Store: Added H2H state and actions in `useStatsStore.ts` with demo mode support.
-  - Component: Created `H2HCrossTabMatrix.vue` displaying opponent profile header, filters, 3 cross-tabulated tables (Matches, Games, Goals) following the No-Line rule (`UX-DR3`), and empty state integration with `EmptyStateCTA.vue`.
-  - Translations: Added keys to `en.json` and `de.json`.
+  - Component: Created `H2HCrossTabMatrix.vue` displaying opponent profile header, opponent selector modal with live search, Rule Configuration filter dropdown, 3 cross-tabulated tables (Matches, Games, Goals) following the No-Line rule (`UX-DR3`), and empty state integration with `EmptyStateCTA.vue`.
+  - Translations: Added keys to `en.json` and `de.json` with German translation fixes.
   - Routing: Added `/statistics` route and tab switching in `StatsDashboard.vue`.
+- **Review Resolutions**:
+  - ✅ Resolved review finding: Added `ruleConfigId` filtering to `Match` entity, `MatchRepository`, and `StatisticsServiceImpl`.
+  - ✅ Resolved review finding: Added defensive null checks for `match.getGames()`.
+  - ✅ Resolved review finding: Removed `opp-user-456` fallback, added Opponent Search modal and watcher for `props.opponentId`.
+  - ✅ Resolved review finding: Added Rule Configuration dropdown in H2H filter bar.
+  - ✅ Resolved review finding: Replaced hardcoded strings in `EmptyStateCTA` and `StatsDashboard` with i18n keys.
+  - ✅ Resolved review finding: Fixed German `startMatch` key in `de.json`.
 - **Testing**:
   - Backend: `StatisticsControllerATDDTest` (enabled and passing), `StatisticsServiceTest` (passing), `StatisticsControllerTest` (passing), `StatisticsServiceIntegrationTest` (passing).
   - Frontend: `h2hCrossTabMatrix.spec.ts` (passing), `StatsDashboard.spec.ts` (passing).
-  - E2E: `head-to-head-statistics.spec.ts` (enabled and all 9 tests passing).
-  - Verification: Ran `./scripts/ci-local.sh` successfully with all tests passing.
+  - E2E: `head-to-head-statistics.spec.ts` (enabled and passing).
+  - Verification: Full `./scripts/ci-local.sh` suite executed and verified passing.
 
 ## Dev Notes
 

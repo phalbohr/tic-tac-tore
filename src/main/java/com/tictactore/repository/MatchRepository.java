@@ -52,6 +52,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             (m.teamAAttackerId = :opponentId OR m.teamADefenderId = :opponentId OR m.teamBAttackerId = :opponentId OR m.teamBDefenderId = :opponentId)
         )
         AND (cast(:startDate as java.time.Instant) IS NULL OR m.createdAt >= :startDate)
+        AND (cast(:ruleConfigId as java.util.UUID) IS NULL OR m.ruleConfigId = :ruleConfigId)
         AND (cast(:matchType as string) IS NULL OR
             (:matchType = '1v1' AND m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL)
             OR (:matchType = '2v2' AND m.teamADefenderId IS NOT NULL AND m.teamBDefenderId IS NOT NULL)
@@ -62,6 +63,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             @Param("playerId") UUID playerId,
             @Param("opponentId") UUID opponentId,
             @Param("startDate") Instant startDate,
+            @Param("ruleConfigId") UUID ruleConfigId,
             @Param("matchType") String matchType
     );
 

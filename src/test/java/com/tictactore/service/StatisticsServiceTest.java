@@ -156,7 +156,7 @@ class StatisticsServiceTest {
         com.tictactore.model.Game g5 = com.tictactore.model.Game.builder().match(matchVs).teamAScore(10).teamBScore(6).build();
         matchVs.setGames(List.of(g4, g5));
 
-        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), eq(null)))
+        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), eq(null), eq(null)))
                 .thenReturn(List.of(matchWith, matchVs));
 
         com.tictactore.dto.H2HStatsResponse response = statisticsService.getHeadToHeadStats(
@@ -204,7 +204,7 @@ class StatisticsServiceTest {
         UUID opponentId = UUID.randomUUID();
 
         when(userRepository.findById(opponentId)).thenReturn(java.util.Optional.empty());
-        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), any()))
+        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), any(), any()))
                 .thenReturn(List.of());
 
         com.tictactore.dto.H2HStatsResponse response = statisticsService.getHeadToHeadStats(
@@ -228,7 +228,7 @@ class StatisticsServiceTest {
 
         User opponent = User.builder().id(opponentId).nickname("ex-player-12345").build();
         when(userRepository.findById(opponentId)).thenReturn(java.util.Optional.of(opponent));
-        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), any()))
+        when(matchRepository.findHeadToHeadMatches(eq(playerId), eq(opponentId), any(), any(), any()))
                 .thenReturn(List.of());
 
         com.tictactore.dto.H2HStatsResponse response = statisticsService.getHeadToHeadStats(

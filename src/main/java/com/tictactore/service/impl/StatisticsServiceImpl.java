@@ -87,7 +87,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         PlayerSummaryDto opponentSummary = new PlayerSummaryDto(opponentId, opponentNickname, opponentAvatar);
 
         Instant startDate = period != null ? period.getStartDate() : null;
-        List<Match> matches = matchRepository.findHeadToHeadMatches(playerId, opponentId, startDate, matchType);
+        List<Match> matches = matchRepository.findHeadToHeadMatches(playerId, opponentId, startDate, ruleConfigId, matchType);
 
         long withMatches = 0;
         long withWins = 0;
@@ -131,14 +131,16 @@ public class StatisticsServiceImpl implements StatisticsService {
                 int teamAGames = 0;
                 int teamBGames = 0;
 
-                for (Game game : match.getGames()) {
-                    withTotalGames++;
-                    if (game.getTeamAScore() > game.getTeamBScore()) {
-                        teamAGames++;
-                        if (isTeamA) withGamesWon++; else withGamesLost++;
-                    } else if (game.getTeamBScore() > game.getTeamAScore()) {
-                        teamBGames++;
-                        if (!isTeamA) withGamesWon++; else withGamesLost++;
+                if (match.getGames() != null) {
+                    for (Game game : match.getGames()) {
+                        withTotalGames++;
+                        if (game.getTeamAScore() > game.getTeamBScore()) {
+                            teamAGames++;
+                            if (isTeamA) withGamesWon++; else withGamesLost++;
+                        } else if (game.getTeamBScore() > game.getTeamAScore()) {
+                            teamBGames++;
+                            if (!isTeamA) withGamesWon++; else withGamesLost++;
+                        }
                     }
                 }
 
@@ -158,34 +160,36 @@ public class StatisticsServiceImpl implements StatisticsService {
                 int teamAGames = 0;
                 int teamBGames = 0;
 
-                for (Game game : match.getGames()) {
-                    vsTotalGames++;
-                    int myGameScore = isTeamA ? game.getTeamAScore() : game.getTeamBScore();
-                    int oppGameScore = isTeamA ? game.getTeamBScore() : game.getTeamAScore();
+                if (match.getGames() != null) {
+                    for (Game game : match.getGames()) {
+                        vsTotalGames++;
+                        int myGameScore = isTeamA ? game.getTeamAScore() : game.getTeamBScore();
+                        int oppGameScore = isTeamA ? game.getTeamBScore() : game.getTeamAScore();
 
-                    if (myGameScore > oppGameScore) {
-                        vsGamesWon++;
-                        if (isTeamA) teamAGames++; else teamBGames++;
-                    } else if (oppGameScore > myGameScore) {
-                        vsGamesLost++;
-                        if (isTeamA) teamBGames++; else teamAGames++;
-                    }
+                        if (myGameScore > oppGameScore) {
+                            vsGamesWon++;
+                            if (isTeamA) teamAGames++; else teamBGames++;
+                        } else if (oppGameScore > myGameScore) {
+                            vsGamesLost++;
+                            if (isTeamA) teamBGames++; else teamAGames++;
+                        }
 
-                    Position playerPos = getPlayerPositionInGame(game, match, playerId);
-                    Position oppPos = getPlayerPositionInGame(game, match, opponentId);
+                        Position playerPos = getPlayerPositionInGame(game, match, playerId);
+                        Position oppPos = getPlayerPositionInGame(game, match, opponentId);
 
-                    if (playerPos == Position.ATTACKER && oppPos == Position.DEFENDER) {
-                        aVsDScored += myGameScore;
-                        aVsDConceded += oppGameScore;
-                    } else if (playerPos == Position.ATTACKER && oppPos == Position.ATTACKER) {
-                        aVsAScored += myGameScore;
-                        aVsAConceded += oppGameScore;
-                    } else if (playerPos == Position.DEFENDER && oppPos == Position.ATTACKER) {
-                        dVsAScored += myGameScore;
-                        dVsAConceded += oppGameScore;
-                    } else if (playerPos == Position.DEFENDER && oppPos == Position.DEFENDER) {
-                        dVsDScored += myGameScore;
-                        dVsDConceded += oppGameScore;
+                        if (playerPos == Position.ATTACKER && oppPos == Position.DEFENDER) {
+                            aVsDScored += myGameScore;
+                            aVsDConceded += oppGameScore;
+                        } else if (playerPos == Position.ATTACKER && oppPos == Position.ATTACKER) {
+                            aVsAScored += myGameScore;
+                            aVsAConceded += oppGameScore;
+                        } else if (playerPos == Position.DEFENDER && oppPos == Position.ATTACKER) {
+                            dVsAScored += myGameScore;
+                            dVsAConceded += oppGameScore;
+                        } else if (playerPos == Position.DEFENDER && oppPos == Position.DEFENDER) {
+                            dVsDScored += myGameScore;
+                            dVsDConceded += oppGameScore;
+                        }
                     }
                 }
 

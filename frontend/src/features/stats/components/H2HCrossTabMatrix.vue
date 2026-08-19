@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStatsStore } from '../stores/useStatsStore'
+import { useRuleConfigStore } from '@/stores/useRuleConfigStore'
 import type { TimePeriod, MatchTypeFilter } from '@/services/statisticsService'
 import AvatarBase from '@/components/AvatarBase.vue'
 import EmptyStateCTA from './EmptyStateCTA.vue'
@@ -14,13 +15,20 @@ const props = defineProps<{
 const route = useRoute()
 const { t } = useI18n()
 const statsStore = useStatsStore()
+const ruleConfigStore = useRuleConfigStore()
 
 const currentOpponentId = ref<string>(
-  props.opponentId || (route.query.opponentId as string) || 'opp-user-456'
+  props.opponentId || (route.query.opponentId as string) || ''
 )
 const selectedPeriod = ref<TimePeriod>('ALL_TIME')
 const selectedMatchType = ref<string>('')
 const selectedRuleConfigId = ref<string>('')
+
+const isSearchOpen = ref(false)
+const searchQuery = ref('')
+const searchResults = ref<Array<{ id: string; nickname: string; avatar?: string }>>([])
+const isSearching = ref(false)
+let searchDebounce: ReturnType<typeof setTimeout> | null = null
 
 const opponentNickname = computed(() => {
   return statsStore.h2hStats?.opponent?.nickname || 'Opponent'
@@ -46,12 +54,55 @@ async function loadH2HData() {
   })
 }
 
+function handleSearchInput(query: string) {
+  searchQuery.value = query
+  if (searchDebounce) clearTimeout(searchDebounce)
+  if (!query.trim()) {
+    searchResults.value = []
+    return
+  }
+  searchDebounce = setTimeout(async () => {
+    isSearching.value = true
+    try {
+      const res = await fetch(`/api/users/me/players/search?q=${encodeURIComponent(query.trim())}`)
+      if (res.ok) {
+        searchResults.value = await res.json()
+      }
+    } catch {
+      searchResults.value = []
+    } finally {
+      isSearching.value = false
+    }
+  }, 300)
+}
+
+function selectOpponent(player: { id: string; nickname: string; avatar?: string }) {
+  currentOpponentId.value = player.id
+  isSearchOpen.value = false
+  searchQuery.value = ''
+  searchResults.value = []
+  loadH2HData()
+}
+
 onMounted(() => {
+  ruleConfigStore.fetchPresets()
   if (route.query.opponentId) {
     currentOpponentId.value = route.query.opponentId as string
   }
-  loadH2HData()
+  if (currentOpponentId.value) {
+    loadH2HData()
+  }
 })
+
+watch(
+  () => props.opponentId,
+  (newOppId) => {
+    if (newOppId) {
+      currentOpponentId.value = newOppId
+      loadH2HData()
+    }
+  }
+)
 
 watch(
   () => route.query.opponentId,
@@ -64,13 +115,15 @@ watch(
 )
 
 watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
-  loadH2HData()
+  if (currentOpponentId.value) {
+    loadH2HData()
+  }
 })
 </script>
 
 <template>
   <div class="ch-h2h w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
-    <!-- Header with Opponent Profile -->
+    <!-- Header with Opponent Profile & Selector -->
     <div class="ch-h2h__header bg-surface-container-low p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
       <div class="flex items-center gap-4">
         <AvatarBase :avatar="opponentAvatar" :nickname="opponentNickname" size="lg" />
@@ -85,11 +138,23 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
         </div>
       </div>
 
-      <!-- Demo Badge -->
-      <div v-if="statsStore.isDemoModeEnabled" class="flex items-center">
-        <span class="text-xs text-orange-400 font-headline uppercase tracking-widest font-bold bg-orange-400/10 px-3 py-1 rounded-full">
-          {{ t('h2h.demoData', 'Demo Data') }}
-        </span>
+      <div class="flex items-center gap-3">
+        <!-- Opponent Selector Button -->
+        <button
+          @click="isSearchOpen = true"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface text-xs font-semibold transition-colors cursor-pointer"
+          data-testid="select-opponent-btn"
+        >
+          <span class="material-symbols-outlined text-sm">person_search</span>
+          {{ currentOpponentId ? t('h2h.changeOpponent', 'Change Opponent') : t('h2h.selectOpponent', 'Select Opponent') }}
+        </button>
+
+        <!-- Demo Badge -->
+        <div v-if="statsStore.isDemoModeEnabled" class="flex items-center">
+          <span class="text-xs text-orange-400 font-headline uppercase tracking-widest font-bold bg-orange-400/10 px-3 py-1 rounded-full">
+            {{ t('h2h.demoData', 'Demo Data') }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -114,6 +179,24 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
           </select>
         </div>
 
+        <!-- Rule Configuration Filter -->
+        <div class="flex items-center gap-2">
+          <label for="h2h-rule-config-select" class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+            {{ t('h2h.ruleConfig', 'Rules') }}:
+          </label>
+          <select
+            id="h2h-rule-config-select"
+            v-model="selectedRuleConfigId"
+            data-testid="stats-rule-config-select"
+            class="bg-surface-container-highest text-on-surface text-sm rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
+          >
+            <option value="">{{ t('h2h.allRules', 'All Rules') }}</option>
+            <option v-for="preset in ruleConfigStore.presets" :key="preset.id" :value="preset.id">
+              {{ preset.name }}
+            </option>
+          </select>
+        </div>
+
         <!-- Match Type Filter -->
         <div class="flex items-center gap-2">
           <label for="h2h-match-type-select" class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
@@ -133,8 +216,69 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
       </div>
     </div>
 
+    <!-- Opponent Search Modal -->
+    <div
+      v-if="isSearchOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+      @click.self="isSearchOpen = false"
+    >
+      <div class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-4 flex flex-col max-h-[80vh]">
+        <div class="flex items-center justify-between">
+          <h2 class="font-headline text-lg font-bold text-on-surface">
+            {{ t('h2h.selectOpponent', 'Select Opponent') }}
+          </h2>
+          <button @click="isSearchOpen = false" class="text-on-surface-variant hover:text-on-surface cursor-pointer">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <input
+          v-model="searchQuery"
+          @input="handleSearchInput(($event.target as HTMLInputElement).value)"
+          type="text"
+          :placeholder="t('h2h.searchPlaceholder', 'Search player...')"
+          class="w-full bg-surface-container-highest text-on-surface rounded-xl p-3 border-none focus:outline-none focus:ring-2 focus:ring-primary"
+          data-testid="opponent-search-input"
+          autofocus
+        />
+
+        <div v-if="isSearching" class="text-center text-on-surface-variant py-4">
+          {{ t('common.loading', 'Loading...') }}
+        </div>
+        <div v-else-if="searchResults.length === 0 && searchQuery.trim()" class="text-center text-on-surface-variant py-4">
+          No players found
+        </div>
+        <div v-else class="overflow-y-auto flex-grow space-y-2 max-h-60">
+          <button
+            v-for="player in searchResults"
+            :key="player.id"
+            class="w-full flex items-center gap-3 p-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 transition-colors text-left cursor-pointer"
+            @click="selectOpponent(player)"
+            data-testid="opponent-search-result"
+          >
+            <AvatarBase :avatar="player.avatar" :nickname="player.nickname" size="sm" />
+            <span class="text-on-surface font-medium">{{ player.nickname }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Opponent Selected Prompt -->
+    <div v-if="!currentOpponentId" class="ch-empty-state w-full flex items-center justify-center p-8 bg-surface-container-low rounded-2xl text-center flex-col gap-4">
+      <span class="material-symbols-outlined text-4xl text-primary">groups</span>
+      <p class="text-on-surface-variant text-sm">{{ t('h2h.noOpponentSelected', 'Select an opponent to view head-to-head matchup statistics') }}</p>
+      <button
+        @click="isSearchOpen = true"
+        class="px-4 py-2.5 rounded-xl bg-primary text-background font-headline font-bold text-sm hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer"
+        data-testid="open-opponent-search-cta"
+      >
+        <span class="material-symbols-outlined text-sm">person_search</span>
+        {{ t('h2h.selectOpponent', 'Select Opponent') }}
+      </button>
+    </div>
+
     <!-- Loading Skeleton -->
-    <div v-if="statsStore.isH2HLoading" class="flex flex-col gap-4">
+    <div v-else-if="statsStore.isH2HLoading" class="flex flex-col gap-4">
       <div v-for="n in 3" :key="n" class="h-36 bg-surface-container-low animate-pulse rounded-2xl"></div>
     </div>
 
