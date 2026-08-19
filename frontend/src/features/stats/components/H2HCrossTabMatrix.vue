@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStatsStore } from '../stores/useStatsStore'
 import { useRuleConfigStore } from '@/stores/useRuleConfigStore'
-import type { TimePeriod, MatchTypeFilter } from '@/services/statisticsService'
+import { searchPlayers, type TimePeriod, type MatchTypeFilter, type PlayerSearchResult } from '@/services/statisticsService'
 import AvatarBase from '@/components/AvatarBase.vue'
 import EmptyStateCTA from './EmptyStateCTA.vue'
 
@@ -13,6 +13,7 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const statsStore = useStatsStore()
 const ruleConfigStore = useRuleConfigStore()
@@ -26,9 +27,10 @@ const selectedRuleConfigId = ref<string>('')
 
 const isSearchOpen = ref(false)
 const searchQuery = ref('')
-const searchResults = ref<Array<{ id: string; nickname: string; avatar?: string }>>([])
+const searchResults = ref<PlayerSearchResult[]>([])
 const isSearching = ref(false)
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
+let searchAbortController: AbortController | null = null
 
 const opponentNickname = computed(() => {
   return statsStore.h2hStats?.opponent?.nickname || 'Opponent'
@@ -45,6 +47,15 @@ const totalMatchCount = computed(() => {
   return withMatches + vsMatches
 })
 
+function formatGoalDiff(scored: number, conceded: number): string {
+  const diff = scored - conceded
+  return diff > 0 ? `+${diff}` : `${diff}`
+}
+
+function getGoalDiffClass(scored: number, conceded: number): string {
+  return scored - conceded >= 0 ? 'text-green-400' : 'text-red-400'
+}
+
 async function loadH2HData() {
   if (!currentOpponentId.value) return
   await statsStore.fetchH2HStats(currentOpponentId.value, {
@@ -57,30 +68,41 @@ async function loadH2HData() {
 function handleSearchInput(query: string) {
   searchQuery.value = query
   if (searchDebounce) clearTimeout(searchDebounce)
+  if (searchAbortController) {
+    searchAbortController.abort()
+    searchAbortController = null
+  }
   if (!query.trim()) {
     searchResults.value = []
+    isSearching.value = false
     return
   }
   searchDebounce = setTimeout(async () => {
+    searchAbortController = new AbortController()
     isSearching.value = true
     try {
-      const res = await fetch(`/api/users/me/players/search?q=${encodeURIComponent(query.trim())}`)
-      if (res.ok) {
-        searchResults.value = await res.json()
-      }
-    } catch {
+      searchResults.value = await searchPlayers(query.trim(), { signal: searchAbortController.signal })
+    } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') return
       searchResults.value = []
     } finally {
       isSearching.value = false
+      searchAbortController = null
     }
   }, 300)
 }
 
-function selectOpponent(player: { id: string; nickname: string; avatar?: string }) {
+function selectOpponent(player: PlayerSearchResult) {
   currentOpponentId.value = player.id
   isSearchOpen.value = false
   searchQuery.value = ''
   searchResults.value = []
+  router.push({
+    query: {
+      ...route.query,
+      opponentId: player.id,
+    },
+  })
   loadH2HData()
 }
 
@@ -126,7 +148,7 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
     <!-- Header with Opponent Profile & Selector -->
     <div class="ch-h2h__header bg-surface-container-low p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
       <div class="flex items-center gap-4">
-        <AvatarBase :avatar="opponentAvatar" :nickname="opponentNickname" size="lg" />
+        <AvatarBase :avatar="opponentAvatar" :name="opponentNickname" />
         <div class="flex flex-col">
           <span class="text-xs text-primary font-bold uppercase tracking-wider">{{ t('h2h.title', 'Head-to-Head') }}</span>
           <h1 class="text-2xl sm:text-3xl font-headline font-bold text-on-surface">
@@ -256,7 +278,7 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
             @click="selectOpponent(player)"
             data-testid="opponent-search-result"
           >
-            <AvatarBase :avatar="player.avatar" :nickname="player.nickname" size="sm" />
+            <AvatarBase :avatar="player.avatar" :name="player.nickname" />
             <span class="text-on-surface font-medium">{{ player.nickname }}</span>
           </button>
         </div>
@@ -404,8 +426,8 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
                 <td class="py-3 px-3 font-semibold text-on-surface">{{ t('h2h.attackerVsDefender', 'Attacker vs Defender') }}</td>
                 <td class="py-3 px-3 text-center text-green-400 font-bold">{{ statsStore.h2hStats.goals.attackerVsDefender.scored }}</td>
                 <td class="py-3 px-3 text-center text-red-400 font-bold">{{ statsStore.h2hStats.goals.attackerVsDefender.conceded }}</td>
-                <td class="py-3 px-3 text-right font-headline font-bold" :class="statsStore.h2hStats.goals.attackerVsDefender.scored - statsStore.h2hStats.goals.attackerVsDefender.conceded >= 0 ? 'text-green-400' : 'text-red-400'">
-                  {{ statsStore.h2hStats.goals.attackerVsDefender.scored - statsStore.h2hStats.goals.attackerVsDefender.conceded > 0 ? '+' : '' }}{{ statsStore.h2hStats.goals.attackerVsDefender.scored - statsStore.h2hStats.goals.attackerVsDefender.conceded }}
+                <td class="py-3 px-3 text-right font-headline font-bold" :class="getGoalDiffClass(statsStore.h2hStats.goals.attackerVsDefender.scored, statsStore.h2hStats.goals.attackerVsDefender.conceded)">
+                  {{ formatGoalDiff(statsStore.h2hStats.goals.attackerVsDefender.scored, statsStore.h2hStats.goals.attackerVsDefender.conceded) }}
                 </td>
               </tr>
               <!-- Attacker vs Attacker -->
@@ -413,8 +435,8 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
                 <td class="py-3 px-3 font-semibold text-on-surface">{{ t('h2h.attackerVsAttacker', 'Attacker vs Attacker') }}</td>
                 <td class="py-3 px-3 text-center text-green-400 font-bold">{{ statsStore.h2hStats.goals.attackerVsAttacker.scored }}</td>
                 <td class="py-3 px-3 text-center text-red-400 font-bold">{{ statsStore.h2hStats.goals.attackerVsAttacker.conceded }}</td>
-                <td class="py-3 px-3 text-right font-headline font-bold" :class="statsStore.h2hStats.goals.attackerVsAttacker.scored - statsStore.h2hStats.goals.attackerVsAttacker.conceded >= 0 ? 'text-green-400' : 'text-red-400'">
-                  {{ statsStore.h2hStats.goals.attackerVsAttacker.scored - statsStore.h2hStats.goals.attackerVsAttacker.conceded > 0 ? '+' : '' }}{{ statsStore.h2hStats.goals.attackerVsAttacker.scored - statsStore.h2hStats.goals.attackerVsAttacker.conceded }}
+                <td class="py-3 px-3 text-right font-headline font-bold" :class="getGoalDiffClass(statsStore.h2hStats.goals.attackerVsAttacker.scored, statsStore.h2hStats.goals.attackerVsAttacker.conceded)">
+                  {{ formatGoalDiff(statsStore.h2hStats.goals.attackerVsAttacker.scored, statsStore.h2hStats.goals.attackerVsAttacker.conceded) }}
                 </td>
               </tr>
               <!-- Defender vs Attacker -->
@@ -422,8 +444,8 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
                 <td class="py-3 px-3 font-semibold text-on-surface">{{ t('h2h.defenderVsAttacker', 'Defender vs Attacker') }}</td>
                 <td class="py-3 px-3 text-center text-green-400 font-bold">{{ statsStore.h2hStats.goals.defenderVsAttacker.scored }}</td>
                 <td class="py-3 px-3 text-center text-red-400 font-bold">{{ statsStore.h2hStats.goals.defenderVsAttacker.conceded }}</td>
-                <td class="py-3 px-3 text-right font-headline font-bold" :class="statsStore.h2hStats.goals.defenderVsAttacker.scored - statsStore.h2hStats.goals.defenderVsAttacker.conceded >= 0 ? 'text-green-400' : 'text-red-400'">
-                  {{ statsStore.h2hStats.goals.defenderVsAttacker.scored - statsStore.h2hStats.goals.defenderVsAttacker.conceded > 0 ? '+' : '' }}{{ statsStore.h2hStats.goals.defenderVsAttacker.scored - statsStore.h2hStats.goals.defenderVsAttacker.conceded }}
+                <td class="py-3 px-3 text-right font-headline font-bold" :class="getGoalDiffClass(statsStore.h2hStats.goals.defenderVsAttacker.scored, statsStore.h2hStats.goals.defenderVsAttacker.conceded)">
+                  {{ formatGoalDiff(statsStore.h2hStats.goals.defenderVsAttacker.scored, statsStore.h2hStats.goals.defenderVsAttacker.conceded) }}
                 </td>
               </tr>
               <!-- Defender vs Defender -->
@@ -431,8 +453,8 @@ watch([selectedPeriod, selectedMatchType, selectedRuleConfigId], () => {
                 <td class="py-3 px-3 font-semibold text-on-surface">{{ t('h2h.defenderVsDefender', 'Defender vs Defender') }}</td>
                 <td class="py-3 px-3 text-center text-green-400 font-bold">{{ statsStore.h2hStats.goals.defenderVsDefender.scored }}</td>
                 <td class="py-3 px-3 text-center text-red-400 font-bold">{{ statsStore.h2hStats.goals.defenderVsDefender.conceded }}</td>
-                <td class="py-3 px-3 text-right font-headline font-bold" :class="statsStore.h2hStats.goals.defenderVsDefender.scored - statsStore.h2hStats.goals.defenderVsDefender.conceded >= 0 ? 'text-green-400' : 'text-red-400'">
-                  {{ statsStore.h2hStats.goals.defenderVsDefender.scored - statsStore.h2hStats.goals.defenderVsDefender.conceded > 0 ? '+' : '' }}{{ statsStore.h2hStats.goals.defenderVsDefender.scored - statsStore.h2hStats.goals.defenderVsDefender.conceded }}
+                <td class="py-3 px-3 text-right font-headline font-bold" :class="getGoalDiffClass(statsStore.h2hStats.goals.defenderVsDefender.scored, statsStore.h2hStats.goals.defenderVsDefender.conceded)">
+                  {{ formatGoalDiff(statsStore.h2hStats.goals.defenderVsDefender.scored, statsStore.h2hStats.goals.defenderVsDefender.conceded) }}
                 </td>
               </tr>
             </tbody>

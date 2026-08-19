@@ -120,6 +120,7 @@ export const useStatsStore = defineStore('stats', () => {
   async function fetchH2HStats(opponentId: string, params: H2HParams = {}) {
     isH2HLoading.value = true
     h2hError.value = null
+    h2hStats.value = null
     selectedOpponentId.value = opponentId
 
     try {

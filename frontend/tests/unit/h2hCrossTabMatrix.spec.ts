@@ -72,4 +72,36 @@ describe('[Story 4.5] H2H Cross-Tab Matrix & Store (ATDD Red Phase)', () => {
     expect(store.h2hStats).toBeDefined()
     expect(store.h2hStats?.matches?.vs?.matches ?? store.h2hStats?.matches?.vs?.totalMatches).toBeGreaterThan(0)
   })
+
+  it('[P3] should clear h2hStats immediately when starting a new fetch to prevent stale UI data', async () => {
+    const store = useStatsStore()
+    store.h2hStats = {
+      opponent: { id: 'old-opp', nickname: 'OldOpponent' },
+      matches: { with: {} as any, vs: {} as any },
+      games: { with: {} as any, vs: {} as any },
+      goals: {} as any,
+    }
+
+    let resolveFetch: (val: any) => void
+    const fetchPromise = new Promise((resolve) => {
+      resolveFetch = resolve
+    })
+    vi.mocked(statisticsService.getHeadToHeadStats).mockReturnValue(fetchPromise as any)
+
+    const callPromise = store.fetchH2HStats('new-opp')
+
+    expect(store.h2hStats).toBeNull()
+    expect(store.isH2HLoading).toBe(true)
+
+    resolveFetch!({
+      opponent: { id: 'new-opp', nickname: 'NewOpponent' },
+      matches: { with: { matches: 1 }, vs: { matches: 2 } },
+      games: { with: {}, vs: {} },
+      goals: {},
+    })
+
+    await callPromise
+    expect(store.h2hStats?.opponent?.nickname).toBe('NewOpponent')
+    expect(store.isH2HLoading).toBe(false)
+  })
 })

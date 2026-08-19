@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getLeaderboard, getPersonalStats, getH2HStats, type PlayerStats } from '../statisticsService'
+import { getLeaderboard, getPersonalStats, getH2HStats, searchPlayers, type PlayerStats } from '../statisticsService'
 
 describe('statisticsService', () => {
   beforeEach(() => {
@@ -184,5 +184,37 @@ describe('statisticsService', () => {
     } as unknown as Response)
 
     await expect(getLeaderboard({})).rejects.toThrow('API error: 400')
+  })
+
+  it('searches players correctly and handles signal and token', async () => {
+    const mockPlayers = [{ id: 'p1', nickname: 'Alex', avatar: 'avatar1' }]
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockPlayers
+    } as Response)
+
+    const controller = new AbortController()
+    const result = await searchPlayers('Alex', { signal: controller.signal, token: 'auth-token' })
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/users/me/players/search?q=Alex',
+      expect.objectContaining({
+        signal: controller.signal,
+        headers: {
+          'Authorization': 'Bearer auth-token'
+        }
+      })
+    )
+    expect(result).toEqual(mockPlayers)
+  })
+
+  it('throws error when searchPlayers fails', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({ message: 'Search failure' })
+    } as Response)
+
+    await expect(searchPlayers('test')).rejects.toThrow('Search failure')
   })
 })

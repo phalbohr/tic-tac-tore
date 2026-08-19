@@ -40,7 +40,7 @@ function recordMatch() {
         </h2>
         <p class="text-sm text-on-surface-variant leading-relaxed">
           <template v-if="props.opponentNickname">
-            {{ t('h2h.emptyState', { opponent: props.opponentNickname }, `You haven't played ${props.opponentNickname} yet — start a match?`) }}
+            {{ t('h2h.emptyState', { opponent: props.opponentNickname }) }}
           </template>
           <template v-else-if="props.message">
             {{ props.message }}

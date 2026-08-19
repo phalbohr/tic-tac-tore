@@ -72,6 +72,12 @@ so that I know our historical matchup across matches, games, and positions.
 - [x] [Review][Patch] Add watcher for props.opponentId to refresh data when prop changes [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:56]
 - [x] [Review][Patch] Replace hardcoded English strings with i18n translation keys in EmptyStateCTA and StatsDashboard [frontend/src/features/stats/components/EmptyStateCTA.vue:60]
 - [x] [Review][Patch] Fix German translation for startMatch in de.json [frontend/src/locales/de.json:1]
+- [x] [Review][WARN] Use shared API client for opponent search [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:67]
+- [x] [Review][WARN] Eliminate search debounce race condition via AbortController [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:64]
+- [x] [Review][WARN] Clear h2hStats upon starting opponent fetch to prevent stale UI flash [frontend/src/features/stats/stores/useStatsStore.ts:124]
+- [x] [Review][WARN] Fix vue-i18n translation signature in EmptyStateCTA [frontend/src/features/stats/components/EmptyStateCTA.vue:42]
+- [x] [Review][NIT] Extract formatGoalDiff & getGoalDiffClass helper functions [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:348]
+- [x] [Review][NIT] Update route query param when selecting opponent in search modal [frontend/src/features/stats/components/H2HCrossTabMatrix.vue:79]
 
 ## Dev Record
 
@@ -82,8 +88,8 @@ so that I know our historical matchup across matches, games, and positions.
   - Service: Implemented `getHeadToHeadStats` in `StatisticsServiceImpl` computing cross-tabulation for "With" and "Vs" (matches and games) as well as 4-way positional goal breakdowns (Attacker vs Defender, Attacker vs Attacker, Defender vs Defender, Defender vs Attacker) with privacy-safe display name resolution and defensive null checks on match games.
   - Controller: Added `GET /api/v1/statistics/head-to-head` in `StatisticsController` supporting parameter validation and authenticated principal extraction.
 - **Frontend**:
-  - Service: Added `getHeadToHeadStats` and TypeScript interfaces in `statisticsService.ts`.
-  - Store: Added H2H state and actions in `useStatsStore.ts` with demo mode support.
+  - Service: Added `getHeadToHeadStats`, `searchPlayers`, and TypeScript interfaces in `statisticsService.ts`.
+  - Store: Added H2H state and actions in `useStatsStore.ts` with demo mode support and immediate stale state clearing on fetch.
   - Component: Created `H2HCrossTabMatrix.vue` displaying opponent profile header, opponent selector modal with live search, Rule Configuration filter dropdown, 3 cross-tabulated tables (Matches, Games, Goals) following the No-Line rule (`UX-DR3`), and empty state integration with `EmptyStateCTA.vue`.
   - Translations: Added keys to `en.json` and `de.json` with German translation fixes.
   - Routing: Added `/statistics` route and tab switching in `StatsDashboard.vue`.
@@ -94,9 +100,15 @@ so that I know our historical matchup across matches, games, and positions.
   - ✅ Resolved review finding: Added Rule Configuration dropdown in H2H filter bar.
   - ✅ Resolved review finding: Replaced hardcoded strings in `EmptyStateCTA` and `StatsDashboard` with i18n keys.
   - ✅ Resolved review finding: Fixed German `startMatch` key in `de.json`.
+  - ✅ Resolved review finding [WARN]: Routed player search through `searchPlayers` in `statisticsService.ts` for unified error handling.
+  - ✅ Resolved review finding [WARN]: Added `AbortController` cancellation to player search debouncing in `H2HCrossTabMatrix.vue`.
+  - ✅ Resolved review finding [WARN]: Cleared `h2hStats.value = null` on starting `fetchH2HStats` in `useStatsStore.ts`.
+  - ✅ Resolved review finding [WARN]: Corrected `vue-i18n` interpolation in `EmptyStateCTA.vue` using standard named argument signature.
+  - ✅ Resolved review finding [NIT]: Extracted `formatGoalDiff` and `getGoalDiffClass` helpers to reduce template duplication.
+  - ✅ Resolved review finding [NIT]: Added `router.push` updating `?opponentId=` query param upon selecting opponent from search modal.
 - **Testing**:
   - Backend: `StatisticsControllerATDDTest` (enabled and passing), `StatisticsServiceTest` (passing), `StatisticsControllerTest` (passing), `StatisticsServiceIntegrationTest` (passing).
-  - Frontend: `h2hCrossTabMatrix.spec.ts` (passing), `StatsDashboard.spec.ts` (passing).
+  - Frontend: `h2hCrossTabMatrix.spec.ts` (passing), `H2HCrossTabMatrix.spec.ts` (passing), `EmptyStateCTA.spec.ts` (passing), `statisticsService.spec.ts` (passing), `StatsDashboard.spec.ts` (passing).
   - E2E: `head-to-head-statistics.spec.ts` (enabled and passing).
   - Verification: Full `./scripts/ci-local.sh` suite executed and verified passing.
 

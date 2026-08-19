@@ -236,4 +236,31 @@ export async function getHeadToHeadStats(opponentId: string, params: H2HParams =
   }, params)
 }
 
+export interface PlayerSearchResult {
+  id: string
+  nickname: string
+  avatar?: string
+}
+
+export async function searchPlayers(query: string, options: { signal?: AbortSignal; token?: string } = {}): Promise<PlayerSearchResult[]> {
+  const url = `/api/users/me/players/search?q=${encodeURIComponent(query)}`
+  const headers: Record<string, string> = {}
+  if (options.token) {
+    headers['Authorization'] = `Bearer ${options.token}`
+  }
+  const response = await fetch(url, {
+    headers,
+    signal: options.signal,
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}))
+    const message = errorBody.message || `API error: ${response.status}`
+    throw new Error(message)
+  }
+
+  return response.json()
+}
+
+
 
