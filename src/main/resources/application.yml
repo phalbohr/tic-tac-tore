@@ -2,8 +2,8 @@ spring:
   datasource:
     url: ${TTT_DB_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1}
     driverClassName: ${TTT_DB_DRIVER:org.h2.Driver}
-    username: ${TTT_DB_USERNAME}
-    password: ${TTT_DB_PASSWORD}
+    username: ${TTT_DB_USERNAME:sa}
+    password: ${TTT_DB_PASSWORD:}
   h2:
     console:
       enabled: true

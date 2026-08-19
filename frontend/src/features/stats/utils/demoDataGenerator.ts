@@ -1,4 +1,5 @@
 import type { PlayerStats, TeamPairStats, Page, H2HStatsResponse } from '@/services/statisticsService'
+import type { MatchResponse, PagedResponse } from '@/services/matchService'
 
 export function generateDemoData(): PlayerStats {
   return {
@@ -110,4 +111,79 @@ export function generateDemoH2HStats(opponentId?: string): H2HStatsResponse {
     },
   }
 }
+
+export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?: string }): PagedResponse<MatchResponse> {
+  const myId = currentUser?.id || 'demo-user-123'
+  const myNick = currentUser?.nickname || 'Demo Player'
+
+  const content: MatchResponse[] = [
+    {
+      id: 'demo-match-1',
+      creatorId: myId,
+      teamAAttackerId: myId,
+      teamADefenderId: null,
+      teamBAttackerId: 'demo-p1',
+      teamBDefenderId: null,
+      status: 'CONFIRMED',
+      games: [{ teamAScore: 10, teamBScore: 7 }],
+      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+      teamAAttackerNickname: myNick,
+      teamBAttackerNickname: 'Alice',
+      teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
+      teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
+      matchFormat: 'STANDARD'
+    },
+    {
+      id: 'demo-match-2',
+      creatorId: 'demo-p2',
+      teamAAttackerId: myId,
+      teamADefenderId: 'demo-p3',
+      teamBAttackerId: 'demo-p2',
+      teamBDefenderId: 'demo-p4',
+      status: 'CONFIRMED',
+      games: [
+        { teamAScore: 10, teamBScore: 8, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
+        { teamAScore: 6, teamBScore: 10, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
+        { teamAScore: 10, teamBScore: 5, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' }
+      ],
+      createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+      teamAAttackerNickname: myNick,
+      teamADefenderNickname: 'Charlie',
+      teamBAttackerNickname: 'Bob',
+      teamBDefenderNickname: 'Diana',
+      teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
+      teamADefenderAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Charlie',
+      teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Bob',
+      teamBDefenderAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Diana',
+      matchFormat: 'STANDARD'
+    },
+    {
+      id: 'demo-match-3',
+      creatorId: 'demo-p1',
+      teamAAttackerId: 'demo-p1',
+      teamADefenderId: null,
+      teamBAttackerId: myId,
+      teamBDefenderId: null,
+      status: 'CONFIRMED',
+      games: [{ teamAScore: 10, teamBScore: 4 }],
+      createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+      teamAAttackerNickname: 'Alice',
+      teamBAttackerNickname: myNick,
+      teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
+      teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
+      matchFormat: 'STANDARD'
+    }
+  ]
+
+  return {
+    content,
+    page: 0,
+    size: 10,
+    totalElements: content.length,
+    totalPages: 1,
+    first: true,
+    last: true
+  }
+}
+
 

@@ -87,6 +87,33 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
     expect(store.isSearchOpen).toBe(false)
   })
 
+  it('[P0] emits select and close events in customSelect mode without mutating draft store', async () => {
+    const wrapper = mount(PlayerSearchOverlay, {
+      global: {
+        plugins: [testingPinia]
+      },
+      props: {
+        isOpen: true,
+        customSelect: true
+      }
+    })
+
+    const store = useMatchDraftStore()
+    const testPlayer = createTestPlayer({ id: 'player-custom', nickname: 'Custom Player' })
+    store.searchResults = [testPlayer]
+
+    await wrapper.vm.$nextTick()
+
+    const rows = wrapper.findAll('[data-testid="search-result-row"]')
+    expect(rows).toHaveLength(1)
+    await rows[0]!.trigger('click')
+
+    expect(wrapper.emitted('select')).toBeTruthy()
+    expect(wrapper.emitted('select')![0]).toEqual([testPlayer])
+    expect(wrapper.emitted('close')).toBeTruthy()
+    expect(store.selectedPlayers).toEqual([])
+  })
+
   it('[P0] emits close event when backdrop is clicked', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {

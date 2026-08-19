@@ -16,7 +16,6 @@ import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
-import com.tictactore.rules.VerificationRules;
 import com.tictactore.service.MatchService;
 import com.tictactore.service.PushNotificationService;
 import com.tictactore.service.RateLimitService;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Retryable
 public class MatchServiceImpl implements MatchService {
 
@@ -41,13 +39,41 @@ public class MatchServiceImpl implements MatchService {
     private final MatchOperation matchOperation;
     private final PushNotificationService pushNotificationService;
     private final RateLimitService rateLimitService;
+    private final com.tictactore.service.operation.MatchResponseMapper matchResponseMapper;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public MatchServiceImpl(
+            MatchRepository matchRepository,
+            UserRepository userRepository,
+            MatchOperation matchOperation,
+            PushNotificationService pushNotificationService,
+            RateLimitService rateLimitService,
+            com.tictactore.service.operation.MatchResponseMapper matchResponseMapper
+    ) {
+        this.matchRepository = matchRepository;
+        this.userRepository = userRepository;
+        this.matchOperation = matchOperation;
+        this.pushNotificationService = pushNotificationService;
+        this.rateLimitService = rateLimitService;
+        this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new com.tictactore.service.operation.MatchResponseMapper(userRepository);
+    }
+
+    public MatchServiceImpl(
+            MatchRepository matchRepository,
+            UserRepository userRepository,
+            MatchOperation matchOperation,
+            PushNotificationService pushNotificationService,
+            RateLimitService rateLimitService
+    ) {
+        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository));
+    }
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
         if (request.idempotencyKey() != null && !request.idempotencyKey().isBlank()) {
             var existing = matchRepository.findByIdempotencyKey(request.idempotencyKey());
             if (existing.isPresent()) {
-                return mapToResponse(existing.get());
+                return matchResponseMapper.mapToResponse(existing.get());
             }
         }
 
@@ -187,7 +213,7 @@ public class MatchServiceImpl implements MatchService {
             log.error("Failed to dispatch push notifications for match {}", savedMatch.getId(), e);
         }
 
-        return mapToResponse(savedMatch);
+        return matchResponseMapper.mapToResponse(savedMatch);
     }
 
     @Override
@@ -231,7 +257,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         List<MatchResponse> userPendingResponses = userPendingMatches.stream()
-                .map(m -> mapToResponseWithUserMap(m, userMap))
+                .map(m -> matchResponseMapper.mapToResponseWithUserMap(m, userMap))
                 .toList();
 
         return new com.tictactore.dto.PendingMatchesResponse(userPendingResponses.size(), userPendingResponses);
@@ -300,14 +326,14 @@ public class MatchServiceImpl implements MatchService {
 
         if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
             if (match.hasConfirmed(userId)) {
-                return mapToResponse(match);
+                return matchResponseMapper.mapToResponse(match);
             }
             throw new InvalidMatchStateException("Match is already confirmed");
         }
 
         if (Match.STATUS_PARTIALLY_CONFIRMED.equals(match.getStatus())) {
             if (match.hasConfirmed(userId)) {
-                return mapToResponse(match);
+                return matchResponseMapper.mapToResponse(match);
             }
         }
 
@@ -320,7 +346,7 @@ public class MatchServiceImpl implements MatchService {
                         .toList();
                 if (!remaining.isEmpty()) {
                     List<User> remainingUsers = userRepository.findAllById(remaining);
-                    String confirmerName = resolveDisplayName(userId);
+                    String confirmerName = matchResponseMapper.resolveDisplayName(userId);
                     pushNotificationService.sendPartialConfirmationNotification(updatedMatch, remainingUsers, confirmerName);
                 }
             } catch (Exception e) {
@@ -328,7 +354,7 @@ public class MatchServiceImpl implements MatchService {
             }
         }
 
-        return mapToResponse(updatedMatch);
+        return matchResponseMapper.mapToResponse(updatedMatch);
     }
 
     @Override
@@ -339,7 +365,7 @@ public class MatchServiceImpl implements MatchService {
 
         if (Match.STATUS_REJECTED.equals(match.getStatus())) {
             if (userId.equals(match.getRejectedByUserId())) {
-                return mapToResponse(match);
+                return matchResponseMapper.mapToResponse(match);
             }
             throw new InvalidMatchStateException("Match is already rejected");
         }
@@ -365,19 +391,45 @@ public class MatchServiceImpl implements MatchService {
             log.error("Failed to dispatch push notification for rejected match {}", updatedMatch.getId(), e);
         }
 
-        return mapToResponse(updatedMatch);
+        return matchResponseMapper.mapToResponse(updatedMatch);
     }
 
-    private MatchResponse mapToResponse(Match match) {
+    @Override
+    public com.tictactore.dto.PagedResponse<MatchResponse> getMatchHistory(
+            UUID currentUserId,
+            String status,
+            UUID filterPlayerId,
+            UUID ruleConfigId,
+            String matchType,
+            int page,
+            int size
+    ) {
+        if (currentUserId == null) {
+            return new com.tictactore.dto.PagedResponse<>(List.of(), 0, size > 0 ? size : 10, 0L, 0);
+        }
+        String normalizedStatus = (status == null || status.isBlank()) ? "CONFIRMED" : status.toUpperCase().trim();
+        String normalizedMatchType = (matchType == null || matchType.isBlank()) ? null : matchType.trim();
+        int safePage = Math.max(0, page);
+        int safeSize = size > 0 ? Math.min(size, 100) : 10;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(safePage, safeSize);
+
+        var matchPage = matchRepository.findMatchHistory(
+                currentUserId, normalizedStatus, filterPlayerId, ruleConfigId, normalizedMatchType, pageable
+        );
+
         Set<UUID> allUserIds = new HashSet<>();
-        if (match.getCreatorId() != null) allUserIds.add(match.getCreatorId());
-        if (match.getTeamAAttackerId() != null) allUserIds.add(match.getTeamAAttackerId());
-        if (match.getTeamADefenderId() != null) allUserIds.add(match.getTeamADefenderId());
-        if (match.getTeamBAttackerId() != null) allUserIds.add(match.getTeamBAttackerId());
-        if (match.getTeamBDefenderId() != null) allUserIds.add(match.getTeamBDefenderId());
+        for (Match m : matchPage.getContent()) {
+            if (m.getCreatorId() != null) allUserIds.add(m.getCreatorId());
+            if (m.getTeamAAttackerId() != null) allUserIds.add(m.getTeamAAttackerId());
+            if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
+            if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
+            if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
+            if (m.getConfirmedByUserId() != null) allUserIds.add(m.getConfirmedByUserId());
+            if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
+        }
 
         Map<UUID, User> userMap = new HashMap<>();
-        if (userRepository != null && !allUserIds.isEmpty()) {
+        if (!allUserIds.isEmpty()) {
             try {
                 for (User u : userRepository.findAllById(allUserIds)) {
                     if (u != null && u.getId() != null) {
@@ -385,79 +437,21 @@ public class MatchServiceImpl implements MatchService {
                     }
                 }
             } catch (Exception e) {
-                log.warn("Failed to resolve users", e);
+                log.warn("Failed to resolve users for match history", e);
             }
         }
 
-        return mapToResponseWithUserMap(match, userMap);
-    }
+        List<MatchResponse> responses = matchPage.getContent().stream()
+                .map(m -> matchResponseMapper.mapToResponseWithUserMap(m, userMap))
+                .toList();
 
-    private MatchResponse mapToResponseWithUserMap(Match match, Map<UUID, User> userMap) {
-        List<GameDto> gameDtos = match.getGames().stream()
-                .map(g -> new GameDto(
-                    g.getTeamAScore(), g.getTeamBScore(),
-                    g.getTeamAAttackerId(), g.getTeamADefenderId(),
-                    g.getTeamBAttackerId(), g.getTeamBDefenderId()
-                ))
-                .collect(Collectors.toList());
-
-        return new MatchResponse(
-                match.getId(),
-                match.getIdempotencyKey(),
-                match.getCreatorId(),
-                match.getTeamAAttackerId(),
-                match.getTeamADefenderId(),
-                match.getTeamBAttackerId(),
-                match.getTeamBDefenderId(),
-                match.getStatus(),
-                gameDtos,
-                match.getCreatedAt(),
-                match.getConfirmedByUserId(),
-                match.getConfirmedAt(),
-                match.getRejectedByUserId(),
-                match.getRejectedAt(),
-                match.getRejectionReason(),
-                getDisplayName(userMap.get(match.getCreatorId())),
-                getDisplayName(userMap.get(match.getTeamAAttackerId())),
-                getDisplayName(userMap.get(match.getTeamADefenderId())),
-                getDisplayName(userMap.get(match.getTeamBAttackerId())),
-                getDisplayName(userMap.get(match.getTeamBDefenderId())),
-                getAvatar(userMap.get(match.getCreatorId())),
-                getAvatar(userMap.get(match.getTeamAAttackerId())),
-                getAvatar(userMap.get(match.getTeamADefenderId())),
-                getAvatar(userMap.get(match.getTeamBAttackerId())),
-                getAvatar(userMap.get(match.getTeamBDefenderId())),
-                match.getEntryMode(),
-                match.getMatchFormat(),
-                match.getConfirmedByOpponentIdsList(),
-                VerificationRules.getRequiredConfirmations(match),
-                match.getCooldownExpiresAt()
+        return new com.tictactore.dto.PagedResponse<>(
+                responses,
+                matchPage.getNumber(),
+                matchPage.getSize(),
+                matchPage.getTotalElements(),
+                matchPage.getTotalPages()
         );
-    }
-
-    private String getDisplayName(User user) {
-        if (user == null) return null;
-        String name = user.getNickname();
-        if (name == null || name.isBlank()) {
-            name = user.getEmail();
-        }
-        return name;
-    }
-
-    private String getAvatar(User user) {
-        return user != null ? user.getAvatar() : null;
-    }
-
-    private String resolveDisplayName(UUID userId) {
-        if (userId == null) return "A player";
-        return userRepository.findById(userId)
-                .map(u -> {
-                    if (u.getNickname() != null && u.getNickname().startsWith("ex-player-")) {
-                        return "A retired player";
-                    }
-                    return u.getNickname() != null ? u.getNickname() : "A player";
-                })
-                .orElse("A player");
     }
 
     @Override

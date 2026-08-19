@@ -73,6 +73,8 @@
     "recordFirstMatch": "Erstes Spiel erfassen",
     "toggleDemoData": "Demo-Daten umschalten",
     "demoDataActive": "Demo-Daten aktiv",
+    "exitDemo": "Demo beenden",
+    "demoDataNotice": "Beispieldaten für Spielverlauf",
     "errorLoading": "Statistiken konnten nicht geladen werden."
   },
   "cabinet": {
@@ -175,5 +177,43 @@
     "ruleConfig": "Regeln",
     "allRules": "Alle Regeln",
     "demoData": "Demo-Daten"
+  },
+  "history": {
+    "title": "Meine Spiele",
+    "tabs": {
+      "confirmed": "Bestätigt",
+      "pending": "Ausstehend"
+    },
+    "filters": {
+      "all": "Alle",
+      "matchType": "Spielmodus",
+      "player": "Nach Spieler filtern",
+      "playerSelected": "Spieler ausgewählt",
+      "clear": "Filter zurücksetzen"
+    },
+    "empty": {
+      "confirmedTitle": "Noch keine bestätigten Spiele",
+      "confirmedCta": "Erstes Spiel erfassen",
+      "pendingTitle": "Alles erledigt",
+      "pendingSubtitle": "Keine ausstehenden Bestätigungen",
+      "filteredTitle": "Keine Spiele gefunden",
+      "filteredCta": "Filter entfernen"
+    },
+    "outcome": {
+      "win": "Sieg",
+      "loss": "Niederlage",
+      "draw": "Unentschieden",
+      "completed": "Abgeschlossen"
+    },
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "page": "Seite {current} von {total}"
+    },
+    "format": {
+      "standard": "Standard",
+      "random": "Zufall"
+    },
+    "retiredPlayer": "Ehemaliger Spieler"
   }
 }

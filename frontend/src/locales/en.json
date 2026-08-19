@@ -73,6 +73,8 @@
     "recordFirstMatch": "Record First Match",
     "toggleDemoData": "Toggle Demo Data",
     "demoDataActive": "Demo Data Active",
+    "exitDemo": "Exit Demo",
+    "demoDataNotice": "Viewing sample demo match history",
     "errorLoading": "Unable to load statistics."
   },
   "cabinet": {
@@ -175,5 +177,43 @@
     "ruleConfig": "Rules",
     "allRules": "All Rules",
     "demoData": "Demo Data"
+  },
+  "history": {
+    "title": "My Matches",
+    "tabs": {
+      "confirmed": "Confirmed",
+      "pending": "Pending"
+    },
+    "filters": {
+      "all": "All",
+      "matchType": "Match Type",
+      "player": "Filter by Player",
+      "playerSelected": "Player Filtered",
+      "clear": "Clear Filters"
+    },
+    "empty": {
+      "confirmedTitle": "No confirmed matches yet",
+      "confirmedCta": "Record your first match",
+      "pendingTitle": "All caught up",
+      "pendingSubtitle": "No pending match confirmations",
+      "filteredTitle": "No matches found",
+      "filteredCta": "Try removing filters"
+    },
+    "outcome": {
+      "win": "Win",
+      "loss": "Loss",
+      "draw": "Draw",
+      "completed": "Completed"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {current} of {total}"
+    },
+    "format": {
+      "standard": "Standard",
+      "random": "Random"
+    },
+    "retiredPlayer": "Retired Player"
   }
 }
