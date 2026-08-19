@@ -175,5 +175,41 @@
     "ruleConfig": "Regeln",
     "allRules": "Alle Regeln",
     "demoData": "Demo-Daten"
+  },
+  "history": {
+    "title": "Meine Spiele",
+    "tabs": {
+      "confirmed": "Bestätigt",
+      "pending": "Ausstehend"
+    },
+    "filters": {
+      "all": "Alle",
+      "matchType": "Spielmodus",
+      "player": "Nach Spieler filtern",
+      "clear": "Filter zurücksetzen"
+    },
+    "empty": {
+      "confirmedTitle": "Noch keine bestätigten Spiele",
+      "confirmedCta": "Erstes Spiel erfassen",
+      "pendingTitle": "Alles erledigt",
+      "pendingSubtitle": "Keine ausstehenden Bestätigungen",
+      "filteredTitle": "Keine Spiele gefunden",
+      "filteredCta": "Filter entfernen"
+    },
+    "outcome": {
+      "win": "Sieg",
+      "loss": "Niederlage",
+      "draw": "Unentschieden"
+    },
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "page": "Seite {current} von {total}"
+    },
+    "format": {
+      "standard": "Standard",
+      "random": "Zufall"
+    },
+    "retiredPlayer": "Ehemaliger Spieler"
   }
 }

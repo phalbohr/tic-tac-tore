@@ -37,8 +37,9 @@ const router = createRouter({
     },
     {
       path: '/matches',
+      alias: '/history',
       name: 'matches',
-      component: () => import('@/views/HomeView.vue'),
+      component: () => import('@/features/match/views/MyMatchesView.vue'),
     },
     {
       path: '/statistics',

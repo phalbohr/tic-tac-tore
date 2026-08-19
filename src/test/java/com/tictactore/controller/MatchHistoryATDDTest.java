@@ -89,7 +89,7 @@ class MatchHistoryATDDTest {
             );
 
             PagedResponse<MatchResponse> pagedResponse = new PagedResponse<>(
-                    List.of(match), 0, 10, 1L, 1, true, true
+                    List.of(match), 0, 10, 1L, 1
             );
 
             when(matchService.getMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), any(), eq(0), eq(10)))
@@ -110,7 +110,7 @@ class MatchHistoryATDDTest {
         @DisplayName("[P0] Should enforce AD-02 status filtering (CONFIRMED vs PENDING)")
         void shouldEnforceStatusFilter() throws Exception {
             PagedResponse<MatchResponse> emptyPending = new PagedResponse<>(
-                    List.of(), 0, 10, 0L, 0, true, true
+                    List.of(), 0, 10, 0L, 0
             );
 
             when(matchService.getMatchHistory(eq(currentUserId), eq("PENDING"), any(), any(), any(), anyInt(), anyInt()))
@@ -132,7 +132,7 @@ class MatchHistoryATDDTest {
             UUID ruleConfigId = UUID.randomUUID();
 
             PagedResponse<MatchResponse> filteredResponse = new PagedResponse<>(
-                    List.of(), 0, 10, 0L, 0, true, true
+                    List.of(), 0, 10, 0L, 0
             );
 
             when(matchService.getMatchHistory(eq(currentUserId), eq("CONFIRMED"), eq(filterPlayerId), eq(ruleConfigId), eq("1v1"), eq(0), eq(10)))

@@ -435,8 +435,70 @@ public class MatchServiceImpl implements MatchService {
         );
     }
 
+    @Override
+    public com.tictactore.dto.PagedResponse<MatchResponse> getMatchHistory(
+            UUID currentUserId,
+            String status,
+            UUID filterPlayerId,
+            UUID ruleConfigId,
+            String matchType,
+            int page,
+            int size
+    ) {
+        if (currentUserId == null) {
+            return new com.tictactore.dto.PagedResponse<>(List.of(), 0, size > 0 ? size : 10, 0L, 0);
+        }
+        String normalizedStatus = (status == null || status.isBlank()) ? "CONFIRMED" : status.toUpperCase().trim();
+        int safePage = Math.max(0, page);
+        int safeSize = size > 0 ? Math.min(size, 100) : 10;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(safePage, safeSize);
+
+        var matchPage = matchRepository.findMatchHistory(
+                currentUserId, normalizedStatus, filterPlayerId, ruleConfigId, matchType, pageable
+        );
+
+        Set<UUID> allUserIds = new HashSet<>();
+        for (Match m : matchPage.getContent()) {
+            if (m.getCreatorId() != null) allUserIds.add(m.getCreatorId());
+            if (m.getTeamAAttackerId() != null) allUserIds.add(m.getTeamAAttackerId());
+            if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
+            if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
+            if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
+            if (m.getConfirmedByUserId() != null) allUserIds.add(m.getConfirmedByUserId());
+            if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
+        }
+
+        Map<UUID, User> userMap = new HashMap<>();
+        if (!allUserIds.isEmpty()) {
+            try {
+                for (User u : userRepository.findAllById(allUserIds)) {
+                    if (u != null && u.getId() != null) {
+                        userMap.put(u.getId(), u);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to resolve users for match history", e);
+            }
+        }
+
+        List<MatchResponse> responses = matchPage.getContent().stream()
+                .map(m -> mapToResponseWithUserMap(m, userMap))
+                .toList();
+
+        return new com.tictactore.dto.PagedResponse<>(
+                responses,
+                matchPage.getNumber(),
+                matchPage.getSize(),
+                matchPage.getTotalElements(),
+                matchPage.getTotalPages()
+        );
+    }
+
     private String getDisplayName(User user) {
         if (user == null) return null;
+        if (user.getNickname() != null && user.getNickname().startsWith("ex-player-")) {
+            return "Retired Player";
+        }
         String name = user.getNickname();
         if (name == null || name.isBlank()) {
             name = user.getEmail();
@@ -445,6 +507,9 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private String getAvatar(User user) {
+        if (user != null && user.getNickname() != null && user.getNickname().startsWith("ex-player-")) {
+            return null;
+        }
         return user != null ? user.getAvatar() : null;
     }
 
@@ -453,7 +518,7 @@ public class MatchServiceImpl implements MatchService {
         return userRepository.findById(userId)
                 .map(u -> {
                     if (u.getNickname() != null && u.getNickname().startsWith("ex-player-")) {
-                        return "A retired player";
+                        return "Retired Player";
                     }
                     return u.getNickname() != null ? u.getNickname() : "A player";
                 })

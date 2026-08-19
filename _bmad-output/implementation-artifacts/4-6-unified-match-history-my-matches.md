@@ -4,7 +4,7 @@ baseline_commit: 7381afc
 
 # Story 4.6: Unified Match History (My Matches)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -40,37 +40,37 @@ so that I can track my historical performance, review pending confirmations, and
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend Domain & API Specifications (AC1, AC2, AC3)
-  - [ ] Add `GET /api/v1/matches/history` endpoint to `com.tictactore.controller.MatchController`.
-  - [ ] Support query parameters: `status` (optional string: `CONFIRMED`, `PENDING`, `ALL`, default `CONFIRMED`), `playerId` (optional UUID to filter by opponent or teammate), `ruleConfigId` (optional UUID), `matchType` (optional string: `1v1`, `2v2`), `page` (int, default 0), and `size` (int, default 10).
-  - [ ] Extract authenticated user via `@AuthenticationPrincipal User principal` (`AD-05`) and return `ResponseEntity<PagedResponse<MatchResponse>>`.
-  - [ ] Ensure safe display name resolution for deleted/retired players via `resolveDisplayName` (`AD-04`).
-- [ ] Task 2: Backend Repository & Service Layer (AC1, AC2)
-  - [ ] Implement paginated query in `com.tictactore.repository.MatchRepository` using `Pageable` and `JOIN FETCH m.games` to fetch matches where current user participated (as `teamAAttackerId`, `teamADefenderId`, `teamBAttackerId`, `teamBDefenderId`, or `creatorId`).
-  - [ ] Enforce `AD-02` (Isolated Verification Pipeline): filter by `status IN ('CONFIRMED', 'PUBLISHED')` for Confirmed history and `status = 'PENDING'` for Pending history.
-  - [ ] Add `PagedResponse<MatchResponse> getMatchHistory(UUID currentUserId, String status, UUID filterPlayerId, UUID ruleConfigId, String matchType, int page, int size)` to `MatchService` and `MatchServiceImpl`.
-- [ ] Task 3: Frontend Service & Pinia Store (AC1, AC2, AC4)
-  - [ ] Create or update `frontend/src/services/matchService.ts` with `getMatchHistory(params)` supporting `AbortSignal`.
-  - [ ] Create `frontend/src/features/match/stores/useMatchHistoryStore.ts` managing:
+- [x] Task 1: Backend Domain & API Specifications (AC1, AC2, AC3)
+  - [x] Add `GET /api/v1/matches/history` endpoint to `com.tictactore.controller.MatchController`.
+  - [x] Support query parameters: `status` (optional string: `CONFIRMED`, `PENDING`, `ALL`, default `CONFIRMED`), `playerId` (optional UUID to filter by opponent or teammate), `ruleConfigId` (optional UUID), `matchType` (optional string: `1v1`, `2v2`), `page` (int, default 0), and `size` (int, default 10).
+  - [x] Extract authenticated user via `@AuthenticationPrincipal User principal` (`AD-05`) and return `ResponseEntity<PagedResponse<MatchResponse>>`.
+  - [x] Ensure safe display name resolution for deleted/retired players via `resolveDisplayName` (`AD-04`).
+- [x] Task 2: Backend Repository & Service Layer (AC1, AC2)
+  - [x] Implement paginated query in `com.tictactore.repository.MatchRepository` using `Pageable` and `JOIN FETCH m.games` to fetch matches where current user participated (as `teamAAttackerId`, `teamADefenderId`, `teamBAttackerId`, `teamBDefenderId`, or `creatorId`).
+  - [x] Enforce `AD-02` (Isolated Verification Pipeline): filter by `status IN ('CONFIRMED', 'PUBLISHED')` for Confirmed history and `status = 'PENDING'` for Pending history.
+  - [x] Add `PagedResponse<MatchResponse> getMatchHistory(UUID currentUserId, String status, UUID filterPlayerId, UUID ruleConfigId, String matchType, int page, int size)` to `MatchService` and `MatchServiceImpl`.
+- [x] Task 3: Frontend Service & Pinia Store (AC1, AC2, AC4)
+  - [x] Create or update `frontend/src/services/matchService.ts` with `getMatchHistory(params)` supporting `AbortSignal`.
+  - [x] Create `frontend/src/features/match/stores/useMatchHistoryStore.ts` managing:
     - State: `activeTab` ('confirmed' | 'pending'), `confirmedMatches`, `pendingMatches`, `pagination` (page, size, totalPages, totalElements), `filters` (playerId, matchType, ruleConfigId), `loading`, `error`, `demoMode`.
     - Actions: `fetchConfirmedHistory()`, `fetchPendingMatches()`, `setFilter()`, `resetFilters()`, `setTab()`, `setPage()`.
     - Handle search debounce and request cancellation via `AbortController`.
-  - [ ] Update `frontend/src/features/stats/utils/demoDataGenerator.ts` to implement `generateDemoMatchHistory()` returning realistic `PagedResponse<MatchResponse>`.
-- [ ] Task 4: Frontend UI Components & Design System Compliance (AC1, AC2, AC3, AC4)
-  - [ ] Create `frontend/src/features/match/views/MyMatchesView.vue` (main orchestrator view under 500 lines per `IP-04`) with tab navigation (`Confirmed` / `Pending`) and badge indicators.
-  - [ ] Create `frontend/src/features/match/components/MatchHistoryList.vue` handling pagination controls and empty states.
-  - [ ] Create `frontend/src/features/match/components/MatchCard.vue` rendering individual match items with win/loss indicators, scores, format tags, and avatar integration following the Clubhouse "No-Line" rule (`UX-DR3`) with `ch-` classes.
-  - [ ] Create `frontend/src/features/match/components/MatchFilterChips.vue` providing thumb-friendly chips for player, match type, and rule filtering.
-  - [ ] Integrate existing `PendingMatches.vue` into the Pending tab of `MyMatchesView.vue` without breaking existing confirmation/rejection timers and toast notifications.
-  - [ ] Add route `/matches` (and alias `/history`) in `frontend/src/router/index.ts` pointing to `MyMatchesView.vue`.
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
-- [ ] Task 5: Testing & Quality Verification
-  - [ ] Backend: Add unit and integration tests in `MatchControllerTest.java`, `MatchServiceTest.java`, and `MatchRepositoryTest.java`.
-  - [ ] Backend ATDD: Implement `MatchHistoryATDDTest.java` verifying filtering, pagination, and status isolation.
-  - [ ] Frontend: Add component tests in `frontend/src/features/match/components/__tests__/MyMatchesView.spec.ts` and `MatchCard.spec.ts`.
-  - [ ] Frontend Store: Add unit tests in `frontend/src/features/match/stores/__tests__/useMatchHistoryStore.spec.ts`.
-  - [ ] E2E: Create Playwright test in `frontend/e2e/match-history.spec.ts` testing tab switching, filtering, and pagination.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure all checks pass.
+  - [x] Update `frontend/src/features/stats/utils/demoDataGenerator.ts` to implement `generateDemoMatchHistory()` returning realistic `PagedResponse<MatchResponse>`.
+- [x] Task 4: Frontend UI Components & Design System Compliance (AC1, AC2, AC3, AC4)
+  - [x] Create `frontend/src/features/match/views/MyMatchesView.vue` (main orchestrator view under 500 lines per `IP-04`) with tab navigation (`Confirmed` / `Pending`) and badge indicators.
+  - [x] Create `frontend/src/features/match/components/MatchHistoryList.vue` handling pagination controls and empty states.
+  - [x] Create `frontend/src/features/match/components/MatchCard.vue` rendering individual match items with win/loss indicators, scores, format tags, and avatar integration following the Clubhouse "No-Line" rule (`UX-DR3`) with `ch-` classes.
+  - [x] Create `frontend/src/features/match/components/MatchFilterChips.vue` providing thumb-friendly chips for player, match type, and rule filtering.
+  - [x] Integrate existing `PendingMatches.vue` into the Pending tab of `MyMatchesView.vue` without breaking existing confirmation/rejection timers and toast notifications.
+  - [x] Add route `/matches` (and alias `/history`) in `frontend/src/router/index.ts` pointing to `MyMatchesView.vue`.
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
+- [x] Task 5: Testing & Quality Verification
+  - [x] Backend: Add unit and integration tests in `MatchControllerTest.java`, `MatchServiceTest.java`, and `MatchRepositoryTest.java`.
+  - [x] Backend ATDD: Implement `MatchHistoryATDDTest.java` verifying filtering, pagination, and status isolation.
+  - [x] Frontend: Add component tests in `frontend/src/features/match/components/__tests__/MyMatchesView.spec.ts` and `MatchCard.spec.ts`.
+  - [x] Frontend Store: Add unit tests in `frontend/src/features/match/stores/__tests__/useMatchHistoryStore.spec.ts`.
+  - [x] E2E: Create Playwright test in `frontend/e2e/match-history.spec.ts` testing tab switching, filtering, and pagination.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure all checks pass.
 
 ## Dev Notes
 
@@ -139,10 +139,44 @@ so that I can track my historical performance, review pending confirmations, and
 
 ### Agent Model Used
 
-Gemini 3.7 Flash (High)
+Gemini 3.7 Flash (Medium)
 
 ### Debug Log References
 
+- Executed `./scripts/ci-local.sh` and verified backend unit/integration tests (`MatchHistoryATDDTest`, `MatchServiceGetMatchHistoryTest`, `MatchRepositoryTest`), frontend Vitest tests (`useMatchHistoryStore.spec.ts`, `MatchCard.spec.ts`, `MyMatchesView.spec.ts`), and Playwright E2E suite (`match-history.spec.ts`).
+
 ### Completion Notes List
 
+- Implemented `GET /api/v1/matches/history` endpoint in `MatchController` with support for `status`, `playerId`, `ruleConfigId`, `matchType`, `page`, and `size`.
+- Implemented `findMatchHistory` query in `MatchRepository` and `getMatchHistory` in `MatchService`/`MatchServiceImpl` with PII masking for retired players (`AD-04`).
+- Created `frontend/src/services/matchService.ts` and `frontend/src/features/match/stores/useMatchHistoryStore.ts` with pagination, filtering, AbortController request cancellation, and demo mode.
+- Created `MyMatchesView.vue`, `MatchHistoryList.vue`, `MatchCard.vue`, `MatchFilterChips.vue` complying with Clubhouse "No-Line" rule (`UX-DR3`) and full i18n support.
+- Updated `demoDataGenerator.ts` with `generateDemoMatchHistory()`.
+- Routed `/matches` and alias `/history` in `frontend/src/router/index.ts`.
+- Full test pass confirmed with `./scripts/ci-local.sh` (backend tests + frontend type-check + build + unit tests + Playwright E2E).
+
 ### File List
+
+- `src/main/java/com/tictactore/controller/MatchController.java`
+- `src/main/java/com/tictactore/service/MatchService.java`
+- `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`
+- `src/main/java/com/tictactore/repository/MatchRepository.java`
+- `src/test/java/com/tictactore/controller/MatchHistoryATDDTest.java`
+- `src/test/java/com/tictactore/service/MatchServiceGetMatchHistoryTest.java`
+- `src/test/java/com/tictactore/repository/MatchRepositoryTest.java`
+- `frontend/src/services/matchService.ts`
+- `frontend/src/features/match/stores/useMatchHistoryStore.ts`
+- `frontend/src/features/match/views/MyMatchesView.vue`
+- `frontend/src/features/match/components/MatchHistoryList.vue`
+- `frontend/src/features/match/components/MatchCard.vue`
+- `frontend/src/features/match/components/MatchFilterChips.vue`
+- `frontend/src/features/stats/utils/demoDataGenerator.ts`
+- `frontend/src/router/index.ts`
+- `frontend/src/locales/en.json`
+- `frontend/src/locales/de.json`
+- `frontend/tests/unit/useMatchHistoryStore.spec.ts`
+- `frontend/src/features/match/components/__tests__/MatchCard.spec.ts`
+- `frontend/src/features/match/components/__tests__/MyMatchesView.spec.ts`
+- `frontend/e2e/match-history.spec.ts`
+- `_bmad-output/implementation-artifacts/4-6-unified-match-history-my-matches.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

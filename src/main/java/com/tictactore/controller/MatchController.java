@@ -4,6 +4,7 @@ import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.dto.MatchConfirmationRequest;
 import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.dto.MatchResponse;
+import com.tictactore.dto.PagedResponse;
 import com.tictactore.dto.PendingMatchesResponse;
 import com.tictactore.model.User;
 import com.tictactore.service.MatchService;
@@ -80,6 +81,25 @@ public class MatchController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         MatchResponse response = matchService.rejectMatch(id, principal.getId(), request, idempotencyHeader);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<PagedResponse<MatchResponse>> getMatchHistory(
+            @RequestParam(value = "status", required = false, defaultValue = "CONFIRMED") String status,
+            @RequestParam(value = "playerId", required = false) UUID playerId,
+            @RequestParam(value = "ruleConfigId", required = false) UUID ruleConfigId,
+            @RequestParam(value = "matchType", required = false) String matchType,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                principal.getId(), status, playerId, ruleConfigId, matchType, page, size
+        );
         return ResponseEntity.ok(response);
     }
 

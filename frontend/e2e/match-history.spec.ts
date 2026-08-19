@@ -21,7 +21,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] should display Unified Match History view with Confirmed tab by default, showing match cards with scores and outcome badges', async ({ page }) => {
+  test('[P0] should display Unified Match History view with Confirmed tab by default, showing match cards with scores and outcome badges', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/matches/history?status=CONFIRMED*', async (route) => {
@@ -62,7 +62,7 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
     await expect(page.getByText('10 - 6')).toBeVisible();
   });
 
-  test.skip('[P1] should switch to Pending tab and display pending confirmation cards with action buttons', async ({ page }) => {
+  test('[P1] should switch to Pending tab and display pending confirmation cards with action buttons', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/matches/pending*', async (route) => {
@@ -94,7 +94,7 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
     await expect(page.getByRole('button', { name: /Reject|Ablehnen/i })).toBeVisible();
   });
 
-  test.skip('[P1] should filter match list by match type using thumb-friendly filter chips', async ({ page }) => {
+  test('[P1] should filter match list by match type using thumb-friendly filter chips', async ({ page }) => {
     await loginUser(page);
 
     let requestedQuery = '';
@@ -125,7 +125,7 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
     }
   });
 
-  test.skip('[P1] should display empty states when there are 0 matches', async ({ page }) => {
+  test('[P1] should display empty states when there are 0 matches', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/matches/history*', async (route) => {
@@ -152,7 +152,7 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
     await expect(recordCta).toHaveAttribute('href', '/matches/new');
   });
 
-  test.skip('[P2] should comply with Clubhouse No-Line rule (UX-DR3)', async ({ page }) => {
+  test('[P2] should comply with Clubhouse No-Line rule (UX-DR3)', async ({ page }) => {
     await loginUser(page);
     await page.goto('/matches');
 
