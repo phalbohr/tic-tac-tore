@@ -1,4 +1,4 @@
-import type { PlayerStats, TeamPairStats, Page } from '@/services/statisticsService'
+import type { PlayerStats, TeamPairStats, Page, H2HStatsResponse } from '@/services/statisticsService'
 
 export function generateDemoData(): PlayerStats {
   return {
@@ -86,3 +86,28 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
     number: 0
   }
 }
+
+export function generateDemoH2HStats(opponentId?: string): H2HStatsResponse {
+  return {
+    opponent: {
+      id: opponentId || 'demo-opp-1',
+      nickname: 'ShadowStriker',
+      avatarUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=ShadowStriker',
+    },
+    matches: {
+      with: { matches: 6, wins: 4, losses: 2, draws: 0, winRate: 66.7 },
+      vs: { matches: 12, wins: 7, losses: 5, draws: 0, winRate: 58.3 },
+    },
+    games: {
+      with: { gamesWon: 14, gamesLost: 8, totalGames: 22, winRate: 63.6 },
+      vs: { gamesWon: 25, gamesLost: 18, totalGames: 43, winRate: 58.1 },
+    },
+    goals: {
+      attackerVsDefender: { scored: 18, conceded: 9 },
+      attackerVsAttacker: { scored: 12, conceded: 15 },
+      defenderVsAttacker: { scored: 9, conceded: 16 },
+      defenderVsDefender: { scored: 6, conceded: 4 },
+    },
+  }
+}
+

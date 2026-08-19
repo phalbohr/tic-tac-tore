@@ -1,8 +1,9 @@
 package com.tictactore.service.impl;
 
-import com.tictactore.dto.PagedResponse;
-import com.tictactore.dto.TeamPairStatsResponse;
-import com.tictactore.dto.TimePeriod;
+import com.tictactore.dto.*;
+import com.tictactore.model.Game;
+import com.tictactore.model.Match;
+import com.tictactore.model.Position;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.UserRepository;
@@ -66,6 +67,188 @@ public class StatisticsServiceImpl implements StatisticsService {
                 projectionsPage.getTotalElements(),
                 projectionsPage.getTotalPages()
         );
+    }
+
+    @Override
+    public H2HStatsResponse getHeadToHeadStats(
+            UUID playerId,
+            UUID opponentId,
+            TimePeriod period,
+            UUID ruleConfigId,
+            String matchType
+    ) {
+        if (playerId == null || opponentId == null) {
+            throw new IllegalArgumentException("Player ID and Opponent ID must not be null");
+        }
+
+        User opponent = userRepository.findById(opponentId).orElse(null);
+        String opponentNickname = resolveDisplayName(opponent);
+        String opponentAvatar = opponent != null ? opponent.getAvatar() : null;
+        PlayerSummaryDto opponentSummary = new PlayerSummaryDto(opponentId, opponentNickname, opponentAvatar);
+
+        Instant startDate = period != null ? period.getStartDate() : null;
+        List<Match> matches = matchRepository.findHeadToHeadMatches(playerId, opponentId, startDate, ruleConfigId, matchType);
+
+        long withMatches = 0;
+        long withWins = 0;
+        long withLosses = 0;
+        long withDraws = 0;
+
+        long vsMatches = 0;
+        long vsWins = 0;
+        long vsLosses = 0;
+        long vsDraws = 0;
+
+        long withGamesWon = 0;
+        long withGamesLost = 0;
+        long withTotalGames = 0;
+
+        long vsGamesWon = 0;
+        long vsGamesLost = 0;
+        long vsTotalGames = 0;
+
+        long aVsDScored = 0;
+        long aVsDConceded = 0;
+
+        long aVsAScored = 0;
+        long aVsAConceded = 0;
+
+        long dVsAScored = 0;
+        long dVsAConceded = 0;
+
+        long dVsDScored = 0;
+        long dVsDConceded = 0;
+
+        for (Match match : matches) {
+            boolean playerInTeamA = playerId.equals(match.getTeamAAttackerId()) || playerId.equals(match.getTeamADefenderId());
+            boolean playerInTeamB = playerId.equals(match.getTeamBAttackerId()) || playerId.equals(match.getTeamBDefenderId());
+            boolean oppInTeamA = opponentId.equals(match.getTeamAAttackerId()) || opponentId.equals(match.getTeamADefenderId());
+            boolean oppInTeamB = opponentId.equals(match.getTeamBAttackerId()) || opponentId.equals(match.getTeamBDefenderId());
+
+            if ((playerInTeamA && oppInTeamA) || (playerInTeamB && oppInTeamB)) {
+                // "With" - Teammates in 2v2
+                boolean isTeamA = playerInTeamA;
+                int teamAGames = 0;
+                int teamBGames = 0;
+
+                if (match.getGames() != null) {
+                    for (Game game : match.getGames()) {
+                        withTotalGames++;
+                        if (game.getTeamAScore() > game.getTeamBScore()) {
+                            teamAGames++;
+                            if (isTeamA) withGamesWon++; else withGamesLost++;
+                        } else if (game.getTeamBScore() > game.getTeamAScore()) {
+                            teamBGames++;
+                            if (!isTeamA) withGamesWon++; else withGamesLost++;
+                        }
+                    }
+                }
+
+                withMatches++;
+                int myTeamGames = isTeamA ? teamAGames : teamBGames;
+                int oppTeamGames = isTeamA ? teamBGames : teamAGames;
+                if (myTeamGames > oppTeamGames) {
+                    withWins++;
+                } else if (oppTeamGames > myTeamGames) {
+                    withLosses++;
+                } else {
+                    withDraws++;
+                }
+            } else if ((playerInTeamA && oppInTeamB) || (playerInTeamB && oppInTeamA)) {
+                // "Vs" - Opponents in 1v1 or 2v2
+                boolean isTeamA = playerInTeamA;
+                int teamAGames = 0;
+                int teamBGames = 0;
+
+                if (match.getGames() != null) {
+                    for (Game game : match.getGames()) {
+                        vsTotalGames++;
+                        int myGameScore = isTeamA ? game.getTeamAScore() : game.getTeamBScore();
+                        int oppGameScore = isTeamA ? game.getTeamBScore() : game.getTeamAScore();
+
+                        if (myGameScore > oppGameScore) {
+                            vsGamesWon++;
+                            if (isTeamA) teamAGames++; else teamBGames++;
+                        } else if (oppGameScore > myGameScore) {
+                            vsGamesLost++;
+                            if (isTeamA) teamBGames++; else teamAGames++;
+                        }
+
+                        Position playerPos = getPlayerPositionInGame(game, match, playerId);
+                        Position oppPos = getPlayerPositionInGame(game, match, opponentId);
+
+                        if (playerPos == Position.ATTACKER && oppPos == Position.DEFENDER) {
+                            aVsDScored += myGameScore;
+                            aVsDConceded += oppGameScore;
+                        } else if (playerPos == Position.ATTACKER && oppPos == Position.ATTACKER) {
+                            aVsAScored += myGameScore;
+                            aVsAConceded += oppGameScore;
+                        } else if (playerPos == Position.DEFENDER && oppPos == Position.ATTACKER) {
+                            dVsAScored += myGameScore;
+                            dVsAConceded += oppGameScore;
+                        } else if (playerPos == Position.DEFENDER && oppPos == Position.DEFENDER) {
+                            dVsDScored += myGameScore;
+                            dVsDConceded += oppGameScore;
+                        }
+                    }
+                }
+
+                vsMatches++;
+                int myTeamGames = isTeamA ? teamAGames : teamBGames;
+                int oppTeamGames = isTeamA ? teamBGames : teamAGames;
+                if (myTeamGames > oppTeamGames) {
+                    vsWins++;
+                } else if (oppTeamGames > myTeamGames) {
+                    vsLosses++;
+                } else {
+                    vsDraws++;
+                }
+            }
+        }
+
+        double withMatchWinRate = withMatches > 0 ? roundOneDecimal((withWins * 100.0) / withMatches) : 0.0;
+        double vsMatchWinRate = vsMatches > 0 ? roundOneDecimal((vsWins * 100.0) / vsMatches) : 0.0;
+        H2HMatchTableDto matchTable = new H2HMatchTableDto(
+                new H2HMatchStatsDto(withMatches, withWins, withLosses, withDraws, withMatchWinRate),
+                new H2HMatchStatsDto(vsMatches, vsWins, vsLosses, vsDraws, vsMatchWinRate)
+        );
+
+        double withGameWinRate = withTotalGames > 0 ? roundOneDecimal((withGamesWon * 100.0) / withTotalGames) : 0.0;
+        double vsGameWinRate = vsTotalGames > 0 ? roundOneDecimal((vsGamesWon * 100.0) / vsTotalGames) : 0.0;
+        H2HGameTableDto gameTable = new H2HGameTableDto(
+                new H2HGameStatsDto(withGamesWon, withGamesLost, withTotalGames, withGameWinRate),
+                new H2HGameStatsDto(vsGamesWon, vsGamesLost, vsTotalGames, vsGameWinRate)
+        );
+
+        H2HGoalStatsDto goalStats = new H2HGoalStatsDto(
+                new PositionalGoalMatrixDto(aVsDScored, aVsDConceded),
+                new PositionalGoalMatrixDto(aVsAScored, aVsAConceded),
+                new PositionalGoalMatrixDto(dVsAScored, dVsAConceded),
+                new PositionalGoalMatrixDto(dVsDScored, dVsDConceded)
+        );
+
+        return new H2HStatsResponse(opponentSummary, matchTable, gameTable, goalStats);
+    }
+
+    private Position getPlayerPositionInGame(Game game, Match match, UUID userId) {
+        if (userId == null) return Position.ATTACKER;
+        if (userId.equals(game.getTeamAAttackerId()) || userId.equals(game.getTeamBAttackerId())) {
+            return Position.ATTACKER;
+        }
+        if (userId.equals(game.getTeamADefenderId()) || userId.equals(game.getTeamBDefenderId())) {
+            return Position.DEFENDER;
+        }
+        if (userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamBAttackerId())) {
+            return Position.ATTACKER;
+        }
+        if (userId.equals(match.getTeamADefenderId()) || userId.equals(match.getTeamBDefenderId())) {
+            return Position.DEFENDER;
+        }
+        return Position.ATTACKER;
+    }
+
+    private double roundOneDecimal(double value) {
+        return Math.round(value * 10.0) / 10.0;
     }
 
     private Map<UUID, User> resolveUsers(List<TeamPairStatsProjection> projections) {

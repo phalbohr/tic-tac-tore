@@ -5,6 +5,16 @@ import StatsDashboard from '@/features/stats/components/StatsDashboard.vue';
 import { useStatsStore } from '@/features/stats/stores/useStatsStore';
 import type { PlayerStats } from '@/services/statisticsService';
 
+vi.mock('vue-i18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-i18n')>()
+  return {
+    ...actual,
+    useI18n: () => ({
+      t: (key: string, fallback?: string) => fallback || key
+    })
+  }
+})
+
 type PositionalStats = Pick<PlayerStats, 'overall' | 'attacker' | 'defender'>;
 
 describe('[Story 4.3] StatsDashboard.vue (ATDD Red Phase)', () => {

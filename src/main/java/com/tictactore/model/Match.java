@@ -71,6 +71,9 @@ public class Match {
     @Column(name = "confirmed_by_opponent_ids")
     private String confirmedByOpponentIds;
 
+    @Column(name = "rule_config_id")
+    private UUID ruleConfigId;
+
     @Column(name = "cooldown_expires_at")
     private Instant cooldownExpiresAt;
 

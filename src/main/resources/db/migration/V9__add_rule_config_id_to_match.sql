@@ -1,0 +1,1 @@
+ALTER TABLE "match" ADD COLUMN IF NOT EXISTS rule_config_id UUID;
