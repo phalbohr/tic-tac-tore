@@ -45,9 +45,4 @@ graphify-out/
 ### BMAD ###
 _bmad-output/implementation-artifacts/current_diff.diff
 test-results/
-.bmad-loop/runs/
-.bmad-loop/cache/
-.bmad-loop/archive/
-.bmad-loop/policy.toml
-.bmad-loop/marker-guard.log
 _bmad/render/
