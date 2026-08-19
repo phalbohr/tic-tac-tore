@@ -146,7 +146,7 @@ jobs:
 
       - name: Install Playwright browsers
         working-directory: frontend
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium
 
       - name: Run E2E tests
         working-directory: frontend
