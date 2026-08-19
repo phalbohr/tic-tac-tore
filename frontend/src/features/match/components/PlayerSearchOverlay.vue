@@ -52,7 +52,6 @@ const displayResults = computed(() => {
 function handleSelect(player: PlayerDto) {
   if (props.customSelect) {
     emit('select', player)
-    store.closeSearch()
     emit('close')
     return
   }

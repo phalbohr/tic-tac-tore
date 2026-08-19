@@ -23,7 +23,9 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
   const activeTab = ref<'confirmed' | 'pending'>('confirmed')
   const confirmedMatches = ref<MatchResponse[]>([])
   const pendingMatches = ref<any[]>([])
-  const loading = ref(false)
+  const isConfirmedLoading = ref(false)
+  const isPendingLoading = ref(false)
+  const loading = computed(() => (activeTab.value === 'confirmed' ? isConfirmedLoading.value : isPendingLoading.value))
   const error = ref<string | null>(null)
   const isDemoMode = ref(false)
 
@@ -42,20 +44,21 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     ruleConfigId: null
   })
 
-  let currentAbortController: AbortController | null = null
+  let confirmedAbortController: AbortController | null = null
+  let pendingAbortController: AbortController | null = null
 
   const hasFilters = computed(() => {
     return !!(filters.value.playerId || filters.value.matchType || filters.value.ruleConfigId)
   })
 
   async function fetchConfirmedHistory(): Promise<void> {
-    if (currentAbortController) {
-      currentAbortController.abort()
+    if (confirmedAbortController) {
+      confirmedAbortController.abort()
     }
     const abortController = new AbortController()
-    currentAbortController = abortController
+    confirmedAbortController = abortController
 
-    loading.value = true
+    isConfirmedLoading.value = true
     error.value = null
 
     try {
@@ -104,29 +107,46 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
       error.value = err.message || 'Failed to load match history'
       confirmedMatches.value = []
     } finally {
-      if (currentAbortController === abortController) {
-        loading.value = false
+      if (confirmedAbortController === abortController) {
+        isConfirmedLoading.value = false
       }
     }
   }
 
   async function fetchPendingMatches(): Promise<void> {
-    loading.value = true
+    if (pendingAbortController) {
+      pendingAbortController.abort()
+    }
+    const abortController = new AbortController()
+    pendingAbortController = abortController
+
+    isPendingLoading.value = true
     error.value = null
     try {
-      const res = await fetch('/api/v1/matches/pending')
+      const res = await fetch('/api/v1/matches/pending', {
+        signal: abortController.signal
+      })
+      if (abortController.signal.aborted) {
+        return
+      }
       if (res.ok) {
         const data = await res.json()
+        if (abortController.signal.aborted) return
         pendingMatches.value = data.matches || []
       } else {
         error.value = `Failed to load pending matches (${res.status})`
         pendingMatches.value = []
       }
     } catch (err: any) {
+      if (err.name === 'AbortError' || abortController.signal.aborted) {
+        return
+      }
       error.value = err.message || 'Failed to load pending matches'
       pendingMatches.value = []
     } finally {
-      loading.value = false
+      if (pendingAbortController === abortController) {
+        isPendingLoading.value = false
+      }
     }
   }
 
@@ -149,8 +169,14 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
   function setTab(tab: 'confirmed' | 'pending'): void {
     activeTab.value = tab
     if (tab === 'confirmed') {
+      if (pendingAbortController) {
+        pendingAbortController.abort()
+      }
       fetchConfirmedHistory()
     } else {
+      if (confirmedAbortController) {
+        confirmedAbortController.abort()
+      }
       fetchPendingMatches()
     }
   }
@@ -176,6 +202,8 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     activeTab,
     confirmedMatches,
     pendingMatches,
+    isConfirmedLoading,
+    isPendingLoading,
     loading,
     error,
     isDemoMode,

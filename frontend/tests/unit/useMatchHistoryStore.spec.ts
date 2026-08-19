@@ -86,4 +86,47 @@ describe('[Story 4.6] useMatchHistoryStore - Unified Match History', () => {
     expect(store.pendingMatches).toHaveLength(0)
     expect(store.loading).toBe(false)
   })
+
+  it('[P1] should isolate loading states between confirmed and pending tabs', async () => {
+    const store = useMatchHistoryStore()
+    let resolveConfirmed: (val: any) => void
+    const confirmedPromise = new Promise((resolve) => {
+      resolveConfirmed = resolve
+    })
+    vi.spyOn(matchService, 'getMatchHistory').mockReturnValue(confirmedPromise as any)
+
+    // Start fetching confirmed history
+    const fetchPromise = store.fetchConfirmedHistory()
+    expect(store.isConfirmedLoading).toBe(true)
+    expect(store.isPendingLoading).toBe(false)
+    expect(store.loading).toBe(true)
+
+    // Switch to pending tab
+    store.activeTab = 'pending'
+    expect(store.loading).toBe(false)
+    expect(store.isConfirmedLoading).toBe(true)
+
+    // Finish confirmed history
+    resolveConfirmed!({ content: [], totalElements: 0, totalPages: 0, page: 0, size: 10 })
+    await fetchPromise
+    expect(store.isConfirmedLoading).toBe(false)
+  })
+
+  it('[P1] should abort previous tab in-flight request when setTab is called', async () => {
+    const store = useMatchHistoryStore()
+    const abortSpy = vi.fn()
+    vi.spyOn(matchService, 'getMatchHistory').mockImplementation((params) => {
+      params?.signal?.addEventListener('abort', abortSpy)
+      return new Promise(() => {}) // never resolves
+    })
+
+    store.fetchConfirmedHistory()
+    expect(abortSpy).not.toHaveBeenCalled()
+
+    globalThis.fetch = vi.fn().mockReturnValue(new Promise(() => {}))
+    store.setTab('pending')
+
+    expect(abortSpy).toHaveBeenCalled()
+    expect(store.activeTab).toBe('pending')
+  })
 })

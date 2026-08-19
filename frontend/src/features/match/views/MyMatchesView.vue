@@ -55,17 +55,6 @@ watch(
   }
 )
 
-watch(
-  () => store.activeTab,
-  (newTab) => {
-    if (newTab === 'confirmed') {
-      store.fetchConfirmedHistory()
-    } else {
-      store.fetchPendingMatches()
-      pendingHelper.fetchPendingCount(true)
-    }
-  }
-)
 
 const authStore = useAuthStore()
 
@@ -88,6 +77,9 @@ onMounted(async () => {
 
 function handleTabChange(tab: 'confirmed' | 'pending') {
   store.setTab(tab)
+  if (tab === 'pending') {
+    pendingHelper.fetchPendingCount(true)
+  }
 }
 
 function handleConfirm(matchId: string, matchNumber: number) {
