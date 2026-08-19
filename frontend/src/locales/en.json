@@ -73,6 +73,8 @@
     "recordFirstMatch": "Record First Match",
     "toggleDemoData": "Toggle Demo Data",
     "demoDataActive": "Demo Data Active",
+    "exitDemo": "Exit Demo",
+    "demoDataNotice": "Viewing sample demo match history",
     "errorLoading": "Unable to load statistics."
   },
   "cabinet": {
@@ -186,6 +188,7 @@
       "all": "All",
       "matchType": "Match Type",
       "player": "Filter by Player",
+      "playerSelected": "Player Filtered",
       "clear": "Clear Filters"
     },
     "empty": {
@@ -199,7 +202,8 @@
     "outcome": {
       "win": "Win",
       "loss": "Loss",
-      "draw": "Draw"
+      "draw": "Draw",
+      "completed": "Completed"
     },
     "pagination": {
       "previous": "Previous",

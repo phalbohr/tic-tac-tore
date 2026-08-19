@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useMatchHistoryStore } from '../stores/useMatchHistoryStore'
 import { usePendingMatches } from '../composables/usePendingMatches'
 import { useMatchConfirmationStore } from '../stores/matchConfirmationStore'
+import { useAuthStore } from '@/stores/auth'
 import MatchFilterChips from '../components/MatchFilterChips.vue'
 import MatchHistoryList from '../components/MatchHistoryList.vue'
 import PendingMatches from '../components/PendingMatches.vue'
@@ -36,17 +37,27 @@ function syncFromQuery() {
   if (mType === '1v1' || mType === '2v2') {
     store.filters.matchType = mType
   }
+  const rId = route.query.ruleConfigId
+  if (typeof rId === 'string' && rId.trim()) {
+    store.filters.ruleConfigId = rId.trim()
+  }
 }
+
+watch(
+  () => [store.activeTab, store.filters.playerId, store.filters.matchType, store.filters.ruleConfigId],
+  ([tab, playerId, matchType, ruleConfigId]) => {
+    const query: Record<string, string> = { tab: tab as string }
+    if (playerId) query.playerId = playerId as string
+    if (matchType) query.matchType = matchType as string
+    if (ruleConfigId) query.ruleConfigId = ruleConfigId as string
+
+    router.replace({ query })
+  }
+)
 
 watch(
   () => store.activeTab,
   (newTab) => {
-    router.replace({
-      query: {
-        ...route.query,
-        tab: newTab,
-      },
-    })
     if (newTab === 'confirmed') {
       store.fetchConfirmedHistory()
     } else {
@@ -56,7 +67,16 @@ watch(
   }
 )
 
+const authStore = useAuthStore()
+
 onMounted(async () => {
+  if (authStore.isAuthenticated && !authStore.profile) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore
+    }
+  }
   syncFromQuery()
   if (store.activeTab === 'confirmed') {
     await store.fetchConfirmedHistory()
@@ -200,6 +220,26 @@ function handleUndo() {
 
     <!-- Pending Matches View -->
     <div v-else class="w-full flex flex-col gap-4">
+      <!-- Pending Error State -->
+      <div
+        v-if="store.error"
+        class="w-full p-4 rounded-2xl bg-error/10 border border-error/20 flex items-center justify-between text-xs text-error shadow-md"
+        data-testid="pending-error-state"
+      >
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">error</span>
+          <span>{{ store.error }}</span>
+        </div>
+        <button
+          type="button"
+          @click="store.fetchPendingMatches"
+          class="px-3 py-1.5 rounded-xl bg-error text-background font-bold uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+          data-testid="pending-retry-btn"
+        >
+          {{ t('common.retry', 'Retry') }}
+        </button>
+      </div>
+
       <template v-if="store.pendingMatches.length > 0">
         <PendingMatches
           :pending-matches="store.pendingMatches"

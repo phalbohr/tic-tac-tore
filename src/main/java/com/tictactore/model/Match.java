@@ -78,6 +78,7 @@ public class Match {
     private Instant cooldownExpiresAt;
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
     @Builder.Default
     private List<Game> games = new ArrayList<>();
 

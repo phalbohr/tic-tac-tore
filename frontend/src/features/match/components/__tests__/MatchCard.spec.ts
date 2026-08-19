@@ -90,4 +90,32 @@ describe('MatchCard.vue', () => {
     expect(wrapper.text()).toContain('Retired Player')
     expect(wrapper.text()).not.toContain('ex-player-9999')
   })
+
+  it('renders neutral COMPLETED badge when current user is not a participant (NONE)', () => {
+    const authStore = useAuthStore()
+    authStore.profile = { id: 'spectator-99', nickname: 'Spectator', avatar: 'avatar99' }
+
+    const wrapper = mount(MatchCard, {
+      props: {
+        match: sample1v1Match
+      }
+    })
+
+    expect(wrapper.find('[data-testid="outcome-badge-match-1"]').text()).toBe('Completed')
+  })
+
+  it('handles invalid date strings gracefully without throwing', () => {
+    const invalidDateMatch: MatchResponse = {
+      ...sample1v1Match,
+      createdAt: 'not-a-valid-date'
+    }
+
+    const wrapper = mount(MatchCard, {
+      props: {
+        match: invalidDateMatch
+      }
+    })
+
+    expect(wrapper.exists()).toBe(true)
+  })
 })

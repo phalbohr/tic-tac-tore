@@ -73,6 +73,8 @@
     "recordFirstMatch": "Erstes Spiel erfassen",
     "toggleDemoData": "Demo-Daten umschalten",
     "demoDataActive": "Demo-Daten aktiv",
+    "exitDemo": "Demo beenden",
+    "demoDataNotice": "Beispieldaten für Spielverlauf",
     "errorLoading": "Statistiken konnten nicht geladen werden."
   },
   "cabinet": {
@@ -186,6 +188,7 @@
       "all": "Alle",
       "matchType": "Spielmodus",
       "player": "Nach Spieler filtern",
+      "playerSelected": "Spieler ausgewählt",
       "clear": "Filter zurücksetzen"
     },
     "empty": {
@@ -199,7 +202,8 @@
     "outcome": {
       "win": "Sieg",
       "loss": "Niederlage",
-      "draw": "Unentschieden"
+      "draw": "Unentschieden",
+      "completed": "Abgeschlossen"
     },
     "pagination": {
       "previous": "Zurück",

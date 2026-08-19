@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getMatchHistory, type MatchResponse } from '@/services/matchService'
 import { generateDemoMatchHistory } from '@/features/stats/utils/demoDataGenerator'
+import { useAuthStore } from '@/stores/auth'
 
 export interface MatchHistoryFilters {
   playerId: string | null
@@ -51,14 +52,16 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     if (currentAbortController) {
       currentAbortController.abort()
     }
-    currentAbortController = new AbortController()
+    const abortController = new AbortController()
+    currentAbortController = abortController
 
     loading.value = true
     error.value = null
 
     try {
       if (isDemoMode.value) {
-        const demo = generateDemoMatchHistory()
+        const authStore = useAuthStore()
+        const demo = generateDemoMatchHistory(authStore.profile ? { id: authStore.profile.id, nickname: authStore.profile.nickname } : undefined)
         confirmedMatches.value = demo.content
         pagination.value = {
           page: demo.page,
@@ -68,7 +71,6 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
           first: demo.first ?? true,
           last: demo.last ?? true
         }
-        loading.value = false
         return
       }
 
@@ -79,8 +81,12 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
         ruleConfigId: filters.value.ruleConfigId,
         page: pagination.value.page,
         size: pagination.value.size,
-        signal: currentAbortController.signal
+        signal: abortController.signal
       })
+
+      if (abortController.signal.aborted) {
+        return
+      }
 
       confirmedMatches.value = res.content || []
       pagination.value = {
@@ -92,13 +98,15 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
         last: res.last ?? ((res.page ?? 0) >= (res.totalPages ?? 1) - 1)
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === 'AbortError' || abortController.signal.aborted) {
         return
       }
       error.value = err.message || 'Failed to load match history'
       confirmedMatches.value = []
     } finally {
-      loading.value = false
+      if (currentAbortController === abortController) {
+        loading.value = false
+      }
     }
   }
 
@@ -110,6 +118,9 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
       if (res.ok) {
         const data = await res.json()
         pendingMatches.value = data.matches || []
+      } else {
+        error.value = `Failed to load pending matches (${res.status})`
+        pendingMatches.value = []
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to load pending matches'

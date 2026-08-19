@@ -22,9 +22,9 @@ async function loginUser(page: Page) {
 test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (ATDD)', () => {
 
   test('[P0] should display Unified Match History view with Confirmed tab by default, showing match cards with scores and outcome badges', async ({ page }) => {
-    await loginUser(page);
+    const nickname = await loginUser(page);
 
-    await page.route('**/api/v1/matches/history?status=CONFIRMED*', async (route) => {
+    await page.route('**/api/v1/matches/history*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -34,8 +34,8 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
               id: 'match-101',
               matchType: '1v1',
               status: 'CONFIRMED',
-              teamAAttackerId: 'user-me',
-              teamBAttackerId: 'user-opp-1',
+              teamAAttackerNickname: nickname,
+              teamBAttackerNickname: 'Opponent1',
               games: [{ teamAScore: 10, teamBScore: 6 }, { teamAScore: 10, teamBScore: 8 }],
               createdAt: new Date().toISOString(),
             }
@@ -118,11 +118,10 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
     await page.goto('/matches');
 
     // Click 2v2 filter chip
-    const filter2v2 = page.getByRole('button', { name: /2v2/i });
-    if (await filter2v2.isVisible()) {
-      await filter2v2.click();
-      expect(requestedQuery).toContain('matchType=2v2');
-    }
+    const filter2v2 = page.getByRole('button', { name: '2v2' });
+    await expect(filter2v2).toBeVisible();
+    await filter2v2.click();
+    await expect.poll(() => requestedQuery).toContain('matchType=2v2');
   });
 
   test('[P1] should display empty states when there are 0 matches', async ({ page }) => {
@@ -158,9 +157,8 @@ test.describe('[Story 4.6] Unified Match History (My Matches) E2E User Journey (
 
     // Ensure list container does not have hard border dividers
     const listContainer = page.locator('.match-history-list, [data-testid="match-history-list"]').first();
-    if (await listContainer.isVisible()) {
-      const borderTopWidth = await listContainer.evaluate(el => window.getComputedStyle(el).borderTopWidth);
-      expect(borderTopWidth).not.toBe('1px solid');
-    }
+    await expect(listContainer).toBeVisible();
+    const borderTopWidth = await listContainer.evaluate(el => window.getComputedStyle(el).borderTopWidth);
+    expect(borderTopWidth).toBe('0px');
   });
 });

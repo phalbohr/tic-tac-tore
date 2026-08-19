@@ -112,19 +112,22 @@ export function generateDemoH2HStats(opponentId?: string): H2HStatsResponse {
   }
 }
 
-export function generateDemoMatchHistory(): PagedResponse<MatchResponse> {
+export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?: string }): PagedResponse<MatchResponse> {
+  const myId = currentUser?.id || 'demo-user-123'
+  const myNick = currentUser?.nickname || 'Demo Player'
+
   const content: MatchResponse[] = [
     {
       id: 'demo-match-1',
-      creatorId: 'demo-user-123',
-      teamAAttackerId: 'demo-user-123',
+      creatorId: myId,
+      teamAAttackerId: myId,
       teamADefenderId: null,
       teamBAttackerId: 'demo-p1',
       teamBDefenderId: null,
       status: 'CONFIRMED',
       games: [{ teamAScore: 10, teamBScore: 7 }],
       createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      teamAAttackerNickname: 'Demo Player',
+      teamAAttackerNickname: myNick,
       teamBAttackerNickname: 'Alice',
       teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
       teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
@@ -133,18 +136,18 @@ export function generateDemoMatchHistory(): PagedResponse<MatchResponse> {
     {
       id: 'demo-match-2',
       creatorId: 'demo-p2',
-      teamAAttackerId: 'demo-user-123',
+      teamAAttackerId: myId,
       teamADefenderId: 'demo-p3',
       teamBAttackerId: 'demo-p2',
       teamBDefenderId: 'demo-p4',
       status: 'CONFIRMED',
       games: [
-        { teamAScore: 10, teamBScore: 8, teamAAttackerId: 'demo-user-123', teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
-        { teamAScore: 6, teamBScore: 10, teamAAttackerId: 'demo-user-123', teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
-        { teamAScore: 10, teamBScore: 5, teamAAttackerId: 'demo-user-123', teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' }
+        { teamAScore: 10, teamBScore: 8, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
+        { teamAScore: 6, teamBScore: 10, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
+        { teamAScore: 10, teamBScore: 5, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' }
       ],
       createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-      teamAAttackerNickname: 'Demo Player',
+      teamAAttackerNickname: myNick,
       teamADefenderNickname: 'Charlie',
       teamBAttackerNickname: 'Bob',
       teamBDefenderNickname: 'Diana',
@@ -159,13 +162,13 @@ export function generateDemoMatchHistory(): PagedResponse<MatchResponse> {
       creatorId: 'demo-p1',
       teamAAttackerId: 'demo-p1',
       teamADefenderId: null,
-      teamBAttackerId: 'demo-user-123',
+      teamBAttackerId: myId,
       teamBDefenderId: null,
       status: 'CONFIRMED',
       games: [{ teamAScore: 10, teamBScore: 4 }],
       createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
       teamAAttackerNickname: 'Alice',
-      teamBAttackerNickname: 'Demo Player',
+      teamBAttackerNickname: myNick,
       teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
       teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
       matchFormat: 'STANDARD'

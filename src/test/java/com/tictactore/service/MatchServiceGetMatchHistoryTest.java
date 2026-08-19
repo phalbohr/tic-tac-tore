@@ -133,4 +133,33 @@ class MatchServiceGetMatchHistoryTest {
         assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
         assertThat(response.content().get(0).teamBAttackerAvatar()).isNull();
     }
+
+    @Test
+    void shouldNeverLeakEmailWhenNicknameIsBlank_andNormalizeBlankMatchTypeToNull() {
+        UUID matchId = UUID.randomUUID();
+        Match match = Match.builder()
+                .id(matchId)
+                .creatorId(currentUserId)
+                .teamAAttackerId(currentUserId)
+                .teamBAttackerId(opponentId)
+                .status("CONFIRMED")
+                .createdAt(Instant.now())
+                .build();
+
+        Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
+        when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), eq(null), any()))
+                .thenReturn(page);
+
+        User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
+        User noNickUser = User.builder().id(opponentId).nickname("").email("secret_user@example.com").build();
+        when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, noNickUser));
+
+        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                currentUserId, "CONFIRMED", null, null, "   ", 0, 10
+        );
+
+        assertThat(response.content()).hasSize(1);
+        assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
+        assertThat(response.content().get(0).teamBAttackerNickname()).doesNotContain("secret_user@example.com");
+    }
 }

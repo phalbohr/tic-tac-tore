@@ -26,6 +26,46 @@ function enableDemoData() {
 
 <template>
   <div class="match-history-list w-full flex flex-col gap-4" data-testid="match-history-list">
+    <!-- Error State -->
+    <div
+      v-if="store.error"
+      class="w-full p-4 rounded-2xl bg-error/10 border border-error/20 flex items-center justify-between text-xs text-error shadow-md"
+      data-testid="history-error-state"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-base">error</span>
+        <span>{{ store.error }}</span>
+      </div>
+      <button
+        type="button"
+        @click="store.fetchConfirmedHistory"
+        class="px-3 py-1.5 rounded-xl bg-error text-background font-bold uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+        data-testid="history-retry-btn"
+      >
+        {{ t('common.retry', 'Retry') }}
+      </button>
+    </div>
+
+    <!-- Demo Mode Active Banner -->
+    <div
+      v-if="store.isDemoMode"
+      class="w-full flex items-center justify-between p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary shadow-sm"
+      data-testid="demo-mode-banner"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">info</span>
+        <span>{{ t('stats.demoDataNotice', 'Viewing sample demo match history') }}</span>
+      </div>
+      <button
+        type="button"
+        @click="store.toggleDemoMode(false)"
+        class="underline font-bold hover:opacity-80 cursor-pointer"
+        data-testid="exit-demo-mode-btn"
+      >
+        {{ t('stats.exitDemo', 'Exit Demo') }}
+      </button>
+    </div>
+
     <!-- Loading State -->
     <div v-if="store.loading" class="w-full flex flex-col gap-3 py-6 items-center justify-center text-on-surface-variant">
       <div class="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>

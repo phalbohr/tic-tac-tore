@@ -3,12 +3,19 @@ import { computed, watch, nextTick, ref } from 'vue'
 import { useMatchDraftStore, type PlayerDto } from '../stores/matchDraftStore'
 import AvatarBase from '@/components/AvatarBase.vue'
 
-const props = defineProps<{
-  isOpen: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean
+    customSelect?: boolean
+  }>(),
+  {
+    customSelect: false
+  }
+)
 
 const emit = defineEmits<{
   (e: 'close'): void
+  (e: 'select', player: PlayerDto): void
 }>()
 
 const store = useMatchDraftStore()
@@ -43,6 +50,12 @@ const displayResults = computed(() => {
 })
 
 function handleSelect(player: PlayerDto) {
+  if (props.customSelect) {
+    emit('select', player)
+    store.closeSearch()
+    emit('close')
+    return
+  }
   store.addPlayer(player.id)
   store.closeSearch()
   emit('close')

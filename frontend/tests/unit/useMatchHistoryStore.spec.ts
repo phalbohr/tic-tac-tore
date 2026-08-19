@@ -62,11 +62,28 @@ describe('[Story 4.6] useMatchHistoryStore - Unified Match History', () => {
     expect(store.filters.ruleConfigId).toBeNull()
   })
 
-  it('[P2] should generate realistic demo match history when demo mode is active or user has 0 matches', async () => {
+  it('[P2] should generate realistic demo match history when demo mode is active and allow exiting demo mode', async () => {
     const store = useMatchHistoryStore()
     store.enableDemoMode()
     await store.fetchConfirmedHistory()
     expect(store.confirmedMatches.length).toBeGreaterThan(0)
     expect(store.isDemoMode).toBe(true)
+
+    // Exit demo mode
+    store.toggleDemoMode(false)
+    expect(store.isDemoMode).toBe(false)
+  })
+
+  it('[P1] should handle HTTP errors in fetchPendingMatches gracefully', async () => {
+    const store = useMatchHistoryStore()
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500
+    })
+
+    await store.fetchPendingMatches()
+    expect(store.error).toContain('Failed to load pending matches')
+    expect(store.pendingMatches).toHaveLength(0)
+    expect(store.loading).toBe(false)
   })
 })

@@ -72,6 +72,21 @@ so that I can track my historical performance, review pending confirmations, and
   - [x] E2E: Create Playwright test in `frontend/e2e/match-history.spec.ts` testing tab switching, filtering, and pagination.
   - [x] Verification: Execute `./scripts/ci-local.sh` and ensure all checks pass.
 
+### Review Findings
+
+- [x] [Review][Patch] Player search overlay modifies Match Draft state instead of setting history filter [frontend/src/features/match/components/MatchFilterChips.vue:99]
+- [x] [Review][Patch] Missing Rule Template (ruleConfigId) filter control in UI and URL sync [frontend/src/features/match/components/MatchFilterChips.vue:24]
+- [x] [Review][Patch] MatchServiceImpl.java violates 500-line architectural constraint IP-04 [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:1]
+- [x] [Review][Patch] PII / Email leakage in MatchServiceImpl.java display name fallback AD-04 [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:504]
+- [x] [Review][Patch] @EntityGraph on collection fetch with Pageable causes in-memory pagination [src/main/java/com/tictactore/repository/MatchRepository.java:70]
+- [x] [Review][Patch] Incorrect WIN/LOSS outcome badge when userTeam is NONE in MatchCard.vue [frontend/src/features/match/components/MatchCard.vue:76]
+- [x] [Review][Patch] Aborted request resets loading to false while replacement request is pending [frontend/src/features/match/stores/useMatchHistoryStore.ts:101]
+- [x] [Review][Patch] Missing HTTP error handling in fetchPendingMatches and absent error UI state [frontend/src/features/match/stores/useMatchHistoryStore.ts:109]
+- [x] [Review][Patch] Irreversible demo mode trap and hardcoded demo IDs in demoDataGenerator.ts [frontend/src/features/match/components/MatchHistoryList.vue:92]
+- [x] [Review][Patch] Untranslated match format tags and unguarded date formatting in MatchCard.vue [frontend/src/features/match/components/MatchCard.vue:113]
+- [x] [Review][Patch] Flawed assertions (if isVisible(), borderTopWidth) and mock DTO mismatches in E2E tests [frontend/e2e/match-history.spec.ts:122]
+- [x] [Review][Patch] Empty or blank matchType string is not normalized to null [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:457]
+
 ## Dev Notes
 
 ### Architecture & Implementation Guardrails
@@ -148,18 +163,29 @@ Gemini 3.7 Flash (Medium)
 ### Completion Notes List
 
 - Implemented `GET /api/v1/matches/history` endpoint in `MatchController` with support for `status`, `playerId`, `ruleConfigId`, `matchType`, `page`, and `size`.
-- Implemented `findMatchHistory` query in `MatchRepository` and `getMatchHistory` in `MatchService`/`MatchServiceImpl` with PII masking for retired players (`AD-04`).
-- Created `frontend/src/services/matchService.ts` and `frontend/src/features/match/stores/useMatchHistoryStore.ts` with pagination, filtering, AbortController request cancellation, and demo mode.
-- Created `MyMatchesView.vue`, `MatchHistoryList.vue`, `MatchCard.vue`, `MatchFilterChips.vue` complying with Clubhouse "No-Line" rule (`UX-DR3`) and full i18n support.
-- Updated `demoDataGenerator.ts` with `generateDemoMatchHistory()`.
-- Routed `/matches` and alias `/history` in `frontend/src/router/index.ts`.
-- Full test pass confirmed with `./scripts/ci-local.sh` (backend tests + frontend type-check + build + unit tests + Playwright E2E).
+- Implemented `findMatchHistory` query in `MatchRepository` and `getMatchHistory` in `MatchService`/`MatchServiceImpl`.
+- Resolved all 12 code review findings:
+  1. Isolated player search in `MatchFilterChips.vue` with `customSelect` mode on `PlayerSearchOverlay.vue` avoiding draft store pollution.
+  2. Integrated rule config chips (`useRuleConfigStore`) and synchronized `ruleConfigId` in URL query.
+  3. Extracted `MatchResponseMapper.java` to reduce `MatchServiceImpl.java` to 462 lines (< 500 lines constraint `IP-04`).
+  4. Resolved `AD-04` PII/email leak in fallback resolution by safely displaying "Retired Player".
+  5. Replaced collection `@EntityGraph` in `MatchRepository.java` with `@BatchSize(size = 50)` on `Match.games` to prevent in-memory pagination warnings.
+  6. Handled spectator/non-participant matches (`userTeam === 'NONE'`) in `MatchCard.vue` with neutral `COMPLETED` outcome badge.
+  7. Fixed race condition in `useMatchHistoryStore.ts` by validating `currentAbortController` before clearing loading flag.
+  8. Added error handling for `fetchPendingMatches()` and corresponding retry error banners in `MyMatchesView.vue` and `MatchHistoryList.vue`.
+  9. Added "Exit Demo" banner in `MatchHistoryList.vue` and dynamic current user awareness in `demoDataGenerator.ts`.
+  10. Added localization for `matchFormat` tags and safe Date parsing in `MatchCard.vue`.
+  11. Fixed E2E test assertions in `match-history.spec.ts` with direct unconditional assertions and valid CSS checks.
+  12. Normalized empty/blank `matchType` strings to `null` before passing to repository query.
+- Full local CI verification confirmed clean pass (`./scripts/ci-local.sh`: backend unit/integration tests, frontend type-check, frontend build, frontend unit tests, and Playwright E2E suite).
 
 ### File List
 
 - `src/main/java/com/tictactore/controller/MatchController.java`
 - `src/main/java/com/tictactore/service/MatchService.java`
 - `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`
+- `src/main/java/com/tictactore/service/operation/MatchResponseMapper.java`
+- `src/main/java/com/tictactore/model/Match.java`
 - `src/main/java/com/tictactore/repository/MatchRepository.java`
 - `src/test/java/com/tictactore/controller/MatchHistoryATDDTest.java`
 - `src/test/java/com/tictactore/service/MatchServiceGetMatchHistoryTest.java`
@@ -170,6 +196,7 @@ Gemini 3.7 Flash (Medium)
 - `frontend/src/features/match/components/MatchHistoryList.vue`
 - `frontend/src/features/match/components/MatchCard.vue`
 - `frontend/src/features/match/components/MatchFilterChips.vue`
+- `frontend/src/features/match/components/PlayerSearchOverlay.vue`
 - `frontend/src/features/stats/utils/demoDataGenerator.ts`
 - `frontend/src/router/index.ts`
 - `frontend/src/locales/en.json`

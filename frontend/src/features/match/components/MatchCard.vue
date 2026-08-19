@@ -45,7 +45,7 @@ const userTeam = computed<'A' | 'B' | 'NONE'>(() => {
   return 'NONE'
 })
 
-const matchOutcome = computed<'WIN' | 'LOSS' | 'DRAW'>(() => {
+const matchOutcome = computed<'WIN' | 'LOSS' | 'DRAW' | 'COMPLETED'>(() => {
   let teamAWins = 0
   let teamBWins = 0
   let teamATotal = 0
@@ -73,9 +73,8 @@ const matchOutcome = computed<'WIN' | 'LOSS' | 'DRAW'>(() => {
     return 'DRAW'
   }
 
-  if (teamAWon) return 'WIN'
-  if (teamBWon) return 'LOSS'
-  return 'DRAW'
+  // Non-participant or spectator viewing
+  return 'COMPLETED'
 })
 
 const outcomeBadgeClass = computed(() => {
@@ -85,6 +84,7 @@ const outcomeBadgeClass = computed(() => {
     case 'LOSS':
       return 'bg-red-500/20 text-red-400'
     case 'DRAW':
+    case 'COMPLETED':
     default:
       return 'bg-neutral-500/20 text-neutral-300'
   }
@@ -97,8 +97,10 @@ const outcomeLabel = computed(() => {
     case 'LOSS':
       return t('history.outcome.loss', 'Loss')
     case 'DRAW':
-    default:
       return t('history.outcome.draw', 'Draw')
+    case 'COMPLETED':
+    default:
+      return t('history.outcome.completed', 'Completed')
   }
 })
 
@@ -110,13 +112,18 @@ function formatPlayerName(nickname?: string | null): string {
 
 const formattedDate = computed(() => {
   if (!props.match.createdAt) return ''
-  const d = new Date(props.match.createdAt)
-  return d.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  try {
+    const d = new Date(props.match.createdAt)
+    if (isNaN(d.getTime())) return ''
+    return d.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return ''
+  }
 })
 
 const scoreSummary = computed(() => {
@@ -149,7 +156,7 @@ const scoreSummary = computed(() => {
           v-if="match.matchFormat"
           class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant uppercase"
         >
-          {{ match.matchFormat }}
+          {{ t(`history.format.${match.matchFormat.toLowerCase()}`, match.matchFormat) }}
         </span>
       </div>
       <span class="text-xs text-on-surface-variant font-medium">

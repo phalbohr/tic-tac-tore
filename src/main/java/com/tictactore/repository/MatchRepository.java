@@ -67,7 +67,6 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             @Param("matchType") String matchType
     );
 
-    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"games"})
     @Query("""
         SELECT m FROM Match m
         WHERE (
