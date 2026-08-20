@@ -19,47 +19,83 @@ so that the match protocol is accurate.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create Live Activity Timeline Component
+- [ ] Task 1: Extend State Management with Undo & Player Lookup (AC 1)
+  - [ ] In `frontend/src/stores/liveMatch.ts`, implement `canUndo` computed property returning `goals.value.length > 0`
+  - [ ] In `frontend/src/stores/liveMatch.ts`, implement `undoLastGoal()` action popping the most recent goal from `goals` (guarded against empty state)
+  - [ ] In `frontend/src/stores/liveMatch.ts`, implement helper/computed getter `getPlayerName(playerId: string): string` or `goalTimeline` getter returning enriched goal items `{ id, playerId, playerName, quadrantRole, timestamp }`
+- [ ] Task 2: Create Live Activity Timeline Component (AC 1)
   - [ ] Initialize `LiveActivityTimeline.vue` in `frontend/src/features/match/`
-  - [ ] Display the sequence of recorded goals in reverse chronological order (latest on top)
-  - [ ] Show scorer identification (name) and the quadrant role where the goal was scored
-- [ ] Task 2: Implement Undo Functionality in State
-  - [ ] Update `useLiveMatchStore` in `frontend/src/stores/liveMatch.ts`
-  - [ ] Add `undoLastGoal()` action that removes the most recent goal from `goals` array
-  - [ ] Provide a computed property `canUndo` that returns true if `goals` array is not empty
-- [ ] Task 3: Implement Undo UI
-  - [ ] Add an "Undo Last Goal" button to the `LiveMatch.vue` or timeline component
-  - [ ] Button should be disabled when `canUndo` is false
-  - [ ] Ensure button styling aligns with "The Clubhouse Editorial" design tokens (e.g., proper contrast in dark theme)
-- [ ] Task 4: Testing & Quality
-  - [ ] Write unit tests for `undoLastGoal` action in Pinia store
-  - [ ] Update Live Mode E2E Playwright tests to verify the timeline displays goals and the undo button removes them
-  - [ ] Verify components conform to the 500-line strict limit (IP-04)
+  - [ ] Display the sequence of recorded goals in reverse chronological order (newest goal at top)
+  - [ ] Render each goal item with scorer name, quadrant role label, and time formatting (`data-testid="timeline-goal-item"`)
+  - [ ] Provide subtle empty state indicator when no goals are recorded (`data-testid="timeline-empty"`)
+  - [ ] Constrain height (`max-h-36` or responsive equivalent) with `overflow-y-auto` to prevent layout overflow in landscape orientation
+  - [ ] Style with "The Clubhouse Editorial" tokens (`ch-bg-gray-800`, `ch-text-white`, `ch-text-gray-400`, `ch-border-gray-700`)
+- [ ] Task 3: Implement Undo UI in Live Match Interface (AC 1)
+  - [ ] Integrate `<LiveActivityTimeline />` and an "Undo Last Goal" button (`data-testid="undo-goal-btn"`) into `LiveMatch.vue`
+  - [ ] Position the timeline / undo control as a centered or floating HUD overlay with non-blocking pointer events (`pointer-events-none` on overlay container, `pointer-events-auto` on timeline and buttons) so quadrant touch areas remain unobstructed
+  - [ ] Bind "Undo Last Goal" button to `matchStore.undoLastGoal()`
+  - [ ] Disable the undo button when `!matchStore.canUndo` with appropriate disabled styling (`opacity-50 cursor-not-allowed`)
+- [ ] Task 4: Unit Testing (Store & Component)
+  - [ ] Create `frontend/tests/unit/liveMatch.spec.ts` testing `recordGoal`, `undoLastGoal`, `canUndo`, and `goalTimeline` / player name resolution
+  - [ ] Create `frontend/tests/unit/LiveActivityTimeline.spec.ts` testing reverse-chronological goal display, empty state, and scorer info rendering
+  - [ ] Ensure all test files follow the 500-line limit (IP-04)
+- [ ] Task 5: E2E Playwright Integration Testing
+  - [ ] Update `frontend/e2e/real-time-scoring-interface.spec.ts` to verify:
+    - Recording a goal displays scorer name and quadrant role in the timeline
+    - Recording multiple goals renders them in reverse chronological order
+    - Tapping "Undo Last Goal" removes the latest goal from the timeline and disables undo when all goals are removed
+    - Undo button remains disabled at match start
 
 ## Dev Notes
 
 ### Technical Requirements
-- **State Management:** The store `liveMatch.ts` already contains a `goals` array with `playerId`, `quadrantRole`, and `timestamp`. Use this array for rendering the timeline.
-- **Undo Logic:** The undo button should strictly pop the last item from the `goals` array based on the sequence they were inserted.
-- **Visual Design:** The application relies on Tailwind CSS v4 and SCSS. Follow "The Clubhouse Editorial" style guide (dark theme, no pure white, strict adherence to `ch-` prefix). The timeline shouldn't obscure the live quadrants entirely.
+- **State Management (`frontend/src/stores/liveMatch.ts`):**
+  - Enrich goal records with a lookup helper or computed getter:
+    ```typescript
+    export interface TimelineGoal extends Goal {
+      playerName: string
+    }
+    ```
+  - `undoLastGoal()` must safely remove the last element from `goals.value` (e.g. `return goals.value.pop()`).
+  - `canUndo` computed property: `computed(() => goals.value.length > 0)`.
+  - Player name lookup: Map `playerId` to player details in `teamA` / `teamB` (e.g. `teamA.value.attacker.id === id ? teamA.value.attacker.name : ...`).
+- **Spatial UI & Touch Isolation (`frontend/src/features/match/LiveMatch.vue`):**
+  - In landscape mode (`w-screen h-screen`), the 2x2 grid (`grid-cols-2 grid-rows-2`) covers the full viewport.
+  - The Live Activity Timeline and Undo button must be positioned in a floating HUD layer (e.g. `absolute inset-x-0 top-2` or centered between quadrants) with `pointer-events-none` on the HUD container and `pointer-events-auto` on the interactive timeline cards/buttons.
+  - This ensures that table-side rapid quadrant tapping is not intercepted by transparent padding/margins of the overlay.
+- **Component Design (`frontend/src/features/match/LiveActivityTimeline.vue`):**
+  - Reverse chronological ordering: `[...goals].reverse()`.
+  - Max height & scrolling: `max-h-36 overflow-y-auto` to prevent overflowing in landscape viewports.
+  - Semantic styling: "The Clubhouse Editorial" design tokens (`ch-bg-gray-800`, `ch-text-white`, `ch-border-gray-700`, `ch-bg-amber-600` or `ch-bg-gray-700` for undo).
+- **Test Selectors Contract:**
+  - `data-testid="live-activity-timeline"` — timeline container
+  - `data-testid="timeline-goal-item"` — individual goal entry in timeline
+  - `data-testid="timeline-empty"` — empty state message
+  - `data-testid="undo-goal-btn"` — button to trigger undo
 
 ### Architecture Compliance
-- Use Vue 3 `<script setup>` syntax and Pinia for state management.
-- Place new domain components in `frontend/src/features/match/`.
-- All CSS must use the established design tokens.
-- Ensure no source file exceeds the 500-line strict limit (IP-04).
+- Use Vue 3 `<script setup lang="ts">` and Pinia setup store pattern.
+- Feature components placed in `frontend/src/features/match/`.
+- All CSS styles must adhere to Tailwind CSS v4 and SCSS with `ch-` prefix where custom classes are needed.
+- No source file or test file may exceed the 500-line strict limit (IP-04).
 
 ### Previous Story Intelligence (5.1)
-- Ensure E2E tests are placed in the correct location (`frontend/e2e/`), do not place them inside `frontend/tests/e2e/` (based on past review patches).
-- Avoid brittle TouchEvent hacks in E2E tests when verifying clicks/taps on the undo button.
+- Place E2E tests strictly in `frontend/e2e/` (not `frontend/tests/e2e/`).
+- Place unit tests in `frontend/tests/unit/` (matching existing `LiveQuadrant.spec.ts`).
+- Avoid brittle TouchEvent dispatch hacks in Playwright — use `.tap()` or `.click()`.
+- Ensure tests verify full business state (goals added and removed from timeline) rather than just CSS class presence.
 
 ### Project Structure Notes
-- Alignment with unified project structure: feature-based organization (`features/match/`).
-- The state is managed within `frontend/src/stores/liveMatch.ts`.
+- Component: `frontend/src/features/match/LiveActivityTimeline.vue`
+- Main View: `frontend/src/features/match/LiveMatch.vue`
+- Store: `frontend/src/stores/liveMatch.ts`
+- Unit Tests: `frontend/tests/unit/liveMatch.spec.ts`, `frontend/tests/unit/LiveActivityTimeline.spec.ts`
+- E2E Tests: `frontend/e2e/real-time-scoring-interface.spec.ts`
 
 ### References
 - PRD FR9: "Player can undo the last recorded goal during live match entry (Phase 1.5)"
 - PRD FR10: "System displays a live activity timeline showing goal sequence with scorer identification during live match mode (Phase 1.5)"
+- Architecture AD-06: PWA-First Infrastructure
 
 ## Dev Agent Record
 
@@ -68,7 +104,7 @@ Gemini 3.1 Pro (High)
 
 ### Debug Log References
 - Extracted from `epics.md`, `prd.md`, and `architecture.md`.
-- Derived from `5-1-real-time-scoring-interface-landscape.md` previous intelligence.
+- Derived from `5-1-real-time-scoring-interface-landscape.md` previous intelligence and review findings.
 
 ### Completion Notes List
 - Comprehensive developer guide created for timeline and undo features.
@@ -77,4 +113,6 @@ Gemini 3.1 Pro (High)
 - `frontend/src/features/match/LiveActivityTimeline.vue` (to be created)
 - `frontend/src/stores/liveMatch.ts` (to modify)
 - `frontend/src/features/match/LiveMatch.vue` (to modify)
+- `frontend/tests/unit/liveMatch.spec.ts` (to be created)
+- `frontend/tests/unit/LiveActivityTimeline.spec.ts` (to be created)
 - `frontend/e2e/real-time-scoring-interface.spec.ts` (to modify)
