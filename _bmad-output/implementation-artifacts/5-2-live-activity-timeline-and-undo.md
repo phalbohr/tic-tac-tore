@@ -92,6 +92,11 @@ so that the match protocol is accurate.
 - Unit Tests: `frontend/tests/unit/liveMatch.spec.ts`, `frontend/tests/unit/LiveActivityTimeline.spec.ts`
 - E2E Tests: `frontend/e2e/real-time-scoring-interface.spec.ts`
 
+### ATDD Artifacts
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-5-2-live-activity-timeline-and-undo.md`
+- Unit Tests: `frontend/tests/unit/liveMatch.spec.ts`, `frontend/tests/unit/LiveActivityTimeline.spec.ts`
+- E2E Tests: `frontend/e2e/real-time-scoring-interface.spec.ts`
+
 ### References
 - PRD FR9: "Player can undo the last recorded goal during live match entry (Phase 1.5)"
 - PRD FR10: "System displays a live activity timeline showing goal sequence with scorer identification during live match mode (Phase 1.5)"
