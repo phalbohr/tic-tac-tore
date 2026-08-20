@@ -392,3 +392,10 @@ status: open
 
 - **Story 4-3 Review Triage:** The review triage log references 6 + 4 deferred findings from initial and follow-up passes. These items were consolidated into DW-48 through DW-51 (unbounded load, ignored query params, JaCoCo build config, observability). Detailed itemized logs were collapsed without individual names preserved.
 - **Story 4-2 Rejected Findings:** 17 review findings (9 on 2026-08-15, 8 on 2026-08-16) were evaluated as noise/non-actionable and rejected per spec logs.
+
+## Deferred from: code review of 5-2-live-activity-timeline-and-undo.md (2026-08-20)
+
+- Sticky Hover States on Mobile [frontend/src/features/match/LiveMatch.vue:94]: The "Undo Last Goal" button uses `hover:ch-bg-gray-700`. On touch devices, hover states frequently stick after the user lifts their finger.
+- Brittle DOM Text Assertions [frontend/tests/unit/LiveActivityTimeline.spec.ts:48]: Tests assert `.toContain('teamA.attacker')`, coupling the test to the UI text formatting.
+- Missing i18n for Empty State [frontend/src/features/match/LiveActivityTimeline.vue:38]: "No goals recorded" is hardcoded directly into the template.
+- Destructive Undo Without Confirmation: Instant undo is retained for speed; deferred confirmation.

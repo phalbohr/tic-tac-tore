@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: 2026-07-04
+# last_updated: "2026-08-20"
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-08-19"
+last_updated: "2026-08-20"
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -81,7 +81,7 @@ development_status:
   epic-4-retrospective: optional
   epic-5: in-progress
   5-1-real-time-scoring-interface-landscape: done
-  5-2-live-activity-timeline-and-undo: backlog
+  5-2-live-activity-timeline-and-undo: review
   5-3-live-position-swapping: backlog
   5-4-third-party-referee-mode: backlog
   5-5-screen-wake-lock-and-continuity: backlog
