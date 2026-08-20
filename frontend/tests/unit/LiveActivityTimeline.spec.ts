@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 import LiveActivityTimeline from '@/features/match/LiveActivityTimeline.vue'
 
 describe('[Story 5.2] LiveActivityTimeline Component', () => {
-  it.skip('[P0] displays empty state indicator when no goals are provided', () => {
+  it('[P0] displays empty state indicator when no goals are provided', () => {
     const wrapper = mount(LiveActivityTimeline, {
       props: {
         goals: [],
@@ -15,7 +15,7 @@ describe('[Story 5.2] LiveActivityTimeline Component', () => {
     expect(empty.text()).toMatch(/no goals/i)
   })
 
-  it.skip('[P0] renders goal events in reverse chronological order with scorer name and role', () => {
+  it('[P0] renders goal events in reverse chronological order with scorer name and role', () => {
     const mockGoals = [
       {
         id: 'g1',
@@ -48,7 +48,7 @@ describe('[Story 5.2] LiveActivityTimeline Component', () => {
     expect(items[1].text()).toContain('teamA.attacker')
   })
 
-  it.skip('[P1] contains scroll and height constraint classes for landscape HUD layout', () => {
+  it('[P1] contains scroll and height constraint classes for landscape HUD layout', () => {
     const wrapper = mount(LiveActivityTimeline, {
       props: {
         goals: [],

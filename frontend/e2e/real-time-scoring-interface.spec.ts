@@ -31,7 +31,7 @@ test.describe('Real-time Scoring Interface', () => {
     await expect(quadrant).toHaveClass(/ch-bg-green-500/)
   })
 
-  test.skip('[Story 5.2] undo button is disabled initially before any goals are recorded', async ({ page }) => {
+  test('[Story 5.2] undo button is disabled initially before any goals are recorded', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -43,7 +43,7 @@ test.describe('Real-time Scoring Interface', () => {
     await expect(emptyTimeline).toBeVisible()
   })
 
-  test.skip('[Story 5.2] recording a goal displays scorer name and quadrant role in timeline, and enables undo', async ({ page }) => {
+  test('[Story 5.2] recording a goal displays scorer name and quadrant role in timeline, and enables undo', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -61,7 +61,7 @@ test.describe('Real-time Scoring Interface', () => {
     await expect(undoBtn).toBeEnabled()
   })
 
-  test.skip('[Story 5.2] recording multiple goals displays them in reverse chronological order and undo removes the latest goal', async ({ page }) => {
+  test('[Story 5.2] recording multiple goals displays them in reverse chronological order and undo removes the latest goal', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
