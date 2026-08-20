@@ -3,7 +3,7 @@ baseline_commit: 14974dbfa803b53f7d4ac8e65d3b515b8571ddc1
 ---
 # Story 5.2: Live Activity Timeline & Undo
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -48,6 +48,34 @@ so that the match protocol is accurate.
     - Recording multiple goals renders them in reverse chronological order
     - Tapping "Undo Last Goal" removes the latest goal from the timeline and disables undo when all goals are removed
     - Undo button remains disabled at match start
+
+### Review Findings
+
+- [ ] [Review][Patch] Center HUD Touch Obstruction — Move timeline to the top strip, full width, and Undo button to the far right. Quadrants take up remaining height.
+  ```text
+  +-------------------------------------------------------------------------+
+  | [====== Live Activity Timeline (Список голов) ======]     [Кнопка Undo] |
+  +------------------------------------+------------------------------------+
+  |                                    |                                    |
+  |   Игрок 1 (Атака Команды Б)        |   Игрок 2 (Защита Команды Б)       |
+  |   [Зона нажатия для гола]          |   [Зона нажатия для гола]          |
+  |                                    |                                    |
+  +------------------------------------+------------------------------------+
+  |                                    |                                    |
+  |   Игрок 4 (Защита Команды А)       |   Игрок 3 (Атака Команды А)        |
+  |   [Зона нажатия для гола]          |   [Зона нажатия для гола]          |
+  |                                    |                                    |
+  +------------------------------------+------------------------------------+
+  ```
+- [ ] [Review][Patch] Wall-Clock Time vs Match Time Formatting — `formatTime` uses `new Date(timestamp).toLocaleTimeString()` which outputs absolute local wall-clock time instead of relative match time.
+- [x] [Review][Defer] Destructive Undo Without Confirmation — Instant undo retained for speed; deferred confirmation.
+- [ ] [Review][Patch] Historical Name Mutation [frontend/src/stores/liveMatch.ts:41]
+- [ ] [Review][Patch] Dangerous Naked CSS Selectors [frontend/src/features/match/LiveActivityTimeline.vue:58]
+- [ ] [Review][Patch] Sloppy UUID Fallback [frontend/src/stores/liveMatch.ts:47]
+- [ ] [Review][Patch] Undo Button Styling Deviation [frontend/src/features/match/LiveMatch.vue:91]
+- [x] [Review][Defer] Sticky Hover States on Mobile [frontend/src/features/match/LiveMatch.vue:94] — deferred, pre-existing
+- [x] [Review][Defer] Brittle DOM Text Assertions [frontend/tests/unit/LiveActivityTimeline.spec.ts:48] — deferred, pre-existing
+- [x] [Review][Defer] Missing i18n for Empty State [frontend/src/features/match/LiveActivityTimeline.vue:38] — deferred, pre-existing
 
 ## Dev Notes
 
