@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 export interface Goal {
   id: string
   playerId: string
+  playerName: string
   quadrantRole: string
   timestamp: number
 }
@@ -12,8 +13,27 @@ export interface TimelineGoal extends Goal {
   playerName: string
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    let r: number
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const array = new Uint8Array(1)
+      crypto.getRandomValues(array)
+      r = (array[0] ?? 0) % 16
+    } else {
+      r = (Math.random() * 16) | 0
+    }
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
 export const useLiveMatchStore = defineStore('liveMatch', () => {
   const goals = ref<Goal[]>([])
+  const matchStartTime = ref<number | null>(null)
 
   const teamA = ref({
     attacker: { id: 'p1', name: 'Alice' },
@@ -38,14 +58,18 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
   const goalTimeline = computed<TimelineGoal[]>(() => {
     return goals.value.map(g => ({
       ...g,
-      playerName: getPlayerName(g.playerId),
+      playerName: g.playerName || getPlayerName(g.playerId),
     }))
   })
 
   const recordGoal = (playerId: string, quadrantRole: string) => {
+    if (matchStartTime.value === null) {
+      matchStartTime.value = Date.now()
+    }
     goals.value.push({
-      id: (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)),
+      id: generateUUID(),
       playerId,
+      playerName: getPlayerName(playerId),
       quadrantRole,
       timestamp: Date.now(),
     })
@@ -58,6 +82,7 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
 
   return {
     goals,
+    matchStartTime,
     teamA,
     teamB,
     canUndo,

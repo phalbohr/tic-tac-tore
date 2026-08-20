@@ -3,7 +3,7 @@ baseline_commit: 14974dbfa803b53f7d4ac8e65d3b515b8571ddc1
 ---
 # Story 5.2: Live Activity Timeline & Undo
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -51,28 +51,13 @@ so that the match protocol is accurate.
 
 ### Review Findings
 
-- [ ] [Review][Patch] Center HUD Touch Obstruction — Move timeline to the top strip, full width, and Undo button to the far right. Quadrants take up remaining height.
-  ```text
-  +-------------------------------------------------------------------------+
-  | [====== Live Activity Timeline (Список голов) ======]     [Кнопка Undo] |
-  +------------------------------------+------------------------------------+
-  |                                    |                                    |
-  |   Игрок 1 (Атака Команды Б)        |   Игрок 2 (Защита Команды Б)       |
-  |   [Зона нажатия для гола]          |   [Зона нажатия для гола]          |
-  |                                    |                                    |
-  +------------------------------------+------------------------------------+
-  |                                    |                                    |
-  |   Игрок 4 (Защита Команды А)       |   Игрок 3 (Атака Команды А)        |
-  |   [Зона нажатия для гола]          |   [Зона нажатия для гола]          |
-  |                                    |                                    |
-  +------------------------------------+------------------------------------+
-  ```
-- [ ] [Review][Patch] Wall-Clock Time vs Match Time Formatting — `formatTime` uses `new Date(timestamp).toLocaleTimeString()` which outputs absolute local wall-clock time instead of relative match time.
+- [x] [Review][Patch] Center HUD Touch Obstruction — Move timeline to the top strip, full width, and Undo button to the far right. Quadrants take up remaining height.
+- [x] [Review][Patch] Wall-Clock Time vs Match Time Formatting — `formatTime` uses `new Date(timestamp).toLocaleTimeString()` which outputs absolute local wall-clock time instead of relative match time.
 - [x] [Review][Defer] Destructive Undo Without Confirmation — Instant undo retained for speed; deferred confirmation.
-- [ ] [Review][Patch] Historical Name Mutation [frontend/src/stores/liveMatch.ts:41]
-- [ ] [Review][Patch] Dangerous Naked CSS Selectors [frontend/src/features/match/LiveActivityTimeline.vue:58]
-- [ ] [Review][Patch] Sloppy UUID Fallback [frontend/src/stores/liveMatch.ts:47]
-- [ ] [Review][Patch] Undo Button Styling Deviation [frontend/src/features/match/LiveMatch.vue:91]
+- [x] [Review][Patch] Historical Name Mutation [frontend/src/stores/liveMatch.ts:41]
+- [x] [Review][Patch] Dangerous Naked CSS Selectors [frontend/src/features/match/LiveActivityTimeline.vue:58]
+- [x] [Review][Patch] Sloppy UUID Fallback [frontend/src/stores/liveMatch.ts:47]
+- [x] [Review][Patch] Undo Button Styling Deviation [frontend/src/features/match/LiveMatch.vue:91]
 - [x] [Review][Defer] Sticky Hover States on Mobile [frontend/src/features/match/LiveMatch.vue:94] — deferred, pre-existing
 - [x] [Review][Defer] Brittle DOM Text Assertions [frontend/tests/unit/LiveActivityTimeline.spec.ts:48] — deferred, pre-existing
 - [x] [Review][Defer] Missing i18n for Empty State [frontend/src/features/match/LiveActivityTimeline.vue:38] — deferred, pre-existing
@@ -147,19 +132,26 @@ Gemini 3.7 Flash
 ### Completion Notes List
 - Implemented `canUndo`, `undoLastGoal`, `getPlayerName`, and `goalTimeline` in `frontend/src/stores/liveMatch.ts`.
 - Created `frontend/src/features/match/LiveActivityTimeline.vue` displaying goal events in reverse chronological order with empty state support.
-- Integrated timeline and "Undo Last Goal" button into `frontend/src/features/match/LiveMatch.vue` within a non-blocking HUD overlay container (`pointer-events-none` container, `pointer-events-auto` controls).
+- Resolved code review findings:
+  - Moved timeline and Undo button into a clean top-strip header in `frontend/src/features/match/LiveMatch.vue`, eliminating touch obstructions on live match quadrants.
+  - Implemented relative match time formatting (`MM:SS`) in `LiveActivityTimeline.vue` instead of absolute wall-clock strings.
+  - Fixed historical name mutation by snapshotting `playerName` onto `Goal` records upon scoring in `liveMatch.ts`.
+  - Scoped scrollbar styling in `LiveActivityTimeline.vue` removing naked element selector.
+  - Replaced sloppy Math.random UUID with standard RFC4122 `generateUUID()` fallback in `liveMatch.ts`.
+  - Aligned Undo button styling with Clubhouse Editorial tokens in `LiveMatch.vue`.
 - Added unit test suites `frontend/tests/unit/liveMatch.spec.ts` and `frontend/tests/unit/LiveActivityTimeline.spec.ts`.
 - Extended E2E suite `frontend/e2e/real-time-scoring-interface.spec.ts` with real-time scoring, timeline rendering, and undo interaction coverage.
 - Successfully verified all unit tests, type checks, lint checks, and Playwright E2E tests via `./scripts/ci-local.sh`.
 
 ### File List
-- `frontend/src/features/match/LiveActivityTimeline.vue` (created)
+- `frontend/src/features/match/LiveActivityTimeline.vue` (modified)
 - `frontend/src/stores/liveMatch.ts` (modified)
 - `frontend/src/features/match/LiveMatch.vue` (modified)
-- `frontend/tests/unit/liveMatch.spec.ts` (created)
-- `frontend/tests/unit/LiveActivityTimeline.spec.ts` (created)
+- `frontend/tests/unit/liveMatch.spec.ts` (modified)
+- `frontend/tests/unit/LiveActivityTimeline.spec.ts` (modified)
 - `frontend/e2e/real-time-scoring-interface.spec.ts` (modified)
 
 ### Change Log
 - 2026-08-20: Implemented Story 5.2 (Live Activity Timeline & Undo) fulfilling FR9 & FR10.
+- 2026-08-20: Addressed all code review findings (top-strip layout, relative match time, historical player name snapshot, RFC4122 UUID, scoped CSS). Full `./scripts/ci-local.sh` suite verified green.
 

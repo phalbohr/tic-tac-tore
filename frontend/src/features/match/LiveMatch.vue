@@ -45,8 +45,32 @@ const onScore = (playerId: string, role: string) => {
       <button @click="startMatch" data-testid="start-match-btn" class="ch-bg-primary ch-text-white px-6 py-3 rounded text-xl">Start Match</button>
     </div>
     
-    <div v-else class="relative w-full h-full">
-      <div class="grid grid-cols-2 grid-rows-2 w-full h-full" data-testid="match-grid">
+    <div v-else class="flex flex-col w-full h-full">
+      <!-- Top strip: Timeline + Undo button -->
+      <header class="flex items-center justify-between gap-3 px-3 py-1.5 ch-bg-gray-800 border-b ch-border-gray-700 z-30 flex-none shadow-md">
+        <div class="flex-1 min-w-0 overflow-hidden">
+          <LiveActivityTimeline
+            :goals="matchStore.goalTimeline"
+            :startTime="matchStore.matchStartTime"
+          />
+        </div>
+
+        <div class="flex-none">
+          <button
+            @click="matchStore.undoLastGoal()"
+            :disabled="!matchStore.canUndo"
+            data-testid="undo-goal-btn"
+            class="px-3 py-1.5 rounded-lg font-medium text-xs transition-all ch-bg-gray-700 border ch-border-gray-600 ch-text-white shadow flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            <span>Undo</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-2 grid-rows-2 flex-1 w-full min-h-0" data-testid="match-grid">
         <LiveQuadrant
           class="grid-item tl"
           :playerId="matchStore.teamA.attacker.id"
@@ -75,31 +99,6 @@ const onScore = (playerId: string, role: string) => {
           role="teamB.attacker"
           @score="onScore"
         />
-      </div>
-
-      <!-- HUD Overlay for Timeline and Undo -->
-      <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-2 z-30">
-        <div class="pointer-events-auto w-72 max-w-[80vw]">
-          <LiveActivityTimeline :goals="matchStore.goalTimeline" />
-        </div>
-
-        <div class="pointer-events-auto pb-1">
-          <button
-            @click="matchStore.undoLastGoal()"
-            :disabled="!matchStore.canUndo"
-            data-testid="undo-goal-btn"
-            class="px-4 py-2 rounded-lg font-medium text-sm transition-all ch-bg-gray-800 ch-border-gray-700 border ch-text-white shadow-lg flex items-center gap-2"
-            :class="{
-              'opacity-50 cursor-not-allowed': !matchStore.canUndo,
-              'hover:ch-bg-gray-700 active:scale-95 cursor-pointer': matchStore.canUndo,
-            }"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-            </svg>
-            Undo Last Goal
-          </button>
-        </div>
       </div>
     </div>
   </div>

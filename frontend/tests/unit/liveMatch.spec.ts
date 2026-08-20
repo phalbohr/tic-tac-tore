@@ -62,4 +62,15 @@ describe('[Story 5.2] LiveMatch Store - Undo & Timeline', () => {
     expect(store.getPlayerName('p4')).toBe('Dave')
     expect(store.getPlayerName('unknown')).toBe('Unknown Player')
   })
+
+  it('[P1] preserves historical player name snapshot even if player roster/name changes later', () => {
+    const store = useLiveMatchStore()
+    store.recordGoal('p1', 'teamA.attacker')
+    expect(store.goals[0].playerName).toBe('Alice')
+
+    // Simulate name change / roster mutation
+    store.teamA.attacker.name = 'Alicia'
+    expect(store.goals[0].playerName).toBe('Alice')
+    expect(store.goalTimeline[0].playerName).toBe('Alice')
+  })
 })

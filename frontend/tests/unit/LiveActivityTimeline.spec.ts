@@ -44,11 +44,13 @@ describe('[Story 5.2] LiveActivityTimeline Component', () => {
     // Reverse chronological order: newest (Charlie) at the top
     expect(items[0].text()).toContain('Charlie')
     expect(items[0].text()).toContain('teamB.attacker')
+    expect(items[0].text()).toContain('00:02')
     expect(items[1].text()).toContain('Alice')
     expect(items[1].text()).toContain('teamA.attacker')
+    expect(items[1].text()).toContain('00:01')
   })
 
-  it('[P1] contains scroll and height constraint classes for landscape HUD layout', () => {
+  it('[P1] contains horizontal scroll and layout classes for top strip display', () => {
     const wrapper = mount(LiveActivityTimeline, {
       props: {
         goals: [],
@@ -57,6 +59,29 @@ describe('[Story 5.2] LiveActivityTimeline Component', () => {
 
     const container = wrapper.find('[data-testid="live-activity-timeline"]')
     expect(container.exists()).toBe(true)
-    expect(container.classes()).toEqual(expect.arrayContaining(['overflow-y-auto']))
+    expect(container.classes()).toEqual(expect.arrayContaining(['overflow-x-auto']))
+  })
+
+  it('[P1] formats relative match time from match startTime correctly', () => {
+    const startTime = 1000000000000
+    const mockGoals = [
+      {
+        id: 'g1',
+        playerId: 'p1',
+        playerName: 'Alice',
+        quadrantRole: 'teamA.attacker',
+        timestamp: startTime + 65000, // 1m 05s
+      },
+    ]
+
+    const wrapper = mount(LiveActivityTimeline, {
+      props: {
+        goals: mockGoals,
+        startTime,
+      },
+    })
+
+    const item = wrapper.find('[data-testid="timeline-goal-item"]')
+    expect(item.text()).toContain('01:05')
   })
 })

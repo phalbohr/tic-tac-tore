@@ -9,31 +9,36 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     goals?: TimelineGoal[]
+    startTime?: number | null
   }>(),
   {
     goals: () => [],
+    startTime: null,
   },
 )
 
 const timelineGoals = computed(() => [...props.goals].reverse())
 
 const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toLocaleTimeString([], {
-    minute: '2-digit',
-    second: '2-digit',
-  })
+  const firstGoal = props.goals[0]
+  const base = props.startTime ?? (firstGoal && firstGoal.timestamp > 1000000000 ? firstGoal.timestamp : 0)
+  const elapsedMs = timestamp >= base ? timestamp - base : timestamp
+  const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 </script>
 
 <template>
   <div
     data-testid="live-activity-timeline"
-    class="max-h-36 overflow-y-auto ch-bg-gray-800/95 ch-border-gray-700 border rounded-lg p-2 text-xs ch-text-white shadow-xl space-y-1.5 backdrop-blur-sm"
+    class="live-activity-timeline flex items-center gap-2 overflow-x-auto py-1 px-1 text-xs ch-text-white"
   >
     <div
       v-if="timelineGoals.length === 0"
       data-testid="timeline-empty"
-      class="text-center ch-text-gray-400 py-1.5 italic"
+      class="text-xs ch-text-gray-400 italic whitespace-nowrap"
     >
       No goals recorded
     </div>
@@ -42,24 +47,27 @@ const formatTime = (timestamp: number) => {
       v-for="goal in timelineGoals"
       :key="goal.id"
       data-testid="timeline-goal-item"
-      class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded ch-bg-gray-700/70 border ch-border-gray-600/40"
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded ch-bg-gray-700/80 border ch-border-gray-600/50 whitespace-nowrap shrink-0 shadow-sm"
     >
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span class="font-semibold truncate">{{ goal.playerName }}</span>
-        <span class="ch-text-gray-400 text-[10px] truncate">({{ goal.quadrantRole }})</span>
-      </div>
-      <span class="ch-text-gray-400 text-[10px] whitespace-nowrap">{{ formatTime(goal.timestamp) }}</span>
+      <span class="font-semibold">{{ goal.playerName }}</span>
+      <span class="ch-text-gray-400 text-[11px]">({{ goal.quadrantRole }})</span>
+      <span class="ch-text-gray-400 text-[10px] pl-1 font-mono">{{ formatTime(goal.timestamp) }}</span>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-/* Custom scrollbar styling for compact HUD display */
-div::-webkit-scrollbar {
-  width: 4px;
-}
-div::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.4);
-  border-radius: 4px;
+/* Custom scrollbar styling for compact top-strip display */
+.live-activity-timeline {
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 4px;
+  }
 }
 </style>
