@@ -3,7 +3,7 @@ baseline_commit: 86c186d1da6d6132c4fcd1b65f846cba198beee3
 ---
 # Story 5.3: Live Position Swapping
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -75,6 +75,19 @@ so that player-level stats are correct.
     - Tapping Team B swap button updates quadrant labels and subsequent goal is attributed to the new attacker
     - Verifying timeline displays past goals with original scorer names and new goals with swapped scorer names
     - Verifying tapping swap button does not trigger an accidental goal registration
+
+### Review Findings
+
+- [x] [Review][Dismiss] Missing Pause/Timeout Constraint — Dismissed: leave it up to the player.
+- [ ] [Review][Patch] UI Overlap — Add padding to quadrants to prevent text overlap with swap buttons.
+- [ ] [Review][Patch] SSR ReferenceError on navigator.vibrate [`frontend/src/features/match/LiveMatch.vue:38`]
+- [ ] [Review][Patch] Store State Mutation (References vs IDs) [`frontend/src/stores/liveMatch.ts:84`]
+- [ ] [Review][Patch] Incomplete E2E assertions for Swap Button Placement [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [ ] [Review][Patch] Unrelated File Modification (Whitespace) [`frontend/e2e/support/fixtures/stats-fixture.ts:21`]
+- [ ] [Review][Patch] Inconsistent Test Interactions (click vs tap) [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [ ] [Review][Patch] Inconsistent ATDD Checklist Status [`_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md`]
+- [ ] [Review][Patch] Disproportionate Icon Size [`frontend/src/features/match/LiveMatch.vue`]
+- [x] [Review][Defer] No Visual Distinction for Buttons — deferred, pre-existing
 
 ## Dev Agent Record
 
