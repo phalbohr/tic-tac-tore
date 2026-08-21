@@ -74,3 +74,80 @@ describe('[Story 5.2] LiveMatch Store - Undo & Timeline', () => {
     expect(store.goalTimeline[0].playerName).toBe('Alice')
   })
 })
+
+describe('[Story 5.3] LiveMatch Store - Position Swapping', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it.skip('[P0] swapPositions(teamA) correctly inverts attacker and defender for Team A', () => {
+    const store = useLiveMatchStore()
+    expect(store.teamA.attacker).toEqual({ id: 'p1', name: 'Alice' })
+    expect(store.teamA.defender).toEqual({ id: 'p2', name: 'Bob' })
+
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamA')
+
+    expect(store.teamA.attacker).toEqual({ id: 'p2', name: 'Bob' })
+    expect(store.teamA.defender).toEqual({ id: 'p1', name: 'Alice' })
+  })
+
+  it.skip('[P0] swapPositions(teamB) correctly inverts attacker and defender for Team B', () => {
+    const store = useLiveMatchStore()
+    expect(store.teamB.attacker).toEqual({ id: 'p3', name: 'Charlie' })
+    expect(store.teamB.defender).toEqual({ id: 'p4', name: 'Dave' })
+
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamB')
+
+    expect(store.teamB.attacker).toEqual({ id: 'p4', name: 'Dave' })
+    expect(store.teamB.defender).toEqual({ id: 'p3', name: 'Charlie' })
+  })
+
+  it.skip('[P0] subsequent goals scored after swapPositions are attributed to newly assigned player', () => {
+    const store = useLiveMatchStore()
+    store.recordGoal(store.teamA.attacker.id, 'teamA.attacker')
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamA')
+    store.recordGoal(store.teamA.attacker.id, 'teamA.attacker')
+
+    expect(store.goals).toHaveLength(2)
+    expect(store.goals[0]).toMatchObject({
+      playerId: 'p1',
+      playerName: 'Alice',
+      quadrantRole: 'teamA.attacker',
+    })
+    expect(store.goals[1]).toMatchObject({
+      playerId: 'p2',
+      playerName: 'Bob',
+      quadrantRole: 'teamA.attacker',
+    })
+  })
+
+  it.skip('[P1] past goals in timeline retain original player snapshot after swapPositions', () => {
+    const store = useLiveMatchStore()
+    store.recordGoal('p1', 'teamA.attacker')
+    expect(store.goalTimeline[0].playerName).toBe('Alice')
+
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamA')
+
+    expect(store.goalTimeline[0].playerName).toBe('Alice')
+    expect(store.goals[0].playerName).toBe('Alice')
+  })
+
+  it.skip('[P1] resolves player names across both teams correctly after swapping positions', () => {
+    const store = useLiveMatchStore()
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamA')
+    // @ts-expect-error method to be implemented in Story 5.3
+    store.swapPositions('teamB')
+
+    expect(store.getPlayerName('p1')).toBe('Alice')
+    expect(store.getPlayerName('p2')).toBe('Bob')
+    expect(store.getPlayerName('p3')).toBe('Charlie')
+    expect(store.getPlayerName('p4')).toBe('Dave')
+    expect(store.getPlayerName('unknown')).toBe('Unknown Player')
+  })
+})
+
