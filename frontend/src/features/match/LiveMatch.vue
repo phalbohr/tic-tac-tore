@@ -34,6 +34,13 @@ const startMatch = async () => {
 const onScore = (playerId: string, role: string) => {
   matchStore.recordGoal(playerId, role)
 }
+
+const onSwap = (team: 'teamA' | 'teamB') => {
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    navigator.vibrate([30])
+  }
+  matchStore.swapPositions(team)
+}
 </script>
 
 <template>
@@ -70,35 +77,70 @@ const onScore = (playerId: string, role: string) => {
         </div>
       </header>
 
-      <div class="grid grid-cols-2 grid-rows-2 flex-1 w-full min-h-0" data-testid="match-grid">
+      <div class="relative grid grid-cols-2 grid-rows-2 flex-1 w-full min-h-0" data-testid="match-grid">
+        <!-- Top Row: Team B -->
         <LiveQuadrant
           class="grid-item tl"
-          :playerId="matchStore.teamA.attacker.id"
-          :playerName="matchStore.teamA.attacker.name"
-          role="teamA.attacker"
-          @score="onScore"
-        />
-        <LiveQuadrant
-          class="grid-item tr"
-          :playerId="matchStore.teamA.defender.id"
-          :playerName="matchStore.teamA.defender.name"
-          role="teamA.defender"
-          @score="onScore"
-        />
-        <LiveQuadrant
-          class="grid-item bl"
           :playerId="matchStore.teamB.defender.id"
           :playerName="matchStore.teamB.defender.name"
           role="teamB.defender"
           @score="onScore"
         />
         <LiveQuadrant
-          class="grid-item br"
+          class="grid-item tr"
           :playerId="matchStore.teamB.attacker.id"
           :playerName="matchStore.teamB.attacker.name"
           role="teamB.attacker"
           @score="onScore"
         />
+        <!-- Bottom Row: Team A -->
+        <LiveQuadrant
+          class="grid-item bl"
+          :playerId="matchStore.teamA.attacker.id"
+          :playerName="matchStore.teamA.attacker.name"
+          role="teamA.attacker"
+          @score="onScore"
+        />
+        <LiveQuadrant
+          class="grid-item br"
+          :playerId="matchStore.teamA.defender.id"
+          :playerName="matchStore.teamA.defender.name"
+          role="teamA.defender"
+          @score="onScore"
+        />
+
+        <!-- Centered Swap Buttons -->
+        <!-- Team B Swap Button (Top Row Center) -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+          <button
+            type="button"
+            @pointerdown.stop
+            @click.stop="onSwap('teamB')"
+            data-testid="swap-team-b-btn"
+            aria-label="Swap Team B Positions"
+            class="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full ch-bg-gray-700 border-2 ch-border-gray-600 ch-text-white shadow-lg flex items-center justify-center cursor-pointer hover:ch-bg-gray-600 active:scale-95 transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Team A Swap Button (Bottom Row Center) -->
+        <div class="absolute top-3/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+          <button
+            type="button"
+            @pointerdown.stop
+            @click.stop="onSwap('teamA')"
+            data-testid="swap-team-a-btn"
+            aria-label="Swap Team A Positions"
+            class="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full ch-bg-gray-700 border-2 ch-border-gray-600 ch-text-white shadow-lg flex items-center justify-center cursor-pointer hover:ch-bg-gray-600 active:scale-95 transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>

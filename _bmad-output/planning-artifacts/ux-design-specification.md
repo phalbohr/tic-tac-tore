@@ -1284,3 +1284,13 @@ Targeting **WCAG AA** compliance to ensure a professional and inclusive experien
 - **Relative Units:** Use `rem` and `em` for typography and spacing to support user-driven text scaling.
 - **Tailwind v4 Modern Primitives:** Leverage container queries and logical properties where beneficial for modern viewports.
 - **Semantic HTML First:** Use native elements (`<button>`, `<main>`, `<nav>`) to ensure consistent assistive technology behavior.
+
+### STRICT RULE FOR LIVE MATCH LAYOUT (LANDSCAPE)
+**DO NOT FORGET THIS:**
+In the 2x2 grid for the live match screen:
+- **Team B** is placed on the **TOP ROW** (above Team A).
+- **Team A** is placed on the **BOTTOM ROW** (below Team B).
+- The Swap Buttons must **NOT** be placed on the edges of the screen.
+- There are exactly TWO Swap buttons, placed **directly in the center** between the attacker and defender of the same team.
+  - Team B's Swap Button goes in the middle of the TOP row.
+  - Team A's Swap Button goes in the middle of the BOTTOM row.

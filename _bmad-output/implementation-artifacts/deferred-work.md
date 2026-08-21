@@ -399,3 +399,5 @@ status: open
 - Brittle DOM Text Assertions [frontend/tests/unit/LiveActivityTimeline.spec.ts:48]: Tests assert `.toContain('teamA.attacker')`, coupling the test to the UI text formatting.
 - Missing i18n for Empty State [frontend/src/features/match/LiveActivityTimeline.vue:38]: "No goals recorded" is hardcoded directly into the template.
 - Destructive Undo Without Confirmation: Instant undo is retained for speed; deferred confirmation.
+## Deferred from: code review (2026-08-21)
+* [Review][Defer] No Visual Distinction for Buttons — Team A and Team B swap buttons use the exact same styling and icon.

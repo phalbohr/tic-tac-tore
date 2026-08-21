@@ -18,6 +18,7 @@ export interface StatsFixtures {
  * - `mockStatsLoading` — delays the response to test loading skeleton
  */
 export const test = base.extend<StatsFixtures>({
+   
   // eslint-disable-next-line no-empty-pattern
   statsFactory: async ({}, use) => {
     await use(new PersonalStatsFactory());
