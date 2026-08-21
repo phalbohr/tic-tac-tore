@@ -16,8 +16,7 @@ const isFlashing = ref(false)
 let flashTimer: any = null
 
 const handleTouch = () => {
-
-  if (navigator.vibrate) {
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
     navigator.vibrate([50])
   }
 
@@ -37,12 +36,12 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="flex items-center justify-center border border-gray-800 transition-colors duration-100 touch-manipulation select-none"
+    class="flex items-center justify-center border border-gray-800 transition-colors duration-100 touch-manipulation select-none p-6"
     :class="isFlashing ? 'ch-bg-green-500' : 'ch-bg-gray-800'"
     @pointerdown.prevent="handleTouch"
     :data-testid="`quadrant-${role}`"
   >
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center px-6 text-center">
       <span class="font-bold text-2xl ch-text-white">{{ playerName }}</span>
       <span class="text-base ch-text-gray-400">{{ role }}</span>
     </div>

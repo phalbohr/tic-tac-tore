@@ -82,7 +82,7 @@ development_status:
   epic-5: in-progress
   5-1-real-time-scoring-interface-landscape: done
   5-2-live-activity-timeline-and-undo: review
-  5-3-live-position-swapping: in-progress
+  5-3-live-position-swapping: review
   5-4-third-party-referee-mode: backlog
   5-5-screen-wake-lock-and-continuity: backlog
   epic-5-retrospective: optional

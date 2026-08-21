@@ -82,9 +82,10 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
 
   const swapPositions = (team: 'teamA' | 'teamB') => {
     const targetTeam = team === 'teamA' ? teamA : teamB
-    const temp = targetTeam.value.attacker
-    targetTeam.value.attacker = targetTeam.value.defender
-    targetTeam.value.defender = temp
+    const tempAttacker = { ...targetTeam.value.attacker }
+    const tempDefender = { ...targetTeam.value.defender }
+    targetTeam.value.attacker = tempDefender
+    targetTeam.value.defender = tempAttacker
   }
 
   return {

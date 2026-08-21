@@ -3,7 +3,7 @@ baseline_commit: 86c186d1da6d6132c4fcd1b65f846cba198beee3
 ---
 # Story 5.3: Live Position Swapping
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -79,14 +79,14 @@ so that player-level stats are correct.
 ### Review Findings
 
 - [x] [Review][Dismiss] Missing Pause/Timeout Constraint — Dismissed: leave it up to the player.
-- [ ] [Review][Patch] UI Overlap — Add padding to quadrants to prevent text overlap with swap buttons.
-- [ ] [Review][Patch] SSR ReferenceError on navigator.vibrate [`frontend/src/features/match/LiveMatch.vue:38`]
-- [ ] [Review][Patch] Store State Mutation (References vs IDs) [`frontend/src/stores/liveMatch.ts:84`]
-- [ ] [Review][Patch] Incomplete E2E assertions for Swap Button Placement [`frontend/e2e/real-time-scoring-interface.spec.ts`]
-- [ ] [Review][Patch] Unrelated File Modification (Whitespace) [`frontend/e2e/support/fixtures/stats-fixture.ts:21`]
-- [ ] [Review][Patch] Inconsistent Test Interactions (click vs tap) [`frontend/e2e/real-time-scoring-interface.spec.ts`]
-- [ ] [Review][Patch] Inconsistent ATDD Checklist Status [`_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md`]
-- [ ] [Review][Patch] Disproportionate Icon Size [`frontend/src/features/match/LiveMatch.vue`]
+- [x] [Review][Patch] UI Overlap — Add padding to quadrants to prevent text overlap with swap buttons.
+- [x] [Review][Patch] SSR ReferenceError on navigator.vibrate [`frontend/src/features/match/LiveMatch.vue:38`]
+- [x] [Review][Patch] Store State Mutation (References vs IDs) [`frontend/src/stores/liveMatch.ts:84`]
+- [x] [Review][Patch] Incomplete E2E assertions for Swap Button Placement [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [x] [Review][Patch] Unrelated File Modification (Whitespace) [`frontend/e2e/support/fixtures/stats-fixture.ts:21`]
+- [x] [Review][Patch] Inconsistent Test Interactions (click vs tap) [`frontend/e2e/real-time-scoring-interface.spec.ts`]
+- [x] [Review][Patch] Inconsistent ATDD Checklist Status [`_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md`]
+- [x] [Review][Patch] Disproportionate Icon Size [`frontend/src/features/match/LiveMatch.vue`]
 - [x] [Review][Defer] No Visual Distinction for Buttons — deferred, pre-existing
 
 ## Dev Agent Record
@@ -96,24 +96,43 @@ so that player-level stats are correct.
 - Reorder landscape grid layout in `frontend/src/features/match/LiveMatch.vue`: Team B (defender/attacker) on top row, Team A (attacker/defender) on bottom row.
 - Add centered, accessible swap buttons (56x56dp minimum touch target) with event propagation isolation (`@pointerdown.stop`, `@click.stop`).
 - Activate unit tests in `frontend/tests/unit/liveMatch.spec.ts` and E2E tests in `frontend/e2e/real-time-scoring-interface.spec.ts`.
+- Address code review findings (SSR safety, object copying, UI padding, icon sizing, E2E assertion coverage, whitespace cleanup).
 - Execute full local CI verification (`./scripts/ci-local.sh`).
 
 ### Debug Log
 - Verified red-green test cycle for unit tests in `frontend/tests/unit/liveMatch.spec.ts`.
 - Verified 27 Playwright tests in `frontend/e2e/real-time-scoring-interface.spec.ts` turning green.
-- Verified `./scripts/ci-local.sh` full suite passing (329 backend unit tests + 265 frontend unit tests + 95 E2E tests).
+- Addressed all 7 review patch findings:
+  - Added padding (`p-6`, `px-6`) to `LiveQuadrant.vue` to prevent UI text overlap with center swap buttons.
+  - Guarded `navigator.vibrate` calls with SSR-safe checks (`typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'`).
+  - Swapped positions via object cloning in `liveMatch.ts` to avoid reference mutation bugs.
+  - Increased swap SVG icon size to `w-7 h-7` for proportional balance inside 56x56dp buttons.
+  - Removed accidental whitespace edit in `frontend/e2e/support/fixtures/stats-fixture.ts`.
+  - Switched E2E touch interactions from `.click()` to `.tap()` consistently in touch mode.
+  - Added comprehensive spatial assertions for swap button centering and quadrant rows in E2E tests.
+  - Synchronized ATDD checklist status to green phase complete.
+- Executed full local CI verification (`./scripts/ci-local.sh`).
 
 ### Completion Notes
 - Implemented `swapPositions(team)` in `useLiveMatchStore` to swap attacker/defender for either team.
 - Corrected landscape grid order in `LiveMatch.vue`: Team B on top row, Team A on bottom row.
-- Added centered swap action buttons with 56x56dp touch targets, SVG bidirectional swap icons, aria-labels, and test IDs `swap-team-a-btn` / `swap-team-b-btn`.
+- Added centered swap action buttons with 56x56dp touch targets, SVG bidirectional swap icons (`w-7 h-7`), aria-labels, and test IDs `swap-team-a-btn` / `swap-team-b-btn`.
 - Verified isolation of touch events preventing accidental goal scoring when tapping swap buttons.
+- ✅ Resolved review finding [Patch]: UI Overlap (added quadrant padding in LiveQuadrant.vue).
+- ✅ Resolved review finding [Patch]: SSR ReferenceError on navigator.vibrate (added SSR guard in LiveMatch.vue and LiveQuadrant.vue).
+- ✅ Resolved review finding [Patch]: Store State Mutation (swapped using object cloning).
+- ✅ Resolved review finding [Patch]: Incomplete E2E assertions for Swap Button Placement (added comprehensive grid & button layout assertions).
+- ✅ Resolved review finding [Patch]: Unrelated File Modification (Whitespace) (reverted trailing spaces in stats-fixture.ts).
+- ✅ Resolved review finding [Patch]: Inconsistent Test Interactions (click vs tap) (used .tap() consistently).
+- ✅ Resolved review finding [Patch]: Inconsistent ATDD Checklist Status (updated ATDD checklist).
+- ✅ Resolved review finding [Patch]: Disproportionate Icon Size (adjusted icon to w-7 h-7).
 - All acceptance criteria AC 1, AC 2, AC 3, AC 4 verified and covered by automated tests.
 
 ## File List
 
 - `frontend/src/stores/liveMatch.ts` (modified)
 - `frontend/src/features/match/LiveMatch.vue` (modified)
+- `frontend/src/features/match/LiveQuadrant.vue` (modified)
 - `frontend/tests/unit/liveMatch.spec.ts` (modified)
 - `frontend/e2e/real-time-scoring-interface.spec.ts` (modified)
 - `_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md` (modified)
@@ -123,6 +142,7 @@ so that player-level stats are correct.
 ## Change Log
 
 - 2026-08-21: Implemented Story 5.3 live position swapping (store logic, UI layout correction, centered swap buttons with touch target >=56dp, unit & Playwright E2E tests).
+- 2026-08-21: Addressed code review findings (SSR safety, store state cloning, UI padding, icon proportion, E2E assertion coverage, whitespace cleanup).
 
 ## Dev Notes
 
