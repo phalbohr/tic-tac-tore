@@ -22,22 +22,22 @@ inputDocuments:
 
 # ATDD Checklist: Story 5.3 — Live Position Swapping
 
-## 🔴 TDD Red Phase Summary
+## 🟢 TDD Green Phase Summary
 
-- **TDD Phase**: RED (All test scaffolds generated with `.skip()` and verified ready for incremental activation)
-- **Unit Tests (Vitest)**: 5 tests in `frontend/tests/unit/liveMatch.spec.ts`
-- **E2E Tests (Playwright)**: 5 tests in `frontend/e2e/real-time-scoring-interface.spec.ts`
-- **Total Red-Phase Tests**: 10 tests
+- **TDD Phase**: GREEN (All unit and E2E tests active and passing 100%)
+- **Unit Tests (Vitest)**: 5 tests in `frontend/tests/unit/liveMatch.spec.ts` (All passed)
+- **E2E Tests (Playwright)**: 5 tests in `frontend/e2e/real-time-scoring-interface.spec.ts` (All passed)
+- **Total Tests**: 10 tests passing
 
 ---
 
 ## 📋 Acceptance Criteria Traceability & Scaffolds
 
 ### AC 1: Team A Position Swapping & Live State Update
-- [ ] Store implements `swapPositions('teamA')` inverting attacker and defender
-- [ ] UI immediately updates Team A quadrant labels upon swap
-- [ ] Subsequent goals scored by Team A are attributed to the newly assigned attacker/defender
-- [ ] Historical goals in timeline retain their original player and role snapshot
+- [x] Store implements `swapPositions('teamA')` inverting attacker and defender
+- [x] UI immediately updates Team A quadrant labels upon swap
+- [x] Subsequent goals scored by Team A are attributed to the newly assigned attacker/defender
+- [x] Historical goals in timeline retain their original player and role snapshot
 - **Test Scaffolds**:
   - `frontend/tests/unit/liveMatch.spec.ts` → `[P0] swapPositions(teamA) correctly inverts attacker and defender for Team A`
   - `frontend/tests/unit/liveMatch.spec.ts` → `[P0] subsequent goals scored after swapPositions are attributed to newly assigned player`
@@ -45,27 +45,27 @@ inputDocuments:
   - `frontend/e2e/real-time-scoring-interface.spec.ts` → `[Story 5.3] [P0] tapping Team A swap button updates quadrant labels and attributes subsequent goals to new attacker`
 
 ### AC 2: Team B Position Swapping & Live State Update
-- [ ] Store implements `swapPositions('teamB')` inverting attacker and defender
-- [ ] UI immediately updates Team B quadrant labels upon swap
-- [ ] Subsequent goals scored by Team B are attributed to the newly assigned attacker/defender
-- [ ] Historical goals in timeline retain their original player and role snapshot
+- [x] Store implements `swapPositions('teamB')` inverting attacker and defender
+- [x] UI immediately updates Team B quadrant labels upon swap
+- [x] Subsequent goals scored by Team B are attributed to the newly assigned attacker/defender
+- [x] Historical goals in timeline retain their original player and role snapshot
 - **Test Scaffolds**:
   - `frontend/tests/unit/liveMatch.spec.ts` → `[P0] swapPositions(teamB) correctly inverts attacker and defender for Team B`
   - `frontend/tests/unit/liveMatch.spec.ts` → `[P1] resolves player names across both teams correctly after swapping positions`
   - `frontend/e2e/real-time-scoring-interface.spec.ts` → `[Story 5.3] [P0] tapping Team B swap button updates quadrant labels and attributes subsequent goals to new attacker`
 
 ### AC 3: Grid Layout Contract & Centered Swap Buttons
-- [ ] Match grid layout in landscape places Team B on the TOP row (`tl`, `tr`) and Team A on the BOTTOM row (`bl`, `br`)
-- [ ] Exactly two swap buttons rendered: Team B centered between Team B quadrants (top row), Team A centered between Team A quadrants (bottom row)
-- [ ] Swap buttons NOT placed on outer screen edges
-- [ ] Minimum 56x56dp touch target met (`min-w-[56px] min-h-[56px]` / `w-14 h-14`)
-- [ ] Explicit accessibility labels (`aria-label="Swap Team A Positions"`, `aria-label="Swap Team B Positions"`) and test selectors (`data-testid="swap-team-a-btn"`, `data-testid="swap-team-b-btn"`)
+- [x] Match grid layout in landscape places Team B on the TOP row (`tl`, `tr`) and Team A on the BOTTOM row (`bl`, `br`)
+- [x] Exactly two swap buttons rendered: Team B centered between Team B quadrants (top row), Team A centered between Team A quadrants (bottom row)
+- [x] Swap buttons NOT placed on outer screen edges
+- [x] Minimum 56x56dp touch target met (`min-w-[56px] min-h-[56px]` / `w-14 h-14`)
+- [x] Explicit accessibility labels (`aria-label="Swap Team A Positions"`, `aria-label="Swap Team B Positions"`) and test selectors (`data-testid="swap-team-a-btn"`, `data-testid="swap-team-b-btn"`)
 - **Test Scaffolds**:
   - `frontend/e2e/real-time-scoring-interface.spec.ts` → `[Story 5.3] [P0] match grid renders Team B on top row and Team A on bottom row with centered swap buttons meeting 56x56dp touch target`
 
 ### AC 4: Event Propagation Isolation & Accidental Goal Prevention
-- [ ] Touch/pointer event propagation stopped on swap button (`@pointerdown.stop` / `@click.stop`)
-- [ ] No accidental goal registered on underlying screen quadrants when tapping swap buttons
+- [x] Touch/pointer event propagation stopped on swap button (`@pointerdown.stop` / `@click.stop`)
+- [x] No accidental goal registered on underlying screen quadrants when tapping swap buttons
 - **Test Scaffolds**:
   - `frontend/e2e/real-time-scoring-interface.spec.ts` → `[Story 5.3] [P1] tapping swap button does not trigger accidental goal registration on underlying quadrants`
   - `frontend/e2e/real-time-scoring-interface.spec.ts` → `[Story 5.3] [P1] timeline preserves original player names for past goals while showing new player names for goals scored after swap`

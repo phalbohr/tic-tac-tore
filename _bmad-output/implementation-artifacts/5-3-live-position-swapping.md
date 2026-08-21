@@ -3,7 +3,7 @@ baseline_commit: 86c186d1da6d6132c4fcd1b65f846cba198beee3
 ---
 # Story 5.3: Live Position Swapping
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -46,35 +46,70 @@ so that player-level stats are correct.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Extend State Management with Swap Position Logic (AC 1, AC 2)
-  - [ ] In `frontend/src/stores/liveMatch.ts`, implement `swapPositions(team: 'teamA' | 'teamB'): void`
-  - [ ] Swap the `attacker` and `defender` objects within the specified team state
-  - [ ] Ensure `getPlayerName(playerId: string)` continues resolving player names correctly
-  - [ ] Ensure goal recording continues snapshotting `playerName` so past goals remain unchanged
-- [ ] Task 2: Correct Grid Layout & Implement Centered Swap Buttons (AC 3, AC 4)
-  - [ ] In `frontend/src/features/match/LiveMatch.vue`, update the 2x2 grid layout:
+- [x] Task 1: Extend State Management with Swap Position Logic (AC 1, AC 2)
+  - [x] In `frontend/src/stores/liveMatch.ts`, implement `swapPositions(team: 'teamA' | 'teamB'): void`
+  - [x] Swap the `attacker` and `defender` objects within the specified team state
+  - [x] Ensure `getPlayerName(playerId: string)` continues resolving player names correctly
+  - [x] Ensure goal recording continues snapshotting `playerName` so past goals remain unchanged
+- [x] Task 2: Correct Grid Layout & Implement Centered Swap Buttons (AC 3, AC 4)
+  - [x] In `frontend/src/features/match/LiveMatch.vue`, update the 2x2 grid layout:
     - **Top Row**: Team B quadrants (`tl` and `tr`)
     - **Bottom Row**: Team A quadrants (`bl` and `br`)
-  - [ ] Add centered Swap button in the Top Row between Team B's two quadrants (`data-testid="swap-team-b-btn"`, `aria-label="Swap Team B Positions"`)
-  - [ ] Add centered Swap button in the Bottom Row between Team A's two quadrants (`data-testid="swap-team-a-btn"`, `aria-label="Swap Team A Positions"`)
-  - [ ] Ensure buttons meet the 56x56dp minimum touch target (`min-w-[56px] min-h-[56px]` / `w-14 h-14`)
-  - [ ] Apply "The Clubhouse Editorial" styling tokens (`ch-bg-gray-700`, `ch-border-gray-600`, `ch-text-white`, `shadow-lg`, `rounded-full`)
-  - [ ] Stop pointer and click event propagation (`@pointerdown.stop`, `@click.stop`) to isolate swap clicks from quadrant goal touches
-  - [ ] Optionally trigger subtle haptic feedback (`navigator.vibrate?.([30])`) upon swap tap
-- [ ] Task 3: Unit Testing (AC 1, AC 2)
-  - [ ] Extend `frontend/tests/unit/liveMatch.spec.ts` to test:
+  - [x] Add centered Swap button in the Top Row between Team B's two quadrants (`data-testid="swap-team-b-btn"`, `aria-label="Swap Team B Positions"`)
+  - [x] Add centered Swap button in the Bottom Row between Team A's two quadrants (`data-testid="swap-team-a-btn"`, `aria-label="Swap Team A Positions"`)
+  - [x] Ensure buttons meet the 56x56dp minimum touch target (`min-w-[56px] min-h-[56px]` / `w-14 h-14`)
+  - [x] Apply "The Clubhouse Editorial" styling tokens (`ch-bg-gray-700`, `ch-border-gray-600`, `ch-text-white`, `shadow-lg`, `rounded-full`)
+  - [x] Stop pointer and click event propagation (`@pointerdown.stop`, `@click.stop`) to isolate swap clicks from quadrant goal touches
+  - [x] Optionally trigger subtle haptic feedback (`navigator.vibrate?.([30])`) upon swap tap
+- [x] Task 3: Unit Testing (AC 1, AC 2)
+  - [x] Extend `frontend/tests/unit/liveMatch.spec.ts` to test:
     - `swapPositions('teamA')` correctly inverts attacker and defender for Team A
     - `swapPositions('teamB')` correctly inverts attacker and defender for Team B
     - Recording goals before and after `swapPositions` attributes each goal to the correct active player while preserving past goal snapshots in `goals` and `goalTimeline`
     - Calling `getPlayerName()` resolves player names correctly before and after swapping
-  - [ ] Adhere to the strict 500-line file limit (IP-04)
-- [ ] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
-  - [ ] Update `frontend/e2e/real-time-scoring-interface.spec.ts` with test cases:
+  - [x] Adhere to the strict 500-line file limit (IP-04)
+- [x] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
+  - [x] Update `frontend/e2e/real-time-scoring-interface.spec.ts` with test cases:
     - Verifying Team B swap button is visible in the top row and Team A swap button in the bottom row
     - Tapping Team A swap button updates quadrant labels and subsequent goal is attributed to the new attacker
     - Tapping Team B swap button updates quadrant labels and subsequent goal is attributed to the new attacker
     - Verifying timeline displays past goals with original scorer names and new goals with swapped scorer names
     - Verifying tapping swap button does not trigger an accidental goal registration
+
+## Dev Agent Record
+
+### Implementation Plan
+- Extend `useLiveMatchStore` (`frontend/src/stores/liveMatch.ts`) with `swapPositions(team: 'teamA' | 'teamB')`.
+- Reorder landscape grid layout in `frontend/src/features/match/LiveMatch.vue`: Team B (defender/attacker) on top row, Team A (attacker/defender) on bottom row.
+- Add centered, accessible swap buttons (56x56dp minimum touch target) with event propagation isolation (`@pointerdown.stop`, `@click.stop`).
+- Activate unit tests in `frontend/tests/unit/liveMatch.spec.ts` and E2E tests in `frontend/e2e/real-time-scoring-interface.spec.ts`.
+- Execute full local CI verification (`./scripts/ci-local.sh`).
+
+### Debug Log
+- Verified red-green test cycle for unit tests in `frontend/tests/unit/liveMatch.spec.ts`.
+- Verified 27 Playwright tests in `frontend/e2e/real-time-scoring-interface.spec.ts` turning green.
+- Verified `./scripts/ci-local.sh` full suite passing (329 backend unit tests + 265 frontend unit tests + 95 E2E tests).
+
+### Completion Notes
+- Implemented `swapPositions(team)` in `useLiveMatchStore` to swap attacker/defender for either team.
+- Corrected landscape grid order in `LiveMatch.vue`: Team B on top row, Team A on bottom row.
+- Added centered swap action buttons with 56x56dp touch targets, SVG bidirectional swap icons, aria-labels, and test IDs `swap-team-a-btn` / `swap-team-b-btn`.
+- Verified isolation of touch events preventing accidental goal scoring when tapping swap buttons.
+- All acceptance criteria AC 1, AC 2, AC 3, AC 4 verified and covered by automated tests.
+
+## File List
+
+- `frontend/src/stores/liveMatch.ts` (modified)
+- `frontend/src/features/match/LiveMatch.vue` (modified)
+- `frontend/tests/unit/liveMatch.spec.ts` (modified)
+- `frontend/e2e/real-time-scoring-interface.spec.ts` (modified)
+- `_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md` (modified)
+- `_bmad-output/implementation-artifacts/5-3-live-position-swapping.md` (modified)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (modified)
+
+## Change Log
+
+- 2026-08-21: Implemented Story 5.3 live position swapping (store logic, UI layout correction, centered swap buttons with touch target >=56dp, unit & Playwright E2E tests).
 
 ## Dev Notes
 

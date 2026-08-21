@@ -80,6 +80,13 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
     return goals.value.pop()
   }
 
+  const swapPositions = (team: 'teamA' | 'teamB') => {
+    const targetTeam = team === 'teamA' ? teamA : teamB
+    const temp = targetTeam.value.attacker
+    targetTeam.value.attacker = targetTeam.value.defender
+    targetTeam.value.defender = temp
+  }
+
   return {
     goals,
     matchStartTime,
@@ -90,5 +97,6 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
     getPlayerName,
     recordGoal,
     undoLastGoal,
+    swapPositions,
   }
 })
