@@ -1,44 +1,121 @@
+---
+baseline_commit: 86c186d1da6d6132c4fcd1b65f846cba198beee3
+---
 # Story 5.3: Live Position Swapping
 
 Status: ready-for-dev
 
+<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+
 ## Story
 
-As a 2v2 participant, I want to swap positions during the match, So that player-level stats are correct.
+As a 2v2 participant,
+I want to swap positions during the match,
+so that player-level stats are correct.
 
 ## Acceptance Criteria
 
-1. **Given** live match active
-   **When** "Swap Positions" tapped (during timeout/break)
-   **Then** system updates current Attacker/Defender for subsequent goals (FR8)
+1. **Given** a live match is active
+   **When** "Swap Positions" is tapped for Team A during a timeout or pause
+   **Then** the store swaps Team A's attacker and defender player assignments
+   **And** the UI immediately updates Team A's quadrant player labels
+   **And** subsequent goals scored by Team A are attributed to the newly assigned attacker/defender (FR8)
+   **And** previously recorded goals in the timeline retain their original player and role snapshot
+
+2. **Given** a live match is active
+   **When** "Swap Positions" is tapped for Team B during a timeout or pause
+   **Then** the store swaps Team B's attacker and defender player assignments
+   **And** the UI immediately updates Team B's quadrant player labels
+   **And** subsequent goals scored by Team B are attributed to the newly assigned attacker/defender (FR8)
+   **And** previously recorded goals in the timeline retain their original player and role snapshot
+
+3. **Given** the live scoring landscape interface
+   **When** viewing the match grid
+   **Then** Team B is positioned on the TOP row (`tl` and `tr`) and Team A is positioned on the BOTTOM row (`bl` and `br`)
+   **And** exactly two swap buttons are rendered:
+     - Team B swap button centered directly between Team B attacker and defender in the TOP row
+     - Team A swap button centered directly between Team A attacker and defender in the BOTTOM row
+   **And** swap buttons are NOT placed on the outer screen edges
+   **And** swap buttons meet the minimum touch target requirement of 56x56dp (PRD Sec 7.2)
+   **And** swap buttons include explicit accessibility labels (`aria-label="Swap Team A Positions"`, `aria-label="Swap Team B Positions"`) and test selectors (`data-testid="swap-team-a-btn"`, `data-testid="swap-team-b-btn"`)
+
+4. **Given** a user taps a swap button
+   **When** the tap event occurs
+   **Then** touch and pointer event propagation is stopped (`@pointerdown.stop` / `@click.stop`)
+   **And** no accidental goal is registered on the underlying screen quadrants
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Extend State Management with Swap Position Logic
-  - [ ] Implement `swapPositions(team: 'teamA' | 'teamB')` method in `liveMatch.ts`.
-- [ ] Task 2: Fix Grid Layout & Implement Swap Buttons
-  - [ ] **CRITICAL FIX**: Ensure the grid layout correctly places **Team B in the TOP ROW** and **Team A in the BOTTOM ROW**.
-  - [ ] Add two swap buttons placed exactly in the center of their respective rows, between the Attacker and Defender.
-  - [ ] DO NOT put swap buttons on the edges of the screen.
-  - [ ] Bind swap buttons to `swapPositions` store method.
-- [ ] Task 3: Unit Testing
-  - [ ] Add unit tests in `liveMatch.spec.ts` for position swapping logic.
-- [ ] Task 4: E2E Testing
-  - [ ] Add Playwright E2E tests for tapping the swap button and recording a goal to verify the swapped player gets the goal.
+- [ ] Task 1: Extend State Management with Swap Position Logic (AC 1, AC 2)
+  - [ ] In `frontend/src/stores/liveMatch.ts`, implement `swapPositions(team: 'teamA' | 'teamB'): void`
+  - [ ] Swap the `attacker` and `defender` objects within the specified team state
+  - [ ] Ensure `getPlayerName(playerId: string)` continues resolving player names correctly
+  - [ ] Ensure goal recording continues snapshotting `playerName` so past goals remain unchanged
+- [ ] Task 2: Correct Grid Layout & Implement Centered Swap Buttons (AC 3, AC 4)
+  - [ ] In `frontend/src/features/match/LiveMatch.vue`, update the 2x2 grid layout:
+    - **Top Row**: Team B quadrants (`tl` and `tr`)
+    - **Bottom Row**: Team A quadrants (`bl` and `br`)
+  - [ ] Add centered Swap button in the Top Row between Team B's two quadrants (`data-testid="swap-team-b-btn"`, `aria-label="Swap Team B Positions"`)
+  - [ ] Add centered Swap button in the Bottom Row between Team A's two quadrants (`data-testid="swap-team-a-btn"`, `aria-label="Swap Team A Positions"`)
+  - [ ] Ensure buttons meet the 56x56dp minimum touch target (`min-w-[56px] min-h-[56px]` / `w-14 h-14`)
+  - [ ] Apply "The Clubhouse Editorial" styling tokens (`ch-bg-gray-700`, `ch-border-gray-600`, `ch-text-white`, `shadow-lg`, `rounded-full`)
+  - [ ] Stop pointer and click event propagation (`@pointerdown.stop`, `@click.stop`) to isolate swap clicks from quadrant goal touches
+  - [ ] Optionally trigger subtle haptic feedback (`navigator.vibrate?.([30])`) upon swap tap
+- [ ] Task 3: Unit Testing (AC 1, AC 2)
+  - [ ] Extend `frontend/tests/unit/liveMatch.spec.ts` to test:
+    - `swapPositions('teamA')` correctly inverts attacker and defender for Team A
+    - `swapPositions('teamB')` correctly inverts attacker and defender for Team B
+    - Recording goals before and after `swapPositions` attributes each goal to the correct active player while preserving past goal snapshots in `goals` and `goalTimeline`
+    - Calling `getPlayerName()` resolves player names correctly before and after swapping
+  - [ ] Adhere to the strict 500-line file limit (IP-04)
+- [ ] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
+  - [ ] Update `frontend/e2e/real-time-scoring-interface.spec.ts` with test cases:
+    - Verifying Team B swap button is visible in the top row and Team A swap button in the bottom row
+    - Tapping Team A swap button updates quadrant labels and subsequent goal is attributed to the new attacker
+    - Tapping Team B swap button updates quadrant labels and subsequent goal is attributed to the new attacker
+    - Verifying timeline displays past goals with original scorer names and new goals with swapped scorer names
+    - Verifying tapping swap button does not trigger an accidental goal registration
 
 ## Dev Notes
 
 ### Technical Requirements
 - **State Management (`frontend/src/stores/liveMatch.ts`):**
-  - Implement a `swapPositions(team: 'teamA' | 'teamB')` method in `liveMatch.ts`.
-  - The method should swap the `attacker` and `defender` objects within the specified team (e.g., `const temp = teamA.value.attacker; teamA.value.attacker = teamA.value.defender; teamA.value.defender = temp;`).
-- **UI Interaction (`frontend/src/features/match/LiveMatch.vue`):**
-  - **LAYOUT CORRECTION**: Ensure Team B is on the top row (`tl` and `tr`) and Team A is on the bottom row (`bl` and `br`). If the current code has this wrong, FIX IT.
-  - Add exactly two buttons to trigger position swapping.
-  - The Swap button for Team B must be in the **center of the TOP row** (between Team B's Attacker and Defender).
-  - The Swap button for Team A must be in the **center of the BOTTOM row** (between Team A's Attacker and Defender).
-  - DO NOT put buttons on the edges.
-  - `data-testid="swap-team-a-btn"` and `data-testid="swap-team-b-btn"`.
+  - Implement `swapPositions(team: 'teamA' | 'teamB'): void`:
+    ```typescript
+    const swapPositions = (team: 'teamA' | 'teamB') => {
+      const targetTeam = team === 'teamA' ? teamA : teamB
+      const temp = targetTeam.value.attacker
+      targetTeam.value.attacker = targetTeam.value.defender
+      targetTeam.value.defender = temp
+    }
+    ```
+  - `recordGoal` snapshots `playerName: getPlayerName(playerId)` at score time. Swapping positions changes `teamA.value` / `teamB.value` for subsequent goals without mutating already recorded `Goal` objects in `goals.value`.
+  - `getPlayerName(playerId)` checks both `attacker.id` and `defender.id` for each team, remaining fully valid regardless of swap count.
+
+- **Grid Layout Correction & Placement (`frontend/src/features/match/LiveMatch.vue`):**
+  - **Grid Layout Contract (Landscape)**:
+    - **Top Row (Row 1 - Team B)**:
+      - Left (`tl`): `teamB.defender` (or assigned quadrant role)
+      - Center: Team B Swap Button (`data-testid="swap-team-b-btn"`)
+      - Right (`tr`): `teamB.attacker` (or assigned quadrant role)
+    - **Bottom Row (Row 2 - Team A)**:
+      - Left (`bl`): `teamA.attacker` (or assigned quadrant role)
+      - Center: Team A Swap Button (`data-testid="swap-team-a-btn"`)
+      - Right (`br`): `teamA.defender` (or assigned quadrant role)
+  - **Swap Button Specs**:
+    - Place each button in the center between the two quadrants on that row (e.g. absolute positioning centered on the row seam or relative flex divider with `z-20`).
+    - DO NOT place swap buttons on the outer screen edges.
+    - Size: Minimum 56x56dp (`w-14 h-14` / `min-w-[56px] min-h-[56px]`) to comply with PRD Section 7.2.
+    - Touch isolation: Prevent event bubbling using `@pointerdown.stop` / `@click.stop` to avoid triggering `@pointerdown.prevent` in `LiveQuadrant.vue`.
+    - Accessibility: `aria-label="Swap Team A Positions"`, `aria-label="Swap Team B Positions"`, and an intuitive SVG swap icon (bidirectional arrows).
+
+- **Test Selectors Contract:**
+  - `data-testid="swap-team-a-btn"` — Team A swap button
+  - `data-testid="swap-team-b-btn"` — Team B swap button
+  - `data-testid="quadrant-teamA.attacker"` — Team A attacker quadrant
+  - `data-testid="quadrant-teamA.defender"` — Team A defender quadrant
+  - `data-testid="quadrant-teamB.attacker"` — Team B attacker quadrant
+  - `data-testid="quadrant-teamB.defender"` — Team B defender quadrant
 
 ### Architecture Compliance
 - Use Vue 3 `<script setup lang="ts">` and Pinia setup store pattern.
@@ -46,17 +123,27 @@ As a 2v2 participant, I want to swap positions during the match, So that player-
 - All CSS styles must adhere to Tailwind CSS v4 and SCSS with `ch-` prefix where custom classes are needed.
 - No source file or test file may exceed the 500-line strict limit (IP-04).
 
-### Previous Story Intelligence (5.2)
-- The layout uses `w-screen h-screen overflow-hidden` with a `grid-cols-2 grid-rows-2`.
-- A top strip header exists for the timeline and undo button (`z-30`).
-- Ensure swap buttons are positioned so they don't obstruct quadrant tapping, for instance, by placing them centered over the gap between the two quadrants on the same row.
+### Previous Story Intelligence (5.1 & 5.2)
+- Top strip header contains `LiveActivityTimeline` and `Undo` button (`z-30`).
+- Ensure swap buttons in the grid (`z-20`) do not overlap or interfere with the top header (`z-30`).
+- Use relative match time formatting (`MM:SS`) in timeline.
+- Maintain UUID fallback (`generateUUID()`) in `liveMatch.ts`.
+- In Playwright E2E tests, use `.tap()` or `.click()` directly without brittle TouchEvent hack dispatches.
 
 ### Project Structure Notes
-- Main View: `frontend/src/features/match/LiveMatch.vue`
+- Component: `frontend/src/features/match/LiveMatch.vue`
 - Store: `frontend/src/stores/liveMatch.ts`
 - Unit Tests: `frontend/tests/unit/liveMatch.spec.ts`
 - E2E Tests: `frontend/e2e/real-time-scoring-interface.spec.ts`
 
+### ATDD Artifacts
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-5-3-live-position-swapping.md`
+- Unit Tests: `frontend/tests/unit/liveMatch.spec.ts`
+- E2E Tests: `frontend/e2e/real-time-scoring-interface.spec.ts`
+
 ### References
-- PRD FR8: "Player can swap attacker/defender positions during a live match (Phase 1.5)"
+- PRD FR8: "Player can swap teammate positions within a game during live match mode via a per-team swap button, if the active rule system permits within-game swaps (Phase 1.5)"
+- PRD Section 7.1: Screen reader accessibility and aria-labels on action buttons
+- PRD Section 7.2: Minimum 56x56dp touch targets for live action buttons
+- UX Specification: "STRICT RULE FOR LIVE MATCH LAYOUT (LANDSCAPE): Team B on TOP ROW, Team A on BOTTOM ROW, two swap buttons placed directly in the center between attacker and defender of the same team"
 - Architecture AD-06: PWA-First Infrastructure
