@@ -145,3 +145,43 @@ describe('[Story 5.3] LiveMatch Store - Position Swapping', () => {
   })
 })
 
+describe('[Story 5.4] LiveMatch Store - Referee Mode', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('[P0] isRefereeMode is false by default and can be toggled via setRefereeMode', () => {
+    const store = useLiveMatchStore()
+    expect(store.isRefereeMode).toBe(false)
+    store.setRefereeMode(true)
+    expect(store.isRefereeMode).toBe(true)
+  })
+
+  it('[P0] recordGoal, undoLastGoal, and swapPositions operate identically in referee mode', () => {
+    const store = useLiveMatchStore()
+    store.setRefereeMode(true)
+
+    store.recordGoal('p1', 'teamA.attacker')
+    expect(store.goals).toHaveLength(1)
+    expect(store.canUndo).toBe(true)
+    expect(store.goalTimeline[0]).toMatchObject({
+      playerId: 'p1',
+      playerName: 'Alice',
+      quadrantRole: 'teamA.attacker',
+    })
+
+    store.swapPositions('teamA')
+    expect(store.teamA.attacker).toEqual({ id: 'p2', name: 'Bob' })
+    expect(store.goalTimeline[0].playerName).toBe('Alice')
+
+    store.recordGoal('p2', 'teamA.attacker')
+    expect(store.goals).toHaveLength(2)
+    expect(store.goalTimeline[1].playerName).toBe('Bob')
+
+    const undone = store.undoLastGoal()
+    expect(undone?.playerId).toBe('p2')
+    expect(store.goals).toHaveLength(1)
+  })
+})
+
+
