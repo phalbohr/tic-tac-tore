@@ -88,16 +88,24 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
     targetTeam.value.defender = tempAttacker
   }
 
+  const isRefereeMode = ref(false)
+
+  const setRefereeMode = (val: boolean) => {
+    isRefereeMode.value = val
+  }
+
   return {
     goals,
     matchStartTime,
     teamA,
     teamB,
+    isRefereeMode,
     canUndo,
     goalTimeline,
     getPlayerName,
     recordGoal,
     undoLastGoal,
     swapPositions,
+    setRefereeMode,
   }
 })

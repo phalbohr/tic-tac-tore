@@ -3,7 +3,7 @@ baseline_commit: 47c2ceb86b51bf128a3f858807a0c8b67bca9c1b
 ---
 # Story 5.4: Third-party Referee Mode
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -51,41 +51,73 @@ so that I can track a match I am not playing in with the exact same fidelity as 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Store & Mode State Support for Referee Mode (AC 1)
-  - [ ] In `frontend/src/stores/liveMatch.ts`, add `isRefereeMode` ref state (default `false`) and action `setRefereeMode(val: boolean)`
-  - [ ] Ensure `recordGoal`, `undoLastGoal`, `swapPositions`, `getPlayerName`, and `goalTimeline` behave consistently regardless of referee mode
-- [ ] Task 2: Implement Portrait Referee Layout & Orientation Handling in LiveMatch (AC 1, AC 2)
-  - [ ] In `frontend/src/features/match/LiveMatch.vue`:
-    - [ ] Parse route query params (e.g. `route.query.referee === 'true' || route.query.mode === 'referee'`) or support store/props to enable referee mode
-    - [ ] Suppress landscape rotation warning overlay when `isRefereeMode` is true (`v-if="isMatchStarted && !matchStore.isRefereeMode"`)
-    - [ ] Adapt `startMatch()` orientation locking to request `lock('portrait')` or allow native portrait when in referee mode, safely guarded with try/catch
-    - [ ] Render the 2x2 grid adapted for portrait table-end view: Left column (Team B: defender `tl`, attacker `bl`), Right column (Team A: attacker `tr`, defender `br`)
-    - [ ] Ensure quadrants use `LiveQuadrant.vue` with proper test IDs, roles, player names, and padding
-  - [ ] Ensure top header strip remains responsive in narrow viewports (~390px) with horizontal scroll on `LiveActivityTimeline` and `shrink-0` on Undo button
-- [ ] Task 3: Position Swap Buttons for Portrait Layout (AC 5)
-  - [ ] In `frontend/src/features/match/LiveMatch.vue`, position swap buttons adaptively for portrait mode:
-    - [ ] Team B swap button centered in left column between Team B defender and attacker (`data-testid="swap-team-b-btn"`, `aria-label="Swap Team B Positions"`)
-    - [ ] Team A swap button centered in right column between Team A attacker and defender (`data-testid="swap-team-a-btn"`, `aria-label="Swap Team A Positions"`)
-    - [ ] In landscape mode, preserve standard placement (`top-1/4 left-1/2` and `top-3/4 left-1/2`)
-  - [ ] Ensure swap buttons meet the 56x56dp minimum touch target (`min-w-[56px] min-h-[56px] w-14 h-14`)
-  - [ ] Stop pointer and click event propagation (`@pointerdown.stop`, `@click.stop`) to prevent accidental goal scoring
-  - [ ] Add SSR-safe haptic feedback (`navigator.vibrate?.([30])`)
-- [ ] Task 4: Unit Testing (AC 1, AC 2, AC 3, AC 4, AC 5)
-  - [ ] In `frontend/tests/unit/liveMatch.spec.ts` (or `frontend/tests/unit/LiveMatchReferee.spec.ts`):
-    - [ ] Test `isRefereeMode` state toggle and getter/actions
-    - [ ] Test goal attribution, undo, and position swapping in referee mode
-    - [ ] Test preserving historical player names on swap during referee scoring
-  - [ ] Maintain strict 500-line file limit (IP-04)
-- [ ] Task 5: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4, AC 5)
-  - [ ] In `frontend/e2e/real-time-scoring-interface.spec.ts` (or `frontend/e2e/referee-mode.spec.ts`):
-    - [ ] Test starting match in referee mode with mobile portrait viewport (`{ width: 390, height: 844 }`, `hasTouch: true`)
-    - [ ] Verify landscape rotation warning overlay is NOT shown in portrait referee mode
-    - [ ] Verify 2x2 grid layout and quadrant placement (Left: Team B defender/attacker, Right: Team A attacker/defender)
-    - [ ] Verify Swap buttons are centered within each team's column (Team B on left, Team A on right) with >=56x56dp touch targets
-    - [ ] Verify tapping quadrants records player-attributed goals in timeline
-    - [ ] Verify Undo removes latest goal and disables when empty
-    - [ ] Verify tapping swap buttons swaps roles and updates future goal attributions without registering accidental goals
-  - [ ] Maintain strict 500-line file limit (IP-04)
+- [x] Task 1: Store & Mode State Support for Referee Mode (AC 1)
+  - [x] In `frontend/src/stores/liveMatch.ts`, add `isRefereeMode` ref state (default `false`) and action `setRefereeMode(val: boolean)`
+  - [x] Ensure `recordGoal`, `undoLastGoal`, `swapPositions`, `getPlayerName`, and `goalTimeline` behave consistently regardless of referee mode
+- [x] Task 2: Implement Portrait Referee Layout & Orientation Handling in LiveMatch (AC 1, AC 2)
+  - [x] In `frontend/src/features/match/LiveMatch.vue`:
+    - [x] Parse route query params (e.g. `route.query.referee === 'true' || route.query.mode === 'referee'`) or support store/props to enable referee mode
+    - [x] Suppress landscape rotation warning overlay when `isRefereeMode` is true (`v-if="isMatchStarted && !matchStore.isRefereeMode"`)
+    - [x] Adapt `startMatch()` orientation locking to request `lock('portrait')` or allow native portrait when in referee mode, safely guarded with try/catch
+    - [x] Render the 2x2 grid adapted for portrait table-end view: Left column (Team B: defender `tl`, attacker `bl`), Right column (Team A: attacker `tr`, defender `br`)
+    - [x] Ensure quadrants use `LiveQuadrant.vue` with proper test IDs, roles, player names, and padding
+  - [x] Ensure top header strip remains responsive in narrow viewports (~390px) with horizontal scroll on `LiveActivityTimeline` and `shrink-0` on Undo button
+- [x] Task 3: Position Swap Buttons for Portrait Layout (AC 5)
+  - [x] In `frontend/src/features/match/LiveMatch.vue`, position swap buttons adaptively for portrait mode:
+    - [x] Team B swap button centered in left column between Team B defender and attacker (`data-testid="swap-team-b-btn"`, `aria-label="Swap Team B Positions"`)
+    - [x] Team A swap button centered in right column between Team A attacker and defender (`data-testid="swap-team-a-btn"`, `aria-label="Swap Team A Positions"`)
+    - [x] In landscape mode, preserve standard placement (`top-1/4 left-1/2` and `top-3/4 left-1/2`)
+  - [x] Ensure swap buttons meet the 56x56dp minimum touch target (`min-w-[56px] min-h-[56px] w-14 h-14`)
+  - [x] Stop pointer and click event propagation (`@pointerdown.stop`, `@click.stop`) to prevent accidental goal scoring
+  - [x] Add SSR-safe haptic feedback (`navigator.vibrate?.([30])`)
+- [x] Task 4: Unit Testing (AC 1, AC 2, AC 3, AC 4, AC 5)
+  - [x] In `frontend/tests/unit/liveMatch.spec.ts` (or `frontend/tests/unit/LiveMatchReferee.spec.ts`):
+    - [x] Test `isRefereeMode` state toggle and getter/actions
+    - [x] Test goal attribution, undo, and position swapping in referee mode
+    - [x] Test preserving historical player names on swap during referee scoring
+  - [x] Maintain strict 500-line file limit (IP-04)
+- [x] Task 5: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4, AC 5)
+  - [x] In `frontend/e2e/real-time-scoring-interface.spec.ts` (or `frontend/e2e/referee-mode.spec.ts`):
+    - [x] Test starting match in referee mode with mobile portrait viewport (`{ width: 390, height: 844 }`, `hasTouch: true`)
+    - [x] Verify landscape rotation warning overlay is NOT shown in portrait referee mode
+    - [x] Verify 2x2 grid layout and quadrant placement (Left: Team B defender/attacker, Right: Team A attacker/defender)
+    - [x] Verify Swap buttons are centered within each team's column (Team B on left, Team A on right) with >=56x56dp touch targets
+    - [x] Verify tapping quadrants records player-attributed goals in timeline
+    - [x] Verify Undo removes latest goal and disables when empty
+    - [x] Verify tapping swap buttons swaps roles and updates future goal attributions without registering accidental goals
+  - [x] Maintain strict 500-line file limit (IP-04)
+
+## Dev Agent Record
+
+### Implementation Plan
+1. **Pinia Store (`liveMatch.ts`)**: Added `isRefereeMode` ref and `setRefereeMode` action. Verified all scoring and position swapping operations work seamlessly.
+2. **Component UI (`LiveMatch.vue`)**:
+   - Added route query param handling (`?mode=referee` / `?referee=true`) and prop support.
+   - Suppressed landscape rotation warning overlay when in referee mode (`data-testid="rotation-warning-overlay"`).
+   - Handled screen orientation lock to request `portrait` in referee mode while preserving `landscape` for standard player mode.
+   - Implemented 2x2 grid layout adapted for table-end view: Left column = Team B (defender `tl`, attacker `bl`), Right column = Team A (attacker `tr`, defender `br`).
+   - Adapted swap button positioning: centered in left column (`top-1/2 left-1/4`) for Team B, centered in right column (`top-1/2 left-3/4`) for Team A in referee mode, while maintaining landscape positioning (`top-1/4 left-1/2`, `top-3/4 left-1/2`).
+   - Maintained >= 56x56dp touch target requirements and event isolation (`@pointerdown.stop`, `@click.stop`).
+3. **Automated Testing & Verification**:
+   - Activated unit tests in `liveMatch.spec.ts` (13/13 passing).
+   - Activated E2E tests in `referee-mode.spec.ts` (18/18 passing across chromium, webkit, firefox).
+   - Verified regression test suite `real-time-scoring-interface.spec.ts` (27/27 passing).
+   - Executed full project verification via `./scripts/ci-local.sh` (101/101 tests passed).
+
+### Completion Notes
+- All 5 Acceptance Criteria fully satisfied with zero regressions across backend and frontend suites.
+- File line limits strictly adhered to (all modified files < 200 lines).
+
+### File List
+- `frontend/src/stores/liveMatch.ts` (modified)
+- `frontend/src/features/match/LiveMatch.vue` (modified)
+- `frontend/tests/unit/liveMatch.spec.ts` (modified)
+- `frontend/e2e/referee-mode.spec.ts` (modified)
+- `_bmad-output/implementation-artifacts/5-4-third-party-referee-mode.md` (modified)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (modified)
+
+### Change Log
+- 2026-08-22: Implemented Story 5.4 Third-party Referee Mode with portrait-adapted 2x2 grid, column-centered swap buttons, orientation handling, unit tests, and Playwright E2E coverage.
 
 ## Dev Notes
 

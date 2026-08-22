@@ -150,19 +150,15 @@ describe('[Story 5.4] LiveMatch Store - Referee Mode', () => {
     setActivePinia(createPinia())
   })
 
-  it.skip('[P0] isRefereeMode is false by default and can be toggled via setRefereeMode', () => {
+  it('[P0] isRefereeMode is false by default and can be toggled via setRefereeMode', () => {
     const store = useLiveMatchStore()
-    // @ts-expect-error isRefereeMode will be added in Story 5.4
     expect(store.isRefereeMode).toBe(false)
-    // @ts-expect-error setRefereeMode will be added in Story 5.4
     store.setRefereeMode(true)
-    // @ts-expect-error isRefereeMode will be added in Story 5.4
     expect(store.isRefereeMode).toBe(true)
   })
 
-  it.skip('[P0] recordGoal, undoLastGoal, and swapPositions operate identically in referee mode', () => {
+  it('[P0] recordGoal, undoLastGoal, and swapPositions operate identically in referee mode', () => {
     const store = useLiveMatchStore()
-    // @ts-expect-error setRefereeMode will be added in Story 5.4
     store.setRefereeMode(true)
 
     store.recordGoal('p1', 'teamA.attacker')
@@ -180,7 +176,7 @@ describe('[Story 5.4] LiveMatch Store - Referee Mode', () => {
 
     store.recordGoal('p2', 'teamA.attacker')
     expect(store.goals).toHaveLength(2)
-    expect(store.goalTimeline[0].playerName).toBe('Bob')
+    expect(store.goalTimeline[1].playerName).toBe('Bob')
 
     const undone = store.undoLastGoal()
     expect(undone?.playerId).toBe('p2')

@@ -24,20 +24,20 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     })
   })
 
-  test.skip('[P0] AC1: ?mode=referee query parameter starts in portrait mode without landscape rotation overlay', async ({ page }) => {
+  test('[P0] AC1: ?mode=referee query parameter starts in portrait mode without landscape rotation overlay', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
     await startBtn.tap()
 
     const rotationOverlay = page.getByTestId('rotation-warning-overlay')
-    await expect(rotationOverlay).not.toBeVisible()
+    await expect(rotationOverlay).toBeHidden()
 
     const matchGrid = page.getByTestId('match-grid')
     await expect(matchGrid).toBeVisible()
   })
 
-  test.skip('[P0] AC2: renders 2x2 grid representing table viewed from the end (Left: Team B defender/attacker, Right: Team A attacker/defender)', async ({ page }) => {
+  test('[P0] AC2: renders 2x2 grid representing table viewed from the end (Left: Team B defender/attacker, Right: Team A attacker/defender)', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -67,7 +67,7 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     expect(boxAAtt?.y).toBeLessThan(boxADef?.y || 0)
   })
 
-  test.skip('[P0] AC2 & AC3: tapping quadrants attributes goals to player and role in live timeline', async ({ page }) => {
+  test('[P0] AC2 & AC3: tapping quadrants attributes goals to player and role in live timeline', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -82,7 +82,7 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     await expect(timelineItems.first()).toContainText('teamA.attacker')
   })
 
-  test.skip('[P0] AC4: undo button removes last goal and disables when empty in referee mode', async ({ page }) => {
+  test('[P0] AC4: undo button removes last goal and disables when empty in referee mode', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -100,7 +100,7 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     await expect(undoBtn).toBeDisabled()
   })
 
-  test.skip('[P0] AC5: swap buttons positioned centered in respective columns meeting 56x56dp touch targets', async ({ page }) => {
+  test('[P0] AC5: swap buttons positioned centered in respective columns meeting 56x56dp touch targets', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
@@ -129,7 +129,7 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     expect(Math.abs((boxSwapA?.x || 0) - (quadAAtt?.x || 0))).toBeLessThan((quadAAtt?.width || 0))
   })
 
-  test.skip('[P1] AC5: tapping swap button updates future goal attribution without accidental goal registration', async ({ page }) => {
+  test('[P1] AC5: tapping swap button updates future goal attribution without accidental goal registration', async ({ page }) => {
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
