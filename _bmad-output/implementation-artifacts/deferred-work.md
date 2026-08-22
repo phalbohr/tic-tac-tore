@@ -406,3 +406,8 @@ status: open
 - DRY violation with LiveQuadrant components [frontend/src/features/match/LiveMatch.vue:103-169] — deferred, pre-existing
 - Undo button touch target size below 56x56dp [frontend/src/features/match/LiveMatch.vue:92] — deferred, pre-existing
 - Swap buttons absolute positioning ruins focus order [frontend/src/features/match/LiveMatch.vue:173-208] — deferred, pre-existing
+
+## Deferred from: code review of 5-5-screen-wake-lock-and-continuity.md (2026-08-23)
+- Fragile Unmount Simulation in E2E test [frontend/e2e/wake-lock-continuity.spec.ts]
+- Ineffective Fallback Assertions in AC4 [frontend/e2e/wake-lock-continuity.spec.ts]
+- Brittle Mock Restoration in unit tests [frontend/tests/unit/useWakeLock.spec.ts]

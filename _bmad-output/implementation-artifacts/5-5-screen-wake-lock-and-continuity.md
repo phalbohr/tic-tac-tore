@@ -4,7 +4,7 @@ baseline_commit: 361daf87016b97fa3cdf185e1928c69217b03e5a
 
 # Story 5.5: Screen Wake Lock & Continuity
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -169,3 +169,14 @@ Gemini 3.7 Flash
 ### Change Log
 
 - **2026-08-22**: Implemented Story 5.5 Screen Wake Lock & Continuity, completed all unit & E2E tests, verified full local CI.
+
+### Review Findings
+- [ ] [Review][Patch] Race condition between request() and release() allows wake lock to leak [frontend/src/composables/useWakeLock.ts]
+- [ ] [Review][Patch] Multiple request() calls overwrite sentinel and leak locks [frontend/src/composables/useWakeLock.ts]
+- [ ] [Review][Patch] LiveMatch.vue calls release() instead of cleanup() on unmount [frontend/src/features/match/LiveMatch.vue]
+- [ ] [Review][Patch] Invalid mock assertions in LiveMatchComponent.spec.ts [frontend/tests/unit/LiveMatchComponent.spec.ts]
+- [ ] [Review][Patch] mockSentinel swallows addEventListener callback in E2E tests [frontend/e2e/wake-lock-continuity.spec.ts]
+- [ ] [Review][Patch] Stray `+` character injected into E2E test file [frontend/e2e/wake-lock-continuity.spec.ts]
+- [x] [Review][Defer] Fragile Unmount Simulation in E2E test [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
+- [x] [Review][Defer] Ineffective Fallback Assertions in AC4 [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
+- [x] [Review][Defer] Brittle Mock Restoration in unit tests [frontend/tests/unit/useWakeLock.spec.ts] — deferred, pre-existing
