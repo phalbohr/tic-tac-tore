@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLiveMatchStore } from '@/stores/liveMatch'
+import { useAuthStore } from '@/stores/auth'
 import LiveQuadrant from './LiveQuadrant.vue'
 import LiveActivityTimeline from './LiveActivityTimeline.vue'
 
@@ -20,13 +21,55 @@ const props = withDefaults(
 
 const route = useRoute()
 const matchStore = useLiveMatchStore()
+const authStore = useAuthStore()
 const isMatchStarted = ref(false)
 const liveMatchContainer = ref<HTMLElement | null>(null)
 
+const isQueryReferee = computed(() => {
+  const referee = route?.query?.referee
+  const mode = route?.query?.mode
+  const refereeMatches = Array.isArray(referee) ? referee.includes('true') : referee === 'true'
+  const modeMatches = Array.isArray(mode) ? mode.includes('referee') : mode === 'referee'
+  return refereeMatches || modeMatches
+})
+
+const isAutoReferee = computed(() => {
+  if (!authStore.isAuthenticated || !authStore.profile) return false
+  const user = authStore.profile
+  const playerIds = [
+    matchStore.teamA.attacker.id,
+    matchStore.teamA.defender.id,
+    matchStore.teamB.attacker.id,
+    matchStore.teamB.defender.id,
+  ]
+  const playerNames = [
+    matchStore.teamA.attacker.name,
+    matchStore.teamA.defender.name,
+    matchStore.teamB.attacker.name,
+    matchStore.teamB.defender.name,
+  ]
+  const isParticipant =
+    (user.id && playerIds.includes(user.id)) ||
+    (user.nickname && playerNames.includes(user.nickname))
+  return !isParticipant
+})
+
+const isRefereeActive = computed(() => {
+  return props.refereeMode || isQueryReferee.value || isAutoReferee.value
+})
+
+watchEffect(() => {
+  matchStore.setRefereeMode(isRefereeActive.value)
+})
+
 onMounted(() => {
-  if (props.refereeMode || route.query.referee === 'true' || route.query.mode === 'referee') {
-    matchStore.setRefereeMode(true)
+  if (authStore.isAuthenticated && !authStore.profile) {
+    authStore.fetchProfile()
   }
+})
+
+onUnmounted(() => {
+  matchStore.setRefereeMode(false)
 })
 
 const startMatch = async () => {

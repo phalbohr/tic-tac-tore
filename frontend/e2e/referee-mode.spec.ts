@@ -58,13 +58,50 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     const boxAAtt = await quadAAtt.boundingBox()
     const boxADef = await quadADef.boundingBox()
 
+    expect(boxBDef).not.toBeNull()
+    expect(boxBAtt).not.toBeNull()
+    expect(boxAAtt).not.toBeNull()
+    expect(boxADef).not.toBeNull()
+
     // Left column: Team B defender (top-left) above Team B attacker (bottom-left)
-    expect(boxBDef?.x).toBeLessThan(boxAAtt?.x || 0)
-    expect(boxBAtt?.x).toBeLessThan(boxADef?.x || 0)
-    expect(boxBDef?.y).toBeLessThan(boxBAtt?.y || 0)
+    expect(boxBDef!.x).toBeLessThan(boxAAtt!.x)
+    expect(boxBAtt!.x).toBeLessThan(boxADef!.x)
+    expect(boxBDef!.y).toBeLessThan(boxBAtt!.y)
 
     // Right column: Team A attacker (top-right) above Team A defender (bottom-right)
-    expect(boxAAtt?.y).toBeLessThan(boxADef?.y || 0)
+    expect(boxAAtt!.y).toBeLessThan(boxADef!.y)
+  })
+
+  test('[P0] AC1: automatic detection enables portrait referee mode when authenticated user is not among registered players', async ({ page, baseURL }) => {
+    await page.context().addCookies([
+      {
+        name: 'TTT_SESSION',
+        value: '1',
+        url: baseURL || 'http://localhost:3000',
+      },
+    ])
+    await page.route('**/api/v1/profile/me', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'referee-user-999',
+          nickname: 'RefereeViktor',
+          avatar: 'referee.png',
+        }),
+      })
+    })
+
+    await page.goto('/live-match')
+    const startBtn = page.getByTestId('start-match-btn')
+    await startBtn.waitFor({ state: 'visible' })
+    await startBtn.tap()
+
+    const rotationOverlay = page.getByTestId('rotation-warning-overlay')
+    await expect(rotationOverlay).toBeHidden()
+
+    const matchGrid = page.getByTestId('match-grid')
+    await expect(matchGrid).toBeVisible()
   })
 
   test('[P0] AC2 & AC3: tapping quadrants attributes goals to player and role in live timeline', async ({ page }) => {
@@ -117,16 +154,21 @@ test.describe('[Story 5.4] Third-party Referee Mode', () => {
     const quadBDef = await page.getByTestId('quadrant-teamB.defender').boundingBox()
     const quadAAtt = await page.getByTestId('quadrant-teamA.attacker').boundingBox()
 
+    expect(boxSwapB).not.toBeNull()
+    expect(boxSwapA).not.toBeNull()
+    expect(quadBDef).not.toBeNull()
+    expect(quadAAtt).not.toBeNull()
+
     // 56x56dp minimum touch target
-    expect(boxSwapB?.width).toBeGreaterThanOrEqual(56)
-    expect(boxSwapB?.height).toBeGreaterThanOrEqual(56)
-    expect(boxSwapA?.width).toBeGreaterThanOrEqual(56)
-    expect(boxSwapA?.height).toBeGreaterThanOrEqual(56)
+    expect(boxSwapB!.width).toBeGreaterThanOrEqual(56)
+    expect(boxSwapB!.height).toBeGreaterThanOrEqual(56)
+    expect(boxSwapA!.width).toBeGreaterThanOrEqual(56)
+    expect(boxSwapA!.height).toBeGreaterThanOrEqual(56)
 
     // Swap B is in left column (near Team B quadrants), Swap A is in right column (near Team A quadrants)
-    expect(boxSwapB?.x).toBeLessThan(boxSwapA?.x || 0)
-    expect(Math.abs((boxSwapB?.x || 0) - (quadBDef?.x || 0))).toBeLessThan((quadBDef?.width || 0))
-    expect(Math.abs((boxSwapA?.x || 0) - (quadAAtt?.x || 0))).toBeLessThan((quadAAtt?.width || 0))
+    expect(boxSwapB!.x).toBeLessThan(boxSwapA!.x)
+    expect(Math.abs(boxSwapB!.x - quadBDef!.x)).toBeLessThan(quadBDef!.width)
+    expect(Math.abs(boxSwapA!.x - quadAAtt!.x)).toBeLessThan(quadAAtt!.width)
   })
 
   test('[P1] AC5: tapping swap button updates future goal attribution without accidental goal registration', async ({ page }) => {

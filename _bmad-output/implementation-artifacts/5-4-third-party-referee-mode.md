@@ -3,7 +3,7 @@ baseline_commit: 47c2ceb86b51bf128a3f858807a0c8b67bca9c1b
 ---
 # Story 5.4: Third-party Referee Mode
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -106,24 +106,31 @@ so that I can track a match I am not playing in with the exact same fidelity as 
 
 ### Completion Notes
 - All 5 Acceptance Criteria fully satisfied with zero regressions across backend and frontend suites.
-- File line limits strictly adhered to (all modified files < 200 lines).
+- Resolved 4 code review findings:
+  - Fixed Pinia store `isRefereeMode` lifecycle leak via reactive `computed` + `watchEffect` + `onUnmounted` reset.
+  - Implemented automatic referee mode detection when authenticated user is not registered in the 4-player match roster.
+  - Hardened route query parameter handling to support array-based queries for `mode` and `referee`.
+  - Replaced bounding box `|| 0` fallbacks in E2E tests with explicit non-null assertions and added auto-detection E2E test.
+- File line limits strictly adhered to (all modified files < 260 lines).
 
 ### File List
 - `frontend/src/stores/liveMatch.ts` (modified)
 - `frontend/src/features/match/LiveMatch.vue` (modified)
 - `frontend/tests/unit/liveMatch.spec.ts` (modified)
+- `frontend/tests/unit/LiveMatchComponent.spec.ts` (new)
 - `frontend/e2e/referee-mode.spec.ts` (modified)
 - `_bmad-output/implementation-artifacts/5-4-third-party-referee-mode.md` (modified)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (modified)
 
 ### Change Log
+- 2026-08-22: Addressed code review findings - 4 items resolved (lifecycle cleanup, auto referee detection, query array safety, E2E bounding box assertion hardening).
 - 2026-08-22: Implemented Story 5.4 Third-party Referee Mode with portrait-adapted 2x2 grid, column-centered swap buttons, orientation handling, unit tests, and Playwright E2E coverage.
 
 ## Dev Notes
 
 ### ATDD Artifacts
 - **Checklist**: [_bmad-output/test-artifacts/atdd-checklist-5-4-third-party-referee-mode.md](file:///Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/atdd-checklist-5-4-third-party-referee-mode.md)
-- **Unit Tests**: [frontend/tests/unit/liveMatch.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/liveMatch.spec.ts)
+- **Unit Tests**: [frontend/tests/unit/liveMatch.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/liveMatch.spec.ts), [frontend/tests/unit/LiveMatchComponent.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/LiveMatchComponent.spec.ts)
 - **E2E Tests**: [frontend/e2e/referee-mode.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/referee-mode.spec.ts)
 
 ### Technical Requirements
@@ -175,10 +182,10 @@ so that I can track a match I am not playing in with the exact same fidelity as 
 - **UX Design Specification (line 65)**: Persona Viktor (The Referee) — "Portrait referee view, live mode, streamlined per-match flow".
 
 ### Review Findings
-- [ ] [Review][Patch] Global Pinia store `isRefereeMode` state leak [frontend/src/features/match/LiveMatch.vue:26-30]
-- [ ] [Review][Patch] Missing automatic detection for referee mode based on user registration [frontend/src/features/match/LiveMatch.vue:26-30]
-- [ ] [Review][Patch] Route query parameter array vulnerability [frontend/src/features/match/LiveMatch.vue:27]
-- [ ] [Review][Patch] Flawed fallback logic in E2E tests for bounding box coordinates [frontend/e2e/referee-mode.spec.ts:62-67]
+- [x] [Review][Patch] Global Pinia store `isRefereeMode` state leak [frontend/src/features/match/LiveMatch.vue:26-30]
+- [x] [Review][Patch] Missing automatic detection for referee mode based on user registration [frontend/src/features/match/LiveMatch.vue:26-30]
+- [x] [Review][Patch] Route query parameter array vulnerability [frontend/src/features/match/LiveMatch.vue:27]
+- [x] [Review][Patch] Flawed fallback logic in E2E tests for bounding box coordinates [frontend/e2e/referee-mode.spec.ts:62-67]
 - [x] [Review][Defer] DRY violation with LiveQuadrant components [frontend/src/features/match/LiveMatch.vue:103-169] — deferred, pre-existing
 - [x] [Review][Defer] Undo button touch target size below 56x56dp [frontend/src/features/match/LiveMatch.vue:92] — deferred, pre-existing
 - [x] [Review][Defer] Swap buttons absolute positioning ruins focus order [frontend/src/features/match/LiveMatch.vue:173-208] — deferred, pre-existing
