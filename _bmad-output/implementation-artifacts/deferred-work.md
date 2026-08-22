@@ -401,3 +401,8 @@ status: open
 - Destructive Undo Without Confirmation: Instant undo is retained for speed; deferred confirmation.
 ## Deferred from: code review (2026-08-21)
 * [Review][Defer] No Visual Distinction for Buttons — Team A and Team B swap buttons use the exact same styling and icon.
+
+## Deferred from: code review of 5-4-third-party-referee-mode.md (2026-08-22)
+- DRY violation with LiveQuadrant components [frontend/src/features/match/LiveMatch.vue:103-169] — deferred, pre-existing
+- Undo button touch target size below 56x56dp [frontend/src/features/match/LiveMatch.vue:92] — deferred, pre-existing
+- Swap buttons absolute positioning ruins focus order [frontend/src/features/match/LiveMatch.vue:173-208] — deferred, pre-existing

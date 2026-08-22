@@ -3,7 +3,7 @@ baseline_commit: 47c2ceb86b51bf128a3f858807a0c8b67bca9c1b
 ---
 # Story 5.4: Third-party Referee Mode
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -173,3 +173,12 @@ so that I can track a match I am not playing in with the exact same fidelity as 
 - **PRD FR14**: "System applies confirmation rules based on match context: 1v1 participant-entered, 1v1 referee-entered, 2v2 standard, 2v2 random pairings, referee-entered 2v2..."
 - **PRD Journey 5 (lines 267–281)**: Viktor, The Referee standing at the narrow end in portrait orientation, viewing 4 player positions, tapping quadrants for goal attribution, using undo and position swaps.
 - **UX Design Specification (line 65)**: Persona Viktor (The Referee) — "Portrait referee view, live mode, streamlined per-match flow".
+
+### Review Findings
+- [ ] [Review][Patch] Global Pinia store `isRefereeMode` state leak [frontend/src/features/match/LiveMatch.vue:26-30]
+- [ ] [Review][Patch] Missing automatic detection for referee mode based on user registration [frontend/src/features/match/LiveMatch.vue:26-30]
+- [ ] [Review][Patch] Route query parameter array vulnerability [frontend/src/features/match/LiveMatch.vue:27]
+- [ ] [Review][Patch] Flawed fallback logic in E2E tests for bounding box coordinates [frontend/e2e/referee-mode.spec.ts:62-67]
+- [x] [Review][Defer] DRY violation with LiveQuadrant components [frontend/src/features/match/LiveMatch.vue:103-169] — deferred, pre-existing
+- [x] [Review][Defer] Undo button touch target size below 56x56dp [frontend/src/features/match/LiveMatch.vue:92] — deferred, pre-existing
+- [x] [Review][Defer] Swap buttons absolute positioning ruins focus order [frontend/src/features/match/LiveMatch.vue:173-208] — deferred, pre-existing
