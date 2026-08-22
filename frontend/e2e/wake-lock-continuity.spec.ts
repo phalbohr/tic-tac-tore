@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('[Story 5.5] Screen Wake Lock & Continuity (ATDD Red Phase)', () => {
+interface WakeLockTestSpy {
+  getCalls: () => string[]
+  isReleased: () => boolean
+  sentinel: {
+    released: boolean
+    type: string
+    release: () => Promise<void>
+    addEventListener: () => void
+    removeEventListener: () => void
+  }
+}
+
+declare global {
+  interface Window {
+    __wakeLockTest?: WakeLockTestSpy
+  }
+}
+
+test.describe('[Story 5.5] Screen Wake Lock & Continuity', () => {
   test.use({
     viewport: { width: 844, height: 390 }, // Landscape
     hasTouch: true,
@@ -30,21 +48,29 @@ test.describe('[Story 5.5] Screen Wake Lock & Continuity (ATDD Red Phase)', () =
           isReleased: () => wakeLockReleased,
           sentinel: mockSentinel,
         },
+        configurable: true,
         writable: true,
       })
 
-      if (!navigator.wakeLock) {
+      const mockWakeLock = {
+        request: async (type: string) => {
+          wakeLockCalls.push(type)
+          wakeLockReleased = false
+          return mockSentinel
+        },
+      }
+
+      try {
         Object.defineProperty(navigator, 'wakeLock', {
-          value: {
-            request: async (type: string) => {
-              wakeLockCalls.push(type)
-              wakeLockReleased = false
-              return mockSentinel
-            },
-          },
+          value: mockWakeLock,
           configurable: true,
           writable: true,
         })
+      } catch {
+        // Fallback for browsers with non-configurable navigator.wakeLock
+        try {
+          Object.assign(navigator, { wakeLock: mockWakeLock })
+        } catch {}
       }
 
       // Safe mocks for orientation and fullscreen
@@ -59,38 +85,45 @@ test.describe('[Story 5.5] Screen Wake Lock & Continuity (ATDD Red Phase)', () =
     })
   })
 
-  test.skip('[Story 5.5] [P0] AC1: requests screen wake lock when starting match in landscape player mode', async ({ page }) => {
+  test('[Story 5.5] [P0] AC1: requests screen wake lock when starting match in landscape player mode', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
     await startBtn.tap()
 
-    const calls = await page.evaluate(() => (window as any).__wakeLockTest?.getCalls())
-    expect(calls).toContain('screen')
+    await expect.poll(async () => {
+      return await page.evaluate(() => window.__wakeLockTest?.getCalls())
+    }).toContain('screen')
 
     const matchGrid = page.getByTestId('match-grid')
     await expect(matchGrid).toBeVisible()
   })
 
-  test.skip('[Story 5.5] [P0] AC1: requests screen wake lock when starting match in portrait referee mode', async ({ page }) => {
+  test('[Story 5.5] [P0] AC1: requests screen wake lock when starting match in portrait referee mode', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/live-match?mode=referee')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
     await startBtn.tap()
 
-    const calls = await page.evaluate(() => (window as any).__wakeLockTest?.getCalls())
-    expect(calls).toContain('screen')
+    await expect.poll(async () => {
+      return await page.evaluate(() => window.__wakeLockTest?.getCalls())
+    }).toContain('screen')
 
     const matchGrid = page.getByTestId('match-grid')
     await expect(matchGrid).toBeVisible()
   })
 
-  test.skip('[Story 5.5] [P0] AC2: re-requests wake lock when document visibility returns to visible during active match', async ({ page }) => {
+  test('[Story 5.5] [P0] AC2: re-requests wake lock when document visibility returns to visible during active match', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
     await startBtn.tap()
+
+    await expect.poll(async () => {
+      const calls = await page.evaluate(() => window.__wakeLockTest?.getCalls())
+      return calls?.length
+    }).toBeGreaterThanOrEqual(1)
 
     // Trigger visibility change to hidden then visible
     await page.evaluate(() => {
@@ -103,34 +136,52 @@ test.describe('[Story 5.5] Screen Wake Lock & Continuity (ATDD Red Phase)', () =
       document.dispatchEvent(new Event('visibilitychange'))
     })
 
-    const calls = await page.evaluate(() => (window as any).__wakeLockTest?.getCalls())
-    expect(calls?.length).toBeGreaterThanOrEqual(2)
+    await expect.poll(async () => {
+      const calls = await page.evaluate(() => window.__wakeLockTest?.getCalls())
+      return calls?.length
+    }).toBeGreaterThanOrEqual(2)
   })
 
-  test.skip('[Story 5.5] [P0] AC3: releases wake lock sentinel when navigating away from live match', async ({ page }) => {
+  test('[Story 5.5] [P0] AC3: releases wake lock sentinel when navigating away from live match', async ({ page }) => {
     await page.goto('/live-match')
     const startBtn = page.getByTestId('start-match-btn')
     await startBtn.waitFor({ state: 'visible' })
     await startBtn.tap()
 
-    // Navigate away to trigger unmount
-    await page.goto('/dashboard')
+    await expect.poll(async () => {
+      const calls = await page.evaluate(() => window.__wakeLockTest?.getCalls())
+      return calls?.length
+    }).toBeGreaterThanOrEqual(1)
 
-    const released = await page.evaluate(() => (window as any).__wakeLockTest?.isReleased())
-    expect(released).toBe(true)
+    // Navigate client-side to unmount LiveMatch.vue without reloading whole page
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/leaderboard')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+
+    await expect.poll(async () => {
+      return await page.evaluate(() => window.__wakeLockTest?.isReleased())
+    }).toBe(true)
   })
 
-  test.skip('[Story 5.5] [P1] AC4: match starts and runs normally without errors when wake lock API rejects request', async ({ page }) => {
+  test('[Story 5.5] [P1] AC4: match starts and runs normally without errors when wake lock API rejects request', async ({ page }) => {
     await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'wakeLock', {
-        value: {
-          request: async () => {
-            throw new Error('NotAllowedError: Wake Lock permission denied by system')
-          },
+      const failingWakeLock = {
+        request: async () => {
+          throw new Error('NotAllowedError: Wake Lock permission denied by system')
         },
-        configurable: true,
-        writable: true,
-      })
+      }
+      try {
+        Object.defineProperty(navigator, 'wakeLock', {
+          value: failingWakeLock,
+          configurable: true,
+          writable: true,
+        })
+      } catch {
+        try {
+          Object.assign(navigator, { wakeLock: failingWakeLock })
+        } catch {}
+      }
     })
 
     await page.goto('/live-match')

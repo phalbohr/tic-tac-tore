@@ -3,6 +3,7 @@ import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLiveMatchStore } from '@/stores/liveMatch'
 import { useAuthStore } from '@/stores/auth'
+import { useWakeLock } from '@/composables/useWakeLock'
 import LiveQuadrant from './LiveQuadrant.vue'
 import LiveActivityTimeline from './LiveActivityTimeline.vue'
 
@@ -22,6 +23,7 @@ const props = withDefaults(
 const route = useRoute()
 const matchStore = useLiveMatchStore()
 const authStore = useAuthStore()
+const wakeLock = useWakeLock()
 const isMatchStarted = ref(false)
 const liveMatchContainer = ref<HTMLElement | null>(null)
 
@@ -70,6 +72,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   matchStore.setRefereeMode(false)
+  wakeLock.release()
 })
 
 const startMatch = async () => {
@@ -89,6 +92,7 @@ const startMatch = async () => {
       console.warn('Orientation lock failed', err)
     }
   }
+  await wakeLock.request()
   isMatchStarted.value = true
 }
 

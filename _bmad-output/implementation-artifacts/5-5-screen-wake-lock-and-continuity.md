@@ -1,6 +1,10 @@
+---
+baseline_commit: 361daf87016b97fa3cdf185e1928c69217b03e5a
+---
+
 # Story 5.5: Screen Wake Lock & Continuity
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -37,37 +41,37 @@ so that the live scoreboard remains immediately visible and responsive throughou
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create Screen Wake Lock Composable (`frontend/src/composables/useWakeLock.ts`) (AC 1, AC 2, AC 3, AC 4)
-  - [ ] Implement `useWakeLock` composable with reactive states: `isSupported` (`computed`/`ref`), `isActive` (`ref<boolean>`), and `sentinel` reference
-  - [ ] Implement `request(): Promise<boolean>` to acquire lock via `navigator.wakeLock.request('screen')` with try/catch handling for `NotAllowedError` and `AbortError`
-  - [ ] Implement `release(): Promise<void>` to release sentinel (`sentinel.value.release()`) and reset `isActive`
-  - [ ] Add `visibilitychange` event listener: automatically re-invoke `request()` when `document.visibilityState === 'visible'` and `isActive` was requested/intended
-  - [ ] Guard all browser API access with SSR checks (`typeof window !== 'undefined'`, `typeof navigator !== 'undefined' && 'wakeLock' in navigator`)
-  - [ ] Provide cleanup function / `onUnmounted` hook within or callable by composable consumers to remove `visibilitychange` listener and release sentinel
-- [ ] Task 2: Integrate `useWakeLock` into `LiveMatch.vue` (AC 1, AC 2, AC 3)
-  - [ ] In `frontend/src/features/match/LiveMatch.vue`:
-    - [ ] Import and initialize `useWakeLock()`
-    - [ ] Call `wakeLock.request()` inside `startMatch()` alongside fullscreen and screen orientation requests
-    - [ ] Ensure wake lock operates identically in both standard landscape player mode and portrait referee mode (`matchStore.isRefereeMode`)
-    - [ ] In `onUnmounted()`, call `wakeLock.release()` to ensure clean teardown when leaving the live match view
-- [ ] Task 3: Unit Testing (AC 1, AC 2, AC 3, AC 4)
-  - [ ] Create `frontend/tests/unit/useWakeLock.spec.ts`:
-    - [ ] Test successful lock acquisition and setting `isActive = true`
-    - [ ] Test lock release on `release()` call and setting `isActive = false`
-    - [ ] Test automatic re-acquisition on `document.dispatchEvent(new Event('visibilitychange'))` when visible
-    - [ ] Test graceful fallback when `navigator.wakeLock` is undefined
-    - [ ] Test error handling when `navigator.wakeLock.request` rejects with `NotAllowedError`
-  - [ ] Create/update `frontend/tests/unit/LiveMatchComponent.spec.ts`:
-    - [ ] Verify `startMatch` triggers wake lock request
-    - [ ] Verify component unmount triggers wake lock release
-  - [ ] Maintain strict 500-line file limit (IP-04)
-- [ ] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
-  - [ ] In `frontend/e2e/wake-lock-continuity.spec.ts` (or `frontend/e2e/real-time-scoring-interface.spec.ts`):
-    - [ ] Mock/intercept `navigator.wakeLock.request` in Playwright context
-    - [ ] Verify wake lock requested upon clicking "Start Match" in landscape mode
-    - [ ] Verify wake lock requested upon clicking "Start Match" in referee mode (`?mode=referee`)
-    - [ ] Verify graceful match play when wake lock API is disabled or throws error
-  - [ ] Maintain strict 500-line file limit (IP-04)
+- [x] Task 1: Create Screen Wake Lock Composable (`frontend/src/composables/useWakeLock.ts`) (AC 1, AC 2, AC 3, AC 4)
+  - [x] Implement `useWakeLock` composable with reactive states: `isSupported` (`computed`/`ref`), `isActive` (`ref<boolean>`), and `sentinel` reference
+  - [x] Implement `request(): Promise<boolean>` to acquire lock via `navigator.wakeLock.request('screen')` with try/catch handling for `NotAllowedError` and `AbortError`
+  - [x] Implement `release(): Promise<void>` to release sentinel (`sentinel.value.release()`) and reset `isActive`
+  - [x] Add `visibilitychange` event listener: automatically re-invoke `request()` when `document.visibilityState === 'visible'` and `isActive` was requested/intended
+  - [x] Guard all browser API access with SSR checks (`typeof window !== 'undefined'`, `typeof navigator !== 'undefined' && 'wakeLock' in navigator`)
+  - [x] Provide cleanup function / `onUnmounted` hook within or callable by composable consumers to remove `visibilitychange` listener and release sentinel
+- [x] Task 2: Integrate `useWakeLock` into `LiveMatch.vue` (AC 1, AC 2, AC 3)
+  - [x] In `frontend/src/features/match/LiveMatch.vue`:
+    - [x] Import and initialize `useWakeLock()`
+    - [x] Call `wakeLock.request()` inside `startMatch()` alongside fullscreen and screen orientation requests
+    - [x] Ensure wake lock operates identically in both standard landscape player mode and portrait referee mode (`matchStore.isRefereeMode`)
+    - [x] In `onUnmounted()`, call `wakeLock.release()` to ensure clean teardown when leaving the live match view
+- [x] Task 3: Unit Testing (AC 1, AC 2, AC 3, AC 4)
+  - [x] Create `frontend/tests/unit/useWakeLock.spec.ts`:
+    - [x] Test successful lock acquisition and setting `isActive = true`
+    - [x] Test lock release on `release()` call and setting `isActive = false`
+    - [x] Test automatic re-acquisition on `document.dispatchEvent(new Event('visibilitychange'))` when visible
+    - [x] Test graceful fallback when `navigator.wakeLock` is undefined
+    - [x] Test error handling when `navigator.wakeLock.request` rejects with `NotAllowedError`
+  - [x] Create/update `frontend/tests/unit/LiveMatchComponent.spec.ts`:
+    - [x] Verify `startMatch` triggers wake lock request
+    - [x] Verify component unmount triggers wake lock release
+  - [x] Maintain strict 500-line file limit (IP-04)
+- [x] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
+  - [x] In `frontend/e2e/wake-lock-continuity.spec.ts` (or `frontend/e2e/real-time-scoring-interface.spec.ts`):
+    - [x] Mock/intercept `navigator.wakeLock.request` in Playwright context
+    - [x] Verify wake lock requested upon clicking "Start Match" in landscape mode
+    - [x] Verify wake lock requested upon clicking "Start Match" in referee mode (`?mode=referee`)
+    - [x] Verify graceful match play when wake lock API is disabled or throws error
+  - [x] Maintain strict 500-line file limit (IP-04)
 
 ## Dev Notes
 
@@ -138,18 +142,30 @@ so that the live scoreboard remains immediately visible and responsive throughou
 
 ### Agent Model Used
 
-Gemini 3.1 Pro (High)
+Gemini 3.7 Flash
 
 ### Debug Log References
 
+- Unit tests (`tests/unit/useWakeLock.spec.ts` & `tests/unit/LiveMatchComponent.spec.ts`) verified passing (7/7 and 7/7).
+- E2E Playwright test suite (`e2e/wake-lock-continuity.spec.ts`) verified passing across Chromium, Firefox, WebKit (15/15).
+- Full local CI verification (`./scripts/ci-local.sh`) verified passing 100% (107 passed, 0 failed).
+
 ### Completion Notes List
 
-- Comprehensive context engine analysis completed. All critical gaps, lifecycle handling, continuity requirements, composable architecture, and test plans documented.
+- Created `useWakeLock` composable (`frontend/src/composables/useWakeLock.ts`) with reactive state (`isSupported`, `isActive`, `sentinel`), safe try/catch error degradation, and automatic `visibilitychange` reconnection for match continuity.
+- Integrated `useWakeLock` into `frontend/src/features/match/LiveMatch.vue` on match startup and teardown on unmount.
+- Created and passed unit test suite (`frontend/tests/unit/useWakeLock.spec.ts`) and component integration tests (`frontend/tests/unit/LiveMatchComponent.spec.ts`).
+- Created and passed E2E test suite (`frontend/e2e/wake-lock-continuity.spec.ts`) covering landscape player mode, portrait referee mode, visibility change continuity, unmount release, and graceful degradation.
 
 ### File List
 
-- `frontend/src/composables/useWakeLock.ts` (to be created)
-- `frontend/src/features/match/LiveMatch.vue` (to be modified)
-- `frontend/tests/unit/useWakeLock.spec.ts` (to be created)
-- `frontend/tests/unit/LiveMatchComponent.spec.ts` (to be updated)
-- `frontend/e2e/wake-lock-continuity.spec.ts` (to be created)
+- `frontend/src/composables/useWakeLock.ts`
+- `frontend/src/features/match/LiveMatch.vue`
+- `frontend/tests/unit/useWakeLock.spec.ts`
+- `frontend/tests/unit/LiveMatchComponent.spec.ts`
+- `frontend/e2e/wake-lock-continuity.spec.ts`
+- `_bmad-output/test-artifacts/atdd-checklist-5-5-screen-wake-lock-and-continuity.md`
+
+### Change Log
+
+- **2026-08-22**: Implemented Story 5.5 Screen Wake Lock & Continuity, completed all unit & E2E tests, verified full local CI.

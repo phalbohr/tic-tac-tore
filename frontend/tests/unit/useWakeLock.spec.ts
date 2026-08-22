@@ -12,8 +12,10 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
 
   let originalWakeLock: unknown
   let originalVisibilityState: PropertyDescriptor | undefined
+  let instances: ReturnType<typeof useWakeLock>[] = []
 
   beforeEach(() => {
+    instances = []
     mockSentinel = {
       released: false,
       release: vi.fn().mockImplementation(async () => {
@@ -42,6 +44,8 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
   })
 
   afterEach(() => {
+    instances.forEach((instance) => instance.cleanup())
+    instances = []
     vi.restoreAllMocks()
     if (originalWakeLock !== undefined) {
       Object.defineProperty(navigator, 'wakeLock', {
@@ -58,13 +62,19 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     }
   })
 
-  it.skip('[P0] isSupported is true when wakeLock API exists in navigator', () => {
-    const { isSupported } = useWakeLock()
+  const createWakeLock = () => {
+    const lock = useWakeLock()
+    instances.push(lock)
+    return lock
+  }
+
+  it('[P0] isSupported is true when wakeLock API exists in navigator', () => {
+    const { isSupported } = createWakeLock()
     expect(isSupported.value).toBe(true)
   })
 
-  it.skip('[P0] request() acquires wake lock sentinel and sets isActive to true', async () => {
-    const { request, isActive, sentinel } = useWakeLock()
+  it('[P0] request() acquires wake lock sentinel and sets isActive to true', async () => {
+    const { request, isActive, sentinel } = createWakeLock()
 
     expect(isActive.value).toBe(false)
     expect(sentinel.value).toBeNull()
@@ -77,8 +87,8 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     expect(sentinel.value).toBe(mockSentinel)
   })
 
-  it.skip('[P0] release() releases sentinel and resets isActive to false', async () => {
-    const { request, release, isActive, sentinel } = useWakeLock()
+  it('[P0] release() releases sentinel and resets isActive to false', async () => {
+    const { request, release, isActive, sentinel } = createWakeLock()
 
     await request()
     expect(isActive.value).toBe(true)
@@ -90,8 +100,8 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     expect(sentinel.value).toBeNull()
   })
 
-  it.skip('[P0] re-requests wake lock on document visibilitychange to visible when lock is active', async () => {
-    const { request, isActive } = useWakeLock()
+  it('[P0] re-requests wake lock on document visibilitychange to visible when lock is active', async () => {
+    const { request, isActive } = createWakeLock()
 
     await request()
     expect(isActive.value).toBe(true)
@@ -116,8 +126,8 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     expect(navigator.wakeLock.request).toHaveBeenCalledTimes(2)
   })
 
-  it.skip('[P0] does not re-request wake lock on visibilitychange when isActive is false', async () => {
-    const { release, isActive } = useWakeLock()
+  it('[P0] does not re-request wake lock on visibilitychange when isActive is false', async () => {
+    const { release, isActive } = createWakeLock()
 
     await release()
     expect(isActive.value).toBe(false)
@@ -132,11 +142,11 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     expect(navigator.wakeLock.request).not.toHaveBeenCalled()
   })
 
-  it.skip('[P1] handles navigator.wakeLock unsupported environment gracefully', async () => {
+  it('[P1] handles navigator.wakeLock unsupported environment gracefully', async () => {
     delete (navigator as unknown as { wakeLock?: unknown }).wakeLock
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    const { isSupported, request, isActive } = useWakeLock()
+    const { isSupported, request, isActive } = createWakeLock()
 
     expect(isSupported.value).toBe(false)
     const result = await request()
@@ -146,7 +156,7 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     warnSpy.mockRestore()
   })
 
-  it.skip('[P1] handles request rejection (NotAllowedError / low battery) gracefully without throwing', async () => {
+  it('[P1] handles request rejection (NotAllowedError / low battery) gracefully without throwing', async () => {
     Object.defineProperty(navigator, 'wakeLock', {
       value: {
         request: vi.fn().mockRejectedValue(new Error('NotAllowedError: permission denied')),
@@ -156,7 +166,7 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     })
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    const { request, isActive } = useWakeLock()
+    const { request, isActive } = createWakeLock()
 
     const result = await request()
 

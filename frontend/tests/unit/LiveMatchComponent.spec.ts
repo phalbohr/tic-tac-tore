@@ -97,14 +97,14 @@ vi.mock('@/composables/useWakeLock', () => ({
   }),
 }))
 
-describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration (ATDD Red Phase)', () => {
+describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     mockRoute.value = { query: {} }
     vi.clearAllMocks()
   })
 
-  it.skip('[P0] requests wake lock when starting match in landscape mode', async () => {
+  it('[P0] requests wake lock when starting match in landscape mode', async () => {
     const wrapper = mount(LiveMatch)
     const startBtn = wrapper.find('[data-testid="start-match-btn"]')
     await startBtn.trigger('click')
@@ -113,7 +113,7 @@ describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration (ATDD Red 
     wrapper.unmount()
   })
 
-  it.skip('[P0] releases wake lock when component is unmounted', async () => {
+  it('[P0] releases wake lock when component is unmounted', async () => {
     const wrapper = mount(LiveMatch)
     wrapper.unmount()
 
