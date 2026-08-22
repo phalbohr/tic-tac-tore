@@ -12,13 +12,13 @@ export function useWakeLock() {
 
   const isActive = ref(false)
   const sentinel = shallowRef<WakeLockSentinel | null>(null)
+  let requestPromise: Promise<boolean> | null = null
 
   const handleVisibilityChange = async () => {
-    if (
-      typeof document !== 'undefined' &&
-      document.visibilityState === 'visible' &&
-      isActive.value
-    ) {
+    if (typeof document === 'undefined') return
+    if (document.visibilityState === 'hidden') {
+      sentinel.value = null
+    } else if (document.visibilityState === 'visible' && isActive.value) {
       await request()
     }
   }
@@ -30,35 +30,61 @@ export function useWakeLock() {
       return false
     }
 
-    try {
-      const lock = await navigator.wakeLock.request('screen')
-      sentinel.value = lock
+    if (sentinel.value && !sentinel.value.released) {
       isActive.value = true
-
-      lock.addEventListener('release', () => {
-        if (sentinel.value === lock) {
-          sentinel.value = null
-        }
-      })
-
       return true
-    } catch (err) {
-      console.warn('Screen Wake Lock request failed:', err)
-      isActive.value = false
-      sentinel.value = null
-      return false
     }
+
+    if (requestPromise) {
+      return requestPromise
+    }
+
+    isActive.value = true
+
+    requestPromise = (async () => {
+      try {
+        const lock = await navigator.wakeLock.request('screen')
+
+        if (!isActive.value) {
+          await lock.release().catch(() => {})
+          return false
+        }
+
+        if (sentinel.value && sentinel.value !== lock && !sentinel.value.released) {
+          await sentinel.value.release().catch(() => {})
+        }
+
+        sentinel.value = lock
+
+        lock.addEventListener('release', () => {
+          if (sentinel.value === lock) {
+            sentinel.value = null
+          }
+        })
+
+        return true
+      } catch (err) {
+        console.warn('Screen Wake Lock request failed:', err)
+        isActive.value = false
+        sentinel.value = null
+        return false
+      } finally {
+        requestPromise = null
+      }
+    })()
+
+    return requestPromise
   }
 
   const release = async (): Promise<void> => {
     isActive.value = false
     if (sentinel.value) {
+      const currentSentinel = sentinel.value
+      sentinel.value = null
       try {
-        await sentinel.value.release()
+        await currentSentinel.release()
       } catch (err) {
         console.warn('Screen Wake Lock release failed:', err)
-      } finally {
-        sentinel.value = null
       }
     }
   }
@@ -71,9 +97,7 @@ export function useWakeLock() {
     if (typeof document !== 'undefined') {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-    if (sentinel.value) {
-      release().catch(() => {})
-    }
+    release().catch(() => {})
   }
 
   if (getCurrentScope()) {

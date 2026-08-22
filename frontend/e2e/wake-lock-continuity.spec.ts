@@ -7,8 +7,8 @@ interface WakeLockTestSpy {
     released: boolean
     type: string
     release: () => Promise<void>
-    addEventListener: () => void
-    removeEventListener: () => void
+    addEventListener: (type: string, cb: Function) => void
+    removeEventListener: (type: string, cb: Function) => void
   }
 }
 
@@ -30,6 +30,7 @@ test.describe('[Story 5.5] Screen Wake Lock & Continuity', () => {
       // Mock Screen Wake Lock API
       const wakeLockCalls: string[] = []
       let wakeLockReleased = false
+      const releaseListeners: Function[] = []
 
       const mockSentinel = {
         released: false,
@@ -37,9 +38,25 @@ test.describe('[Story 5.5] Screen Wake Lock & Continuity', () => {
         release: async () => {
           wakeLockReleased = true
           mockSentinel.released = true
+          releaseListeners.forEach((cb) => {
+            try {
+              cb()
+            } catch {}
+          })
         },
-        addEventListener: () => {},
-        removeEventListener: () => {},
+        addEventListener: (type: string, cb: Function) => {
+          if (type === 'release') {
+            releaseListeners.push(cb)
+          }
+        },
+        removeEventListener: (type: string, cb: Function) => {
+          if (type === 'release') {
+            const idx = releaseListeners.indexOf(cb)
+            if (idx !== -1) {
+              releaseListeners.splice(idx, 1)
+            }
+          }
+        },
       }
 
       Object.defineProperty(window, '__wakeLockTest', {

@@ -86,6 +86,7 @@ describe('[Story 5.4] LiveMatch.vue Component - Referee Mode & Auto Detection', 
 
 const mockWakeLockRequest = vi.fn().mockResolvedValue(true)
 const mockWakeLockRelease = vi.fn().mockResolvedValue(undefined)
+const mockWakeLockCleanup = vi.fn()
 
 vi.mock('@/composables/useWakeLock', () => ({
   useWakeLock: () => ({
@@ -94,6 +95,7 @@ vi.mock('@/composables/useWakeLock', () => ({
     sentinel: ref(null),
     request: mockWakeLockRequest,
     release: mockWakeLockRelease,
+    cleanup: mockWakeLockCleanup,
   }),
 }))
 
@@ -113,11 +115,11 @@ describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration', () => {
     wrapper.unmount()
   })
 
-  it('[P0] releases wake lock when component is unmounted', async () => {
+  it('[P0] cleans up wake lock when component is unmounted', async () => {
     const wrapper = mount(LiveMatch)
     wrapper.unmount()
 
-    expect(mockWakeLockRelease).toHaveBeenCalled()
+    expect(mockWakeLockCleanup).toHaveBeenCalled()
   })
 })
 

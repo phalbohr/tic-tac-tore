@@ -4,7 +4,7 @@ baseline_commit: 361daf87016b97fa3cdf185e1928c69217b03e5a
 
 # Story 5.5: Screen Wake Lock & Continuity
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -146,16 +146,20 @@ Gemini 3.7 Flash
 
 ### Debug Log References
 
-- Unit tests (`tests/unit/useWakeLock.spec.ts` & `tests/unit/LiveMatchComponent.spec.ts`) verified passing (7/7 and 7/7).
+- Unit tests (`tests/unit/useWakeLock.spec.ts` & `tests/unit/LiveMatchComponent.spec.ts`) verified passing (10/10 and 7/7).
 - E2E Playwright test suite (`e2e/wake-lock-continuity.spec.ts`) verified passing across Chromium, Firefox, WebKit (15/15).
 - Full local CI verification (`./scripts/ci-local.sh`) verified passing 100% (107 passed, 0 failed).
 
 ### Completion Notes List
 
 - Created `useWakeLock` composable (`frontend/src/composables/useWakeLock.ts`) with reactive state (`isSupported`, `isActive`, `sentinel`), safe try/catch error degradation, and automatic `visibilitychange` reconnection for match continuity.
-- Integrated `useWakeLock` into `frontend/src/features/match/LiveMatch.vue` on match startup and teardown on unmount.
-- Created and passed unit test suite (`frontend/tests/unit/useWakeLock.spec.ts`) and component integration tests (`frontend/tests/unit/LiveMatchComponent.spec.ts`).
-- Created and passed E2E test suite (`frontend/e2e/wake-lock-continuity.spec.ts`) covering landscape player mode, portrait referee mode, visibility change continuity, unmount release, and graceful degradation.
+- Fixed race condition between `request()` and `release()` in `useWakeLock.ts` to prevent wake lock leaks when `release()` is called while `request()` is in-flight.
+- Prevented duplicate sentinel leaks by reusing active sentinel if already unreleased and coalescing concurrent requests.
+- Integrated `useWakeLock` into `frontend/src/features/match/LiveMatch.vue` on match startup and called `wakeLock.cleanup()` on unmount to release sentinel and deregister event listeners.
+- Updated `frontend/tests/unit/LiveMatchComponent.spec.ts` to mock `cleanup` and assert `cleanup()` is called on unmount.
+- Updated `mockSentinel` in `frontend/e2e/wake-lock-continuity.spec.ts` to properly handle and invoke registered event listeners.
+- Added comprehensive unit tests in `frontend/tests/unit/useWakeLock.spec.ts` covering race conditions, duplicate request deduplication, and cleanup listener removal.
+- Verified all unit and E2E tests pass 100%.
 
 ### File List
 
@@ -169,14 +173,15 @@ Gemini 3.7 Flash
 ### Change Log
 
 - **2026-08-22**: Implemented Story 5.5 Screen Wake Lock & Continuity, completed all unit & E2E tests, verified full local CI.
+- **2026-08-23**: Addressed code review findings (6 patch items resolved), added unit test coverage for race conditions and cleanup, verified full local CI.
 
 ### Review Findings
-- [ ] [Review][Patch] Race condition between request() and release() allows wake lock to leak [frontend/src/composables/useWakeLock.ts]
-- [ ] [Review][Patch] Multiple request() calls overwrite sentinel and leak locks [frontend/src/composables/useWakeLock.ts]
-- [ ] [Review][Patch] LiveMatch.vue calls release() instead of cleanup() on unmount [frontend/src/features/match/LiveMatch.vue]
-- [ ] [Review][Patch] Invalid mock assertions in LiveMatchComponent.spec.ts [frontend/tests/unit/LiveMatchComponent.spec.ts]
-- [ ] [Review][Patch] mockSentinel swallows addEventListener callback in E2E tests [frontend/e2e/wake-lock-continuity.spec.ts]
-- [ ] [Review][Patch] Stray `+` character injected into E2E test file [frontend/e2e/wake-lock-continuity.spec.ts]
+- [x] [Review][Patch] Race condition between request() and release() allows wake lock to leak [frontend/src/composables/useWakeLock.ts]
+- [x] [Review][Patch] Multiple request() calls overwrite sentinel and leak locks [frontend/src/composables/useWakeLock.ts]
+- [x] [Review][Patch] LiveMatch.vue calls release() instead of cleanup() on unmount [frontend/src/features/match/LiveMatch.vue]
+- [x] [Review][Patch] Invalid mock assertions in LiveMatchComponent.spec.ts [frontend/tests/unit/LiveMatchComponent.spec.ts]
+- [x] [Review][Patch] mockSentinel swallows addEventListener callback in E2E tests [frontend/e2e/wake-lock-continuity.spec.ts]
+- [x] [Review][Patch] Stray `+` character injected into E2E test file [frontend/e2e/wake-lock-continuity.spec.ts]
 - [x] [Review][Defer] Fragile Unmount Simulation in E2E test [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
 - [x] [Review][Defer] Ineffective Fallback Assertions in AC4 [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
 - [x] [Review][Defer] Brittle Mock Restoration in unit tests [frontend/tests/unit/useWakeLock.spec.ts] — deferred, pre-existing

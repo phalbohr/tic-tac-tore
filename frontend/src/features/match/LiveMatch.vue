@@ -72,7 +72,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   matchStore.setRefereeMode(false)
-  wakeLock.release()
+  wakeLock.cleanup()
 })
 
 const startMatch = async () => {

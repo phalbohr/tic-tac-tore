@@ -175,4 +175,71 @@ describe('[Story 5.5] useWakeLock Composable (ATDD Red Phase)', () => {
     expect(warnSpy).toHaveBeenCalled()
     warnSpy.mockRestore()
   })
+
+  it('[P0] releases lock immediately if release() is called while request() is in-flight (race condition)', async () => {
+    let resolveLockRequest!: (val: typeof mockSentinel) => void
+    const pendingPromise = new Promise<typeof mockSentinel>((resolve) => {
+      resolveLockRequest = resolve
+    })
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      value: {
+        request: vi.fn().mockReturnValue(pendingPromise),
+      },
+      configurable: true,
+      writable: true,
+    })
+
+    const { request, release, isActive, sentinel } = createWakeLock()
+
+    const requestPromise = request()
+    expect(isActive.value).toBe(true)
+
+    // Call release while request is pending
+    await release()
+    expect(isActive.value).toBe(false)
+
+    // Now resolve the in-flight request
+    resolveLockRequest(mockSentinel)
+    const result = await requestPromise
+
+    expect(result).toBe(false)
+    expect(mockSentinel.release).toHaveBeenCalled()
+    expect(isActive.value).toBe(false)
+    expect(sentinel.value).toBeNull()
+  })
+
+  it('[P0] does not duplicate wake lock request if already holding an active sentinel', async () => {
+    const { request, isActive } = createWakeLock()
+
+    const res1 = await request()
+    expect(res1).toBe(true)
+    expect(navigator.wakeLock.request).toHaveBeenCalledTimes(1)
+
+    const res2 = await request()
+    expect(res2).toBe(true)
+    expect(navigator.wakeLock.request).toHaveBeenCalledTimes(1)
+    expect(isActive.value).toBe(true)
+  })
+
+  it('[P0] cleanup() removes visibilitychange listener and releases sentinel', async () => {
+    const { request, cleanup, isActive, sentinel } = createWakeLock()
+
+    await request()
+    expect(isActive.value).toBe(true)
+
+    cleanup()
+    expect(isActive.value).toBe(false)
+    expect(sentinel.value).toBeNull()
+
+    // Trigger visibility change to visible; should NOT trigger request because listener was removed
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'visible',
+      configurable: true,
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+    await nextTick()
+
+    expect(navigator.wakeLock.request).toHaveBeenCalledTimes(1)
+  })
 })
