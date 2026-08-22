@@ -83,3 +83,41 @@ describe('[Story 5.4] LiveMatch.vue Component - Referee Mode & Auto Detection', 
     wrapper.unmount()
   })
 })
+
+const mockWakeLockRequest = vi.fn().mockResolvedValue(true)
+const mockWakeLockRelease = vi.fn().mockResolvedValue(undefined)
+
+vi.mock('@/composables/useWakeLock', () => ({
+  useWakeLock: () => ({
+    isSupported: ref(true),
+    isActive: ref(false),
+    sentinel: ref(null),
+    request: mockWakeLockRequest,
+    release: mockWakeLockRelease,
+  }),
+}))
+
+describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration (ATDD Red Phase)', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRoute.value = { query: {} }
+    vi.clearAllMocks()
+  })
+
+  it.skip('[P0] requests wake lock when starting match in landscape mode', async () => {
+    const wrapper = mount(LiveMatch)
+    const startBtn = wrapper.find('[data-testid="start-match-btn"]')
+    await startBtn.trigger('click')
+
+    expect(mockWakeLockRequest).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it.skip('[P0] releases wake lock when component is unmounted', async () => {
+    const wrapper = mount(LiveMatch)
+    wrapper.unmount()
+
+    expect(mockWakeLockRelease).toHaveBeenCalled()
+  })
+})
+
