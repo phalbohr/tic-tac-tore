@@ -89,6 +89,11 @@ so that I can track a match I am not playing in with the exact same fidelity as 
 
 ## Dev Notes
 
+### ATDD Artifacts
+- **Checklist**: [_bmad-output/test-artifacts/atdd-checklist-5-4-third-party-referee-mode.md](file:///Users/ppolukhin/Projects/tic-tac-tore/_bmad-output/test-artifacts/atdd-checklist-5-4-third-party-referee-mode.md)
+- **Unit Tests**: [frontend/tests/unit/liveMatch.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/liveMatch.spec.ts)
+- **E2E Tests**: [frontend/e2e/referee-mode.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/referee-mode.spec.ts)
+
 ### Technical Requirements
 - **Perspective & Spatial Layout Mapping (Portrait vs Landscape)**:
   - **Landscape Grid (Story 5.1/5.3)**:
