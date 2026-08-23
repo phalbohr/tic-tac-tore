@@ -70,27 +70,7 @@ class PlayerGroupControllerATDDTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(playerGroupController)
-                .setCustomArgumentResolvers(new org.springframework.web.method.support.HandlerMethodArgumentResolver() {
-                    @Override
-                    public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
-                        return parameter.hasParameterAnnotation(org.springframework.security.core.annotation.AuthenticationPrincipal.class);
-                    }
-
-                    @Override
-                    public Object resolveArgument(org.springframework.core.MethodParameter parameter,
-                                                  org.springframework.web.method.support.ModelAndViewContainer mavContainer,
-                                                  org.springframework.web.context.request.NativeWebRequest webRequest,
-                                                  org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
-                        java.security.Principal principal = webRequest.getUserPrincipal();
-                        if (principal instanceof org.springframework.security.core.Authentication authentication) {
-                            Object p = authentication.getPrincipal();
-                            if (p instanceof User user) {
-                                return user;
-                            }
-                        }
-                        return null;
-                    }
-                })
+                .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
         objectMapper = new ObjectMapper();
@@ -98,6 +78,7 @@ class PlayerGroupControllerATDDTest {
         currentUserId = UUID.randomUUID();
         currentUser = User.builder().id(currentUserId).email("player@example.com").build();
         auth = new UsernamePasswordAuthenticationToken(currentUser, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @org.junit.jupiter.api.AfterEach
@@ -137,6 +118,8 @@ class PlayerGroupControllerATDDTest {
         @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated")
         @WithAnonymousUser
         void shouldReturn401WhenUnauthenticated() throws Exception {
+            SecurityContextHolder.clearContext();
+
             mockMvc.perform(get("/api/v1/player-groups")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
