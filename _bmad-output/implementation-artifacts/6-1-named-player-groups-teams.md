@@ -4,7 +4,7 @@ baseline_commit: 66fd32b166a30c09b1a31360f31adef112b7171c
 
 # Story 6.1: Named Player Groups ("Teams")
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -176,3 +176,18 @@ Gemini 3.7 Flash (High)
 - `frontend/e2e/player-groups.spec.ts`
 - `_bmad-output/implementation-artifacts/6-1-named-player-groups-teams.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Review Findings
+- [ ] [Review][Patch] Missing "Favorites" group auto-provisioning (Auto-create Favorites group upon user registration)
+- [ ] [Review][Patch] No quotas on group creation or size — Add limits: max 10 groups per user, max 12 players per group
+- [ ] [Review][Patch] Ownership verification bypass in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:436]
+- [ ] [Review][Patch] `LazyInitializationException` risk in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:438]
+- [ ] [Review][Patch] Cynical hack for empty group filtering [MatchServiceImpl.java:436]
+- [ ] [Review][Patch] Hibernate MVCC bloat on group update [PlayerGroupServiceImpl.java:117]
+- [ ] [Review][Patch] Missing optimistic locking support in API [UpdatePlayerGroupRequest.java]
+- [ ] [Review][Patch] Unrestricted `isFavorite` flag [PlayerGroupServiceImpl.java:81]
+- [ ] [Review][Patch] Invalid UUIDs silently dropped [PlayerGroupServiceImpl.java:75]
+- [ ] [Review][Patch] Database vs DTO constraints mismatch [CreatePlayerGroupRequest.java:11]
+- [ ] [Review][Patch] Raw UUIDs exposed in UI [PlayerSelection.vue]
+- [ ] [Review][Patch] Frontend: `groups.value = []` on fail [usePlayerGroupStore.ts]
+- [x] [Review][Defer] Testing anti-pattern in Vue components [PlayerSelection.vue] — deferred, pre-existing

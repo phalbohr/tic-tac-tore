@@ -411,3 +411,6 @@ status: open
 - Fragile Unmount Simulation in E2E test [frontend/e2e/wake-lock-continuity.spec.ts]
 - Ineffective Fallback Assertions in AC4 [frontend/e2e/wake-lock-continuity.spec.ts]
 - Brittle Mock Restoration in unit tests [frontend/tests/unit/useWakeLock.spec.ts]
+
+## Deferred from: code review of 6-1-named-player-groups-teams (2026-08-23)
+- Testing anti-pattern in Vue components [PlayerSelection.vue]: `useI18n()` is wrapped in a silent `try/catch` block labeled "// fallback for tests". If translation fails, errors are swallowed and users see raw localization keys.
