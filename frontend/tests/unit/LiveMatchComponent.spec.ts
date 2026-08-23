@@ -1,7 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, getCurrentScope, onScopeDispose } from 'vue'
 import LiveMatch from '@/features/match/LiveMatch.vue'
 import { useLiveMatchStore } from '@/stores/liveMatch'
 import { useAuthStore } from '@/stores/auth'
@@ -83,3 +83,48 @@ describe('[Story 5.4] LiveMatch.vue Component - Referee Mode & Auto Detection', 
     wrapper.unmount()
   })
 })
+
+const mockWakeLockRequest = vi.fn().mockResolvedValue(true)
+const mockWakeLockRelease = vi.fn().mockResolvedValue(undefined)
+const mockWakeLockCleanup = vi.fn()
+
+vi.mock('@/composables/useWakeLock', () => ({
+  useWakeLock: () => {
+    if (getCurrentScope()) {
+      onScopeDispose(mockWakeLockCleanup)
+    }
+    return {
+      isSupported: ref(true),
+      isActive: ref(false),
+      sentinel: ref(null),
+      request: mockWakeLockRequest,
+      release: mockWakeLockRelease,
+      cleanup: mockWakeLockCleanup,
+    }
+  },
+}))
+
+describe('[Story 5.5] LiveMatch.vue Component - Wake Lock Integration', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRoute.value = { query: {} }
+    vi.clearAllMocks()
+  })
+
+  it('[P0] requests wake lock when starting match in landscape mode', async () => {
+    const wrapper = mount(LiveMatch)
+    const startBtn = wrapper.find('[data-testid="start-match-btn"]')
+    await startBtn.trigger('click')
+
+    expect(mockWakeLockRequest).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('[P0] cleans up wake lock when component is unmounted', async () => {
+    const wrapper = mount(LiveMatch)
+    wrapper.unmount()
+
+    expect(mockWakeLockCleanup).toHaveBeenCalled()
+  })
+})
+

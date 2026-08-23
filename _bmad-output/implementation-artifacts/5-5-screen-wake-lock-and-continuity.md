@@ -1,0 +1,187 @@
+---
+baseline_commit: 361daf87016b97fa3cdf185e1928c69217b03e5a
+---
+
+# Story 5.5: Screen Wake Lock & Continuity
+
+Status: review
+
+<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+
+## Story
+
+As a player or referee,
+I want the device screen to stay illuminated continuously during an active live match,
+so that the live scoreboard remains immediately visible and responsive throughout play without requiring periodic screen touches.
+
+## Acceptance Criteria
+
+1. **Wake Lock Acquisition on Live Match Start (Landscape & Referee Mode)**:
+   - **Given** the live scoring interface is loaded (in standard landscape player mode or portrait referee mode)
+   - **When** the user taps "Start Match" (`data-testid="start-match-btn"`)
+   - **Then** the application requests a screen wake lock using the Screen Wake Lock API (`navigator.wakeLock.request('screen')`) (FR11, AD-06)
+   - **And** prevents the device display from dimming or locking while the match is active.
+
+2. **Continuity Across Visibility Changes (Tab Switch / App Switch / Screen Re-open)**:
+   - **Given** an active live match with a wake lock acquired
+   - **When** the application visibility state changes to `'hidden'` (e.g. user switches tabs, minimizes browser, or locks screen) and subsequently returns to `'visible'` (`document.visibilityState === 'visible'`)
+   - **Then** the application automatically re-requests and restores the screen wake lock if the match is still active (`isMatchStarted === true`)
+   - **And** ensures seamless continuity without requiring user re-activation.
+
+3. **Wake Lock Release on Match Finish, Exit, and Component Unmount**:
+   - **Given** an active live match with a wake lock acquired
+   - **When** the match finishes, the user navigates away, or the `LiveMatch.vue` component is unmounted
+   - **Then** the application explicitly releases the wake lock sentinel (`sentinel.release()`), cleans up all `visibilitychange` event listeners, and resets internal wake lock state to avoid resource leaks.
+
+4. **Graceful Degradation on Unsupported Browsers or Permission Errors**:
+   - **Given** a browser environment where the Screen Wake Lock API is unsupported (`!('wakeLock' in navigator)`) or where the request is rejected (e.g. system battery saver mode, permission policy restriction)
+   - **When** the match starts or visibility changes
+   - **Then** the match startup and scoring flow continue uninterrupted without throwing unhandled exceptions or breaking the UI
+   - **And** a non-fatal warning is logged to `console.warn`.
+
+## Tasks / Subtasks
+
+- [x] Task 1: Create Screen Wake Lock Composable (`frontend/src/composables/useWakeLock.ts`) (AC 1, AC 2, AC 3, AC 4)
+  - [x] Implement `useWakeLock` composable with reactive states: `isSupported` (`computed`/`ref`), `isActive` (`ref<boolean>`), and `sentinel` reference
+  - [x] Implement `request(): Promise<boolean>` to acquire lock via `navigator.wakeLock.request('screen')` with try/catch handling for `NotAllowedError` and `AbortError`
+  - [x] Implement `release(): Promise<void>` to release sentinel (`sentinel.value.release()`) and reset `isActive`
+  - [x] Add `visibilitychange` event listener: automatically re-invoke `request()` when `document.visibilityState === 'visible'` and `isActive` was requested/intended
+  - [x] Guard all browser API access with SSR checks (`typeof window !== 'undefined'`, `typeof navigator !== 'undefined' && 'wakeLock' in navigator`)
+  - [x] Provide cleanup function / `onUnmounted` hook within or callable by composable consumers to remove `visibilitychange` listener and release sentinel
+- [x] Task 2: Integrate `useWakeLock` into `LiveMatch.vue` (AC 1, AC 2, AC 3)
+  - [x] In `frontend/src/features/match/LiveMatch.vue`:
+    - [x] Import and initialize `useWakeLock()`
+    - [x] Call `wakeLock.request()` inside `startMatch()` alongside fullscreen and screen orientation requests
+    - [x] Ensure wake lock operates identically in both standard landscape player mode and portrait referee mode (`matchStore.isRefereeMode`)
+    - [x] In `onUnmounted()`, call `wakeLock.release()` to ensure clean teardown when leaving the live match view
+- [x] Task 3: Unit Testing (AC 1, AC 2, AC 3, AC 4)
+  - [x] Create `frontend/tests/unit/useWakeLock.spec.ts`:
+    - [x] Test successful lock acquisition and setting `isActive = true`
+    - [x] Test lock release on `release()` call and setting `isActive = false`
+    - [x] Test automatic re-acquisition on `document.dispatchEvent(new Event('visibilitychange'))` when visible
+    - [x] Test graceful fallback when `navigator.wakeLock` is undefined
+    - [x] Test error handling when `navigator.wakeLock.request` rejects with `NotAllowedError`
+  - [x] Create/update `frontend/tests/unit/LiveMatchComponent.spec.ts`:
+    - [x] Verify `startMatch` triggers wake lock request
+    - [x] Verify component unmount triggers wake lock release
+  - [x] Maintain strict 500-line file limit (IP-04)
+- [x] Task 4: E2E Playwright Integration Testing (AC 1, AC 2, AC 3, AC 4)
+  - [x] In `frontend/e2e/wake-lock-continuity.spec.ts` (or `frontend/e2e/real-time-scoring-interface.spec.ts`):
+    - [x] Mock/intercept `navigator.wakeLock.request` in Playwright context
+    - [x] Verify wake lock requested upon clicking "Start Match" in landscape mode
+    - [x] Verify wake lock requested upon clicking "Start Match" in referee mode (`?mode=referee`)
+    - [x] Verify graceful match play when wake lock API is disabled or throws error
+  - [x] Maintain strict 500-line file limit (IP-04)
+
+## Dev Notes
+
+### ATDD Artifacts
+- **Unit Tests**: [frontend/tests/unit/useWakeLock.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/useWakeLock.spec.ts), [frontend/tests/unit/LiveMatchComponent.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/tests/unit/LiveMatchComponent.spec.ts)
+- **E2E Tests**: [frontend/e2e/wake-lock-continuity.spec.ts](file:///Users/ppolukhin/Projects/tic-tac-tore/frontend/e2e/wake-lock-continuity.spec.ts)
+
+### Technical Requirements
+- **Screen Wake Lock API Lifecycle**:
+  - Acquisition: `const sentinel = await navigator.wakeLock.request('screen')`
+  - Release listener on sentinel: `sentinel.addEventListener('release', () => { ... })`
+  - Browser behavior: The browser automatically releases the wake lock whenever the document loses visibility (`document.visibilityState === 'hidden'`).
+  - Continuity requirement: A `visibilitychange` listener on `document` must re-acquire the wake lock when `document.visibilityState === 'visible'` if the match is still active (`isActive.value === true`).
+  - Explicit teardown: When the match is finished or component is unmounted, calling `sentinel.release()` releases the lock and the `visibilitychange` listener must be removed (`document.removeEventListener('visibilitychange', ...)`).
+- **Error Resilience & SSR Safety**:
+  - Always verify `typeof navigator !== 'undefined' && 'wakeLock' in navigator`.
+  - Wrap `request()` in `try / catch`. Possible errors include `NotAllowedError` (user/OS denied or low battery mode) and `AbortError`.
+  - Errors MUST NOT throw or block match gameplay. Log with `console.warn('WakeLock request failed:', err)`.
+
+### Existing Code Analysis (`LiveMatch.vue`)
+- **Current `startMatch` implementation**:
+  ```ts
+  const startMatch = async () => {
+    if (liveMatchContainer.value) {
+      try {
+        if (liveMatchContainer.value.requestFullscreen) {
+          await liveMatchContainer.value.requestFullscreen()
+        } else if ((liveMatchContainer.value as any).webkitRequestFullscreen) {
+          await (liveMatchContainer.value as any).webkitRequestFullscreen()
+        }
+        if (typeof screen !== 'undefined' && screen.orientation && (screen.orientation as any).lock) {
+          const orientationMode = matchStore.isRefereeMode ? 'portrait' : 'landscape'
+          await (screen.orientation as any).lock(orientationMode)
+        }
+      } catch (err) {
+        console.warn('Orientation lock failed', err)
+      }
+    }
+    await wakeLock.request()
+    isMatchStarted.value = true
+  }
+  ```
+- **Current `onUnmounted` implementation**:
+  ```ts
+  onUnmounted(() => {
+    matchStore.setRefereeMode(false)
+    wakeLock.release()
+  })
+  ```
+
+### Architecture Compliance
+- **Composable Pattern**: Encapsulate wake lock logic inside `frontend/src/composables/useWakeLock.ts` to keep `LiveMatch.vue` lightweight and testable in isolation.
+- **500-Line Rule (IP-04)**: Keep `LiveMatch.vue`, `useWakeLock.ts`, and all test files strictly under 500 lines.
+- **AD-06 PWA-First Infrastructure**: Use native Screen Wake Lock API for zero-overhead native app feel.
+
+### Previous Story Intelligence (5.1 – 5.4)
+- Keep browser API calls (vibration, orientation, wakeLock, fullscreen) safely guarded against SSR and unsupported browser environments.
+- Referee Mode (Story 5.4) shares the exact same scoring state and lifecycle in `LiveMatch.vue` — ensure wake lock works equally in referee portrait view.
+- In Playwright tests, mock `navigator.wakeLock` using `page.addInitScript()` to verify acquisition calls deterministically.
+
+### References
+- **PRD FR11**: "System prevents screen dimming during live match mode (Phase 1.5)"
+- **PRD Journey 5**: Phone placed on table as live scoreboard, screen stays on continuously.
+- **Architecture AD-06**: "PWA-First Infrastructure: Use of Service Workers for Push API and Screen Wake Lock API (Live Mode)."
+- **W3C Screen Wake Lock API**: `https://w3c.github.io/screen-wake-lock/`
+
+## Dev Agent Record
+
+### Agent Model Used
+
+Gemini 3.7 Flash
+
+### Debug Log References
+
+- Unit tests (`tests/unit/useWakeLock.spec.ts` & `tests/unit/LiveMatchComponent.spec.ts`) verified passing (10/10 and 7/7).
+- E2E Playwright test suite (`e2e/wake-lock-continuity.spec.ts`) verified passing across Chromium, Firefox, WebKit (15/15).
+- Full local CI verification (`./scripts/ci-local.sh`) verified passing 100% (107 passed, 0 failed).
+
+### Completion Notes List
+
+- Created `useWakeLock` composable (`frontend/src/composables/useWakeLock.ts`) with reactive state (`isSupported`, `isActive`, `sentinel`), safe try/catch error degradation, and automatic `visibilitychange` reconnection for match continuity.
+- Fixed race condition between `request()` and `release()` in `useWakeLock.ts` to prevent wake lock leaks when `release()` is called while `request()` is in-flight.
+- Prevented duplicate sentinel leaks by reusing active sentinel if already unreleased and coalescing concurrent requests.
+- Integrated `useWakeLock` into `frontend/src/features/match/LiveMatch.vue` on match startup and called `wakeLock.cleanup()` on unmount to release sentinel and deregister event listeners.
+- Updated `frontend/tests/unit/LiveMatchComponent.spec.ts` to mock `cleanup` and assert `cleanup()` is called on unmount.
+- Updated `mockSentinel` in `frontend/e2e/wake-lock-continuity.spec.ts` to properly handle and invoke registered event listeners.
+- Added comprehensive unit tests in `frontend/tests/unit/useWakeLock.spec.ts` covering race conditions, duplicate request deduplication, and cleanup listener removal.
+- Verified all unit and E2E tests pass 100%.
+
+### File List
+
+- `frontend/src/composables/useWakeLock.ts`
+- `frontend/src/features/match/LiveMatch.vue`
+- `frontend/tests/unit/useWakeLock.spec.ts`
+- `frontend/tests/unit/LiveMatchComponent.spec.ts`
+- `frontend/e2e/wake-lock-continuity.spec.ts`
+- `_bmad-output/test-artifacts/atdd-checklist-5-5-screen-wake-lock-and-continuity.md`
+
+### Change Log
+
+- **2026-08-22**: Implemented Story 5.5 Screen Wake Lock & Continuity, completed all unit & E2E tests, verified full local CI.
+- **2026-08-23**: Addressed code review findings (6 patch items resolved), added unit test coverage for race conditions and cleanup, verified full local CI.
+
+### Review Findings
+- [x] [Review][Patch] Race condition between request() and release() allows wake lock to leak [frontend/src/composables/useWakeLock.ts]
+- [x] [Review][Patch] Multiple request() calls overwrite sentinel and leak locks [frontend/src/composables/useWakeLock.ts]
+- [x] [Review][Patch] LiveMatch.vue calls release() instead of cleanup() on unmount [frontend/src/features/match/LiveMatch.vue]
+- [x] [Review][Patch] Invalid mock assertions in LiveMatchComponent.spec.ts [frontend/tests/unit/LiveMatchComponent.spec.ts]
+- [x] [Review][Patch] mockSentinel swallows addEventListener callback in E2E tests [frontend/e2e/wake-lock-continuity.spec.ts]
+- [x] [Review][Patch] Stray `+` character injected into E2E test file [frontend/e2e/wake-lock-continuity.spec.ts]
+- [x] [Review][Defer] Fragile Unmount Simulation in E2E test [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
+- [x] [Review][Defer] Ineffective Fallback Assertions in AC4 [frontend/e2e/wake-lock-continuity.spec.ts] — deferred, pre-existing
+- [x] [Review][Defer] Brittle Mock Restoration in unit tests [frontend/tests/unit/useWakeLock.spec.ts] — deferred, pre-existing

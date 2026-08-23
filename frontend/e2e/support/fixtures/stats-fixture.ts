@@ -19,7 +19,7 @@ export interface StatsFixtures {
  */
 export const test = base.extend<StatsFixtures>({
    
-  // eslint-disable-next-line no-empty-pattern
+   
   statsFactory: async ({}, use) => {
     await use(new PersonalStatsFactory());
   },
