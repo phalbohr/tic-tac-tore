@@ -136,7 +136,16 @@ so that I can save and reuse my group's specific house rules for future matches 
 - **Testing Standards:**
   - **Strict AAA Pattern:** All test methods adhere to Arrange-Act-Assert separated by a single blank line, with zero structural comments.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-6-1b-create-rule-template.md`
+- **Backend API Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1b/RuleConfigurationControllerATDDTest.java`
+- **Frontend E2E Tests:** `frontend/e2e/rule-system-selection.spec.ts`
+- **Frontend Store Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1b/useRuleConfigStore.spec.ts`
+- **Frontend Component Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1b/RuleTemplateModal.spec.ts`
+
 ### References
+
 
 - [Source: _bmad-output/planning-artifacts/prd.md#Rule System Consistency] - Rule templates are immutable. Modifying settings creates a new template.
 - [Source: _bmad-output/planning-artifacts/prd.md#FR3] - Player can select a rule system (ITSF, DTFB, or Custom template) or create inline.
