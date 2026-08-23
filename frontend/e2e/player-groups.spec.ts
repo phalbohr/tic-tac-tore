@@ -142,9 +142,8 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
 
     // Set match type to 2v2
     const matchType2v2 = page.getByRole('button', { name: '2v2' });
-    if (await matchType2v2.isVisible()) {
-      await matchType2v2.click();
-    }
+    await expect(matchType2v2).toBeVisible();
+    await matchType2v2.click();
 
     // Open inline group creation modal
     const createGroupBtn = page.getByRole('button', { name: /Create Group|New Team|\+ Group/i });
@@ -156,7 +155,7 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
 
     // Verify match draft state is preserved (still 2v2 mode selected)
     await expect(matchType2v2).toHaveClass(/bg-primary|active|selected/);
-    await expect(page.locator('.player-slot')).toHaveCount(4);
+    await expect(page.getByTestId('player-slot')).toHaveCount(4);
   });
 
   test('[P1] should filter Unified Match History by player group chips (/matches)', async ({ page }) => {
@@ -209,10 +208,9 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
     await loginUser(page);
     await page.goto('/cabinet');
 
-    const groupList = page.locator('.player-group-list, [data-testid="player-group-list"]').first();
-    if (await groupList.isVisible()) {
-      const borderTopWidth = await groupList.evaluate(el => window.getComputedStyle(el).borderTopWidth);
-      expect(borderTopWidth).toBe('0px');
-    }
+    const groupList = page.getByTestId('player-group-list');
+    await expect(groupList).toBeVisible();
+    const borderTopWidth = await groupList.evaluate((el) => window.getComputedStyle(el).borderTopWidth);
+    expect(borderTopWidth).toBe('0px');
   });
 });

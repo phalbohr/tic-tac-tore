@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -80,6 +81,11 @@ class PlayerGroupControllerATDDTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Nested
     @DisplayName("GET /api/v1/player-groups Endpoint Specs")
     class GetPlayerGroupsSpecs {
@@ -110,6 +116,7 @@ class PlayerGroupControllerATDDTest {
 
         @Test
         @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated")
+        @WithAnonymousUser
         void shouldReturn401WhenUnauthenticated() throws Exception {
             SecurityContextHolder.clearContext();
 

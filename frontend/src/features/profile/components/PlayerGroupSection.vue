@@ -6,15 +6,7 @@ import type { PlayerGroupResponse } from '@/services/playerGroupService'
 import PlayerGroupModal from '@/features/group/components/PlayerGroupModal.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 
-let t = (key: string, defaultVal?: string) => defaultVal || key
-try {
-  const i18n = useI18n()
-  if (i18n && i18n.t) {
-    t = i18n.t
-  }
-} catch {
-  // fallback for tests
-}
+const { t } = useI18n()
 const store = usePlayerGroupStore()
 
 const isModalOpen = ref(false)
