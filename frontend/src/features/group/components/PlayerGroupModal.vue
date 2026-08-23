@@ -17,15 +17,7 @@ const emit = defineEmits<{
   (e: 'save', payload: { name: string; isFavorite: boolean; memberIds: string[] }): void
 }>()
 
-let t = (key: string, defaultVal?: string) => defaultVal || key
-try {
-  const i18n = useI18n()
-  if (i18n && i18n.t) {
-    t = i18n.t
-  }
-} catch {
-  // fallback for tests
-}
+const { t } = useI18n()
 
 const name = ref('')
 const isFavorite = ref(false)

@@ -11,15 +11,7 @@ defineOptions({
   name: 'PlayerSelection',
 })
 
-let t = (key: string, defaultVal?: string) => defaultVal || key
-try {
-  const i18n = useI18n()
-  if (i18n && i18n.t) {
-    t = i18n.t
-  }
-} catch {
-  // fallback for tests
-}
+const { t } = useI18n()
 const store = useMatchDraftStore()
 const playerGroupStore = usePlayerGroupStore()
 
@@ -126,6 +118,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
     <div
       v-for="index in maxPlayers"
       :key="index"
+      data-testid="player-slot"
       class="player-slot h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2"
     >
       <div v-if="maxPlayers === 4" class="w-4 text-center font-bold text-on-surface-variant text-sm">

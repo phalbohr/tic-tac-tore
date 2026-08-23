@@ -77,8 +77,7 @@ describe('PlayerGroupModal.vue (ATDD Red Phase)', () => {
     const nameInput = wrapper.find('input[type="text"]')
     await nameInput.setValue('  Weekend Squad  ')
 
-    const submitBtn = wrapper.find('button[type="submit"], [data-testid="group-save-btn"]')
-    await submitBtn.trigger('click')
+    await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('save')).toBeTruthy()
     const payload = wrapper.emitted('save')?.[0]?.[0] as { name: string; isFavorite: boolean; memberIds: string[] }

@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -69,7 +70,27 @@ class PlayerGroupControllerATDDTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(playerGroupController)
-                .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
+                .setCustomArgumentResolvers(new org.springframework.web.method.support.HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
+                        return parameter.hasParameterAnnotation(org.springframework.security.core.annotation.AuthenticationPrincipal.class);
+                    }
+
+                    @Override
+                    public Object resolveArgument(org.springframework.core.MethodParameter parameter,
+                                                  org.springframework.web.method.support.ModelAndViewContainer mavContainer,
+                                                  org.springframework.web.context.request.NativeWebRequest webRequest,
+                                                  org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
+                        java.security.Principal principal = webRequest.getUserPrincipal();
+                        if (principal instanceof org.springframework.security.core.Authentication authentication) {
+                            Object p = authentication.getPrincipal();
+                            if (p instanceof User user) {
+                                return user;
+                            }
+                        }
+                        return null;
+                    }
+                })
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
         objectMapper = new ObjectMapper();
@@ -77,7 +98,6 @@ class PlayerGroupControllerATDDTest {
         currentUserId = UUID.randomUUID();
         currentUser = User.builder().id(currentUserId).email("player@example.com").build();
         auth = new UsernamePasswordAuthenticationToken(currentUser, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @Nested
@@ -110,9 +130,8 @@ class PlayerGroupControllerATDDTest {
 
         @Test
         @DisplayName("[P1] Should return 401 Unauthorized when unauthenticated")
+        @WithAnonymousUser
         void shouldReturn401WhenUnauthenticated() throws Exception {
-            SecurityContextHolder.clearContext();
-
             mockMvc.perform(get("/api/v1/player-groups")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
