@@ -35,11 +35,11 @@ export function useWakeLock() {
       return true
     }
 
+    isActive.value = true
+
     if (requestPromise) {
       return requestPromise
     }
-
-    isActive.value = true
 
     requestPromise = (async () => {
       try {
