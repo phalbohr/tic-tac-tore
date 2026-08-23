@@ -235,5 +235,48 @@
     "nameTooLong": "Gruppenname darf maximal 50 Zeichen lang sein",
     "tooManyMembers": "Maximal 12 Mitglieder pro Gruppe erlaubt",
     "groupLimitReached": "Maximale Grenze von 10 Gruppen erreicht"
+  },
+  "rules": {
+    "sectionTitle": "Regelvorlagen",
+    "createButton": "Vorlage erstellen",
+    "createCustom": "+ Eigene Regel",
+    "pickerTitle": "Regelwerk",
+    "noTemplates": "Keine Regelvorlagen verfügbar.",
+    "editAsNew": "Als neu bearbeiten",
+    "modal": {
+      "createTitle": "Regelvorlage erstellen",
+      "editAsNew": "Regelvorlage als neu bearbeiten",
+      "saveButton": "Vorlage speichern"
+    },
+    "sections": {
+      "general": "Allgemein",
+      "gameFlow": "Spielablauf & Tie-Break",
+      "conduct": "Spielregeln & Verhalten"
+    },
+    "fields": {
+      "name": "Vorlagenname",
+      "goalLimit": "Tore zum Sieg",
+      "gameLimit": "Sätze",
+      "winByTwo": "2 Tore Vorsprung",
+      "absoluteCap": "Maximale Punktzahl",
+      "timeouts": "Auszeiten / Satz",
+      "timeoutDuration": "Dauer (s)",
+      "possession5Bar": "5er-Stange Limit (s)",
+      "possessionOther": "Andere Stangen (s)",
+      "sideSwap": "Seitenwechsel",
+      "restart": "Wiederanstoß",
+      "positionSwap": "Positionswechsel",
+      "points": "Punkteverteilung",
+      "spinningAllowed": "Kurbeln erlaubt",
+      "aerialsAllowed": "Heber erlaubt"
+    },
+    "validation": {
+      "nameRequired": "Name ist erforderlich (max. 50 Zeichen)"
+    },
+    "summary": {
+      "gameLimit": "Best of {limit}",
+      "goalLimit": "{goals} Tore",
+      "winByTwo": "2 Tore Vorsprung"
+    }
   }
 }
