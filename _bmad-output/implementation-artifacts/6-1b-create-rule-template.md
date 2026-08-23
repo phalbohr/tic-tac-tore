@@ -4,7 +4,7 @@ baseline_commit: f5cdcf998ba52f6ce6ca77686f9c560f2c1dd268
 
 # Story 6.1b: Create Rule Template
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -56,59 +56,59 @@ so that I can save and reuse my group's specific house rules for future matches 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Domain Entity Expansion (AC1, AC2, AC3, AC4)
-  - [ ] Create Flyway migration `V11__expand_rule_configuration_table.sql`:
+- [x] Task 1: Database Migration & Domain Entity Expansion (AC1, AC2, AC3, AC4)
+  - [x] Create Flyway migration `V11__expand_rule_configuration_table.sql`:
     - Alter table `rule_configuration` adding columns: `absolute_score_cap INT`, `timeouts_per_game INT DEFAULT 2 NOT NULL`, `timeout_duration_seconds INT DEFAULT 30 NOT NULL`, `possession_limit_5bar_seconds INT DEFAULT 10 NOT NULL`, `possession_limit_other_seconds INT DEFAULT 15 NOT NULL`, `side_swap_rule VARCHAR(30) DEFAULT 'BETWEEN_GAMES' NOT NULL`, `restart_rule VARCHAR(30) DEFAULT 'CONCEDING_TEAM' NOT NULL`, `spinning_allowed BOOLEAN DEFAULT FALSE NOT NULL`, `aerials_allowed BOOLEAN DEFAULT FALSE NOT NULL`, `position_swap_rule VARCHAR(30) DEFAULT 'BETWEEN_GAMES' NOT NULL`, `point_distribution VARCHAR(30) DEFAULT 'WIN_LOSS_3_0' NOT NULL`.
     - Create indexes on `rule_configuration(created_by)` and `rule_configuration(type)`.
     - Update existing seeded presets in `V5` to ensure consistent column defaults.
-  - [ ] Update `com.tictactore.model.RuleConfiguration` entity with new fields, enums (`SideSwapRule`, `RestartRule`, `PositionSwapRule`, `PointDistribution`), `@Version`, `@CreationTimestamp`, `@Builder`.
-  - [ ] Update `com.tictactore.repository.RuleConfigurationRepository`:
+  - [x] Update `com.tictactore.model.RuleConfiguration` entity with new fields, enums (`SideSwapRule`, `RestartRule`, `PositionSwapRule`, `PointDistribution`), `@Version`, `@CreationTimestamp`, `@Builder`.
+  - [x] Update `com.tictactore.repository.RuleConfigurationRepository`:
     - `List<RuleConfiguration> findByTypeOrCreatedByOrderByCreatedAtDesc(RuleConfigurationType type, UUID createdBy)`
     - `List<RuleConfiguration> findByCreatedByOrderByCreatedAtDesc(UUID createdBy)`
     - `Optional<RuleConfiguration> findByIdAndCreatedByOrType(UUID id, UUID createdBy, RuleConfigurationType type)`
     - `long countByCreatedBy(UUID createdBy)`
     - `boolean existsByCreatedByAndNameIgnoreCase(UUID createdBy, String name)`
-- [ ] Task 2: Backend DTOs, Service & Controller (AC1, AC2, AC3, AC4, AC5)
-  - [ ] Create/Update DTOs:
+- [x] Task 2: Backend DTOs, Service & Controller (AC1, AC2, AC3, AC4, AC5)
+  - [x] Create/Update DTOs:
     - `RuleConfigurationRequest` with Jakarta validation annotations (`@NotBlank @Size(max=50) String name`, `@Min(1) @Max(100) int goalLimit`, `@Min(1) @Max(15) int gameLimit`, `boolean winByTwo`, `@Min(1) @Max(100) Integer absoluteScoreCap`, `@Min(0) @Max(10) int timeoutsPerGame`, `@Min(0) @Max(300) int timeoutDurationSeconds`, `@Min(0) @Max(60) int possessionLimit5BarSeconds`, `@Min(0) @Max(60) int possessionLimitOtherSeconds`, `@NotNull SideSwapRule sideSwapRule`, `@NotNull RestartRule restartRule`, `boolean spinningAllowed`, `boolean aerialsAllowed`, `@NotNull PositionSwapRule positionSwapRule`, `@NotNull PointDistribution pointDistribution`).
     - `RuleConfigurationResponse` including all fields, `id`, `name`, `type`, `createdBy`, `createdAt`.
-  - [ ] Update `com.tictactore.service.RuleConfigurationService` and `RuleConfigurationOperation`:
+  - [x] Update `com.tictactore.service.RuleConfigurationService` and `RuleConfigurationOperation`:
     - `List<RuleConfigurationResponse> getAvailableRules(UUID userId, RuleConfigurationType type)`
     - `RuleConfigurationResponse getRuleById(UUID userId, UUID id)`
     - `RuleConfigurationResponse createCustomRule(UUID userId, RuleConfigurationRequest request)`
     - `void deleteCustomRule(UUID userId, UUID id)`
     - Enforce quota (max 20 custom templates per user), name uniqueness per creator (case-insensitive), preset protection (presets cannot be deleted), and user isolation (`AD-04`, `AD-05`).
-  - [ ] Update `com.tictactore.controller.RuleConfigurationController` mapped to `/api/v1/rule-configurations`:
+  - [x] Update `com.tictactore.controller.RuleConfigurationController` mapped to `/api/v1/rule-configurations`:
     - `GET /api/v1/rule-configurations` -> returns presets + authenticated user's custom templates (or filtered by `type` query param if provided).
     - `GET /api/v1/rule-configurations/{id}` -> returns template if preset or owned by user.
     - `POST /api/v1/rule-configurations` -> `201 Created` with created response.
     - `DELETE /api/v1/rule-configurations/{id}` -> `204 No Content` (403 if preset or belongs to another user).
     - Use `@AuthenticationPrincipal com.tictactore.model.User principal` across all endpoints (`principal.getId()`).
-- [ ] Task 3: Frontend Service & Pinia Store (AC1, AC2, AC4, AC5)
-  - [ ] Create `frontend/src/services/ruleConfigService.ts` for interacting with `/api/v1/rule-configurations` with CSRF headers.
-  - [ ] Update `frontend/src/stores/useRuleConfigStore.ts`:
+- [x] Task 3: Frontend Service & Pinia Store (AC1, AC2, AC4, AC5)
+  - [x] Create `frontend/src/services/ruleConfigService.ts` for interacting with `/api/v1/rule-configurations` with CSRF headers.
+  - [x] Update `frontend/src/stores/useRuleConfigStore.ts`:
     - State: `presets: RuleConfig[]`, `customRules: RuleConfig[]`, `selectedRuleId: string | null`, `loading: boolean`, `error: string | null`.
     - Getters: `allRules`, `getRuleById`.
     - Actions: `fetchAllRules()`, `fetchPresets()`, `createCustomRule(ruleData)`, `deleteCustomRule(id)`, `selectRule(id)`.
-- [ ] Task 4: Frontend UI Components & Inline Match Integration (AC2, AC4, AC5, AC6)
-  - [ ] Create `frontend/src/features/match/components/RuleTemplateModal.vue`:
+- [x] Task 4: Frontend UI Components & Inline Match Integration (AC2, AC4, AC5, AC6)
+  - [x] Create `frontend/src/features/match/components/RuleTemplateModal.vue`:
     - Clubhouse-styled modal/bottom sheet for creating and "editing as new" rule templates.
     - Form sections: General (Name, Game Limit, Goal Limit), Game Flow (Tie-break, Absolute Cap, Timeouts, Possession Limits), Match Conduct (Side Swap, Restart, Illegal Moves, Position Swap, Point Distribution).
     - Smart defaults pre-fill and live validation.
-  - [ ] Create `frontend/src/features/profile/components/RuleTemplateSection.vue` in `frontend/src/features/profile/Cabinet.vue`:
+  - [x] Create `frontend/src/features/profile/components/RuleTemplateSection.vue` in `frontend/src/features/profile/Cabinet.vue`:
     - Lists presets and custom templates with summary badges and parameters.
     - Actions: "Create Template", "Edit as New", "Delete" (custom only).
-  - [ ] Integrate rule selector in `frontend/src/features/match/components/NewMatchFlow.vue` and `PlayerSelection.vue`:
+  - [x] Integrate rule selector in `frontend/src/features/match/components/NewMatchFlow.vue` and `PlayerSelection.vue`:
     - Quick-select chip / dropdown for rule templates (Presets + Custom).
     - Inline "Create Custom Template" button opening `RuleTemplateModal.vue` without clearing match draft state.
-  - [ ] Add i18n localization keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
-  - [ ] Adhere to Clubhouse "No-Line" rule (`UX-DR3`) with `ch-` classes and 500-line limit (`IP-04`).
-- [ ] Task 5: Testing & Quality Verification
-  - [ ] Backend Unit Tests: `RuleConfigurationServiceTest.java` and `RuleConfigurationRepositoryTest.java`.
-  - [ ] Backend ATDD: Integration test `RuleConfigurationControllerATDDTest.java` covering preset fetching, custom rule creation, quota enforcement, user isolation, immutability, and validation errors.
-  - [ ] Frontend Unit Tests: Store tests in `frontend/src/stores/__tests__/useRuleConfigStore.spec.ts` and component tests in `RuleTemplateModal.spec.ts`.
-  - [ ] E2E Test: Update `frontend/e2e/rule-system-selection.spec.ts` with Playwright tests validating inline rule template creation, selection in New Match flow, and profile settings management.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and verify 100% test pass.
+  - [x] Add i18n localization keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
+  - [x] Adhere to Clubhouse "No-Line" rule (`UX-DR3`) with `ch-` classes and 500-line limit (`IP-04`).
+- [x] Task 5: Testing & Quality Verification
+  - [x] Backend Unit Tests: `RuleConfigurationServiceTest.java` and `RuleConfigurationRepositoryTest.java`.
+  - [x] Backend ATDD: Integration test `RuleConfigurationControllerATDDTest.java` covering preset fetching, custom rule creation, quota enforcement, user isolation, immutability, and validation errors.
+  - [x] Frontend Unit Tests: Store tests in `frontend/src/stores/__tests__/useRuleConfigStore.spec.ts` and component tests in `RuleTemplateModal.spec.ts`.
+  - [x] E2E Test: Update `frontend/e2e/rule-system-selection.spec.ts` with Playwright tests validating inline rule template creation, selection in New Match flow, and profile settings management.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and verify 100% test pass.
 
 ## Dev Notes
 
@@ -167,7 +167,12 @@ N/A
 
 ### Completion Notes List
 
-N/A
+- Database: Added migration `V11__expand_rule_configuration_table.sql` with columns for ITSF/custom rule parameters, defaults, and indexes.
+- Domain: Updated `RuleConfiguration` entity with enums (`SideSwapRule`, `RestartRule`, `PositionSwapRule`, `PointDistribution`), `@Version` for optimistic locking, `@CreationTimestamp`, and repository queries.
+- Backend: Implemented `RuleConfigurationService` and `RuleConfigurationOperation` with `@Retryable`, quota checks (max 20), case-insensitive unique naming per user, preset immutability and user isolation. Implemented `/api/v1/rule-configurations` REST controller with `@AuthenticationPrincipal`.
+- Frontend: Created `ruleConfigService.ts`, Pinia store `useRuleConfigStore.ts`, `RuleTemplateModal.vue`, `RulePicker.vue`, and `RuleTemplateSection.vue` in `Cabinet.vue` and `NewMatchFlow.vue`.
+- Localization: Added complete English and German translations in `en.json` and `de.json`.
+- Testing & Verification: 100% test pass on `./scripts/ci-local.sh` (384 backend tests, 311 frontend unit tests, 115 Playwright E2E tests).
 
 ### File List
 
@@ -183,17 +188,21 @@ N/A
 - `src/main/java/com/tictactore/service/RuleConfigurationService.java`
 - `src/main/java/com/tictactore/service/RuleConfigurationOperation.java`
 - `src/main/java/com/tictactore/controller/RuleConfigurationController.java`
+- `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
 - `src/test/java/com/tictactore/service/RuleConfigurationServiceTest.java`
 - `src/test/java/com/tictactore/repository/RuleConfigurationRepositoryTest.java`
 - `src/test/java/com/tictactore/controller/RuleConfigurationControllerATDDTest.java`
+- `src/test/java/com/tictactore/api/RuleConfigurationApiIT.java`
 - `frontend/src/services/ruleConfigService.ts`
 - `frontend/src/stores/useRuleConfigStore.ts`
 - `frontend/src/stores/__tests__/useRuleConfigStore.spec.ts`
 - `frontend/src/features/match/components/RuleTemplateModal.vue`
 - `frontend/src/features/match/components/__tests__/RuleTemplateModal.spec.ts`
+- `frontend/src/features/match/components/RulePicker.vue`
+- `frontend/src/features/match/components/NewMatchFlow.vue`
 - `frontend/src/features/profile/components/RuleTemplateSection.vue`
 - `frontend/src/features/profile/Cabinet.vue`
-- `frontend/src/features/match/components/NewMatchFlow.vue`
+- `frontend/src/components/RuleSystemSelection.vue`
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
 - `frontend/e2e/rule-system-selection.spec.ts`
