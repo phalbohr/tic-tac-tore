@@ -57,7 +57,7 @@ class RuleConfigurationControllerATDDTest {
     @InjectMocks
     private RuleConfigurationController ruleConfigurationController;
 
-    private final UUID userId = UUID.fromString("50f4a8e2-888e-4f10-9173-67c8cbcf8f3a");
+    private final UUID userId = UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d");
     private final UUID presetId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private final UUID customRuleId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 

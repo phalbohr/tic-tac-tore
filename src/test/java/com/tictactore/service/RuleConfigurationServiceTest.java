@@ -26,7 +26,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +42,7 @@ class RuleConfigurationServiceTest {
     @InjectMocks
     private RuleConfigurationService service;
 
-    private final UUID userId = UUID.fromString("50f4a8e2-888e-4f10-9173-67c8cbcf8f3a");
+    private final UUID userId = UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d");
     private final UUID foreignUserId = UUID.fromString("99999999-9999-9999-9999-999999999999");
     private final UUID ruleId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
@@ -200,10 +199,8 @@ class RuleConfigurationServiceTest {
     }
 
     @Test
-    @DisplayName("createCustomRule should create and return new custom rule response")
+    @DisplayName("createCustomRule should delegate to operation and return response")
     void shouldCreateCustomRule_whenValid() {
-        when(repository.countByCreatedBy(userId)).thenReturn(5L);
-        when(repository.existsByCreatedByAndNameIgnoreCase(userId, "Office Fast 7")).thenReturn(false);
         when(operation.createCustomRule(eq(sampleRequest), eq(userId))).thenReturn(sampleCustom);
 
         RuleConfigurationResponse result = service.createCustomRule(userId, sampleRequest);
@@ -211,27 +208,6 @@ class RuleConfigurationServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.name()).isEqualTo("Office Fast 7");
         verify(operation).createCustomRule(sampleRequest, userId);
-    }
-
-    @Test
-    @DisplayName("createCustomRule should throw IllegalArgumentException when user quota (20) exceeded")
-    void shouldThrowException_whenQuotaExceeded() {
-        when(repository.countByCreatedBy(userId)).thenReturn(20L);
-
-        assertThatThrownBy(() -> service.createCustomRule(userId, sampleRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("quota exceeded");
-    }
-
-    @Test
-    @DisplayName("createCustomRule should throw IllegalArgumentException when rule name already exists for user")
-    void shouldThrowException_whenNameAlreadyExists() {
-        when(repository.countByCreatedBy(userId)).thenReturn(3L);
-        when(repository.existsByCreatedByAndNameIgnoreCase(userId, "Office Fast 7")).thenReturn(true);
-
-        assertThatThrownBy(() -> service.createCustomRule(userId, sampleRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("already exists");
     }
 
     @Test

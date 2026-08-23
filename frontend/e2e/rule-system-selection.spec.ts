@@ -49,7 +49,7 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
                     id: crypto.randomUUID(),
                     ...body,
                     type: 'CUSTOM',
-                    createdBy: '50f4a8e2-888e-4f10-9173-67c8cbcf8f3a',
+                    createdBy: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d',
                     createdAt: new Date().toISOString()
                 };
                 rulesList.push(created);
@@ -79,7 +79,7 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
                     id: crypto.randomUUID(),
                     ...body,
                     type: 'CUSTOM',
-                    createdBy: '50f4a8e2-888e-4f10-9173-67c8cbcf8f3a',
+                    createdBy: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d',
                     createdAt: new Date().toISOString()
                 };
                 rulesList.push(created);

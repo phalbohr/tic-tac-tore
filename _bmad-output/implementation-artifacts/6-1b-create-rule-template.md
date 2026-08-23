@@ -4,7 +4,7 @@ baseline_commit: f5cdcf998ba52f6ce6ca77686f9c560f2c1dd268
 
 # Story 6.1b: Create Rule Template
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -172,6 +172,15 @@ N/A
 - Backend: Implemented `RuleConfigurationService` and `RuleConfigurationOperation` with `@Retryable`, quota checks (max 20), case-insensitive unique naming per user, preset immutability and user isolation. Implemented `/api/v1/rule-configurations` REST controller with `@AuthenticationPrincipal`.
 - Frontend: Created `ruleConfigService.ts`, Pinia store `useRuleConfigStore.ts`, `RuleTemplateModal.vue`, `RulePicker.vue`, and `RuleTemplateSection.vue` in `Cabinet.vue` and `NewMatchFlow.vue`.
 - Localization: Added complete English and German translations in `en.json` and `de.json`.
+- Code Review Fixes:
+  - Added cross-field validation for `absoluteScoreCap` (`winByTwo` required and `absoluteScoreCap > goalLimit`).
+  - Removed unused query `findByIdAndCreatedByOrType` and `findByType` from `RuleConfigurationRepository`.
+  - Extracted `MAX_CUSTOM_TEMPLATES_PER_USER = 20` constant in `RuleConfigurationOperation` and `RuleConfigurationService`.
+  - Enclosed quota check, uniqueness check, and validations in atomic transaction in `RuleConfigurationOperation.createCustomRule` to eliminate TOCTOU race conditions.
+  - Eliminated mock user UUID collision with ITSF preset ID across all unit and E2E tests.
+  - Conformed `@Version` in `RuleConfiguration` strictly to `code-1-guide` (no `@Column`).
+  - Cleaned up unused `getPresets()` dead code.
+  - Created `RuleConfigurationOperationTest.java` and expanded `RuleConfigurationApiIT.java` for full integration test coverage.
 - Testing & Verification: 100% test pass on `./scripts/ci-local.sh` (384 backend tests, 311 frontend unit tests, 115 Playwright E2E tests).
 
 ### File List
@@ -189,6 +198,7 @@ N/A
 - `src/main/java/com/tictactore/service/RuleConfigurationOperation.java`
 - `src/main/java/com/tictactore/controller/RuleConfigurationController.java`
 - `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
+- `src/test/java/com/tictactore/service/RuleConfigurationOperationTest.java`
 - `src/test/java/com/tictactore/service/RuleConfigurationServiceTest.java`
 - `src/test/java/com/tictactore/repository/RuleConfigurationRepositoryTest.java`
 - `src/test/java/com/tictactore/controller/RuleConfigurationControllerATDDTest.java`
@@ -209,11 +219,14 @@ N/A
 - `_bmad-output/implementation-artifacts/6-1b-create-rule-template.md`
 
 ### Review Findings
-- [ ] [Review][Patch] Missing cross-field validation for absoluteScoreCap and goalLimit [src/main/java/com/tictactore/service/RuleConfigurationService.java:492-501]
-- [ ] [Review][Patch] Unused Custom Repository Query (findByIdAndCreatedByOrType) [src/main/java/com/tictactore/service/RuleConfigurationService.java]
-- [ ] [Review][Patch] Hardcoded magic number for quota limit [src/main/java/com/tictactore/service/RuleConfigurationService.java]
-- [ ] [Review][Patch] TOCTOU race condition in template creation quota check [src/main/java/com/tictactore/service/RuleConfigurationService.java:492-494]
-- [ ] [Review][Patch] Migration UUID reused from mock user ID [src/main/resources/db/migration/V11__expand_rule_configuration_table.sql]
-- [ ] [Review][Patch] RuleConfigurationControllerATDDTest uses mocks instead of integration [src/test/java/com/tictactore/controller/RuleConfigurationControllerATDDTest.java]
-- [ ] [Review][Patch] Removed @Column(nullable = false) from @Version field [src/main/java/com/tictactore/model/RuleConfiguration.java]
-- [ ] [Review][Patch] Removed caller of getPresets() leaves dead code [src/main/java/com/tictactore/service/RuleConfigurationService.java:523-526]
+- [x] [Review][Patch] Missing cross-field validation for absoluteScoreCap and goalLimit [src/main/java/com/tictactore/service/RuleConfigurationService.java:492-501]
+- [x] [Review][Patch] Unused Custom Repository Query (findByIdAndCreatedByOrType) [src/main/java/com/tictactore/service/RuleConfigurationService.java]
+- [x] [Review][Patch] Hardcoded magic number for quota limit [src/main/java/com/tictactore/service/RuleConfigurationService.java]
+- [x] [Review][Patch] TOCTOU race condition in template creation quota check [src/main/java/com/tictactore/service/RuleConfigurationService.java:492-494]
+- [x] [Review][Patch] Migration UUID reused from mock user ID [src/main/resources/db/migration/V11__expand_rule_configuration_table.sql]
+- [x] [Review][Patch] RuleConfigurationControllerATDDTest uses mocks instead of integration [src/test/java/com/tictactore/controller/RuleConfigurationControllerATDDTest.java]
+- [x] [Review][Patch] Removed @Column(nullable = false) from @Version field [src/main/java/com/tictactore/model/RuleConfiguration.java]
+- [x] [Review][Patch] Removed caller of getPresets() leaves dead code [src/main/java/com/tictactore/service/RuleConfigurationService.java:523-526]
+
+### Change Log
+- Addressed code review findings - 8 items resolved (Date: 2026-08-23)

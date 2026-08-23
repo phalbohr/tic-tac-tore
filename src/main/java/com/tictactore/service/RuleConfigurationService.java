@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RuleConfigurationService {
 
+    public static final int MAX_CUSTOM_TEMPLATES_PER_USER = RuleConfigurationOperation.MAX_CUSTOM_TEMPLATES_PER_USER;
+
     private final RuleConfigurationOperation operation;
     private final RuleConfigurationRepository repository;
 
@@ -54,13 +56,6 @@ public class RuleConfigurationService {
             backoff = @Backoff(delay = 100)
     )
     public RuleConfigurationResponse createCustomRule(UUID userId, RuleConfigurationRequest request) {
-        if (repository.countByCreatedBy(userId) >= 20) {
-            throw new IllegalArgumentException("Custom rule template quota exceeded (maximum 20 templates per user)");
-        }
-        if (repository.existsByCreatedByAndNameIgnoreCase(userId, request.name().trim())) {
-            throw new IllegalArgumentException("Rule template with name '" + request.name() + "' already exists");
-        }
-
         RuleConfiguration saved = operation.createCustomRule(request, userId);
         return toResponse(saved);
     }
@@ -82,11 +77,6 @@ public class RuleConfigurationService {
         }
 
         operation.deleteCustomRule(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<RuleConfiguration> getPresets() {
-        return repository.findByType(RuleConfigurationType.PRESET);
     }
 
     public RuleConfigurationResponse toResponse(RuleConfiguration config) {
