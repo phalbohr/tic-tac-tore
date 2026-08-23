@@ -88,6 +88,7 @@ development_status:
   epic-5-retrospective: optional
   epic-6: in-progress
   6-1-named-player-groups-teams: review
+  6-1b-create-rule-template: ready-for-dev
   6-2-default-team-and-rule-template: backlog
   6-3-create-want-to-play-pool: backlog
   6-4-join-existing-pool: backlog
