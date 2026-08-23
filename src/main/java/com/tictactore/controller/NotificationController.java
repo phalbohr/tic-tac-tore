@@ -76,7 +76,10 @@ public class NotificationController {
         if (principal instanceof User user && user.getId() != null) {
             return user.getId();
         }
-        if (principal != null) {
+        if (principal instanceof String str && "anonymousUser".equalsIgnoreCase(str)) {
+            return null;
+        }
+        if (principal != null && !(principal instanceof String && "anonymousUser".equalsIgnoreCase((String) principal))) {
             return UUID.fromString("00000000-0000-0000-0000-000000000001");
         }
         return null;

@@ -215,5 +215,22 @@
       "random": "Zufall"
     },
     "retiredPlayer": "Ehemaliger Spieler"
+  },
+  "groups": {
+    "sectionTitle": "Spielergruppen",
+    "createButton": "Gruppe erstellen",
+    "createGroup": "+ Gruppe",
+    "createTitle": "Gruppe erstellen",
+    "editTitle": "Gruppe bearbeiten",
+    "nameLabel": "Name der Gruppe",
+    "namePlaceholder": "z.B. Dienstagsteam",
+    "isFavoriteLabel": "Als Favoriten markieren",
+    "membersLabel": "Mitglieder",
+    "addMember": "Mitglied hinzufügen",
+    "noMembers": "Noch keine Mitglieder hinzugefügt",
+    "noGroups": "Noch keine Spielergruppen. Erstelle Gruppen für schnelle Teamauswahl!",
+    "membersCount": "Mitglieder",
+    "nameRequired": "Gruppenname ist erforderlich",
+    "nameTooLong": "Gruppenname darf maximal 50 Zeichen lang sein"
   }
 }

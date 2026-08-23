@@ -41,6 +41,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(Map.of("message", msg));
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(org.springframework.security.access.AccessDeniedException e) {
+        var msg = e.getMessage() != null ? e.getMessage() : "Access denied";
+        return ResponseEntity.status(403).body(Map.of("message", msg));
+    }
+
     @ExceptionHandler(ParticipantNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleParticipantNotFound(ParticipantNotFoundException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Participant not found";

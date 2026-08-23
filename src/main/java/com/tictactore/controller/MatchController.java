@@ -88,6 +88,7 @@ public class MatchController {
     public ResponseEntity<PagedResponse<MatchResponse>> getMatchHistory(
             @RequestParam(value = "status", required = false, defaultValue = "CONFIRMED") String status,
             @RequestParam(value = "playerId", required = false) UUID playerId,
+            @RequestParam(value = "groupId", required = false) UUID groupId,
             @RequestParam(value = "ruleConfigId", required = false) UUID ruleConfigId,
             @RequestParam(value = "matchType", required = false) String matchType,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
@@ -97,9 +98,16 @@ public class MatchController {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
-                principal.getId(), status, playerId, ruleConfigId, matchType, page, size
-        );
+        PagedResponse<MatchResponse> response;
+        if (groupId != null) {
+            response = matchService.getMatchHistory(
+                    principal.getId(), status, playerId, groupId, ruleConfigId, matchType, page, size
+            );
+        } else {
+            response = matchService.getMatchHistory(
+                    principal.getId(), status, playerId, ruleConfigId, matchType, page, size
+            );
+        }
         return ResponseEntity.ok(response);
     }
 

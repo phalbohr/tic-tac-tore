@@ -22,7 +22,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] should create custom player group in Profile Settings (/cabinet) and list it', async ({ page }) => {
+  test('[P0] should create custom player group in Profile Settings (/cabinet) and list it', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/player-groups', async (route) => {
@@ -72,13 +72,13 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
 
     // Fill Modal
     await page.getByLabel(/Group Name|Name der Gruppe/i).fill('Friday Champions');
-    await page.getByRole('button', { name: /Save|Speichern/i }).click();
+    await page.locator('[role="dialog"]').getByRole('button', { name: /Save|Speichern/i }).click();
 
     // Expect group created
     await expect(page.getByText('Friday Champions')).toBeVisible();
   });
 
-  test.skip('[P0] should display player group chips during match creation (/matches/new) and filter player selection', async ({ page }) => {
+  test('[P0] should display player group chips during match creation (/matches/new) and filter player selection', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/player-groups', async (route) => {
@@ -110,7 +110,10 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
       });
     });
 
-    await page.goto('/matches/new');
+    await page.goto('/');
+    const newMatchBtn = page.getByRole('button', { name: /New Match/i });
+    await expect(newMatchBtn).toBeVisible();
+    await newMatchBtn.click();
 
     // Verify Group quick filter chips
     await expect(page.getByRole('button', { name: /Favorites|Favoriten/i })).toBeVisible();
@@ -121,7 +124,7 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
     await expect(page.getByText('Bob')).toBeVisible();
   });
 
-  test.skip('[P1] should create new player group inline via modal during match creation (/matches/new) without resetting match draft state', async ({ page }) => {
+  test('[P1] should create new player group inline via modal during match creation (/matches/new) without resetting match draft state', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/player-groups', async (route) => {
@@ -132,7 +135,10 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
       });
     });
 
-    await page.goto('/matches/new');
+    await page.goto('/');
+    const newMatchBtn = page.getByRole('button', { name: /New Match/i });
+    await expect(newMatchBtn).toBeVisible();
+    await newMatchBtn.click();
 
     // Set match type to 2v2
     const matchType2v2 = page.getByRole('button', { name: '2v2' });
@@ -146,13 +152,14 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
     await createGroupBtn.click();
 
     // Close or cancel modal
-    await page.getByRole('button', { name: /Cancel|Abbrechen/i }).click();
+    await page.locator('[role="dialog"]').getByRole('button', { name: /Cancel|Abbrechen/i }).click();
 
     // Verify match draft state is preserved (still 2v2 mode selected)
-    await expect(matchType2v2).toHaveClass(/active|selected|ch-surface/);
+    await expect(matchType2v2).toHaveClass(/bg-primary|active|selected/);
+    await expect(page.locator('.player-slot')).toHaveCount(4);
   });
 
-  test.skip('[P1] should filter Unified Match History by player group chips (/matches)', async ({ page }) => {
+  test('[P1] should filter Unified Match History by player group chips (/matches)', async ({ page }) => {
     await loginUser(page);
 
     let requestedQuery = '';
@@ -198,7 +205,7 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
     await expect.poll(() => requestedQuery).toContain('groupId=grp-weekend');
   });
 
-  test.skip('[P2] should adhere to Clubhouse No-Line rule for group list items (UX-DR3)', async ({ page }) => {
+  test('[P2] should adhere to Clubhouse No-Line rule for group list items (UX-DR3)', async ({ page }) => {
     await loginUser(page);
     await page.goto('/cabinet');
 

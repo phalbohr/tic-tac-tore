@@ -3,12 +3,22 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMatchHistoryStore } from '../stores/useMatchHistoryStore'
 import { useRuleConfigStore } from '@/stores/useRuleConfigStore'
+import { usePlayerGroupStore } from '@/features/group/stores/usePlayerGroupStore'
 import type { PlayerDto } from '../stores/matchDraftStore'
 import PlayerSearchOverlay from './PlayerSearchOverlay.vue'
 
-const { t } = useI18n()
+let t = (key: string, defaultVal?: string) => defaultVal || key
+try {
+  const i18n = useI18n()
+  if (i18n && i18n.t) {
+    t = i18n.t
+  }
+} catch {
+  // fallback for tests
+}
 const store = useMatchHistoryStore()
 const ruleConfigStore = useRuleConfigStore()
+const playerGroupStore = usePlayerGroupStore()
 
 const isPlayerSearchOpen = ref(false)
 const selectedPlayerNickname = ref<string | null>(null)
@@ -21,6 +31,13 @@ onMounted(async () => {
       // ignore preset fetch error if offline or unauthenticated
     }
   }
+  if (playerGroupStore.groups.length === 0) {
+    try {
+      await playerGroupStore.fetchGroups()
+    } catch {
+      // ignore player groups fetch error if offline or unauthenticated
+    }
+  }
 })
 
 function selectMatchType(type: '1v1' | '2v2' | null) {
@@ -29,6 +46,10 @@ function selectMatchType(type: '1v1' | '2v2' | null) {
 
 function selectRulePreset(ruleId: string | null) {
   store.setFilter('ruleConfigId', store.filters.ruleConfigId === ruleId ? null : ruleId)
+}
+
+function selectGroup(groupId: string | null) {
+  store.setFilter('groupId', store.filters.groupId === groupId ? null : groupId)
 }
 
 function handleSelectPlayer(player: PlayerDto) {
@@ -113,6 +134,27 @@ function handleReset() {
         >
           <span class="material-symbols-outlined text-xs">gavel</span>
           <span>{{ preset.name }}</span>
+        </button>
+      </template>
+
+      <!-- Player Group Chips -->
+      <template v-if="playerGroupStore.groups && playerGroupStore.groups.length > 0">
+        <button
+          v-for="group in playerGroupStore.groups"
+          :key="group.id"
+          type="button"
+          class="px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1"
+          :class="
+            store.filters.groupId === group.id
+              ? 'bg-primary text-background shadow-md'
+              : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
+          "
+          @click="selectGroup(group.id)"
+          :data-testid="`filter-group-${group.id}`"
+        >
+          <span v-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
+          <span v-else class="material-symbols-outlined text-xs">groups</span>
+          <span>{{ group.name }}</span>
         </button>
       </template>
 

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 
 export interface MatchHistoryFilters {
   playerId: string | null
+  groupId: string | null
   matchType: '1v1' | '2v2' | null
   ruleConfigId: string | null
 }
@@ -40,6 +41,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
 
   const filters = ref<MatchHistoryFilters>({
     playerId: null,
+    groupId: null,
     matchType: null,
     ruleConfigId: null
   })
@@ -48,7 +50,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
   let pendingAbortController: AbortController | null = null
 
   const hasFilters = computed(() => {
-    return !!(filters.value.playerId || filters.value.matchType || filters.value.ruleConfigId)
+    return !!(filters.value.playerId || filters.value.groupId || filters.value.matchType || filters.value.ruleConfigId)
   })
 
   async function fetchConfirmedHistory(): Promise<void> {
@@ -80,6 +82,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
       const res = await getMatchHistory({
         status: 'CONFIRMED',
         playerId: filters.value.playerId,
+        groupId: filters.value.groupId,
         matchType: filters.value.matchType,
         ruleConfigId: filters.value.ruleConfigId,
         page: pagination.value.page,
@@ -159,6 +162,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
   function resetFilters(): void {
     filters.value = {
       playerId: null,
+      groupId: null,
       matchType: null,
       ruleConfigId: null
     }

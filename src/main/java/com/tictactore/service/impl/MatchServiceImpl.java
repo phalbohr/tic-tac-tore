@@ -40,6 +40,7 @@ public class MatchServiceImpl implements MatchService {
     private final PushNotificationService pushNotificationService;
     private final RateLimitService rateLimitService;
     private final com.tictactore.service.operation.MatchResponseMapper matchResponseMapper;
+    private final com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
 
     @org.springframework.beans.factory.annotation.Autowired
     public MatchServiceImpl(
@@ -48,7 +49,8 @@ public class MatchServiceImpl implements MatchService {
             MatchOperation matchOperation,
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService,
-            com.tictactore.service.operation.MatchResponseMapper matchResponseMapper
+            com.tictactore.service.operation.MatchResponseMapper matchResponseMapper,
+            com.tictactore.repository.PlayerGroupRepository playerGroupRepository
     ) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
@@ -56,6 +58,7 @@ public class MatchServiceImpl implements MatchService {
         this.pushNotificationService = pushNotificationService;
         this.rateLimitService = rateLimitService;
         this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new com.tictactore.service.operation.MatchResponseMapper(userRepository);
+        this.playerGroupRepository = playerGroupRepository;
     }
 
     public MatchServiceImpl(
@@ -65,7 +68,7 @@ public class MatchServiceImpl implements MatchService {
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService
     ) {
-        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository));
+        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null);
     }
 
     @Override
@@ -404,6 +407,20 @@ public class MatchServiceImpl implements MatchService {
             int page,
             int size
     ) {
+        return getMatchHistory(currentUserId, status, filterPlayerId, null, ruleConfigId, matchType, page, size);
+    }
+
+    @Override
+    public com.tictactore.dto.PagedResponse<MatchResponse> getMatchHistory(
+            UUID currentUserId,
+            String status,
+            UUID filterPlayerId,
+            UUID groupId,
+            UUID ruleConfigId,
+            String matchType,
+            int page,
+            int size
+    ) {
         if (currentUserId == null) {
             return new com.tictactore.dto.PagedResponse<>(List.of(), 0, size > 0 ? size : 10, 0L, 0);
         }
@@ -413,9 +430,21 @@ public class MatchServiceImpl implements MatchService {
         int safeSize = size > 0 ? Math.min(size, 100) : 10;
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(safePage, safeSize);
 
-        var matchPage = matchRepository.findMatchHistory(
-                currentUserId, normalizedStatus, filterPlayerId, ruleConfigId, normalizedMatchType, pageable
-        );
+        org.springframework.data.domain.Page<Match> matchPage;
+        if (groupId != null && playerGroupRepository != null) {
+            var groupOpt = playerGroupRepository.findById(groupId);
+            List<UUID> groupMemberIds = List.of(UUID.randomUUID());
+            if (groupOpt.isPresent() && groupOpt.get().getMembers() != null && !groupOpt.get().getMembers().isEmpty()) {
+                groupMemberIds = groupOpt.get().getMembers().stream().map(User::getId).toList();
+            }
+            matchPage = matchRepository.findMatchHistoryWithGroupMembers(
+                    currentUserId, normalizedStatus, filterPlayerId, groupMemberIds, ruleConfigId, normalizedMatchType, pageable
+            );
+        } else {
+            matchPage = matchRepository.findMatchHistory(
+                    currentUserId, normalizedStatus, filterPlayerId, ruleConfigId, normalizedMatchType, pageable
+            );
+        }
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : matchPage.getContent()) {

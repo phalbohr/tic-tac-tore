@@ -7,6 +7,7 @@ import { useStatsStore } from '@/features/stats/stores/useStatsStore'
 import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
 import DemoDataToggle from './components/DemoDataToggle.vue'
+import PlayerGroupSection from './components/PlayerGroupSection.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -250,6 +251,9 @@ async function handleLogout() {
           </div>
         </div>
       </div>
+
+      <!-- Player Groups / Teams Section -->
+      <PlayerGroupSection />
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 

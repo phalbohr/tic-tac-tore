@@ -53,6 +53,7 @@ export interface PagedResponse<T> {
 export interface MatchHistoryParams {
   status?: 'CONFIRMED' | 'PENDING' | 'ALL' | string
   playerId?: string | null
+  groupId?: string | null
   ruleConfigId?: string | null
   matchType?: '1v1' | '2v2' | string | null
   page?: number
@@ -67,6 +68,7 @@ export async function getMatchHistory(params: MatchHistoryParams = {}): Promise<
   const queryParams = new URLSearchParams()
   if (params.status) queryParams.append('status', params.status)
   if (params.playerId) queryParams.append('playerId', params.playerId)
+  if (params.groupId) queryParams.append('groupId', params.groupId)
   if (params.ruleConfigId) queryParams.append('ruleConfigId', params.ruleConfigId)
   if (params.matchType) queryParams.append('matchType', params.matchType)
   if (typeof params.page === 'number') queryParams.append('page', params.page.toString())

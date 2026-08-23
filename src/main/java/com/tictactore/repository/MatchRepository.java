@@ -102,6 +102,47 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             Pageable pageable
     );
 
+    @Query("""
+        SELECT m FROM Match m
+        WHERE (
+            m.teamAAttackerId = :currentUserId OR m.teamADefenderId = :currentUserId
+            OR m.teamBAttackerId = :currentUserId OR m.teamBDefenderId = :currentUserId
+            OR m.creatorId = :currentUserId
+        )
+        AND (
+            (:status = 'CONFIRMED' AND m.status IN ('CONFIRMED', 'PUBLISHED'))
+            OR (:status = 'PENDING' AND m.status IN ('PENDING_APPROVAL', 'PARTIALLY_CONFIRMED'))
+            OR (:status = 'ALL')
+            OR (m.status = :status)
+        )
+        AND (
+            cast(:filterPlayerId as java.util.UUID) IS NULL OR
+            (m.teamAAttackerId = :filterPlayerId OR m.teamADefenderId = :filterPlayerId
+             OR m.teamBAttackerId = :filterPlayerId OR m.teamBDefenderId = :filterPlayerId
+             OR m.creatorId = :filterPlayerId)
+        )
+        AND (
+            (m.teamAAttackerId IN (:groupMemberIds) OR m.teamADefenderId IN (:groupMemberIds)
+             OR m.teamBAttackerId IN (:groupMemberIds) OR m.teamBDefenderId IN (:groupMemberIds)
+             OR m.creatorId IN (:groupMemberIds))
+        )
+        AND (cast(:ruleConfigId as java.util.UUID) IS NULL OR m.ruleConfigId = :ruleConfigId)
+        AND (cast(:matchType as string) IS NULL OR
+            (:matchType = '1v1' AND m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL)
+            OR (:matchType = '2v2' AND m.teamADefenderId IS NOT NULL AND m.teamBDefenderId IS NOT NULL)
+        )
+        ORDER BY m.createdAt DESC
+        """)
+    Page<Match> findMatchHistoryWithGroupMembers(
+            @Param("currentUserId") UUID currentUserId,
+            @Param("status") String status,
+            @Param("filterPlayerId") UUID filterPlayerId,
+            @Param("groupMemberIds") List<UUID> groupMemberIds,
+            @Param("ruleConfigId") UUID ruleConfigId,
+            @Param("matchType") String matchType,
+            Pageable pageable
+    );
+
     @Query(value = """
         WITH match_results AS (
             SELECT

@@ -215,5 +215,22 @@
       "random": "Random"
     },
     "retiredPlayer": "Retired Player"
+  },
+  "groups": {
+    "sectionTitle": "Player Groups",
+    "createButton": "Create Group",
+    "createGroup": "+ Group",
+    "createTitle": "Create Group",
+    "editTitle": "Edit Group",
+    "nameLabel": "Group Name",
+    "namePlaceholder": "e.g. Tuesday Squad",
+    "isFavoriteLabel": "Mark as Favorites",
+    "membersLabel": "Members",
+    "addMember": "Add Member",
+    "noMembers": "No members added yet",
+    "noGroups": "No player groups yet. Create groups to quickly select teams!",
+    "membersCount": "members",
+    "nameRequired": "Group name is required",
+    "nameTooLong": "Group name cannot exceed 50 characters"
   }
 }

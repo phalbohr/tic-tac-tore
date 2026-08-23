@@ -17,10 +17,23 @@ public interface MatchService {
             UUID currentUserId,
             String status,
             UUID filterPlayerId,
+            UUID groupId,
             UUID ruleConfigId,
             String matchType,
             int page,
             int size
     );
+
+    default PagedResponse<MatchResponse> getMatchHistory(
+            UUID currentUserId,
+            String status,
+            UUID filterPlayerId,
+            UUID ruleConfigId,
+            String matchType,
+            int page,
+            int size
+    ) {
+        return getMatchHistory(currentUserId, status, filterPlayerId, null, ruleConfigId, matchType, page, size);
+    }
 }
 
