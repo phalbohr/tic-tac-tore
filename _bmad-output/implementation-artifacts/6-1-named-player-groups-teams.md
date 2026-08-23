@@ -115,6 +115,14 @@ so that I can quickly select frequent teammates and opponents during match creat
   - **Strict AAA Pattern:** All test methods MUST adhere to Arrange-Act-Assert separated by a single blank line, with **zero structural comments** (no `// Arrange`, `// Act`, `// Assert`).
   - Unit, ATDD, and E2E tests are mandatory before marking the story done.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-6-1-named-player-groups-teams.md`
+- **Backend API tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1/PlayerGroupControllerATDDTest.java`
+- **Frontend E2E tests:** `frontend/e2e/player-groups.spec.ts`
+- **Frontend Store tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1/usePlayerGroupStore.spec.ts`
+- **Frontend Component tests:** `_bmad-output/test-artifacts/atdd-redphase-6-1/PlayerGroupModal.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md] - FR39 (Named player groups / "teams", built-in "Favorites" group)

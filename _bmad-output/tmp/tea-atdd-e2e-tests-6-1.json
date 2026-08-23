@@ -1,0 +1,65 @@
+{
+  "success": true,
+  "subagent": "atdd-e2e-tests",
+  "tests": [
+    {
+      "file": "frontend/e2e/player-groups.spec.ts",
+      "description": "ATDD E2E test scaffolds for Named Player Groups user journey (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC 1: Create and manage player groups in Profile Settings (/cabinet)",
+        "AC 3: Inline player group selection and modal creation during match setup (/matches/new) preserving draft state",
+        "AC 4: Filter Unified Match History (/matches) by player group chips",
+        "UX-DR3: Clubhouse No-Line styling for group lists"
+      ],
+      "priority_coverage": {
+        "P0": 2,
+        "P1": 2,
+        "P2": 1,
+        "P3": 0
+      }
+    },
+    {
+      "file": "_bmad-output/test-artifacts/atdd-redphase-6-1/usePlayerGroupStore.spec.ts",
+      "description": "ATDD Unit/Store test scaffolds for usePlayerGroupStore (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC 1: Store state management for player groups and Favorites",
+        "AC 2: Fetch user groups from /api/v1/player-groups",
+        "AC 3: Select group and filter members in portrait match creation",
+        "AC 5: Group updates and deletions"
+      ],
+      "priority_coverage": {
+        "P0": 4,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    },
+    {
+      "file": "_bmad-output/test-artifacts/atdd-redphase-6-1/PlayerGroupModal.spec.ts",
+      "description": "ATDD Component test scaffolds for PlayerGroupModal.vue (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC 1: Modal inputs for name, favorite checkbox, and member selection",
+        "AC 3: Inline modal integration without losing draft state"
+      ],
+      "priority_coverage": {
+        "P0": 2,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": ["groupModalMock", "playerSelectionFixture"],
+  "knowledge_fragments_used": [
+    "fixture-architecture",
+    "network-first",
+    "selector-resilience",
+    "component-tdd"
+  ],
+  "test_count": 15,
+  "tdd_phase": "RED",
+  "summary": "Generated 15 red-phase E2E, store, and component test scaffolds for Player Groups story"
+}

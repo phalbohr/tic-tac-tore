@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "subagent": "atdd-api-tests",
+  "tests": [
+    {
+      "file": "_bmad-output/test-artifacts/atdd-redphase-6-1/PlayerGroupControllerATDDTest.java",
+      "description": "ATDD API test scaffolds for PlayerGroupController (/api/v1/player-groups) (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC 1: Create and update player groups with unique name per creator (1-50 chars), member IDs, and Favorites flag",
+        "AC 2: GET /api/v1/player-groups returns user-isolated groups with safe member summaries (no PII, AD-04)",
+        "AC 5: PUT and DELETE return 403 Forbidden for non-creator access"
+      ],
+      "priority_coverage": {
+        "P0": 6,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": ["playerGroupDataFactory", "authSession"],
+  "knowledge_fragments_used": [
+    "api-request",
+    "data-factories",
+    "test-quality",
+    "test-priorities-matrix"
+  ],
+  "test_count": 8,
+  "tdd_phase": "RED",
+  "summary": "Generated 8 red-phase API test scaffolds for Player Groups story"
+}
