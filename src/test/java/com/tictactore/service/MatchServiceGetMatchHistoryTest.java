@@ -49,6 +49,9 @@ class MatchServiceGetMatchHistoryTest {
     @Mock
     private RateLimitService rateLimitService;
 
+    @Mock
+    private com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
+
     @InjectMocks
     private MatchServiceImpl matchService;
 
@@ -161,5 +164,40 @@ class MatchServiceGetMatchHistoryTest {
         assertThat(response.content()).hasSize(1);
         assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
         assertThat(response.content().get(0).teamBAttackerNickname()).doesNotContain("secret_user@example.com");
+    }
+
+    @Test
+    void shouldThrowAccessDeniedExceptionWhenFilteringByGroupOwnedByAnotherUser() {
+        UUID foreignCreatorId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        com.tictactore.model.PlayerGroup foreignGroup = com.tictactore.model.PlayerGroup.builder()
+                .id(groupId)
+                .name("Secret Group")
+                .creatorId(foreignCreatorId)
+                .build();
+        when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(foreignGroup));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> matchService.getMatchHistory(
+                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10
+        )).isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+    }
+
+    @Test
+    void shouldReturnEmptyPageImmediatelyWhenGroupHasNoMembers() {
+        UUID groupId = UUID.randomUUID();
+        com.tictactore.model.PlayerGroup emptyGroup = com.tictactore.model.PlayerGroup.builder()
+                .id(groupId)
+                .name("Empty Squad")
+                .creatorId(currentUserId)
+                .members(java.util.Set.of())
+                .build();
+        when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(emptyGroup));
+
+        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10
+        );
+
+        assertThat(response.content()).isEmpty();
+        assertThat(response.totalElements()).isZero();
     }
 }

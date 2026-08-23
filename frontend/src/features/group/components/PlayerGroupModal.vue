@@ -69,6 +69,11 @@ function handleClose() {
 }
 
 function handleAddPlayer(player: PlayerDto) {
+  if (members.value.length >= 12) {
+    error.value = t('groups.tooManyMembers', 'Maximum 12 members allowed per group')
+    isPlayerSearchOpen.value = false
+    return
+  }
   if (!members.value.some((m) => m.id === player.id)) {
     members.value.push({
       id: player.id,
@@ -76,11 +81,15 @@ function handleAddPlayer(player: PlayerDto) {
       avatar: player.avatar,
     })
   }
+  error.value = ''
   isPlayerSearchOpen.value = false
 }
 
 function handleRemoveMember(id: string) {
   members.value = members.value.filter((m) => m.id !== id)
+  if (members.value.length <= 12) {
+    error.value = ''
+  }
 }
 
 function handleSubmit() {
@@ -91,6 +100,10 @@ function handleSubmit() {
   }
   if (trimmedName.length > 50) {
     error.value = t('groups.nameTooLong', 'Group name cannot exceed 50 characters')
+    return
+  }
+  if (members.value.length > 12) {
+    error.value = t('groups.tooManyMembers', 'Maximum 12 members allowed per group')
     return
   }
   emit('save', {

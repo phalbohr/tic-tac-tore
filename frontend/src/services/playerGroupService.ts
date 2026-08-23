@@ -12,6 +12,7 @@ export interface PlayerGroupResponse {
   members: PlayerSummaryDto[]
   createdAt: string
   updatedAt?: string
+  version?: number
 }
 
 export interface CreatePlayerGroupRequest {
@@ -24,6 +25,7 @@ export interface UpdatePlayerGroupRequest {
   name: string
   memberIds: string[]
   isFavorite?: boolean
+  version?: number
 }
 
 export async function getPlayerGroups(): Promise<PlayerGroupResponse[]> {

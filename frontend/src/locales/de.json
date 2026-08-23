@@ -20,6 +20,7 @@
     "close": "Schließen"
   },
   "match": {
+    "playerFallback": "Spieler",
     "submit": "Spiel eintragen",
     "confirm": "Bestätigen",
     "pending": "Ausstehende Bestätigung",
@@ -231,6 +232,8 @@
     "noGroups": "Noch keine Spielergruppen. Erstelle Gruppen für schnelle Teamauswahl!",
     "membersCount": "Mitglieder",
     "nameRequired": "Gruppenname ist erforderlich",
-    "nameTooLong": "Gruppenname darf maximal 50 Zeichen lang sein"
+    "nameTooLong": "Gruppenname darf maximal 50 Zeichen lang sein",
+    "tooManyMembers": "Maximal 12 Mitglieder pro Gruppe erlaubt",
+    "groupLimitReached": "Maximale Grenze von 10 Gruppen erreicht"
   }
 }

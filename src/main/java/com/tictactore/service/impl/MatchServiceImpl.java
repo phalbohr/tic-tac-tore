@@ -411,6 +411,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public com.tictactore.dto.PagedResponse<MatchResponse> getMatchHistory(
             UUID currentUserId,
             String status,
@@ -432,10 +433,16 @@ public class MatchServiceImpl implements MatchService {
 
         org.springframework.data.domain.Page<Match> matchPage;
         if (groupId != null && playerGroupRepository != null) {
-            var groupOpt = playerGroupRepository.findById(groupId);
-            List<UUID> groupMemberIds = List.of(UUID.randomUUID());
-            if (groupOpt.isPresent() && groupOpt.get().getMembers() != null && !groupOpt.get().getMembers().isEmpty()) {
-                groupMemberIds = groupOpt.get().getMembers().stream().map(User::getId).toList();
+            var group = playerGroupRepository.findById(groupId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Group not found with ID: " + groupId));
+            if (!currentUserId.equals(group.getCreatorId())) {
+                throw new org.springframework.security.access.AccessDeniedException("Access denied to player group");
+            }
+            List<UUID> groupMemberIds = group.getMembers() != null
+                    ? group.getMembers().stream().map(User::getId).toList()
+                    : List.of();
+            if (groupMemberIds.isEmpty()) {
+                return new com.tictactore.dto.PagedResponse<>(List.of(), safePage, safeSize, 0L, 0);
             }
             matchPage = matchRepository.findMatchHistoryWithGroupMembers(
                     currentUserId, normalizedStatus, filterPlayerId, groupMemberIds, ruleConfigId, normalizedMatchType, pageable

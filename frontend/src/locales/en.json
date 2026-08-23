@@ -20,6 +20,7 @@
     "close": "Close"
   },
   "match": {
+    "playerFallback": "Player",
     "submit": "Submit Match",
     "confirm": "Confirm",
     "pending": "Pending Confirmation",
@@ -231,6 +232,8 @@
     "noGroups": "No player groups yet. Create groups to quickly select teams!",
     "membersCount": "members",
     "nameRequired": "Group name is required",
-    "nameTooLong": "Group name cannot exceed 50 characters"
+    "nameTooLong": "Group name cannot exceed 50 characters",
+    "tooManyMembers": "Maximum 12 members allowed per group",
+    "groupLimitReached": "Maximum limit of 10 groups reached"
   }
 }

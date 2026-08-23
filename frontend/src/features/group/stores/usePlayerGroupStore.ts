@@ -30,7 +30,6 @@ export const usePlayerGroupStore = defineStore('playerGroup', () => {
       groups.value = data || []
     } catch (err: any) {
       error.value = err.message || 'Failed to load player groups'
-      groups.value = []
     } finally {
       loading.value = false
     }
@@ -50,6 +49,11 @@ export const usePlayerGroupStore = defineStore('playerGroup', () => {
         throw new Error(errorData.message || `Failed to create player group (${res.status})`)
       }
       const created: PlayerGroupResponse = await res.json()
+      if (created.isFavorite) {
+        groups.value.forEach((g) => {
+          g.isFavorite = false
+        })
+      }
       groups.value.push(created)
       return created
     } catch (err: any) {
@@ -77,6 +81,13 @@ export const usePlayerGroupStore = defineStore('playerGroup', () => {
         throw new Error(errorData.message || `Failed to update player group (${res.status})`)
       }
       const updated: PlayerGroupResponse = await res.json()
+      if (updated.isFavorite) {
+        groups.value.forEach((g) => {
+          if (g.id !== id) {
+            g.isFavorite = false
+          }
+        })
+      }
       const index = groups.value.findIndex((g) => g.id === id)
       if (index !== -1) {
         groups.value[index] = updated

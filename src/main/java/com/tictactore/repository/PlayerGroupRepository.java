@@ -12,6 +12,10 @@ import java.util.UUID;
 @Repository
 public interface PlayerGroupRepository extends JpaRepository<PlayerGroup, UUID> {
 
+    @Override
+    @EntityGraph(attributePaths = {"members"})
+    Optional<PlayerGroup> findById(UUID id);
+
     @EntityGraph(attributePaths = {"members"})
     List<PlayerGroup> findByCreatorIdOrderByCreatedAtAsc(UUID creatorId);
 
@@ -21,4 +25,10 @@ public interface PlayerGroupRepository extends JpaRepository<PlayerGroup, UUID> 
     boolean existsByCreatorIdAndNameIgnoreCase(UUID creatorId, String name);
 
     boolean existsByCreatorIdAndNameIgnoreCaseAndIdNot(UUID creatorId, String name, UUID id);
+
+    long countByCreatorId(UUID creatorId);
+
+    boolean existsByCreatorIdAndIsFavoriteTrue(UUID creatorId);
+
+    List<PlayerGroup> findByCreatorIdAndIsFavoriteTrue(UUID creatorId);
 }

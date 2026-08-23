@@ -10,6 +10,7 @@ public record CreatePlayerGroupRequest(
         @NotBlank(message = "Group name is required")
         @Size(max = 50, message = "Group name cannot exceed 50 characters")
         String name,
+        @Size(max = 12, message = "Group cannot have more than 12 members")
         List<UUID> memberIds,
         Boolean isFavorite
 ) {

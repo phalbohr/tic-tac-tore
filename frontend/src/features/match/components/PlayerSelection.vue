@@ -143,7 +143,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
       <span class="text-on-surface flex-1 truncate">
         {{
           store.selectedPlayers[index - 1]
-            ? getPlayer(store.selectedPlayers[index - 1])?.nickname || `Player ${store.selectedPlayers[index - 1]}`
+            ? getPlayer(store.selectedPlayers[index - 1])?.nickname || t('match.playerFallback', 'Player')
             : t('match.selectPlayer', 'Select Player')
         }}
       </span>

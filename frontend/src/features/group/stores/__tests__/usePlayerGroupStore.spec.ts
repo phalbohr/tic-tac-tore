@@ -170,6 +170,28 @@ describe('usePlayerGroupStore (ATDD Red Phase)', () => {
     expect(store.groups).toHaveLength(0)
   })
 
+  it('fetchGroups() preserves existing groups when fetch fails', async () => {
+    const store = usePlayerGroupStore()
+    store.groups = [
+      {
+        id: 'group-cached',
+        name: 'Cached Squad',
+        isFavorite: false,
+        creatorId: 'user-1',
+        members: [],
+        createdAt: '2026-08-23T10:00:00Z',
+      },
+    ]
+
+    fetchMock.mockRejectedValueOnce(new Error('Network error'))
+
+    await store.fetchGroups()
+
+    expect(store.groups).toHaveLength(1)
+    expect(store.groups[0]?.name).toBe('Cached Squad')
+    expect(store.error).toBe('Network error')
+  })
+
   it('selectGroup() updates selectedGroupId', () => {
     const store = usePlayerGroupStore()
     store.selectGroup('group-123')

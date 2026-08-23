@@ -10,12 +10,19 @@ public record UpdatePlayerGroupRequest(
         @NotBlank(message = "Group name is required")
         @Size(max = 50, message = "Group name cannot exceed 50 characters")
         String name,
+        @Size(max = 12, message = "Group cannot have more than 12 members")
         List<UUID> memberIds,
-        Boolean isFavorite
+        Boolean isFavorite,
+        Long version
 ) {
     public UpdatePlayerGroupRequest(String name, List<UUID> memberIds, Boolean isFavorite) {
+        this(name, memberIds, isFavorite, null);
+    }
+
+    public UpdatePlayerGroupRequest(String name, List<UUID> memberIds, Boolean isFavorite, Long version) {
         this.name = name != null ? name.trim() : null;
         this.memberIds = memberIds != null ? memberIds : List.of();
         this.isFavorite = Boolean.TRUE.equals(isFavorite);
+        this.version = version;
     }
 }

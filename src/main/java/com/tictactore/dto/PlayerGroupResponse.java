@@ -14,5 +14,18 @@ public record PlayerGroupResponse(
         UUID creatorId,
         List<PlayerSummaryDto> members,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
-) {}
+        OffsetDateTime updatedAt,
+        Long version
+) {
+    public PlayerGroupResponse(
+            UUID id,
+            String name,
+            boolean isFavorite,
+            UUID creatorId,
+            List<PlayerSummaryDto> members,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+        this(id, name, isFavorite, creatorId, members, createdAt, updatedAt, 0L);
+    }
+}

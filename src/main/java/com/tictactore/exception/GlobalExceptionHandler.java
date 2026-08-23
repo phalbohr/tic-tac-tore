@@ -71,6 +71,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("message", msg != null ? msg : "Validation error"));
     }
 
+    @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
+    public ResponseEntity<Map<String, String>> handleOptimisticLocking(RuntimeException e) {
+        return ResponseEntity.status(409).body(Map.of("message", "The record has been modified by another transaction"));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException e) {
         var message = e.getConstraintViolations().stream()

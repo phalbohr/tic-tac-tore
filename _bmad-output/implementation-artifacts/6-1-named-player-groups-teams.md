@@ -4,7 +4,7 @@ baseline_commit: 66fd32b166a30c09b1a31360f31adef112b7171c
 
 # Story 6.1: Named Player Groups ("Teams")
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -136,9 +136,9 @@ Gemini 3.7 Flash (High)
 - Scoped Playwright dialog locators to prevent strict mode collisions with global buttons.
 
 ### Completion Notes List
-
 - All 5 tasks completed and verified with unit, ATDD, and E2E suites.
-- Full verification script `./scripts/ci-local.sh` passed cleanly with 112 passing Playwright tests and 350 passing Maven tests.
+- Full verification script `./scripts/ci-local.sh` passed cleanly with 111 passing Playwright tests and 350+ passing Maven tests.
+- Resolved 12 code review patch items: auto-provisioning of Favorites group, 10 groups / 12 members limits, group ownership isolation in match history, transactional boundary for lazy loading, empty group short-circuit, collection in-place updates, optimistic locking versioning, single-favorite invariant enforcement, invalid UUID validation, and frontend error resilience/label fallbacks.
 
 ### File List
 
@@ -159,6 +159,7 @@ Gemini 3.7 Flash (High)
 - `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
 - `src/test/java/com/tictactore/repository/PlayerGroupRepositoryTest.java`
 - `src/test/java/com/tictactore/service/PlayerGroupServiceTest.java`
+- `src/test/java/com/tictactore/service/MatchServiceGetMatchHistoryTest.java`
 - `src/test/java/com/tictactore/controller/PlayerGroupControllerATDDTest.java`
 - `frontend/src/services/playerGroupService.ts`
 - `frontend/src/services/matchService.ts`
@@ -178,16 +179,16 @@ Gemini 3.7 Flash (High)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Review Findings
-- [ ] [Review][Patch] Missing "Favorites" group auto-provisioning (Auto-create Favorites group upon user registration)
-- [ ] [Review][Patch] No quotas on group creation or size — Add limits: max 10 groups per user, max 12 players per group
-- [ ] [Review][Patch] Ownership verification bypass in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:436]
-- [ ] [Review][Patch] `LazyInitializationException` risk in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:438]
-- [ ] [Review][Patch] Cynical hack for empty group filtering [MatchServiceImpl.java:436]
-- [ ] [Review][Patch] Hibernate MVCC bloat on group update [PlayerGroupServiceImpl.java:117]
-- [ ] [Review][Patch] Missing optimistic locking support in API [UpdatePlayerGroupRequest.java]
-- [ ] [Review][Patch] Unrestricted `isFavorite` flag [PlayerGroupServiceImpl.java:81]
-- [ ] [Review][Patch] Invalid UUIDs silently dropped [PlayerGroupServiceImpl.java:75]
-- [ ] [Review][Patch] Database vs DTO constraints mismatch [CreatePlayerGroupRequest.java:11]
-- [ ] [Review][Patch] Raw UUIDs exposed in UI [PlayerSelection.vue]
-- [ ] [Review][Patch] Frontend: `groups.value = []` on fail [usePlayerGroupStore.ts]
+- [x] [Review][Patch] Missing "Favorites" group auto-provisioning (Auto-create Favorites group upon user registration)
+- [x] [Review][Patch] No quotas on group creation or size — Add limits: max 10 groups per user, max 12 players per group
+- [x] [Review][Patch] Ownership verification bypass in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:436]
+- [x] [Review][Patch] `LazyInitializationException` risk in `MatchServiceImpl.getMatchHistory` [MatchServiceImpl.java:438]
+- [x] [Review][Patch] Cynical hack for empty group filtering [MatchServiceImpl.java:436]
+- [x] [Review][Patch] Hibernate MVCC bloat on group update [PlayerGroupServiceImpl.java:117]
+- [x] [Review][Patch] Missing optimistic locking support in API [UpdatePlayerGroupRequest.java]
+- [x] [Review][Patch] Unrestricted `isFavorite` flag [PlayerGroupServiceImpl.java:81]
+- [x] [Review][Patch] Invalid UUIDs silently dropped [PlayerGroupServiceImpl.java:75]
+- [x] [Review][Patch] Database vs DTO constraints mismatch [CreatePlayerGroupRequest.java:11]
+- [x] [Review][Patch] Raw UUIDs exposed in UI [PlayerSelection.vue]
+- [x] [Review][Patch] Frontend: `groups.value = []` on fail [usePlayerGroupStore.ts]
 - [x] [Review][Defer] Testing anti-pattern in Vue components [PlayerSelection.vue] — deferred, pre-existing

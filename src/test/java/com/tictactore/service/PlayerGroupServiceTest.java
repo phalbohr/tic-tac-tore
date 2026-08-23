@@ -53,6 +53,7 @@ class PlayerGroupServiceTest {
                 .isFavorite(true)
                 .members(Set.of(member))
                 .build();
+        when(playerGroupRepository.existsByCreatorIdAndIsFavoriteTrue(creatorId)).thenReturn(true);
         when(playerGroupRepository.findByCreatorIdOrderByCreatedAtAsc(creatorId)).thenReturn(List.of(group));
 
         var responses = playerGroupService.getGroups(creatorId);
@@ -160,6 +161,78 @@ class PlayerGroupServiceTest {
         assertThat(response.name()).isEqualTo("New Squad");
         assertThat(response.isFavorite()).isTrue();
         assertThat(response.members()).hasSize(1);
+    }
+
+    @Test
+    void shouldAutoCreateFavoritesGroupWhenNotPresentInGetGroups() {
+        UUID creatorId = UUID.randomUUID();
+        when(playerGroupRepository.existsByCreatorIdAndIsFavoriteTrue(creatorId)).thenReturn(false);
+        when(playerGroupRepository.existsByCreatorIdAndNameIgnoreCase(creatorId, "Favorites")).thenReturn(false);
+        when(playerGroupRepository.findByCreatorIdOrderByCreatedAtAsc(creatorId)).thenReturn(List.of(
+                PlayerGroup.builder().id(UUID.randomUUID()).name("Favorites").creatorId(creatorId).isFavorite(true).build()
+        ));
+
+        var responses = playerGroupService.getGroups(creatorId);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).name()).isEqualTo("Favorites");
+        assertThat(responses.get(0).isFavorite()).isTrue();
+        verify(playerGroupRepository).save(any(PlayerGroup.class));
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenGroupLimitExceeded() {
+        UUID creatorId = UUID.randomUUID();
+        CreatePlayerGroupRequest request = new CreatePlayerGroupRequest("New Group", List.of(), false);
+        when(playerGroupRepository.countByCreatorId(creatorId)).thenReturn(10L);
+
+        assertThatThrownBy(() -> playerGroupService.createGroup(creatorId, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Maximum limit of 10 groups reached");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenMemberLimitExceeded() {
+        UUID creatorId = UUID.randomUUID();
+        List<UUID> tooManyMembers = java.util.stream.IntStream.range(0, 13)
+                .mapToObj(i -> UUID.randomUUID())
+                .toList();
+        CreatePlayerGroupRequest request = new CreatePlayerGroupRequest("Huge Squad", tooManyMembers, false);
+
+        assertThatThrownBy(() -> playerGroupService.createGroup(creatorId, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Maximum 12 members allowed per group");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenMemberIdDoesNotExist() {
+        UUID creatorId = UUID.randomUUID();
+        UUID validId = UUID.randomUUID();
+        UUID invalidId = UUID.randomUUID();
+        User validUser = User.builder().id(validId).nickname("Valid").build();
+        CreatePlayerGroupRequest request = new CreatePlayerGroupRequest("Squad", List.of(validId, invalidId), false);
+        when(userRepository.findAllById(any())).thenReturn(List.of(validUser));
+
+        assertThatThrownBy(() -> playerGroupService.createGroup(creatorId, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("One or more selected player IDs are invalid or not found");
+    }
+
+    @Test
+    void shouldThrowOptimisticLockingFailureExceptionWhenVersionMismatch() {
+        UUID creatorId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        PlayerGroup group = PlayerGroup.builder()
+                .id(groupId)
+                .name("Squad")
+                .creatorId(creatorId)
+                .version(2L)
+                .build();
+        UpdatePlayerGroupRequest request = new UpdatePlayerGroupRequest("Updated", List.of(), false, 1L);
+        when(playerGroupRepository.findById(groupId)).thenReturn(Optional.of(group));
+
+        assertThatThrownBy(() -> playerGroupService.updateGroup(creatorId, groupId, request))
+                .isInstanceOf(org.springframework.dao.OptimisticLockingFailureException.class);
     }
 
     @Test
