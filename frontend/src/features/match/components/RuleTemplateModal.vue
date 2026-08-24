@@ -94,10 +94,21 @@ watch(
   }
 );
 
+watch(goalLimit, (newVal) => {
+  if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(newVal)) {
+    absoluteScoreCap.value = Number(newVal) + 3;
+  }
+});
+
 function handleSave() {
   const trimmedName = name.value.trim();
   if (!trimmedName || trimmedName.length > 50) {
     nameError.value = t('rules.validation.nameRequired', 'Name is required (max 50 characters)');
+    return;
+  }
+
+  if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(goalLimit.value)) {
+    nameError.value = t('rules.validation.capMustBeGreater', 'Absolute score cap must be greater than goal limit');
     return;
   }
 
@@ -106,7 +117,7 @@ function handleSave() {
     goalLimit: Number(goalLimit.value),
     gameLimit: Number(gameLimit.value),
     winByTwo: Boolean(winByTwo.value),
-    absoluteScoreCap: absoluteScoreCap.value ? Number(absoluteScoreCap.value) : null,
+    absoluteScoreCap: winByTwo.value && absoluteScoreCap.value ? Number(absoluteScoreCap.value) : null,
     timeoutsPerGame: Number(timeoutsPerGame.value),
     timeoutDurationSeconds: Number(timeoutDurationSeconds.value),
     possessionLimit5BarSeconds: Number(possessionLimit5BarSeconds.value),

@@ -72,7 +72,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
         @click="selectRule(rule.id, rule.name)"
         class="px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1 cursor-pointer"
         :class="
-          (ruleStore.selectedRuleId === rule.id || draftStore.ruleSystem.toUpperCase() === rule.name.toUpperCase() || draftStore.ruleSystem === rule.id)
+          (ruleStore.selectedRuleId === rule.id || draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase() || draftStore.ruleSystem === rule.id)
             ? 'bg-primary text-background shadow-md'
             : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
         "

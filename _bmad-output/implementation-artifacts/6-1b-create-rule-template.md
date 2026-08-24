@@ -181,7 +181,10 @@ N/A
   - Conformed `@Version` in `RuleConfiguration` strictly to `code-1-guide` (no `@Column`).
   - Cleaned up unused `getPresets()` dead code.
   - Created `RuleConfigurationOperationTest.java` and expanded `RuleConfigurationApiIT.java` for full integration test coverage.
-- Testing & Verification: 100% test pass on `./scripts/ci-local.sh` (384 backend tests, 311 frontend unit tests, 115 Playwright E2E tests).
+  - Added optional chaining in `RulePicker.vue` (`draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase()`).
+  - Switched `rule-system-selection.spec.ts` from API route interception (`page.route`) to real Spring Boot backend integration.
+  - Added `RuleConfigurationInitializer` for deterministic database preset initialization via JdbcTemplate across all environments (dev/e2e/test).
+- Testing & Verification: 100% test pass on `./scripts/ci-local.sh` (389 backend tests, 311 frontend unit tests, 114 Playwright E2E tests).
 
 ### File List
 
@@ -196,8 +199,10 @@ N/A
 - `src/main/java/com/tictactore/dto/RuleConfigurationResponse.java`
 - `src/main/java/com/tictactore/service/RuleConfigurationService.java`
 - `src/main/java/com/tictactore/service/RuleConfigurationOperation.java`
+- `src/main/java/com/tictactore/config/RuleConfigurationInitializer.java`
 - `src/main/java/com/tictactore/controller/RuleConfigurationController.java`
 - `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
+- `src/test/java/com/tictactore/config/RuleConfigurationInitializerTest.java`
 - `src/test/java/com/tictactore/service/RuleConfigurationOperationTest.java`
 - `src/test/java/com/tictactore/service/RuleConfigurationServiceTest.java`
 - `src/test/java/com/tictactore/repository/RuleConfigurationRepositoryTest.java`
@@ -230,3 +235,4 @@ N/A
 
 ### Change Log
 - Addressed code review findings - 8 items resolved (Date: 2026-08-23)
+- Fixed RulePicker optional chaining and converted Playwright tests to real backend E2E (Date: 2026-08-24)
