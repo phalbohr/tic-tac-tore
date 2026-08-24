@@ -137,6 +137,17 @@ so that future match creation screens automatically pre-populate the selected ru
 - [PRD](_bmad-output/planning-artifacts/prd.md) - FR40 (Default team and rule template, inline match setup)
 - [UX Design Specification](_bmad-output/planning-artifacts/ux-design-specification.md) - Section "Teams & Rules: no dedicated screen", UX-DR3
 
+### ATDD Artifacts
+
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-6-2-default-team-and-rule-template.md`
+- Backend API tests: `_bmad-output/test-artifacts/atdd-redphase-6-2/UserControllerATDDTest.java`
+- Frontend E2E tests: `frontend/e2e/user-defaults.spec.ts`
+- Frontend Store tests: `_bmad-output/test-artifacts/atdd-redphase-6-2/matchDraftStore.defaults.spec.ts`
+- Frontend Component tests:
+  - `_bmad-output/test-artifacts/atdd-redphase-6-2/UserPreferencesSection.spec.ts`
+  - `_bmad-output/test-artifacts/atdd-redphase-6-2/RulePicker.defaults.spec.ts`
+  - `_bmad-output/test-artifacts/atdd-redphase-6-2/PlayerSelection.defaults.spec.ts`
+
 ### Planned File List
 
 - `src/main/resources/db/migration/V12__add_user_defaults.sql` (NEW)
