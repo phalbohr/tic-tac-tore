@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useMatchDraftStore } from '../stores/matchDraftStore'
+import { useAuthStore } from '@/stores/auth'
 import MatchTypePicker from './MatchTypePicker.vue'
 import RulePicker from './RulePicker.vue'
 import PlayerSelection from './PlayerSelection.vue'
@@ -8,6 +9,7 @@ import ScoreEntry from './ScoreEntry.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 
 const store = useMatchDraftStore()
+const authStore = useAuthStore()
 const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'complete'): void
@@ -15,6 +17,7 @@ const emit = defineEmits<{
 
 onMounted(() => {
   store.fetchDefaults()
+  authStore.fetchProfile()
 })
 
 onUnmounted(() => {
