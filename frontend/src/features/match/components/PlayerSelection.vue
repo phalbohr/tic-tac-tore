@@ -89,7 +89,11 @@ function toggleGroup(groupId: string) {
 }
 
 async function handleSetAsDefaultGroup(groupId: string) {
-  await authStore.updateProfile({ defaultGroupId: groupId })
+  try {
+    await authStore.updateProfile({ defaultGroupId: groupId })
+  } catch (error) {
+    console.error('Failed to set default group', error)
+  }
 }
 
 async function handleSaveGroup(payload: { name: string; isFavorite: boolean; memberIds: string[] }) {
@@ -118,7 +122,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
           class="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
           :title="t('groups.setAsDefault', 'Set as default')"
         >
-          <span class="material-symbols-outlined text-xs">star</span>
+          <span class="material-symbols-outlined text-xs">push_pin</span>
           <span>{{ t('groups.setAsDefault', 'Set as default') }}</span>
         </button>
       </div>
@@ -160,7 +164,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
           class="material-symbols-outlined text-xs text-yellow-400"
           :title="t('common.default', 'Default')"
         >
-          star
+          push_pin
         </span>
         <span v-else-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
         <span v-else class="material-symbols-outlined text-xs">groups</span>

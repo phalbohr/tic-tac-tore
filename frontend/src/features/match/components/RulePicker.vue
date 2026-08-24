@@ -89,7 +89,11 @@ function selectRule(ruleId: string, ruleName: string) {
 }
 
 async function handleSetAsDefault(ruleId: string) {
-  await authStore.updateProfile({ defaultRuleConfigurationId: ruleId });
+  try {
+    await authStore.updateProfile({ defaultRuleConfigurationId: ruleId });
+  } catch (error) {
+    console.error('Failed to set default rule', error);
+  }
 }
 
 async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
@@ -119,7 +123,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
           class="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
           :title="t('rules.setAsDefault', 'Set as default')"
         >
-          <span class="material-symbols-outlined text-xs">star</span>
+          <span class="material-symbols-outlined text-xs">push_pin</span>
           <span>{{ t('rules.setAsDefault', 'Set as default') }}</span>
         </button>
       </div>
@@ -160,7 +164,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
           class="material-symbols-outlined text-xs text-yellow-400"
           :title="t('common.default', 'Default')"
         >
-          star
+          push_pin
         </span>
       </button>
     </div>
