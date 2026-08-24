@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth';
 import { useRuleConfigStore } from '@/stores/useRuleConfigStore';
 import { useMatchDraftStore } from '../stores/matchDraftStore';
 import type { CreateRuleConfigRequest } from '@/services/ruleConfigService';
@@ -11,11 +12,27 @@ defineOptions({
 });
 
 const { t } = useI18n();
+const authStore = useAuthStore();
 const ruleStore = useRuleConfigStore();
 const draftStore = useMatchDraftStore();
 
+const selectedRuleId = ref<string | null>(
+  ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null
+);
 const isModalOpen = ref(false);
 const modalError = ref('');
+
+watch(
+  () => authStore.profile?.defaultRuleConfigurationId,
+  (newDef) => {
+    if (newDef && !selectedRuleId.value) {
+      const defaultRule = ruleStore.allRules.find((r) => r.id === newDef);
+      if (defaultRule) {
+        selectRule(defaultRule.id, defaultRule.name);
+      }
+    }
+  }
+);
 
 onMounted(async () => {
   if (ruleStore.allRules.length === 0) {
@@ -25,7 +42,39 @@ onMounted(async () => {
       // ignore
     }
   }
+  if (!selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
+    const defaultRule = ruleStore.allRules.find(
+      (r) => r.id === authStore.profile?.defaultRuleConfigurationId
+    );
+    if (defaultRule) {
+      selectRule(defaultRule.id, defaultRule.name);
+    }
+  }
 });
+
+const selectedRule = computed(() => {
+  if (selectedRuleId.value) {
+    const found = ruleStore.allRules.find((r) => r.id === selectedRuleId.value);
+    if (found) return found;
+  }
+  return (
+    ruleStore.allRules.find(
+      (r) =>
+        ruleStore.selectedRuleId === r.id ||
+        draftStore.ruleSystem?.toUpperCase() === r.name?.toUpperCase() ||
+        draftStore.ruleSystem === r.id
+    ) || null
+  );
+});
+
+function isSelected(rule: { id: string; name: string }) {
+  return (
+    selectedRuleId.value === rule.id ||
+    ruleStore.selectedRuleId === rule.id ||
+    draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase() ||
+    draftStore.ruleSystem === rule.id
+  );
+}
 
 function openModal() {
   modalError.value = '';
@@ -33,9 +82,14 @@ function openModal() {
 }
 
 function selectRule(ruleId: string, ruleName: string) {
+  selectedRuleId.value = ruleId;
   ruleStore.selectRule(ruleId);
   draftStore.ruleSystem = ruleName;
   draftStore.loadRuleConfig();
+}
+
+async function handleSetAsDefault(ruleId: string) {
+  await authStore.updateProfile({ defaultRuleConfigurationId: ruleId });
 }
 
 async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
@@ -44,8 +98,8 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
     const created = await ruleStore.createCustomRule(payload);
     isModalOpen.value = false;
     selectRule(created.id, created.name);
-  } catch (err: any) {
-    modalError.value = err.message || t('common.error', 'An error occurred');
+  } catch (err: unknown) {
+    modalError.value = err instanceof Error ? err.message : t('common.error', 'An error occurred');
   }
 }
 </script>
@@ -53,9 +107,22 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
 <template>
   <div class="flex flex-col gap-2 w-full text-start" data-testid="rule-picker">
     <div class="flex justify-between items-center mb-1">
-      <h3 class="text-on-surface font-headline font-bold text-sm">
-        {{ t('rules.pickerTitle', 'Rule System') }}
-      </h3>
+      <div class="flex items-center gap-2">
+        <h3 class="text-on-surface font-headline font-bold text-sm">
+          {{ t('rules.pickerTitle', 'Rule System') }}
+        </h3>
+        <button
+          v-if="selectedRule && selectedRule.id !== authStore.profile?.defaultRuleConfigurationId"
+          type="button"
+          @click="handleSetAsDefault(selectedRule.id)"
+          data-test="set-as-default-rule-btn"
+          class="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
+          :title="t('rules.setAsDefault', 'Set as default')"
+        >
+          <span class="material-symbols-outlined text-xs">star</span>
+          <span>{{ t('rules.setAsDefault', 'Set as default') }}</span>
+        </button>
+      </div>
       <button
         type="button"
         @click="openModal"
@@ -76,16 +143,25 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
         v-for="rule in ruleStore.allRules"
         :key="rule.id"
         type="button"
+        :data-rule-id="rule.id"
         @click="selectRule(rule.id, rule.name)"
         class="px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1 cursor-pointer"
-        :class="
-          (ruleStore.selectedRuleId === rule.id || draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase() || draftStore.ruleSystem === rule.id)
-            ? 'bg-primary text-background shadow-md'
+        :class="[
+          isSelected(rule)
+            ? 'bg-primary text-background shadow-md active'
             : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
-        "
+        ]"
         :data-testid="`rule-chip-${rule.id}`"
       >
         <span>{{ rule.name }}</span>
+        <span
+          v-if="rule.id === authStore.profile?.defaultRuleConfigurationId"
+          data-test="default-indicator"
+          class="material-symbols-outlined text-xs text-yellow-400"
+          :title="t('common.default', 'Default')"
+        >
+          star
+        </span>
       </button>
     </div>
 

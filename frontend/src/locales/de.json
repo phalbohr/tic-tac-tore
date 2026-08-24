@@ -17,7 +17,9 @@
     "cancel": "Abbrechen",
     "loading": "Lädt...",
     "error": "Etwas ist schiefgelaufen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "none": "Keine",
+    "default": "Standard"
   },
   "match": {
     "playerFallback": "Spieler",
@@ -91,7 +93,10 @@
     "deleteTitle": "Konto löschen",
     "deleteConfirmMessage": "Diese Aktion ist unumkehrbar. Alle Ihre persönlichen Daten werden dauerhaft entfernt und Ihr Konto wird anonymisiert. Ihr Spielverlauf bleibt erhalten.",
     "confirmDelete": "Löschen bestätigen",
-    "avatarSuccess": "Avatar erfolgreich aktualisiert"
+    "avatarSuccess": "Avatar erfolgreich aktualisiert",
+    "defaultPreferences": "Standard-Spieleinstellungen",
+    "defaultPlayerGroup": "Standard-Spielergruppe",
+    "defaultRuleTemplate": "Standard-Regelvorlage"
   },
   "avatarPicker": {
     "title": "Avatar auswählen"
@@ -234,13 +239,17 @@
     "nameRequired": "Gruppenname ist erforderlich",
     "nameTooLong": "Gruppenname darf maximal 50 Zeichen lang sein",
     "tooManyMembers": "Maximal 12 Mitglieder pro Gruppe erlaubt",
-    "groupLimitReached": "Maximale Grenze von 10 Gruppen erreicht"
+    "groupLimitReached": "Maximale Grenze von 10 Gruppen erreicht",
+    "setAsDefault": "Als Standard festlegen"
   },
   "rules": {
     "sectionTitle": "Regelvorlagen",
     "createButton": "Vorlage erstellen",
     "createCustom": "+ Eigene Regel",
     "pickerTitle": "Regelwerk",
+    "setAsDefault": "Als Standard festlegen",
+    "presets": "Voreinstellungen",
+    "custom": "Eigene Vorlagen",
     "noTemplates": "Keine Regelvorlagen verfügbar.",
     "editAsNew": "Als neu bearbeiten",
     "modal": {

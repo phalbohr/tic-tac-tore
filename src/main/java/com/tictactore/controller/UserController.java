@@ -34,6 +34,8 @@ public class UserController implements ProfileApi {
                 .avatar(principal.getAvatar())
                 .language(principal.getLanguage())
                 .tutorialCompleted(principal.isTutorialCompleted())
+                .defaultGroupId(principal.getDefaultGroupId())
+                .defaultRuleConfigurationId(principal.getDefaultRuleConfigurationId())
                 .version(principal.getVersion())
                 .build();
                 
@@ -69,6 +71,8 @@ public class UserController implements ProfileApi {
                 .avatar(user.getAvatar())
                 .language(user.getLanguage())
                 .tutorialCompleted(user.isTutorialCompleted())
+                .defaultGroupId(user.getDefaultGroupId())
+                .defaultRuleConfigurationId(user.getDefaultRuleConfigurationId())
                 .version(user.getVersion())
                 .build();
                 

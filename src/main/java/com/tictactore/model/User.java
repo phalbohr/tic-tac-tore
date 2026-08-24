@@ -37,6 +37,12 @@ public class User {
     @Builder.Default
     private boolean tutorialCompleted = false;
 
+    @Column(name = "default_group_id")
+    private UUID defaultGroupId;
+
+    @Column(name = "default_rule_configuration_id")
+    private UUID defaultRuleConfigurationId;
+
     @Version
     private Long version;
 }

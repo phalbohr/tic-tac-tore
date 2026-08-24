@@ -4,6 +4,9 @@ import com.tictactore.annotation.Idempotent;
 import com.tictactore.exception.UserNotFoundException;
 import com.tictactore.exception.ValidationException;
 import com.tictactore.model.User;
+import com.tictactore.model.RuleConfigurationType;
+import com.tictactore.repository.PlayerGroupRepository;
+import com.tictactore.repository.RuleConfigurationRepository;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.validation.AvatarValidator;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,8 @@ public class UserOperation {
     private static final String DELETED_EMAIL_SUFFIX = "@tic-tac-tore.invalid";
 
     private final UserRepository userRepository;
+    private final PlayerGroupRepository playerGroupRepository;
+    private final RuleConfigurationRepository ruleConfigurationRepository;
     private final Clock clock;
 
     private String sanitizeNickname(String nickname) {
@@ -49,6 +54,22 @@ public class UserOperation {
     @Idempotent
     @Transactional(propagation = Propagation.REQUIRED)
     public User updateProfile(UUID userId, String nickname, String language, String avatar, Boolean tutorialCompleted) {
+        return updateProfile(userId, nickname, language, avatar, tutorialCompleted, null, null, false, false);
+    }
+
+    @Idempotent
+    @Transactional(propagation = Propagation.REQUIRED)
+    public User updateProfile(
+            UUID userId,
+            String nickname,
+            String language,
+            String avatar,
+            Boolean tutorialCompleted,
+            UUID defaultGroupId,
+            UUID defaultRuleConfigurationId,
+            Boolean clearDefaultGroup,
+            Boolean clearDefaultRuleConfiguration
+    ) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ERR_USER_NOT_FOUND));
 
@@ -90,6 +111,23 @@ public class UserOperation {
 
         if (tutorialCompleted != null) {
             user.setTutorialCompleted(tutorialCompleted);
+        }
+
+        if (defaultGroupId != null) {
+            playerGroupRepository.findByIdAndCreatorId(defaultGroupId, userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Selected player group does not exist or does not belong to the user"));
+            user.setDefaultGroupId(defaultGroupId);
+        } else if (Boolean.TRUE.equals(clearDefaultGroup)) {
+            user.setDefaultGroupId(null);
+        }
+
+        if (defaultRuleConfigurationId != null) {
+            ruleConfigurationRepository.findById(defaultRuleConfigurationId)
+                    .filter(r -> r.getType() == RuleConfigurationType.PRESET || userId.equals(r.getCreatedBy()))
+                    .orElseThrow(() -> new IllegalArgumentException("Selected rule configuration does not exist or is not accessible"));
+            user.setDefaultRuleConfigurationId(defaultRuleConfigurationId);
+        } else if (Boolean.TRUE.equals(clearDefaultRuleConfiguration)) {
+            user.setDefaultRuleConfigurationId(null);
         }
 
         try {

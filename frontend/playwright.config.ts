@@ -84,13 +84,13 @@ export default defineConfig({
     {
       command: `cd .. && SPRING_PROFILES_ACTIVE=e2e SPRING_DOCKER_COMPOSE_ENABLED=false TTT_GOOGLE_CLIENT_ID=dummy TTT_GOOGLE_CLIENT_SECRET=dummy TTT_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4173 TTT_OAUTH2_REDIRECT_URI=${process.env.CI ? 'http://localhost:4173/oauth2/redirect' : 'http://localhost:3000/oauth2/redirect'} ./mvnw spring-boot:run`,
       url: 'http://localhost:8090/actuator/health',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120 * 1000,
     },
     {
-      command: process.env.CI ? 'npm run preview' : 'npm run dev',
-      port: process.env.CI ? 4173 : 3000,
-      reuseExistingServer: !process.env.CI,
+      command: process.env.CI ? 'npm run preview -- --port 4173 --host 0.0.0.0' : 'npm run dev',
+      url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
+      reuseExistingServer: true,
       timeout: 120 * 1000,
     },
   ],

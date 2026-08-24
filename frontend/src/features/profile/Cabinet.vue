@@ -9,6 +9,7 @@ import AvatarPicker from '@/components/AvatarPicker.vue'
 import DemoDataToggle from './components/DemoDataToggle.vue'
 import PlayerGroupSection from './components/PlayerGroupSection.vue'
 import RuleTemplateSection from './components/RuleTemplateSection.vue'
+import UserPreferencesSection from './components/UserPreferencesSection.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -252,6 +253,9 @@ async function handleLogout() {
           </div>
         </div>
       </div>
+
+      <!-- Match Preferences Section -->
+      <UserPreferencesSection />
 
       <!-- Player Groups / Teams Section -->
       <PlayerGroupSection />

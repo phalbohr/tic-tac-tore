@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
 import { useMatchDraftStore, MatchType, type PlayerDto } from '../stores/matchDraftStore'
 import { usePlayerGroupStore } from '@/features/group/stores/usePlayerGroupStore'
 import AvatarBase from '@/components/AvatarBase.vue'
@@ -12,12 +13,27 @@ defineOptions({
 })
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const store = useMatchDraftStore()
 const playerGroupStore = usePlayerGroupStore()
 
 const maxPlayers = computed(() => (store.matchType === MatchType.ONE_VS_ONE ? 2 : 4))
 const isGroupModalOpen = ref(false)
-const selectedGroupId = ref<string | null>(null)
+const selectedGroupId = ref<string | null>(
+  authStore.profile?.defaultGroupId ||
+    playerGroupStore.selectedGroupId ||
+    store.selectedGroupId ||
+    null
+)
+
+watch(
+  () => authStore.profile?.defaultGroupId,
+  (newDef) => {
+    if (newDef && !selectedGroupId.value) {
+      selectedGroupId.value = newDef
+    }
+  }
+)
 
 onMounted(async () => {
   if (playerGroupStore.groups.length === 0) {
@@ -26,6 +42,18 @@ onMounted(async () => {
     } catch {
       // ignore error
     }
+  }
+  if (
+    !selectedGroupId.value &&
+    (authStore.profile?.defaultGroupId ||
+      playerGroupStore.selectedGroupId ||
+      store.selectedGroupId)
+  ) {
+    selectedGroupId.value =
+      authStore.profile?.defaultGroupId ||
+      playerGroupStore.selectedGroupId ||
+      store.selectedGroupId ||
+      null
   }
 })
 
@@ -60,6 +88,10 @@ function toggleGroup(groupId: string) {
   }
 }
 
+async function handleSetAsDefaultGroup(groupId: string) {
+  await authStore.updateProfile({ defaultGroupId: groupId })
+}
+
 async function handleSaveGroup(payload: { name: string; isFavorite: boolean; memberIds: string[] }) {
   try {
     const newGroup = await playerGroupStore.createGroup(payload)
@@ -74,9 +106,22 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
 <template>
   <div class="flex flex-col gap-2 w-full mt-6">
     <div class="flex justify-between items-center mb-2">
-      <h2 class="text-on-surface font-headline font-bold text-lg">
-        {{ t('match.players', 'Players') }}
-      </h2>
+      <div class="flex items-center gap-2">
+        <h2 class="text-on-surface font-headline font-bold text-lg">
+          {{ t('match.players', 'Players') }}
+        </h2>
+        <button
+          v-if="selectedGroupId && selectedGroupId !== authStore.profile?.defaultGroupId"
+          type="button"
+          @click="handleSetAsDefaultGroup(selectedGroupId)"
+          data-test="set-as-default-group-btn"
+          class="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
+          :title="t('groups.setAsDefault', 'Set as default')"
+        >
+          <span class="material-symbols-outlined text-xs">star</span>
+          <span>{{ t('groups.setAsDefault', 'Set as default') }}</span>
+        </button>
+      </div>
       <!-- Create Group Inline CTA -->
       <button
         type="button"
@@ -99,16 +144,25 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
         v-for="group in playerGroupStore.groups"
         :key="group.id"
         type="button"
+        :data-group-id="group.id"
         @click="toggleGroup(group.id)"
         class="px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1 cursor-pointer"
-        :class="
+        :class="[
           selectedGroupId === group.id
-            ? 'bg-primary text-background shadow-md'
+            ? 'bg-primary text-background shadow-md active'
             : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
-        "
+        ]"
         :data-testid="`group-chip-${group.id}`"
       >
-        <span v-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
+        <span
+          v-if="group.id === authStore.profile?.defaultGroupId"
+          data-test="default-indicator"
+          class="material-symbols-outlined text-xs text-yellow-400"
+          :title="t('common.default', 'Default')"
+        >
+          star
+        </span>
+        <span v-else-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
         <span v-else class="material-symbols-outlined text-xs">groups</span>
         <span>{{ group.name }}</span>
       </button>

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -71,6 +73,8 @@ class UserRepositoryTest {
         assertThat(result).isFalse();
     }
 
+
+
     @Test
     @DisplayName("Save User - should persist tutorialCompleted flag")
     void saveUser_PersistsTutorialCompletedFlag() {
@@ -86,5 +90,47 @@ class UserRepositoryTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().isTutorialCompleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Save User - should persist and retrieve defaultGroupId and defaultRuleConfigurationId")
+    void saveUser_PersistsAndRetrievesDefaults() {
+        var groupId = UUID.randomUUID();
+        var ruleId = UUID.randomUUID();
+        var user = User.builder()
+                .email(TEST_EMAIL)
+                .nickname(TEST_NICKNAME)
+                .defaultGroupId(groupId)
+                .defaultRuleConfigurationId(ruleId)
+                .build();
+
+        var savedUser = userRepository.save(user);
+        var result = userRepository.findById(savedUser.getId());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getDefaultGroupId()).isEqualTo(groupId);
+        assertThat(result.get().getDefaultRuleConfigurationId()).isEqualTo(ruleId);
+    }
+
+    @Test
+    @DisplayName("Update User - should allow clearing defaultGroupId and defaultRuleConfigurationId to null")
+    void updateUser_ClearsDefaultsToNull() {
+        var groupId = UUID.randomUUID();
+        var ruleId = UUID.randomUUID();
+        var user = userRepository.save(User.builder()
+                .email(TEST_EMAIL)
+                .nickname(TEST_NICKNAME)
+                .defaultGroupId(groupId)
+                .defaultRuleConfigurationId(ruleId)
+                .build());
+
+        user.setDefaultGroupId(null);
+        user.setDefaultRuleConfigurationId(null);
+        userRepository.save(user);
+        var reloaded = userRepository.findById(user.getId());
+
+        assertThat(reloaded).isPresent();
+        assertThat(reloaded.get().getDefaultGroupId()).isNull();
+        assertThat(reloaded.get().getDefaultRuleConfigurationId()).isNull();
     }
 }

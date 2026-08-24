@@ -1,10 +1,10 @@
 ---
-baseline_commit: HEAD
+baseline_commit: 682bad9a031d8f3dc79e92229a8d5a10926114ee
 ---
 
 # Story 6.2: Default Team and Rule Template
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -41,62 +41,62 @@ so that future match creation screens automatically pre-populate the selected ru
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC5)
-  - [ ] Create Flyway migration `V12__add_user_defaults.sql`:
+- [x] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC5)
+  - [x] Create Flyway migration `V12__add_user_defaults.sql`:
     - Add nullable columns `default_group_id UUID REFERENCES player_group(id) ON DELETE SET NULL` and `default_rule_configuration_id UUID REFERENCES rule_configuration(id) ON DELETE SET NULL` to the `"user"` table.
     - Create indexes on `"user"(default_group_id)` and `"user"(default_rule_configuration_id)`.
-  - [ ] Update `com.tictactore.model.User` entity with `defaultGroupId` (UUID) and `defaultRuleConfigurationId` (UUID) mappings.
-  - [ ] Update `UserRepositoryTest.java` to verify persistence, retrieval, and DB-level `ON DELETE SET NULL` cascades when referenced group/rule is deleted.
-- [ ] Task 2: Backend DTOs, Service Validation & Controller Integration (AC1, AC2, AC5)
-  - [ ] Update `com.tictactore.dto.ProfileDto`:
+  - [x] Update `com.tictactore.model.User` entity with `defaultGroupId` (UUID) and `defaultRuleConfigurationId` (UUID) mappings.
+  - [x] Update `UserRepositoryTest.java` to verify persistence, retrieval, and DB-level `ON DELETE SET NULL` cascades when referenced group/rule is deleted.
+- [x] Task 2: Backend DTOs, Service Validation & Controller Integration (AC1, AC2, AC5)
+  - [x] Update `com.tictactore.dto.ProfileDto`:
     - Add `UUID defaultGroupId` and `UUID defaultRuleConfigurationId` with Swagger schema annotations.
-  - [ ] Update `com.tictactore.dto.UpdateProfileRequest`:
+  - [x] Update `com.tictactore.dto.UpdateProfileRequest`:
     - Add `UUID defaultGroupId` and `UUID defaultRuleConfigurationId` with Swagger schema annotations.
-  - [ ] Update `com.tictactore.service.UserService` & `UserServiceImpl.updateProfile`:
+  - [x] Update `com.tictactore.service.UserService` & `UserServiceImpl.updateProfile`:
     - When `defaultGroupId` is non-null, verify existence and creator ownership in `PlayerGroupRepository` (`findByIdAndCreatorId`), throwing `IllegalArgumentException` / `400 Bad Request` if invalid or owned by another user.
     - When `defaultRuleConfigurationId` is non-null, verify existence and validity in `RuleConfigurationRepository` (`findByIdAndCreatedByOrType`), throwing `IllegalArgumentException` / `400 Bad Request` if invalid or owned by another user.
     - Map `defaultGroupId` and `defaultRuleConfigurationId` to the `User` entity and save.
     - Populate fields in the returned `ProfileDto`.
-  - [ ] Update `UserController.java` (`getMyProfile` and `updateProfile`) to include `defaultGroupId` and `defaultRuleConfigurationId` in `ProfileDto`.
-  - [ ] Unit & ATDD Tests:
+  - [x] Update `UserController.java` (`getMyProfile` and `updateProfile`) to include `defaultGroupId` and `defaultRuleConfigurationId` in `ProfileDto`.
+  - [x] Unit & ATDD Tests:
     - Update `UserServiceTest.java` and `UserControllerTest.java` with valid, null-clearing, and unauthorized group/rule scenarios.
     - Create/Update `UserControllerATDDTest.java` with tests for profile preferences update, cross-user isolation, and preset vs custom validation.
-- [ ] Task 3: Frontend Store & Service Updates (AC1, AC2, AC3, AC4)
-  - [ ] Update `frontend/src/stores/auth.ts`:
+- [x] Task 3: Frontend Store & Service Updates (AC1, AC2, AC3, AC4)
+  - [x] Update `frontend/src/stores/auth.ts`:
     - Extend `UserProfile` interface with `defaultGroupId?: string | null` and `defaultRuleConfigurationId?: string | null`.
     - Update `updateProfile` action to accept and persist `defaultGroupId` and `defaultRuleConfigurationId`.
-  - [ ] Update `frontend/src/features/match/stores/matchDraftStore.ts`:
+  - [x] Update `frontend/src/features/match/stores/matchDraftStore.ts`:
     - In `fetchDefaults()`, read `authStore.profile?.defaultRuleConfigurationId` and `authStore.profile?.defaultGroupId`.
     - Apply `defaultRuleConfigurationId` as the initial `ruleSystem` if available (falling back to `STANDARD` preset).
     - Provide a method or action to set inline defaults (`setDefaultRule(ruleId)`, `setDefaultGroup(groupId)`) calling `authStore.updateProfile`.
-- [ ] Task 4: Frontend UI Components & Inline Match Creation Integration (AC1, AC3, AC4)
-  - [ ] Create `frontend/src/features/profile/components/UserPreferencesSection.vue`:
+- [x] Task 4: Frontend UI Components & Inline Match Creation Integration (AC1, AC3, AC4)
+  - [x] Create `frontend/src/features/profile/components/UserPreferencesSection.vue`:
     - Clubhouse-styled card (`bg-surface-container-low`, rounded-2xl, no 1px borders per `UX-DR3`).
     - Selectors for "Default Player Group" (options from `usePlayerGroupStore`) and "Default Rule Template" (options from `useRuleConfigStore`), each with a "None" option.
     - Inline save / debounced patch or save button calling `authStore.updateProfile`.
     - Add to `frontend/src/features/profile/Cabinet.vue` ensuring `Cabinet.vue` stays strictly under 500 lines (`IP-04`).
-  - [ ] Update `frontend/src/features/match/components/RulePicker.vue`:
+  - [x] Update `frontend/src/features/match/components/RulePicker.vue`:
     - Check if the currently selected rule matches `authStore.profile?.defaultRuleConfigurationId`.
     - Add an inline "Set as default" action/button (star/bookmark icon) to let the user save the selected rule as their profile default directly from match setup (FR40).
-  - [ ] Update `frontend/src/features/match/components/PlayerSelection.vue`:
+  - [x] Update `frontend/src/features/match/components/PlayerSelection.vue`:
     - On mount, if `authStore.profile?.defaultGroupId` exists and `selectedGroupId` is not set, initialize `selectedGroupId` to `defaultGroupId`.
     - Add an inline "Set as default" action/button on the active player group chip to let the user save the selected group as their profile default directly from match setup (FR40).
-  - [ ] Add i18n keys to `frontend/src/locales/en.json` and `frontend/src/locales/de.json` for all new labels, tooltips, and messages.
-- [ ] Task 5: Testing & Quality Verification
-  - [ ] Backend Unit & ATDD Tests:
+  - [x] Add i18n keys to `frontend/src/locales/en.json` and `frontend/src/locales/de.json` for all new labels, tooltips, and messages.
+- [x] Task 5: Testing & Quality Verification
+  - [x] Backend Unit & ATDD Tests:
     - `UserServiceTest.java` (setting defaults, clearing defaults with null, validating group ownership, validating rule preset vs custom ownership).
     - `UserControllerATDDTest.java` (full request/response cycle for `GET /api/v1/profile/me` and `PATCH /api/v1/profile/me`).
-  - [ ] Frontend Unit/Store Tests:
+  - [x] Frontend Unit/Store Tests:
     - `auth.spec.ts` (store updates with `defaultGroupId` and `defaultRuleConfigurationId`).
     - `UserPreferencesSection.spec.ts` (rendering selectors, selecting None, saving preferences).
     - `RulePicker.spec.ts` and `PlayerSelection.spec.ts` (pre-population and inline set-as-default triggers).
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create `frontend/e2e/user-defaults.spec.ts`:
       - Test 1: Set default group and rule in Profile Cabinet -> open New Match -> verify rule is pre-selected and group is pre-filtered.
       - Test 2: Override rule and group in New Match -> verify match can be started with overridden values without altering profile defaults.
       - Test 3: Set default rule and group inline during match creation -> verify profile is updated.
       - Test 4: Delete the default group in Cabinet -> verify default group resets to null and does not break match creation.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 

@@ -190,8 +190,17 @@ public class UserService {
     @Retryable(retryFor = {
             ObjectOptimisticLockingFailureException.class }, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
-        return userOperation.updateProfile(userId, request.getNickname(), request.getLanguage(), request.getAvatar(),
-                request.getTutorialCompleted());
+        return userOperation.updateProfile(
+                userId,
+                request.getNickname(),
+                request.getLanguage(),
+                request.getAvatar(),
+                request.getTutorialCompleted(),
+                request.getDefaultGroupId(),
+                request.getDefaultRuleConfigurationId(),
+                request.getClearDefaultGroup(),
+                request.getClearDefaultRuleConfiguration()
+        );
     }
 
     @Retryable(retryFor = {
