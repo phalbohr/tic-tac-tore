@@ -15,6 +15,7 @@ const ruleStore = useRuleConfigStore();
 const draftStore = useMatchDraftStore();
 
 const isModalOpen = ref(false);
+const modalError = ref('');
 
 onMounted(async () => {
   if (ruleStore.allRules.length === 0) {
@@ -26,6 +27,11 @@ onMounted(async () => {
   }
 });
 
+function openModal() {
+  modalError.value = '';
+  isModalOpen.value = true;
+}
+
 function selectRule(ruleId: string, ruleName: string) {
   ruleStore.selectRule(ruleId);
   draftStore.ruleSystem = ruleName;
@@ -33,12 +39,13 @@ function selectRule(ruleId: string, ruleName: string) {
 }
 
 async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
+  modalError.value = '';
   try {
     const created = await ruleStore.createCustomRule(payload);
     isModalOpen.value = false;
     selectRule(created.id, created.name);
-  } catch {
-    // error handled in modal
+  } catch (err: any) {
+    modalError.value = err.message || t('common.error', 'An error occurred');
   }
 }
 </script>
@@ -51,7 +58,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
       </h3>
       <button
         type="button"
-        @click="isModalOpen = true"
+        @click="openModal"
         data-testid="create-custom-rule-inline-btn"
         class="text-xs font-bold text-primary hover:opacity-80 flex items-center gap-1 cursor-pointer transition-opacity"
       >
@@ -85,6 +92,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
     <!-- Rule Template Modal -->
     <RuleTemplateModal
       :is-open="isModalOpen"
+      :error-message="modalError"
       @close="isModalOpen = false"
       @save="handleSaveCustomRule"
     />

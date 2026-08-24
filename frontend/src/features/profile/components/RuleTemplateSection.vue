@@ -168,6 +168,7 @@ async function confirmDelete() {
     <RuleTemplateModal
       :is-open="isModalOpen"
       :initial-template="editingTemplate"
+      :error-message="error"
       @close="isModalOpen = false"
       @save="handleSaveTemplate"
     />

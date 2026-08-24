@@ -112,4 +112,18 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
         expect(emittedPayload.goalLimit).toBe(5);
         expect(emittedPayload.gameLimit).toBe(3);
     });
+
+    it('should display error message when errorMessage prop is provided', () => {
+        const wrapper = mount(RuleTemplateModal, {
+            props: {
+                isOpen: true,
+                initialTemplate: null,
+                errorMessage: 'Custom rule limit reached (max 20)',
+            },
+        });
+
+        const errorEl = wrapper.find('[data-testid="name-validation-error"]');
+        expect(errorEl.exists()).toBe(true);
+        expect(errorEl.text()).toContain('Custom rule limit reached (max 20)');
+    });
 });

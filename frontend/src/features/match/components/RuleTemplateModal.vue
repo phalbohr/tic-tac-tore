@@ -11,6 +11,7 @@ defineOptions({
 const props = defineProps<{
   isOpen: boolean;
   initialTemplate?: RuleConfig | null;
+  errorMessage?: string;
 }>();
 
 const emit = defineEmits<{
@@ -36,7 +37,7 @@ const aerialsAllowed = ref(false);
 const positionSwapRule = ref<PositionSwapRule>('BETWEEN_GAMES');
 const pointDistribution = ref<PointDistribution>('WIN_LOSS_3_0');
 
-const nameError = ref('');
+const formError = ref('');
 
 function resetForm() {
   if (props.initialTemplate) {
@@ -72,7 +73,7 @@ function resetForm() {
     positionSwapRule.value = 'BETWEEN_GAMES';
     pointDistribution.value = 'WIN_LOSS_3_0';
   }
-  nameError.value = '';
+  formError.value = '';
 }
 
 watch(
@@ -94,6 +95,15 @@ watch(
   }
 );
 
+watch(
+  () => props.errorMessage,
+  (val) => {
+    if (val) {
+      formError.value = val;
+    }
+  }
+);
+
 watch(goalLimit, (newVal) => {
   if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(newVal)) {
     absoluteScoreCap.value = Number(newVal) + 3;
@@ -103,12 +113,12 @@ watch(goalLimit, (newVal) => {
 function handleSave() {
   const trimmedName = name.value.trim();
   if (!trimmedName || trimmedName.length > 50) {
-    nameError.value = t('rules.validation.nameRequired', 'Name is required (max 50 characters)');
+    formError.value = t('rules.validation.nameRequired', 'Name is required (max 50 characters)');
     return;
   }
 
   if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(goalLimit.value)) {
-    nameError.value = t('rules.validation.capMustBeGreater', 'Absolute score cap must be greater than goal limit');
+    formError.value = t('rules.validation.capMustBeGreater', 'Absolute score cap must be greater than goal limit');
     return;
   }
 
@@ -189,11 +199,11 @@ function handleClose() {
               data-testid="template-name-input"
             />
             <p
-              v-if="nameError"
+              v-if="formError || errorMessage"
               class="text-error text-xs mt-1"
               data-testid="name-validation-error"
             >
-              {{ nameError }}
+              {{ formError || errorMessage }}
             </p>
           </div>
 

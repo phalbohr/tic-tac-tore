@@ -232,7 +232,10 @@ N/A
 - [x] [Review][Patch] RuleConfigurationControllerATDDTest uses mocks instead of integration [src/test/java/com/tictactore/controller/RuleConfigurationControllerATDDTest.java]
 - [x] [Review][Patch] Removed @Column(nullable = false) from @Version field [src/main/java/com/tictactore/model/RuleConfiguration.java]
 - [x] [Review][Patch] Removed caller of getPresets() leaves dead code [src/main/java/com/tictactore/service/RuleConfigurationService.java:523-526]
+- [x] [Review][Patch] Pass backend error state to RuleTemplateModal from RulePicker [frontend/src/features/match/components/RulePicker.vue]
+- [x] [Review][Patch] Renamed nameError to formError in RuleTemplateModal [frontend/src/features/match/components/RuleTemplateModal.vue]
 
 ### Change Log
 - Addressed code review findings - 8 items resolved (Date: 2026-08-23)
 - Fixed RulePicker optional chaining and converted Playwright tests to real backend E2E (Date: 2026-08-24)
+- Added errorMessage propagation from RulePicker to RuleTemplateModal and renamed nameError to formError (Date: 2026-08-24)
