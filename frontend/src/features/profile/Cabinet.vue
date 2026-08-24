@@ -8,6 +8,7 @@ import AvatarBase from '@/components/AvatarBase.vue'
 import AvatarPicker from '@/components/AvatarPicker.vue'
 import DemoDataToggle from './components/DemoDataToggle.vue'
 import PlayerGroupSection from './components/PlayerGroupSection.vue'
+import RuleTemplateSection from './components/RuleTemplateSection.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -254,6 +255,9 @@ async function handleLogout() {
 
       <!-- Player Groups / Teams Section -->
       <PlayerGroupSection />
+
+      <!-- Rule Templates Section -->
+      <RuleTemplateSection />
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 

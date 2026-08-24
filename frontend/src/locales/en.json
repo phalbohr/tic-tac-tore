@@ -235,5 +235,48 @@
     "nameTooLong": "Group name cannot exceed 50 characters",
     "tooManyMembers": "Maximum 12 members allowed per group",
     "groupLimitReached": "Maximum limit of 10 groups reached"
+  },
+  "rules": {
+    "sectionTitle": "Rule Templates",
+    "createButton": "Create Template",
+    "createCustom": "+ Custom Rule",
+    "pickerTitle": "Rule System",
+    "noTemplates": "No rule templates available.",
+    "editAsNew": "Edit as New",
+    "modal": {
+      "createTitle": "Create Rule Template",
+      "editAsNew": "Edit Rule Template as New",
+      "saveButton": "Save Template"
+    },
+    "sections": {
+      "general": "General",
+      "gameFlow": "Game Flow & Tie-Break",
+      "conduct": "Match Conduct & Rules"
+    },
+    "fields": {
+      "name": "Template Name",
+      "goalLimit": "Goal Limit",
+      "gameLimit": "Game Limit",
+      "winByTwo": "Win by 2 Goals",
+      "absoluteCap": "Absolute Score Cap",
+      "timeouts": "Timeouts / Game",
+      "timeoutDuration": "Duration (s)",
+      "possession5Bar": "5-Bar Limit (s)",
+      "possessionOther": "Other Rods (s)",
+      "sideSwap": "Side Swap",
+      "restart": "Restart Rule",
+      "positionSwap": "Position Swap",
+      "points": "Points Dist.",
+      "spinningAllowed": "Allow Spinning",
+      "aerialsAllowed": "Allow Aerials"
+    },
+    "validation": {
+      "nameRequired": "Name is required (max 50 characters)"
+    },
+    "summary": {
+      "gameLimit": "Best of {limit}",
+      "goalLimit": "{goals} goals",
+      "winByTwo": "Win by 2"
+    }
   }
 }

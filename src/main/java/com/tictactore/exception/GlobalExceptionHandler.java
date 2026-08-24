@@ -58,8 +58,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException e) {
+    @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> handleValidationException(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Invalid input";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
     }

@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useMatchDraftStore } from '../stores/matchDraftStore'
 import MatchTypePicker from './MatchTypePicker.vue'
+import RulePicker from './RulePicker.vue'
 import PlayerSelection from './PlayerSelection.vue'
 import ScoreEntry from './ScoreEntry.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
@@ -72,6 +73,8 @@ function handleMatchReady() {
       <h3 class="text-on-surface font-headline font-bold mb-1">Match Type</h3>
       <MatchTypePicker />
     </div>
+
+    <RulePicker />
     
     <PlayerSelection />
     <div v-if="errorMsg" class="text-red-500 text-sm mt-2">{{ errorMsg }}</div>
