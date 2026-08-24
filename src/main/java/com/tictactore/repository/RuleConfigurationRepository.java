@@ -5,9 +5,21 @@ import com.tictactore.model.RuleConfigurationType;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RuleConfigurationRepository extends JpaRepository<RuleConfiguration, UUID> {
-    List<RuleConfiguration> findByType(RuleConfigurationType type);
+
+    List<RuleConfiguration> findByTypeOrderByCreatedAtDesc(RuleConfigurationType type);
+
+    @Query("SELECT r FROM RuleConfiguration r WHERE r.type = :type OR r.createdBy = :createdBy ORDER BY r.createdAt DESC")
+    List<RuleConfiguration> findByTypeOrCreatedByOrderByCreatedAtDesc(@Param("type") RuleConfigurationType type, @Param("createdBy") UUID createdBy);
+
+    List<RuleConfiguration> findByCreatedByOrderByCreatedAtDesc(UUID createdBy);
+
+    long countByCreatedBy(UUID createdBy);
+
+    boolean existsByCreatedByAndNameIgnoreCase(UUID createdBy, String name);
 }

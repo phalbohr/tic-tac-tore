@@ -49,6 +49,43 @@ public class RuleConfiguration {
     @Column(name = "win_by_two", nullable = false)
     private boolean winByTwo;
 
+    @Column(name = "absolute_score_cap")
+    private Integer absoluteScoreCap;
+
+    @Column(name = "timeouts_per_game", nullable = false)
+    private int timeoutsPerGame;
+
+    @Column(name = "timeout_duration_seconds", nullable = false)
+    private int timeoutDurationSeconds;
+
+    @Column(name = "possession_limit_5bar_seconds", nullable = false)
+    private int possessionLimit5BarSeconds;
+
+    @Column(name = "possession_limit_other_seconds", nullable = false)
+    private int possessionLimitOtherSeconds;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "side_swap_rule", nullable = false, length = 30)
+    private SideSwapRule sideSwapRule;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "restart_rule", nullable = false, length = 30)
+    private RestartRule restartRule;
+
+    @Column(name = "spinning_allowed", nullable = false)
+    private boolean spinningAllowed;
+
+    @Column(name = "aerials_allowed", nullable = false)
+    private boolean aerialsAllowed;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "position_swap_rule", nullable = false, length = 30)
+    private PositionSwapRule positionSwapRule;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "point_distribution", nullable = false, length = 30)
+    private PointDistribution pointDistribution;
+
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
@@ -57,6 +94,5 @@ public class RuleConfiguration {
     private OffsetDateTime createdAt;
 
     @Version
-    @Column(nullable = false)
     private Long version;
 }
