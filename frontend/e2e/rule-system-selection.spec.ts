@@ -36,7 +36,7 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         await page.getByRole('button', { name: 'Save Template' }).click();
 
         // Modal should close and new rule should be selected without resetting player draft
-        await expect(page.getByRole('dialog')).not.toBeVisible();
+        await expect(page.getByRole('dialog')).toBeHidden();
         await expect(page.getByText(uniqueName)).toBeVisible();
     });
 
@@ -46,7 +46,7 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
 
         // Verify Rule Templates section exists with preset
         await expect(page.getByRole('heading', { name: /Rule Templates/i })).toBeVisible();
-        await expect(page.getByText('ITSF Standard Matchplay')).toBeVisible();
+        await expect(page.locator('.rule-template-list').getByText('ITSF Standard Matchplay')).toBeVisible();
 
         // Create new template from cabinet
         const uniqueName = `Friday Special ${crypto.randomUUID().substring(0, 6)}`;
@@ -56,12 +56,12 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         await page.getByRole('button', { name: 'Save Template' }).click();
 
         // Verify new template appears in user list
-        await expect(page.getByText(uniqueName)).toBeVisible();
+        await expect(page.locator('.rule-template-list').getByText(uniqueName)).toBeVisible();
 
         // Delete template
         await page.getByRole('button', { name: new RegExp(`Delete ${uniqueName}|delete-rule`, 'i') }).click();
         await page.locator('[data-testid="delete-rule-confirm-modal"]').getByRole('button', { name: /Delete|Confirm/i }).click();
-        await expect(page.getByText(uniqueName)).not.toBeVisible();
+        await expect(page.locator('.rule-template-list').getByText(uniqueName)).toBeHidden();
     });
 
     test('[P1] should support "Edit as New" for existing templates in /cabinet (AC 4)', async ({ page }) => {
@@ -82,8 +82,8 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         await page.getByRole('button', { name: 'Save Template' }).click();
 
         // Verify original preset remains and new custom template is added
-        await expect(page.getByText('ITSF Standard Matchplay')).toBeVisible();
-        await expect(page.getByText(modifiedName)).toBeVisible();
+        await expect(page.locator('.rule-template-list').getByText('ITSF Standard Matchplay')).toBeVisible();
+        await expect(page.locator('.rule-template-list').getByText(modifiedName)).toBeVisible();
     });
 
     test('[P2] should adhere to Clubhouse No-Line styling in RuleTemplateModal (UX-DR3)', async ({ page }) => {

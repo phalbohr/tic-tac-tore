@@ -20,7 +20,7 @@ export interface StatsFixtures {
 export const test = base.extend<StatsFixtures>({
    
    
-  statsFactory: async ({}, use) => {
+  statsFactory: async ({ page: _page }, use) => {
     await use(new PersonalStatsFactory());
   },
 

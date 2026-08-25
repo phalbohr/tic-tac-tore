@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,4 +30,16 @@ public class UpdateProfileRequest {
 
     @Schema(description = "Whether the user has completed the onboarding tutorial", example = "true", defaultValue = "false")
     private Boolean tutorialCompleted;
+
+    @Schema(description = "Default player group ID to set", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+    private UUID defaultGroupId;
+
+    @Schema(description = "Default rule configuration ID to set", example = "50f4a8e2-888e-4f10-9173-67c8cbcf8f3a")
+    private UUID defaultRuleConfigurationId;
+
+    @Schema(description = "Whether to clear default player group", example = "false")
+    private Boolean clearDefaultGroup;
+
+    @Schema(description = "Whether to clear default rule configuration", example = "false")
+    private Boolean clearDefaultRuleConfiguration;
 }

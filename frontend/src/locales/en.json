@@ -17,7 +17,9 @@
     "cancel": "Cancel",
     "loading": "Loading...",
     "error": "Something went wrong",
-    "close": "Close"
+    "close": "Close",
+    "none": "None",
+    "default": "Default"
   },
   "match": {
     "playerFallback": "Player",
@@ -91,7 +93,10 @@
     "deleteTitle": "Delete Account",
     "deleteConfirmMessage": "This action is irreversible. All your personal data will be permanently removed, and your account will be anonymized. Your match history will be preserved.",
     "confirmDelete": "Confirm Deletion",
-    "avatarSuccess": "Avatar updated successfully"
+    "avatarSuccess": "Avatar updated successfully",
+    "defaultPreferences": "Default Match Preferences",
+    "defaultPlayerGroup": "Default Player Group",
+    "defaultRuleTemplate": "Default Rule Template"
   },
   "avatarPicker": {
     "title": "Select Avatar"
@@ -234,13 +239,17 @@
     "nameRequired": "Group name is required",
     "nameTooLong": "Group name cannot exceed 50 characters",
     "tooManyMembers": "Maximum 12 members allowed per group",
-    "groupLimitReached": "Maximum limit of 10 groups reached"
+    "groupLimitReached": "Maximum limit of 10 groups reached",
+    "setAsDefault": "Set as Default"
   },
   "rules": {
     "sectionTitle": "Rule Templates",
     "createButton": "Create Template",
     "createCustom": "+ Custom Rule",
     "pickerTitle": "Rule System",
+    "setAsDefault": "Set as Default",
+    "presets": "Presets",
+    "custom": "Custom Templates",
     "noTemplates": "No rule templates available.",
     "editAsNew": "Edit as New",
     "modal": {

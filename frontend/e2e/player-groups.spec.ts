@@ -65,7 +65,7 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
 
     // Verify Player Groups section in Settings
     await expect(page.getByRole('heading', { name: /Player Groups|Teams|Spielergruppen/i })).toBeVisible();
-    await expect(page.getByText('Office Rivals')).toBeVisible();
+    await expect(page.getByTestId('player-group-list').getByText('Office Rivals')).toBeVisible();
 
     // Click "New Group" / "Create Group"
     await page.getByRole('button', { name: /Create Group|New Group|Gruppe erstellen/i }).click();
@@ -75,7 +75,7 @@ test.describe('[Story 6.1] Named Player Groups ("Teams") E2E User Journey (ATDD)
     await page.locator('[role="dialog"]').getByRole('button', { name: /Save|Speichern/i }).click();
 
     // Expect group created
-    await expect(page.getByText('Friday Champions')).toBeVisible();
+    await expect(page.getByTestId('player-group-list').getByText('Friday Champions')).toBeVisible();
   });
 
   test('[P0] should display player group chips during match creation (/matches/new) and filter player selection', async ({ page }) => {

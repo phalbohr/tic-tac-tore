@@ -37,6 +37,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const matchType = ref<MatchType>(MatchType.ONE_VS_ONE)
 
   const selectedPlayers = ref<string[]>([])
+  const selectedGroupId = ref<string | null>(null)
+  const ruleConfigurationId = ref<string | null>(null)
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
   const fetchedPlayers = ref<Record<string, PlayerDto>>({})
@@ -144,7 +146,31 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     submitError.value = null
   }
 
+  function initDraft() {
+    if (authStore.profile?.defaultRuleConfigurationId) {
+      ruleConfigurationId.value = authStore.profile.defaultRuleConfigurationId
+      ruleSystem.value = authStore.profile.defaultRuleConfigurationId
+    } else {
+      ruleConfigurationId.value = null
+      ruleSystem.value = 'STANDARD'
+    }
+    if (authStore.profile?.defaultGroupId) {
+      selectedGroupId.value = authStore.profile.defaultGroupId
+    } else {
+      selectedGroupId.value = null
+    }
+  }
+
+  async function setDefaultRule(ruleId: string) {
+    await authStore.updateProfile({ defaultRuleConfigurationId: ruleId })
+  }
+
+  async function setDefaultGroup(groupId: string) {
+    await authStore.updateProfile({ defaultGroupId: groupId })
+  }
+
   async function fetchDefaults() {
+    initDraft()
     try {
       const results = await Promise.allSettled([
         fetch('/api/users/me/frequent-opponents'),
@@ -159,7 +185,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       const prefsRes = results[1]
       if (prefsRes.status === 'fulfilled' && prefsRes.value.ok) {
         const data = await prefsRes.value.json()
-        if (data.lastRuleSystem) {
+        if (data.lastRuleSystem && !authStore.profile?.defaultRuleConfigurationId) {
           ruleSystem.value = data.lastRuleSystem
         }
       }
@@ -644,7 +670,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   function resetDraftStateOnly() {
     matchType.value = MatchType.ONE_VS_ONE
     selectedPlayers.value = []
-    ruleSystem.value = 'STANDARD'
+    initDraft()
     ruleConfig.value = null
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
@@ -663,6 +689,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   return {
     matchType,
     selectedPlayers,
+    selectedGroupId,
+    ruleConfigurationId,
     ruleSystem,
     frequentOpponents,
     fetchedPlayers,
@@ -686,6 +714,9 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     submissionCountdown,
     startSubmissionTimer,
     cancelSubmissionTimer,
+    initDraft,
+    setDefaultRule,
+    setDefaultGroup,
     fetchDefaults,
     loadRuleConfig,
     setMatchType,

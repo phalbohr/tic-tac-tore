@@ -16,6 +16,9 @@ interface UserProfile {
   avatar: string
   language?: string
   tutorialCompleted?: boolean
+  defaultGroupId?: string | null
+  defaultRuleConfigurationId?: string | null
+  version?: number
 }
 
 
@@ -73,6 +76,10 @@ export const useAuthStore = defineStore('auth', () => {
     language?: string
     avatar?: string
     tutorialCompleted?: boolean
+    defaultGroupId?: string | null
+    defaultRuleConfigurationId?: string | null
+    clearDefaultGroup?: boolean
+    clearDefaultRuleConfiguration?: boolean
   }) {
     if (fetchProfilePromise) {
       await fetchProfilePromise
@@ -82,7 +89,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
     if (!profile.value) return
 
-    const { nickname, language, avatar, tutorialCompleted } = options
+    const {
+      nickname,
+      language,
+      avatar,
+      tutorialCompleted,
+      defaultGroupId,
+      defaultRuleConfigurationId,
+      clearDefaultGroup,
+      clearDefaultRuleConfiguration
+    } = options
     const previousProfile = { ...profile.value }
 
     const localeStore = useLocaleStore()
@@ -111,6 +127,12 @@ export const useAuthStore = defineStore('auth', () => {
     if (tutorialCompleted !== undefined) {
       profile.value.tutorialCompleted = tutorialCompleted
     }
+    if (defaultGroupId !== undefined) {
+      profile.value.defaultGroupId = defaultGroupId
+    }
+    if (defaultRuleConfigurationId !== undefined) {
+      profile.value.defaultRuleConfigurationId = defaultRuleConfigurationId
+    }
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
@@ -124,7 +146,16 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await fetch(PROFILE_ENDPOINT, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ nickname: finalNickname, language, avatar, tutorialCompleted }),
+        body: JSON.stringify({
+          nickname: finalNickname,
+          language,
+          avatar,
+          tutorialCompleted,
+          defaultGroupId,
+          defaultRuleConfigurationId,
+          clearDefaultGroup: clearDefaultGroup ?? (defaultGroupId === null ? true : undefined),
+          clearDefaultRuleConfiguration: clearDefaultRuleConfiguration ?? (defaultRuleConfigurationId === null ? true : undefined)
+        }),
       })
 
       if (!response.ok) {

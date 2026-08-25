@@ -250,20 +250,26 @@ class UserServiceTest {
     @DisplayName("Update Profile - should delegate to UserOperation")
     void updateProfile_shouldDelegateToUserOperation() {
         var userId = UUID.randomUUID();
+        var groupId = UUID.randomUUID();
+        var ruleId = UUID.randomUUID();
         var request = UpdateProfileRequest.builder()
                 .nickname("newNickname")
                 .language("DE")
                 .avatar("ball-classic")
                 .tutorialCompleted(true)
+                .defaultGroupId(groupId)
+                .defaultRuleConfigurationId(ruleId)
+                .clearDefaultGroup(false)
+                .clearDefaultRuleConfiguration(false)
                 .build();
         var expectedUser = new User();
         expectedUser.setNickname("newNickname");
-        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true)).thenReturn(expectedUser);
+        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false)).thenReturn(expectedUser);
 
         var actualUser = userService.updateProfile(userId, request);
 
         assertThat(actualUser).isSameAs(expectedUser);
-        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true);
+        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false);
     }
 
     @Test

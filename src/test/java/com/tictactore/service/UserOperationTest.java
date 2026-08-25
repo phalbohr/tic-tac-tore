@@ -2,7 +2,12 @@ package com.tictactore.service;
 
 import com.tictactore.exception.UserNotFoundException;
 import com.tictactore.exception.ValidationException;
+import com.tictactore.model.PlayerGroup;
+import com.tictactore.model.RuleConfiguration;
+import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.User;
+import com.tictactore.repository.PlayerGroupRepository;
+import com.tictactore.repository.RuleConfigurationRepository;
 import com.tictactore.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +35,12 @@ class UserOperationTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PlayerGroupRepository playerGroupRepository;
+
+    @Mock
+    private RuleConfigurationRepository ruleConfigurationRepository;
 
     @Mock
     private Clock clock;
@@ -380,5 +391,89 @@ class UserOperationTest {
 
         assertThatThrownBy(() -> userOperation.deleteAccount(userId))
                 .isInstanceOf(ObjectOptimisticLockingFailureException.class);
+    }
+
+    @Test
+    @DisplayName("Update Profile - should persist valid owned defaultGroupId and custom defaultRuleConfigurationId")
+    void updateProfile_shouldPersistValidOwnedDefaults() {
+        var userId = UUID.randomUUID();
+        var groupId = UUID.randomUUID();
+        var ruleId = UUID.randomUUID();
+        var user = User.builder().id(userId).nickname("nick").build();
+        var group = PlayerGroup.builder().id(groupId).creatorId(userId).name("My Squad").build();
+        var rule = RuleConfiguration.builder().id(ruleId).createdBy(userId).type(RuleConfigurationType.CUSTOM).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(playerGroupRepository.findByIdAndCreatorId(groupId, userId)).thenReturn(Optional.of(group));
+        when(ruleConfigurationRepository.findById(ruleId)).thenReturn(Optional.of(rule));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updated = userOperation.updateProfile(userId, null, null, null, null, groupId, ruleId, false, false);
+
+        assertThat(updated.getDefaultGroupId()).isEqualTo(groupId);
+        assertThat(updated.getDefaultRuleConfigurationId()).isEqualTo(ruleId);
+    }
+
+    @Test
+    @DisplayName("Update Profile - should persist PRESET defaultRuleConfigurationId regardless of creator")
+    void updateProfile_shouldPersistPresetRuleConfiguration() {
+        var userId = UUID.randomUUID();
+        var presetId = UUID.randomUUID();
+        var user = User.builder().id(userId).nickname("nick").build();
+        var presetRule = RuleConfiguration.builder().id(presetId).createdBy(UUID.randomUUID()).type(RuleConfigurationType.PRESET).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(ruleConfigurationRepository.findById(presetId)).thenReturn(Optional.of(presetRule));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updated = userOperation.updateProfile(userId, null, null, null, null, null, presetId, false, false);
+
+        assertThat(updated.getDefaultRuleConfigurationId()).isEqualTo(presetId);
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw IllegalArgumentException when defaultGroupId not owned by user")
+    void updateProfile_shouldThrowWhenGroupNotOwned() {
+        var userId = UUID.randomUUID();
+        var foreignGroupId = UUID.randomUUID();
+        var user = User.builder().id(userId).nickname("nick").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(playerGroupRepository.findByIdAndCreatorId(foreignGroupId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userOperation.updateProfile(userId, null, null, null, null, foreignGroupId, null, false, false))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Selected player group does not exist or does not belong to the user");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should throw IllegalArgumentException when defaultRuleConfigurationId not owned and not preset")
+    void updateProfile_shouldThrowWhenRuleNotOwnedAndNotPreset() {
+        var userId = UUID.randomUUID();
+        var foreignRuleId = UUID.randomUUID();
+        var user = User.builder().id(userId).nickname("nick").build();
+        var foreignCustomRule = RuleConfiguration.builder().id(foreignRuleId).createdBy(UUID.randomUUID()).type(RuleConfigurationType.CUSTOM).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(ruleConfigurationRepository.findById(foreignRuleId)).thenReturn(Optional.of(foreignCustomRule));
+
+        assertThatThrownBy(() -> userOperation.updateProfile(userId, null, null, null, null, null, foreignRuleId, false, false))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Selected rule configuration does not exist or is not accessible");
+    }
+
+    @Test
+    @DisplayName("Update Profile - should clear defaultGroupId and defaultRuleConfigurationId when clear flags are true")
+    void updateProfile_shouldClearDefaultsWhenFlagsTrue() {
+        var userId = UUID.randomUUID();
+        var user = User.builder()
+                .id(userId)
+                .nickname("nick")
+                .defaultGroupId(UUID.randomUUID())
+                .defaultRuleConfigurationId(UUID.randomUUID())
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updated = userOperation.updateProfile(userId, null, null, null, null, null, null, true, true);
+
+        assertThat(updated.getDefaultGroupId()).isNull();
+        assertThat(updated.getDefaultRuleConfigurationId()).isNull();
     }
 }

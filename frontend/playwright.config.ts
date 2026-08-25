@@ -88,8 +88,8 @@ export default defineConfig({
       timeout: 120 * 1000,
     },
     {
-      command: process.env.CI ? 'npm run preview' : 'npm run dev',
-      port: process.env.CI ? 4173 : 3000,
+      command: process.env.CI ? 'npm run preview -- --port 4173 --host 0.0.0.0' : 'npm run dev',
+      url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },
