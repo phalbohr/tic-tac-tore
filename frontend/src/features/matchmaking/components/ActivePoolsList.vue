@@ -16,16 +16,23 @@ const poolStore = usePoolStore();
 const authStore = useAuthStore();
 
 const joiningPoolId = ref<string | null>(null);
+const initialLoading = ref(true);
+const fetchError = ref<string | null>(null);
+const joinError = ref<string | null>(null);
+
+async function loadPools() {
+  fetchError.value = null;
+  try {
+    await poolStore.fetchActivePools();
+  } catch (err: any) {
+    fetchError.value = err?.message || poolStore.error || t('pool.fetchFailed', 'Failed to load matchmaking pools');
+  } finally {
+    initialLoading.value = false;
+  }
+}
 
 onMounted(() => {
-  try {
-    const res = poolStore.fetchActivePools();
-    if (res && typeof res.catch === 'function') {
-      res.catch(() => {});
-    }
-  } catch {
-    // Ignore fetch error on mount
-  }
+  loadPools();
 });
 
 function isUserParticipant(pool: PoolResponse): boolean {
@@ -64,12 +71,16 @@ function getSkillLevelLabel(skill: SkillLevel): string {
 }
 
 async function handleJoin(poolId: string) {
+  if (joiningPoolId.value || poolStore.isLoading) {
+    return;
+  }
   joiningPoolId.value = poolId;
+  joinError.value = null;
   try {
     const updated = await poolStore.joinPool(poolId);
     emit('joined', updated);
-  } catch (e) {
-    // Error is set in store
+  } catch (e: any) {
+    joinError.value = e?.message || poolStore.error || t('pool.joinFailed', 'Failed to join pool');
   } finally {
     joiningPoolId.value = null;
   }
@@ -90,9 +101,53 @@ async function handleJoin(poolId: string) {
       </span>
     </div>
 
+    <!-- Join Error Banner -->
+    <div
+      v-if="joinError"
+      class="w-full bg-error-container text-on-error-container rounded-xl p-3 text-xs flex items-center justify-between gap-2"
+      data-testid="join-error-banner"
+    >
+      <span>{{ joinError }}</span>
+      <button
+        type="button"
+        class="font-bold underline text-xs ml-2 cursor-pointer"
+        @click="joinError = null"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Fetch Error Banner -->
+    <div
+      v-if="fetchError"
+      class="w-full bg-error-container text-on-error-container rounded-xl p-3 text-xs flex items-center justify-between gap-2"
+      data-testid="fetch-error-banner"
+    >
+      <span>{{ fetchError }}</span>
+      <button
+        type="button"
+        class="font-bold underline text-xs ml-2 cursor-pointer"
+        @click="loadPools"
+      >
+        {{ t('common.retry', 'Retry') }}
+      </button>
+    </div>
+
+    <!-- Loading State (Prevents Flickering Empty State) -->
+    <div
+      v-if="initialLoading && poolStore.activePools.length === 0"
+      class="w-full bg-surface-container-low rounded-2xl p-6 text-center shadow-sm flex items-center justify-center py-8"
+      data-testid="loading-pools-state"
+    >
+      <div class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
+        <span class="animate-spin">⏳</span>
+        <span>{{ t('pool.loadingPools', 'Loading matchmaking pools...') }}</span>
+      </div>
+    </div>
+
     <!-- Empty State -->
     <div
-      v-if="poolStore.activePools.length === 0"
+      v-else-if="poolStore.activePools.length === 0"
       class="w-full bg-surface-container-low rounded-2xl p-6 text-center shadow-sm flex flex-col items-center gap-2"
       data-testid="empty-pools-state"
     >
@@ -187,7 +242,7 @@ async function handleJoin(poolId: string) {
               v-else-if="pool.status === 'OPEN' && pool.currentPlayers < pool.requiredPlayers"
               variant="primary"
               class="!h-9 !px-4 text-xs font-bold rounded-full"
-              :disabled="joiningPoolId === pool.id"
+              :disabled="Boolean(joiningPoolId) || poolStore.isLoading"
               :data-testid="`join-pool-btn-${pool.id}`"
               @click="handleJoin(pool.id)"
             >

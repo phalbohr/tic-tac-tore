@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue';
 import { usePoolStore } from '@/features/matchmaking/stores/poolStore';
@@ -167,7 +167,50 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
         },
       },
     });
+    await flushPromises();
 
     expect(wrapper.find('[data-testid="empty-pools-state"]').exists()).toBe(true);
+  });
+
+  it('renders join error feedback banner when joinPool fails', async () => {
+    const wrapper = mount(ActivePoolsList, {
+      global: {
+        plugins: [pinia],
+        mocks: {
+          t: (key: string, fallback?: string) => fallback || key,
+        },
+      },
+    });
+
+    const poolStore = usePoolStore();
+    vi.mocked(poolStore.joinPool).mockRejectedValueOnce(new Error('User is already a participant in this pool'));
+
+    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]');
+    await joinButton.trigger('click');
+    await flushPromises();
+
+    const errorBanner = wrapper.find('[data-testid="join-error-banner"]');
+    expect(errorBanner.exists()).toBe(true);
+    expect(errorBanner.text()).toContain('User is already a participant in this pool');
+  });
+
+  it('renders fetch error banner when active pools fetch fails', async () => {
+    const store = usePoolStore();
+    vi.mocked(store.fetchActivePools).mockRejectedValueOnce(new Error('Network error'));
+
+    const wrapper = mount(ActivePoolsList, {
+      global: {
+        plugins: [pinia],
+        mocks: {
+          t: (key: string, fallback?: string) => fallback || key,
+        },
+      },
+    });
+
+    await flushPromises();
+
+    const fetchErrorBanner = wrapper.find('[data-testid="fetch-error-banner"]');
+    expect(fetchErrorBanner.exists()).toBe(true);
+    expect(fetchErrorBanner.text()).toContain('Network error');
   });
 });

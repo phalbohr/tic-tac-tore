@@ -371,7 +371,7 @@ class PoolServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalStateException (409 Conflict) when user is already a participant")
+        @DisplayName("Should throw PoolConflictException (409 Conflict) when user is already a participant")
         void shouldThrowConflictWhenUserAlreadyParticipant() {
             UUID poolId = UUID.randomUUID();
             MatchmakingPool pool = MatchmakingPool.builder()
@@ -391,16 +391,18 @@ class PoolServiceTest {
                     .joinedAt(Instant.now())
                     .build();
             pool.addParticipant(host);
+            User joinerUser = User.builder().id(creatorId).build();
 
             when(matchmakingPoolRepository.findById(eq(poolId))).thenReturn(Optional.of(pool));
+            when(userRepository.findById(eq(creatorId))).thenReturn(Optional.of(joinerUser));
 
             assertThatThrownBy(() -> poolService.joinPool(poolId, creatorId))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(com.tictactore.exception.PoolConflictException.class)
                     .hasMessageContaining("User is already a participant in this pool");
         }
 
         @Test
-        @DisplayName("Should throw IllegalStateException (409 Conflict) when pool is not in OPEN status")
+        @DisplayName("Should throw PoolConflictException (409 Conflict) when pool is not in OPEN status")
         void shouldThrowConflictWhenPoolNotOpen() {
             UUID joinerId = UUID.randomUUID();
             UUID poolId = UUID.randomUUID();
@@ -413,11 +415,13 @@ class PoolServiceTest {
                     .status(PoolStatus.FILLED)
                     .participants(new ArrayList<>())
                     .build();
+            User joinerUser = User.builder().id(joinerId).build();
 
             when(matchmakingPoolRepository.findById(eq(poolId))).thenReturn(Optional.of(pool));
+            when(userRepository.findById(eq(joinerId))).thenReturn(Optional.of(joinerUser));
 
             assertThatThrownBy(() -> poolService.joinPool(poolId, joinerId))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(com.tictactore.exception.PoolConflictException.class)
                     .hasMessageContaining("Pool is no longer open for joining");
         }
 

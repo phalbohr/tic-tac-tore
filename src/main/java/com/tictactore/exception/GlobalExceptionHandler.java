@@ -71,13 +71,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("message", msg != null ? msg : "Validation error"));
     }
 
-    @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
-    public ResponseEntity<Map<String, String>> handleOptimisticLocking(RuntimeException e) {
+    @ExceptionHandler({
+            org.springframework.dao.OptimisticLockingFailureException.class,
+            jakarta.persistence.OptimisticLockException.class,
+            org.hibernate.StaleObjectStateException.class,
+            org.springframework.dao.DataIntegrityViolationException.class
+    })
+    public ResponseEntity<Map<String, String>> handleOptimisticLocking(Exception e) {
         return ResponseEntity.status(409).body(Map.of("message", "The record has been modified by another transaction"));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException e) {
+    @ExceptionHandler(PoolConflictException.class)
+    public ResponseEntity<Map<String, String>> handlePoolConflict(PoolConflictException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Conflict";
         return ResponseEntity.status(409).body(Map.of("message", msg));
     }

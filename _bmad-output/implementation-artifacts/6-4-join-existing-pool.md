@@ -4,7 +4,7 @@ baseline_commit: HEAD
 
 # Story 6.4: Join Existing Pool
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -183,13 +183,16 @@ Gemini 3.7 Flash
 1. Added query `findByStatusOrderByCreatedAtDesc` with `@EntityGraph` to `MatchmakingPoolRepository.java`.
 2. Implemented `getActivePools()` and `joinPool(poolId, userId)` in `PoolService` / `PoolServiceImpl`, ensuring optimistic locking handling, duplicate participant prevention (409), status transitions to `FILLED` on capacity fill, and transactional atomicity.
 3. Added endpoints `GET /api/v1/pools` and `POST /api/v1/pools/{id}/join` to `PoolController.java`.
-4. Mapped `IllegalStateException` to HTTP 409 Conflict in `GlobalExceptionHandler.java`.
-5. Added client methods in `poolService.ts` and actions `fetchActivePools`, `joinPool` in `poolStore.ts`.
+4. Mapped `PoolConflictException` and optimistic locking / constraint violation exceptions to HTTP 409 Conflict in `GlobalExceptionHandler.java`.
+5. Added client methods in `poolService.ts` and actions `fetchActivePools`, `joinPool` in `poolStore.ts` (removing filled pools from active list).
 6. Created `ActivePoolsList.vue` following Clubhouse styling tokens (`bg-surface-container-low`, rounded-2xl, no 1px solid border) and mounted it in `HomeView.vue`.
-7. Added internationalization strings to `en.json` and `de.json`.
-8. Added unit, component, and E2E Playwright tests covering all acceptance criteria.
+7. Fixed UX flickering, double-click race condition, missing join error banners, and fetch error retry in `ActivePoolsList.vue`.
+8. Added internationalization strings to `en.json` and `de.json`.
+9. Added unit, component, and E2E Playwright tests covering all acceptance criteria, duplicate join error feedback, and optimistic locking concurrency.
 
 ### File List
+- `src/main/java/com/tictactore/model/MatchmakingPool.java`
+- `src/main/java/com/tictactore/exception/PoolConflictException.java`
 - `src/main/java/com/tictactore/repository/MatchmakingPoolRepository.java`
 - `src/main/java/com/tictactore/service/PoolService.java`
 - `src/main/java/com/tictactore/service/PoolServiceImpl.java`
@@ -209,14 +212,14 @@ Gemini 3.7 Flash
 
 ### Review Findings
 
-- [ ] [Review][Patch] Catastrophic global exception handling for IllegalStateException [GlobalExceptionHandler.java:56]
-- [ ] [Review][Patch] Missing UI error feedback for join failures [ActivePoolsList.vue:90]
-- [ ] [Review][Patch] Flawed concurrent state transition allowing pool capacity overruns [PoolServiceImpl.java]
-- [ ] [Review][Patch] Joined pool remains in active list indefinitely [poolStore.ts]
-- [ ] [Review][Patch] Flickering empty state UX bug [ActivePoolsList.vue]
-- [ ] [Review][Patch] Silent swallowing of fetch errors on mount [ActivePoolsList.vue:24]
-- [ ] [Review][Patch] Race condition in UI loading state allows double-clicks [ActivePoolsList.vue:18]
-- [ ] [Review][Patch] Missing ATDD test coverage for optimistic concurrency control [ATDD Test Suites]
-- [ ] [Review][Patch] Missing E2E test scenario for duplicate join rejection [want-to-play-pool.spec.ts]
+- [x] [Review][Patch] Catastrophic global exception handling for IllegalStateException [GlobalExceptionHandler.java:56]
+- [x] [Review][Patch] Missing UI error feedback for join failures [ActivePoolsList.vue:90]
+- [x] [Review][Patch] Flawed concurrent state transition allowing pool capacity overruns [PoolServiceImpl.java]
+- [x] [Review][Patch] Joined pool remains in active list indefinitely [poolStore.ts]
+- [x] [Review][Patch] Flickering empty state UX bug [ActivePoolsList.vue]
+- [x] [Review][Patch] Silent swallowing of fetch errors on mount [ActivePoolsList.vue:24]
+- [x] [Review][Patch] Race condition in UI loading state allows double-clicks [ActivePoolsList.vue:18]
+- [x] [Review][Patch] Missing ATDD test coverage for optimistic concurrency control [ATDD Test Suites]
+- [x] [Review][Patch] Missing E2E test scenario for duplicate join rejection [want-to-play-pool.spec.ts]
 - [x] [Review][Defer] No pagination or limits on pool fetching [MatchmakingPoolRepository.java] — deferred, pre-existing
 - [x] [Review][Defer] Hardcoded match format labels break i18n [ActivePoolsList.vue] — deferred, pre-existing

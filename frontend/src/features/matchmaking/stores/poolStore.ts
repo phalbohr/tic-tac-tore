@@ -48,8 +48,12 @@ export const usePoolStore = defineStore('pool', () => {
       currentPool.value = response;
       const index = activePools.value.findIndex((p) => p.id === poolId);
       if (index !== -1) {
-        activePools.value[index] = response;
-      } else {
+        if (response.status === 'FILLED' || response.status !== 'OPEN') {
+          activePools.value.splice(index, 1);
+        } else {
+          activePools.value[index] = response;
+        }
+      } else if (response.status === 'OPEN') {
         activePools.value.push(response);
       }
       return response;

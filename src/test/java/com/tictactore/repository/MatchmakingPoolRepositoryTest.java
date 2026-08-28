@@ -158,8 +158,8 @@ class MatchmakingPoolRepositoryTest {
                 .role(PoolParticipantRole.PLAYER)
                 .joinedAt(Instant.now())
                 .build();
-        pool.addParticipant(part1);
-        pool.addParticipant(part2);
+        pool.getParticipants().add(part1);
+        pool.getParticipants().add(part2);
 
         matchmakingPoolRepository.save(pool);
 

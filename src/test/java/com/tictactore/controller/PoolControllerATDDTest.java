@@ -409,7 +409,7 @@ class PoolControllerATDDTest {
         void shouldReturn409WhenUserAlreadyParticipant() throws Exception {
             UUID poolId = UUID.randomUUID();
             when(poolService.joinPool(eq(poolId), eq(currentUserId)))
-                    .thenThrow(new IllegalStateException("User is already a participant in this pool"));
+                    .thenThrow(new com.tictactore.exception.PoolConflictException("User is already a participant in this pool"));
 
             mockMvc.perform(post("/api/v1/pools/{id}/join", poolId)
                             .principal(auth)
@@ -423,13 +423,41 @@ class PoolControllerATDDTest {
         void shouldReturn409WhenPoolNotOpen() throws Exception {
             UUID poolId = UUID.randomUUID();
             when(poolService.joinPool(eq(poolId), eq(currentUserId)))
-                    .thenThrow(new IllegalStateException("Pool is no longer open for joining"));
+                    .thenThrow(new com.tictactore.exception.PoolConflictException("Pool is no longer open for joining"));
 
             mockMvc.perform(post("/api/v1/pools/{id}/join", poolId)
                             .principal(auth)
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.message").value("Pool is no longer open for joining"));
+        }
+
+        @Test
+        @DisplayName("[P0] Should return 409 Conflict on optimistic concurrency conflict (AC 6)")
+        void shouldReturn409OnOptimisticLockingFailure() throws Exception {
+            UUID poolId = UUID.randomUUID();
+            when(poolService.joinPool(eq(poolId), eq(currentUserId)))
+                    .thenThrow(new org.springframework.dao.OptimisticLockingFailureException("Version conflict"));
+
+            mockMvc.perform(post("/api/v1/pools/{id}/join", poolId)
+                            .principal(auth)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value("The record has been modified by another transaction"));
+        }
+
+        @Test
+        @DisplayName("[P0] Should return 409 Conflict on unique constraint violation (AC 6)")
+        void shouldReturn409OnDataIntegrityViolation() throws Exception {
+            UUID poolId = UUID.randomUUID();
+            when(poolService.joinPool(eq(poolId), eq(currentUserId)))
+                    .thenThrow(new org.springframework.dao.DataIntegrityViolationException("uk_pool_participant violated"));
+
+            mockMvc.perform(post("/api/v1/pools/{id}/join", poolId)
+                            .principal(auth)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value("The record has been modified by another transaction"));
         }
 
         @Test

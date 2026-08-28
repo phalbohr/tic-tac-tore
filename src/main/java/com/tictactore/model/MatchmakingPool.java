@@ -65,7 +65,21 @@ public class MatchmakingPool {
     private Long version;
 
     public void addParticipant(PoolParticipant participant) {
-        participants.add(participant);
+        int requiredPlayers = this.matchType == MatchType.ONE_VS_ONE ? 2 : 4;
+        if (this.status != PoolStatus.OPEN || (this.participants != null && this.participants.size() >= requiredPlayers)) {
+            throw new com.tictactore.exception.PoolConflictException("Pool is no longer open for joining");
+        }
+        if (this.participants != null && participant.getUser() != null && participant.getUser().getId() != null
+                && this.participants.stream().anyMatch(p -> p.getUser() != null && participant.getUser().getId().equals(p.getUser().getId()))) {
+            throw new com.tictactore.exception.PoolConflictException("User is already a participant in this pool");
+        }
+        if (this.participants == null) {
+            this.participants = new ArrayList<>();
+        }
+        this.participants.add(participant);
         participant.setPool(this);
+        if (this.participants.size() >= requiredPlayers) {
+            this.status = PoolStatus.FILLED;
+        }
     }
 }

@@ -46,7 +46,10 @@
     "open": "Offen",
     "noActivePools": "Zurzeit keine offenen Pools. Starte einen mit Lust auf ein Spiel!",
     "poolJoinedSuccess": "Matchmaking-Pool erfolgreich beigetreten!",
-    "poolJoinError": "Beitritt zum Pool fehlgeschlagen"
+    "poolJoinError": "Beitritt zum Pool fehlgeschlagen",
+    "joinFailed": "Beitritt zum Matchmaking-Pool fehlgeschlagen",
+    "fetchFailed": "Laden der Matchmaking-Pools fehlgeschlagen",
+    "loadingPools": "Matchmaking-Pools werden geladen..."
   },
   "match": {
     "playerFallback": "Spieler",

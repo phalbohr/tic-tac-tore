@@ -282,4 +282,66 @@ test.describe('[Story 6.4] Join Existing Matchmaking Pool E2E User Journeys', ()
     const emptyState = page.locator('[data-testid="empty-pools-state"]');
     await expect(emptyState).toBeVisible();
   });
+
+  test('[P1] should show error feedback when duplicate join is rejected with 409 Conflict (AC 4)', async ({ page }) => {
+    const hostUser = {
+      userId: 'user-host-1',
+      nickname: 'HostStriker',
+      avatar: 'avatar-1',
+      role: 'HOST',
+      joinedAt: new Date().toISOString(),
+    };
+
+    const poolState = {
+      id: 'pool-open-101',
+      creatorId: 'user-host-1',
+      creatorNickname: 'HostStriker',
+      matchType: 'ONE_VS_ONE',
+      startCondition: 'FILL_BASED',
+      scheduledTime: null,
+      skillLevel: 'OPEN_FOR_ALL',
+      status: 'OPEN',
+      requiredPlayers: 2,
+      currentPlayers: 1,
+      participants: [hostUser],
+      createdAt: new Date().toISOString(),
+    };
+
+    await page.route('**/api/v1/pools', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([poolState]),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.route('**/api/v1/pools/pool-open-101/join', async (route) => {
+      if (route.request().method() === 'POST') {
+        await route.fulfill({
+          status: 409,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            message: 'User is already a participant in this pool',
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await loginUser(page);
+    await page.goto('/');
+
+    const joinBtn = page.locator('[data-testid="join-pool-btn-pool-open-101"]');
+    await expect(joinBtn).toBeVisible();
+    await joinBtn.click();
+
+    const errorBanner = page.locator('[data-testid="join-error-banner"]');
+    await expect(errorBanner).toBeVisible();
+    await expect(errorBanner).toContainText('User is already a participant in this pool');
+  });
 });

@@ -46,7 +46,10 @@
     "open": "Open",
     "noActivePools": "No open pools right now. Start one with Want to Play!",
     "poolJoinedSuccess": "Joined matchmaking pool successfully!",
-    "poolJoinError": "Failed to join matchmaking pool"
+    "poolJoinError": "Failed to join matchmaking pool",
+    "joinFailed": "Failed to join matchmaking pool",
+    "fetchFailed": "Failed to load matchmaking pools",
+    "loadingPools": "Loading matchmaking pools..."
   },
   "match": {
     "playerFallback": "Player",

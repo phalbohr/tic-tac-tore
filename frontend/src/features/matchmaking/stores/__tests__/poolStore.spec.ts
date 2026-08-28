@@ -141,7 +141,7 @@ describe('usePoolStore ATDD Specs', () => {
     expect(store.error).toBeNull();
   });
 
-  it('should join pool, update activePools entry, and set currentPool (AC 2, AC 3, AC 7)', async () => {
+  it('should join pool and remove from activePools when pool transitions to FILLED (AC 2, AC 3)', async () => {
     const store = usePoolStore();
     const mockOpenPool: PoolResponse = {
       id: 'pool-123',
@@ -190,7 +190,59 @@ describe('usePoolStore ATDD Specs', () => {
     expect(result.status).toBe('FILLED');
     expect(result.currentPlayers).toBe(2);
     expect(store.currentPool?.status).toBe('FILLED');
-    expect(store.activePools[0]!.status).toBe('FILLED');
+    expect(store.activePools).toHaveLength(0);
+  });
+
+  it('should join 2v2 pool and update activePools entry when pool remains OPEN (AC 2, AC 7)', async () => {
+    const store = usePoolStore();
+    const mockOpen2v2Pool: PoolResponse = {
+      id: 'pool-2v2',
+      creatorId: 'host-1',
+      creatorNickname: 'HostPlayer',
+      matchType: 'TWO_VS_TWO',
+      startCondition: 'FILL_BASED',
+      scheduledTime: null,
+      skillLevel: 'OPEN_FOR_ALL',
+      status: 'OPEN',
+      requiredPlayers: 4,
+      currentPlayers: 1,
+      participants: [
+        {
+          userId: 'host-1',
+          nickname: 'HostPlayer',
+          avatar: 'avatar-1',
+          role: 'HOST',
+          joinedAt: '2026-08-28T12:00:00Z',
+        },
+      ],
+      createdAt: '2026-08-28T12:00:00Z',
+    };
+    const mockUpdated2v2Pool: PoolResponse = {
+      ...mockOpen2v2Pool,
+      status: 'OPEN',
+      currentPlayers: 2,
+      participants: [
+        ...mockOpen2v2Pool.participants,
+        {
+          userId: 'user-2',
+          nickname: 'JoinerPlayer',
+          avatar: 'avatar-2',
+          role: 'PLAYER',
+          joinedAt: '2026-08-28T12:05:00Z',
+        },
+      ],
+    };
+
+    vi.mocked(poolService.fetchActivePools).mockResolvedValue([mockOpen2v2Pool]);
+    vi.mocked(poolService.joinPool).mockResolvedValue(mockUpdated2v2Pool);
+
+    await store.fetchActivePools();
+    const result = await store.joinPool('pool-2v2');
+
+    expect(result.status).toBe('OPEN');
+    expect(result.currentPlayers).toBe(2);
+    expect(store.activePools).toHaveLength(1);
+    expect(store.activePools[0]!.currentPlayers).toBe(2);
     expect(store.activePools[0]!.participants).toHaveLength(2);
   });
 
