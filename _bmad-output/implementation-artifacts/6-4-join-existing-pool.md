@@ -152,6 +152,15 @@ so that I can quickly get into a game without the friction of creating my own po
 - **EntityGraph Optimization:** Always fetch `participants`, `participants.user`, and `creator` eagerly using `@EntityGraph` to prevent N+1 queries when mapping `PoolResponse`.
 - **Frontend Modularity:** Keep matchmaking components inside `src/features/matchmaking/` isolated from match entry and profile logic.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-6-4-join-existing-pool.md`
+- **Controller ATDD Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-4/PoolControllerATDDTest.java`
+- **Service ATDD Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-4/PoolServiceTest.java`
+- **Frontend Pinia Store Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-4/poolStore.spec.ts`
+- **Frontend Component Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-4/ActivePoolsList.spec.ts`
+- **Frontend E2E Test Suite:** `frontend/e2e/want-to-play-pool.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md] - FR36 ("Join Want to Play pool")
