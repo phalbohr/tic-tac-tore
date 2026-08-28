@@ -21,6 +21,24 @@
     "none": "None",
     "default": "Default"
   },
+  "pool": {
+    "createTitle": "Create Want to Play Pool",
+    "wantToPlay": "Want to Play",
+    "matchType": "Match Format",
+    "type1v1": "1 vs 1",
+    "type2v2": "2 vs 2",
+    "startCondition": "Start Condition",
+    "fillBased": "Immediate (Fill-based)",
+    "scheduledTime": "Scheduled Time",
+    "scheduledTimeLabel": "Start Date & Time",
+    "skillLevel": "Skill Level Filter",
+    "skillOpenForAll": "Open for All",
+    "skillBeginner": "Beginner",
+    "skillIntermediate": "Intermediate",
+    "skillAdvanced": "Advanced",
+    "createPool": "Create Pool",
+    "poolCreated": "Matchmaking pool created successfully!"
+  },
   "match": {
     "playerFallback": "Player",
     "submit": "Submit Match",

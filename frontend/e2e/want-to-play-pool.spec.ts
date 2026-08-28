@@ -15,7 +15,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 6.3] Create "Want to Play" Pool E2E User Journeys', () => {
 
-  test.skip('[P0] should open CreatePoolModal from Home Hub and create fill-based 1v1 pool (AC 1, AC 2, AC 6)', async ({ page }) => {
+  test('[P0] should open CreatePoolModal from Home Hub and create fill-based 1v1 pool (AC 1, AC 2, AC 6)', async ({ page }) => {
     let createdPayload: any = null;
 
     await page.route('**/api/v1/pools', async (route) => {
@@ -75,12 +75,12 @@ test.describe('[Story 6.3] Create "Want to Play" Pool E2E User Journeys', () => 
 
     // 6. Modal should close and toast should appear
     await expect(modal).not.toBeVisible();
-    await expect(page.locator('.toast, [role="alert"], [data-test="toast-notification"]')).toBeVisible();
+    await expect(page.locator('[data-testid="success-toast"], [role="status"], .toast, [role="alert"], [data-test="toast-notification"]')).toBeVisible();
     expect(createdPayload.matchType).toBe('ONE_VS_ONE');
     expect(createdPayload.startCondition).toBe('FILL_BASED');
   });
 
-  test.skip('[P0] should create scheduled 2v2 pool with future timestamp (AC 1, AC 3, AC 6)', async ({ page }) => {
+  test('[P0] should create scheduled 2v2 pool with future timestamp (AC 1, AC 3, AC 6)', async ({ page }) => {
     let createdPayload: any = null;
 
     await page.route('**/api/v1/pools', async (route) => {
@@ -149,7 +149,7 @@ test.describe('[Story 6.3] Create "Want to Play" Pool E2E User Journeys', () => 
     expect(createdPayload.scheduledTime).toBeTruthy();
   });
 
-  test.skip('[P1] should show validation error when maximum pool quota is exceeded (AC 5)', async ({ page }) => {
+  test('[P1] should show validation error when maximum pool quota is exceeded (AC 5)', async ({ page }) => {
     await page.route('**/api/v1/pools', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
