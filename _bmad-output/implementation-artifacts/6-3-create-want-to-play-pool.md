@@ -4,7 +4,7 @@ baseline_commit: 8488830e2ea8a6818274ef9a58fb944eef26f32e
 
 # Story 6.3: Create "Want to Play" Pool
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -262,3 +262,6 @@ Gemini 3.7 Flash
 
 - **2026-08-28**: Implemented Story 6.3 "Create Want to Play Pool" backend schema, models, services, controller, frontend store, UI modal, Home Hub CTA, and ATDD/E2E test suites. Ready for review.
 
+
+### Review Findings
+- [ ] [Review][Patch] Deviation: "Want to Play" button uses secondary styling instead of primary [frontend/src/views/HomeView.vue:2149] — Violates Dev Notes (Home Hub Evolution: Add Want to Play primary action button alongside New Match).
