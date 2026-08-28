@@ -76,6 +76,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(Map.of("message", "The record has been modified by another transaction"));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException e) {
+        var msg = e.getMessage() != null ? e.getMessage() : "Conflict";
+        return ResponseEntity.status(409).body(Map.of("message", msg));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException e) {
         var message = e.getConstraintViolations().stream()

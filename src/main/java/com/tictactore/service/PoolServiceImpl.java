@@ -72,6 +72,56 @@ public class PoolServiceImpl implements PoolService {
         return mapToPoolResponse(pool);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PoolResponse> getActivePools() {
+        return matchmakingPoolRepository.findByStatusOrderByCreatedAtDesc(PoolStatus.OPEN)
+                .stream()
+                .map(this::mapToPoolResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public PoolResponse joinPool(UUID poolId, UUID userId) {
+        MatchmakingPool pool = matchmakingPoolRepository.findById(poolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pool not found: " + poolId));
+
+        if (pool.getStatus() != PoolStatus.OPEN) {
+            throw new IllegalStateException("Pool is no longer open for joining");
+        }
+
+        boolean alreadyParticipant = pool.getParticipants() != null && pool.getParticipants().stream()
+                .anyMatch(p -> p.getUser().getId().equals(userId));
+        if (alreadyParticipant) {
+            throw new IllegalStateException("User is already a participant in this pool");
+        }
+
+        int requiredPlayers = pool.getMatchType() == MatchType.ONE_VS_ONE ? 2 : 4;
+        int currentCount = pool.getParticipants() != null ? pool.getParticipants().size() : 0;
+        if (currentCount >= requiredPlayers) {
+            throw new IllegalStateException("Pool is no longer open for joining");
+        }
+
+        User joiner = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        PoolParticipant participant = PoolParticipant.builder()
+                .pool(pool)
+                .user(joiner)
+                .role(PoolParticipantRole.PLAYER)
+                .joinedAt(Instant.now())
+                .build();
+        pool.addParticipant(participant);
+
+        if (pool.getParticipants().size() == requiredPlayers) {
+            pool.setStatus(PoolStatus.FILLED);
+        }
+
+        MatchmakingPool savedPool = matchmakingPoolRepository.save(pool);
+        return mapToPoolResponse(savedPool);
+    }
+
     private void validateCreationRequest(CreatePoolRequest request) {
         if (request.startCondition() == StartCondition.SCHEDULED_TIME) {
             if (request.scheduledTime() == null) {

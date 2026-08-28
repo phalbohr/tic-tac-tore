@@ -18,6 +18,37 @@ export async function createPool(payload: CreatePoolPayload): Promise<PoolRespon
   return res.json();
 }
 
+export async function fetchActivePools(): Promise<PoolResponse[]> {
+  const res = await fetch('/api/v1/pools', {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || `Failed to fetch active pools (${res.status})`);
+  }
+
+  return res.json();
+}
+
+export async function joinPool(id: string): Promise<PoolResponse> {
+  const res = await fetch(`/api/v1/pools/${id}/join`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || `Failed to join pool (${res.status})`);
+  }
+
+  return res.json();
+}
+
 export async function fetchPoolById(id: string): Promise<PoolResponse> {
   const res = await fetch(`/api/v1/pools/${id}`, {
     headers: {

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,9 @@ public interface MatchmakingPoolRepository extends JpaRepository<MatchmakingPool
 
     @EntityGraph(attributePaths = {"participants", "participants.user", "creator"})
     Optional<MatchmakingPool> findByIdAndStatus(UUID id, PoolStatus status);
+
+    @EntityGraph(attributePaths = {"participants", "participants.user", "creator"})
+    List<MatchmakingPool> findByStatusOrderByCreatedAtDesc(PoolStatus status);
 
     @Override
     @EntityGraph(attributePaths = {"participants", "participants.user", "creator"})

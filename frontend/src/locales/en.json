@@ -37,7 +37,16 @@
     "skillIntermediate": "Intermediate",
     "skillAdvanced": "Advanced",
     "createPool": "Create Pool",
-    "poolCreated": "Matchmaking pool created successfully!"
+    "poolCreated": "Matchmaking pool created successfully!",
+    "activePoolsTitle": "Active Matchmaking Pools",
+    "join": "Join",
+    "joining": "Joining...",
+    "joined": "Joined",
+    "full": "Full",
+    "open": "Open",
+    "noActivePools": "No open pools right now. Start one with Want to Play!",
+    "poolJoinedSuccess": "Joined matchmaking pool successfully!",
+    "poolJoinError": "Failed to join matchmaking pool"
   },
   "match": {
     "playerFallback": "Player",

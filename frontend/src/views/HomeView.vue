@@ -17,6 +17,7 @@ import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import SuccessToast from '@/core/components/SuccessToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import CreatePoolModal from '@/features/matchmaking/components/CreatePoolModal.vue'
+import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
@@ -138,6 +139,13 @@ function handleDismissError() {
 
 function handlePoolCreated() {
   poolSuccessToast.value = t('pool.poolCreated', 'Matchmaking pool created successfully!')
+  setTimeout(() => {
+    poolSuccessToast.value = null
+  }, 4000)
+}
+
+function handlePoolJoined() {
+  poolSuccessToast.value = t('pool.poolJoinedSuccess', 'Joined matchmaking pool successfully!')
   setTimeout(() => {
     poolSuccessToast.value = null
   }, 4000)
@@ -460,6 +468,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             >
               {{ t('pool.wantToPlay', 'Want to Play') }}
             </BaseButton>
+            <ActivePoolsList @joined="handlePoolJoined" />
             <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
           </div>
 

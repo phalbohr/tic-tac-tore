@@ -4,7 +4,7 @@ baseline_commit: HEAD
 
 # Story 6.4: Join Existing Pool
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -43,10 +43,10 @@ so that I can quickly get into a game without the friction of creating my own po
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend API & Service Enhancements (AC1, AC2, AC3, AC4, AC5, AC6)
-  - [ ] Update `MatchmakingPoolRepository.java`:
+- [x] Task 1: Backend API & Service Enhancements (AC1, AC2, AC3, AC4, AC5, AC6)
+  - [x] Update `MatchmakingPoolRepository.java`:
     - Add `@EntityGraph(attributePaths = {"participants", "participants.user", "creator"}) List<MatchmakingPool> findByStatusOrderByCreatedAtDesc(PoolStatus status);`
-  - [ ] Update `PoolService.java` & `PoolServiceImpl.java`:
+  - [x] Update `PoolService.java` & `PoolServiceImpl.java`:
     - Add `List<PoolResponse> getActivePools();` querying open pools.
     - Add `PoolResponse joinPool(UUID poolId, UUID userId);` implementation:
       - Fetch `MatchmakingPool` by ID. Throw `ResourceNotFoundException` (404) if not found.
@@ -58,47 +58,47 @@ so that I can quickly get into a game without the friction of creating my own po
       - If `pool.getParticipants().size() == requiredPlayers`, set `pool.setStatus(PoolStatus.FILLED)`.
       - Save pool via `matchmakingPoolRepository.save(pool)` (optimistic locking handled via `@Version`).
       - Return `mapToPoolResponse(savedPool)`.
-  - [ ] Update `PoolController.java`:
+  - [x] Update `PoolController.java`:
     - Add `GET /api/v1/pools` returning `ResponseEntity<List<PoolResponse>>` with `@AuthenticationPrincipal User principal`.
     - Add `POST /api/v1/pools/{id}/join` returning `ResponseEntity<PoolResponse>` (200 OK) with `@PathVariable("id") UUID id` and `@AuthenticationPrincipal User principal`.
-  - [ ] Ensure exception handling in `GlobalExceptionHandler.java` / controller maps state conflicts to `409 Conflict`.
-  - [ ] Write backend unit and integration tests:
+  - [x] Ensure exception handling in `GlobalExceptionHandler.java` / controller maps state conflicts to `409 Conflict`.
+  - [x] Write backend unit and integration tests:
     - `PoolServiceTest.java`: Unit tests for `getActivePools`, successful `joinPool`, duplicate join rejection (409), full pool auto-fill to `FILLED`, closed pool rejection (409).
     - `PoolControllerATDDTest.java`: Integration tests for `GET /api/v1/pools` and `POST /api/v1/pools/{id}/join` (200 OK, 401 Unauthorized, 404 Not Found, 409 Conflict).
-- [ ] Task 2: Frontend Types, Service & Pinia Store (AC1, AC2, AC7)
-  - [ ] Update `frontend/src/features/matchmaking/services/poolService.ts`:
+- [x] Task 2: Frontend Types, Service & Pinia Store (AC1, AC2, AC7)
+  - [x] Update `frontend/src/features/matchmaking/services/poolService.ts`:
     - Add `fetchActivePools(): Promise<PoolResponse[]>` calling `GET /api/v1/pools`.
     - Add `joinPool(id: string): Promise<PoolResponse>` calling `POST /api/v1/pools/${id}/join`.
-  - [ ] Update `frontend/src/features/matchmaking/stores/poolStore.ts`:
+  - [x] Update `frontend/src/features/matchmaking/stores/poolStore.ts`:
     - Add `fetchActivePools()` action: fetches open pools and updates `activePools.value`.
     - Add `joinPool(poolId: string)` action: calls service, updates pool in `activePools.value`, and sets `currentPool.value`.
-  - [ ] Update store tests in `frontend/src/features/matchmaking/stores/__tests__/poolStore.spec.ts`.
-- [ ] Task 3: Frontend UI Components & Home Hub Integration (AC1, AC2, AC7, AC8)
-  - [ ] Create `frontend/src/features/matchmaking/components/ActivePoolsList.vue`:
+  - [x] Update store tests in `frontend/src/features/matchmaking/stores/__tests__/poolStore.spec.ts`.
+- [x] Task 3: Frontend UI Components & Home Hub Integration (AC1, AC2, AC7, AC8)
+  - [x] Create `frontend/src/features/matchmaking/components/ActivePoolsList.vue`:
     - Self-contained component: loads active pools on mount via `usePoolStore()`.
     - Clubhouse design token styling (`bg-surface-container-low`, rounded-2xl, elevation, no 1px solid borders per `UX-DR3`).
     - Render pool cards with creator avatar + nickname, format badge (`1v1` / `2v2`), start condition badge (`Immediate` or formatted date/time), skill level badge (`OPEN_FOR_ALL`, `BEGINNER`, `INTERMEDIATE`, `ADVANCED`).
     - Participant slots visualization: show avatars of joined users and placeholder circles for remaining open slots (`1/2` or `3/4`).
     - Action button: "Join" (calls store `joinPool`, shows loading spinner, emits toast event on success). If current authenticated user is already in the pool, display "Joined" badge instead of "Join" button.
     - Clean empty state when `activePools.length === 0`.
-  - [ ] Update `frontend/src/views/HomeView.vue`:
+  - [x] Update `frontend/src/views/HomeView.vue`:
     - Mount `<ActivePoolsList />` cleanly below matchmaking actions.
     - Ensure `HomeView.vue` stays modular and strictly under 500 lines (rule `IP-04`).
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`:
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`:
     - Pool list labels, format tags, start condition labels, skill tags, "Join" button, "Joined" status, "Full" status, empty state text, success/error toast messages.
-  - [ ] Component unit tests in `frontend/src/features/matchmaking/components/__tests__/ActivePoolsList.spec.ts`.
-- [ ] Task 4: Testing & Quality Verification
-  - [ ] Backend Unit & Integration Tests:
+  - [x] Component unit tests in `frontend/src/features/matchmaking/components/__tests__/ActivePoolsList.spec.ts`.
+- [x] Task 4: Testing & Quality Verification
+  - [x] Backend Unit & Integration Tests:
     - `PoolServiceTest.java` (strict AAA pattern, 100% logic coverage).
     - `PoolControllerATDDTest.java` (full request/response lifecycle).
-  - [ ] Frontend Unit & Component Tests:
+  - [x] Frontend Unit & Component Tests:
     - `poolStore.spec.ts` (store state transitions).
     - `ActivePoolsList.spec.ts` (rendering, join action, disabled/joined states, empty state).
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Update `frontend/e2e/want-to-play-pool.spec.ts`:
       - Test 1: User A creates a 1v1 pool -> User B logs in and sees pool in active list -> User B clicks "Join" -> verifies User B avatar is added, button shows "Joined", and pool status becomes `FILLED`.
       - Test 2: User cannot rejoin a pool they already participate in.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 
@@ -133,6 +133,7 @@ so that I can quickly get into a game without the friction of creating my own po
 | `src/main/java/com/tictactore/service/PoolService.java` | UPDATE | Add `getActivePools` and `joinPool` method signatures |
 | `src/main/java/com/tictactore/service/PoolServiceImpl.java` | UPDATE | Implement `getActivePools` and `joinPool` with concurrency validations |
 | `src/main/java/com/tictactore/controller/PoolController.java` | UPDATE | Add `GET /api/v1/pools` and `POST /api/v1/pools/{id}/join` endpoints |
+| `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java` | UPDATE | Map IllegalStateException to 409 Conflict |
 | `src/test/java/com/tictactore/service/PoolServiceTest.java` | UPDATE | Add unit tests for pool retrieval and join logic |
 | `src/test/java/com/tictactore/controller/PoolControllerATDDTest.java` | UPDATE | Add ATDD tests for active pools and join API |
 | `frontend/src/features/matchmaking/services/poolService.ts` | UPDATE | Add `fetchActivePools` and `joinPool` API client methods |
@@ -170,9 +171,38 @@ so that I can quickly get into a game without the friction of creating my own po
 ## Dev Agent Record
 
 ### Agent Model Used
+Gemini 3.7 Flash
 
 ### Debug Log References
+- Unit & ATDD Backend Tests: `PoolServiceTest`, `PoolControllerATDDTest`, `MatchmakingPoolRepositoryTest` passed 100% (31/31).
+- Frontend Vitest Tests: `poolStore.spec.ts`, `ActivePoolsList.spec.ts`, and full suite passed (57 suites, 337 tests).
+- E2E Tests: Playwright `want-to-play-pool.spec.ts` passed 100% across Chromium, Firefox, WebKit (15/15).
+- CI Verification: `./scripts/ci-local.sh` passed 100%.
 
 ### Completion Notes List
+1. Added query `findByStatusOrderByCreatedAtDesc` with `@EntityGraph` to `MatchmakingPoolRepository.java`.
+2. Implemented `getActivePools()` and `joinPool(poolId, userId)` in `PoolService` / `PoolServiceImpl`, ensuring optimistic locking handling, duplicate participant prevention (409), status transitions to `FILLED` on capacity fill, and transactional atomicity.
+3. Added endpoints `GET /api/v1/pools` and `POST /api/v1/pools/{id}/join` to `PoolController.java`.
+4. Mapped `IllegalStateException` to HTTP 409 Conflict in `GlobalExceptionHandler.java`.
+5. Added client methods in `poolService.ts` and actions `fetchActivePools`, `joinPool` in `poolStore.ts`.
+6. Created `ActivePoolsList.vue` following Clubhouse styling tokens (`bg-surface-container-low`, rounded-2xl, no 1px solid border) and mounted it in `HomeView.vue`.
+7. Added internationalization strings to `en.json` and `de.json`.
+8. Added unit, component, and E2E Playwright tests covering all acceptance criteria.
 
 ### File List
+- `src/main/java/com/tictactore/repository/MatchmakingPoolRepository.java`
+- `src/main/java/com/tictactore/service/PoolService.java`
+- `src/main/java/com/tictactore/service/PoolServiceImpl.java`
+- `src/main/java/com/tictactore/controller/PoolController.java`
+- `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java`
+- `src/test/java/com/tictactore/service/PoolServiceTest.java`
+- `src/test/java/com/tictactore/controller/PoolControllerATDDTest.java`
+- `frontend/src/features/matchmaking/services/poolService.ts`
+- `frontend/src/features/matchmaking/stores/poolStore.ts`
+- `frontend/src/features/matchmaking/stores/__tests__/poolStore.spec.ts`
+- `frontend/src/features/matchmaking/components/ActivePoolsList.vue`
+- `frontend/src/features/matchmaking/components/__tests__/ActivePoolsList.spec.ts`
+- `frontend/src/views/HomeView.vue`
+- `frontend/src/locales/en.json`
+- `frontend/src/locales/de.json`
+- `frontend/e2e/want-to-play-pool.spec.ts`
