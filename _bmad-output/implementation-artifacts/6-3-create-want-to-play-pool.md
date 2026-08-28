@@ -182,6 +182,15 @@ so that I can easily find suitable opponents and organize casual or scheduled fo
 - **Database Cascades:** Use `ON DELETE CASCADE` between `matchmaking_pool` and `pool_participant` to ensure clean deletion if pools are removed.
 - **Frontend Architecture:** Keep matchmaking components inside `src/features/matchmaking/` isolated from match entry and profile logic.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-6-3-create-want-to-play-pool.md`
+- **Controller ATDD Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-3/PoolControllerATDDTest.java`
+- **Service ATDD Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-3/PoolServiceTest.java`
+- **Frontend Pinia Store Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-3/poolStore.spec.ts`
+- **Frontend Component Test Scaffold:** `_bmad-output/test-artifacts/atdd-redphase-6-3/CreatePoolModal.spec.ts`
+- **Frontend E2E Test Suite (Skipped for Red Phase):** `frontend/e2e/want-to-play-pool.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md] - FR35 ("Want to Play" pools)
