@@ -46,3 +46,4 @@ graphify-out/
 _bmad-output/implementation-artifacts/current_diff.diff
 test-results/
 _bmad/render/
+.claude/settings.local.json

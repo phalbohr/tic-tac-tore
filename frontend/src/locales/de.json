@@ -21,6 +21,24 @@
     "none": "Keine",
     "default": "Standard"
   },
+  "pool": {
+    "createTitle": "Matchmaking-Pool erstellen",
+    "wantToPlay": "Lust auf ein Spiel",
+    "matchType": "Spielformat",
+    "type1v1": "1 gegen 1",
+    "type2v2": "2 gegen 2",
+    "startCondition": "Startbedingung",
+    "fillBased": "Sofort (Voll-basiert)",
+    "scheduledTime": "Geplante Zeit",
+    "scheduledTimeLabel": "Startdatum & -zeit",
+    "skillLevel": "Spielstärke-Filter",
+    "skillOpenForAll": "Offen für alle",
+    "skillBeginner": "Anfänger",
+    "skillIntermediate": "Fortgeschritten",
+    "skillAdvanced": "Profi",
+    "createPool": "Pool erstellen",
+    "poolCreated": "Matchmaking-Pool erfolgreich erstellt!"
+  },
   "match": {
     "playerFallback": "Spieler",
     "submit": "Spiel eintragen",

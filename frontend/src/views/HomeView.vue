@@ -14,7 +14,9 @@ import RejectReasonSelector from '@/features/match/components/RejectReasonSelect
 import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
+import SuccessToast from '@/core/components/SuccessToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
+import CreatePoolModal from '@/features/matchmaking/components/CreatePoolModal.vue'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
@@ -22,6 +24,8 @@ import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirma
 
 const { t } = useI18n()
 const showNewMatch = ref(false)
+const isCreatePoolOpen = ref(false)
+const poolSuccessToast = ref<string | null>(null)
 const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
@@ -130,6 +134,13 @@ function getConfirmationToastMessage(matchNumber: number): string {
 
 function handleDismissError() {
   matchStore.clearSubmitError()
+}
+
+function handlePoolCreated() {
+  poolSuccessToast.value = t('pool.poolCreated', 'Matchmaking pool created successfully!')
+  setTimeout(() => {
+    poolSuccessToast.value = null
+  }, 4000)
 }
 
 watch(() => matchStore.submitError, (newVal) => {
@@ -440,6 +451,15 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             >
               New Match
             </BaseButton>
+            <BaseButton
+              @click="isCreatePoolOpen = true"
+              variant="primary"
+              class="w-full rounded-full"
+              data-test="want-to-play-button"
+              data-testid="want-to-play-btn"
+            >
+              {{ t('pool.wantToPlay', 'Want to Play') }}
+            </BaseButton>
             <p class="text-on-surface-variant italic font-body">{{ t('home.comingSoon') }}</p>
           </div>
 
@@ -452,6 +472,18 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         :countdown="matchStore.submissionCountdown"
         :is-offline="matchStore.isOfflinePending"
         @undo="handleUndo"
+      />
+
+      <SuccessToast
+        v-if="poolSuccessToast"
+        :message="poolSuccessToast"
+        @dismiss="poolSuccessToast = null"
+      />
+
+      <CreatePoolModal
+        :is-open="isCreatePoolOpen"
+        @close="isCreatePoolOpen = false"
+        @created="handlePoolCreated"
       />
 
       <!-- Multi-Toast Stack for Pending Confirmations -->
