@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: "2026-08-23"
+# last_updated: "2026-08-28"
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-08-24"
+last_updated: "2026-08-28"
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -90,7 +90,7 @@ development_status:
   6-1-named-player-groups-teams: review
   6-1b-create-rule-template: review
   6-2-default-team-and-rule-template: review
-  6-3-create-want-to-play-pool: backlog
+  6-3-create-want-to-play-pool: review
   6-4-join-existing-pool: backlog
   6-5-pool-notifications: backlog
   6-6-challenge-player-or-group: backlog
