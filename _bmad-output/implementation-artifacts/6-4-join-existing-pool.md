@@ -4,7 +4,7 @@ baseline_commit: HEAD
 
 # Story 6.4: Join Existing Pool
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -206,3 +206,17 @@ Gemini 3.7 Flash
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
 - `frontend/e2e/want-to-play-pool.spec.ts`
+
+### Review Findings
+
+- [ ] [Review][Patch] Catastrophic global exception handling for IllegalStateException [GlobalExceptionHandler.java:56]
+- [ ] [Review][Patch] Missing UI error feedback for join failures [ActivePoolsList.vue:90]
+- [ ] [Review][Patch] Flawed concurrent state transition allowing pool capacity overruns [PoolServiceImpl.java]
+- [ ] [Review][Patch] Joined pool remains in active list indefinitely [poolStore.ts]
+- [ ] [Review][Patch] Flickering empty state UX bug [ActivePoolsList.vue]
+- [ ] [Review][Patch] Silent swallowing of fetch errors on mount [ActivePoolsList.vue:24]
+- [ ] [Review][Patch] Race condition in UI loading state allows double-clicks [ActivePoolsList.vue:18]
+- [ ] [Review][Patch] Missing ATDD test coverage for optimistic concurrency control [ATDD Test Suites]
+- [ ] [Review][Patch] Missing E2E test scenario for duplicate join rejection [want-to-play-pool.spec.ts]
+- [x] [Review][Defer] No pagination or limits on pool fetching [MatchmakingPoolRepository.java] — deferred, pre-existing
+- [x] [Review][Defer] Hardcoded match format labels break i18n [ActivePoolsList.vue] — deferred, pre-existing

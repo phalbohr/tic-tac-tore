@@ -414,3 +414,7 @@ status: open
 
 ## Deferred from: code review of 6-1-named-player-groups-teams (2026-08-23)
 - Testing anti-pattern in Vue components [PlayerSelection.vue]: `useI18n()` is wrapped in a silent `try/catch` block labeled "// fallback for tests". If translation fails, errors are swallowed and users see raw localization keys.
+
+## Deferred from: code review of 6-4-join-existing-pool (2026-08-28)
+- No pagination or limits on pool fetching: PoolServiceImpl.getActivePools() fetches all OPEN pools indiscriminately, risking memory exhaustion. (MatchmakingPoolRepository.java)
+- Hardcoded match format labels break i18n: Match format tags (1v1 / 2v2) in ActivePoolsList.vue are hardcoded strings.
