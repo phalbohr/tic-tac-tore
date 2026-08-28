@@ -453,7 +453,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
             </BaseButton>
             <BaseButton
               @click="isCreatePoolOpen = true"
-              variant="secondary"
+              variant="primary"
               class="w-full rounded-full"
               data-test="want-to-play-button"
               data-testid="want-to-play-btn"

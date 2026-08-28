@@ -4,7 +4,7 @@ baseline_commit: 8488830e2ea8a6818274ef9a58fb944eef26f32e
 
 # Story 6.3: Create "Want to Play" Pool
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -220,6 +220,7 @@ Gemini 3.7 Flash
 - Created frontend matchmaking module under `src/features/matchmaking/` with TypeScript types, API service client, and Pinia store (`usePoolStore`).
 - Implemented `CreatePoolModal.vue` following Clubhouse styling without 1px solid borders, integrated "Want to Play" CTA on Home Hub (`HomeView.vue`), added `SuccessToast.vue`, and added bilingual i18n keys (`en.json`, `de.json`).
 - Added comprehensive unit, ATDD, and E2E Playwright test suites. Full `./scripts/ci-local.sh` passed with 100% success.
+- Resolved code review finding: updated "Want to Play" button in `HomeView.vue` to use `primary` variant styling per UX/Dev Notes.
 
 ### File List
 
@@ -260,8 +261,9 @@ Gemini 3.7 Flash
 
 ## Change Log
 
+- **2026-08-28**: Addressed code review finding — updated "Want to Play" button in `HomeView.vue` to use primary variant styling. Local CI verified 100% passing. Ready for review.
 - **2026-08-28**: Implemented Story 6.3 "Create Want to Play Pool" backend schema, models, services, controller, frontend store, UI modal, Home Hub CTA, and ATDD/E2E test suites. Ready for review.
 
 
 ### Review Findings
-- [ ] [Review][Patch] Deviation: "Want to Play" button uses secondary styling instead of primary [frontend/src/views/HomeView.vue:2149] — Violates Dev Notes (Home Hub Evolution: Add Want to Play primary action button alongside New Match).
+- [x] [Review][Patch] Deviation: "Want to Play" button uses secondary styling instead of primary [frontend/src/views/HomeView.vue:2149] — Violates Dev Notes (Home Hub Evolution: Add Want to Play primary action button alongside New Match).
