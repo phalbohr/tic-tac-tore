@@ -38,18 +38,26 @@ onMounted(async () => {
 const selectedGroupId = computed({
   get: () => authStore.profile?.defaultGroupId || '',
   set: async (val: string) => {
-    await authStore.updateProfile({
-      defaultGroupId: val ? val : null,
-    })
+    try {
+      await authStore.updateProfile({
+        defaultGroupId: val ? val : null,
+      })
+    } catch (err) {
+      console.error('Failed to update default group', err)
+    }
   },
 })
 
 const selectedRuleId = computed({
   get: () => authStore.profile?.defaultRuleConfigurationId || '',
   set: async (val: string) => {
-    await authStore.updateProfile({
-      defaultRuleConfigurationId: val ? val : null,
-    })
+    try {
+      await authStore.updateProfile({
+        defaultRuleConfigurationId: val ? val : null,
+      })
+    } catch (err) {
+      console.error('Failed to update default rule configuration', err)
+    }
   },
 })
 
@@ -66,6 +74,8 @@ async function togglePoolNotifications() {
     await authStore.updateProfile({
       poolNotificationsEnabled: !currentVal,
     })
+  } catch (err) {
+    console.error('Failed to update pool notifications preference', err)
   } finally {
     isUpdating.value = false
   }

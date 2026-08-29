@@ -227,6 +227,7 @@ so that I can promptly join matches and know when games are ready to begin witho
 - **Review Findings Resolution (2026-08-29):**
   - Resolved [Patch] OOM & thread starvation: Added `Slice<User>` pagination (`BATCH_SIZE = 100`) in `PoolNotificationListener` and `UserRepository` to stream and batch dispatch notifications safely.
   - Resolved [Patch] Missing loading guard & stale state: Added `isUpdating` guard, safe profile fetching on mount/toggle, `:disabled` and `:aria-busy` bindings with loading styles in `UserPreferencesSection.vue`.
+  - Resolved [Patch] Missing catch block: Wrapped all asynchronous `authStore.updateProfile` calls (`togglePoolNotifications`, `selectedGroupId`, `selectedRuleId`) in `try/catch/finally` blocks in `UserPreferencesSection.vue`.
   - Resolved [Patch] SW title mismatch: Corrected `sw.js` push title for `POOL_CREATED` to `"New Matchmaking Pool"` strictly matching AC1.
 
 ### Review Findings
