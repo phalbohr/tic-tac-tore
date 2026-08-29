@@ -37,7 +37,19 @@
     "skillIntermediate": "Fortgeschritten",
     "skillAdvanced": "Profi",
     "createPool": "Pool erstellen",
-    "poolCreated": "Matchmaking-Pool erfolgreich erstellt!"
+    "poolCreated": "Matchmaking-Pool erfolgreich erstellt!",
+    "activePoolsTitle": "Aktive Matchmaking-Pools",
+    "join": "Beitreten",
+    "joining": "Wird beigetreten...",
+    "joined": "Beigetreten",
+    "full": "Voll",
+    "open": "Offen",
+    "noActivePools": "Zurzeit keine offenen Pools. Starte einen mit Lust auf ein Spiel!",
+    "poolJoinedSuccess": "Matchmaking-Pool erfolgreich beigetreten!",
+    "poolJoinError": "Beitritt zum Pool fehlgeschlagen",
+    "joinFailed": "Beitritt zum Matchmaking-Pool fehlgeschlagen",
+    "fetchFailed": "Laden der Matchmaking-Pools fehlgeschlagen",
+    "loadingPools": "Matchmaking-Pools werden geladen..."
   },
   "match": {
     "playerFallback": "Spieler",

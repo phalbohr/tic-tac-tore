@@ -25,6 +25,46 @@ export const usePoolStore = defineStore('pool', () => {
     }
   }
 
+  async function fetchActivePools(): Promise<PoolResponse[]> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const response = await poolService.fetchActivePools();
+      activePools.value = response;
+      return response;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch active pools';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function joinPool(poolId: string): Promise<PoolResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const response = await poolService.joinPool(poolId);
+      currentPool.value = response;
+      const index = activePools.value.findIndex((p) => p.id === poolId);
+      if (index !== -1) {
+        if (response.status === 'FILLED' || response.status !== 'OPEN') {
+          activePools.value.splice(index, 1);
+        } else {
+          activePools.value[index] = response;
+        }
+      } else if (response.status === 'OPEN') {
+        activePools.value.push(response);
+      }
+      return response;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to join matchmaking pool';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   async function fetchPool(id: string): Promise<PoolResponse> {
     isLoading.value = true;
     error.value = null;
@@ -47,5 +87,7 @@ export const usePoolStore = defineStore('pool', () => {
     error,
     createPool,
     fetchPool,
+    fetchActivePools,
+    joinPool,
   };
 });

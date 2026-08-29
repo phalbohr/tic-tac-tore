@@ -72,6 +72,35 @@ public class PoolServiceImpl implements PoolService {
         return mapToPoolResponse(pool);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PoolResponse> getActivePools() {
+        return matchmakingPoolRepository.findByStatusOrderByCreatedAtDesc(PoolStatus.OPEN)
+                .stream()
+                .map(this::mapToPoolResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public PoolResponse joinPool(UUID poolId, UUID userId) {
+        MatchmakingPool pool = matchmakingPoolRepository.findById(poolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pool not found: " + poolId));
+
+        User joiner = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        PoolParticipant participant = PoolParticipant.builder()
+                .user(joiner)
+                .role(PoolParticipantRole.PLAYER)
+                .joinedAt(Instant.now())
+                .build();
+        pool.addParticipant(participant);
+
+        MatchmakingPool savedPool = matchmakingPoolRepository.save(pool);
+        return mapToPoolResponse(savedPool);
+    }
+
     private void validateCreationRequest(CreatePoolRequest request) {
         if (request.startCondition() == StartCondition.SCHEDULED_TIME) {
             if (request.scheduledTime() == null) {

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +33,17 @@ public class PoolController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping
+    public ResponseEntity<List<PoolResponse>> getActivePools(
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<PoolResponse> response = poolService.getActivePools();
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PoolResponse> getPoolById(
             @PathVariable("id") UUID id,
@@ -41,6 +53,18 @@ public class PoolController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         PoolResponse response = poolService.getPoolById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/join")
+    public ResponseEntity<PoolResponse> joinPool(
+            @PathVariable("id") UUID id,
+            @AuthenticationPrincipal User principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        PoolResponse response = poolService.joinPool(id, principal.getId());
         return ResponseEntity.ok(response);
     }
 }
