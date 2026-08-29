@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { usePlayerGroupStore } from '@/stores/usePlayerGroupStore'
@@ -9,13 +9,29 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const playerGroupStore = usePlayerGroupStore()
 const ruleConfigStore = useRuleConfigStore()
+const isUpdating = ref(false)
 
 onMounted(async () => {
+  if (!authStore.profile) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore fetch error if unauthenticated
+    }
+  }
   if (playerGroupStore.groups.length === 0) {
-    playerGroupStore.fetchGroups().catch(() => {})
+    try {
+      await playerGroupStore.fetchGroups()
+    } catch {
+      // ignore fetch error
+    }
   }
   if (ruleConfigStore.presets.length === 0 && ruleConfigStore.customRules.length === 0) {
-    ruleConfigStore.fetchAllRules().catch(() => {})
+    try {
+      await ruleConfigStore.fetchAllRules()
+    } catch {
+      // ignore fetch error
+    }
   }
 })
 
@@ -40,9 +56,19 @@ const selectedRuleId = computed({
 const poolNotificationsEnabled = computed(() => authStore.profile?.poolNotificationsEnabled ?? true)
 
 async function togglePoolNotifications() {
-  await authStore.updateProfile({
-    poolNotificationsEnabled: !poolNotificationsEnabled.value,
-  })
+  if (isUpdating.value) return
+  isUpdating.value = true
+  try {
+    if (!authStore.profile) {
+      await authStore.fetchProfile()
+    }
+    const currentVal = authStore.profile?.poolNotificationsEnabled ?? true
+    await authStore.updateProfile({
+      poolNotificationsEnabled: !currentVal,
+    })
+  } finally {
+    isUpdating.value = false
+  }
 }
 </script>
 
@@ -138,10 +164,13 @@ async function togglePoolNotifications() {
           type="button"
           role="switch"
           :aria-checked="poolNotificationsEnabled"
+          :aria-busy="isUpdating"
+          :disabled="isUpdating"
           data-test="pool-notifications-toggle"
           @click="togglePoolNotifications"
           :class="[
-            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background cursor-pointer',
+            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
+            isUpdating ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
             poolNotificationsEnabled ? 'bg-primary' : 'bg-surface-container-highest'
           ]"
         >

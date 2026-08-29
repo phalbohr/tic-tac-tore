@@ -22,7 +22,7 @@ self.addEventListener('push', (event) => {
   let actions = []
 
   if (type === 'POOL_CREATED') {
-    title = `New Matchmaking Pool: ${creatorName}`
+    title = 'New Matchmaking Pool'
     body = payload.summary || 'A new matchmaking pool is looking for players'
     url = payload.url || '/'
     actions = [{ action: 'open', title: 'Open' }]

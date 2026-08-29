@@ -175,4 +175,38 @@ class UserRepositoryTest {
                 .extracting(User::getId)
                 .containsExactly(eligibleUser.getId());
     }
+
+    @Test
+    @DisplayName("findByPoolNotificationsEnabledTrueAndIdNot with Pageable - should return paginated slice of eligible users")
+    void findByPoolNotificationsEnabledTrueAndIdNot_WithPageable_ReturnsPaginatedSlice() {
+        var creator = userRepository.save(User.builder()
+                .email("creator2@example.com")
+                .nickname("creator2")
+                .poolNotificationsEnabled(true)
+                .build());
+        var user1 = userRepository.save(User.builder()
+                .email("user1@example.com")
+                .nickname("user1")
+                .poolNotificationsEnabled(true)
+                .build());
+        var user2 = userRepository.save(User.builder()
+                .email("user2@example.com")
+                .nickname("user2")
+                .poolNotificationsEnabled(true)
+                .build());
+
+        var page0 = userRepository.findByPoolNotificationsEnabledTrueAndIdNot(
+                creator.getId(),
+                org.springframework.data.domain.PageRequest.of(0, 1, org.springframework.data.domain.Sort.by("id"))
+        );
+        var page1 = userRepository.findByPoolNotificationsEnabledTrueAndIdNot(
+                creator.getId(),
+                org.springframework.data.domain.PageRequest.of(1, 1, org.springframework.data.domain.Sort.by("id"))
+        );
+
+        assertThat(page0.getContent()).hasSize(1);
+        assertThat(page0.hasNext()).isTrue();
+        assertThat(page1.getContent()).hasSize(1);
+        assertThat(page1.hasNext()).isFalse();
+    }
 }

@@ -15,6 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +49,7 @@ class PoolNotificationListenerTest {
     class PoolCreatedEventTests {
 
         @Test
-        @DisplayName("Should query eligible subscribers excluding creator and dispatch push notification (AC 1)")
+        @DisplayName("Should query eligible subscribers excluding creator and dispatch push notification in batches (AC 1)")
         void shouldDispatchPushToEligibleSubscribersExcludingCreator() {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
@@ -51,12 +57,13 @@ class PoolNotificationListenerTest {
             User recipient1 = User.builder().id(UUID.randomUUID()).nickname("PlayerA").poolNotificationsEnabled(true).build();
             User recipient2 = User.builder().id(UUID.randomUUID()).nickname("PlayerB").poolNotificationsEnabled(true).build();
             List<User> eligibleUsers = List.of(recipient1, recipient2);
-            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(creatorId)).thenReturn(eligibleUsers);
+            Slice<User> slice = new SliceImpl<>(eligibleUsers, PageRequest.of(0, 100, Sort.by("id")), false);
+            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(eq(creatorId), any())).thenReturn(slice);
             PoolCreatedEvent event = new PoolCreatedEvent(poolId, creatorId, MatchType.ONE_VS_ONE, SkillLevel.OPEN_FOR_ALL, creatorNickname);
 
             poolNotificationListener.handlePoolCreated(event);
 
-            verify(userRepository).findByPoolNotificationsEnabledTrueAndIdNot(creatorId);
+            verify(userRepository).findByPoolNotificationsEnabledTrueAndIdNot(eq(creatorId), eq(PageRequest.of(0, 100, Sort.by("id"))));
             verify(pushNotificationService).sendPoolCreatedNotification(
                     eq(poolId),
                     eq(creatorId),
@@ -72,19 +79,13 @@ class PoolNotificationListenerTest {
         void shouldNotDispatchWhenNoEligibleSubscribers() {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
-            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(creatorId)).thenReturn(List.of());
+            Slice<User> emptySlice = new SliceImpl<>(List.of(), PageRequest.of(0, 100, Sort.by("id")), false);
+            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(eq(creatorId), any())).thenReturn(emptySlice);
             PoolCreatedEvent event = new PoolCreatedEvent(poolId, creatorId, MatchType.TWO_VS_TWO, SkillLevel.ADVANCED, "Host");
 
             poolNotificationListener.handlePoolCreated(event);
 
-            verify(pushNotificationService).sendPoolCreatedNotification(
-                    eq(poolId),
-                    eq(creatorId),
-                    eq("Host"),
-                    eq(MatchType.TWO_VS_TWO),
-                    eq(SkillLevel.ADVANCED),
-                    eq(List.of())
-            );
+            verify(pushNotificationService, never()).sendPoolCreatedNotification(any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -93,7 +94,8 @@ class PoolNotificationListenerTest {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
             User recipient = User.builder().id(UUID.randomUUID()).nickname("PlayerA").poolNotificationsEnabled(true).build();
-            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(creatorId)).thenReturn(List.of(recipient));
+            Slice<User> slice = new SliceImpl<>(List.of(recipient), PageRequest.of(0, 100, Sort.by("id")), false);
+            when(userRepository.findByPoolNotificationsEnabledTrueAndIdNot(eq(creatorId), any())).thenReturn(slice);
             doThrow(new RuntimeException("Push dispatch failed"))
                     .when(pushNotificationService)
                     .sendPoolCreatedNotification(any(), any(), any(), any(), any(), any());

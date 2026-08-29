@@ -4,7 +4,7 @@ baseline_commit: 73d8059c2f3df59ec42f68e05ebb3b84827210d1
 
 # Story 6.5: Pool Notifications
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -224,10 +224,15 @@ so that I can promptly join matches and know when games are ready to begin witho
   - Push service enhancements: `PushNotificationService` and `PushNotificationServiceImpl` formatting `POOL_CREATED` and `POOL_FILLED` payloads, logging `NotificationLog` entries with `pool_id`, and handling subscriber exclusions and retired creator pseudonymization.
   - Frontend Service Worker & Profile UI: `sw.js` payload parsing and deep-link click handling; `useAuthStore` updated with `poolNotificationsEnabled`; `UserPreferencesSection.vue` updated with Clubhouse-styled toggle switch; i18n added for English and German.
 
+- **Review Findings Resolution (2026-08-29):**
+  - Resolved [Patch] OOM & thread starvation: Added `Slice<User>` pagination (`BATCH_SIZE = 100`) in `PoolNotificationListener` and `UserRepository` to stream and batch dispatch notifications safely.
+  - Resolved [Patch] Missing loading guard & stale state: Added `isUpdating` guard, safe profile fetching on mount/toggle, `:disabled` and `:aria-busy` bindings with loading styles in `UserPreferencesSection.vue`.
+  - Resolved [Patch] SW title mismatch: Corrected `sw.js` push title for `POOL_CREATED` to `"New Matchmaking Pool"` strictly matching AC1.
+
 ### Review Findings
 
-- [ ] [Review][Patch] OOM and massive thread starvation during batch dispatching [src/main/java/com/tictactore/listener/PoolNotificationListener.java]
-- [ ] [Review][Patch] Missing loading guard in UserPreferencesSection toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
-- [ ] [Review][Patch] Stale State in Vue Component toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
-- [ ] [Review][Patch] Title format in Service Worker contradicts AC1 constraints [frontend/public/sw.js]
+- [x] [Review][Patch] OOM and massive thread starvation during batch dispatching [src/main/java/com/tictactore/listener/PoolNotificationListener.java]
+- [x] [Review][Patch] Missing loading guard in UserPreferencesSection toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
+- [x] [Review][Patch] Stale State in Vue Component toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
+- [x] [Review][Patch] Title format in Service Worker contradicts AC1 constraints [frontend/public/sw.js]
 - [x] [Review][Defer] Ignored "Matching Criteria" Requirement — deferred, pre-existing

@@ -164,4 +164,27 @@ describe('UserPreferencesSection.vue (Story 6.2 & 6.5)', () => {
       })
     );
   });
+
+  it('[P1] should fetch profile on mount if profile is not loaded', () => {
+    const freshPinia = createTestingPinia({
+      createSpy: vi.fn,
+      initialState: {
+        auth: {
+          profile: null,
+        },
+      },
+    });
+
+    mount(UserPreferencesSection, {
+      global: {
+        plugins: [freshPinia],
+        stubs: {
+          'router-link': true,
+        },
+      },
+    });
+
+    const authStore = useAuthStore();
+    expect(authStore.fetchProfile).toHaveBeenCalled();
+  });
 });
