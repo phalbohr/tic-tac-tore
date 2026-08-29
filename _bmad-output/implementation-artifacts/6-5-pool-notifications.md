@@ -189,6 +189,15 @@ so that I can promptly join matches and know when games are ready to begin witho
 | `frontend/src/features/profile/components/__tests__/UserPreferencesSection.spec.ts` | UPDATE | Component tests for preference toggle |
 | `frontend/e2e/pool-notifications.spec.ts` | NEW | Playwright E2E tests for pool notification preferences |
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-6-5-pool-notifications.md`
+- **Backend Listener Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-5/PoolNotificationListenerTest.java`
+- **Backend Service ATDD Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-5/PushNotificationServiceATDDTest.java`
+- **Backend Controller ATDD Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-5/UserControllerATDDTest.java`
+- **Frontend Component Tests:** `_bmad-output/test-artifacts/atdd-redphase-6-5/UserPreferencesSection.spec.ts`
+- **Frontend E2E Tests:** `frontend/e2e/pool-notifications.spec.ts`
+
 ### Previous Story Intelligence (Learnings from 6.1–6.4 & 3.1)
 
 - **Asynchronous Isolation:** Push notifications involve external WebPush network roundtrips. Never block user-facing database transactions; always dispatch via `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`.
