@@ -11,7 +11,7 @@ const emit = defineEmits<{
   (e: 'joined', pool: PoolResponse): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const poolStore = usePoolStore();
 const authStore = useAuthStore();
 
@@ -48,7 +48,7 @@ function formatScheduledTime(dateStr?: string | null): string {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return dateStr;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale.value, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',

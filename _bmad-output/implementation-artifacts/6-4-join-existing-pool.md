@@ -210,16 +210,16 @@ Gemini 3.7 Flash
 - `frontend/src/locales/de.json`
 - `frontend/e2e/want-to-play-pool.spec.ts`
 
-### Review Findings
+### Code Review History & Resolved Items
 
-- [x] [Review][Patch] Catastrophic global exception handling for IllegalStateException [GlobalExceptionHandler.java:56]
-- [x] [Review][Patch] Missing UI error feedback for join failures [ActivePoolsList.vue:90]
-- [x] [Review][Patch] Flawed concurrent state transition allowing pool capacity overruns [PoolServiceImpl.java]
-- [x] [Review][Patch] Joined pool remains in active list indefinitely [poolStore.ts]
-- [x] [Review][Patch] Flickering empty state UX bug [ActivePoolsList.vue]
-- [x] [Review][Patch] Silent swallowing of fetch errors on mount [ActivePoolsList.vue:24]
-- [x] [Review][Patch] Race condition in UI loading state allows double-clicks [ActivePoolsList.vue:18]
-- [x] [Review][Patch] Missing ATDD test coverage for optimistic concurrency control [ATDD Test Suites]
-- [x] [Review][Patch] Missing E2E test scenario for duplicate join rejection [want-to-play-pool.spec.ts]
-- [x] [Review][Defer] No pagination or limits on pool fetching [MatchmakingPoolRepository.java] — deferred, pre-existing
-- [x] [Review][Defer] Hardcoded match format labels break i18n [ActivePoolsList.vue] — deferred, pre-existing
+- Resolved: Replaced global IllegalStateException mapping with dedicated domain PoolConflictException and concurrency exception handling (GlobalExceptionHandler.java).
+- Resolved: Added UI error feedback banner for join failures (ActivePoolsList.vue).
+- Resolved: Encapsulated concurrent state transitions and capacity checks inside MatchmakingPool entity (PoolServiceImpl.java).
+- Resolved: Updated poolStore to remove filled/closed pools from activePools upon joining.
+- Resolved: Fixed flickering empty state by showing loading state until initial pool fetch resolves (ActivePoolsList.vue).
+- Resolved: Fixed silent error swallowing on mount with user retry action (ActivePoolsList.vue).
+- Resolved: Prevented double-click race conditions by disabling join action while request is pending (ActivePoolsList.vue).
+- Resolved: Added ATDD test coverage for optimistic concurrency control in PoolControllerATDDTest.
+- Resolved: Added Playwright E2E test scenario for duplicate join rejection in want-to-play-pool.spec.ts.
+- Resolved: Formatted scheduled time with user active i18n locale in ActivePoolsList.vue.
+- Deferred: Pool pagination and hardcoded format badge labels (logged in deferred-work.md).

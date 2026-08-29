@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue';
 import { usePoolStore } from '@/features/matchmaking/stores/poolStore';
@@ -158,6 +158,7 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
         },
       },
     });
+    await flushPromises();
 
     expect(wrapper.find('[data-testid="empty-pools-state"]').exists()).toBe(true);
   });
