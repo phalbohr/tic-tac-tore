@@ -10,7 +10,8 @@ import java.util.UUID;
 @Table(
     name = "notification_log",
     indexes = {
-        @Index(name = "idx_notif_log_match_recipient", columnList = "match_id, recipient_id")
+        @Index(name = "idx_notif_log_match_recipient", columnList = "match_id, recipient_id"),
+        @Index(name = "idx_notif_log_pool_recipient", columnList = "pool_id, recipient_id")
     }
 )
 @Getter
@@ -29,6 +30,9 @@ public class NotificationLog {
 
     @Column(name = "match_id")
     private UUID matchId;
+
+    @Column(name = "pool_id")
+    private UUID poolId;
 
     @Column(nullable = false)
     private String type;

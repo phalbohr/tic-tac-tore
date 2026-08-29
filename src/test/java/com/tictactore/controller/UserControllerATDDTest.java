@@ -241,4 +241,75 @@ class UserControllerATDDTest {
                     .andExpect(jsonPath("$.message").value("Selected rule configuration does not exist or is not accessible"));
         }
     }
+
+    @Nested
+    @DisplayName("Story 6.5 AC 4: Pool Notifications Preference")
+    class PoolNotificationsPreferences {
+
+        @Test
+        @DisplayName("GET /api/v1/profile/me should return poolNotificationsEnabled true by default")
+        void shouldReturnPoolNotificationsEnabledTrue() throws Exception {
+            mockMvc.perform(get("/api/v1/profile/me")
+                            .with(authentication(auth))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.nickname").value("ProFoosballer"))
+                    .andExpect(jsonPath("$.poolNotificationsEnabled").value(true));
+        }
+
+        @Test
+        @DisplayName("PATCH /api/v1/profile/me should update poolNotificationsEnabled to false")
+        void shouldUpdatePoolNotificationsEnabledToFalse() throws Exception {
+            UpdateProfileRequest request = UpdateProfileRequest.builder()
+                    .poolNotificationsEnabled(false)
+                    .build();
+            User updatedUser = User.builder()
+                    .id(userId)
+                    .email("player@example.com")
+                    .nickname("ProFoosballer")
+                    .avatar("avatar-1")
+                    .language("EN")
+                    .tutorialCompleted(true)
+                    .poolNotificationsEnabled(false)
+                    .build();
+            when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class)))
+                    .thenReturn(updatedUser);
+
+            mockMvc.perform(patch("/api/v1/profile/me")
+                            .with(authentication(auth))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.poolNotificationsEnabled").value(false));
+        }
+
+        @Test
+        @DisplayName("PATCH /api/v1/profile/me should update poolNotificationsEnabled to true")
+        void shouldUpdatePoolNotificationsEnabledToTrue() throws Exception {
+            UpdateProfileRequest request = UpdateProfileRequest.builder()
+                    .poolNotificationsEnabled(true)
+                    .build();
+            User updatedUser = User.builder()
+                    .id(userId)
+                    .email("player@example.com")
+                    .nickname("ProFoosballer")
+                    .avatar("avatar-1")
+                    .language("EN")
+                    .tutorialCompleted(true)
+                    .poolNotificationsEnabled(true)
+                    .build();
+            when(userService.updateProfile(eq(userId), any(UpdateProfileRequest.class)))
+                    .thenReturn(updatedUser);
+
+            mockMvc.perform(patch("/api/v1/profile/me")
+                            .with(authentication(auth))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.poolNotificationsEnabled").value(true));
+        }
+    }
 }

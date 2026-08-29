@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { usePlayerGroupStore } from '@/stores/usePlayerGroupStore'
@@ -9,33 +9,77 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const playerGroupStore = usePlayerGroupStore()
 const ruleConfigStore = useRuleConfigStore()
+const isUpdating = ref(false)
 
 onMounted(async () => {
+  if (!authStore.profile) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore fetch error if unauthenticated
+    }
+  }
   if (playerGroupStore.groups.length === 0) {
-    playerGroupStore.fetchGroups().catch(() => {})
+    try {
+      await playerGroupStore.fetchGroups()
+    } catch {
+      // ignore fetch error
+    }
   }
   if (ruleConfigStore.presets.length === 0 && ruleConfigStore.customRules.length === 0) {
-    ruleConfigStore.fetchAllRules().catch(() => {})
+    try {
+      await ruleConfigStore.fetchAllRules()
+    } catch {
+      // ignore fetch error
+    }
   }
 })
 
 const selectedGroupId = computed({
   get: () => authStore.profile?.defaultGroupId || '',
   set: async (val: string) => {
-    await authStore.updateProfile({
-      defaultGroupId: val ? val : null,
-    })
+    try {
+      await authStore.updateProfile({
+        defaultGroupId: val ? val : null,
+      })
+    } catch (err) {
+      console.error('Failed to update default group', err)
+    }
   },
 })
 
 const selectedRuleId = computed({
   get: () => authStore.profile?.defaultRuleConfigurationId || '',
   set: async (val: string) => {
-    await authStore.updateProfile({
-      defaultRuleConfigurationId: val ? val : null,
-    })
+    try {
+      await authStore.updateProfile({
+        defaultRuleConfigurationId: val ? val : null,
+      })
+    } catch (err) {
+      console.error('Failed to update default rule configuration', err)
+    }
   },
 })
+
+const poolNotificationsEnabled = computed(() => authStore.profile?.poolNotificationsEnabled ?? true)
+
+async function togglePoolNotifications() {
+  if (isUpdating.value) return
+  isUpdating.value = true
+  try {
+    if (!authStore.profile) {
+      await authStore.fetchProfile()
+    }
+    const currentVal = authStore.profile?.poolNotificationsEnabled ?? true
+    await authStore.updateProfile({
+      poolNotificationsEnabled: !currentVal,
+    })
+  } catch (err) {
+    console.error('Failed to update pool notifications preference', err)
+  } finally {
+    isUpdating.value = false
+  }
+}
 </script>
 
 <template>
@@ -113,6 +157,41 @@ const selectedRuleId = computed({
             </option>
           </optgroup>
         </select>
+      </div>
+
+      <!-- Matchmaking Pool Notifications Toggle -->
+      <div class="pt-2 flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-on-surface font-headline font-semibold text-sm">
+            {{ t('cabinet.poolNotifications', 'Matchmaking Pool Notifications') }}
+          </span>
+          <span class="text-on-surface-variant text-[10px]">
+            {{ t('cabinet.poolNotificationsDesc', 'Receive push notifications when new matchmaking pools are created') }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="poolNotificationsEnabled"
+          :aria-busy="isUpdating"
+          :disabled="isUpdating"
+          data-test="pool-notifications-toggle"
+          @click="togglePoolNotifications"
+          :class="[
+            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
+            isUpdating ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
+            poolNotificationsEnabled ? 'bg-primary' : 'bg-surface-container-highest'
+          ]"
+        >
+          <span class="sr-only">Toggle Matchmaking Pool Notifications</span>
+          <span
+            :class="[
+              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+              poolNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+            ]"
+          />
+        </button>
       </div>
     </div>
   </section>

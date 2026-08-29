@@ -54,7 +54,7 @@ public class UserOperation {
     @Idempotent
     @Transactional(propagation = Propagation.REQUIRED)
     public User updateProfile(UUID userId, String nickname, String language, String avatar, Boolean tutorialCompleted) {
-        return updateProfile(userId, nickname, language, avatar, tutorialCompleted, null, null, false, false);
+        return updateProfile(userId, nickname, language, avatar, tutorialCompleted, null, null, false, false, null);
     }
 
     @Idempotent
@@ -69,6 +69,23 @@ public class UserOperation {
             UUID defaultRuleConfigurationId,
             Boolean clearDefaultGroup,
             Boolean clearDefaultRuleConfiguration
+    ) {
+        return updateProfile(userId, nickname, language, avatar, tutorialCompleted, defaultGroupId, defaultRuleConfigurationId, clearDefaultGroup, clearDefaultRuleConfiguration, null);
+    }
+
+    @Idempotent
+    @Transactional(propagation = Propagation.REQUIRED)
+    public User updateProfile(
+            UUID userId,
+            String nickname,
+            String language,
+            String avatar,
+            Boolean tutorialCompleted,
+            UUID defaultGroupId,
+            UUID defaultRuleConfigurationId,
+            Boolean clearDefaultGroup,
+            Boolean clearDefaultRuleConfiguration,
+            Boolean poolNotificationsEnabled
     ) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ERR_USER_NOT_FOUND));
@@ -128,6 +145,10 @@ public class UserOperation {
             user.setDefaultRuleConfigurationId(defaultRuleConfigurationId);
         } else if (Boolean.TRUE.equals(clearDefaultRuleConfiguration)) {
             user.setDefaultRuleConfigurationId(null);
+        }
+
+        if (poolNotificationsEnabled != null) {
+            user.setPoolNotificationsEnabled(poolNotificationsEnabled);
         }
 
         try {

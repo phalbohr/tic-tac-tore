@@ -14,6 +14,8 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'cabinet.defaultPreferences': 'Default Match Preferences',
           'cabinet.defaultPlayerGroup': 'Default Player Group',
           'cabinet.defaultRuleTemplate': 'Default Rule Template',
+          'cabinet.poolNotifications': 'Matchmaking Pool Notifications',
+          'cabinet.poolNotificationsDesc': 'Receive push notifications when new matchmaking pools are created',
           'common.none': 'None',
           'rules.presets': 'Presets',
           'rules.custom': 'Custom Templates',
@@ -24,7 +26,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   };
 });
 
-describe('UserPreferencesSection.vue (Story 6.2)', () => {
+describe('UserPreferencesSection.vue (Story 6.2 & 6.5)', () => {
   let pinia: ReturnType<typeof createTestingPinia>;
 
   beforeEach(() => {
@@ -37,6 +39,7 @@ describe('UserPreferencesSection.vue (Story 6.2)', () => {
             nickname: 'PlayerOne',
             defaultGroupId: 'group-1',
             defaultRuleConfigurationId: 'rule-preset-1',
+            poolNotificationsEnabled: true,
           },
         },
         playerGroup: {
@@ -123,5 +126,65 @@ describe('UserPreferencesSection.vue (Story 6.2)', () => {
         defaultGroupId: null,
       })
     );
+  });
+
+  it('[P0] should render Matchmaking Pool Notifications toggle switch (Story 6.5 AC 4)', () => {
+    const wrapper = mount(UserPreferencesSection, {
+      global: {
+        plugins: [pinia],
+        stubs: {
+          'router-link': true,
+        },
+      },
+    });
+
+    const toggle = wrapper.find('[data-test="pool-notifications-toggle"]');
+    expect(toggle.exists()).toBe(true);
+    expect(wrapper.text()).toContain('Matchmaking Pool Notifications');
+  });
+
+  it('[P0] should toggle pool notifications preference and dispatch updateProfile (Story 6.5 AC 4)', async () => {
+    const wrapper = mount(UserPreferencesSection, {
+      global: {
+        plugins: [pinia],
+        stubs: {
+          'router-link': true,
+        },
+      },
+    });
+
+    const authStore = useAuthStore();
+    const toggle = wrapper.find('[data-test="pool-notifications-toggle"]');
+    
+    await toggle.trigger('click');
+
+    expect(authStore.updateProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        poolNotificationsEnabled: false,
+      })
+    );
+  });
+
+  it('[P1] should fetch profile on mount if profile is not loaded', () => {
+    const freshPinia = createTestingPinia({
+      createSpy: vi.fn,
+      initialState: {
+        auth: {
+          profile: null,
+        },
+      },
+    });
+
+    mount(UserPreferencesSection, {
+      global: {
+        plugins: [freshPinia],
+        stubs: {
+          'router-link': true,
+        },
+      },
+    });
+
+    const authStore = useAuthStore();
+    expect(authStore.fetchProfile).toHaveBeenCalled();
   });
 });

@@ -36,6 +36,7 @@ public class UserController implements ProfileApi {
                 .tutorialCompleted(principal.isTutorialCompleted())
                 .defaultGroupId(principal.getDefaultGroupId())
                 .defaultRuleConfigurationId(principal.getDefaultRuleConfigurationId())
+                .poolNotificationsEnabled(principal.isPoolNotificationsEnabled())
                 .version(principal.getVersion())
                 .build();
                 
@@ -73,6 +74,7 @@ public class UserController implements ProfileApi {
                 .tutorialCompleted(user.isTutorialCompleted())
                 .defaultGroupId(user.getDefaultGroupId())
                 .defaultRuleConfigurationId(user.getDefaultRuleConfigurationId())
+                .poolNotificationsEnabled(user.isPoolNotificationsEnabled())
                 .version(user.getVersion())
                 .build();
                 

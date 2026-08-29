@@ -69,5 +69,27 @@ describe('useAuthStore', () => {
         .rejects
         .toThrow('Nickname cannot be empty')
     })
+
+    it('updates poolNotificationsEnabled and sends in payload', async () => {
+      const store = useAuthStore()
+      store.profile = { nickname: 'PlayerOne', avatar: '1', poolNotificationsEnabled: true }
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: () => Promise.resolve({ nickname: 'PlayerOne', avatar: '1', poolNotificationsEnabled: false })
+      }) as Mock
+
+      await store.updateProfile({ poolNotificationsEnabled: false })
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/profile/me',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: expect.stringContaining('"poolNotificationsEnabled":false')
+        })
+      )
+      expect(store.profile?.poolNotificationsEnabled).toBe(false)
+    })
   })
 })

@@ -418,3 +418,7 @@ status: open
 ## Deferred from: code review of 6-4-join-existing-pool (2026-08-28)
 - No pagination or limits on pool fetching: PoolServiceImpl.getActivePools() fetches all OPEN pools indiscriminately, risking memory exhaustion. (MatchmakingPoolRepository.java)
 - Hardcoded match format labels break i18n: Match format tags (1v1 / 2v2) in ActivePoolsList.vue are hardcoded strings.
+
+## Deferred from: code review of 6-5-pool-notifications (2026-08-29)
+
+- Ignored "Matching Criteria" Requirement: The original user story requests notifications for "pools matching my criteria," but the implementation (and the mutated Acceptance Criteria) drops this logic, blasting POOL_CREATED notifications to every user in the system regardless of preferences.

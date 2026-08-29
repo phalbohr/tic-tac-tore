@@ -199,7 +199,8 @@ public class UserService {
                 request.getDefaultGroupId(),
                 request.getDefaultRuleConfigurationId(),
                 request.getClearDefaultGroup(),
-                request.getClearDefaultRuleConfiguration()
+                request.getClearDefaultRuleConfiguration(),
+                request.getPoolNotificationsEnabled()
         );
     }
 

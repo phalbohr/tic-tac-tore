@@ -42,4 +42,7 @@ public class UpdateProfileRequest {
 
     @Schema(description = "Whether to clear default rule configuration", example = "false")
     private Boolean clearDefaultRuleConfiguration;
+
+    @Schema(description = "Whether to receive push notifications for newly created matchmaking pools", example = "true")
+    private Boolean poolNotificationsEnabled;
 }

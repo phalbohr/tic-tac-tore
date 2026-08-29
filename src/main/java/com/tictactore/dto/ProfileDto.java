@@ -35,6 +35,9 @@ public class ProfileDto {
     @Schema(description = "User's default rule template configuration ID", example = "50f4a8e2-888e-4f10-9173-67c8cbcf8f3a")
     private UUID defaultRuleConfigurationId;
 
+    @Schema(description = "Whether the user has enabled pool push notifications", example = "true")
+    private Boolean poolNotificationsEnabled;
+
     @Schema(description = "Version for optimistic locking", example = "1")
     private Long version;
 }

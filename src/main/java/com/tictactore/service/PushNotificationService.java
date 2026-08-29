@@ -2,8 +2,9 @@ package com.tictactore.service;
 
 import com.tictactore.dto.NotificationLogDto;
 import com.tictactore.dto.PushSubscriptionRequest;
-
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchType;
+import com.tictactore.model.SkillLevel;
 import com.tictactore.model.User;
 
 import java.util.List;
@@ -22,6 +23,10 @@ public interface PushNotificationService {
     void sendPartialConfirmationNotification(Match match, List<User> remainingOpponents, String firstConfirmerName);
 
     void sendCooldownReminderNotification(Match match, List<User> recipients);
+
+    void sendPoolCreatedNotification(UUID poolId, UUID creatorId, String creatorName, MatchType matchType, SkillLevel skillLevel, List<User> recipients);
+
+    void sendPoolFilledNotification(UUID poolId, MatchType matchType, List<User> participants);
 
     List<NotificationLogDto> getUserNotifications(UUID userId);
 }
