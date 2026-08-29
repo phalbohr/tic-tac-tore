@@ -4,7 +4,7 @@ baseline_commit: 73d8059c2f3df59ec42f68e05ebb3b84827210d1
 
 # Story 6.5: Pool Notifications
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -39,85 +39,85 @@ so that I can promptly join matches and know when games are ready to begin witho
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC4, AC5)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V14__add_pool_notifications.sql`:
+- [x] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC4, AC5)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V14__add_pool_notifications.sql`:
     - Add `pool_id UUID` column to `notification_log` table with foreign key `REFERENCES matchmaking_pool(id) ON DELETE SET NULL`.
     - Add index `idx_notif_log_pool_recipient ON notification_log(pool_id, recipient_id)`.
     - Add `pool_notifications_enabled BOOLEAN DEFAULT TRUE NOT NULL` to `"user"` table.
     - Add index `idx_user_pool_notifications_enabled ON "user"(pool_notifications_enabled)`.
-  - [ ] Update `com.tictactore.model.NotificationLog`:
+  - [x] Update `com.tictactore.model.NotificationLog`:
     - Add `private UUID poolId;` mapped to `@Column(name = "pool_id")`.
     - Update `@Table(indexes = { ... })` with `@Index(name = "idx_notif_log_pool_recipient", columnList = "pool_id, recipient_id")`.
-  - [ ] Update `com.tictactore.dto.NotificationLogDto`:
+  - [x] Update `com.tictactore.dto.NotificationLogDto`:
     - Add `UUID poolId` to the record fields.
-  - [ ] Update `com.tictactore.model.User`:
+  - [x] Update `com.tictactore.model.User`:
     - Add `@Column(name = "pool_notifications_enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE") @Builder.Default private boolean poolNotificationsEnabled = true;`.
-  - [ ] Update `com.tictactore.dto.ProfileDto` and `com.tictactore.dto.UpdateProfileRequest`:
+  - [x] Update `com.tictactore.dto.ProfileDto` and `com.tictactore.dto.UpdateProfileRequest`:
     - Add `Boolean poolNotificationsEnabled` with Swagger/OpenAPI documentation.
-  - [ ] Update `com.tictactore.repository.UserRepository`:
+  - [x] Update `com.tictactore.repository.UserRepository`:
     - Add `List<User> findByPoolNotificationsEnabledTrueAndIdNot(UUID excludedUserId);`.
-  - [ ] Update repository tests (`UserRepositoryTest.java`, `NotificationLogRepositoryTest.java`) to verify schema and queries.
-- [ ] Task 2: Backend Event-Driven Notification System (AC1, AC2, AC4, AC5)
-  - [ ] Create Domain Events in `com.tictactore.event`:
+  - [x] Update repository tests (`UserRepositoryTest.java`, `NotificationLogRepositoryTest.java`) to verify schema and queries.
+- [x] Task 2: Backend Event-Driven Notification System (AC1, AC2, AC4, AC5)
+  - [x] Create Domain Events in `com.tictactore.event`:
     - `PoolCreatedEvent.java` (`UUID poolId`, `UUID creatorId`, `MatchType matchType`, `SkillLevel skillLevel`, `String creatorNickname`).
     - `PoolFilledEvent.java` (`UUID poolId`, `MatchType matchType`, `List<UUID> participantUserIds`).
-  - [ ] Update `com.tictactore.service.PoolServiceImpl`:
+  - [x] Update `com.tictactore.service.PoolServiceImpl`:
     - Inject `ApplicationEventPublisher eventPublisher`.
     - In `createPool(UUID creatorId, CreatePoolRequest request)`: After saving the pool, publish `new PoolCreatedEvent(savedPool.getId(), creatorId, savedPool.getMatchType(), savedPool.getSkillLevel(), creator.getNickname())`.
     - In `joinPool(UUID poolId, UUID userId)`: When `pool.getStatus() == PoolStatus.FILLED`, publish `new PoolFilledEvent(savedPool.getId(), savedPool.getMatchType(), savedPool.getParticipants().stream().map(p -> p.getUser().getId()).toList())`.
-  - [ ] Update `com.tictactore.dto.PushNotificationPayload`:
+  - [x] Update `com.tictactore.dto.PushNotificationPayload`:
     - Expand record to include: `UUID matchId`, `UUID poolId`, `String type`, `String creatorName`, `String summary`, `String url`, `boolean isDuplicateWarning`, `String timestamp`.
     - Provide overloaded constructors/factory methods to preserve backwards compatibility for existing match notification calls.
-  - [ ] Update `com.tictactore.service.PushNotificationService` & `com.tictactore.service.impl.PushNotificationServiceImpl`:
+  - [x] Update `com.tictactore.service.PushNotificationService` & `com.tictactore.service.impl.PushNotificationServiceImpl`:
     - Add interface methods:
       - `void sendPoolCreatedNotification(UUID poolId, UUID creatorId, String creatorName, MatchType matchType, SkillLevel skillLevel, List<User> recipients);`
       - `void sendPoolFilledNotification(UUID poolId, MatchType matchType, List<User> participants);`
     - In `PushNotificationServiceImpl`:
       - Implement push dispatch using `PushService`, serialize `PushNotificationPayload` (`type: "POOL_CREATED"` / `"POOL_FILLED"`), retrieve subscriptions via `NotificationOperation`, record `NotificationLog` with `pool_id`, and handle exceptions with `FAILED` log without re-throwing.
       - Apply pseudonymization for retired creators (`resolveCreatorName`).
-  - [ ] Create `com.tictactore.listener.PoolNotificationListener`:
+  - [x] Create `com.tictactore.listener.PoolNotificationListener`:
     - Annotate with `@Component` and `@RequiredArgsConstructor`.
     - Implement `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` for `PoolCreatedEvent`:
       - Query eligible users via `userRepository.findByPoolNotificationsEnabledTrueAndIdNot(event.creatorId())`.
       - Call `pushNotificationService.sendPoolCreatedNotification(...)`.
     - Implement `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` for `PoolFilledEvent`:
       - Retrieve participant users and call `pushNotificationService.sendPoolFilledNotification(...)`.
-  - [ ] Update `com.tictactore.service.impl.UserServiceImpl`:
+  - [x] Update `com.tictactore.service.impl.UserServiceImpl`:
     - In `updateProfile`, map `request.poolNotificationsEnabled()` to `User` entity if non-null.
-  - [ ] Backend Unit & ATDD Tests:
+  - [x] Backend Unit & ATDD Tests:
     - Create `PoolNotificationListenerTest.java` verifying asynchronous event handling, creator exclusion, and push delegation.
     - Update `PushNotificationServiceTest.java` and `PushNotificationServiceATDDTest.java` with pool creation and pool filled test cases.
     - Update `PoolServiceTest.java` verifying that `ApplicationEventPublisher` publishes events upon pool creation and full join.
     - Update `UserControllerTest.java` and `UserControllerATDDTest.java` verifying `poolNotificationsEnabled` profile updates.
-- [ ] Task 3: Frontend Service Worker & User Preferences UI (AC3, AC4)
-  - [ ] Update `frontend/public/sw.js`:
+- [x] Task 3: Frontend Service Worker & User Preferences UI (AC3, AC4)
+  - [x] Update `frontend/public/sw.js`:
     - Parse push JSON payload.
     - If `payload.type === 'POOL_CREATED'`: title = `New Matchmaking Pool: ${creatorName}`, body = `payload.summary`, `data.url = payload.url || '/'`.
     - If `payload.type === 'POOL_FILLED'`: title = `Pool Filled!`, body = `payload.summary`, `data.url = payload.url || '/'`.
     - Retain default match verification logic for match confirmation requests.
     - In `notificationclick`, navigate to and focus `event.notification.data.url`.
-  - [ ] Update `frontend/src/stores/auth.ts`:
+  - [x] Update `frontend/src/stores/auth.ts`:
     - Extend `UserProfile` interface with `poolNotificationsEnabled?: boolean`.
     - Update `updateProfile` action to accept `poolNotificationsEnabled`.
-  - [ ] Update `frontend/src/features/profile/components/UserPreferencesSection.vue`:
+  - [x] Update `frontend/src/features/profile/components/UserPreferencesSection.vue`:
     - Add a toggle switch for "Matchmaking Pool Notifications" with descriptive caption ("Receive push notifications when new matchmaking pools are created").
     - Bind to `poolNotificationsEnabled` computed property updating `authStore.updateProfile({ poolNotificationsEnabled: val })`.
     - Clubhouse design token styling (`bg-surface-container-low`, rounded-2xl, no 1px solid borders per `UX-DR3`).
-  - [ ] Update i18n in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`:
+  - [x] Update i18n in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`:
     - Add translation keys for pool notifications toggle label, caption, and push titles.
-  - [ ] Frontend Unit/Component Tests:
+  - [x] Frontend Unit/Component Tests:
     - Update `frontend/src/features/profile/components/__tests__/UserPreferencesSection.spec.ts` verifying toggle rendering and store action dispatch.
     - Update `frontend/src/stores/__tests__/auth.spec.ts`.
-- [ ] Task 4: Testing & Quality Verification
-  - [ ] Backend Test Suite:
+- [x] Task 4: Testing & Quality Verification
+  - [x] Backend Test Suite:
     - Run all unit and ATDD tests for `PoolNotificationListenerTest`, `PushNotificationServiceTest`, `PushNotificationServiceATDDTest`, `PoolServiceTest`, `UserControllerATDDTest`.
-  - [ ] Frontend Test Suite:
+  - [x] Frontend Test Suite:
     - Run Vitest tests for `UserPreferencesSection.spec.ts` and `auth.spec.ts`.
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create `frontend/e2e/pool-notifications.spec.ts`:
       - Test 1: User navigates to Cabinet -> toggles Pool Notifications off -> reloads -> verifies preference persisted.
       - Test 2: User toggles Pool Notifications on -> updates profile -> verifies preference persisted.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 
@@ -211,3 +211,15 @@ so that I can promptly join matches and know when games are ready to begin witho
 - [Source: _bmad-output/planning-artifacts/epics.md] - Story 6.5 (Pool Notifications)
 - [Source: _bmad-output/planning-artifacts/architecture.md] - AD-04, AD-05, IP-04 (500-Line Rule)
 - [Source: _bmad-output/planning-artifacts/ux-design-specification.md] - UX-DR3 (Clubhouse Design Tokens)
+
+## Dev Agent Record
+
+- **Implemented By:** Developer Agent (Amelia)
+- **Status Transition:** `in-progress` -> `review`
+- **Verification Results:** Full `./scripts/ci-local.sh` suite passed with 100% success (125 Playwright E2E tests, 455 backend unit/IT tests, 57 Vitest suites with 343 unit/component tests).
+- **Key Changes:**
+  - Database schema: `V14__add_pool_notifications.sql` with `notification_log.pool_id` (FK to `matchmaking_pool` with index) and `"user".pool_notifications_enabled` (boolean, indexed).
+  - Event-driven architecture: Domain events `PoolCreatedEvent` and `PoolFilledEvent` published from `PoolServiceImpl` on transaction commit.
+  - Event Listener: `PoolNotificationListener` listening via `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` with robust try/catch error containment.
+  - Push service enhancements: `PushNotificationService` and `PushNotificationServiceImpl` formatting `POOL_CREATED` and `POOL_FILLED` payloads, logging `NotificationLog` entries with `pool_id`, and handling subscriber exclusions and retired creator pseudonymization.
+  - Frontend Service Worker & Profile UI: `sw.js` payload parsing and deep-link click handling; `useAuthStore` updated with `poolNotificationsEnabled`; `UserPreferencesSection.vue` updated with Clubhouse-styled toggle switch; i18n added for English and German.

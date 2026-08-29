@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE LOWER(CONCAT('%', :query, '%')) AND u.email NOT LIKE 'deleted-%' AND u.nickname NOT LIKE 'ex-player-%'")
     List<User> searchActiveUsers(@Param("query") String query, Pageable pageable);
+
+    List<User> findByPoolNotificationsEnabledTrueAndIdNot(UUID excludedUserId);
 }

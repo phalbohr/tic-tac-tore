@@ -16,8 +16,6 @@ async function loginUser(page: Page) {
 test.describe('[Story 6.5] Pool Notifications Preference & Web Push E2E Journey', () => {
 
   test('[P0] should display Matchmaking Pool Notifications toggle in Cabinet and allow toggling preference (AC 4)', async ({ page }) => {
-    test.skip(true, 'ATDD Red Phase: Pool notifications toggle preference not yet implemented');
-
     let patchPayload: { poolNotificationsEnabled?: boolean } | null = null;
     await page.route('**/api/v1/profile/me', async (route) => {
       if (route.request().method() === 'PATCH') {
@@ -54,8 +52,6 @@ test.describe('[Story 6.5] Pool Notifications Preference & Web Push E2E Journey'
   });
 
   test('[P1] should persist pool notifications preference across page reloads (AC 4)', async ({ page }) => {
-    test.skip(true, 'ATDD Red Phase: Pool notifications preference persistence not yet implemented');
-
     await page.route('**/api/v1/profile/me', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
@@ -76,7 +72,8 @@ test.describe('[Story 6.5] Pool Notifications Preference & Web Push E2E Journey'
     await loginUser(page);
 
     await page.goto('/cabinet');
-    const notifToggle = page.locator('[data-test="pool-notifications-toggle"] input, [data-test="pool-notifications-toggle"][aria-checked]');
+    const notifToggle = page.locator('[data-test="pool-notifications-toggle"]');
     await expect(notifToggle).toBeVisible();
+    await expect(notifToggle).toHaveAttribute('aria-checked', 'false');
   });
 });

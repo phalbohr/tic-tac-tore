@@ -264,12 +264,12 @@ class UserServiceTest {
                 .build();
         var expectedUser = new User();
         expectedUser.setNickname("newNickname");
-        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false)).thenReturn(expectedUser);
+        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false, null)).thenReturn(expectedUser);
 
         var actualUser = userService.updateProfile(userId, request);
 
         assertThat(actualUser).isSameAs(expectedUser);
-        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false);
+        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false, null);
     }
 
     @Test

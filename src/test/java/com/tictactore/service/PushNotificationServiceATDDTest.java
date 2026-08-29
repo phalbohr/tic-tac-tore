@@ -107,7 +107,7 @@ class PushNotificationServiceATDDTest {
         }
 
         @Test
-        @DisplayName("[P0] Should catch push delivery exception gracefully, record FAILED status, and not fail match transaction")
+        @DisplayName("Should catch push delivery exception gracefully, record FAILED status, and not fail match transaction")
         void shouldLogFailedStatusWithoutThrowingException() {
             Match match = new Match();
             match.setId(UUID.randomUUID());
@@ -115,6 +115,135 @@ class PushNotificationServiceATDDTest {
             assertThatCode(() -> {
                 pushNotificationService.sendConfirmationRequest(match, List.of(), false);
             }).doesNotThrowAnyException();
+        }
+    }
+
+    @Nested
+    @DisplayName("Story 6.5: Pool Created Push Notifications (AC 1, AC 5)")
+    class PoolCreatedNotificationSpecs {
+
+        @Test
+        @DisplayName("Should generate valid POOL_CREATED payload with correct summary and deep link (AC 1)")
+        void shouldDispatchPoolCreatedNotificationWithValidPayload() {
+            UUID poolId = UUID.randomUUID();
+            UUID creatorId = UUID.randomUUID();
+            String creatorNickname = "PavelHost";
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname(creatorNickname).build()));
+
+            assertThatCode(() -> {
+                pushNotificationService.sendPoolCreatedNotification(
+                        poolId,
+                        creatorId,
+                        creatorNickname,
+                        com.tictactore.model.MatchType.ONE_VS_ONE,
+                        com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
+                        List.of(recipient)
+                );
+            }).doesNotThrowAnyException();
+        }
+
+        @Test
+        @DisplayName("Should pseudonymize retired creators as 'A retired player' in pool push (AC 1)")
+        void shouldPseudonymizeRetiredCreatorInPoolNotification() {
+            UUID poolId = UUID.randomUUID();
+            UUID creatorId = UUID.randomUUID();
+            User retiredCreator = User.builder().id(creatorId).nickname("ex-player-9999").build();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            when(userRepository.findById(creatorId)).thenReturn(Optional.of(retiredCreator));
+
+            assertThatCode(() -> {
+                pushNotificationService.sendPoolCreatedNotification(
+                        poolId,
+                        creatorId,
+                        "ex-player-9999",
+                        com.tictactore.model.MatchType.TWO_VS_TWO,
+                        com.tictactore.model.SkillLevel.ADVANCED,
+                        List.of(recipient)
+                );
+            }).doesNotThrowAnyException();
+        }
+
+        @Test
+        @DisplayName("Should record NotificationLog with pool_id and status for each recipient (AC 1)")
+        void shouldRecordNotificationLogWithPoolIdOnPoolCreated() {
+            UUID poolId = UUID.randomUUID();
+            UUID creatorId = UUID.randomUUID();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname("Host").build()));
+
+            pushNotificationService.sendPoolCreatedNotification(
+                    poolId,
+                    creatorId,
+                    "Host",
+                    com.tictactore.model.MatchType.ONE_VS_ONE,
+                    com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
+                    List.of(recipient)
+            );
+
+            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor.forClass(com.tictactore.model.NotificationLog.class);
+            org.mockito.Mockito.verify(notificationOperation).saveNotificationLog(logCaptor.capture());
+            assertThat(logCaptor.getValue().getPoolId()).isEqualTo(poolId);
+            assertThat(logCaptor.getValue().getRecipientId()).isEqualTo(recipient.getId());
+        }
+
+        @Test
+        @DisplayName("Should catch delivery failure gracefully and record FAILED status in NotificationLog (AC 5)")
+        void shouldHandlePushExceptionGracefullyAndLogFailed() {
+            UUID poolId = UUID.randomUUID();
+            UUID creatorId = UUID.randomUUID();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname("Host").build()));
+
+            assertThatCode(() -> {
+                pushNotificationService.sendPoolCreatedNotification(
+                        poolId,
+                        creatorId,
+                        "Host",
+                        com.tictactore.model.MatchType.ONE_VS_ONE,
+                        com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
+                        List.of(recipient)
+                );
+            }).doesNotThrowAnyException();
+        }
+    }
+
+    @Nested
+    @DisplayName("Story 6.5: Pool Filled Push Notifications (AC 2, AC 5)")
+    class PoolFilledNotificationSpecs {
+
+        @Test
+        @DisplayName("Should generate valid POOL_FILLED payload and dispatch to all participants (AC 2)")
+        void shouldDispatchPoolFilledNotificationWithValidPayload() {
+            UUID poolId = UUID.randomUUID();
+            User host = User.builder().id(UUID.randomUUID()).nickname("HostUser").build();
+            User player = User.builder().id(UUID.randomUUID()).nickname("JoinerUser").build();
+
+            assertThatCode(() -> {
+                pushNotificationService.sendPoolFilledNotification(
+                        poolId,
+                        com.tictactore.model.MatchType.ONE_VS_ONE,
+                        List.of(host, player)
+                );
+            }).doesNotThrowAnyException();
+        }
+
+        @Test
+        @DisplayName("Should record NotificationLog with pool_id for each participant on POOL_FILLED (AC 2)")
+        void shouldRecordNotificationLogForEachParticipantOnPoolFilled() {
+            UUID poolId = UUID.randomUUID();
+            User host = User.builder().id(UUID.randomUUID()).nickname("HostUser").build();
+            User player = User.builder().id(UUID.randomUUID()).nickname("JoinerUser").build();
+
+            pushNotificationService.sendPoolFilledNotification(
+                    poolId,
+                    com.tictactore.model.MatchType.TWO_VS_TWO,
+                    List.of(host, player)
+            );
+
+            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor.forClass(com.tictactore.model.NotificationLog.class);
+            org.mockito.Mockito.verify(notificationOperation, org.mockito.Mockito.atLeastOnce()).saveNotificationLog(logCaptor.capture());
+            assertThat(logCaptor.getAllValues()).allMatch(log -> poolId.equals(log.getPoolId()));
         }
     }
 }

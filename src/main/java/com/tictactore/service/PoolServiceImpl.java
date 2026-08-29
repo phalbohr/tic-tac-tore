@@ -3,6 +3,8 @@ package com.tictactore.service;
 import com.tictactore.dto.CreatePoolRequest;
 import com.tictactore.dto.PoolParticipantDto;
 import com.tictactore.dto.PoolResponse;
+import com.tictactore.event.PoolCreatedEvent;
+import com.tictactore.event.PoolFilledEvent;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.MatchmakingPool;
 import com.tictactore.model.MatchType;
@@ -15,6 +17,7 @@ import com.tictactore.model.User;
 import com.tictactore.repository.MatchmakingPoolRepository;
 import com.tictactore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,7 @@ public class PoolServiceImpl implements PoolService {
 
     private final MatchmakingPoolRepository matchmakingPoolRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -61,6 +65,13 @@ public class PoolServiceImpl implements PoolService {
         pool.addParticipant(hostParticipant);
 
         MatchmakingPool savedPool = matchmakingPoolRepository.save(pool);
+        eventPublisher.publishEvent(new PoolCreatedEvent(
+                savedPool.getId(),
+                creatorId,
+                savedPool.getMatchType(),
+                savedPool.getSkillLevel(),
+                creator.getNickname()
+        ));
         return mapToPoolResponse(savedPool);
     }
 
@@ -98,6 +109,12 @@ public class PoolServiceImpl implements PoolService {
         pool.addParticipant(participant);
 
         MatchmakingPool savedPool = matchmakingPoolRepository.save(pool);
+        if (savedPool.getStatus() == PoolStatus.FILLED) {
+            List<UUID> participantIds = savedPool.getParticipants().stream()
+                    .map(p -> p.getUser().getId())
+                    .toList();
+            eventPublisher.publishEvent(new PoolFilledEvent(savedPool.getId(), savedPool.getMatchType(), participantIds));
+        }
         return mapToPoolResponse(savedPool);
     }
 

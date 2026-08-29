@@ -10,25 +10,46 @@ self.addEventListener('push', (event) => {
     payload = { summary: event.data.text() }
   }
 
+  const type = payload.type || ''
   const matchId = payload.matchId || ''
+  const poolId = payload.poolId || ''
   const creatorName = payload.creatorName || 'A player'
   const isDuplicate = payload.isDuplicateWarning === true
 
-  const title = isDuplicate
-    ? `⚠️ Duplicate Warning: Match from ${creatorName}`
-    : `Match Verification Request: ${creatorName}`
+  let title = ''
+  let body = payload.summary || ''
+  let url = payload.url || '/'
+  let actions = []
+
+  if (type === 'POOL_CREATED') {
+    title = `New Matchmaking Pool: ${creatorName}`
+    body = payload.summary || 'A new matchmaking pool is looking for players'
+    url = payload.url || '/'
+    actions = [{ action: 'open', title: 'Open' }]
+  } else if (type === 'POOL_FILLED') {
+    title = 'Pool Filled!'
+    body = payload.summary || 'Your pool is full — head to the table!'
+    url = payload.url || '/'
+    actions = [{ action: 'open', title: 'Open' }]
+  } else {
+    title = isDuplicate
+      ? `⚠️ Duplicate Warning: Match from ${creatorName}`
+      : `Match Verification Request: ${creatorName}`
+    body = payload.summary || 'Tap to review and verify this match outcome.'
+    url = matchId ? `/match/${matchId}/review` : '/matches?tab=pending'
+    actions = [{ action: 'review', title: 'Review Match' }]
+  }
 
   const options = {
-    body: payload.summary || 'Tap to review and verify this match outcome.',
+    body,
     icon: '/favicon.ico',
     badge: '/favicon.ico',
     data: {
       matchId,
-      url: matchId ? `/match/${matchId}/review` : '/matches?tab=pending',
+      poolId,
+      url,
     },
-    actions: [
-      { action: 'review', title: 'Review Match' },
-    ],
+    actions,
   }
 
   event.waitUntil(

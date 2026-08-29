@@ -36,6 +36,14 @@ const selectedRuleId = computed({
     })
   },
 })
+
+const poolNotificationsEnabled = computed(() => authStore.profile?.poolNotificationsEnabled ?? true)
+
+async function togglePoolNotifications() {
+  await authStore.updateProfile({
+    poolNotificationsEnabled: !poolNotificationsEnabled.value,
+  })
+}
 </script>
 
 <template>
@@ -113,6 +121,38 @@ const selectedRuleId = computed({
             </option>
           </optgroup>
         </select>
+      </div>
+
+      <!-- Matchmaking Pool Notifications Toggle -->
+      <div class="pt-2 flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-on-surface font-headline font-semibold text-sm">
+            {{ t('cabinet.poolNotifications', 'Matchmaking Pool Notifications') }}
+          </span>
+          <span class="text-on-surface-variant text-[10px]">
+            {{ t('cabinet.poolNotificationsDesc', 'Receive push notifications when new matchmaking pools are created') }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="poolNotificationsEnabled"
+          data-test="pool-notifications-toggle"
+          @click="togglePoolNotifications"
+          :class="[
+            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background cursor-pointer',
+            poolNotificationsEnabled ? 'bg-primary' : 'bg-surface-container-highest'
+          ]"
+        >
+          <span class="sr-only">Toggle Matchmaking Pool Notifications</span>
+          <span
+            :class="[
+              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+              poolNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+            ]"
+          />
+        </button>
       </div>
     </div>
   </section>

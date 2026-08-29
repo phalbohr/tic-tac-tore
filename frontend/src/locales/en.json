@@ -126,7 +126,9 @@
     "avatarSuccess": "Avatar updated successfully",
     "defaultPreferences": "Default Match Preferences",
     "defaultPlayerGroup": "Default Player Group",
-    "defaultRuleTemplate": "Default Rule Template"
+    "defaultRuleTemplate": "Default Rule Template",
+    "poolNotifications": "Matchmaking Pool Notifications",
+    "poolNotificationsDesc": "Receive push notifications when new matchmaking pools are created"
   },
   "avatarPicker": {
     "title": "Select Avatar"

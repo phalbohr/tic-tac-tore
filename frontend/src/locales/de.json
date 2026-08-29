@@ -126,7 +126,9 @@
     "avatarSuccess": "Avatar erfolgreich aktualisiert",
     "defaultPreferences": "Standard-Spieleinstellungen",
     "defaultPlayerGroup": "Standard-Spielergruppe",
-    "defaultRuleTemplate": "Standard-Regelvorlage"
+    "defaultRuleTemplate": "Standard-Regelvorlage",
+    "poolNotifications": "Matchmaking-Pool-Benachrichtigungen",
+    "poolNotificationsDesc": "Push-Benachrichtigungen erhalten, wenn neue Matchmaking-Pools erstellt werden"
   },
   "avatarPicker": {
     "title": "Avatar auswählen"

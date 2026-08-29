@@ -74,7 +74,7 @@ test.describe('[Story 6.3] Create "Want to Play" Pool E2E User Journeys', () => 
     await modal.locator('[data-test="submit-pool-btn"]').click();
 
     // 6. Modal should close and toast should appear
-    await expect(modal).not.toBeVisible();
+    await expect(modal).toBeHidden();
     await expect(page.locator('[data-testid="success-toast"], [role="status"], .toast, [role="alert"], [data-test="toast-notification"]')).toBeVisible();
     expect(createdPayload.matchType).toBe('ONE_VS_ONE');
     expect(createdPayload.startCondition).toBe('FILL_BASED');
@@ -142,7 +142,7 @@ test.describe('[Story 6.3] Create "Want to Play" Pool E2E User Journeys', () => 
     // Submit
     await modal.locator('[data-test="submit-pool-btn"]').click();
 
-    await expect(modal).not.toBeVisible();
+    await expect(modal).toBeHidden();
     expect(createdPayload.matchType).toBe('TWO_VS_TWO');
     expect(createdPayload.startCondition).toBe('SCHEDULED_TIME');
     expect(createdPayload.skillLevel).toBe('ADVANCED');

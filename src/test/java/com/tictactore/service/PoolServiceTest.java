@@ -46,6 +46,9 @@ class PoolServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private PoolServiceImpl poolService;
 
@@ -112,6 +115,7 @@ class PoolServiceTest {
             assertThat(response.participants()).hasSize(1);
             assertThat(response.participants().get(0).role()).isEqualTo(PoolParticipantRole.HOST);
             verify(matchmakingPoolRepository).save(any(MatchmakingPool.class));
+            verify(eventPublisher).publishEvent(any(com.tictactore.event.PoolCreatedEvent.class));
         }
 
         @Test
@@ -325,6 +329,7 @@ class PoolServiceTest {
                     .extracting(p -> p.userId())
                     .containsExactlyInAnyOrder(creatorId, joinerId);
             verify(matchmakingPoolRepository).save(pool);
+            verify(eventPublisher).publishEvent(any(com.tictactore.event.PoolFilledEvent.class));
         }
 
         @Test
@@ -368,6 +373,7 @@ class PoolServiceTest {
             assertThat(response.status()).isEqualTo(PoolStatus.OPEN);
             assertThat(response.currentPlayers()).isEqualTo(2);
             assertThat(response.requiredPlayers()).isEqualTo(4);
+            org.mockito.Mockito.verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any(com.tictactore.event.PoolFilledEvent.class));
         }
 
         @Test

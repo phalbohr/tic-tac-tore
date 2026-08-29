@@ -133,4 +133,46 @@ class UserRepositoryTest {
         assertThat(reloaded.get().getDefaultGroupId()).isNull();
         assertThat(reloaded.get().getDefaultRuleConfigurationId()).isNull();
     }
+
+    @Test
+    @DisplayName("Save User - should persist poolNotificationsEnabled flag")
+    void saveUser_PersistsPoolNotificationsEnabledFlag() {
+        var user = User.builder()
+                .email(TEST_EMAIL)
+                .nickname(TEST_NICKNAME)
+                .poolNotificationsEnabled(false)
+                .build();
+
+        var savedUser = userRepository.save(user);
+        var reloaded = userRepository.findById(savedUser.getId());
+
+        assertThat(reloaded).isPresent();
+        assertThat(reloaded.get().isPoolNotificationsEnabled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("findByPoolNotificationsEnabledTrueAndIdNot - should return only users with notifications enabled excluding specified user")
+    void findByPoolNotificationsEnabledTrueAndIdNot_ReturnsEligibleUsersOnly() {
+        var creator = userRepository.save(User.builder()
+                .email("creator@example.com")
+                .nickname("creator")
+                .poolNotificationsEnabled(true)
+                .build());
+        var eligibleUser = userRepository.save(User.builder()
+                .email("eligible@example.com")
+                .nickname("eligible")
+                .poolNotificationsEnabled(true)
+                .build());
+        var disabledUser = userRepository.save(User.builder()
+                .email("disabled@example.com")
+                .nickname("disabled")
+                .poolNotificationsEnabled(false)
+                .build());
+
+        var result = userRepository.findByPoolNotificationsEnabledTrueAndIdNot(creator.getId());
+
+        assertThat(result)
+                .extracting(User::getId)
+                .containsExactly(eligibleUser.getId());
+    }
 }

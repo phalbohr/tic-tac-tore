@@ -43,6 +43,10 @@ public class User {
     @Column(name = "default_rule_configuration_id")
     private UUID defaultRuleConfigurationId;
 
+    @Column(name = "pool_notifications_enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Builder.Default
+    private boolean poolNotificationsEnabled = true;
+
     @Version
     private Long version;
 }

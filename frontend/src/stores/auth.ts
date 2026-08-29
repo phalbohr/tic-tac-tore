@@ -18,6 +18,7 @@ interface UserProfile {
   tutorialCompleted?: boolean
   defaultGroupId?: string | null
   defaultRuleConfigurationId?: string | null
+  poolNotificationsEnabled?: boolean
   version?: number
 }
 
@@ -80,6 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
     defaultRuleConfigurationId?: string | null
     clearDefaultGroup?: boolean
     clearDefaultRuleConfiguration?: boolean
+    poolNotificationsEnabled?: boolean
   }) {
     if (fetchProfilePromise) {
       await fetchProfilePromise
@@ -97,7 +99,8 @@ export const useAuthStore = defineStore('auth', () => {
       defaultGroupId,
       defaultRuleConfigurationId,
       clearDefaultGroup,
-      clearDefaultRuleConfiguration
+      clearDefaultRuleConfiguration,
+      poolNotificationsEnabled
     } = options
     const previousProfile = { ...profile.value }
 
@@ -133,6 +136,9 @@ export const useAuthStore = defineStore('auth', () => {
     if (defaultRuleConfigurationId !== undefined) {
       profile.value.defaultRuleConfigurationId = defaultRuleConfigurationId
     }
+    if (poolNotificationsEnabled !== undefined) {
+      profile.value.poolNotificationsEnabled = poolNotificationsEnabled
+    }
 
     try {
       const csrfToken = getCookie(CSRF_COOKIE_NAME)
@@ -153,6 +159,7 @@ export const useAuthStore = defineStore('auth', () => {
           tutorialCompleted,
           defaultGroupId,
           defaultRuleConfigurationId,
+          poolNotificationsEnabled,
           clearDefaultGroup: clearDefaultGroup ?? (defaultGroupId === null ? true : undefined),
           clearDefaultRuleConfiguration: clearDefaultRuleConfiguration ?? (defaultRuleConfigurationId === null ? true : undefined)
         }),

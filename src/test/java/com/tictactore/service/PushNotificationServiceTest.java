@@ -344,5 +344,61 @@ class PushNotificationServiceTest {
             assertThat(result.get(0).status()).isEqualTo("SKIPPED");
             assertThat(result.get(0).recipientId()).isEqualTo(userId);
         }
+
+        @Test
+        @DisplayName("getUserNotifications should return DTO with poolId")
+        void getUserNotifications_shouldReturnDtoWithPoolId() {
+            var userId = UUID.randomUUID();
+            var poolId = UUID.randomUUID();
+            var logEntry = NotificationLog.builder()
+                    .id(UUID.randomUUID())
+                    .recipientId(userId)
+                    .poolId(poolId)
+                    .type("POOL_CREATED")
+                    .payload("{\"poolId\":\"" + poolId + "\"}")
+                    .status("DELIVERED")
+                    .sentAt(Instant.now())
+                    .build();
+
+            when(notificationOperation.getNotificationsForUser(userId)).thenReturn(List.of(logEntry));
+
+            var result = pushNotificationService.getUserNotifications(userId);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).poolId()).isEqualTo(poolId);
+            assertThat(result.get(0).type()).isEqualTo("POOL_CREATED");
+        }
+    }
+
+    @Nested
+    @DisplayName("Pool Notifications Unit Specs")
+    class PoolNotificationUnitSpecs {
+
+        @Test
+        @DisplayName("sendPoolCreatedNotification should do nothing when recipients list is empty")
+        void sendPoolCreatedNotification_shouldDoNothing_whenRecipientsEmpty() {
+            assertThatCode(() -> pushNotificationService.sendPoolCreatedNotification(
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "Host",
+                    com.tictactore.model.MatchType.ONE_VS_ONE,
+                    com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
+                    List.of()
+            )).doesNotThrowAnyException();
+
+            verify(notificationOperation, never()).saveNotificationLog(any());
+        }
+
+        @Test
+        @DisplayName("sendPoolFilledNotification should do nothing when participants list is empty")
+        void sendPoolFilledNotification_shouldDoNothing_whenParticipantsEmpty() {
+            assertThatCode(() -> pushNotificationService.sendPoolFilledNotification(
+                    UUID.randomUUID(),
+                    com.tictactore.model.MatchType.ONE_VS_ONE,
+                    List.of()
+            )).doesNotThrowAnyException();
+
+            verify(notificationOperation, never()).saveNotificationLog(any());
+        }
     }
 }
