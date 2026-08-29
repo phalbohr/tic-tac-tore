@@ -4,7 +4,7 @@ baseline_commit: 73d8059c2f3df59ec42f68e05ebb3b84827210d1
 
 # Story 6.5: Pool Notifications
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -223,3 +223,11 @@ so that I can promptly join matches and know when games are ready to begin witho
   - Event Listener: `PoolNotificationListener` listening via `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` with robust try/catch error containment.
   - Push service enhancements: `PushNotificationService` and `PushNotificationServiceImpl` formatting `POOL_CREATED` and `POOL_FILLED` payloads, logging `NotificationLog` entries with `pool_id`, and handling subscriber exclusions and retired creator pseudonymization.
   - Frontend Service Worker & Profile UI: `sw.js` payload parsing and deep-link click handling; `useAuthStore` updated with `poolNotificationsEnabled`; `UserPreferencesSection.vue` updated with Clubhouse-styled toggle switch; i18n added for English and German.
+
+### Review Findings
+
+- [ ] [Review][Patch] OOM and massive thread starvation during batch dispatching [src/main/java/com/tictactore/listener/PoolNotificationListener.java]
+- [ ] [Review][Patch] Missing loading guard in UserPreferencesSection toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
+- [ ] [Review][Patch] Stale State in Vue Component toggle [frontend/src/features/profile/components/UserPreferencesSection.vue]
+- [ ] [Review][Patch] Title format in Service Worker contradicts AC1 constraints [frontend/public/sw.js]
+- [x] [Review][Defer] Ignored "Matching Criteria" Requirement — deferred, pre-existing
