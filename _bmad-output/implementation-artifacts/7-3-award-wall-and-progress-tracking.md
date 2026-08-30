@@ -153,7 +153,8 @@ so that I can celebrate my collected badges, easily browse different categories,
 ### ATDD Artifacts
 
 - Checklist: `_bmad-output/test-artifacts/atdd-checklist-7-3-award-wall-and-progress-tracking.md`
-- Backend ATDD Controller test: `src/test/java/com/tictactore/controller/AchievementControllerATDDTest.java`
-- Frontend E2E test: `frontend/e2e/achievements-profile.spec.ts`
-- Frontend Component tests: `frontend/src/features/achievements/components/__tests__/BadgeCard.spec.ts`
+- Backend Evaluator ATDD: `_bmad-output/test-artifacts/atdd-redphase-7-3/AchievementProgressEvaluatorATDDTest.java`
+- Backend Controller ATDD: `_bmad-output/test-artifacts/atdd-redphase-7-3/AchievementProgressControllerATDDTest.java`
+- Frontend E2E test: `frontend/e2e/achievements-progress-wall.spec.ts`
+- Frontend Component tests: `frontend/src/features/achievements/components/__tests__/BadgeCardProgress.spec.ts`, `frontend/src/features/achievements/components/__tests__/ProfileBadgesSectionFilter.spec.ts`
 
