@@ -22,7 +22,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 7.2] Humorous Anti-Achievements E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] [AC6] should display anti-achievement badges with icons in profile badges section', async ({ page }) => {
+  test('[P0] [AC6] should display anti-achievement badges with icons in profile badges section', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {
@@ -89,7 +89,7 @@ test.describe('[Story 7.2] Humorous Anti-Achievements E2E User Journey (ATDD)', 
     await expect(unlockedBadges).toHaveCount(2);
   });
 
-  test.skip('[P1] [AC5, AC6] should display humorous modal details for unlocked anti-achievement', async ({ page }) => {
+  test('[P1] [AC5, AC6] should display humorous modal details for unlocked anti-achievement', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {

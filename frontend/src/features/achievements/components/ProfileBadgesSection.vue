@@ -71,8 +71,16 @@ const selectedBadgeIcon = computed(() => {
       return 'track_changes'
     case 'wall':
       return 'fence'
+    case 'egg':
+      return 'egg'
+    case 'volunteer_activism':
+      return 'volunteer_activism'
+    case 'water_drop':
+      return 'water_drop'
+    case 'heart_broken':
+      return 'heart_broken'
     default:
-      return 'military_tech'
+      return selectedBadge.value.icon || 'military_tech'
   }
 })
 
@@ -157,7 +165,9 @@ function formatUnlockDate(unlockedAt: string | null): string {
               class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
               :class="[
                 selectedBadge.isUnlocked
-                  ? 'bg-gradient-to-br from-amber-400/20 to-yellow-600/30 text-amber-300 border border-amber-400/30'
+                  ? (selectedBadge.category === 'ANTI_ACHIEVEMENT'
+                      ? 'bg-gradient-to-br from-orange-500/20 to-amber-600/30 text-amber-300 border border-orange-400/30'
+                      : 'bg-gradient-to-br from-amber-400/20 to-yellow-600/30 text-amber-300 border border-amber-400/30')
                   : 'bg-ch-surface-highest text-ch-text-secondary/40 border border-ch-border'
               ]"
             >

@@ -4,7 +4,7 @@ baseline_commit: 99d15aa7f132778f9616726ff0ef2f33efd71cc8
 
 # Story 7.2: Humorous Anti-achievements
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is complete. Story is ready for dev-story execution. -->
 
@@ -40,49 +40,49 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration for Anti-Achievements Seed Data (AC1-AC5)
-  - [ ] Create Flyway migration `V17__seed_anti_achievements.sql`:
+- [x] Task 1: Database Migration for Anti-Achievements Seed Data (AC1-AC5)
+  - [x] Create Flyway migration `V17__seed_anti_achievements.sql`:
     - Insert 4 initial humorous anti-achievements into `achievement` table:
       - `GOOSE_EGG` (`category: ANTI_ACHIEVEMENT`, `icon: egg`, `name_key: achievements.goose_egg.title`, `description_key: achievements.goose_egg.description`)
       - `GENEROUS_HOST` (`category: ANTI_ACHIEVEMENT`, `icon: volunteer_activism`, `name_key: achievements.generous_host.title`, `description_key: achievements.generous_host.description`)
       - `SIEVE_DEFENSE` (`category: ANTI_ACHIEVEMENT`, `icon: water_drop`, `name_key: achievements.sieve_defense.title`, `description_key: achievements.sieve_defense.description`)
       - `HEARTBREAKER` (`category: ANTI_ACHIEVEMENT`, `icon: heart_broken`, `name_key: achievements.heartbreaker.title`, `description_key: achievements.heartbreaker.description`)
     - Set `created_at = CURRENT_TIMESTAMP`, `version = 0`.
-- [ ] Task 2: Concrete Evaluators Implementation (AC1-AC4)
-  - [ ] Create `com.tictactore.service.achievement.evaluator.GooseEggEvaluator` implementing `AchievementEvaluator`:
+- [x] Task 2: Concrete Evaluators Implementation (AC1-AC4)
+  - [x] Create `com.tictactore.service.achievement.evaluator.GooseEggEvaluator` implementing `AchievementEvaluator`:
     - Code: `GOOSE_EGG`
     - Evaluates `match.getGames()`: returns `true` if any game has player's team score equal to 0.
-  - [ ] Create `com.tictactore.service.achievement.evaluator.GenerousHostEvaluator` implementing `AchievementEvaluator`:
+  - [x] Create `com.tictactore.service.achievement.evaluator.GenerousHostEvaluator` implementing `AchievementEvaluator`:
     - Code: `GENEROUS_HOST`
     - Evaluates `match.getGames()`: returns `true` if any game has opponent team score >= 10.
-  - [ ] Create `com.tictactore.service.achievement.evaluator.SieveDefenseEvaluator` implementing `AchievementEvaluator`:
+  - [x] Create `com.tictactore.service.achievement.evaluator.SieveDefenseEvaluator` implementing `AchievementEvaluator`:
     - Code: `SIEVE_DEFENSE`
     - Evaluates defender position: returns `true` if player is defender on team A/B and total conceded goals in match >= 15.
-  - [ ] Create `com.tictactore.service.achievement.evaluator.HeartbreakerEvaluator` implementing `AchievementEvaluator`:
+  - [x] Create `com.tictactore.service.achievement.evaluator.HeartbreakerEvaluator` implementing `AchievementEvaluator`:
     - Code: `HEARTBREAKER`
     - Evaluates match outcome: returns `true` if player lost the deciding game by exactly 1 goal.
-- [ ] Task 3: Localization in English & German (AC5)
-  - [ ] Add translation entries in `frontend/src/locales/en.json`:
+- [x] Task 3: Localization in English & German (AC5)
+  - [x] Add translation entries in `frontend/src/locales/en.json`:
     - `achievements.goose_egg.title` / `description`
     - `achievements.generous_host.title` / `description`
     - `achievements.sieve_defense.title` / `description`
     - `achievements.heartbreaker.title` / `description`
-  - [ ] Add translation entries in `frontend/src/locales/de.json`:
+  - [x] Add translation entries in `frontend/src/locales/de.json`:
     - `achievements.goose_egg.title` / `description`
     - `achievements.generous_host.title` / `description`
     - `achievements.sieve_defense.title` / `description`
     - `achievements.heartbreaker.title` / `description`
-- [ ] Task 4: Frontend Badge Card & Icon Mapping (AC6)
-  - [ ] Update `frontend/src/features/achievements/components/BadgeCard.vue`:
+- [x] Task 4: Frontend Badge Card & Icon Mapping (AC6)
+  - [x] Update `frontend/src/features/achievements/components/BadgeCard.vue`:
     - Map icons: `egg` -> `egg`, `volunteer_activism` -> `volunteer_activism`, `water_drop` -> `water_drop`, `heart_broken` -> `heart_broken`.
     - Support visual styling for `category === 'ANTI_ACHIEVEMENT'` in Clubhouse Editorial design tokens.
-  - [ ] Update `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
+  - [x] Update `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
     - Ensure modal icon mapping includes new anti-achievement icons.
-- [ ] Task 5: Testing & Quality Verification (AC1-AC6)
-  - [ ] Backend Unit Tests: Add unit tests in `src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java` for `GooseEggEvaluator`, `GenerousHostEvaluator`, `SieveDefenseEvaluator`, and `HeartbreakerEvaluator`.
-  - [ ] Backend ATDD & Integration Tests: Verify anti-achievement evaluations triggered by `MatchConfirmedEvent` in `AchievementServiceTest.java` and `AchievementControllerATDDTest.java`.
-  - [ ] Frontend Unit Tests: Update `BadgeCard.spec.ts` to verify icon and styling mapping for anti-achievements.
-  - [ ] Full Verification: Run `./scripts/ci-local.sh` and ensure 100% test pass.
+- [x] Task 5: Testing & Quality Verification (AC1-AC6)
+  - [x] Backend Unit Tests: Add unit tests in `src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java` for `GooseEggEvaluator`, `GenerousHostEvaluator`, `SieveDefenseEvaluator`, and `HeartbreakerEvaluator`.
+  - [x] Backend ATDD & Integration Tests: Verify anti-achievement evaluations triggered by `MatchConfirmedEvent` in `AchievementServiceTest.java` and `AchievementControllerATDDTest.java`.
+  - [x] Frontend Unit Tests: Update `BadgeCard.spec.ts` and `AntiAchievementBadgeCard.spec.ts` to verify icon and styling mapping for anti-achievements.
+  - [x] Full Verification: Run `./scripts/ci-local.sh` and ensure 100% test pass.
 
 ## Dev Notes
 
@@ -109,13 +109,22 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 
 ### Implementation Plan
 - Step 1: Create Flyway migration `V17__seed_anti_achievements.sql` seeding the 4 initial anti-achievements.
-- Step 2: Implement 4 concrete evaluators in `com.tictactore.service.achievement.evaluator`.
+- Step 2: Implement 4 concrete evaluators in `com.tictactore.service.achievement.evaluator` (`GooseEggEvaluator`, `GenerousHostEvaluator`, `SieveDefenseEvaluator`, `HeartbreakerEvaluator`).
 - Step 3: Add localized strings in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
 - Step 4: Update icon mapping and category styling in `BadgeCard.vue` and `ProfileBadgesSection.vue`.
 - Step 5: Add backend unit/integration tests and frontend component tests, then verify with `./scripts/ci-local.sh`.
 
 ### Completion Notes
-- Awaiting implementation.
+- Implemented Flyway migration `V17__seed_anti_achievements.sql` seeding the 4 anti-achievements (`GOOSE_EGG`, `GENEROUS_HOST`, `SIEVE_DEFENSE`, `HEARTBREAKER`).
+- Implemented 4 concrete evaluators annotated with `@Component`:
+  - `GooseEggEvaluator`: checks if player's team scored 0 points in any match game (AC1).
+  - `GenerousHostEvaluator`: checks if opponent team scored >= 10 points in any game (AC2).
+  - `SieveDefenseEvaluator`: checks if player played as defender and conceded >= 15 goals in the match (AC3).
+  - `HeartbreakerEvaluator`: checks if player's team lost the match in the deciding game by exactly 1 goal (AC4).
+- Added localization in English (`en.json`) and German (`de.json`) with warm, celebratory phrasing per FR49 (AC5).
+- Updated `BadgeCard.vue` and `ProfileBadgesSection.vue` to map icons (`egg`, `volunteer_activism`, `water_drop`, `heart_broken`) and provide distinct warm amber/orange styling for `ANTI_ACHIEVEMENT` badges per Clubhouse Editorial design tokens (AC6).
+- Added unit tests in `AchievementEvaluatorTest.java`, unskipped component tests in `AntiAchievementBadgeCard.spec.ts`, unskipped Playwright E2E tests in `achievements-anti-badges.spec.ts`.
+- Full verification via `./scripts/ci-local.sh` succeeded with 100% pass across backend compilation, unit/integration tests, frontend build, unit tests, and Playwright E2E suite.
 
 ## File List
 
@@ -129,8 +138,10 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 - `frontend/src/locales/de.json`
 - `frontend/src/features/achievements/components/BadgeCard.vue`
 - `frontend/src/features/achievements/components/ProfileBadgesSection.vue`
-- `frontend/src/features/achievements/components/__tests__/BadgeCard.spec.ts`
+- `frontend/src/features/achievements/components/__tests__/AntiAchievementBadgeCard.spec.ts`
+- `frontend/e2e/achievements-anti-badges.spec.ts`
 
 ## Change Log
 
 - 2026-08-30: Initialized comprehensive Story 7.2 specification, Acceptance Criteria, Tasks, and Dev Notes following validation review.
+- 2026-08-30: Implemented Story 7.2 humorous anti-achievements (Flyway migration V17, 4 Spring evaluators, EN/DE localizations, Vue badge rendering & icon mapping, and comprehensive test suite). Passed `./scripts/ci-local.sh`.

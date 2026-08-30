@@ -23,7 +23,7 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-describe.skip('[Story 7.2 ATDD Red Phase] Anti-Achievement Badge Rendering (BadgeCard.vue)', () => {
+describe('[Story 7.2 ATDD] Anti-Achievement Badge Rendering (BadgeCard.vue)', () => {
   const gooseEggBadge = {
     id: 'anti-1',
     code: 'GOOSE_EGG',
