@@ -165,30 +165,33 @@ function formatUnlockDate(unlockedAt: string | null): string {
         data-testid="category-filter-tab-all"
         :data-active="activeFilter === 'all'"
         @click="activeFilter = 'all'"
-        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shrink-0"
         :class="activeFilter === 'all' ? 'bg-ch-primary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
       >
-        {{ t('achievements.filterAll') }}
+        <span>{{ t('achievements.filterAll') }}</span>
+        <span class="text-[10px] opacity-80" data-testid="filter-count-all">({{ achievementStore.totalUnlocked }}/{{ achievementStore.totalAvailable }})</span>
       </button>
       <button
         type="button"
         data-testid="category-filter-tab-badges"
         :data-active="activeFilter === 'badges'"
         @click="activeFilter = 'badges'"
-        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shrink-0"
         :class="activeFilter === 'badges' ? 'bg-ch-primary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
       >
-        {{ t('achievements.filterBadges') }}
+        <span>{{ t('achievements.filterBadges') }}</span>
+        <span class="text-[10px] opacity-80" data-testid="filter-count-badges">({{ achievementStore.badgesUnlockedCount }}/{{ achievementStore.badgesTotalCount }})</span>
       </button>
       <button
         type="button"
         data-testid="category-filter-tab-anti"
         :data-active="activeFilter === 'anti'"
         @click="activeFilter = 'anti'"
-        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shrink-0"
         :class="activeFilter === 'anti' ? 'bg-ch-secondary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
       >
-        {{ t('achievements.filterAnti') }}
+        <span>{{ t('achievements.filterAnti') }}</span>
+        <span class="text-[10px] opacity-80" data-testid="filter-count-anti">({{ achievementStore.antiAchievementsUnlockedCount }}/{{ achievementStore.antiAchievementsTotalCount }})</span>
       </button>
     </div>
 
@@ -264,8 +267,10 @@ function formatUnlockDate(unlockedAt: string | null): string {
               <span class="text-ch-text-primary">
                 {{ t('achievements.progress', { current: selectedBadge.currentProgress || 0, target: selectedBadge.targetValue || 0 }) }}
               </span>
-              <span class="text-ch-text-secondary/80 text-[11px]">
-                {{ t('achievements.remaining', { count: modalProgressRemaining }) }}
+              <span class="text-ch-text-secondary/80 text-[11px] flex items-center gap-1.5">
+                <span data-testid="modal-progress-percentage" class="text-ch-primary font-bold">{{ Math.round(modalProgressPercentage) }}%</span>
+                <span>•</span>
+                <span>{{ t('achievements.remaining', modalProgressRemaining, { named: { count: modalProgressRemaining } }) }}</span>
               </span>
             </div>
             <div

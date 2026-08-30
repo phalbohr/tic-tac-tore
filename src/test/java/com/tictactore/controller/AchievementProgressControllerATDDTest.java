@@ -4,6 +4,9 @@ import com.tictactore.model.Achievement;
 import com.tictactore.model.PlayerAchievement;
 import com.tictactore.repository.AchievementRepository;
 import com.tictactore.repository.PlayerAchievementRepository;
+import com.tictactore.model.User;
+import com.tictactore.repository.UserRepository;
+import com.tictactore.service.TokenRevocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,7 +42,7 @@ class AchievementProgressControllerATDDTest {
     private RedissonClient redissonClient;
 
     @MockBean
-    private com.tictactore.service.TokenRevocationService tokenRevocationService;
+    private TokenRevocationService tokenRevocationService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +54,7 @@ class AchievementProgressControllerATDDTest {
     private PlayerAchievementRepository playerAchievementRepository;
 
     @Autowired
-    private com.tictactore.repository.UserRepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
@@ -104,7 +107,7 @@ class AchievementProgressControllerATDDTest {
         @WithMockUser
         @DisplayName("[P0] [AC3] unlocked progressive achievement should return currentProgress equal to targetValue")
         void shouldReturnTargetValueAsCurrentProgressWhenUnlocked() throws Exception {
-            var user = userRepository.save(com.tictactore.model.User.builder()
+            var user = userRepository.save(User.builder()
                     .email("prog_user_" + UUID.randomUUID() + "@example.com")
                     .nickname("ProgUser")
                     .build());

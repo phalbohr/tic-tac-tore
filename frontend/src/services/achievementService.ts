@@ -7,9 +7,9 @@ export interface AchievementDto {
   icon: string
   isUnlocked: boolean
   unlockedAt: string | null
-  currentProgress?: number | null
-  targetValue?: number | null
-  hasProgress?: boolean
+  currentProgress: number | null
+  targetValue: number | null
+  hasProgress: boolean
 }
 
 export interface PlayerAchievementsSummaryResponse {

@@ -216,7 +216,11 @@ public class AchievementServiceImpl implements AchievementService {
 
         if (hasProgress) {
             targetValue = progressInfo.target();
-            currentProgress = isUnlocked ? targetValue : progressInfo.current();
+            if (isUnlocked) {
+                currentProgress = targetValue;
+            } else {
+                currentProgress = Math.min(progressInfo.current(), Math.max(0L, targetValue - 1));
+            }
         }
 
         return new AchievementDto(

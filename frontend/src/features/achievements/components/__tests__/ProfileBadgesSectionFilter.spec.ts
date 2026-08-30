@@ -12,7 +12,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   return {
     ...actual,
     useI18n: () => ({
-      t: (key: string, values?: Record<string, unknown>) => {
+      t: (key: string, values?: Record<string, unknown> | number, options?: { named?: Record<string, unknown> }) => {
         const map: Record<string, string> = {
           'achievements.title': 'Achievements',
           'achievements.filterAll': 'All',
@@ -22,11 +22,12 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'achievements.locked': 'Locked',
           'common.close': 'Close',
         }
-        if (key === 'achievements.progress' && values) {
+        if (key === 'achievements.progress' && typeof values === 'object' && values !== null) {
           return `Progress: ${values.current} / ${values.target}`
         }
-        if (key === 'achievements.remaining' && values) {
-          return `${values.count} remaining`
+        if (key === 'achievements.remaining') {
+          const count = typeof values === 'number' ? values : (values?.count ?? options?.named?.count)
+          return `${count} remaining`
         }
         return map[key] || key
       },
@@ -84,7 +85,7 @@ describe('[Story 7.3 ATDD] ProfileBadgesSection.vue Category Filtering & Modal P
     },
   ]
 
-  it('[P0] [AC1] should render category filter tabs (All, Badges, Anti-Achievements)', async () => {
+  it('[P0] [AC1] should render category filter tabs with category-specific unlock counts', async () => {
     const store = useAchievementStore()
     store.achievements = mockAchievements
     store.totalUnlocked = 1
@@ -95,8 +96,11 @@ describe('[Story 7.3 ATDD] ProfileBadgesSection.vue Category Filtering & Modal P
     const tabs = wrapper.findAll('[data-testid^="category-filter-tab-"]')
     expect(tabs.length).toBe(3)
     expect(tabs[0]?.text()).toContain('All')
+    expect(tabs[0]?.text()).toContain('(1/3)')
     expect(tabs[1]?.text()).toContain('Badges')
+    expect(tabs[1]?.text()).toContain('(1/2)')
     expect(tabs[2]?.text()).toContain('Anti-Achievements')
+    expect(tabs[2]?.text()).toContain('(0/1)')
   })
 
   it('[P0] [AC1] should filter badges list when clicking Anti-Achievements tab', async () => {
@@ -114,7 +118,7 @@ describe('[Story 7.3 ATDD] ProfileBadgesSection.vue Category Filtering & Modal P
     expect(displayedCards.length).toBe(1)
   })
 
-  it('[P0] [AC5] should render modal progress bar with remaining count when clicking locked progressive badge', async () => {
+  it('[P0] [AC5] should render modal progress bar with percentage and remaining count when clicking locked progressive badge', async () => {
     const store = useAchievementStore()
     store.achievements = mockAchievements
     store.totalUnlocked = 1
@@ -131,6 +135,9 @@ describe('[Story 7.3 ATDD] ProfileBadgesSection.vue Category Filtering & Modal P
 
     const modalProgressBar = wrapper.find('[data-testid="modal-progress-bar"]')
     expect(modalProgressBar.exists()).toBe(true)
+    const percentage = wrapper.find('[data-testid="modal-progress-percentage"]')
+    expect(percentage.exists()).toBe(true)
+    expect(percentage.text()).toBe('40%')
     expect(wrapper.text()).toContain('Progress: 4 / 10')
     expect(wrapper.text()).toContain('6 remaining')
   })

@@ -26,6 +26,9 @@ describe('[Story 7.1] useAchievementStore', () => {
           icon: 'trophy',
           isUnlocked: true,
           unlockedAt: '2026-08-30T12:00:00Z',
+          currentProgress: 1,
+          targetValue: 1,
+          hasProgress: true,
         },
         {
           id: 'ach-2',
@@ -36,6 +39,9 @@ describe('[Story 7.1] useAchievementStore', () => {
           icon: 'flame',
           isUnlocked: false,
           unlockedAt: null,
+          currentProgress: 4,
+          targetValue: 10,
+          hasProgress: true,
         },
       ],
     }
@@ -58,7 +64,7 @@ describe('[Story 7.1] useAchievementStore', () => {
     expect(store.lockedList[0]?.code).toBe('MATCHES_10')
   })
 
-  it('[P0] [AC1] should separate badgesList and antiAchievementsList based on category', () => {
+  it('[P0] [AC1] should separate badgesList and antiAchievementsList and compute category counts', () => {
     const store = useAchievementStore()
     store.achievements = [
       {
@@ -70,9 +76,25 @@ describe('[Story 7.1] useAchievementStore', () => {
         icon: 'trophy',
         isUnlocked: true,
         unlockedAt: null,
+        currentProgress: 1,
+        targetValue: 1,
+        hasProgress: true,
       },
       {
         id: 'ach-2',
+        code: 'MATCHES_10',
+        category: 'EXPERIENCE',
+        nameKey: 'achievements.matches_10.title',
+        descriptionKey: 'achievements.matches_10.description',
+        icon: 'flame',
+        isUnlocked: false,
+        unlockedAt: null,
+        currentProgress: 0,
+        targetValue: 10,
+        hasProgress: true,
+      },
+      {
+        id: 'ach-3',
         code: 'GOOSE_EGG',
         category: 'ANTI_ACHIEVEMENT',
         nameKey: 'achievements.goose_egg.title',
@@ -80,13 +102,20 @@ describe('[Story 7.1] useAchievementStore', () => {
         icon: 'egg',
         isUnlocked: false,
         unlockedAt: null,
+        currentProgress: null,
+        targetValue: null,
+        hasProgress: false,
       },
     ]
 
-    expect(store.badgesList).toHaveLength(1)
+    expect(store.badgesList).toHaveLength(2)
     expect(store.badgesList[0]?.code).toBe('FIRST_WIN')
+    expect(store.badgesUnlockedCount).toBe(1)
+    expect(store.badgesTotalCount).toBe(2)
     expect(store.antiAchievementsList).toHaveLength(1)
     expect(store.antiAchievementsList[0]?.code).toBe('GOOSE_EGG')
+    expect(store.antiAchievementsUnlockedCount).toBe(0)
+    expect(store.antiAchievementsTotalCount).toBe(1)
   })
 
   it('[P1] should handle error gracefully when achievement API fails', async () => {

@@ -4,7 +4,7 @@ baseline_commit: 67fc7b1f2b9853666f631b78233eb4baa57cde07
 
 # Story 7.3: Award Wall and Progress Tracking
 
-Status: in-progress
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -80,13 +80,13 @@ so that I can celebrate my collected badges, easily browse different categories,
     - `achievements.filterBadges: "Badges"`
     - `achievements.filterAnti: "Anti-Achievements"`
     - `achievements.progress: "Progress: {current} / {target}"`
-    - `achievements.remaining: "{count} remaining"`
+    - `achievements.remaining: "0 remaining | 1 remaining | {count} remaining"`
   - [x] Add translation keys in `frontend/src/locales/de.json`:
     - `achievements.filterAll: "Alle"`
     - `achievements.filterBadges: "Erfolge"`
     - `achievements.filterAnti: "Anti-Erfolge"`
     - `achievements.progress: "Fortschritt: {current} / {target}"`
-    - `achievements.remaining: "Noch {count}"`
+    - `achievements.remaining: "Noch 0 | Noch 1 | Noch {count}"`
 - [x] Task 7: Frontend Unit & Playwright E2E Tests (AC1, AC5, AC6)
   - [x] Create `BadgeCardProgress.spec.ts`: test progress bar rendering when `hasProgress = true` and hidden when `hasProgress = false` or `isUnlocked = true`.
   - [x] Update `useAchievementStore.spec.ts` and create `ProfileBadgesSectionFilter.spec.ts` for category filtering and modal progress.
@@ -95,12 +95,12 @@ so that I can celebrate my collected badges, easily browse different categories,
   - [x] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend, frontend unit tests, and Playwright E2E suites.
 
 ### Review Findings
-- [ ] [Review][Patch] Race Condition: Locked Badges Showing 100% Progress [src/main/java/com/tictactore/service/impl/AchievementServiceImpl.java]
-- [ ] [Review][Patch] Missing i18n Pluralization Rules [frontend/src/locales/en.json]
-- [ ] [Review][Patch] Leftover Test Scaffolding [src/test/java/com/tictactore/controller/AchievementProgressControllerATDDTest.java]
-- [ ] [Review][Patch] Missing category-specific unlock counts in UI and API [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
-- [ ] [Review][Patch] Missing numeric percentage text in the detail modal [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
-- [ ] [Review][Patch] Frontend DTO properties incorrectly marked as optional [frontend/src/services/achievementService.ts]
+- [x] [Review][Patch] Race Condition: Locked Badges Showing 100% Progress [src/main/java/com/tictactore/service/impl/AchievementServiceImpl.java]
+- [x] [Review][Patch] Missing i18n Pluralization Rules [frontend/src/locales/en.json]
+- [x] [Review][Patch] Leftover Test Scaffolding [src/test/java/com/tictactore/controller/AchievementProgressControllerATDDTest.java]
+- [x] [Review][Patch] Missing category-specific unlock counts in UI and API [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
+- [x] [Review][Patch] Missing numeric percentage text in the detail modal [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
+- [x] [Review][Patch] Frontend DTO properties incorrectly marked as optional [frontend/src/services/achievementService.ts]
 - [x] [Review][Defer] Test Endpoint Security Hazard [src/main/java/com/tictactore/controller/TestAuthController.java] — deferred, pre-existing
 
 ## Dev Agent Record
@@ -127,13 +127,27 @@ so that I can celebrate my collected badges, easily browse different categories,
 - `frontend/src/features/achievements/components/__tests__/BadgeCardProgress.spec.ts` (NEW)
 - `frontend/src/features/achievements/components/__tests__/ProfileBadgesSectionFilter.spec.ts` (NEW)
 - `frontend/src/features/achievements/stores/__tests__/useAchievementStore.spec.ts` (MODIFIED)
+- `frontend/src/features/achievements/components/__tests__/AntiAchievementBadgeCard.spec.ts` (MODIFIED)
+- `frontend/src/features/achievements/components/__tests__/BadgeCard.spec.ts` (MODIFIED)
 - `frontend/e2e/achievements-progress-wall.spec.ts` (MODIFIED)
+
+### Completion Notes
+- Fixed locked badge race condition in `AchievementServiceImpl.java` by capping `currentProgress` at `targetValue - 1` for locked badges when stats equal or exceed the threshold prior to awarding.
+- Added unit test in `AchievementServiceTest.java` to verify `currentProgress` capping on locked badges.
+- Cleaned up test scaffolding and fully qualified class names in `AchievementProgressControllerATDDTest.java`.
+- Updated `AchievementDto` in `achievementService.ts` to use strict required non-optional properties (`currentProgress: number | null`, `targetValue: number | null`, `hasProgress: boolean`).
+- Added category-specific unlock counters (`badgesUnlockedCount`, `badgesTotalCount`, `antiAchievementsUnlockedCount`, `antiAchievementsTotalCount`) to `useAchievementStore.ts` and displayed them on category filter tabs in `ProfileBadgesSection.vue`.
+- Added explicit numeric percentage text element `modal-progress-percentage` (e.g. `40%`) to the badge detail modal progress section.
+- Configured vue-i18n pluralization in `en.json` and `de.json` for `achievements.remaining` and integrated with `t()` calls.
+
+### Change Log
+- Addressed code review findings - 6 patch items resolved (Date: 2026-08-30).
 
 ### Verification
 - `./scripts/ci-local.sh`: Executed full suite (Backend tests, frontend type-check, lint, unit tests, and Playwright E2E across Chromium, Firefox, WebKit) with code 0 ("All local CI checks passed").
-- Backend test suites passed: `AchievementProgressEvaluatorATDDTest` (11/11), `AchievementEvaluatorTest` (30/30), `AchievementProgressControllerATDDTest` (6/6), `AchievementControllerATDDTest` (5/5), `AchievementServiceTest` (4/4), `AchievementServiceIT` (5/5).
+- Backend test suites passed: `AchievementProgressEvaluatorATDDTest` (11/11), `AchievementEvaluatorTest` (30/30), `AchievementProgressControllerATDDTest` (6/6), `AchievementControllerATDDTest` (5/5), `AchievementServiceTest` (5/5), `AchievementServiceIT` (5/5).
 - Frontend test suites passed: 65 test files, 377 unit tests, 0 errors in vue-tsc / eslint.
-- Playwright E2E: 21 tests passed across browsers in achievements test suite.
+- Playwright E2E: 136 tests passed (4 skipped) in full test suite.
 
 ## Dev Notes
 

@@ -15,6 +15,11 @@ export const useAchievementStore = defineStore('achievement', () => {
   const badgesList = computed(() => achievements.value.filter((a) => a.category !== 'ANTI_ACHIEVEMENT'))
   const antiAchievementsList = computed(() => achievements.value.filter((a) => a.category === 'ANTI_ACHIEVEMENT'))
 
+  const badgesUnlockedCount = computed(() => badgesList.value.filter((a) => a.isUnlocked).length)
+  const badgesTotalCount = computed(() => badgesList.value.length)
+  const antiAchievementsUnlockedCount = computed(() => antiAchievementsList.value.filter((a) => a.isUnlocked).length)
+  const antiAchievementsTotalCount = computed(() => antiAchievementsList.value.length)
+
   async function fetchPlayerAchievements(playerId: string): Promise<PlayerAchievementsSummaryResponse> {
     loading.value = true
     error.value = null
@@ -42,6 +47,10 @@ export const useAchievementStore = defineStore('achievement', () => {
     lockedList,
     badgesList,
     antiAchievementsList,
+    badgesUnlockedCount,
+    badgesTotalCount,
+    antiAchievementsUnlockedCount,
+    antiAchievementsTotalCount,
     fetchPlayerAchievements,
   }
 })
