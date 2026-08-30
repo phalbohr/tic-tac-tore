@@ -159,9 +159,16 @@ function formatUnlockDate(unlockedAt: string | null): string {
     </div>
 
     <!-- Category Filter Tabs -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-1" data-testid="category-filter-tabs">
+    <div
+      role="tablist"
+      aria-label="Achievement Categories"
+      class="flex items-center gap-2 overflow-x-auto pb-1"
+      data-testid="category-filter-tabs"
+    >
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeFilter === 'all'"
         data-testid="category-filter-tab-all"
         :data-active="activeFilter === 'all'"
         @click="activeFilter = 'all'"
@@ -173,6 +180,8 @@ function formatUnlockDate(unlockedAt: string | null): string {
       </button>
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeFilter === 'badges'"
         data-testid="category-filter-tab-badges"
         :data-active="activeFilter === 'badges'"
         @click="activeFilter = 'badges'"
@@ -184,6 +193,8 @@ function formatUnlockDate(unlockedAt: string | null): string {
       </button>
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeFilter === 'anti'"
         data-testid="category-filter-tab-anti"
         :data-active="activeFilter === 'anti'"
         @click="activeFilter = 'anti'"

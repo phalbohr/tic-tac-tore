@@ -77,25 +77,25 @@ test.describe('[Story 7.3] Award Wall & Progress Tracking E2E User Journey (ATDD
     });
 
     await page.goto('/cabinet');
-    await expect(page.locator('[data-testid="profile-badges-section"]')).toBeVisible();
+    await expect(page.getByTestId('profile-badges-section')).toBeVisible();
 
     // Verify filter tabs exist and show counts
-    const tabs = page.locator('[data-testid^="category-filter-tab-"]');
+    const tabs = page.getByRole('tab');
     await expect(tabs).toHaveCount(3);
-    await expect(page.locator('[data-testid="category-filter-tab-all"]')).toContainText('(1/3)');
-    await expect(page.locator('[data-testid="category-filter-tab-badges"]')).toContainText('(1/2)');
-    await expect(page.locator('[data-testid="category-filter-tab-anti"]')).toContainText('(0/1)');
+    await expect(page.getByTestId('category-filter-tab-all')).toContainText('(1/3)');
+    await expect(page.getByTestId('category-filter-tab-badges')).toContainText('(1/2)');
+    await expect(page.getByTestId('category-filter-tab-anti')).toContainText('(0/1)');
 
     // Initial "All" tab shows all 3 cards
-    await expect(page.locator('[data-testid="badge-card"]')).toHaveCount(3);
+    await expect(page.getByTestId('badge-card')).toHaveCount(3);
 
     // Filter to Badges
-    await page.locator('[data-testid="category-filter-tab-badges"]').click();
-    await expect(page.locator('[data-testid="badge-card"]')).toHaveCount(2);
+    await page.getByTestId('category-filter-tab-badges').click();
+    await expect(page.getByTestId('badge-card')).toHaveCount(2);
 
     // Filter to Anti-Achievements
-    await page.locator('[data-testid="category-filter-tab-anti"]').click();
-    await expect(page.locator('[data-testid="badge-card"]')).toHaveCount(1);
+    await page.getByTestId('category-filter-tab-anti').click();
+    await expect(page.getByTestId('badge-card')).toHaveCount(1);
   });
 
   test('[P0] [AC2, AC5] should display progress bar on locked progressive badge and expanded modal progress', async ({ page }) => {
@@ -131,16 +131,16 @@ test.describe('[Story 7.3] Award Wall & Progress Tracking E2E User Journey (ATDD
     await page.goto('/cabinet');
 
     // Verify card progress bar
-    const badgeCard = page.locator('[data-testid="badge-card"]').first();
-    await expect(badgeCard.locator('[data-testid="badge-progress-bar"]')).toBeVisible();
-    await expect(badgeCard.locator('[data-testid="badge-progress-ratio"]')).toHaveText('4 / 10');
+    const badgeCard = page.getByTestId('badge-card').first();
+    await expect(badgeCard.getByTestId('badge-progress-bar')).toBeVisible();
+    await expect(badgeCard.getByTestId('badge-progress-ratio')).toHaveText('4 / 10');
 
     // Click card to open modal
     await badgeCard.click();
-    const modal = page.locator('[data-testid="badge-modal"]');
+    const modal = page.getByTestId('badge-modal');
     await expect(modal).toBeVisible();
-    await expect(modal.locator('[data-testid="modal-progress-bar"]')).toBeVisible();
-    await expect(modal.locator('[data-testid="modal-progress-percentage"]')).toHaveText('40%');
+    await expect(modal.getByTestId('modal-progress-bar')).toBeVisible();
+    await expect(modal.getByTestId('modal-progress-percentage')).toHaveText('40%');
     await expect(modal.getByText('4 / 10', { exact: false })).toBeVisible();
     await expect(modal.getByText('6', { exact: false })).toBeVisible(); // 6 remaining
   });
