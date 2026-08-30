@@ -344,5 +344,32 @@
       "declineFailed": "Fehler beim Ablehnen der Herausforderung",
       "cancelFailed": "Fehler beim Abbrechen der Herausforderung"
     }
+  },
+  "achievements": {
+    "title": "Erfolge",
+    "unlocked": "Freigeschaltet",
+    "locked": "Gesperrt",
+    "empty": "Keine Erfolge verfügbar",
+    "unknownTitle": "Erfolg",
+    "first_win": {
+      "title": "Erster Sieg",
+      "description": "Gewinne dein erstes Tischfußballspiel."
+    },
+    "matches_10": {
+      "title": "Spielveteran",
+      "description": "Spiele 10 bestätigte Spiele."
+    },
+    "clean_sheet": {
+      "title": "Weiße Weste",
+      "description": "Gewinne ein Spiel ohne ein einziges Gegentor."
+    },
+    "striker_50": {
+      "title": "Tormaschine",
+      "description": "Erzielt 50 Tore als Angreifer."
+    },
+    "defense_wall": {
+      "title": "Eiserne Wand",
+      "description": "Spiele 10 Spiele als Verteidiger."
+    }
   }
 }

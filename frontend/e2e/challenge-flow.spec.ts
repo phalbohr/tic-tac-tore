@@ -85,7 +85,7 @@ test.describe('[Story 6.6] Challenge Player or Group E2E Tests', () => {
 
     // 7. Submit challenge
     await page.locator('[data-testid="challenge-submit-btn"]').click();
-    await expect(targetPlayerName).not.toBeVisible();
+    await expect(targetPlayerName).toBeHidden();
   });
 
   test('[P0] Target user accepts incoming challenge on Home Hub (AC 2, AC 3)', async ({ page }) => {
@@ -143,7 +143,7 @@ test.describe('[Story 6.6] Challenge Player or Group E2E Tests', () => {
     await acceptBtn.click();
 
     // 4. Verify challenge card is removed
-    await expect(challengeCard).not.toBeVisible();
+    await expect(challengeCard).toBeHidden();
   });
 
   test('[P1] Target user declines incoming challenge on Home Hub (AC 3)', async ({ page }) => {
@@ -186,7 +186,7 @@ test.describe('[Story 6.6] Challenge Player or Group E2E Tests', () => {
     await expect(declineBtn).toBeVisible();
     await declineBtn.click();
 
-    await expect(challengeCard).not.toBeVisible();
+    await expect(challengeCard).toBeHidden();
   });
 
   test('[P1] Challenger cancels pending challenge (AC 4)', async ({ page }) => {
@@ -233,6 +233,6 @@ test.describe('[Story 6.6] Challenge Player or Group E2E Tests', () => {
     await expect(cancelBtn).toBeVisible();
     await cancelBtn.click();
 
-    await expect(page.locator('[data-testid="outgoing-challenge-card"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="outgoing-challenge-card"]')).toBeHidden();
   });
 });

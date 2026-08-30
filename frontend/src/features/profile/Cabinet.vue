@@ -10,6 +10,7 @@ import DemoDataToggle from './components/DemoDataToggle.vue'
 import PlayerGroupSection from './components/PlayerGroupSection.vue'
 import RuleTemplateSection from './components/RuleTemplateSection.vue'
 import UserPreferencesSection from './components/UserPreferencesSection.vue'
+import ProfileBadgesSection from '@/features/achievements/components/ProfileBadgesSection.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -262,6 +263,9 @@ async function handleLogout() {
 
       <!-- Rule Templates Section -->
       <RuleTemplateSection />
+
+      <!-- Achievement Badges Section -->
+      <ProfileBadgesSection />
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 

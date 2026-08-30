@@ -1,34 +1,56 @@
 package com.tictactore.service.operation;
 
 import com.tictactore.annotation.Idempotent;
+import com.tictactore.event.MatchConfirmedEvent;
 import com.tictactore.model.Match;
 import com.tictactore.repository.MatchRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Component
-@RequiredArgsConstructor
 public class MatchOperation {
 
     private final MatchRepository matchRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    public MatchOperation(MatchRepository matchRepository, ApplicationEventPublisher eventPublisher) {
+        this.matchRepository = matchRepository;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public MatchOperation(MatchRepository matchRepository) {
+        this(matchRepository, null);
+    }
 
     @Idempotent
     @Transactional
     public Match saveMatch(Match match) {
-        return matchRepository.save(match);
+        Match saved = matchRepository.save(match);
+        if (Match.STATUS_CONFIRMED.equals(saved.getStatus()) && eventPublisher != null) {
+            eventPublisher.publishEvent(new MatchConfirmedEvent(saved.getId(), saved.getParticipantIds()));
+        }
+        return saved;
     }
 
     @Idempotent
     @Transactional
-    public Match confirmMatch(Match match, java.util.UUID opponentId) {
+    public Match confirmMatch(Match match, UUID opponentId) {
         match.confirmByOpponent(opponentId);
-        return matchRepository.save(match);
+        Match saved = matchRepository.save(match);
+        if (Match.STATUS_CONFIRMED.equals(saved.getStatus()) && eventPublisher != null) {
+            eventPublisher.publishEvent(new MatchConfirmedEvent(saved.getId(), saved.getParticipantIds()));
+        }
+        return saved;
     }
 
     @Idempotent
     @Transactional
-    public Match rejectMatch(java.util.UUID matchId, java.util.UUID opponentId, String reason, String customReason) {
+    public Match rejectMatch(UUID matchId, UUID opponentId, String reason, String customReason) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
         match.rejectByOpponent(opponentId, reason, customReason);
@@ -37,10 +59,10 @@ public class MatchOperation {
 
     @Idempotent
     @Transactional
-    public void deleteMatch(java.util.UUID matchId, java.util.UUID userId) {
+    public void deleteMatch(UUID matchId, UUID userId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new com.tictactore.exception.ResourceNotFoundException("Match not found with ID: " + matchId));
-        
+
         boolean isCreator = userId != null && userId.equals(match.getCreatorId());
         boolean isParticipant = userId != null && (userId.equals(match.getTeamAAttackerId())
                 || userId.equals(match.getTeamADefenderId())

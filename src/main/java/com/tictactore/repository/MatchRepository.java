@@ -234,4 +234,42 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
             @Param("minMatches") int minMatches,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT COUNT(m) FROM Match m
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+        AND (m.teamAAttackerId = :userId OR m.teamADefenderId = :userId OR m.teamBAttackerId = :userId OR m.teamBDefenderId = :userId)
+        """)
+    long countConfirmedMatchesByPlayerId(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT COUNT(m) FROM Match m
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+        AND (m.teamADefenderId = :userId OR m.teamBDefenderId = :userId)
+        """)
+    long countConfirmedMatchesAsDefender(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN g.teamAAttackerId = :userId THEN g.teamAScore
+                WHEN g.teamBAttackerId = :userId THEN g.teamBScore
+                WHEN m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL AND m.teamAAttackerId = :userId THEN g.teamAScore
+                WHEN m.teamADefenderId IS NULL AND m.teamBDefenderId IS NULL AND m.teamBAttackerId = :userId THEN g.teamBScore
+                ELSE 0
+            END
+        ), 0)
+        FROM Game g JOIN g.match m
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+        AND (m.teamAAttackerId = :userId OR m.teamBAttackerId = :userId OR g.teamAAttackerId = :userId OR g.teamBAttackerId = :userId)
+        """)
+    long sumGoalsAsAttacker(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT DISTINCT m FROM Match m
+        LEFT JOIN FETCH m.games g
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+        AND (m.teamAAttackerId = :userId OR m.teamADefenderId = :userId OR m.teamBAttackerId = :userId OR m.teamBDefenderId = :userId)
+        """)
+    List<Match> findConfirmedMatchesByPlayerId(@Param("userId") UUID userId);
 }

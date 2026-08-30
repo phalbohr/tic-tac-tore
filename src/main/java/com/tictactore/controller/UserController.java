@@ -30,6 +30,7 @@ public class UserController implements ProfileApi {
         }
         
         var profile = ProfileDto.builder()
+                .id(principal.getId())
                 .nickname(principal.getNickname())
                 .avatar(principal.getAvatar())
                 .language(principal.getLanguage())
@@ -68,6 +69,7 @@ public class UserController implements ProfileApi {
         httpResponse.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, authCookie.toString());
 
         var profile = ProfileDto.builder()
+                .id(user.getId())
                 .nickname(user.getNickname())
                 .avatar(user.getAvatar())
                 .language(user.getLanguage())
