@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * AC2: Dynamic evaluation of progress for progressive milestones (MATCHES_10, STRIKER_50, DEFENSE_WALL, FIRST_WIN)
  * AC3: Non-progressive evaluators return hasProgress=false, current=0, target=0
  */
-@Disabled("ATDD Red-Phase Scaffolds: Enable during Story 7.3 Task 1 & Task 3 implementation")
 @DisplayName("Story 7.3: Achievement Evaluator Progress ATDD Tests")
 class AchievementProgressEvaluatorATDDTest {
 

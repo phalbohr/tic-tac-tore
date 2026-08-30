@@ -126,7 +126,6 @@ describe('[Story 7.3 ATDD] ProfileBadgesSection.vue Category Filtering & Modal P
 
     const wrapper = mount(ProfileBadgesSection)
 
-    // Select the locked progressive badge (MATCHES_10)
     const cards = wrapper.findAll('[data-testid="badge-card"]')
     await cards[1]?.trigger('click')
 

@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,15 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Story 7.3: Award Wall and Progress Tracking — REST Controller ATDD Tests (TDD Red Phase).
- *
- * AC2: Dynamic evaluation of progress for locked achievements without DB persistence
- * AC3: Non-progressive return hasProgress=false, currentProgress=null, targetValue=null;
- *      unlocked progressive return currentProgress=targetValue
- * AC4: GET /api/v1/players/{id}/achievements returns enriched DTO with progress metadata, authorization check, zero PII leak
- */
-@Disabled("ATDD Red-Phase Scaffolds: Enable during Story 7.3 Task 2 & Task 3 implementation")
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -139,6 +131,7 @@ class AchievementProgressControllerATDDTest {
         }
 
         @Test
+        @WithAnonymousUser
         @DisplayName("[P0] [AC4] should return 401 Unauthorized for unauthenticated requests")
         void shouldReturn401WhenUnauthenticated() throws Exception {
             var playerId = UUID.randomUUID();
