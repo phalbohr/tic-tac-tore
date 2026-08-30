@@ -29,9 +29,9 @@ public class GooseEggEvaluator implements AchievementEvaluator {
         }
 
         if (onTeamA) {
-            return match.getGames().stream().anyMatch(g -> g.getTeamAScore() == 0);
+            return match.getGames().stream().anyMatch(g -> g.getTeamAScore() == 0 && g.getTeamBScore() > 0);
         } else {
-            return match.getGames().stream().anyMatch(g -> g.getTeamBScore() == 0);
+            return match.getGames().stream().anyMatch(g -> g.getTeamBScore() == 0 && g.getTeamAScore() > 0);
         }
     }
 }

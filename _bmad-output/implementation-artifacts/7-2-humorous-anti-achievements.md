@@ -4,7 +4,7 @@ baseline_commit: 99d15aa7f132778f9616726ff0ef2f33efd71cc8
 
 # Story 7.2: Humorous Anti-achievements
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is complete. Story is ready for dev-story execution. -->
 
@@ -86,14 +86,14 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 
 ### Review Findings
 
-- [ ] [Review][Patch] Goose Egg False Positives & Incomplete Tests [src/main/java/com/tictactore/service/achievement/evaluator/GooseEggEvaluator.java]
-- [ ] [Review][Patch] Redundant Icon Mapping Boilerplate [frontend/src/features/achievements/components/BadgeCard.vue]
-- [ ] [Review][Patch] Vue Template Logic Abuse [frontend/src/features/achievements/components/BadgeCard.vue]
-- [ ] [Review][Patch] Deciding Game Order Assumption [src/main/java/com/tictactore/service/achievement/evaluator/HeartbreakerEvaluator.java:40]
-- [ ] [Review][Patch] Lazy Hardcoded UUIDs [src/main/resources/db/migration/V17__seed_anti_achievements.sql]
-- [ ] [Review][Patch] Invalid Test Implementation for Heartbreaker (False Positive) [src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java]
-- [ ] [Review][Patch] Missing Backend Integration Tests [N/A]
-- [ ] [Review][Patch] Design Tokens Guardrail Violation [frontend/src/features/achievements/components/BadgeCard.vue]
+- [x] [Review][Patch] Goose Egg False Positives & Incomplete Tests [src/main/java/com/tictactore/service/achievement/evaluator/GooseEggEvaluator.java]
+- [x] [Review][Patch] Redundant Icon Mapping Boilerplate [frontend/src/features/achievements/components/BadgeCard.vue]
+- [x] [Review][Patch] Vue Template Logic Abuse [frontend/src/features/achievements/components/BadgeCard.vue]
+- [x] [Review][Patch] Deciding Game Order Assumption [src/main/java/com/tictactore/service/achievement/evaluator/HeartbreakerEvaluator.java:40]
+- [x] [Review][Patch] Lazy Hardcoded UUIDs [src/main/resources/db/migration/V17__seed_anti_achievements.sql]
+- [x] [Review][Patch] Invalid Test Implementation for Heartbreaker (False Positive) [src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java]
+- [x] [Review][Patch] Missing Backend Integration Tests [N/A]
+- [x] [Review][Patch] Design Tokens Guardrail Violation [frontend/src/features/achievements/components/BadgeCard.vue]
 - [x] [Review][Defer] Copy-Pasted Team Affiliation [Multiple Evaluators] — deferred, pre-existing
 
 ## Dev Notes
@@ -127,15 +127,15 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 - Step 5: Add backend unit/integration tests and frontend component tests, then verify with `./scripts/ci-local.sh`.
 
 ### Completion Notes
-- Implemented Flyway migration `V17__seed_anti_achievements.sql` seeding the 4 anti-achievements (`GOOSE_EGG`, `GENEROUS_HOST`, `SIEVE_DEFENSE`, `HEARTBREAKER`).
+- Implemented Flyway migration `V17__seed_anti_achievements.sql` seeding the 4 anti-achievements (`GOOSE_EGG`, `GENEROUS_HOST`, `SIEVE_DEFENSE`, `HEARTBREAKER`) with RFC 4122 v4 UUIDs.
 - Implemented 4 concrete evaluators annotated with `@Component`:
-  - `GooseEggEvaluator`: checks if player's team scored 0 points in any match game (AC1).
+  - `GooseEggEvaluator`: checks if player's team lost any match game with 0 points scored while opponent scored points (AC1).
   - `GenerousHostEvaluator`: checks if opponent team scored >= 10 points in any game (AC2).
   - `SieveDefenseEvaluator`: checks if player played as defender and conceded >= 15 goals in the match (AC3).
-  - `HeartbreakerEvaluator`: checks if player's team lost the match in the deciding game by exactly 1 goal (AC4).
+  - `HeartbreakerEvaluator`: checks if player's team lost the match in the deciding game (sorted by `gameOrder`) by exactly 1 goal (AC4).
 - Added localization in English (`en.json`) and German (`de.json`) with warm, celebratory phrasing per FR49 (AC5).
-- Updated `BadgeCard.vue` and `ProfileBadgesSection.vue` to map icons (`egg`, `volunteer_activism`, `water_drop`, `heart_broken`) and provide distinct warm amber/orange styling for `ANTI_ACHIEVEMENT` badges per Clubhouse Editorial design tokens (AC6).
-- Added unit tests in `AchievementEvaluatorTest.java`, unskipped component tests in `AntiAchievementBadgeCard.spec.ts`, unskipped Playwright E2E tests in `achievements-anti-badges.spec.ts`.
+- Refactored `BadgeCard.vue` and `ProfileBadgesSection.vue`: eliminated redundant icon mapping boilerplate with `ICON_MAP`, moved template logic to script computed properties, and applied Clubhouse Editorial design tokens exclusively (AC6).
+- Added unit tests in `AchievementEvaluatorTest.java` (including out-of-order `gameOrder` sorting and false-positive prevention), created backend integration tests in `AchievementServiceIT.java`, unskipped component tests in `AntiAchievementBadgeCard.spec.ts`, and unskipped Playwright E2E tests in `achievements-anti-badges.spec.ts`.
 - Full verification via `./scripts/ci-local.sh` succeeded with 100% pass across backend compilation, unit/integration tests, frontend build, unit tests, and Playwright E2E suite.
 
 ## File List
@@ -146,6 +146,7 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 - `src/main/java/com/tictactore/service/achievement/evaluator/SieveDefenseEvaluator.java`
 - `src/main/java/com/tictactore/service/achievement/evaluator/HeartbreakerEvaluator.java`
 - `src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java`
+- `src/test/java/com/tictactore/service/achievement/AchievementServiceIT.java`
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
 - `frontend/src/features/achievements/components/BadgeCard.vue`
@@ -157,3 +158,5 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 
 - 2026-08-30: Initialized comprehensive Story 7.2 specification, Acceptance Criteria, Tasks, and Dev Notes following validation review.
 - 2026-08-30: Implemented Story 7.2 humorous anti-achievements (Flyway migration V17, 4 Spring evaluators, EN/DE localizations, Vue badge rendering & icon mapping, and comprehensive test suite). Passed `./scripts/ci-local.sh`.
+- 2026-08-30: Addressed code review findings (resolved 8 review findings: fixed GooseEgg false positives, refactored BadgeCard icon mapping & template logic, enforced Clubhouse Editorial tokens, resolved Heartbreaker game order assumption & false positive unit tests, seeded RFC4122 v4 UUIDs in V17 migration, and added AchievementServiceIT backend integration tests).
+

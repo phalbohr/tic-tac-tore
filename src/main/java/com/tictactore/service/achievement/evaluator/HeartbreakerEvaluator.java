@@ -5,6 +5,7 @@ import com.tictactore.service.achievement.AchievementEvaluator;
 import com.tictactore.service.achievement.PlayerStatsContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 @Component
@@ -37,7 +38,13 @@ public class HeartbreakerEvaluator implements AchievementEvaluator {
             return false;
         }
 
-        var decidingGame = match.getGames().get(match.getGames().size() - 1);
+        var decidingGame = match.getGames().stream()
+                .max(Comparator.comparingInt(com.tictactore.model.Game::getGameOrder))
+                .orElse(null);
+        if (decidingGame == null) {
+            return false;
+        }
+
         int goalDifference = onTeamA
                 ? decidingGame.getTeamBScore() - decidingGame.getTeamAScore()
                 : decidingGame.getTeamAScore() - decidingGame.getTeamBScore();

@@ -211,12 +211,12 @@ class AchievementEvaluatorTest {
     class GooseEggTests {
 
         @Test
-        @DisplayName("should return true when player team scored 0 points in any game")
+        @DisplayName("should return true when player team scored 0 points in any game and opponent scored points")
         void shouldReturnTrueWhenPlayerTeamScoredZeroInAnyGame() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(5).build();
-            var game2 = Game.builder().teamAScore(0).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(0).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
@@ -229,16 +229,67 @@ class AchievementEvaluatorTest {
         }
 
         @Test
+        @DisplayName("should return true when player is on Team B and scored 0 points")
+        void shouldReturnTrueWhenPlayerOnTeamBScoredZero() {
+            var userId = UUID.randomUUID();
+            var oppId = UUID.randomUUID();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(0).build();
+            var match = Match.builder()
+                    .teamAAttackerId(oppId)
+                    .teamBAttackerId(userId)
+                    .games(List.of(game1))
+                    .build();
+
+            var result = gooseEggEvaluator.evaluate(userId, match, null);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
         @DisplayName("should return false when player team scored at least 1 point in all games")
         void shouldReturnFalseWhenPlayerTeamScoredPointsInAllGames() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(1).teamBScore(10).build();
-            var game2 = Game.builder().teamAScore(3).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(1).teamBScore(10).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(3).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
                     .games(List.of(game1, game2))
+                    .build();
+
+            var result = gooseEggEvaluator.evaluate(userId, match, null);
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("should return false when player team won with opponent scoring 0")
+        void shouldReturnFalseWhenPlayerTeamWonWithOpponentZero() {
+            var userId = UUID.randomUUID();
+            var oppId = UUID.randomUUID();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(0).build();
+            var match = Match.builder()
+                    .teamAAttackerId(userId)
+                    .teamBAttackerId(oppId)
+                    .games(List.of(game1))
+                    .build();
+
+            var result = gooseEggEvaluator.evaluate(userId, match, null);
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("should return false when both teams scored 0 (unplayed/draw)")
+        void shouldReturnFalseWhenBothTeamsScoredZero() {
+            var userId = UUID.randomUUID();
+            var oppId = UUID.randomUUID();
+            var game1 = Game.builder().gameOrder(1).teamAScore(0).teamBScore(0).build();
+            var match = Match.builder()
+                    .teamAAttackerId(userId)
+                    .teamBAttackerId(oppId)
+                    .games(List.of(game1))
                     .build();
 
             var result = gooseEggEvaluator.evaluate(userId, match, null);
@@ -256,7 +307,7 @@ class AchievementEvaluatorTest {
         void shouldReturnTrueWhenOpponentScoredTenOrMoreInSingleGame() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game = Game.builder().teamAScore(2).teamBScore(10).build();
+            var game = Game.builder().gameOrder(1).teamAScore(2).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
@@ -273,8 +324,8 @@ class AchievementEvaluatorTest {
         void shouldReturnFalseWhenOpponentScoredLessThanTenInAllGames() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(8).teamBScore(9).build();
-            var game2 = Game.builder().teamAScore(7).teamBScore(9).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(8).teamBScore(9).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(7).teamBScore(9).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
@@ -298,9 +349,9 @@ class AchievementEvaluatorTest {
             var attackerId = UUID.randomUUID();
             var oppAttackerId = UUID.randomUUID();
             var oppDefenderId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(8).build();
-            var game2 = Game.builder().teamAScore(7).teamBScore(10).build();
-            var game3 = Game.builder().teamAScore(8).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(8).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(7).teamBScore(10).build();
+            var game3 = Game.builder().gameOrder(3).teamAScore(8).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(attackerId)
                     .teamADefenderId(defenderId)
@@ -321,8 +372,8 @@ class AchievementEvaluatorTest {
             var defenderId = UUID.randomUUID();
             var oppAttackerId = UUID.randomUUID();
             var oppDefenderId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(5).teamBScore(10).build();
-            var game2 = Game.builder().teamAScore(5).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(5).teamBScore(10).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(5).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(attackerId)
                     .teamADefenderId(defenderId)
@@ -343,8 +394,8 @@ class AchievementEvaluatorTest {
             var attackerId = UUID.randomUUID();
             var oppAttackerId = UUID.randomUUID();
             var oppDefenderId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(7).build();
-            var game2 = Game.builder().teamAScore(10).teamBScore(7).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(7).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(10).teamBScore(7).build();
             var match = Match.builder()
                     .teamAAttackerId(attackerId)
                     .teamADefenderId(defenderId)
@@ -368,9 +419,9 @@ class AchievementEvaluatorTest {
         void shouldReturnTrueWhenPlayerLostDecidingGameByOneGoal() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(5).build();
-            var game2 = Game.builder().teamAScore(5).teamBScore(10).build();
-            var game3 = Game.builder().teamAScore(9).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(5).teamBScore(10).build();
+            var game3 = Game.builder().gameOrder(3).teamAScore(9).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
@@ -383,12 +434,31 @@ class AchievementEvaluatorTest {
         }
 
         @Test
+        @DisplayName("should return true when games in match are not in list index order but ordered by gameOrder")
+        void shouldReturnTrueWhenGamesOutOfOrderInList() {
+            var userId = UUID.randomUUID();
+            var oppId = UUID.randomUUID();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(5).teamBScore(10).build();
+            var game3 = Game.builder().gameOrder(3).teamAScore(9).teamBScore(10).build();
+            var match = Match.builder()
+                    .teamAAttackerId(userId)
+                    .teamBAttackerId(oppId)
+                    .games(List.of(game3, game1, game2))
+                    .build();
+
+            var result = heartbreakerEvaluator.evaluate(userId, match, null);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
         @DisplayName("should return false when player team won the match")
         void shouldReturnFalseWhenPlayerTeamWonMatch() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(9).build();
-            var game2 = Game.builder().teamAScore(10).teamBScore(8).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(9).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(10).teamBScore(8).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
@@ -405,12 +475,13 @@ class AchievementEvaluatorTest {
         void shouldReturnFalseWhenPlayerLostDecidingGameByTwoOrMoreGoals() {
             var userId = UUID.randomUUID();
             var oppId = UUID.randomUUID();
-            var game1 = Game.builder().teamAScore(10).teamBScore(5).build();
-            var game2 = Game.builder().teamAScore(5).teamBScore(10).build();
+            var game1 = Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build();
+            var game2 = Game.builder().gameOrder(2).teamAScore(5).teamBScore(10).build();
+            var game3 = Game.builder().gameOrder(3).teamAScore(8).teamBScore(10).build();
             var match = Match.builder()
                     .teamAAttackerId(userId)
                     .teamBAttackerId(oppId)
-                    .games(List.of(game1, game2))
+                    .games(List.of(game1, game2, game3))
                     .build();
 
             var result = heartbreakerEvaluator.evaluate(userId, match, null);
