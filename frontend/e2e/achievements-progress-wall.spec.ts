@@ -20,7 +20,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 7.3] Award Wall & Progress Tracking E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] [AC1] should render category filter tabs and filter achievements gallery', async ({ page }) => {
+  test('[P0] [AC1] should render category filter tabs and filter achievements gallery', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {
@@ -80,7 +80,7 @@ test.describe('[Story 7.3] Award Wall & Progress Tracking E2E User Journey (ATDD
     await expect(page.locator('[data-testid="profile-badges-section"]')).toBeVisible();
 
     // Verify filter tabs exist
-    const tabs = page.locator('[data-testid="category-filter-tab"]');
+    const tabs = page.locator('[data-testid^="category-filter-tab-"]');
     await expect(tabs).toHaveCount(3);
 
     // Initial "All" tab shows all 3 cards
@@ -95,7 +95,7 @@ test.describe('[Story 7.3] Award Wall & Progress Tracking E2E User Journey (ATDD
     await expect(page.locator('[data-testid="badge-card"]')).toHaveCount(1);
   });
 
-  test.skip('[P0] [AC2, AC5] should display progress bar on locked progressive badge and expanded modal progress', async ({ page }) => {
+  test('[P0] [AC2, AC5] should display progress bar on locked progressive badge and expanded modal progress', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {

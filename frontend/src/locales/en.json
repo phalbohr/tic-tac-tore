@@ -351,6 +351,11 @@
     "locked": "Locked",
     "empty": "No achievements available",
     "unknownTitle": "Achievement",
+    "filterAll": "All",
+    "filterBadges": "Badges",
+    "filterAnti": "Anti-Achievements",
+    "progress": "Progress: {current} / {target}",
+    "remaining": "{count} remaining",
     "first_win": {
       "title": "First Win",
       "description": "Win your first foosball match."

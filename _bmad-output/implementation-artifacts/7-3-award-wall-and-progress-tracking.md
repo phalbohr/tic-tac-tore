@@ -4,7 +4,7 @@ baseline_commit: 67fc7b1f2b9853666f631b78233eb4baa57cde07
 
 # Story 7.3: Award Wall and Progress Tracking
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -43,55 +43,88 @@ so that I can celebrate my collected badges, easily browse different categories,
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend Domain & Evaluator Extensions (AC2, AC3)
-  - [ ] Create `com.tictactore.service.achievement.ProgressInfo` record (`long current`, `long target`, `boolean hasProgress`).
-  - [ ] Add default method `ProgressInfo getProgress(UUID userId, PlayerStatsContext stats)` to `AchievementEvaluator` returning `new ProgressInfo(0, 0, false)`.
-  - [ ] Update `MatchesPlayedEvaluator`: return `new ProgressInfo(Math.min(stats.totalMatches(), THRESHOLD), THRESHOLD, true)`.
-  - [ ] Update `StrikerGoalsEvaluator`: return `new ProgressInfo(Math.min(stats.totalGoalsAsAttacker(), THRESHOLD), THRESHOLD, true)`.
-  - [ ] Update `DefenseWallEvaluator`: return `new ProgressInfo(Math.min(stats.totalMatchesAsDefender(), THRESHOLD), THRESHOLD, true)`.
-  - [ ] Update `FirstWinEvaluator`: return `new ProgressInfo(Math.min(stats.totalWins(), 1), 1, true)`.
-- [ ] Task 2: Backend DTO & Service Implementation (AC2, AC3, AC4)
-  - [ ] Update `com.tictactore.dto.AchievementDto`:
+- [x] Task 1: Backend Domain & Evaluator Extensions (AC2, AC3)
+  - [x] Create `com.tictactore.service.achievement.ProgressInfo` record (`long current`, `long target`, `boolean hasProgress`).
+  - [x] Add default method `ProgressInfo getProgress(UUID userId, PlayerStatsContext stats)` to `AchievementEvaluator` returning `new ProgressInfo(0, 0, false)`.
+  - [x] Update `MatchesPlayedEvaluator`: return `new ProgressInfo(Math.min(stats.totalMatches(), THRESHOLD), THRESHOLD, true)`.
+  - [x] Update `StrikerGoalsEvaluator`: return `new ProgressInfo(Math.min(stats.totalGoalsAsAttacker(), THRESHOLD), THRESHOLD, true)`.
+  - [x] Update `DefenseWallEvaluator`: return `new ProgressInfo(Math.min(stats.totalMatchesAsDefender(), THRESHOLD), THRESHOLD, true)`.
+  - [x] Update `FirstWinEvaluator`: return `new ProgressInfo(Math.min(stats.totalWins(), 1), 1, true)`.
+- [x] Task 2: Backend DTO & Service Implementation (AC2, AC3, AC4)
+  - [x] Update `com.tictactore.dto.AchievementDto`:
     - Add fields: `Long currentProgress`, `Long targetValue`, `boolean hasProgress`.
-  - [ ] Update `AchievementServiceImpl.getPlayerAchievements(UUID playerId)`:
+  - [x] Update `AchievementServiceImpl.getPlayerAchievements(UUID playerId)`:
     - Build `PlayerStatsContext` for the requested `playerId`.
     - Map evaluators by achievement code into a lookup map.
     - Compute `currentProgress`, `targetValue`, and `hasProgress` for each catalog achievement based on unlock status and evaluator `getProgress()`.
     - Ensure unlocked progressive achievements set `currentProgress = targetValue`.
-- [ ] Task 3: Backend Unit, ATDD & Integration Tests (AC2, AC3, AC4)
-  - [ ] Update `AchievementEvaluatorTest.java`: add unit test cases for `getProgress()` on each evaluator (0 progress, partial progress, threshold met).
-  - [ ] Update `AchievementServiceTest.java`: verify `getPlayerAchievements` correctly populates progress fields for both locked and unlocked achievements.
-  - [ ] Update `AchievementControllerATDDTest.java` and `AchievementServiceIT.java`: verify REST endpoint contract includes new progress fields and passes ATDD acceptance tests.
-- [ ] Task 4: Frontend Types & Store Enhancements (AC1, AC4)
-  - [ ] Update `AchievementDto` in `frontend/src/services/achievementService.ts` with `currentProgress: number | null`, `targetValue: number | null`, and `hasProgress: boolean`.
-  - [ ] Update `frontend/src/features/achievements/stores/useAchievementStore.ts`:
-    - Add computed getters for filtered views if needed (`badgesList`, `antiAchievementsList`).
-- [ ] Task 5: Frontend UI: Award Wall & Progress Bars (AC1, AC5)
-  - [ ] Update `frontend/src/features/achievements/components/BadgeCard.vue`:
+- [x] Task 3: Backend Unit, ATDD & Integration Tests (AC2, AC3, AC4)
+  - [x] Update `AchievementEvaluatorTest.java`: add unit test cases for `getProgress()` on each evaluator (0 progress, partial progress, threshold met).
+  - [x] Update `AchievementServiceTest.java`: verify `getPlayerAchievements` correctly populates progress fields for both locked and unlocked achievements.
+  - [x] Create `AchievementProgressEvaluatorATDDTest.java` and `AchievementProgressControllerATDDTest.java`: verify REST endpoint contract includes new progress fields and passes ATDD acceptance tests.
+  - [x] Update `AchievementControllerATDDTest.java` and `AchievementServiceIT.java`.
+- [x] Task 4: Frontend Types & Store Enhancements (AC1, AC4)
+  - [x] Update `AchievementDto` in `frontend/src/services/achievementService.ts` with `currentProgress: number | null`, `targetValue: number | null`, and `hasProgress: boolean`.
+  - [x] Update `frontend/src/features/achievements/stores/useAchievementStore.ts`:
+    - Add computed getters for filtered views (`badgesList`, `antiAchievementsList`).
+- [x] Task 5: Frontend UI: Award Wall & Progress Bars (AC1, AC5)
+  - [x] Update `frontend/src/features/achievements/components/BadgeCard.vue`:
     - Render mini progress bar and numeric counter (`currentProgress / targetValue`) when `badge.hasProgress && !badge.isUnlocked`.
     - Apply Clubhouse Editorial tokens (`bg-ch-surface-highest` track, `bg-ch-primary` fill, `text-ch-text-secondary/70` ratio).
-  - [ ] Update `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
+  - [x] Update `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
     - Add category filter pill tabs (`All`, `Badges`, `Anti-Achievements`) with active styling.
     - Update badge detail modal to render a full progress bar with percentage and remaining count for progressive achievements.
-- [ ] Task 6: Localization in English & German (AC6)
-  - [ ] Add translation keys in `frontend/src/locales/en.json`:
+- [x] Task 6: Localization in English & German (AC6)
+  - [x] Add translation keys in `frontend/src/locales/en.json`:
     - `achievements.filterAll: "All"`
     - `achievements.filterBadges: "Badges"`
     - `achievements.filterAnti: "Anti-Achievements"`
     - `achievements.progress: "Progress: {current} / {target}"`
     - `achievements.remaining: "{count} remaining"`
-  - [ ] Add translation keys in `frontend/src/locales/de.json`:
+  - [x] Add translation keys in `frontend/src/locales/de.json`:
     - `achievements.filterAll: "Alle"`
     - `achievements.filterBadges: "Erfolge"`
     - `achievements.filterAnti: "Anti-Erfolge"`
     - `achievements.progress: "Fortschritt: {current} / {target}"`
     - `achievements.remaining: "Noch {count}"`
-- [ ] Task 7: Frontend Unit & Playwright E2E Tests (AC1, AC5, AC6)
-  - [ ] Update `BadgeCard.spec.ts`: test progress bar rendering when `hasProgress = true` and hidden when `hasProgress = false` or `isUnlocked = true`.
-  - [ ] Update `useAchievementStore.spec.ts` and add tests for `ProfileBadgesSection.spec.ts` for category filtering.
-  - [ ] Update Playwright E2E test `frontend/e2e/achievements-profile.spec.ts`: assert category filtering and progress bars render properly on `/cabinet`.
-- [ ] Task 8: Verification & Quality Gate
-  - [ ] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend, frontend unit tests, and Playwright E2E suites.
+- [x] Task 7: Frontend Unit & Playwright E2E Tests (AC1, AC5, AC6)
+  - [x] Create `BadgeCardProgress.spec.ts`: test progress bar rendering when `hasProgress = true` and hidden when `hasProgress = false` or `isUnlocked = true`.
+  - [x] Update `useAchievementStore.spec.ts` and create `ProfileBadgesSectionFilter.spec.ts` for category filtering and modal progress.
+  - [x] Enable and verify Playwright E2E test `frontend/e2e/achievements-progress-wall.spec.ts`: assert category filtering and progress bars render properly on `/cabinet`.
+- [x] Task 8: Verification & Quality Gate
+  - [x] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend, frontend unit tests, and Playwright E2E suites.
+
+## Dev Agent Record
+
+### File List
+- `src/main/java/com/tictactore/service/achievement/ProgressInfo.java` (NEW)
+- `src/main/java/com/tictactore/service/achievement/AchievementEvaluator.java` (MODIFIED)
+- `src/main/java/com/tictactore/service/achievement/evaluator/MatchesPlayedEvaluator.java` (MODIFIED)
+- `src/main/java/com/tictactore/service/achievement/evaluator/StrikerGoalsEvaluator.java` (MODIFIED)
+- `src/main/java/com/tictactore/service/achievement/evaluator/DefenseWallEvaluator.java` (MODIFIED)
+- `src/main/java/com/tictactore/service/achievement/evaluator/FirstWinEvaluator.java` (MODIFIED)
+- `src/main/java/com/tictactore/dto/AchievementDto.java` (MODIFIED)
+- `src/main/java/com/tictactore/service/impl/AchievementServiceImpl.java` (MODIFIED)
+- `src/test/java/com/tictactore/service/achievement/AchievementProgressEvaluatorATDDTest.java` (NEW)
+- `src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java` (MODIFIED)
+- `src/test/java/com/tictactore/controller/AchievementProgressControllerATDDTest.java` (NEW)
+- `src/test/java/com/tictactore/service/AchievementServiceTest.java` (MODIFIED)
+- `frontend/src/services/achievementService.ts` (MODIFIED)
+- `frontend/src/features/achievements/stores/useAchievementStore.ts` (MODIFIED)
+- `frontend/src/locales/en.json` (MODIFIED)
+- `frontend/src/locales/de.json` (MODIFIED)
+- `frontend/src/features/achievements/components/BadgeCard.vue` (MODIFIED)
+- `frontend/src/features/achievements/components/ProfileBadgesSection.vue` (MODIFIED)
+- `frontend/src/features/achievements/components/__tests__/BadgeCardProgress.spec.ts` (NEW)
+- `frontend/src/features/achievements/components/__tests__/ProfileBadgesSectionFilter.spec.ts` (NEW)
+- `frontend/src/features/achievements/stores/__tests__/useAchievementStore.spec.ts` (MODIFIED)
+- `frontend/e2e/achievements-progress-wall.spec.ts` (MODIFIED)
+
+### Verification
+- `./scripts/ci-local.sh`: Executed full suite (Backend tests, frontend type-check, lint, unit tests, and Playwright E2E across Chromium, Firefox, WebKit) with code 0 ("All local CI checks passed").
+- Backend test suites passed: `AchievementProgressEvaluatorATDDTest` (11/11), `AchievementEvaluatorTest` (30/30), `AchievementProgressControllerATDDTest` (6/6), `AchievementControllerATDDTest` (5/5), `AchievementServiceTest` (4/4), `AchievementServiceIT` (5/5).
+- Frontend test suites passed: 65 test files, 377 unit tests, 0 errors in vue-tsc / eslint.
+- Playwright E2E: 21 tests passed across browsers in achievements test suite.
 
 ## Dev Notes
 
@@ -157,4 +190,3 @@ so that I can celebrate my collected badges, easily browse different categories,
 - Backend Controller ATDD: `_bmad-output/test-artifacts/atdd-redphase-7-3/AchievementProgressControllerATDDTest.java`
 - Frontend E2E test: `frontend/e2e/achievements-progress-wall.spec.ts`
 - Frontend Component tests: `frontend/src/features/achievements/components/__tests__/BadgeCardProgress.spec.ts`, `frontend/src/features/achievements/components/__tests__/ProfileBadgesSectionFilter.spec.ts`
-

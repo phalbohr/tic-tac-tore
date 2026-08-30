@@ -1,28 +1,33 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BadgeCard from '../BadgeCard.vue'
+import type { AchievementDto } from '@/services/achievementService'
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: (key: string, values?: Record<string, unknown>) => {
-      const map: Record<string, string> = {
-        'achievements.matches_10.title': '10 Matches Played',
-        'achievements.matches_10.description': 'Play 10 total foosball matches.',
-        'achievements.clean_sheet.title': 'Clean Sheet',
-        'achievements.unlocked': 'Unlocked',
-        'achievements.locked': 'Locked',
-      }
-      if (key === 'achievements.progress' && values) {
-        return `Progress: ${values.current} / ${values.target}`
-      }
-      return map[key] || key
-    },
-    te: () => true,
-  }),
-}))
+vi.mock('vue-i18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-i18n')>()
+  return {
+    ...actual,
+    useI18n: () => ({
+      t: (key: string, values?: Record<string, unknown>) => {
+        const map: Record<string, string> = {
+          'achievements.matches_10.title': '10 Matches Played',
+          'achievements.matches_10.description': 'Play 10 total foosball matches.',
+          'achievements.clean_sheet.title': 'Clean Sheet',
+          'achievements.unlocked': 'Unlocked',
+          'achievements.locked': 'Locked',
+        }
+        if (key === 'achievements.progress' && values) {
+          return `Progress: ${values.current} / ${values.target}`
+        }
+        return map[key] || key
+      },
+      te: () => true,
+    }),
+  }
+})
 
-describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
-  const lockedProgressiveBadge = {
+describe('[Story 7.3 ATDD] BadgeCard.vue Progress Bar', () => {
+  const lockedProgressiveBadge: AchievementDto = {
     id: 'b-2',
     code: 'MATCHES_10',
     category: 'EXPERIENCE',
@@ -36,7 +41,7 @@ describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
     hasProgress: true,
   }
 
-  const unlockedProgressiveBadge = {
+  const unlockedProgressiveBadge: AchievementDto = {
     id: 'b-2',
     code: 'MATCHES_10',
     category: 'EXPERIENCE',
@@ -50,7 +55,7 @@ describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
     hasProgress: true,
   }
 
-  const nonProgressiveBadge = {
+  const nonProgressiveBadge: AchievementDto = {
     id: 'b-3',
     code: 'CLEAN_SHEET',
     category: 'SKILL',
@@ -67,7 +72,7 @@ describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
   it('[P0] [AC5] should render mini progress bar and ratio text (4 / 10) when locked and hasProgress is true', () => {
     const wrapper = mount(BadgeCard, {
       props: {
-        badge: lockedProgressiveBadge as any,
+        badge: lockedProgressiveBadge,
       },
     })
 
@@ -82,7 +87,7 @@ describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
   it('[P0] [AC3, AC5] should NOT render progress bar when badge is already unlocked', () => {
     const wrapper = mount(BadgeCard, {
       props: {
-        badge: unlockedProgressiveBadge as any,
+        badge: unlockedProgressiveBadge,
       },
     })
 
@@ -93,7 +98,7 @@ describe.skip('[Story 7.3 ATDD Red Phase] BadgeCard.vue Progress Bar', () => {
   it('[P0] [AC3, AC5] should NOT render progress bar for non-progressive badges', () => {
     const wrapper = mount(BadgeCard, {
       props: {
-        badge: nonProgressiveBadge as any,
+        badge: nonProgressiveBadge,
       },
     })
 

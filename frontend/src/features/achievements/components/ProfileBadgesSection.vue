@@ -11,6 +11,7 @@ const authStore = useAuthStore()
 const achievementStore = useAchievementStore()
 
 const selectedBadge = ref<AchievementDto | null>(null)
+const activeFilter = ref<'all' | 'badges' | 'anti'>('all')
 
 watch(
   () => authStore.profile?.id,
@@ -25,6 +26,16 @@ watch(
   },
   { immediate: true }
 )
+
+const filteredAchievements = computed(() => {
+  if (activeFilter.value === 'badges') {
+    return achievementStore.badgesList
+  }
+  if (activeFilter.value === 'anti') {
+    return achievementStore.antiAchievementsList
+  }
+  return achievementStore.achievements
+})
 
 function openBadgeModal(badge: AchievementDto) {
   selectedBadge.value = badge
@@ -89,6 +100,26 @@ const selectedBadgeModalStatusClasses = computed(() => {
   return selectedBadge.value.category === 'ANTI_ACHIEVEMENT' ? 'text-ch-secondary' : 'text-ch-primary'
 })
 
+const showModalProgress = computed(() => {
+  return Boolean(
+    selectedBadge.value?.hasProgress &&
+    !selectedBadge.value?.isUnlocked &&
+    selectedBadge.value?.targetValue
+  )
+})
+
+const modalProgressPercentage = computed(() => {
+  if (!selectedBadge.value?.targetValue || selectedBadge.value.targetValue <= 0) return 0
+  const cur = selectedBadge.value.currentProgress || 0
+  return Math.min(100, Math.max(0, (cur / selectedBadge.value.targetValue) * 100))
+})
+
+const modalProgressRemaining = computed(() => {
+  if (!selectedBadge.value?.targetValue) return 0
+  const cur = selectedBadge.value.currentProgress || 0
+  return Math.max(0, selectedBadge.value.targetValue - cur)
+})
+
 function formatUnlockDate(unlockedAt: string | null): string {
   if (!unlockedAt) return ''
   try {
@@ -127,6 +158,40 @@ function formatUnlockDate(unlockedAt: string | null): string {
       </div>
     </div>
 
+    <!-- Category Filter Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1" data-testid="category-filter-tabs">
+      <button
+        type="button"
+        data-testid="category-filter-tab-all"
+        :data-active="activeFilter === 'all'"
+        @click="activeFilter = 'all'"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        :class="activeFilter === 'all' ? 'bg-ch-primary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
+      >
+        {{ t('achievements.filterAll') }}
+      </button>
+      <button
+        type="button"
+        data-testid="category-filter-tab-badges"
+        :data-active="activeFilter === 'badges'"
+        @click="activeFilter = 'badges'"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        :class="activeFilter === 'badges' ? 'bg-ch-primary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
+      >
+        {{ t('achievements.filterBadges') }}
+      </button>
+      <button
+        type="button"
+        data-testid="category-filter-tab-anti"
+        :data-active="activeFilter === 'anti'"
+        @click="activeFilter = 'anti'"
+        class="px-3 py-1.5 rounded-xl font-headline text-xs font-semibold transition-all duration-200"
+        :class="activeFilter === 'anti' ? 'bg-ch-secondary text-ch-surface shadow-sm' : 'bg-ch-surface-highest text-ch-text-secondary hover:text-ch-text-primary hover:bg-ch-surface-highest/80'"
+      >
+        {{ t('achievements.filterAnti') }}
+      </button>
+    </div>
+
     <!-- Loading State -->
     <div v-if="achievementStore.loading && achievementStore.achievements.length === 0" class="py-8 flex justify-center">
       <span class="material-symbols-outlined animate-spin text-2xl text-ch-primary">sync</span>
@@ -134,7 +199,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
 
     <!-- Empty State -->
     <div
-      v-else-if="achievementStore.achievements.length === 0"
+      v-else-if="filteredAchievements.length === 0"
       class="py-6 text-center text-xs text-ch-text-secondary/60 font-headline"
     >
       {{ t('achievements.empty') }}
@@ -146,7 +211,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
       class="grid grid-cols-3 sm:grid-cols-5 gap-3"
     >
       <BadgeCard
-        v-for="badge in achievementStore.achievements"
+        v-for="badge in filteredAchievements"
         :key="badge.id"
         :badge="badge"
         @select="openBadgeModal"
@@ -188,6 +253,31 @@ function formatUnlockDate(unlockedAt: string | null): string {
           <p class="text-xs text-ch-text-secondary leading-relaxed">
             {{ selectedBadgeDescription }}
           </p>
+
+          <!-- Modal Progress for Progressive Badges -->
+          <div
+            v-if="showModalProgress && selectedBadge"
+            data-testid="modal-progress-container"
+            class="p-3.5 rounded-xl bg-ch-surface-highest/60 border border-ch-border space-y-2 text-left"
+          >
+            <div class="flex items-center justify-between text-xs font-headline font-semibold">
+              <span class="text-ch-text-primary">
+                {{ t('achievements.progress', { current: selectedBadge.currentProgress || 0, target: selectedBadge.targetValue || 0 }) }}
+              </span>
+              <span class="text-ch-text-secondary/80 text-[11px]">
+                {{ t('achievements.remaining', { count: modalProgressRemaining }) }}
+              </span>
+            </div>
+            <div
+              data-testid="modal-progress-bar"
+              class="w-full h-2 rounded-full bg-ch-surface-highest overflow-hidden"
+            >
+              <div
+                class="h-full bg-ch-primary rounded-full transition-all duration-300"
+                :style="{ width: `${modalProgressPercentage}%` }"
+              />
+            </div>
+          </div>
 
           <!-- Unlock Status & Date -->
           <div class="p-3 rounded-xl bg-ch-surface-highest/60 border border-ch-border space-y-1">

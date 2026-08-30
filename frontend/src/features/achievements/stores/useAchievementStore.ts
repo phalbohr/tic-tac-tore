@@ -12,6 +12,8 @@ export const useAchievementStore = defineStore('achievement', () => {
 
   const unlockedList = computed(() => achievements.value.filter((a) => a.isUnlocked))
   const lockedList = computed(() => achievements.value.filter((a) => !a.isUnlocked))
+  const badgesList = computed(() => achievements.value.filter((a) => a.category !== 'ANTI_ACHIEVEMENT'))
+  const antiAchievementsList = computed(() => achievements.value.filter((a) => a.category === 'ANTI_ACHIEVEMENT'))
 
   async function fetchPlayerAchievements(playerId: string): Promise<PlayerAchievementsSummaryResponse> {
     loading.value = true
@@ -38,6 +40,8 @@ export const useAchievementStore = defineStore('achievement', () => {
     error,
     unlockedList,
     lockedList,
+    badgesList,
+    antiAchievementsList,
     fetchPlayerAchievements,
   }
 })

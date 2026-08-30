@@ -351,6 +351,11 @@
     "locked": "Gesperrt",
     "empty": "Keine Erfolge verfügbar",
     "unknownTitle": "Erfolg",
+    "filterAll": "Alle",
+    "filterBadges": "Erfolge",
+    "filterAnti": "Anti-Erfolge",
+    "progress": "Fortschritt: {current} / {target}",
+    "remaining": "Noch {count}",
     "first_win": {
       "title": "Erster Sieg",
       "description": "Gewinne dein erstes Tischfußballspiel."

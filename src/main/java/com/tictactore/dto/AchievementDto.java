@@ -11,6 +11,9 @@ public record AchievementDto(
         String descriptionKey,
         String icon,
         boolean isUnlocked,
-        OffsetDateTime unlockedAt
+        OffsetDateTime unlockedAt,
+        Long currentProgress,
+        Long targetValue,
+        boolean hasProgress
 ) {
 }
