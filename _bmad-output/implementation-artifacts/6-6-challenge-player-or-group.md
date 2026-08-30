@@ -4,7 +4,7 @@ baseline_commit: 2b5390d79d67566ca0b29849508e64cbe3943360
 
 # Story 6.6: Challenge Player or Group
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -58,8 +58,8 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC3, AC4, AC6)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V15__create_match_challenges.sql`:
+- [x] Task 1: Database Migration & Domain Entity Updates (AC1, AC2, AC3, AC4, AC6)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V15__create_match_challenges.sql`:
     - Create `match_challenge` table:
       ```sql
       CREATE TABLE match_challenge (
@@ -88,40 +88,40 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
           ADD COLUMN challenge_id UUID REFERENCES match_challenge(id) ON DELETE SET NULL;
       CREATE INDEX idx_notif_log_challenge_recipient ON notification_log(challenge_id, recipient_id);
       ```
-  - [ ] Create `com.tictactore.model.ChallengeStatus` enum: `PENDING`, `ACCEPTED`, `DECLINED`, `CANCELLED`, `EXPIRED`.
-  - [ ] Create `com.tictactore.model.MatchChallenge` entity with JPA annotations, `@Version`, `@Builder`, and relations to `User`, `PlayerGroup`, `RuleConfiguration`.
-  - [ ] Update `com.tictactore.model.NotificationLog` entity:
+  - [x] Create `com.tictactore.model.ChallengeStatus` enum: `PENDING`, `ACCEPTED`, `DECLINED`, `CANCELLED`, `EXPIRED`.
+  - [x] Create `com.tictactore.model.MatchChallenge` entity with JPA annotations, `@Version`, `@Builder`, and relations to `User`, `PlayerGroup`, `RuleConfiguration`.
+  - [x] Update `com.tictactore.model.NotificationLog` entity:
     - Add `private UUID challengeId;` mapped to `@Column(name = "challenge_id")`.
     - Update `@Table(indexes = { ... })` with `@Index(name = "idx_notif_log_challenge_recipient", columnList = "challenge_id, recipient_id")`.
-  - [ ] Update `com.tictactore.dto.NotificationLogDto` to include `UUID challengeId`.
-  - [ ] Create `com.tictactore.repository.MatchChallengeRepository`:
+  - [x] Update `com.tictactore.dto.NotificationLogDto` to include `UUID challengeId`.
+  - [x] Create `com.tictactore.repository.MatchChallengeRepository`:
     - `List<MatchChallenge> findIncomingChallenges(UUID userId, List<UUID> groupIds, ChallengeStatus status);`
     - `List<MatchChallenge> findByChallengerIdAndStatus(UUID challengerId, ChallengeStatus status);`
     - `boolean existsByChallengerIdAndTargetPlayerIdAndStatus(UUID challengerId, UUID targetPlayerId, ChallengeStatus status);`
     - `boolean existsByChallengerIdAndTargetGroupIdAndStatus(UUID challengerId, UUID targetGroupId, ChallengeStatus status);`
-  - [ ] Create repository tests in `MatchChallengeRepositoryTest.java` verifying queries, index constraints, and cascading rules.
+  - [x] Create repository tests in `MatchChallengeRepositoryTest.java` verifying queries, index constraints, and cascading rules.
 
-- [ ] Task 2: Backend Challenge Service, Events & REST API (AC1, AC2, AC3, AC4, AC6)
-  - [ ] Create DTO records in `com.tictactore.dto`:
+- [x] Task 2: Backend Challenge Service, Events & REST API (AC1, AC2, AC3, AC4, AC6)
+  - [x] Create DTO records in `com.tictactore.dto`:
     - `CreateChallengeRequest.java` (`UUID targetPlayerId`, `UUID targetGroupId`, `MatchType matchType`, `UUID ruleConfigId`, `String message`).
     - `ChallengeResponse.java` (`UUID id`, `UUID challengerId`, `String challengerNickname`, `String challengerAvatar`, `UUID targetPlayerId`, `String targetPlayerNickname`, `String targetPlayerAvatar`, `UUID targetGroupId`, `String targetGroupName`, `MatchType matchType`, `UUID ruleConfigId`, `String ruleConfigName`, `String message`, `ChallengeStatus status`, `Instant createdAt`, `Instant expiresAt`).
     - `ChallengeActionResponse.java` (`UUID challengeId`, `ChallengeStatus status`, `String message`).
-  - [ ] Create Domain Events in `com.tictactore.event`:
+  - [x] Create Domain Events in `com.tictactore.event`:
     - `ChallengeCreatedEvent.java` (`UUID challengeId`, `UUID challengerId`, `String challengerNickname`, `UUID targetPlayerId`, `UUID targetGroupId`, `MatchType matchType`).
     - `ChallengeAcceptedEvent.java` (`UUID challengeId`, `UUID challengerId`, `UUID targetUserId`, `String targetNickname`, `MatchType matchType`).
     - `ChallengeDeclinedEvent.java` (`UUID challengeId`, `UUID challengerId`, `UUID targetUserId`, `String targetNickname`).
-  - [ ] Update `com.tictactore.dto.PushNotificationPayload`:
+  - [x] Update `com.tictactore.dto.PushNotificationPayload`:
     - Add `UUID challengeId` to record fields with backwards-compatible constructors.
-  - [ ] Update `com.tictactore.service.PushNotificationService` & `com.tictactore.service.impl.PushNotificationServiceImpl`:
+  - [x] Update `com.tictactore.service.PushNotificationService` & `com.tictactore.service.impl.PushNotificationServiceImpl`:
     - Add methods:
       - `void sendChallengeCreatedNotification(UUID challengeId, String challengerName, MatchType matchType, List<User> recipients);`
       - `void sendChallengeAcceptedNotification(UUID challengeId, String targetName, MatchType matchType, User challenger);`
       - `void sendChallengeDeclinedNotification(UUID challengeId, String targetName, User challenger);`
     - Implement push dispatch serializing `PushNotificationPayload` (`type: "CHALLENGE_RECEIVED"`, `"CHALLENGE_ACCEPTED"`, `"CHALLENGE_DECLINED"`), logging to `NotificationLog` with `challenge_id`, and isolating exceptions.
-  - [ ] Create `com.tictactore.listener.ChallengeNotificationListener`:
+  - [x] Create `com.tictactore.listener.ChallengeNotificationListener`:
     - Annotate with `@Component` and `@RequiredArgsConstructor`.
     - Implement `@Async` `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` handlers for `ChallengeCreatedEvent`, `ChallengeAcceptedEvent`, and `ChallengeDeclinedEvent`.
-  - [ ] Create `com.tictactore.service.ChallengeService` and `com.tictactore.service.impl.ChallengeServiceImpl`:
+  - [x] Create `com.tictactore.service.ChallengeService` and `com.tictactore.service.impl.ChallengeServiceImpl`:
     - `ChallengeResponse createChallenge(UUID challengerId, CreateChallengeRequest request);`
     - `List<ChallengeResponse> getIncomingChallenges(UUID userId);`
     - `List<ChallengeResponse> getOutgoingChallenges(UUID userId);`
@@ -130,7 +130,7 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
     - `ChallengeActionResponse declineChallenge(UUID challengeId, UUID userId);`
     - `ChallengeActionResponse cancelChallenge(UUID challengeId, UUID userId);`
     - Enforce validation: prevent self-challenge, verify target authorization, prevent double accept/decline, prevent duplicate pending challenges.
-  - [ ] Create `com.tictactore.controller.ChallengeController` (`/api/v1/challenges`):
+  - [x] Create `com.tictactore.controller.ChallengeController` (`/api/v1/challenges`):
     - `POST /api/v1/challenges` -> `createChallenge` (201 Created)
     - `GET /api/v1/challenges/incoming` -> `getIncomingChallenges` (200 OK)
     - `GET /api/v1/challenges/outgoing` -> `getOutgoingChallenges` (200 OK)
@@ -138,59 +138,59 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
     - `POST /api/v1/challenges/{id}/accept` -> `acceptChallenge` (200 OK)
     - `POST /api/v1/challenges/{id}/decline` -> `declineChallenge` (200 OK)
     - `POST /api/v1/challenges/{id}/cancel` -> `cancelChallenge` (200 OK)
-  - [ ] Backend Unit & ATDD Tests:
+  - [x] Backend Unit & ATDD Tests:
     - Create `ChallengeServiceTest.java` and `ChallengeServiceImplTest.java`.
     - Create `ChallengeControllerTest.java` and `ChallengeControllerATDDTest.java`.
     - Create `ChallengeNotificationListenerTest.java`.
 
-- [ ] Task 3: Frontend Challenge Components, Store & UI Integration (AC1, AC2, AC3, AC4, AC5)
-  - [ ] Create `frontend/src/services/challengeService.ts`:
+- [x] Task 3: Frontend Challenge Components, Store & UI Integration (AC1, AC2, AC3, AC4, AC5)
+  - [x] Create `frontend/src/services/challengeService.ts`:
     - Define TypeScript interfaces `ChallengeItem`, `CreateChallengePayload`, `ChallengeActionResponse`.
     - Implement API methods: `createChallenge`, `getIncomingChallenges`, `getOutgoingChallenges`, `acceptChallenge`, `declineChallenge`, `cancelChallenge`.
-  - [ ] Create Pinia store `frontend/src/features/challenge/stores/useChallengeStore.ts`:
+  - [x] Create Pinia store `frontend/src/features/challenge/stores/useChallengeStore.ts`:
     - State: `incomingChallenges: ChallengeItem[]`, `outgoingChallenges: ChallengeItem[]`, `loading: boolean`, `error: string | null`.
     - Actions: `fetchIncoming()`, `fetchOutgoing()`, `createChallenge(payload)`, `acceptChallenge(id)`, `declineChallenge(id)`, `cancelChallenge(id)`.
-  - [ ] Create `frontend/src/features/challenge/components/ChallengeModal.vue`:
+  - [x] Create `frontend/src/features/challenge/components/ChallengeModal.vue`:
     - Modal dialog displaying target player/group details.
     - Match type selector (`1v1` / `2v2`).
     - Rule template selector (with default pre-selection from user preferences).
     - Message input field (max 255 chars, e.g. "Ready for a rematch?").
     - Action buttons: "Cancel" and "Send Challenge".
     - Clubhouse design token styling (`bg-surface-container-low`, rounded-2xl, no 1px borders).
-  - [ ] Create `frontend/src/features/challenge/components/PendingChallenges.vue`:
+  - [x] Create `frontend/src/features/challenge/components/PendingChallenges.vue`:
     - Card list of incoming challenges.
     - Challenger avatar, nickname, match format chip, rule name, timestamp.
     - Buttons for "Accept" (Primary) and "Decline" (Secondary).
-  - [ ] Update `frontend/src/features/stats/views/LeaderboardView.vue`:
+  - [x] Update `frontend/src/features/stats/views/LeaderboardView.vue`:
     - Add "Challenge" icon/button on player rows (rendered only when user is authenticated and `entry.playerId !== authStore.profile.id`).
     - Clicking opens `ChallengeModal.vue` with target player pre-selected.
-  - [ ] Update `frontend/src/features/profile/components/PlayerGroupSection.vue`:
+  - [x] Update `frontend/src/features/profile/components/PlayerGroupSection.vue`:
     - Add "Challenge Group" action button on group items.
     - Clicking opens `ChallengeModal.vue` with target group pre-selected.
-  - [ ] Update `frontend/src/features/match/components/PlayerSearchOverlay.vue`:
+  - [x] Update `frontend/src/features/match/components/PlayerSearchOverlay.vue`:
     - Support challenge mode / action when searching players.
-  - [ ] Update `frontend/src/views/HomeView.vue`:
+  - [x] Update `frontend/src/views/HomeView.vue`:
     - Integrate `PendingChallenges.vue` widget into the Home Hub feed.
     - Add badge notification count and polling refresh for incoming challenges.
-  - [ ] Update `frontend/public/sw.js`:
+  - [x] Update `frontend/public/sw.js`:
     - Handle `type === 'CHALLENGE_RECEIVED'`: Title `"Match Challenge!"`, Body `payload.summary`, `data.url = '/?tab=challenges'`.
     - Handle `type === 'CHALLENGE_ACCEPTED'`: Title `"Challenge Accepted!"`, Body `payload.summary`, `data.url = '/?tab=challenges'`.
     - Handle notification click navigation.
-  - [ ] Update i18n locales (`frontend/src/locales/en.json`, `frontend/src/locales/de.json`):
+  - [x] Update i18n locales (`frontend/src/locales/en.json`, `frontend/src/locales/de.json`):
     - Add translation keys for challenge modal, buttons, statuses, push messages, and toast notifications.
-  - [ ] Frontend Unit & Component Tests:
+  - [x] Frontend Unit & Component Tests:
     - Create `frontend/src/features/challenge/components/__tests__/ChallengeModal.spec.ts`.
     - Create `frontend/src/features/challenge/components/__tests__/PendingChallenges.spec.ts`.
     - Create `frontend/src/features/challenge/stores/__tests__/useChallengeStore.spec.ts`.
     - Update `frontend/src/features/stats/views/__tests__/LeaderboardView.spec.ts`.
 
-- [ ] Task 4: E2E Testing & Quality Verification (AC1–AC6)
-  - [ ] Create Playwright E2E test `frontend/e2e/challenge-flow.spec.ts`:
+- [x] Task 4: E2E Testing & Quality Verification (AC1–AC6)
+  - [x] Create Playwright E2E test `frontend/e2e/challenge-flow.spec.ts`:
     - Test 1: Authenticated user creates 1v1 challenge from Leaderboard -> verifies challenge sent and modal closes.
     - Test 2: Target user logs in -> sees incoming challenge on Home Hub -> accepts challenge -> verifies success toast and state transition to ACCEPTED.
     - Test 3: User creates challenge -> cancels challenge -> verifies challenge is cancelled.
     - Test 4: Validation prevents self-challenge and duplicate pending challenges.
-  - [ ] Run full local verification: `./scripts/ci-local.sh` and ensure 100% pass rate across backend and frontend.
+  - [x] Run full local verification: `./scripts/ci-local.sh` and ensure 100% pass rate across backend and frontend.
 
 ## Dev Notes
 

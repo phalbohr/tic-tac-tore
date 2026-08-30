@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { getLeaderboard, type LeaderboardParams } from '@/services/statisticsService'
+import ChallengeModal from '@/features/challenge/components/ChallengeModal.vue'
 
+const authStore = useAuthStore()
 const entries = ref<import('@/services/statisticsService').LeaderboardEntry[]>([])
 const totalPages = ref(0)
 const totalElements = ref(0)
@@ -9,6 +12,17 @@ const currentPage = ref(0)
 const pageSize = ref(20)
 const isLoading = ref(false)
 const error = ref('')
+
+const isChallengeModalOpen = ref(false)
+const selectedTargetPlayer = ref<{ id: string; nickname: string; avatar?: string } | null>(null)
+
+function openChallenge(entry: import('@/services/statisticsService').LeaderboardEntry) {
+  selectedTargetPlayer.value = {
+    id: entry.playerId,
+    nickname: entry.playerName,
+  }
+  isChallengeModalOpen.value = true
+}
 
 const filters = ref({
   matchFormat: '',
@@ -44,7 +58,14 @@ function setPage(page: number) {
   loadLeaderboard()
 }
 
-onMounted(() => {
+onMounted(async () => {
+  if (authStore.isAuthenticated && !authStore.profile) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore
+    }
+  }
   loadLeaderboard()
 })
 </script>
@@ -94,6 +115,7 @@ onMounted(() => {
             <th class="py-2 px-3 text-right">Wins</th>
             <th class="py-2 px-3 text-right">Losses</th>
             <th class="py-2 px-3 text-right">Win Rate</th>
+            <th v-if="authStore.isAuthenticated" class="py-2 px-3 text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -104,6 +126,19 @@ onMounted(() => {
             <td class="py-3 px-3 text-right text-green-400">{{ entry.wins }}</td>
             <td class="py-3 px-3 text-right text-red-400">{{ entry.losses }}</td>
             <td class="py-3 px-3 text-right">{{ (entry.winRate * 100).toFixed(1) }}%</td>
+            <td v-if="authStore.isAuthenticated" class="py-3 px-3 text-center">
+              <button
+                v-if="entry.playerId !== authStore.profile?.id"
+                type="button"
+                data-testid="challenge-player-btn"
+                @click="openChallenge(entry)"
+                class="px-2.5 py-1 rounded-lg bg-primary/20 hover:bg-primary text-primary hover:text-background text-xs font-headline font-bold transition-all flex items-center gap-1 mx-auto cursor-pointer"
+                title="Challenge Player"
+              >
+                <span class="material-symbols-outlined text-xs">swords</span>
+                <span>Challenge</span>
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -126,5 +161,11 @@ onMounted(() => {
         Next
       </button>
     </div>
+
+    <!-- Challenge Modal -->
+    <ChallengeModal
+      v-model="isChallengeModalOpen"
+      :target-player="selectedTargetPlayer"
+    />
   </div>
 </template>

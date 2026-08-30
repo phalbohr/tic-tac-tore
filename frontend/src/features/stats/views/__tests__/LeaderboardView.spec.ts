@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import LeaderboardView from '@/features/stats/views/LeaderboardView.vue'
 import * as statisticsService from '@/services/statisticsService'
+import { useAuthStore } from '@/stores/auth'
+
+vi.mock('vue-i18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-i18n')>()
+  return {
+    ...actual,
+    useI18n: () => ({
+      t: (key: string, defaultVal?: string) => defaultVal || key,
+    }),
+  }
+})
 
 vi.mock('@/services/statisticsService', () => ({
   getLeaderboard: vi.fn(),
@@ -9,6 +21,7 @@ vi.mock('@/services/statisticsService', () => ({
 
 describe('[Story 4.2] LeaderboardView.vue', () => {
   beforeEach(() => {
+    setActivePinia(createPinia())
     vi.clearAllMocks()
   })
 
@@ -251,5 +264,34 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
       expect.objectContaining({ page: 0, ruleSystem: 'STANDARD' })
     )
+  })
+
+  it('renders challenge button for authenticated user on other players rows', async () => {
+    const authStore = useAuthStore()
+    authStore.setAuthenticated(true)
+    authStore.profile = { id: 'my-user-id', nickname: 'Me', avatar: 'avatar-1' }
+
+    vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
+      content: [
+        { playerId: 'my-user-id', playerName: 'Me', totalMatches: 10, wins: 8, losses: 2, winRate: 0.8 },
+        { playerId: 'opponent-id', playerName: 'Opponent', totalMatches: 5, wins: 2, losses: 3, winRate: 0.4 },
+      ],
+      totalPages: 1,
+      totalElements: 2,
+      size: 20,
+      number: 0,
+    } as any)
+
+    const wrapper = mount(LeaderboardView, {
+      global: {
+        stubs: {
+          ChallengeModal: true,
+        },
+      },
+    })
+    await flushPromises()
+
+    const challengeBtns = wrapper.findAll('[data-testid="challenge-player-btn"]')
+    expect(challengeBtns).toHaveLength(1)
   })
 })

@@ -319,5 +319,30 @@
       "goalLimit": "{goals} goals",
       "winByTwo": "Win by 2"
     }
+  },
+  "challenge": {
+    "sectionTitle": "Match Challenges",
+    "modalTitle": "Challenge to Match",
+    "challengingPlayer": "Challenging player",
+    "challengingGroup": "Challenging group",
+    "matchTypeLabel": "Match Format",
+    "ruleTemplateLabel": "Rule Configuration (Optional)",
+    "defaultRules": "Default / Standard Rules",
+    "messageLabel": "Message (Optional)",
+    "messagePlaceholder": "e.g. Ready for a rematch? Head to table 1!",
+    "sendChallenge": "Send Challenge",
+    "incomingTab": "Incoming",
+    "outgoingTab": "Sent",
+    "noIncoming": "No incoming challenges right now",
+    "noOutgoing": "No pending outgoing challenges",
+    "accept": "Accept",
+    "decline": "Decline",
+    "pending": "Pending",
+    "errors": {
+      "createFailed": "Failed to send challenge",
+      "acceptFailed": "Failed to accept challenge",
+      "declineFailed": "Failed to decline challenge",
+      "cancelFailed": "Failed to cancel challenge"
+    }
   }
 }

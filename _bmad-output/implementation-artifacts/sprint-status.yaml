@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: "2026-08-29"
+last_updated: "2026-08-30"
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -93,7 +93,7 @@ development_status:
   6-3-create-want-to-play-pool: review
   6-4-join-existing-pool: review
   6-5-pool-notifications: review
-  6-6-challenge-player-or-group: ready-for-dev
+  6-6-challenge-player-or-group: review
   epic-6-retrospective: optional
   epic-7: backlog
   7-1-achievement-system-badges: backlog

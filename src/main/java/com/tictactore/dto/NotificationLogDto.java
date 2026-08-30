@@ -10,6 +10,7 @@ import java.util.UUID;
  * @param recipientId user ID of the recipient
  * @param matchId match ID associated with the notification
  * @param poolId pool ID associated with the notification
+ * @param challengeId challenge ID associated with the notification
  * @param type type of notification
  * @param payload raw JSON payload sent
  * @param status delivery status (DELIVERED, QUEUED, FAILED)
@@ -21,6 +22,7 @@ public record NotificationLogDto(
     UUID recipientId,
     UUID matchId,
     UUID poolId,
+    UUID challengeId,
     String type,
     String payload,
     String status,
@@ -31,12 +33,26 @@ public record NotificationLogDto(
         UUID id,
         UUID recipientId,
         UUID matchId,
+        UUID poolId,
         String type,
         String payload,
         String status,
         String errorMessage,
         Instant sentAt
     ) {
-        this(id, recipientId, matchId, null, type, payload, status, errorMessage, sentAt);
+        this(id, recipientId, matchId, poolId, null, type, payload, status, errorMessage, sentAt);
+    }
+
+    public NotificationLogDto(
+        UUID id,
+        UUID recipientId,
+        UUID matchId,
+        String type,
+        String payload,
+        String status,
+        String errorMessage,
+        Instant sentAt
+    ) {
+        this(id, recipientId, matchId, null, null, type, payload, status, errorMessage, sentAt);
     }
 }

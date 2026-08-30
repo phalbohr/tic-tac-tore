@@ -21,7 +21,22 @@ self.addEventListener('push', (event) => {
   let url = payload.url || '/'
   let actions = []
 
-  if (type === 'POOL_CREATED') {
+  if (type === 'CHALLENGE_RECEIVED') {
+    title = 'Match Challenge!'
+    body = payload.summary || `${creatorName} challenged you to a match`
+    url = payload.url || '/?tab=challenges'
+    actions = [{ action: 'open', title: 'Open' }]
+  } else if (type === 'CHALLENGE_ACCEPTED') {
+    title = 'Challenge Accepted!'
+    body = payload.summary || `${creatorName} accepted your challenge — head to the table!`
+    url = payload.url || '/?tab=challenges'
+    actions = [{ action: 'open', title: 'Open' }]
+  } else if (type === 'CHALLENGE_DECLINED') {
+    title = 'Challenge Declined'
+    body = payload.summary || `${creatorName} declined your challenge.`
+    url = payload.url || '/?tab=challenges'
+    actions = [{ action: 'open', title: 'Open' }]
+  } else if (type === 'POOL_CREATED') {
     title = 'New Matchmaking Pool'
     body = payload.summary || 'A new matchmaking pool is looking for players'
     url = payload.url || '/'

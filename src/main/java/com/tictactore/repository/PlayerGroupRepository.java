@@ -31,4 +31,7 @@ public interface PlayerGroupRepository extends JpaRepository<PlayerGroup, UUID> 
     boolean existsByCreatorIdAndIsFavoriteTrue(UUID creatorId);
 
     List<PlayerGroup> findByCreatorIdAndIsFavoriteTrue(UUID creatorId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT pg.id FROM PlayerGroup pg JOIN pg.members m WHERE m.id = :userId")
+    List<UUID> findGroupIdsByMemberId(@org.springframework.data.repository.query.Param("userId") UUID userId);
 }
