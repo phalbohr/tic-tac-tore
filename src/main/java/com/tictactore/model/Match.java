@@ -9,7 +9,9 @@ import lombok.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -249,11 +251,11 @@ public class Match {
     }
 
     public List<UUID> getParticipantIds() {
-        List<UUID> participants = new ArrayList<>();
+        Set<UUID> participants = new LinkedHashSet<>();
         if (teamAAttackerId != null) participants.add(teamAAttackerId);
         if (teamADefenderId != null) participants.add(teamADefenderId);
         if (teamBAttackerId != null) participants.add(teamBAttackerId);
         if (teamBDefenderId != null) participants.add(teamBDefenderId);
-        return participants;
+        return new ArrayList<>(participants);
     }
 }

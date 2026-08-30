@@ -39,13 +39,21 @@ const selectedBadgeTitle = computed(() => {
   if (selectedBadge.value.nameKey && te(selectedBadge.value.nameKey)) {
     return t(selectedBadge.value.nameKey)
   }
-  return selectedBadge.value.code.replace(/_/g, ' ')
+  const fallbackKey = `achievements.${selectedBadge.value.code.toLowerCase()}.title`
+  if (te(fallbackKey)) {
+    return t(fallbackKey)
+  }
+  return t('achievements.unknownTitle', 'Achievement')
 })
 
 const selectedBadgeDescription = computed(() => {
   if (!selectedBadge.value) return ''
   if (selectedBadge.value.descriptionKey && te(selectedBadge.value.descriptionKey)) {
     return t(selectedBadge.value.descriptionKey)
+  }
+  const fallbackKey = `achievements.${selectedBadge.value.code.toLowerCase()}.description`
+  if (te(fallbackKey)) {
+    return t(fallbackKey)
   }
   return ''
 })
@@ -86,7 +94,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
 <template>
   <section
     data-testid="profile-badges-section"
-    class="w-full bg-surface-container-low/60 backdrop-blur-sm rounded-2xl p-5 border border-white/5 space-y-4"
+    class="ch-profile-badges w-full bg-surface-container-low/60 backdrop-blur-sm rounded-2xl p-5 border border-white/5 space-y-4"
   >
     <!-- Section Header -->
     <div class="flex items-center justify-between">

@@ -1,5 +1,8 @@
 package com.tictactore.controller;
 
+import com.tictactore.model.Achievement;
+import com.tictactore.repository.AchievementRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,6 +17,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -42,6 +46,22 @@ class AchievementControllerATDDTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AchievementRepository achievementRepository;
+
+    @BeforeEach
+    void setUp() {
+        if (achievementRepository.count() == 0) {
+            achievementRepository.saveAll(List.of(
+                    Achievement.builder().code("FIRST_WIN").category("MILESTONE").nameKey("achievements.first_win.title").descriptionKey("achievements.first_win.description").icon("trophy").build(),
+                    Achievement.builder().code("MATCHES_10").category("EXPERIENCE").nameKey("achievements.matches_10.title").descriptionKey("achievements.matches_10.description").icon("flame").build(),
+                    Achievement.builder().code("CLEAN_SHEET").category("SKILL").nameKey("achievements.clean_sheet.title").descriptionKey("achievements.clean_sheet.description").icon("shield").build(),
+                    Achievement.builder().code("STRIKER_50").category("OFFENSE").nameKey("achievements.striker_50.title").descriptionKey("achievements.striker_50.description").icon("target").build(),
+                    Achievement.builder().code("DEFENSE_WALL").category("DEFENSE").nameKey("achievements.defense_wall.title").descriptionKey("achievements.defense_wall.description").icon("wall").build()
+            ));
+        }
+    }
 
     @Nested
     @DisplayName("GET /api/v1/players/{id}/achievements Endpoint Specs")

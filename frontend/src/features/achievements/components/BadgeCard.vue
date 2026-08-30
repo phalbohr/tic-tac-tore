@@ -17,12 +17,20 @@ const localizedTitle = computed(() => {
   if (props.badge.nameKey && te(props.badge.nameKey)) {
     return t(props.badge.nameKey)
   }
-  return props.badge.code.replace(/_/g, ' ')
+  const fallbackKey = `achievements.${props.badge.code.toLowerCase()}.title`
+  if (te(fallbackKey)) {
+    return t(fallbackKey)
+  }
+  return t('achievements.unknownTitle', 'Achievement')
 })
 
 const localizedDescription = computed(() => {
   if (props.badge.descriptionKey && te(props.badge.descriptionKey)) {
     return t(props.badge.descriptionKey)
+  }
+  const fallbackKey = `achievements.${props.badge.code.toLowerCase()}.description`
+  if (te(fallbackKey)) {
+    return t(fallbackKey)
   }
   return ''
 })
@@ -51,7 +59,7 @@ const iconName = computed(() => {
     data-testid="badge-card"
     :data-unlocked="badge.isUnlocked"
     @click="emit('select', badge)"
-    class="relative group w-full flex flex-col items-center p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    class="ch-badge-card relative group w-full flex flex-col items-center p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     :class="[
       badge.isUnlocked
         ? 'bg-surface-container-low/90 hover:bg-surface-container-high/90 border-primary/30 shadow-md hover:shadow-lg'

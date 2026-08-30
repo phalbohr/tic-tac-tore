@@ -350,6 +350,7 @@
     "unlocked": "Unlocked",
     "locked": "Locked",
     "empty": "No achievements available",
+    "unknownTitle": "Achievement",
     "first_win": {
       "title": "First Win",
       "description": "Win your first foosball match."

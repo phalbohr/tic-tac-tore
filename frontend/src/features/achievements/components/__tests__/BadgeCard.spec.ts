@@ -48,6 +48,7 @@ describe('[Story 7.1] BadgeCard.vue', () => {
     })
 
     expect(wrapper.find('[data-testid="badge-card"]').attributes('data-unlocked')).toBe('true')
+    expect(wrapper.find('[data-testid="badge-card"]').classes()).toContain('ch-badge-card')
     expect(wrapper.text()).toContain('First Win')
     expect(wrapper.text()).toContain('Unlocked')
   })
@@ -60,6 +61,7 @@ describe('[Story 7.1] BadgeCard.vue', () => {
     })
 
     expect(wrapper.find('[data-testid="badge-card"]').attributes('data-unlocked')).toBe('false')
+    expect(wrapper.find('[data-testid="badge-card"]').classes()).toContain('ch-badge-card')
     expect(wrapper.text()).toContain('Locked')
     expect(wrapper.text()).toContain('lock')
   })

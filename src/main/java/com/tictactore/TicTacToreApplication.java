@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableScheduling
-@org.springframework.scheduling.annotation.EnableAsync
 public class TicTacToreApplication {
 
 	public static void main(String[] args) {

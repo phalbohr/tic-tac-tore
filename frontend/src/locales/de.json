@@ -350,6 +350,7 @@
     "unlocked": "Freigeschaltet",
     "locked": "Gesperrt",
     "empty": "Keine Erfolge verfügbar",
+    "unknownTitle": "Erfolg",
     "first_win": {
       "title": "Erster Sieg",
       "description": "Gewinne dein erstes Tischfußballspiel."
