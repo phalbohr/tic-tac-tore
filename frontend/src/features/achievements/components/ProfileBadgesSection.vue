@@ -94,19 +94,19 @@ function formatUnlockDate(unlockedAt: string | null): string {
 <template>
   <section
     data-testid="profile-badges-section"
-    class="ch-profile-badges w-full bg-surface-container-low/60 backdrop-blur-sm rounded-2xl p-5 border border-white/5 space-y-4"
+    class="ch-profile-badges w-full bg-ch-surface-card/60 backdrop-blur-sm rounded-2xl p-5 border border-ch-border space-y-4"
   >
     <!-- Section Header -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary text-xl">military_tech</span>
-        <h3 class="font-headline text-sm font-bold text-on-surface uppercase tracking-wider">
+        <span class="material-symbols-outlined text-ch-primary text-xl">military_tech</span>
+        <h3 class="font-headline text-sm font-bold text-ch-text-primary uppercase tracking-wider">
           {{ t('achievements.title') }}
         </h3>
       </div>
       <div
         v-if="achievementStore.totalAvailable > 0"
-        class="font-headline text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center gap-1.5"
+        class="font-headline text-xs font-semibold px-2.5 py-1 rounded-full bg-ch-surface-highest text-ch-text-secondary flex items-center gap-1.5"
       >
         <span class="text-amber-400 font-bold">{{ achievementStore.totalUnlocked }}</span>
         <span>/</span>
@@ -116,13 +116,13 @@ function formatUnlockDate(unlockedAt: string | null): string {
 
     <!-- Loading State -->
     <div v-if="achievementStore.loading && achievementStore.achievements.length === 0" class="py-8 flex justify-center">
-      <span class="material-symbols-outlined animate-spin text-2xl text-primary">sync</span>
+      <span class="material-symbols-outlined animate-spin text-2xl text-ch-primary">sync</span>
     </div>
 
     <!-- Empty State -->
     <div
       v-else-if="achievementStore.achievements.length === 0"
-      class="py-6 text-center text-xs text-on-surface-variant/60 font-headline"
+      class="py-6 text-center text-xs text-ch-text-secondary/60 font-headline"
     >
       {{ t('achievements.empty') }}
     </div>
@@ -150,7 +150,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
         aria-modal="true"
         @click.self="closeBadgeModal"
       >
-        <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-5 shadow-2xl border border-white/10 text-center">
+        <div class="w-full max-w-sm bg-ch-surface-card rounded-2xl p-6 space-y-5 shadow-2xl border border-ch-border text-center">
           <!-- Icon -->
           <div class="flex justify-center">
             <div
@@ -158,7 +158,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
               :class="[
                 selectedBadge.isUnlocked
                   ? 'bg-gradient-to-br from-amber-400/20 to-yellow-600/30 text-amber-300 border border-amber-400/30'
-                  : 'bg-surface-container-highest text-on-surface-variant/40 border border-white/5'
+                  : 'bg-ch-surface-highest text-ch-text-secondary/40 border border-ch-border'
               ]"
             >
               <span class="material-symbols-outlined text-3xl">{{ selectedBadgeIcon }}</span>
@@ -167,30 +167,30 @@ function formatUnlockDate(unlockedAt: string | null): string {
 
           <!-- Title & Category -->
           <div class="space-y-1">
-            <h4 class="font-headline text-lg font-bold text-on-surface">
+            <h4 class="font-headline text-lg font-bold text-ch-text-primary">
               {{ selectedBadgeTitle }}
             </h4>
-            <p class="text-[10px] font-headline uppercase tracking-widest text-primary/80 font-semibold">
+            <p class="text-[10px] font-headline uppercase tracking-widest text-ch-primary/80 font-semibold">
               {{ selectedBadge.category }}
             </p>
           </div>
 
           <!-- Description -->
-          <p class="text-xs text-on-surface-variant leading-relaxed">
+          <p class="text-xs text-ch-text-secondary leading-relaxed">
             {{ selectedBadgeDescription }}
           </p>
 
           <!-- Unlock Status & Date -->
-          <div class="p-3 rounded-xl bg-surface-container-highest/60 border border-white/5 space-y-1">
+          <div class="p-3 rounded-xl bg-ch-surface-highest/60 border border-ch-border space-y-1">
             <div class="flex items-center justify-center gap-1.5 text-xs font-semibold"
-              :class="selectedBadge.isUnlocked ? 'text-amber-400' : 'text-on-surface-variant/50'"
+              :class="selectedBadge.isUnlocked ? 'text-amber-400' : 'text-ch-text-secondary/50'"
             >
               <span class="material-symbols-outlined text-sm">
                 {{ selectedBadge.isUnlocked ? 'check_circle' : 'lock' }}
               </span>
               <span>{{ selectedBadge.isUnlocked ? t('achievements.unlocked') : t('achievements.locked') }}</span>
             </div>
-            <div v-if="selectedBadge.isUnlocked && selectedBadge.unlockedAt" class="text-[10px] text-on-surface-variant/70 font-headline">
+            <div v-if="selectedBadge.isUnlocked && selectedBadge.unlockedAt" class="text-[10px] text-ch-text-secondary/70 font-headline">
               {{ formatUnlockDate(selectedBadge.unlockedAt) }}
             </div>
           </div>
@@ -199,7 +199,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
           <button
             type="button"
             @click="closeBadgeModal"
-            class="w-full py-2.5 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-headline font-bold text-xs transition-colors"
+            class="w-full py-2.5 rounded-xl bg-ch-surface-highest hover:bg-ch-surface-highest/80 text-ch-text-primary font-headline font-bold text-xs transition-colors"
           >
             {{ t('common.close') }}
           </button>

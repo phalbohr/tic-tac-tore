@@ -26,9 +26,6 @@ public class AchievementController {
             @PathVariable("id") UUID id,
             @AuthenticationPrincipal Object principal
     ) {
-        if (principal == null) {
-            return ResponseEntity.status(401).build();
-        }
         PlayerAchievementsSummaryResponse response = achievementService.getPlayerAchievements(id);
         return ResponseEntity.ok(response);
     }

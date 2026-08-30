@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,4 +49,7 @@ public class PlayerAchievement {
     @CreationTimestamp
     @Column(name = "unlocked_at", nullable = false, updatable = false)
     private Instant unlockedAt;
+
+    @Version
+    private Long version;
 }

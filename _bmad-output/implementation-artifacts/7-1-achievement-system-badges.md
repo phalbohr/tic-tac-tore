@@ -184,6 +184,7 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 - 2026-08-30: Initialized comprehensive Story 7.1 specification, Acceptance Criteria, Tasks, and Dev Notes.
 - 2026-08-30: Implemented Story 7.1 fullstack features (database migrations, entities, evaluators, event listeners, API endpoint, Vue components, i18n, unit and ATDD tests). Status transitioned to review.
 - 2026-08-30: Addressed all code review findings (resolved `@AuthenticationPrincipal` in `AchievementController`, added `ch-` tokens and safe fallback localization in `BadgeCard.vue` and `ProfileBadgesSection.vue`, deduplicated participant IDs in `Match.java`, removed redundant `AchievementCatalogInitializer.java`, moved `@EnableAsync` to dedicated `AsyncConfig.java`, and verified with full local CI test suite).
+- 2026-08-30: Addressed follow-up review findings (added `@Version private Long version;` to `Achievement.java` and `PlayerAchievement.java` with Flyway V16 schema update, converted UI components to Clubhouse Editorial `ch-` utility classes, and removed redundant `principal == null` check in `AchievementController.java`). All CI checks pass.
 
 ### Review Findings
 

@@ -59,11 +59,11 @@ const iconName = computed(() => {
     data-testid="badge-card"
     :data-unlocked="badge.isUnlocked"
     @click="emit('select', badge)"
-    class="ch-badge-card relative group w-full flex flex-col items-center p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    class="ch-badge-card relative group w-full flex flex-col items-center p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ch-primary"
     :class="[
       badge.isUnlocked
-        ? 'bg-surface-container-low/90 hover:bg-surface-container-high/90 border-primary/30 shadow-md hover:shadow-lg'
-        : 'bg-surface-container-low/40 hover:bg-surface-container-low/70 border-white/5 opacity-60 hover:opacity-80'
+        ? 'bg-ch-surface-card/90 hover:bg-ch-surface-highest/90 border-ch-primary/30 shadow-md hover:shadow-lg'
+        : 'bg-ch-surface-card/40 hover:bg-ch-surface-card/70 border-ch-border opacity-60 hover:opacity-80'
     ]"
   >
     <!-- Badge Icon Container -->
@@ -72,7 +72,7 @@ const iconName = computed(() => {
       :class="[
         badge.isUnlocked
           ? 'bg-gradient-to-br from-amber-400/20 to-yellow-600/30 text-amber-300 border border-amber-400/30 shadow-inner'
-          : 'bg-surface-container-highest text-on-surface-variant/40 border border-white/5'
+          : 'bg-ch-surface-highest text-ch-text-secondary/40 border border-ch-border'
       ]"
     >
       <span class="material-symbols-outlined text-2xl">
@@ -83,14 +83,14 @@ const iconName = computed(() => {
     <!-- Badge Title -->
     <span
       class="font-headline text-xs font-bold tracking-tight line-clamp-1"
-      :class="badge.isUnlocked ? 'text-on-surface' : 'text-on-surface-variant/70'"
+      :class="badge.isUnlocked ? 'text-ch-text-primary' : 'text-ch-text-secondary/70'"
     >
       {{ localizedTitle }}
     </span>
 
     <!-- Status Subtitle -->
     <span class="text-[9px] font-headline uppercase tracking-wider mt-1 font-semibold"
-      :class="badge.isUnlocked ? 'text-amber-400/90' : 'text-on-surface-variant/40'"
+      :class="badge.isUnlocked ? 'text-amber-400/90' : 'text-ch-text-secondary/40'"
     >
       {{ badge.isUnlocked ? t('achievements.unlocked') : t('achievements.locked') }}
     </span>
@@ -98,7 +98,7 @@ const iconName = computed(() => {
     <!-- Locked Overlay Lock Badge -->
     <div
       v-if="!badge.isUnlocked"
-      class="absolute top-2 right-2 text-on-surface-variant/40"
+      class="absolute top-2 right-2 text-ch-text-secondary/40"
       aria-hidden="true"
     >
       <span class="material-symbols-outlined text-xs">lock</span>
