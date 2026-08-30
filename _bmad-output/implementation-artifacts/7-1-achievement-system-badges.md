@@ -111,6 +111,14 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
   - Adhere to the "Clubhouse Editorial" aesthetic with `ch-` class tokens (`bg-ch-surface-card`, `text-ch-primary`, `border-ch-border`).
   - Do NOT use garish neon gaming styling or flashy pop-ups. Maintain editorial restraint.
 
+### ATDD Artifacts
+
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-7-1-achievement-system-badges.md`
+- Backend ATDD Controller test: `src/test/java/com/tictactore/controller/AchievementControllerATDDTest.java`
+- Frontend E2E test: `frontend/e2e/achievements-profile.spec.ts`
+- Frontend Store test: `frontend/src/features/achievements/stores/__tests__/useAchievementStore.spec.ts`
+- Frontend Component test: `frontend/src/features/achievements/components/__tests__/BadgeCard.spec.ts`
+
 ## Dev Agent Record
 
 ### Implementation Plan
