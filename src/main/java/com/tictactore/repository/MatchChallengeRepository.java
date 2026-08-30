@@ -46,6 +46,17 @@ public interface MatchChallengeRepository extends JpaRepository<MatchChallenge, 
            "ORDER BY mc.createdAt DESC")
     List<MatchChallenge> findByChallengerIdAndStatus(@Param("challengerId") UUID challengerId, @Param("status") ChallengeStatus status);
 
+    @Query("SELECT COUNT(mc) > 0 FROM MatchChallenge mc " +
+           "WHERE mc.status = :status AND (" +
+           "  (mc.challenger.id = :user1 AND mc.targetPlayer.id = :user2) OR " +
+           "  (mc.challenger.id = :user2 AND mc.targetPlayer.id = :user1)" +
+           ")")
+    boolean existsPendingBetweenPlayers(
+            @Param("user1") UUID user1,
+            @Param("user2") UUID user2,
+            @Param("status") ChallengeStatus status
+    );
+
     boolean existsByChallengerIdAndTargetPlayerIdAndStatus(UUID challengerId, UUID targetPlayerId, ChallengeStatus status);
 
     boolean existsByChallengerIdAndTargetGroupIdAndStatus(UUID challengerId, UUID targetGroupId, ChallengeStatus status);

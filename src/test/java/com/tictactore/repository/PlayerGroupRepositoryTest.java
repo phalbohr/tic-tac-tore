@@ -78,6 +78,21 @@ class PlayerGroupRepositoryTest {
     }
 
     @Test
+    void shouldFindGroupByIdWithMembers() {
+        var group = playerGroupRepository.save(PlayerGroup.builder()
+                .name("Alpha Squad")
+                .creatorId(creator.getId())
+                .isFavorite(true)
+                .members(Set.of(member1, member2))
+                .build());
+
+        var found = playerGroupRepository.findByIdWithMembers(group.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getMembers()).hasSize(2);
+    }
+
+    @Test
     void shouldCheckExistenceByCreatorIdAndNameIgnoreCase() {
         playerGroupRepository.save(PlayerGroup.builder()
                 .name("Friday Crew")

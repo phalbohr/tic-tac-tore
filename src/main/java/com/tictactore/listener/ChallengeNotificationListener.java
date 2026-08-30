@@ -39,7 +39,7 @@ public class ChallengeNotificationListener {
                         )
                 );
             } else if (event.targetGroupId() != null) {
-                playerGroupRepository.findById(event.targetGroupId()).ifPresent(group -> {
+                playerGroupRepository.findByIdWithMembers(event.targetGroupId()).ifPresent(group -> {
                     List<User> recipients = group.getMembers().stream()
                             .filter(member -> !member.getId().equals(event.challengerId()))
                             .toList();

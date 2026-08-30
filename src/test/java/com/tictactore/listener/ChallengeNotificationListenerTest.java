@@ -80,7 +80,7 @@ class ChallengeNotificationListenerTest {
             var group = PlayerGroup.builder().id(targetGroupId).name("Squad").members(Set.of(challengerUser, member1, member2)).build();
             var event = new ChallengeCreatedEvent(challengeId, challengerId, "Challenger", null, targetGroupId, MatchType.TWO_VS_TWO);
 
-            when(playerGroupRepository.findById(targetGroupId)).thenReturn(Optional.of(group));
+            when(playerGroupRepository.findByIdWithMembers(targetGroupId)).thenReturn(Optional.of(group));
 
             challengeNotificationListener.handleChallengeCreated(event);
 

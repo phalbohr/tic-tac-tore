@@ -98,7 +98,7 @@ class ChallengeServiceTest {
             var request = new CreateChallengeRequest(targetPlayerId, null, MatchType.ONE_VS_ONE, null, "Game on!");
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(userRepository.findById(targetPlayerId)).thenReturn(Optional.of(targetPlayerUser));
-            when(matchChallengeRepository.existsByChallengerIdAndTargetPlayerIdAndStatus(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(false);
+            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(false);
 
             var saved = MatchChallenge.builder()
                     .id(UUID.randomUUID())
@@ -159,7 +159,16 @@ class ChallengeServiceTest {
 
             assertThatThrownBy(() -> challengeService.createChallenge(challengerId, request))
                     .isInstanceOf(ValidationException.class)
-                    .hasMessageContaining("Target player or group must be specified");
+                    .hasMessageContaining("Challenge must target either a player or a group, not both");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenBothPlayerAndGroupTargetsSpecified() {
+            var request = new CreateChallengeRequest(targetPlayerId, targetGroupId, MatchType.ONE_VS_ONE, null, null);
+
+            assertThatThrownBy(() -> challengeService.createChallenge(challengerId, request))
+                    .isInstanceOf(ValidationException.class)
+                    .hasMessageContaining("Challenge must target either a player or a group, not both");
         }
 
         @Test
@@ -176,7 +185,7 @@ class ChallengeServiceTest {
             var request = new CreateChallengeRequest(targetPlayerId, null, MatchType.ONE_VS_ONE, null, null);
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(userRepository.findById(targetPlayerId)).thenReturn(Optional.of(targetPlayerUser));
-            when(matchChallengeRepository.existsByChallengerIdAndTargetPlayerIdAndStatus(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(true);
+            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(true);
 
             assertThatThrownBy(() -> challengeService.createChallenge(challengerId, request))
                     .isInstanceOf(ChallengeConflictException.class)

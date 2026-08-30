@@ -109,6 +109,9 @@ public class MatchChallenge {
     }
 
     private void validateTargetAuthorization(UUID userId, Collection<UUID> userGroupIds, String action) {
+        if (this.challenger != null && this.challenger.getId().equals(userId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Challenger cannot " + action + " their own challenge");
+        }
         boolean isDirectTarget = this.targetPlayer != null && this.targetPlayer.getId().equals(userId);
         boolean isGroupMember = this.targetGroup != null && userGroupIds != null && userGroupIds.contains(this.targetGroup.getId());
 

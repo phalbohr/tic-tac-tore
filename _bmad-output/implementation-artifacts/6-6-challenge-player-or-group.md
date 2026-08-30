@@ -4,7 +4,7 @@ baseline_commit: 2b5390d79d67566ca0b29849508e64cbe3943360
 
 # Story 6.6: Challenge Player or Group
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -195,10 +195,10 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
 
 ### Review Findings
 
-- [ ] [Review][Patch] Flawed conflict detection allows duplicate/crossed challenges [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:65]
-- [ ] [Review][Patch] Group members can accept their own challenges [src/main/java/com/tictactore/model/MatchChallenge.java:111]
-- [ ] [Review][Patch] LazyInitializationException in ChallengeNotificationListener [src/main/java/com/tictactore/listener/ChallengeNotificationListener.java:43]
-- [ ] [Review][Patch] Target validation allows simultaneous player and group targets [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:51]
+- [x] [Review][Patch] Flawed conflict detection allows duplicate/crossed challenges [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:65]
+- [x] [Review][Patch] Group members can accept their own challenges [src/main/java/com/tictactore/model/MatchChallenge.java:111]
+- [x] [Review][Patch] LazyInitializationException in ChallengeNotificationListener [src/main/java/com/tictactore/listener/ChallengeNotificationListener.java:43]
+- [x] [Review][Patch] Target validation allows simultaneous player and group targets [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:51]
 - [x] [Review][Defer] Redundant authentication boilerplate in controller [src/main/java/com/tictactore/controller/ChallengeController.java] — deferred, pre-existing
 - [x] [Review][Defer] Database chattiness in createChallenge [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java] — deferred, pre-existing
 - [x] [Review][Defer] SQL IN clause hack with random UUID [src/main/java/com/tictactore/repository/MatchChallengeRepository.java:36] — deferred, pre-existing
@@ -303,5 +303,57 @@ Gemini 3.7 Flash (High)
 
 ### Completion Notes List
 
+- Addressed review findings:
+  1. Fixed target validation in `ChallengeServiceImpl`: rejecting requests containing both player and group targets.
+  2. Fixed pending challenge conflict detection in `MatchChallengeRepository`: added `existsPendingBetweenPlayers` checking both challenger->target and target->challenger directions for pending status.
+  3. Fixed authorization in `MatchChallenge.validateTargetAuthorization`: prevented group members who are the challengers from accepting/declining their own group challenge.
+  4. Fixed `LazyInitializationException` risk in `ChallengeNotificationListener`: added `PlayerGroupRepository.findByIdWithMembers` using `LEFT JOIN FETCH pg.members` for eager retrieval across async boundaries.
+  5. Added unit tests for `MatchChallengeTest`, updated `ChallengeServiceTest`, `MatchChallengeRepositoryTest`, `PlayerGroupRepositoryTest`, and `ChallengeNotificationListenerTest`.
+  6. Verified 100% test pass rate in `./scripts/ci-local.sh` (backend + frontend unit + E2E tests).
+
 ### File List
+
+- `src/main/resources/db/migration/V15__create_match_challenges.sql`
+- `src/main/java/com/tictactore/model/ChallengeStatus.java`
+- `src/main/java/com/tictactore/model/MatchChallenge.java`
+- `src/main/java/com/tictactore/model/NotificationLog.java`
+- `src/main/java/com/tictactore/dto/NotificationLogDto.java`
+- `src/main/java/com/tictactore/dto/CreateChallengeRequest.java`
+- `src/main/java/com/tictactore/dto/ChallengeResponse.java`
+- `src/main/java/com/tictactore/dto/ChallengeActionResponse.java`
+- `src/main/java/com/tictactore/dto/PushNotificationPayload.java`
+- `src/main/java/com/tictactore/event/ChallengeCreatedEvent.java`
+- `src/main/java/com/tictactore/event/ChallengeAcceptedEvent.java`
+- `src/main/java/com/tictactore/event/ChallengeDeclinedEvent.java`
+- `src/main/java/com/tictactore/repository/MatchChallengeRepository.java`
+- `src/main/java/com/tictactore/repository/PlayerGroupRepository.java`
+- `src/main/java/com/tictactore/service/ChallengeService.java`
+- `src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java`
+- `src/main/java/com/tictactore/service/operation/ChallengeOperation.java`
+- `src/main/java/com/tictactore/service/PushNotificationService.java`
+- `src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java`
+- `src/main/java/com/tictactore/listener/ChallengeNotificationListener.java`
+- `src/main/java/com/tictactore/controller/ChallengeController.java`
+- `src/test/java/com/tictactore/model/MatchChallengeTest.java`
+- `src/test/java/com/tictactore/service/ChallengeServiceTest.java`
+- `src/test/java/com/tictactore/repository/MatchChallengeRepositoryTest.java`
+- `src/test/java/com/tictactore/repository/PlayerGroupRepositoryTest.java`
+- `src/test/java/com/tictactore/listener/ChallengeNotificationListenerTest.java`
+- `src/test/java/com/tictactore/controller/ChallengeControllerTest.java`
+- `frontend/src/services/challengeService.ts`
+- `frontend/src/features/challenge/stores/useChallengeStore.ts`
+- `frontend/src/features/challenge/components/ChallengeModal.vue`
+- `frontend/src/features/challenge/components/PendingChallenges.vue`
+- `frontend/src/features/challenge/components/__tests__/ChallengeModal.spec.ts`
+- `frontend/src/features/challenge/components/__tests__/PendingChallenges.spec.ts`
+- `frontend/src/features/challenge/stores/__tests__/useChallengeStore.spec.ts`
+- `frontend/src/features/stats/views/LeaderboardView.vue`
+- `frontend/src/features/stats/views/__tests__/LeaderboardView.spec.ts`
+- `frontend/src/features/profile/components/PlayerGroupSection.vue`
+- `frontend/src/features/match/components/PlayerSearchOverlay.vue`
+- `frontend/src/views/HomeView.vue`
+- `frontend/public/sw.js`
+- `frontend/src/locales/en.json`
+- `frontend/src/locales/de.json`
+- `frontend/e2e/challenge-flow.spec.ts`
 

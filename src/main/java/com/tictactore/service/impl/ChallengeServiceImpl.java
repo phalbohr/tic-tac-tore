@@ -48,8 +48,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ChallengeResponse createChallenge(UUID challengerId, CreateChallengeRequest request) {
-        if (request.targetPlayerId() == null && request.targetGroupId() == null) {
-            throw new ValidationException("Target player or group must be specified");
+        if ((request.targetPlayerId() == null && request.targetGroupId() == null)
+                || (request.targetPlayerId() != null && request.targetGroupId() != null)) {
+            throw new ValidationException("Challenge must target either a player or a group, not both");
         }
         if (request.targetPlayerId() != null && request.targetPlayerId().equals(challengerId)) {
             throw new ValidationException("Challenger cannot challenge themselves");
@@ -62,7 +63,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (request.targetPlayerId() != null) {
             targetPlayer = userRepository.findById(request.targetPlayerId())
                     .orElseThrow(() -> new ResourceNotFoundException("Target player not found: " + request.targetPlayerId()));
-            if (matchChallengeRepository.existsByChallengerIdAndTargetPlayerIdAndStatus(challengerId, request.targetPlayerId(), ChallengeStatus.PENDING)) {
+            if (matchChallengeRepository.existsPendingBetweenPlayers(challengerId, request.targetPlayerId(), ChallengeStatus.PENDING)) {
                 throw new ChallengeConflictException("An active pending challenge already exists for this player");
             }
         }

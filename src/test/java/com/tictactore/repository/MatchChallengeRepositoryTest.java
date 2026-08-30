@@ -171,14 +171,17 @@ class MatchChallengeRepositoryTest {
         matchChallengeRepository.save(groupChallenge);
         entityManager.flush();
 
-        var playerExists = matchChallengeRepository.existsByChallengerIdAndTargetPlayerIdAndStatus(
+        var playerExistsDirect = matchChallengeRepository.existsPendingBetweenPlayers(
                 challenger.getId(), targetPlayer.getId(), ChallengeStatus.PENDING);
+        var playerExistsReverse = matchChallengeRepository.existsPendingBetweenPlayers(
+                targetPlayer.getId(), challenger.getId(), ChallengeStatus.PENDING);
         var groupExists = matchChallengeRepository.existsByChallengerIdAndTargetGroupIdAndStatus(
                 challenger.getId(), targetGroup.getId(), ChallengeStatus.PENDING);
-        var playerNotExists = matchChallengeRepository.existsByChallengerIdAndTargetPlayerIdAndStatus(
+        var playerNotExists = matchChallengeRepository.existsPendingBetweenPlayers(
                 challenger.getId(), groupMember.getId(), ChallengeStatus.PENDING);
 
-        assertThat(playerExists).isTrue();
+        assertThat(playerExistsDirect).isTrue();
+        assertThat(playerExistsReverse).isTrue();
         assertThat(groupExists).isTrue();
         assertThat(playerNotExists).isFalse();
     }
