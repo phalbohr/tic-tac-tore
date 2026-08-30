@@ -62,7 +62,7 @@ class AchievementServiceTest {
     class GetPlayerAchievementsTests {
 
         @Test
-        @DisplayName("should return summary with unlocked and locked badges")
+        @DisplayName("should return summary with unlocked and locked badges and progress info")
         void shouldReturnSummaryWithUnlockedAndLockedBadges() {
             var playerId = UUID.randomUUID();
             var badge1 = Achievement.builder()
@@ -87,8 +87,46 @@ class AchievementServiceTest {
                     .unlockedAt(Instant.now())
                     .build();
 
+            evaluators.add(new AchievementEvaluator() {
+                @Override
+                public String getAchievementCode() {
+                    return "FIRST_WIN";
+                }
+
+                @Override
+                public boolean evaluate(UUID userId, Match match, PlayerStatsContext stats) {
+                    return true;
+                }
+
+                @Override
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                    return new com.tictactore.service.achievement.ProgressInfo(1, 1, true);
+                }
+            });
+
+            evaluators.add(new AchievementEvaluator() {
+                @Override
+                public String getAchievementCode() {
+                    return "MATCHES_10";
+                }
+
+                @Override
+                public boolean evaluate(UUID userId, Match match, PlayerStatsContext stats) {
+                    return false;
+                }
+
+                @Override
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                    return new com.tictactore.service.achievement.ProgressInfo(4, 10, true);
+                }
+            });
+
             when(achievementRepository.findAll()).thenReturn(List.of(badge1, badge2));
             when(playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(playerId)).thenReturn(List.of(playerAchievement));
+            when(matchRepository.countConfirmedMatchesByPlayerId(playerId)).thenReturn(4L);
+            when(matchRepository.countConfirmedMatchesAsDefender(playerId)).thenReturn(2L);
+            when(matchRepository.sumGoalsAsAttacker(playerId)).thenReturn(8L);
+            when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(List.of());
 
             var response = achievementService.getPlayerAchievements(playerId);
 
@@ -99,9 +137,62 @@ class AchievementServiceTest {
             var firstWinDto = response.achievements().stream().filter(a -> a.code().equals("FIRST_WIN")).findFirst().orElseThrow();
             assertThat(firstWinDto.isUnlocked()).isTrue();
             assertThat(firstWinDto.unlockedAt()).isNotNull();
+            assertThat(firstWinDto.hasProgress()).isTrue();
+            assertThat(firstWinDto.currentProgress()).isEqualTo(1L);
+            assertThat(firstWinDto.targetValue()).isEqualTo(1L);
             var matches10Dto = response.achievements().stream().filter(a -> a.code().equals("MATCHES_10")).findFirst().orElseThrow();
             assertThat(matches10Dto.isUnlocked()).isFalse();
             assertThat(matches10Dto.unlockedAt()).isNull();
+            assertThat(matches10Dto.hasProgress()).isTrue();
+            assertThat(matches10Dto.currentProgress()).isEqualTo(4L);
+            assertThat(matches10Dto.targetValue()).isEqualTo(10L);
+        }
+
+        @Test
+        @DisplayName("should cap currentProgress at targetValue - 1 when locked badge has reached target threshold")
+        void shouldCapCurrentProgressWhenLockedBadgeReachesTarget() {
+            var playerId = UUID.randomUUID();
+            var badge = Achievement.builder()
+                    .id(UUID.randomUUID())
+                    .code("MATCHES_10")
+                    .category("EXPERIENCE")
+                    .nameKey("achievements.matches_10.title")
+                    .descriptionKey("achievements.matches_10.description")
+                    .icon("flame")
+                    .build();
+
+            evaluators.add(new AchievementEvaluator() {
+                @Override
+                public String getAchievementCode() {
+                    return "MATCHES_10";
+                }
+
+                @Override
+                public boolean evaluate(UUID userId, Match match, PlayerStatsContext stats) {
+                    return false;
+                }
+
+                @Override
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                    return new com.tictactore.service.achievement.ProgressInfo(10, 10, true);
+                }
+            });
+
+            when(achievementRepository.findAll()).thenReturn(List.of(badge));
+            when(playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(playerId)).thenReturn(List.of());
+            when(matchRepository.countConfirmedMatchesByPlayerId(playerId)).thenReturn(10L);
+            when(matchRepository.countConfirmedMatchesAsDefender(playerId)).thenReturn(0L);
+            when(matchRepository.sumGoalsAsAttacker(playerId)).thenReturn(0L);
+            when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(List.of());
+
+            var response = achievementService.getPlayerAchievements(playerId);
+
+            assertThat(response.achievements()).hasSize(1);
+            var matches10Dto = response.achievements().get(0);
+            assertThat(matches10Dto.isUnlocked()).isFalse();
+            assertThat(matches10Dto.hasProgress()).isTrue();
+            assertThat(matches10Dto.currentProgress()).isEqualTo(9L);
+            assertThat(matches10Dto.targetValue()).isEqualTo(10L);
         }
     }
 

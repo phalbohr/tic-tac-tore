@@ -33,6 +33,9 @@ describe('[Story 7.2 ATDD] Anti-Achievement Badge Rendering (BadgeCard.vue)', ()
     icon: 'egg',
     isUnlocked: true,
     unlockedAt: '2026-08-30T14:00:00Z',
+    currentProgress: null,
+    targetValue: null,
+    hasProgress: false,
   }
 
   const generousHostBadge = {
@@ -44,6 +47,9 @@ describe('[Story 7.2 ATDD] Anti-Achievement Badge Rendering (BadgeCard.vue)', ()
     icon: 'volunteer_activism',
     isUnlocked: true,
     unlockedAt: '2026-08-30T14:05:00Z',
+    currentProgress: null,
+    targetValue: null,
+    hasProgress: false,
   }
 
   const sieveDefenseBadge = {
@@ -55,6 +61,9 @@ describe('[Story 7.2 ATDD] Anti-Achievement Badge Rendering (BadgeCard.vue)', ()
     icon: 'water_drop',
     isUnlocked: false,
     unlockedAt: null,
+    currentProgress: null,
+    targetValue: null,
+    hasProgress: false,
   }
 
   const heartbreakerBadge = {
@@ -66,6 +75,9 @@ describe('[Story 7.2 ATDD] Anti-Achievement Badge Rendering (BadgeCard.vue)', ()
     icon: 'heart_broken',
     isUnlocked: true,
     unlockedAt: '2026-08-30T14:10:00Z',
+    currentProgress: null,
+    targetValue: null,
+    hasProgress: false,
   }
 
   it('[P0] [AC6] should render GOOSE_EGG anti-achievement with egg icon and styling', () => {

@@ -489,4 +489,74 @@ class AchievementEvaluatorTest {
             assertThat(result).isFalse();
         }
     }
+
+    @Nested
+    @DisplayName("Progress Calculation Tests")
+    class ProgressCalculationTests {
+
+        @Test
+        @DisplayName("should calculate progress for MatchesPlayedEvaluator")
+        void shouldCalculateMatchesProgress() {
+            var userId = UUID.randomUUID();
+            var stats = new PlayerStatsContext(userId, 5, 2, 10, 2);
+
+            var progress = matchesPlayedEvaluator.getProgress(userId, stats);
+
+            assertThat(progress.hasProgress()).isTrue();
+            assertThat(progress.current()).isEqualTo(5L);
+            assertThat(progress.target()).isEqualTo(10L);
+        }
+
+        @Test
+        @DisplayName("should calculate progress for StrikerGoalsEvaluator")
+        void shouldCalculateStrikerGoalsProgress() {
+            var userId = UUID.randomUUID();
+            var stats = new PlayerStatsContext(userId, 10, 5, 30, 2);
+
+            var progress = strikerGoalsEvaluator.getProgress(userId, stats);
+
+            assertThat(progress.hasProgress()).isTrue();
+            assertThat(progress.current()).isEqualTo(30L);
+            assertThat(progress.target()).isEqualTo(50L);
+        }
+
+        @Test
+        @DisplayName("should calculate progress for DefenseWallEvaluator")
+        void shouldCalculateDefenseWallProgress() {
+            var userId = UUID.randomUUID();
+            var stats = new PlayerStatsContext(userId, 10, 5, 10, 8);
+
+            var progress = defenseWallEvaluator.getProgress(userId, stats);
+
+            assertThat(progress.hasProgress()).isTrue();
+            assertThat(progress.current()).isEqualTo(8L);
+            assertThat(progress.target()).isEqualTo(10L);
+        }
+
+        @Test
+        @DisplayName("should calculate progress for FirstWinEvaluator")
+        void shouldCalculateFirstWinProgress() {
+            var userId = UUID.randomUUID();
+            var stats = new PlayerStatsContext(userId, 5, 0, 10, 2);
+
+            var progress = firstWinEvaluator.getProgress(userId, stats);
+
+            assertThat(progress.hasProgress()).isTrue();
+            assertThat(progress.current()).isEqualTo(0L);
+            assertThat(progress.target()).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("should return no progress for non-progressive evaluators")
+        void shouldReturnNoProgressForNonProgressiveEvaluator() {
+            var userId = UUID.randomUUID();
+            var stats = new PlayerStatsContext(userId, 10, 5, 20, 5);
+
+            var progress = cleanSheetEvaluator.getProgress(userId, stats);
+
+            assertThat(progress.hasProgress()).isFalse();
+            assertThat(progress.current()).isEqualTo(0L);
+            assertThat(progress.target()).isEqualTo(0L);
+        }
+    }
 }

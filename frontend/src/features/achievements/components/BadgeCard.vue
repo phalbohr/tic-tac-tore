@@ -33,17 +33,6 @@ const localizedTitle = computed(() => {
   return t('achievements.unknownTitle', 'Achievement')
 })
 
-const localizedDescription = computed(() => {
-  if (props.badge.descriptionKey && te(props.badge.descriptionKey)) {
-    return t(props.badge.descriptionKey)
-  }
-  const fallbackKey = `achievements.${props.badge.code.toLowerCase()}.description`
-  if (te(fallbackKey)) {
-    return t(fallbackKey)
-  }
-  return ''
-})
-
 const iconName = computed(() => {
   const icon = props.badge.icon
   return (icon && ICON_MAP[icon]) || icon || 'military_tech'
@@ -77,6 +66,20 @@ const statusClasses = computed(() => {
   }
   return isAntiAchievement.value ? 'text-ch-secondary' : 'text-ch-primary'
 })
+
+const showProgress = computed(() => Boolean(props.badge.hasProgress && !props.badge.isUnlocked && props.badge.targetValue))
+
+const progressPercentage = computed(() => {
+  if (!props.badge.targetValue || props.badge.targetValue <= 0) return 0
+  const cur = props.badge.currentProgress || 0
+  return Math.min(100, Math.max(0, (cur / props.badge.targetValue) * 100))
+})
+
+const progressRatioText = computed(() => {
+  const cur = props.badge.currentProgress ?? 0
+  const target = props.badge.targetValue ?? 0
+  return `${cur} / ${target}`
+})
 </script>
 
 <template>
@@ -109,6 +112,29 @@ const statusClasses = computed(() => {
     >
       {{ badge.isUnlocked ? t('achievements.unlocked') : t('achievements.locked') }}
     </span>
+
+    <!-- Mini Progress Bar for Locked Progressive Badges -->
+    <div
+      v-if="showProgress"
+      class="w-full mt-2 space-y-1"
+      data-testid="badge-progress-container"
+    >
+      <div
+        data-testid="badge-progress-bar"
+        class="w-full h-1.5 rounded-full bg-ch-surface-highest overflow-hidden"
+      >
+        <div
+          class="h-full bg-ch-primary rounded-full transition-all duration-300"
+          :style="{ width: `${progressPercentage}%` }"
+        />
+      </div>
+      <span
+        data-testid="badge-progress-ratio"
+        class="text-[9px] font-headline font-semibold text-ch-text-secondary/70 tracking-tight"
+      >
+        {{ progressRatioText }}
+      </span>
+    </div>
 
     <!-- Locked Overlay Lock Badge -->
     <div

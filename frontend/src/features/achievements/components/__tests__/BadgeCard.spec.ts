@@ -27,6 +27,9 @@ describe('[Story 7.1] BadgeCard.vue', () => {
     icon: 'trophy',
     isUnlocked: true,
     unlockedAt: '2026-08-30T12:00:00Z',
+    currentProgress: 1,
+    targetValue: 1,
+    hasProgress: true,
   }
 
   const lockedBadge = {
@@ -38,6 +41,9 @@ describe('[Story 7.1] BadgeCard.vue', () => {
     icon: 'flame',
     isUnlocked: false,
     unlockedAt: null,
+    currentProgress: 0,
+    targetValue: 10,
+    hasProgress: true,
   }
 
   it('[P0] should render unlocked badge with icon and Clubhouse styles', () => {

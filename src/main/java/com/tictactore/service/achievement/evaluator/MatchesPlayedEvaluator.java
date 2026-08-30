@@ -3,6 +3,7 @@ package com.tictactore.service.achievement.evaluator;
 import com.tictactore.model.Match;
 import com.tictactore.service.achievement.AchievementEvaluator;
 import com.tictactore.service.achievement.PlayerStatsContext;
+import com.tictactore.service.achievement.ProgressInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -24,5 +25,13 @@ public class MatchesPlayedEvaluator implements AchievementEvaluator {
             return false;
         }
         return stats.totalMatches() >= THRESHOLD;
+    }
+
+    @Override
+    public ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+        if (stats == null) {
+            return new ProgressInfo(0, THRESHOLD, true);
+        }
+        return new ProgressInfo(Math.min(stats.totalMatches(), THRESHOLD), THRESHOLD, true);
     }
 }

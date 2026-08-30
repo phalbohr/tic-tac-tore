@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -57,9 +58,20 @@ public class AchievementServiceImpl implements AchievementService {
                 .filter(pa -> pa.getAchievement() != null && pa.getAchievement().getId() != null)
                 .collect(Collectors.toMap(pa -> pa.getAchievement().getId(), pa -> pa, (a, b) -> a));
 
+        Map<String, AchievementEvaluator> evaluatorMap = evaluators.stream()
+                .collect(Collectors.toMap(AchievementEvaluator::getAchievementCode, e -> e, (a, b) -> a));
+
+        PlayerStatsContext statsContext = buildPlayerStatsContext(playerId);
+
         List<AchievementDto> dtos = allCatalog.stream()
                 .sorted(Comparator.comparing(Achievement::getCode))
-                .map(achievement -> mapToDto(achievement, unlockedMap.get(achievement.getId())))
+                .map(achievement -> mapToDto(
+                        achievement,
+                        unlockedMap.get(achievement.getId()),
+                        evaluatorMap.get(achievement.getCode()),
+                        playerId,
+                        statsContext
+                ))
                 .toList();
 
         return new PlayerAchievementsSummaryResponse(
@@ -182,8 +194,35 @@ public class AchievementServiceImpl implements AchievementService {
         return (onTeamA && teamAWins > teamBWins) || (onTeamB && teamBWins > teamAWins);
     }
 
-    private AchievementDto mapToDto(Achievement achievement, PlayerAchievement unlockedRecord) {
+    private AchievementDto mapToDto(
+            Achievement achievement,
+            PlayerAchievement unlockedRecord,
+            AchievementEvaluator evaluator,
+            UUID playerId,
+            PlayerStatsContext statsContext
+    ) {
         boolean isUnlocked = unlockedRecord != null;
+        OffsetDateTime unlockedAt = isUnlocked && unlockedRecord.getUnlockedAt() != null
+                ? unlockedRecord.getUnlockedAt().atOffset(ZoneOffset.UTC)
+                : null;
+
+        var progressInfo = evaluator != null
+                ? evaluator.getProgress(playerId, statsContext)
+                : new com.tictactore.service.achievement.ProgressInfo(0, 0, false);
+
+        Long currentProgress = null;
+        Long targetValue = null;
+        boolean hasProgress = progressInfo.hasProgress();
+
+        if (hasProgress) {
+            targetValue = progressInfo.target();
+            if (isUnlocked) {
+                currentProgress = targetValue;
+            } else {
+                currentProgress = Math.min(progressInfo.current(), Math.max(0L, targetValue - 1));
+            }
+        }
+
         return new AchievementDto(
                 achievement.getId(),
                 achievement.getCode(),
@@ -192,7 +231,10 @@ public class AchievementServiceImpl implements AchievementService {
                 achievement.getDescriptionKey(),
                 achievement.getIcon(),
                 isUnlocked,
-                isUnlocked && unlockedRecord.getUnlockedAt() != null ? unlockedRecord.getUnlockedAt().atOffset(ZoneOffset.UTC) : null
+                unlockedAt,
+                currentProgress,
+                targetValue,
+                hasProgress
         );
     }
 }
