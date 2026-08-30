@@ -95,8 +95,8 @@ development_status:
   6-5-pool-notifications: review
   6-6-challenge-player-or-group: review
   epic-6-retrospective: optional
-  epic-7: backlog
-  7-1-achievement-system-badges: backlog
+  epic-7: in-progress
+  7-1-achievement-system-badges: ready-for-dev
   7-2-humorous-anti-achievements: backlog
   7-3-award-wall-and-progress-tracking: backlog
   7-4-narrative-match-broadcasts: backlog
