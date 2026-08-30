@@ -86,6 +86,12 @@ so that losses and comical situations are celebrated with good sportsmanship rat
 
 ## Dev Notes
 
+### ATDD Artifacts
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-7-2-humorous-anti-achievements.md`
+- Backend ATDD Unit tests: `_bmad-output/test-artifacts/atdd-redphase-7-2/AntiAchievementEvaluatorATDDTest.java`
+- Frontend Component tests: `frontend/src/features/achievements/components/__tests__/AntiAchievementBadgeCard.spec.ts`
+- Frontend E2E tests: `frontend/e2e/achievements-anti-badges.spec.ts`
+
 ### Architecture & Implementation Guardrails
 
 - **Flyway Migration Sequencing:**
