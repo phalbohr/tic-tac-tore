@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { usePlayerGroupStore } from '@/features/group/stores/usePlayerGroupStore'
 import type { PlayerGroupResponse } from '@/services/playerGroupService'
 import PlayerGroupModal from '@/features/group/components/PlayerGroupModal.vue'
+import ChallengeModal from '@/features/challenge/components/ChallengeModal.vue'
 import AvatarBase from '@/components/AvatarBase.vue'
 
 const { t } = useI18n()
@@ -12,6 +13,17 @@ const store = usePlayerGroupStore()
 const isModalOpen = ref(false)
 const editingGroup = ref<PlayerGroupResponse | null>(null)
 const error = ref('')
+
+const isChallengeModalOpen = ref(false)
+const selectedChallengeGroup = ref<{ id: string; name: string } | null>(null)
+
+function openChallengeGroup(group: PlayerGroupResponse) {
+  selectedChallengeGroup.value = {
+    id: group.id,
+    name: group.name,
+  }
+  isChallengeModalOpen.value = true
+}
 
 onMounted(async () => {
   if (store.groups.length === 0) {
@@ -132,6 +144,16 @@ async function handleDeleteGroup(id: string) {
         <div class="flex items-center gap-1 shrink-0">
           <button
             type="button"
+            @click="openChallengeGroup(group)"
+            :data-testid="`challenge-group-${group.id}`"
+            class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors cursor-pointer"
+            aria-label="Challenge group"
+            title="Challenge group"
+          >
+            <span class="material-symbols-outlined text-sm">swords</span>
+          </button>
+          <button
+            type="button"
             @click="openEditModal(group)"
             :data-testid="`edit-group-${group.id}`"
             class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors cursor-pointer"
@@ -157,6 +179,12 @@ async function handleDeleteGroup(id: string) {
       v-model="isModalOpen"
       :group="editingGroup"
       @save="handleSaveGroup"
+    />
+
+    <!-- Challenge Group Modal -->
+    <ChallengeModal
+      v-model="isChallengeModalOpen"
+      :target-group="selectedChallengeGroup"
     />
   </section>
 </template>

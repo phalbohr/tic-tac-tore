@@ -16,6 +16,9 @@ public interface PlayerGroupRepository extends JpaRepository<PlayerGroup, UUID> 
     @EntityGraph(attributePaths = {"members"})
     Optional<PlayerGroup> findById(UUID id);
 
+    @org.springframework.data.jpa.repository.Query("SELECT pg FROM PlayerGroup pg LEFT JOIN FETCH pg.members WHERE pg.id = :id")
+    Optional<PlayerGroup> findByIdWithMembers(@org.springframework.data.repository.query.Param("id") UUID id);
+
     @EntityGraph(attributePaths = {"members"})
     List<PlayerGroup> findByCreatorIdOrderByCreatedAtAsc(UUID creatorId);
 
@@ -31,4 +34,7 @@ public interface PlayerGroupRepository extends JpaRepository<PlayerGroup, UUID> 
     boolean existsByCreatorIdAndIsFavoriteTrue(UUID creatorId);
 
     List<PlayerGroup> findByCreatorIdAndIsFavoriteTrue(UUID creatorId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT pg.id FROM PlayerGroup pg JOIN pg.members m WHERE m.id = :userId")
+    List<UUID> findGroupIdsByMemberId(@org.springframework.data.repository.query.Param("userId") UUID userId);
 }

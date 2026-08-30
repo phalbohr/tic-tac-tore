@@ -18,6 +18,9 @@ import SuccessToast from '@/core/components/SuccessToast.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import CreatePoolModal from '@/features/matchmaking/components/CreatePoolModal.vue'
 import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue'
+import PendingChallenges from '@/features/challenge/components/PendingChallenges.vue'
+import HomeConfirmationToasts from '@/features/match/components/HomeConfirmationToasts.vue'
+import { mapApiMatchItem, type ApiMatchItem } from '@/features/match/utils/matchMapper'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
@@ -124,15 +127,6 @@ async function handleSubmitRejection(payload: { reason: string; customReason: st
   }
 }
 
-function handleConfirmationUndo(matchId?: string) {
-  confirmationStore.cancelConfirmationTimer(matchId)
-}
-
-function getConfirmationToastMessage(matchNumber: number): string {
-  const msg = t('match.matchConfirmedTapUndo', { number: matchNumber })
-  return msg !== 'match.matchConfirmedTapUndo' ? msg : `Match ${matchNumber} confirmed. Tap to undo.`
-}
-
 function handleDismissError() {
   matchStore.clearSubmitError()
 }
@@ -157,45 +151,6 @@ watch(() => matchStore.submitError, (newVal) => {
   }
 })
 
-interface ApiMatchItem {
-  id: string
-  status?: string
-  rejectionReason?: string
-  creatorId?: string
-  teamAAttackerId?: string
-  teamADefenderId?: string
-  teamBAttackerId?: string
-  teamBDefenderId?: string
-  creatorNickname?: string
-  teamAAttackerNickname?: string
-  teamADefenderNickname?: string
-  teamBAttackerNickname?: string
-  teamBDefenderNickname?: string
-  creatorAvatar?: string
-  teamAAttackerAvatar?: string
-  teamADefenderAvatar?: string
-  teamBAttackerAvatar?: string
-  teamBDefenderAvatar?: string
-  teamANames?: string[]
-  teamBNames?: string[]
-  teamAScore?: number
-  teamBScore?: number
-  games?: Array<{
-    teamAScore: number;
-    teamBScore: number;
-    teamAAttackerId?: string;
-    teamADefenderId?: string;
-    teamBAttackerId?: string;
-    teamBDefenderId?: string;
-  }>
-  createdAt?: string
-  entryMode?: string
-  matchFormat?: string
-  confirmedByOpponentIds?: string[]
-  requiredConfirmations?: number
-  cooldownExpiresAt?: string
-}
-
 async function fetchPendingMatches() {
   if (!authStore.isAuthenticated) return
   try {
@@ -203,79 +158,7 @@ async function fetchPendingMatches() {
     if (res.ok) {
       const data = await res.json()
       const list: ApiMatchItem[] = Array.isArray(data) ? data : (data.matches || [])
-      pendingMatches.value = list.map((m) => {
-        const teamANames: string[] = []
-        if (m.teamAAttackerNickname) teamANames.push(m.teamAAttackerNickname)
-        if (m.teamADefenderNickname) teamANames.push(m.teamADefenderNickname)
-
-        const teamBNames: string[] = []
-        if (m.teamBAttackerNickname) teamBNames.push(m.teamBAttackerNickname)
-        if (m.teamBDefenderNickname) teamBNames.push(m.teamBDefenderNickname)
-
-        const idToNickname = new Map<string, string>()
-        const idToAvatar = new Map<string, string>()
-        
-        if (m.teamAAttackerId && m.teamAAttackerNickname) idToNickname.set(m.teamAAttackerId, m.teamAAttackerNickname)
-        if (m.teamADefenderId && m.teamADefenderNickname) idToNickname.set(m.teamADefenderId, m.teamADefenderNickname)
-        if (m.teamBAttackerId && m.teamBAttackerNickname) idToNickname.set(m.teamBAttackerId, m.teamBAttackerNickname)
-        if (m.teamBDefenderId && m.teamBDefenderNickname) idToNickname.set(m.teamBDefenderId, m.teamBDefenderNickname)
-
-        if (m.teamAAttackerId && m.teamAAttackerAvatar) idToAvatar.set(m.teamAAttackerId, m.teamAAttackerAvatar)
-        if (m.teamADefenderId && m.teamADefenderAvatar) idToAvatar.set(m.teamADefenderId, m.teamADefenderAvatar)
-        if (m.teamBAttackerId && m.teamBAttackerAvatar) idToAvatar.set(m.teamBAttackerId, m.teamBAttackerAvatar)
-        if (m.teamBDefenderId && m.teamBDefenderAvatar) idToAvatar.set(m.teamBDefenderId, m.teamBDefenderAvatar)
-
-        const games = (m.games || []).map((g) => {
-          const aAttId = g.teamAAttackerId || m.teamAAttackerId
-          const aDefId = g.teamADefenderId || m.teamADefenderId
-          const bAttId = g.teamBAttackerId || m.teamBAttackerId
-          const bDefId = g.teamBDefenderId || m.teamBDefenderId
-
-          return {
-            teamAScore: g.teamAScore,
-            teamBScore: g.teamBScore,
-            teamAAttackerId: aAttId,
-            teamADefenderId: aDefId,
-            teamBAttackerId: bAttId,
-            teamBDefenderId: bDefId,
-            teamAAttackerNickname: aAttId ? idToNickname.get(aAttId) || m.teamAAttackerNickname : undefined,
-            teamADefenderNickname: aDefId ? idToNickname.get(aDefId) || m.teamADefenderNickname : undefined,
-            teamBAttackerNickname: bAttId ? idToNickname.get(bAttId) || m.teamBAttackerNickname : undefined,
-            teamBDefenderNickname: bDefId ? idToNickname.get(bDefId) || m.teamBDefenderNickname : undefined,
-          }
-        })
-
-        return {
-          id: m.id,
-          status: m.status,
-          rejectionReason: m.rejectionReason,
-          creatorNickname: m.creatorNickname || 'Opponent',
-          teamAAttackerId: m.teamAAttackerId,
-          teamADefenderId: m.teamADefenderId,
-          teamBAttackerId: m.teamBAttackerId,
-          teamBDefenderId: m.teamBDefenderId,
-          teamAAttackerNickname: m.teamAAttackerNickname,
-          teamADefenderNickname: m.teamADefenderNickname,
-          teamBAttackerNickname: m.teamBAttackerNickname,
-          teamBDefenderNickname: m.teamBDefenderNickname,
-          creatorAvatar: m.creatorAvatar,
-          teamAAttackerAvatar: m.teamAAttackerAvatar,
-          teamADefenderAvatar: m.teamADefenderAvatar,
-          teamBAttackerAvatar: m.teamBAttackerAvatar,
-          teamBDefenderAvatar: m.teamBDefenderAvatar,
-          teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
-          teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
-          teamAScore: games[0]?.teamAScore ?? m.teamAScore,
-          teamBScore: games[0]?.teamBScore ?? m.teamBScore,
-          games: games.length > 0 ? games : undefined,
-          createdAt: m.createdAt,
-          entryMode: m.entryMode,
-          matchFormat: m.matchFormat,
-          confirmedByOpponentIds: m.confirmedByOpponentIds,
-          requiredConfirmations: m.requiredConfirmations,
-          cooldownExpiresAt: m.cooldownExpiresAt
-        }
-      })
+      pendingMatches.value = list.map(mapApiMatchItem)
     }
   } catch (e) {
     console.warn('Failed to fetch pending matches', e)
@@ -453,6 +336,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <StatsDashboard v-if="!showNewMatch" />
           
           <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
+            <PendingChallenges class="w-full text-left" />
             <BaseButton 
               @click="showNewMatch = true"
               class="w-full mt-4 rounded-full"
@@ -496,41 +380,7 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
       />
 
       <!-- Multi-Toast Stack for Pending Confirmations -->
-      <div
-        v-if="confirmationStore.activeConfirmations.length > 0"
-        class="fixed bottom-6 left-4 right-4 z-50 max-w-md mx-auto pointer-events-none flex flex-col gap-2.5 items-stretch"
-        data-testid="confirmation-toast-stack"
-      >
-        <TransitionGroup name="toast-list">
-          <div
-            v-for="item in confirmationStore.activeConfirmations"
-            :key="item.matchId"
-            class="pointer-events-auto w-full bg-surface-container-highest text-on-surface rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4"
-            role="status"
-            aria-live="polite"
-            :data-testid="`confirmation-toast-${item.matchId}`"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
-                {{ item.countdown }}s
-              </div>
-              <span class="text-sm font-medium">
-                {{ item.isOfflinePending ? t('match.willRetryOnline') : getConfirmationToastMessage(item.matchNumber) }}
-              </span>
-            </div>
-
-            <BaseButton
-              v-if="!item.isOfflinePending"
-              variant="primary"
-              @click="handleConfirmationUndo(item.matchId)"
-              class="!h-10 px-4 text-xs font-bold min-h-12 min-w-[48px]"
-              :data-testid="`undo-confirmation-btn-${item.matchId}`"
-            >
-              {{ t('match.undo') }}
-            </BaseButton>
-          </div>
-        </TransitionGroup>
-      </div>
+      <HomeConfirmationToasts />
 
       <ErrorToast
         v-if="matchStore.submitError"
@@ -563,17 +413,5 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.toast-list-move,
-.toast-list-enter-active,
-.toast-list-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-list-enter-from,
-.toast-list-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
 }
 </style>

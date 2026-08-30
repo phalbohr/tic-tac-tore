@@ -7,6 +7,7 @@ import com.tictactore.dto.PushNotificationPayload;
 import com.tictactore.dto.PushSubscriptionRequest;
 import com.tictactore.model.NotificationLog;
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchType;
 import com.tictactore.model.PushSubscription;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
@@ -302,6 +303,143 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendChallengeCreatedNotification(
+            UUID challengeId,
+            String challengerName,
+            MatchType matchType,
+            List<User> recipients
+    ) {
+        if (recipients == null || recipients.isEmpty()) {
+            return;
+        }
+
+        String matchTypeStr = matchType == MatchType.TWO_VS_TWO ? "2v2" : "1v1";
+        String summary = challengerName + " challenged you to a " + matchTypeStr + " match";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                challengeId,
+                "CHALLENGE_RECEIVED",
+                challengerName,
+                summary,
+                "/?tab=challenges",
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize challenge created push notification payload for challenge {}", challengeId, e);
+            return;
+        }
+
+        for (User recipient : recipients) {
+            List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+            if (subscriptions.isEmpty()) {
+                recordNotificationLog(recipient.getId(), null, null, challengeId, "CHALLENGE_RECEIVED", jsonPayload, "SKIPPED", "No push subscription registered");
+                continue;
+            }
+
+            for (PushSubscription sub : subscriptions) {
+                dispatchPushNotification(sub, recipient.getId(), null, null, challengeId, "CHALLENGE_RECEIVED", jsonPayload);
+            }
+        }
+    }
+
+    @Override
+    public void sendChallengeAcceptedNotification(
+            UUID challengeId,
+            String targetName,
+            MatchType matchType,
+            User challenger
+    ) {
+        if (challenger == null || challenger.getId() == null) {
+            return;
+        }
+
+        String summary = targetName + " accepted your challenge — head to the table!";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                challengeId,
+                "CHALLENGE_ACCEPTED",
+                targetName,
+                summary,
+                "/?challengeId=" + challengeId,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize challenge accepted push notification payload for challenge {}", challengeId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(challenger.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(challenger.getId(), null, null, challengeId, "CHALLENGE_ACCEPTED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, challenger.getId(), null, null, challengeId, "CHALLENGE_ACCEPTED", jsonPayload);
+        }
+    }
+
+    @Override
+    public void sendChallengeDeclinedNotification(
+            UUID challengeId,
+            String targetName,
+            User challenger
+    ) {
+        if (challenger == null || challenger.getId() == null) {
+            return;
+        }
+
+        String summary = targetName + " declined your challenge.";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                challengeId,
+                "CHALLENGE_DECLINED",
+                targetName,
+                summary,
+                "/?tab=challenges",
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize challenge declined push notification payload for challenge {}", challengeId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(challenger.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(challenger.getId(), null, null, challengeId, "CHALLENGE_DECLINED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, challenger.getId(), null, null, challengeId, "CHALLENGE_DECLINED", jsonPayload);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {
@@ -313,6 +451,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                         logEntry.getRecipientId(),
                         logEntry.getMatchId(),
                         logEntry.getPoolId(),
+                        logEntry.getChallengeId(),
                         logEntry.getType(),
                         logEntry.getPayload(),
                         logEntry.getStatus(),
@@ -343,10 +482,14 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     private void dispatchPushNotification(PushSubscription sub, UUID recipientId, UUID matchId, String type, String jsonPayload) {
-        dispatchPushNotification(sub, recipientId, matchId, null, type, jsonPayload);
+        dispatchPushNotification(sub, recipientId, matchId, null, null, type, jsonPayload);
     }
 
     private void dispatchPushNotification(PushSubscription sub, UUID recipientId, UUID matchId, UUID poolId, String type, String jsonPayload) {
+        dispatchPushNotification(sub, recipientId, matchId, poolId, null, type, jsonPayload);
+    }
+
+    private void dispatchPushNotification(PushSubscription sub, UUID recipientId, UUID matchId, UUID poolId, UUID challengeId, String type, String jsonPayload) {
         try {
             PushService pushService = getPushService();
             byte[] authBytes = safeDecodeBase64(sub.getAuth());
@@ -362,17 +505,17 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             var response = pushService.send(notification);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode < 300) {
-                recordNotificationLog(recipientId, matchId, poolId, type, jsonPayload, "DELIVERED", null);
+                recordNotificationLog(recipientId, matchId, poolId, challengeId, type, jsonPayload, "DELIVERED", null);
             } else if (statusCode == 404 || statusCode == 410) {
                 log.info("Push subscription expired/invalid for recipient {}. Removing endpoint.", recipientId);
                 notificationOperation.deleteSubscriptionByEndpoint(sub.getEndpoint());
-                recordNotificationLog(recipientId, matchId, poolId, type, jsonPayload, "FAILED", "Expired subscription HTTP " + statusCode);
+                recordNotificationLog(recipientId, matchId, poolId, challengeId, type, jsonPayload, "FAILED", "Expired subscription HTTP " + statusCode);
             } else {
-                recordNotificationLog(recipientId, matchId, poolId, type, jsonPayload, "FAILED", "Push server returned HTTP " + statusCode);
+                recordNotificationLog(recipientId, matchId, poolId, challengeId, type, jsonPayload, "FAILED", "Push server returned HTTP " + statusCode);
             }
         } catch (Exception e) {
             log.warn("Failed to deliver Web Push to recipient {}: {}", recipientId, e.getMessage());
-            recordNotificationLog(recipientId, matchId, poolId, type, jsonPayload, "FAILED", e.getMessage());
+            recordNotificationLog(recipientId, matchId, poolId, challengeId, type, jsonPayload, "FAILED", e.getMessage());
         }
     }
 
@@ -395,14 +538,19 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     private void recordNotificationLog(UUID recipientId, UUID matchId, String type, String payload, String status, String errorMessage) {
-        recordNotificationLog(recipientId, matchId, null, type, payload, status, errorMessage);
+        recordNotificationLog(recipientId, matchId, null, null, type, payload, status, errorMessage);
     }
 
     private void recordNotificationLog(UUID recipientId, UUID matchId, UUID poolId, String type, String payload, String status, String errorMessage) {
+        recordNotificationLog(recipientId, matchId, poolId, null, type, payload, status, errorMessage);
+    }
+
+    private void recordNotificationLog(UUID recipientId, UUID matchId, UUID poolId, UUID challengeId, String type, String payload, String status, String errorMessage) {
         NotificationLog logEntry = NotificationLog.builder()
                 .recipientId(recipientId)
                 .matchId(matchId)
                 .poolId(poolId)
+                .challengeId(challengeId)
                 .type(type)
                 .payload(payload)
                 .status(status)

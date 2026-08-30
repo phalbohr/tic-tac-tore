@@ -28,6 +28,11 @@ public interface PushNotificationService {
 
     void sendPoolFilledNotification(UUID poolId, MatchType matchType, List<User> participants);
 
+    void sendChallengeCreatedNotification(UUID challengeId, String challengerName, MatchType matchType, List<User> recipients);
+
+    void sendChallengeAcceptedNotification(UUID challengeId, String targetName, MatchType matchType, User challenger);
+
+    void sendChallengeDeclinedNotification(UUID challengeId, String targetName, User challenger);
+
     List<NotificationLogDto> getUserNotifications(UUID userId);
 }
-

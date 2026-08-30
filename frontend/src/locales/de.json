@@ -319,5 +319,30 @@
       "goalLimit": "{goals} Tore",
       "winByTwo": "2 Tore Vorsprung"
     }
+  },
+  "challenge": {
+    "sectionTitle": "Herausforderungen",
+    "modalTitle": "Zu einem Spiel herausfordern",
+    "challengingPlayer": "Spieler herausfordern",
+    "challengingGroup": "Gruppe herausfordern",
+    "matchTypeLabel": "Spielformat",
+    "ruleTemplateLabel": "Regelwerk (Optional)",
+    "defaultRules": "Standardregeln",
+    "messageLabel": "Nachricht (Optional)",
+    "messagePlaceholder": "z.B. Bereit für eine Revanche? Tisch 1!",
+    "sendChallenge": "Herausforderung senden",
+    "incomingTab": "Eingehend",
+    "outgoingTab": "Gesendet",
+    "noIncoming": "Zurzeit keine eingehenden Herausforderungen",
+    "noOutgoing": "Keine ausstehenden gesendeten Herausforderungen",
+    "accept": "Annehmen",
+    "decline": "Ablehnen",
+    "pending": "Ausstehend",
+    "errors": {
+      "createFailed": "Fehler beim Senden der Herausforderung",
+      "acceptFailed": "Fehler beim Annehmen der Herausforderung",
+      "declineFailed": "Fehler beim Ablehnen der Herausforderung",
+      "cancelFailed": "Fehler beim Abbrechen der Herausforderung"
+    }
   }
 }
