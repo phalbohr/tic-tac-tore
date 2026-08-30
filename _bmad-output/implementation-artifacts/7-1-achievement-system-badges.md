@@ -4,7 +4,7 @@ baseline_commit: f90fb27aa66112ab8b49a49c0f57b2105464cfc6
 
 # Story 7.1: Achievement System (Badges)
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is complete. Story is ready for dev-story execution. -->
 
@@ -182,3 +182,16 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 
 - 2026-08-30: Initialized comprehensive Story 7.1 specification, Acceptance Criteria, Tasks, and Dev Notes.
 - 2026-08-30: Implemented Story 7.1 fullstack features (database migrations, entities, evaluators, event listeners, API endpoint, Vue components, i18n, unit and ATDD tests). Status transitioned to review.
+
+### Review Findings
+
+- [ ] [Review][Patch] Controller ignores `@AuthenticationPrincipal` [src/main/java/com/tictactore/controller/AchievementController.java:23]
+- [ ] [Review][Patch] UI lacks `ch-` palette tokens [frontend/src/features/achievements/components/BadgeCard.vue]
+- [ ] [Review][Patch] `Match.java` participant list lacks deduplication [src/main/java/com/tictactore/model/Match.java:251]
+- [ ] [Review][Patch] Redundant achievement initialization in code and Flyway [src/main/java/com/tictactore/config/AchievementCatalogInitializer.java]
+- [ ] [Review][Patch] Global `@EnableAsync` pollutes application context [src/main/java/com/tictactore/TicTacToreApplication.java:11]
+- [ ] [Review][Patch] Fallback localization uses raw system codes [frontend/src/features/achievements/components/BadgeCard.vue:19]
+- [x] [Review][Defer] Achievement evaluation exceptions are swallowed silently [src/main/java/com/tictactore/listener/AchievementEventListener.java:28] — deferred, pre-existing
+- [x] [Review][Defer] No debouncing for achievement fetch [frontend/src/features/achievements/stores/useAchievementStore.ts:16] — deferred, pre-existing
+- [x] [Review][Defer] Icon mapping logic leaked to presentation layer [frontend/src/features/achievements/components/BadgeCard.vue:29] — deferred, pre-existing
+- [x] [Review][Defer] E2E tests use fabricated UUID strings [frontend/e2e/achievements-profile.spec.ts] — deferred, pre-existing

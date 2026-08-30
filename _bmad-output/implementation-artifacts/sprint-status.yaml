@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: '2026-08-30T12:41:45Z'
+# last_updated: '2026-08-30T18:34:00Z'
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: '2026-08-30T12:41:45Z'
+last_updated: '2026-08-30T18:34:00Z'
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
@@ -96,7 +96,7 @@ development_status:
   6-6-challenge-player-or-group: review
   epic-6-retrospective: optional
   epic-7: in-progress
-  7-1-achievement-system-badges: review
+  7-1-achievement-system-badges: in-progress
   7-2-humorous-anti-achievements: backlog
   7-3-award-wall-and-progress-tracking: backlog
   7-4-narrative-match-broadcasts: backlog

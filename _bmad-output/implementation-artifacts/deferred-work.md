@@ -432,3 +432,9 @@ status: open
 - Sequential blocking network calls for group push notifications: Iterating over group members and making sequential push network calls.
 - Complex OR conditions in findIncomingChallenges: Query spans different relationships, potentially defeating query planner.
 - Bypassed standard validation for CreateChallengeRequest: Target validation throws a custom ValidationException instead of using a class-level @Constraint.
+
+## Deferred from: code review (2026-08-30) (7-1-achievement-system-badges)
+- Achievement evaluation exceptions are swallowed silently [src/main/java/com/tictactore/listener/AchievementEventListener.java:28]
+- No debouncing for achievement fetch [frontend/src/features/achievements/stores/useAchievementStore.ts:16]
+- Icon mapping logic leaked to presentation layer [frontend/src/features/achievements/components/BadgeCard.vue:29]
+- E2E tests use fabricated UUID strings [frontend/e2e/achievements-profile.spec.ts]
