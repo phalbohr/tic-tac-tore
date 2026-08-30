@@ -370,6 +370,22 @@
     "defense_wall": {
       "title": "Eiserne Wand",
       "description": "Spiele 10 Spiele als Verteidiger."
+    },
+    "goose_egg": {
+      "title": "Nullnummer",
+      "description": "Ein Satz ganz ohne eigenen Treffer beendet. Nächstes Mal klappt es bestimmt!"
+    },
+    "generous_host": {
+      "title": "Großzügiger Gastgeber",
+      "description": "Den Gegnern 10 oder mehr Tore in einem Satz gegönnt. Wahre Gastfreundschaft!"
+    },
+    "sieve_defense": {
+      "title": "Schweizer Käse",
+      "description": "15 oder mehr Gegentore als Verteidiger in einem Spiel kassiert. Der Ball wollte einfach rein!"
+    },
+    "heartbreaker": {
+      "title": "Herzschlag-Finale",
+      "description": "Das entscheidende Spiel mit nur einem Tor Unterschied verloren. Fast geschafft!"
     }
   }
 }

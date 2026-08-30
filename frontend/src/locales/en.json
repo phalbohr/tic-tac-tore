@@ -370,6 +370,22 @@
     "defense_wall": {
       "title": "Iron Wall",
       "description": "Play 10 matches as a defender."
+    },
+    "goose_egg": {
+      "title": "Goose Egg",
+      "description": "Experienced the rare art of scoring zero points in a game. Better luck next time!"
+    },
+    "generous_host": {
+      "title": "Generous Host",
+      "description": "Let the opponents score 10 or more points in a single game. True hospitality!"
+    },
+    "sieve_defense": {
+      "title": "Sieve Defense",
+      "description": "Conceded 15 or more goals as defender in a match. The ball just loved finding the net!"
+    },
+    "heartbreaker": {
+      "title": "Heartbreaker",
+      "description": "Fell short by just a single goal in the deciding game. So close, yet unforgettable!"
     }
   }
 }

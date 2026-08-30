@@ -58,22 +58,35 @@ const selectedBadgeDescription = computed(() => {
   return ''
 })
 
+const ICON_MAP: Record<string, string> = {
+  trophy: 'emoji_events',
+  flame: 'local_fire_department',
+  target: 'track_changes',
+  wall: 'fence',
+}
+
 const selectedBadgeIcon = computed(() => {
   if (!selectedBadge.value) return 'military_tech'
-  switch (selectedBadge.value.icon) {
-    case 'trophy':
-      return 'emoji_events'
-    case 'flame':
-      return 'local_fire_department'
-    case 'shield':
-      return 'shield'
-    case 'target':
-      return 'track_changes'
-    case 'wall':
-      return 'fence'
-    default:
-      return 'military_tech'
+  const icon = selectedBadge.value.icon
+  return (icon && ICON_MAP[icon]) || icon || 'military_tech'
+})
+
+const selectedBadgeModalIconClasses = computed(() => {
+  if (!selectedBadge.value) return ''
+  if (!selectedBadge.value.isUnlocked) {
+    return 'bg-ch-surface-highest text-ch-text-secondary/40 border border-ch-border'
   }
+  if (selectedBadge.value.category === 'ANTI_ACHIEVEMENT') {
+    return 'bg-ch-secondary/20 text-ch-secondary border border-ch-secondary/30'
+  }
+  return 'bg-ch-primary/20 text-ch-primary border border-ch-primary/30'
+})
+
+const selectedBadgeModalStatusClasses = computed(() => {
+  if (!selectedBadge.value?.isUnlocked) {
+    return 'text-ch-text-secondary/50'
+  }
+  return selectedBadge.value.category === 'ANTI_ACHIEVEMENT' ? 'text-ch-secondary' : 'text-ch-primary'
 })
 
 function formatUnlockDate(unlockedAt: string | null): string {
@@ -108,7 +121,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
         v-if="achievementStore.totalAvailable > 0"
         class="font-headline text-xs font-semibold px-2.5 py-1 rounded-full bg-ch-surface-highest text-ch-text-secondary flex items-center gap-1.5"
       >
-        <span class="text-amber-400 font-bold">{{ achievementStore.totalUnlocked }}</span>
+        <span class="text-ch-primary font-bold">{{ achievementStore.totalUnlocked }}</span>
         <span>/</span>
         <span>{{ achievementStore.totalAvailable }}</span>
       </div>
@@ -155,11 +168,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
           <div class="flex justify-center">
             <div
               class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
-              :class="[
-                selectedBadge.isUnlocked
-                  ? 'bg-gradient-to-br from-amber-400/20 to-yellow-600/30 text-amber-300 border border-amber-400/30'
-                  : 'bg-ch-surface-highest text-ch-text-secondary/40 border border-ch-border'
-              ]"
+              :class="selectedBadgeModalIconClasses"
             >
               <span class="material-symbols-outlined text-3xl">{{ selectedBadgeIcon }}</span>
             </div>
@@ -183,7 +192,7 @@ function formatUnlockDate(unlockedAt: string | null): string {
           <!-- Unlock Status & Date -->
           <div class="p-3 rounded-xl bg-ch-surface-highest/60 border border-ch-border space-y-1">
             <div class="flex items-center justify-center gap-1.5 text-xs font-semibold"
-              :class="selectedBadge.isUnlocked ? 'text-amber-400' : 'text-ch-text-secondary/50'"
+              :class="selectedBadgeModalStatusClasses"
             >
               <span class="material-symbols-outlined text-sm">
                 {{ selectedBadge.isUnlocked ? 'check_circle' : 'lock' }}
