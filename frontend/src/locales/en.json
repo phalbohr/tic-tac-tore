@@ -344,5 +344,31 @@
       "declineFailed": "Failed to decline challenge",
       "cancelFailed": "Failed to cancel challenge"
     }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "empty": "No achievements available",
+    "first_win": {
+      "title": "First Win",
+      "description": "Win your first foosball match."
+    },
+    "matches_10": {
+      "title": "Match Veteran",
+      "description": "Play 10 confirmed matches."
+    },
+    "clean_sheet": {
+      "title": "Clean Sheet",
+      "description": "Win a match without conceding a single goal."
+    },
+    "striker_50": {
+      "title": "Goal Machine",
+      "description": "Score 50 goals as an attacker."
+    },
+    "defense_wall": {
+      "title": "Iron Wall",
+      "description": "Play 10 matches as a defender."
+    }
   }
 }

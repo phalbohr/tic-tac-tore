@@ -34,8 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@DisplayName("AchievementController ATDD Red Phase Scaffolds — Story 7.1")
-@Disabled("Story 7.1 RED Phase - Scaffolds fail until story implementation is complete")
+@DisplayName("AchievementController ATDD Tests — Story 7.1")
 class AchievementControllerATDDTest {
 
     @MockBean

@@ -22,7 +22,7 @@ async function loginUser(page: Page) {
 
 test.describe('[Story 7.1] Achievement System (Badges) E2E User Journey (ATDD)', () => {
 
-  test.skip('[P0] [AC4] should display ProfileBadgesSection in Cabinet with earned and locked badges', async ({ page }) => {
+  test('[P0] [AC4] should display ProfileBadgesSection in Cabinet with earned and locked badges', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {
@@ -99,7 +99,7 @@ test.describe('[Story 7.1] Achievement System (Badges) E2E User Journey (ATDD)',
     await expect(unlockedBadge).toHaveCount(1);
   });
 
-  test.skip('[P1] [AC4] should display badge details, description, and unlock timestamp on click/hover', async ({ page }) => {
+  test('[P1] [AC4] should display badge details, description, and unlock timestamp on click/hover', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/players/*/achievements', async (route) => {
@@ -130,11 +130,12 @@ test.describe('[Story 7.1] Achievement System (Badges) E2E User Journey (ATDD)',
     const badge = page.locator('[data-testid="badge-card"]').first();
     await badge.click();
 
-    await expect(page.locator('[data-testid="badge-modal"], [data-testid="badge-popover"]')).toBeVisible();
-    await expect(page.getByText('First Win', { exact: false })).toBeVisible();
+    const modal = page.locator('[data-testid="badge-modal"], [data-testid="badge-popover"]');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText('First Win', { exact: false })).toBeVisible();
   });
 
-  test.skip('[P2] [AC5] should render badges with localized text when switching language to German', async ({ page }) => {
+  test('[P2] [AC5] should render badges with localized text when switching language to German', async ({ page }) => {
     await loginUser(page);
 
     await page.goto('/cabinet');

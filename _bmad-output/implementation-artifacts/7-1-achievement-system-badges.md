@@ -4,7 +4,7 @@ baseline_commit: f90fb27aa66112ab8b49a49c0f57b2105464cfc6
 
 # Story 7.1: Achievement System (Badges)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is complete. Story is ready for dev-story execution. -->
 
@@ -38,59 +38,59 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Domain Entities (AC1, AC2)
-  - [ ] Create Flyway migration `V16__create_achievements_tables.sql`:
+- [x] Task 1: Database Migration & Domain Entities (AC1, AC2)
+  - [x] Create Flyway migration `V16__create_achievements_tables.sql`:
     - Table `achievement` (`id UUID PRIMARY KEY`, `code VARCHAR(50) NOT NULL UNIQUE`, `category VARCHAR(50) NOT NULL`, `name_key VARCHAR(100) NOT NULL`, `description_key VARCHAR(255) NOT NULL`, `icon VARCHAR(100) NOT NULL`, `created_at TIMESTAMP WITH TIME ZONE NOT NULL`).
     - Table `player_achievement` (`id UUID PRIMARY KEY`, `user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE`, `achievement_id UUID NOT NULL REFERENCES achievement(id) ON DELETE CASCADE`, `unlocked_at TIMESTAMP WITH TIME ZONE NOT NULL`, `CONSTRAINT uk_player_achievement UNIQUE (user_id, achievement_id)`).
     - Indexes on `player_achievement(user_id)` and `player_achievement(achievement_id)`.
     - Seed initial achievements (`FIRST_WIN`, `MATCHES_10`, `CLEAN_SHEET`, `STRIKER_50`, `DEFENSE_WALL`).
-  - [ ] Create JPA entity `com.tictactore.model.Achievement` with `@CreationTimestamp`.
-  - [ ] Create JPA entity `com.tictactore.model.PlayerAchievement` with `@CreationTimestamp`.
-  - [ ] Create `com.tictactore.repository.AchievementRepository` extending `JpaRepository<Achievement, UUID>`.
-  - [ ] Create `com.tictactore.repository.PlayerAchievementRepository` extending `JpaRepository<PlayerAchievement, UUID>`:
+  - [x] Create JPA entity `com.tictactore.model.Achievement` with `@CreationTimestamp`.
+  - [x] Create JPA entity `com.tictactore.model.PlayerAchievement` with `@CreationTimestamp`.
+  - [x] Create `com.tictactore.repository.AchievementRepository` extending `JpaRepository<Achievement, UUID>`.
+  - [x] Create `com.tictactore.repository.PlayerAchievementRepository` extending `JpaRepository<PlayerAchievement, UUID>`:
     - `List<PlayerAchievement> findByUserIdOrderByUnlockedAtDesc(UUID userId)`
     - `boolean existsByUserIdAndAchievementId(UUID userId, UUID achievementId)`
-- [ ] Task 2: Domain Events & Asynchronous Achievement Evaluation Engine (AC1, AC2)
-  - [ ] Create `com.tictactore.event.MatchConfirmedEvent` record (`UUID matchId`, `List<UUID> participantIds`).
-  - [ ] Update `MatchServiceImpl.java` / `MatchOperation.java` to publish `MatchConfirmedEvent` when match status becomes `CONFIRMED`.
-  - [ ] Create `com.tictactore.service.achievement.AchievementEvaluator` interface:
+- [x] Task 2: Domain Events & Asynchronous Achievement Evaluation Engine (AC1, AC2)
+  - [x] Create `com.tictactore.event.MatchConfirmedEvent` record (`UUID matchId`, `List<UUID> participantIds`).
+  - [x] Update `MatchServiceImpl.java` / `MatchOperation.java` to publish `MatchConfirmedEvent` when match status becomes `CONFIRMED`.
+  - [x] Create `com.tictactore.service.achievement.AchievementEvaluator` interface:
     - `String getAchievementCode()`
     - `boolean evaluate(UUID userId, Match match, PlayerStatsContext stats)`
-  - [ ] Implement concrete evaluators:
+  - [x] Implement concrete evaluators:
     - `FirstWinEvaluator` (`FIRST_WIN` — player won at least one match)
     - `MatchesPlayedEvaluator` (`MATCHES_10` — player participated in >= 10 matches)
     - `CleanSheetEvaluator` (`CLEAN_SHEET` — player won match conceding 0 goals)
     - `StrikerGoalsEvaluator` (`STRIKER_50` — player scored >= 50 total goals as attacker)
     - `DefenseWallEvaluator` (`DEFENSE_WALL` — player played >= 10 matches as defender)
-  - [ ] Create `com.tictactore.listener.AchievementEventListener` with `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` and `@Async` evaluation.
-  - [ ] Create `com.tictactore.service.AchievementService` and `AchievementServiceImpl`:
+  - [x] Create `com.tictactore.listener.AchievementEventListener` with `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` and `@Async` evaluation.
+  - [x] Create `com.tictactore.service.AchievementService` and `AchievementServiceImpl`:
     - `PlayerAchievementsSummaryResponse getPlayerAchievements(UUID playerId)`
     - `void evaluateMatchAchievements(UUID matchId, List<UUID> participantIds)`
-- [ ] Task 3: REST Controller & DTOs (AC3)
-  - [ ] Create DTOs:
+- [x] Task 3: REST Controller & DTOs (AC3)
+  - [x] Create DTOs:
     - `AchievementDto` (`UUID id`, `String code`, `String category`, `String nameKey`, `String descriptionKey`, `String icon`, `boolean isUnlocked`, `OffsetDateTime unlockedAt`)
     - `PlayerAchievementsSummaryResponse` (`UUID playerId`, `int totalUnlocked`, `int totalAvailable`, `List<AchievementDto> achievements`)
-  - [ ] Create `com.tictactore.controller.AchievementController` mapped to `/api/v1/players/{id}/achievements`:
+  - [x] Create `com.tictactore.controller.AchievementController` mapped to `/api/v1/players/{id}/achievements`:
     - `GET /api/v1/players/{id}/achievements` -> `200 OK`
     - Extract caller from `@AuthenticationPrincipal User principal` (`AD-05`).
-- [ ] Task 4: Frontend Service & Pinia Store (AC3, AC4)
-  - [ ] Create `frontend/src/services/achievementService.ts` for calling `/api/v1/players/{id}/achievements`.
-  - [ ] Create `frontend/src/features/achievements/stores/useAchievementStore.ts`:
+- [x] Task 4: Frontend Service & Pinia Store (AC3, AC4)
+  - [x] Create `frontend/src/services/achievementService.ts` for calling `/api/v1/players/{id}/achievements`.
+  - [x] Create `frontend/src/features/achievements/stores/useAchievementStore.ts`:
     - State: `achievements: AchievementDto[]`, `totalUnlocked: number`, `totalAvailable: number`, `loading: boolean`, `error: string | null`.
     - Getters: `unlockedList`, `lockedList`.
     - Actions: `fetchPlayerAchievements(playerId: string)`.
-- [ ] Task 5: Frontend UI Components & Profile Integration (AC4, AC5)
-  - [ ] Create `frontend/src/features/achievements/components/BadgeCard.vue`:
+- [x] Task 5: Frontend UI Components & Profile Integration (AC4, AC5)
+  - [x] Create `frontend/src/features/achievements/components/BadgeCard.vue`:
     - Renders icon, localized name, description, and status with tactile Clubhouse styling (`UX-DR3`).
-  - [ ] Create `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
+  - [x] Create `frontend/src/features/achievements/components/ProfileBadgesSection.vue`:
     - Displays grid of badges with progress overview. Keep under 500 lines (`IP-04`).
-  - [ ] Mount `ProfileBadgesSection.vue` in `frontend/src/features/profile/Cabinet.vue`.
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
-- [ ] Task 6: Testing & Quality Verification (AC1-AC5)
-  - [ ] Backend: Unit tests in `AchievementEvaluatorTest.java` and `AchievementServiceTest.java`.
-  - [ ] Backend ATDD: `AchievementControllerATDDTest.java` covering contract, query by ID, and idempotent award.
-  - [ ] Frontend: Store and component tests in `useAchievementStore.spec.ts` and `BadgeCard.spec.ts`.
-  - [ ] Verification: Run `./scripts/ci-local.sh` and ensure 100% test pass.
+  - [x] Mount `ProfileBadgesSection.vue` in `frontend/src/features/profile/Cabinet.vue`.
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
+- [x] Task 6: Testing & Quality Verification (AC1-AC5)
+  - [x] Backend: Unit tests in `AchievementEvaluatorTest.java` and `AchievementServiceTest.java`.
+  - [x] Backend ATDD: `AchievementControllerATDDTest.java` covering contract, query by ID, and idempotent award.
+  - [x] Frontend: Store and component tests in `useAchievementStore.spec.ts` and `BadgeCard.spec.ts`.
+  - [x] Verification: Run `./scripts/ci-local.sh` and ensure 100% test pass.
 
 ## Dev Notes
 
@@ -122,18 +122,30 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 ## Dev Agent Record
 
 ### Implementation Plan
-- Step 1: Scaffold Flyway migration `V16__create_achievements_tables.sql` and JPA entities `Achievement`, `PlayerAchievement`.
+- Step 1: Scaffold Flyway migration `V16__create_achievements_tables.sql`, runtime catalog initializer, and JPA entities `Achievement`, `PlayerAchievement`.
 - Step 2: Implement `AchievementEvaluator` strategy pattern and asynchronous `AchievementEventListener`.
 - Step 3: Implement `AchievementController` and DTOs with ATDD test coverage.
 - Step 4: Implement frontend Pinia store, service, and Vue components (`BadgeCard.vue`, `ProfileBadgesSection.vue`).
 - Step 5: Mount in `Cabinet.vue`, add i18n keys for EN/DE, and verify with `./scripts/ci-local.sh`.
 
 ### Completion Notes
-- *Pending development execution.*
+- Implemented Flyway migration `V16__create_achievements_tables.sql` and `AchievementCatalogInitializer` for seeding the initial 5 achievement badges (`FIRST_WIN`, `MATCHES_10`, `CLEAN_SHEET`, `STRIKER_50`, `DEFENSE_WALL`).
+- Created JPA entities `Achievement` and `PlayerAchievement` with uniqueness constraint `(user_id, achievement_id)` and repositories `AchievementRepository`, `PlayerAchievementRepository`.
+- Implemented `MatchConfirmedEvent` and wired publisher in `MatchOperation` and `MatchCooldownService` on match confirmation.
+- Created `AchievementEventListener` using `@Async` and `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`.
+- Implemented 5 concrete evaluators implementing `AchievementEvaluator` interface: `FirstWinEvaluator`, `MatchesPlayedEvaluator`, `CleanSheetEvaluator`, `StrikerGoalsEvaluator`, `DefenseWallEvaluator`.
+- Created `AchievementService` and `AchievementServiceImpl` for asynchronous evaluation and querying summary badge lists.
+- Implemented `AchievementController` (`GET /api/v1/players/{id}/achievements`) returning `PlayerAchievementsSummaryResponse` with complete PII sanitization.
+- Created frontend `achievementService.ts` and `useAchievementStore.ts` with getters for unlocked and locked badge lists.
+- Created `BadgeCard.vue` and `ProfileBadgesSection.vue` adhering to Clubhouse Editorial styling and mounted in `Cabinet.vue`.
+- Added localized strings to `frontend/src/locales/en.json` and `frontend/src/locales/de.json`.
+- All backend unit tests (`AchievementEvaluatorTest`, `AchievementServiceTest`), backend ATDD tests (`AchievementControllerATDDTest`), frontend unit tests (`useAchievementStore.spec.ts`, `BadgeCard.spec.ts`), and Playwright E2E tests (`achievements-profile.spec.ts`) pass 100%.
+- Full verification script `./scripts/ci-local.sh` executed successfully.
 
 ## File List
 
 - `src/main/resources/db/migration/V16__create_achievements_tables.sql`
+- `src/main/java/com/tictactore/config/AchievementCatalogInitializer.java`
 - `src/main/java/com/tictactore/model/Achievement.java`
 - `src/main/java/com/tictactore/model/PlayerAchievement.java`
 - `src/main/java/com/tictactore/repository/AchievementRepository.java`
@@ -141,6 +153,7 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 - `src/main/java/com/tictactore/event/MatchConfirmedEvent.java`
 - `src/main/java/com/tictactore/listener/AchievementEventListener.java`
 - `src/main/java/com/tictactore/service/achievement/AchievementEvaluator.java`
+- `src/main/java/com/tictactore/service/achievement/PlayerStatsContext.java`
 - `src/main/java/com/tictactore/service/achievement/evaluator/FirstWinEvaluator.java`
 - `src/main/java/com/tictactore/service/achievement/evaluator/MatchesPlayedEvaluator.java`
 - `src/main/java/com/tictactore/service/achievement/evaluator/CleanSheetEvaluator.java`
@@ -151,14 +164,21 @@ so that I feel rewarded for my progress and can showcase my accomplishments on m
 - `src/main/java/com/tictactore/dto/AchievementDto.java`
 - `src/main/java/com/tictactore/dto/PlayerAchievementsSummaryResponse.java`
 - `src/main/java/com/tictactore/controller/AchievementController.java`
+- `src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java`
+- `src/test/java/com/tictactore/service/AchievementServiceTest.java`
+- `src/test/java/com/tictactore/controller/AchievementControllerATDDTest.java`
 - `frontend/src/services/achievementService.ts`
 - `frontend/src/features/achievements/stores/useAchievementStore.ts`
+- `frontend/src/features/achievements/stores/__tests__/useAchievementStore.spec.ts`
 - `frontend/src/features/achievements/components/BadgeCard.vue`
 - `frontend/src/features/achievements/components/ProfileBadgesSection.vue`
+- `frontend/src/features/achievements/components/__tests__/BadgeCard.spec.ts`
 - `frontend/src/features/profile/Cabinet.vue`
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
+- `frontend/e2e/achievements-profile.spec.ts`
 
 ## Change Log
 
 - 2026-08-30: Initialized comprehensive Story 7.1 specification, Acceptance Criteria, Tasks, and Dev Notes.
+- 2026-08-30: Implemented Story 7.1 fullstack features (database migrations, entities, evaluators, event listeners, API endpoint, Vue components, i18n, unit and ATDD tests). Status transitioned to review.

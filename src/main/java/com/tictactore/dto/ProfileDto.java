@@ -17,6 +17,9 @@ import java.util.UUID;
 @Schema(description = "User profile information")
 public class ProfileDto {
 
+    @Schema(description = "User's unique ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+    private UUID id;
+
     @Schema(description = "User's unique nickname", example = "johndoe")
     private String nickname;
 

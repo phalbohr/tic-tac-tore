@@ -247,4 +247,13 @@ public class Match {
         }
         return opponents;
     }
+
+    public List<UUID> getParticipantIds() {
+        List<UUID> participants = new ArrayList<>();
+        if (teamAAttackerId != null) participants.add(teamAAttackerId);
+        if (teamADefenderId != null) participants.add(teamADefenderId);
+        if (teamBAttackerId != null) participants.add(teamBAttackerId);
+        if (teamBDefenderId != null) participants.add(teamBDefenderId);
+        return participants;
+    }
 }
