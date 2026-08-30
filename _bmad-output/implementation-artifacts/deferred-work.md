@@ -422,3 +422,13 @@ status: open
 ## Deferred from: code review of 6-5-pool-notifications (2026-08-29)
 
 - Ignored "Matching Criteria" Requirement: The original user story requests notifications for "pools matching my criteria," but the implementation (and the mutated Acceptance Criteria) drops this logic, blasting POOL_CREATED notifications to every user in the system regardless of preferences.
+
+## Deferred from: code review of 6-6-challenge-player-or-group.md (2026-08-30)
+
+- Redundant authentication boilerplate in controller: Endpoints manually check if principal == null and throw 401 instead of relying on Spring Security.
+- Database chattiness in createChallenge: Creating a challenge triggers up to four separate findById calls instead of using getReferenceById.
+- SQL IN clause hack with random UUID: findIncomingChallenges uses UUID.randomUUID() to bypass SQL syntax errors for empty collections.
+- Exception swallowing in ChallengeNotificationListener: Methods log exceptions and continue, potentially masking systemic failures.
+- Sequential blocking network calls for group push notifications: Iterating over group members and making sequential push network calls.
+- Complex OR conditions in findIncomingChallenges: Query spans different relationships, potentially defeating query planner.
+- Bypassed standard validation for CreateChallengeRequest: Target validation throws a custom ValidationException instead of using a class-level @Constraint.

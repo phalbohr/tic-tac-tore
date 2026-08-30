@@ -4,7 +4,7 @@ baseline_commit: 2b5390d79d67566ca0b29849508e64cbe3943360
 
 # Story 6.6: Challenge Player or Group
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -192,7 +192,21 @@ so that we can settle rivalries, organize targeted games, and receive instant pu
     - Test 4: Validation prevents self-challenge and duplicate pending challenges.
   - [x] Run full local verification: `./scripts/ci-local.sh` and ensure 100% pass rate across backend and frontend.
 
-## Dev Notes
+
+### Review Findings
+
+- [ ] [Review][Patch] Flawed conflict detection allows duplicate/crossed challenges [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:65]
+- [ ] [Review][Patch] Group members can accept their own challenges [src/main/java/com/tictactore/model/MatchChallenge.java:111]
+- [ ] [Review][Patch] LazyInitializationException in ChallengeNotificationListener [src/main/java/com/tictactore/listener/ChallengeNotificationListener.java:43]
+- [ ] [Review][Patch] Target validation allows simultaneous player and group targets [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java:51]
+- [x] [Review][Defer] Redundant authentication boilerplate in controller [src/main/java/com/tictactore/controller/ChallengeController.java] — deferred, pre-existing
+- [x] [Review][Defer] Database chattiness in createChallenge [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java] — deferred, pre-existing
+- [x] [Review][Defer] SQL IN clause hack with random UUID [src/main/java/com/tictactore/repository/MatchChallengeRepository.java:36] — deferred, pre-existing
+- [x] [Review][Defer] Exception swallowing in ChallengeNotificationListener [src/main/java/com/tictactore/listener/ChallengeNotificationListener.java] — deferred, pre-existing
+- [x] [Review][Defer] Sequential blocking network calls for group push notifications [src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java] — deferred, pre-existing
+- [x] [Review][Defer] Complex OR conditions in findIncomingChallenges [src/main/java/com/tictactore/repository/MatchChallengeRepository.java:23] — deferred, pre-existing
+- [x] [Review][Defer] Bypassed standard validation for CreateChallengeRequest [src/main/java/com/tictactore/service/impl/ChallengeServiceImpl.java] — deferred, pre-existing
+
 
 ### Architecture & Implementation Guardrails
 
