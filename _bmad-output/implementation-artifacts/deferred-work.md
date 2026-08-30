@@ -441,3 +441,6 @@ status: open
 
 ## Deferred from: code review of 7-2-humorous-anti-achievements (2026-08-30)
 - Copy-Pasted Team Affiliation [Multiple Evaluators]: Every evaluator duplicates identical logic to determine onTeamA and onTeamB, instead of utilizing a shared base class or context utility to keep the code DRY.
+
+## Deferred from: code review of 7-3-award-wall-and-progress-tracking (2026-08-30)
+- Test Endpoint Security Hazard [src/main/java/com/tictactore/controller/TestAuthController.java]: The Playwright E2E test relies on an open `GET /api/auth/test-login` endpoint. While guarded by specific profiles (test, e2e, dev), it presents a risk if misconfigured in higher environments.

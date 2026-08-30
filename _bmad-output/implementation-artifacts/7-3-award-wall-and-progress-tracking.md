@@ -4,7 +4,7 @@ baseline_commit: 67fc7b1f2b9853666f631b78233eb4baa57cde07
 
 # Story 7.3: Award Wall and Progress Tracking
 
-Status: review
+Status: in-progress
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -93,6 +93,15 @@ so that I can celebrate my collected badges, easily browse different categories,
   - [x] Enable and verify Playwright E2E test `frontend/e2e/achievements-progress-wall.spec.ts`: assert category filtering and progress bars render properly on `/cabinet`.
 - [x] Task 8: Verification & Quality Gate
   - [x] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend, frontend unit tests, and Playwright E2E suites.
+
+### Review Findings
+- [ ] [Review][Patch] Race Condition: Locked Badges Showing 100% Progress [src/main/java/com/tictactore/service/impl/AchievementServiceImpl.java]
+- [ ] [Review][Patch] Missing i18n Pluralization Rules [frontend/src/locales/en.json]
+- [ ] [Review][Patch] Leftover Test Scaffolding [src/test/java/com/tictactore/controller/AchievementProgressControllerATDDTest.java]
+- [ ] [Review][Patch] Missing category-specific unlock counts in UI and API [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
+- [ ] [Review][Patch] Missing numeric percentage text in the detail modal [frontend/src/features/achievements/components/ProfileBadgesSection.vue]
+- [ ] [Review][Patch] Frontend DTO properties incorrectly marked as optional [frontend/src/services/achievementService.ts]
+- [x] [Review][Defer] Test Endpoint Security Hazard [src/main/java/com/tictactore/controller/TestAuthController.java] — deferred, pre-existing
 
 ## Dev Agent Record
 
