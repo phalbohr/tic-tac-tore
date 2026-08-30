@@ -4,7 +4,7 @@ baseline_commit: 99d15aa7f132778f9616726ff0ef2f33efd71cc8
 
 # Story 7.2: Humorous Anti-achievements
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is complete. Story is ready for dev-story execution. -->
 
@@ -83,6 +83,18 @@ so that losses and comical situations are celebrated with good sportsmanship rat
   - [x] Backend ATDD & Integration Tests: Verify anti-achievement evaluations triggered by `MatchConfirmedEvent` in `AchievementServiceTest.java` and `AchievementControllerATDDTest.java`.
   - [x] Frontend Unit Tests: Update `BadgeCard.spec.ts` and `AntiAchievementBadgeCard.spec.ts` to verify icon and styling mapping for anti-achievements.
   - [x] Full Verification: Run `./scripts/ci-local.sh` and ensure 100% test pass.
+
+### Review Findings
+
+- [ ] [Review][Patch] Goose Egg False Positives & Incomplete Tests [src/main/java/com/tictactore/service/achievement/evaluator/GooseEggEvaluator.java]
+- [ ] [Review][Patch] Redundant Icon Mapping Boilerplate [frontend/src/features/achievements/components/BadgeCard.vue]
+- [ ] [Review][Patch] Vue Template Logic Abuse [frontend/src/features/achievements/components/BadgeCard.vue]
+- [ ] [Review][Patch] Deciding Game Order Assumption [src/main/java/com/tictactore/service/achievement/evaluator/HeartbreakerEvaluator.java:40]
+- [ ] [Review][Patch] Lazy Hardcoded UUIDs [src/main/resources/db/migration/V17__seed_anti_achievements.sql]
+- [ ] [Review][Patch] Invalid Test Implementation for Heartbreaker (False Positive) [src/test/java/com/tictactore/service/achievement/AchievementEvaluatorTest.java]
+- [ ] [Review][Patch] Missing Backend Integration Tests [N/A]
+- [ ] [Review][Patch] Design Tokens Guardrail Violation [frontend/src/features/achievements/components/BadgeCard.vue]
+- [x] [Review][Defer] Copy-Pasted Team Affiliation [Multiple Evaluators] — deferred, pre-existing
 
 ## Dev Notes
 

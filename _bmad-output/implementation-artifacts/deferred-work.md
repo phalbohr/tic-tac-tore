@@ -438,3 +438,6 @@ status: open
 - No debouncing for achievement fetch [frontend/src/features/achievements/stores/useAchievementStore.ts:16]
 - Icon mapping logic leaked to presentation layer [frontend/src/features/achievements/components/BadgeCard.vue:29]
 - E2E tests use fabricated UUID strings [frontend/e2e/achievements-profile.spec.ts]
+
+## Deferred from: code review of 7-2-humorous-anti-achievements (2026-08-30)
+- Copy-Pasted Team Affiliation [Multiple Evaluators]: Every evaluator duplicates identical logic to determine onTeamA and onTeamB, instead of utilizing a shared base class or context utility to keep the code DRY.
