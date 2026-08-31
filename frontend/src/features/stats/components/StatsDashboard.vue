@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useStatsStore } from '../stores/useStatsStore'
 import H2HCrossTabMatrix from './H2HCrossTabMatrix.vue'
 import TeamStatsView from './TeamStatsView.vue'
+import InsightsSection from './InsightsSection.vue'
 
 const route = useRoute()
 const statsStore = useStatsStore()
@@ -87,6 +88,8 @@ const currentTab = computed<'personal' | 'h2h' | 'teams'>(() => {
       <div v-else class="text-on-surface-variant text-sm italic">
         {{ t('stats.errorLoading', 'Unable to load statistics.') }}
       </div>
+
+      <InsightsSection />
     </div>
   </div>
 </template>

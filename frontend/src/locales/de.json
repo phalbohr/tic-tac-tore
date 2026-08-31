@@ -392,5 +392,47 @@
       "title": "Herzschlag-Finale",
       "description": "Das entscheidende Spiel mit nur einem Tor Unterschied verloren. Fast geschafft!"
     }
+  },
+  "insights": {
+    "title": "Statistische Einblicke",
+    "empty": "Spiele mindestens 3 Spiele, um persönliche Spiel-Einblicke freizuschalten.",
+    "insufficientData": "Spiele mindestens 3 Spiele, um persönliche Spiel-Einblicke freizuschalten.",
+    "badgeStreak": "Serie",
+    "badgeTrend": "Formkurve",
+    "badgePosition": "Position",
+    "badgePartnership": "Partnerschaft",
+    "badgeMilestone": "Meilenstein",
+    "badgeGeneral": "Einblick",
+    "category": {
+      "streak": "Serie",
+      "trend": "Formkurve",
+      "position": "Position",
+      "partnership": "Partnerschaft",
+      "milestone": "Meilenstein",
+      "general": "Einblick"
+    },
+    "winStreak": {
+      "title": "Lauf des Lebens!",
+      "description": "Du hast aktuell eine Siegesserie von {streak} Spielen in Folge."
+    },
+    "formTrend": {
+      "title": "Aufsteigende Form",
+      "description": "Deine aktuelle Siegquote ({recentWinRate}%) liegt um {diff}% über deinem Karrieredurchschnitt."
+    },
+    "positionalMastery": {
+      "title": "Positionsspezialist",
+      "description": "Du überzeugst als {favoredPosition} mit einer Siegquote von {higherWinRate}% im Vergleich zu {lowerWinRate}% auf der anderen Position."
+    },
+    "bestPartnership": {
+      "title": "Traum-Duo",
+      "description": "Du und {partnerName} haltet eine starke Siegquote von {winRate}% über {matches} gemeinsame Spiele."
+    },
+    "milestoneProximity": {
+      "title": "Meilenstein in Reichweite",
+      "description": "Nur noch {remaining} bis zum nächsten Erfolgs-Abzeichen!"
+    },
+    "drillDown": "Details anzeigen",
+    "celebrationTitle": "Aktuelles Highlight"
   }
 }
+

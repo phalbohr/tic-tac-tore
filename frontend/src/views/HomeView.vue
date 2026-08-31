@@ -20,11 +20,13 @@ import CreatePoolModal from '@/features/matchmaking/components/CreatePoolModal.v
 import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue'
 import PendingChallenges from '@/features/challenge/components/PendingChallenges.vue'
 import HomeConfirmationToasts from '@/features/match/components/HomeConfirmationToasts.vue'
+import MicroCelebrationBanner from '@/features/stats/components/MicroCelebrationBanner.vue'
 import { mapApiMatchItem, type ApiMatchItem } from '@/features/match/utils/matchMapper'
 import { useMatchDraftStore } from '@/features/match/stores/matchDraftStore'
 import { usePushNotifications } from '@/features/match/composables/usePushNotifications'
 import { usePendingMatches } from '@/features/match/composables/usePendingMatches'
 import { useMatchConfirmationStore } from '@/features/match/stores/matchConfirmationStore'
+import { useInsightStore } from '@/features/stats/stores/useInsightStore'
 
 const { t } = useI18n()
 const showNewMatch = ref(false)
@@ -33,6 +35,7 @@ const poolSuccessToast = ref<string | null>(null)
 const authStore = useAuthStore()
 const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
+const insightStore = useInsightStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
 const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch, collapsedMatchIds, collapseMatch, expandAllMatches, cleanupCollapsedMatches } = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
@@ -69,6 +72,7 @@ watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
     pendingMatches.value = pendingMatches.value.filter((m) => m.id !== confirmedId)
     await fetchPendingCount(true)
     await statsStore.fetchStats()
+    await insightStore.fetchInsights()
     await fetchPendingMatches()
   }
 })
@@ -193,6 +197,7 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchProfile()
     await statsStore.fetchStats()
+    await insightStore.fetchInsights()
     await fetchPendingMatches()
   }
 
@@ -223,6 +228,7 @@ onUnmounted(() => {
 watch(() => authStore.isAuthenticated, async (newVal) => {
   if (newVal && !authStore.profile) {
     await authStore.fetchProfile()
+    await insightStore.fetchInsights()
     await fetchPendingMatches()
   }
 })
@@ -247,6 +253,13 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
     </header>
 
     <main class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8 p-6 text-center">
+      <!-- Micro Celebration Banner -->
+      <MicroCelebrationBanner
+        v-if="!showNewMatch && authStore.isAuthenticated && insightStore.latestCelebrationInsight"
+        :insight="insightStore.latestCelebrationInsight"
+        @dismiss="insightStore.dismissCelebration(insightStore.latestCelebrationInsight.id)"
+      />
+
       <!-- Permission Re-prompt Banner -->
       <div
         v-if="permissionState === 'denied'"

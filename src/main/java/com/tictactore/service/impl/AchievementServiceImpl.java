@@ -157,7 +157,8 @@ public class AchievementServiceImpl implements AchievementService {
     private PlayerStatsContext buildPlayerStatsContext(UUID playerId) {
         long totalMatches = matchRepository.countConfirmedMatchesByPlayerId(playerId);
         long totalMatchesAsDefender = matchRepository.countConfirmedMatchesAsDefender(playerId);
-        long totalGoalsAsAttacker = matchRepository.sumGoalsAsAttacker(playerId);
+        Long goals = matchRepository.sumGoalsAsAttacker(playerId);
+        long totalGoalsAsAttacker = goals != null ? goals : 0L;
         long totalWins = countTotalWins(playerId);
 
         return new PlayerStatsContext(

@@ -263,7 +263,7 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
         WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
         AND (m.teamAAttackerId = :userId OR m.teamBAttackerId = :userId OR g.teamAAttackerId = :userId OR g.teamBAttackerId = :userId)
         """)
-    long sumGoalsAsAttacker(@Param("userId") UUID userId);
+    Long sumGoalsAsAttacker(@Param("userId") UUID userId);
 
     @Query("""
         SELECT DISTINCT m FROM Match m
