@@ -102,8 +102,8 @@ development_status:
   7-4-narrative-match-broadcasts: backlog
   7-5-auto-generated-statistical-insights: review
   epic-7-retrospective: optional
-  epic-8: backlog
-  8-1-tournament-creation-and-configuration: backlog
+  epic-8: in-progress
+  8-1-tournament-creation-and-configuration: ready-for-dev
   8-2-team-registration-and-confirmation: backlog
   8-3-automated-bracket-generation-and-seeding: backlog
   8-4-equal-match-distribution-2v2-random-pairing: backlog
