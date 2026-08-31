@@ -38,7 +38,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   }
 })
 
-describe.skip('[Story 7.5 ATDD] InsightCard.vue Component Tests (RED PHASE)', () => {
+describe('[Story 7.5 ATDD] InsightCard.vue Component Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

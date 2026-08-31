@@ -18,9 +18,9 @@ async function loginUser(page: Page) {
   return { nickname, email };
 }
 
-test.describe('[Story 7.5] Auto-generated Statistical Insights E2E (ATDD RED PHASE)', () => {
+test.describe('[Story 7.5] Auto-generated Statistical Insights E2E', () => {
 
-  test.skip('[P0] [AC1, AC5] should render personalized statistical insights cards in Statistics Hub and navigate via drillDownUrl', async ({ page }) => {
+  test('[P0] [AC1, AC5] should render personalized statistical insights cards in Statistics Hub and navigate via drillDownUrl', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/statistics/insights', async (route) => {
@@ -82,7 +82,7 @@ test.describe('[Story 7.5] Auto-generated Statistical Insights E2E (ATDD RED PHA
     await expect(page).toHaveURL(/.*tab=teams.*/);
   });
 
-  test.skip('[P0] [AC6] should display MicroCelebrationBanner on Home Hub after match confirmation and auto-dismiss', async ({ page }) => {
+  test('[P0] [AC6] should display MicroCelebrationBanner on Home Hub after match confirmation and auto-dismiss', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/statistics/insights', async (route) => {
@@ -119,7 +119,7 @@ test.describe('[Story 7.5] Auto-generated Statistical Insights E2E (ATDD RED PHA
     await expect(banner).toBeHidden({ timeout: 6000 });
   });
 
-  test.skip('[P1] [AC3, AC7] should display starter empty state or demo insights when player has fewer than 3 matches', async ({ page }) => {
+  test('[P1] [AC3, AC7] should display starter empty state or demo insights when player has fewer than 3 matches', async ({ page }) => {
     await loginUser(page);
 
     await page.route('**/api/v1/statistics/insights', async (route) => {

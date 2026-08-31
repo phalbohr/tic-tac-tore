@@ -15,7 +15,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   return {
     ...actual,
     useI18n: () => ({
-      t: (key: string, values?: Record<string, unknown>) => {
+      t: (key: string, _values?: Record<string, unknown>) => {
         const map: Record<string, string> = {
           'insights.winStreak.title': 'On a Roll!',
           'insights.winStreak.description': 'You are on a 5-match winning streak.',
@@ -30,7 +30,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   }
 })
 
-describe.skip('[Story 7.5 ATDD] MicroCelebrationBanner.vue Component Tests (RED PHASE)', () => {
+describe('[Story 7.5 ATDD] MicroCelebrationBanner.vue Component Tests', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()

@@ -4,7 +4,7 @@ baseline_commit: fd1456bd7ae74c098239e299fc23acb04b4596b5
 
 # Story 7.5: Auto-generated Statistical Insights
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -54,54 +54,54 @@ so that I can understand my improvement over time, discover tactical strengths, 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend Domain & Insight Generation Engine (AC1, AC2, AC3, AC4)
-  - [ ] Create domain records and enums:
+- [x] Task 1: Backend Domain & Insight Generation Engine (AC1, AC2, AC3, AC4)
+  - [x] Create domain records and enums:
     - `com.tictactore.dto.InsightType` (`WIN_STREAK`, `FORM_TREND`, `POSITIONAL_MASTERY`, `BEST_PARTNERSHIP`, `MILESTONE_PROXIMITY`, `INSUFFICIENT_DATA`).
     - `com.tictactore.dto.InsightCategory` (`STREAK`, `TREND`, `POSITION`, `PARTNERSHIP`, `MILESTONE`, `GENERAL`).
     - `com.tictactore.dto.InsightImportance` (`HIGH`, `MEDIUM`, `LOW`).
     - `com.tictactore.dto.PlayerInsightDto` (`UUID id`, `InsightType type`, `InsightCategory category`, `InsightImportance importance`, `String titleKey`, `String descriptionKey`, `Map<String, Object> params`, `String icon`, `String drillDownUrl`).
     - `com.tictactore.dto.PlayerInsightsResponse` (`UUID playerId`, `int totalCount`, `List<PlayerInsightDto> insights`).
-  - [ ] Create `com.tictactore.service.insight.InsightGenerator` interface:
+  - [x] Create `com.tictactore.service.insight.InsightGenerator` interface:
     - `Optional<PlayerInsightDto> generate(UUID playerId, List<Match> matches, PlayerStatsContext stats, List<AchievementDto> achievements)`.
     - `int getOrder()`.
-  - [ ] Implement concrete generator components in `com.tictactore.service.insight.generator`:
+  - [x] Implement concrete generator components in `com.tictactore.service.insight.generator`:
     - `WinStreakInsightGenerator` (`WIN_STREAK` — evaluates recent consecutive match wins).
     - `FormTrendInsightGenerator` (`FORM_TREND` — compares win rate of last 5–10 matches against career average).
     - `PositionalMasteryInsightGenerator` (`POSITIONAL_MASTERY` — compares Attacker vs Defender win rates with min 5 matches each).
     - `BestPartnershipInsightGenerator` (`BEST_PARTNERSHIP` — analyzes 2v2 partner win rates with min 3 matches).
     - `MilestoneProximityInsightGenerator` (`MILESTONE_PROXIMITY` — checks locked progressive badges with remaining progress $\le 2$).
-  - [ ] Create `com.tictactore.service.InsightService` and `com.tictactore.service.impl.InsightServiceImpl`:
+  - [x] Create `com.tictactore.service.InsightService` and `com.tictactore.service.impl.InsightServiceImpl`:
     - Collects all `InsightGenerator` beans, loads player matches via `MatchRepository.findConfirmedMatchesByPlayerId(userId)`, executes single-pass aggregation, sorts by importance, and limits output to top 5.
-- [ ] Task 2: REST Controller & Security Integration (AC4)
-  - [ ] Update `com.tictactore.controller.StatisticsController` (or add `com.tictactore.controller.InsightController`):
+- [x] Task 2: REST Controller & Security Integration (AC4)
+  - [x] Update `com.tictactore.controller.StatisticsController` (or add `com.tictactore.controller.InsightController`):
     - `GET /api/v1/players/{id}/insights` -> returns `200 OK` with `PlayerInsightsResponse`.
     - `GET /api/v1/statistics/insights` -> returns `200 OK` for `@AuthenticationPrincipal User principal`.
     - Enforce authentication and sanitize output (no PII/email).
-- [ ] Task 3: Backend Unit, ATDD & Integration Tests (AC1-AC4)
-  - [ ] Create `src/test/java/com/tictactore/service/insight/InsightGeneratorTest.java`: unit tests for each individual generator strategy (streak, trend, position, partnership, milestone, empty state).
-  - [ ] Create `src/test/java/com/tictactore/service/insight/InsightServiceTest.java`: unit test for `InsightServiceImpl` aggregation, sorting, and capping.
-  - [ ] Create `src/test/java/com/tictactore/controller/InsightControllerATDDTest.java`: ATDD acceptance tests verifying REST API contracts, status codes, and security.
-- [ ] Task 4: Frontend Service, Store & Demo Generator (AC1, AC4, AC7)
-  - [ ] Create `frontend/src/services/insightService.ts`:
+- [x] Task 3: Backend Unit, ATDD & Integration Tests (AC1-AC4)
+  - [x] Create `src/test/java/com/tictactore/service/insight/InsightGeneratorTest.java`: unit tests for each individual generator strategy (streak, trend, position, partnership, milestone, empty state).
+  - [x] Create `src/test/java/com/tictactore/service/insight/InsightServiceTest.java`: unit test for `InsightServiceImpl` aggregation, sorting, and capping.
+  - [x] Create `src/test/java/com/tictactore/controller/InsightControllerATDDTest.java`: ATDD acceptance tests verifying REST API contracts, status codes, and security.
+- [x] Task 4: Frontend Service, Store & Demo Generator (AC1, AC4, AC7)
+  - [x] Create `frontend/src/services/insightService.ts`:
     - TypeScript interfaces: `PlayerInsight`, `PlayerInsightsResponse`, `InsightType`, `InsightCategory`, `InsightImportance`.
     - API fetch methods: `getPlayerInsights(playerId: string)`, `getMyInsights()`.
-  - [ ] Create `frontend/src/features/stats/stores/useInsightStore.ts`:
+  - [x] Create `frontend/src/features/stats/stores/useInsightStore.ts`:
     - State: `insights: PlayerInsight[]`, `isLoading: boolean`, `error: string | null`.
     - Getters: `topInsights`, `latestCelebrationInsight`.
     - Actions: `fetchInsights(playerId?: string)`.
-  - [ ] Update `frontend/src/features/stats/utils/demoDataGenerator.ts`:
+  - [x] Update `frontend/src/features/stats/utils/demoDataGenerator.ts`:
     - Add `generateDemoInsights(): PlayerInsight[]` producing realistic demo insights.
-- [ ] Task 5: Frontend UI Components & Views Integration (AC5, AC6)
-  - [ ] Create `frontend/src/features/stats/components/InsightCard.vue`:
+- [x] Task 5: Frontend UI Components & Views Integration (AC5, AC6)
+  - [x] Create `frontend/src/features/stats/components/InsightCard.vue`:
     - Renders icon, localized title, description with dynamic parameter interpolation, category badge, and interactive drill-down button with Clubhouse Editorial design tokens (`UX-DR3`). Keep under 500 lines (`IP-04`).
-  - [ ] Create `frontend/src/features/stats/components/MicroCelebrationBanner.vue`:
+  - [x] Create `frontend/src/features/stats/components/MicroCelebrationBanner.vue`:
     - Post-confirmation reward banner on Home Hub (`role="status"`, `aria-live="polite"`, auto-dismiss after 4s, drill-link CTA).
-  - [ ] Create `frontend/src/features/stats/components/InsightsSection.vue`:
+  - [x] Create `frontend/src/features/stats/components/InsightsSection.vue`:
     - Grid/list container for displaying insights cards in `StatsDashboard.vue` and `Cabinet.vue`.
-  - [ ] Mount `InsightsSection.vue` in `StatsDashboard.vue` and `Cabinet.vue`.
-  - [ ] Mount `MicroCelebrationBanner.vue` in `HomeView.vue`.
-- [ ] Task 6: Localization in English & German (AC8)
-  - [ ] Add translation keys to `frontend/src/locales/en.json`:
+  - [x] Mount `InsightsSection.vue` in `StatsDashboard.vue` and `Cabinet.vue`.
+  - [x] Mount `MicroCelebrationBanner.vue` in `HomeView.vue`.
+- [x] Task 6: Localization in English & German (AC8)
+  - [x] Add translation keys to `frontend/src/locales/en.json`:
     - `insights.title: "Statistical Insights"`
     - `insights.empty: "Play at least 3 matches to unlock personalized gameplay insights."`
     - `insights.winStreak.title: "On a Roll!"`
@@ -115,14 +115,14 @@ so that I can understand my improvement over time, discover tactical strengths, 
     - `insights.milestoneProximity.title: "Milestone in Reach"`
     - `insights.milestoneProximity.description: "Only {remaining} more to unlock the next achievement badge!"`
     - `insights.drillDown: "View Details"`
-  - [ ] Add translation keys to `frontend/src/locales/de.json` with accurate German phrasing.
-- [ ] Task 7: Frontend Unit & Playwright E2E Tests (AC1-AC8)
-  - [ ] Create `frontend/src/features/stats/components/__tests__/InsightCard.spec.ts`.
-  - [ ] Create `frontend/src/features/stats/components/__tests__/MicroCelebrationBanner.spec.ts`.
-  - [ ] Create `frontend/src/features/stats/stores/__tests__/useInsightStore.spec.ts`.
-  - [ ] Create Playwright E2E test `frontend/e2e/statistical-insights.spec.ts` verifying insight rendering, demo mode display, and micro-celebration banner interaction.
-- [ ] Task 8: Verification & Quality Gate
-  - [ ] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend compilation, unit/ATDD/integration tests, frontend type-check, lint, unit tests, and Playwright E2E suite.
+  - [x] Add translation keys to `frontend/src/locales/de.json` with accurate German phrasing.
+- [x] Task 7: Frontend Unit & Playwright E2E Tests (AC1-AC8)
+  - [x] Create `frontend/src/features/stats/components/__tests__/InsightCard.spec.ts`.
+  - [x] Create `frontend/src/features/stats/components/__tests__/MicroCelebrationBanner.spec.ts`.
+  - [x] Create `frontend/src/features/stats/stores/__tests__/useInsightStore.spec.ts`.
+  - [x] Create Playwright E2E test `frontend/e2e/statistical-insights.spec.ts` verifying insight rendering, demo mode display, and micro-celebration banner interaction.
+- [x] Task 8: Verification & Quality Gate
+  - [x] Execute `./scripts/ci-local.sh` and ensure 100% test pass across backend compilation, unit/ATDD/integration tests, frontend type-check, lint, unit tests, and Playwright E2E suite.
 
 ## Dev Notes
 

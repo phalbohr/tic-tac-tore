@@ -11,6 +11,7 @@ import PlayerGroupSection from './components/PlayerGroupSection.vue'
 import RuleTemplateSection from './components/RuleTemplateSection.vue'
 import UserPreferencesSection from './components/UserPreferencesSection.vue'
 import ProfileBadgesSection from '@/features/achievements/components/ProfileBadgesSection.vue'
+import InsightsSection from '@/features/stats/components/InsightsSection.vue'
 
 defineOptions({
   name: 'CabinetView'
@@ -266,6 +267,9 @@ async function handleLogout() {
 
       <!-- Achievement Badges Section -->
       <ProfileBadgesSection />
+
+      <!-- Statistical Insights Section -->
+      <InsightsSection :player-id="authStore.profile?.id" />
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 

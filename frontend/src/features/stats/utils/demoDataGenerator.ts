@@ -1,5 +1,6 @@
 import type { PlayerStats, TeamPairStats, Page, H2HStatsResponse } from '@/services/statisticsService'
 import type { MatchResponse, PagedResponse } from '@/services/matchService'
+import type { PlayerInsight } from '@/services/insightService'
 
 export function generateDemoData(): PlayerStats {
   return {
@@ -185,5 +186,66 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
     last: true
   }
 }
+
+export function generateDemoInsights(): PlayerInsight[] {
+  return [
+    {
+      id: 'demo-insight-1',
+      type: 'WIN_STREAK',
+      category: 'STREAK',
+      importance: 'HIGH',
+      titleKey: 'insights.winStreak.title',
+      descriptionKey: 'insights.winStreak.description',
+      params: { streak: 4 },
+      icon: 'local_fire_department',
+      drillDownUrl: null
+    },
+    {
+      id: 'demo-insight-2',
+      type: 'FORM_TREND',
+      category: 'TREND',
+      importance: 'HIGH',
+      titleKey: 'insights.formTrend.title',
+      descriptionKey: 'insights.formTrend.description',
+      params: { recentWinRate: 80, careerWinRate: 60, diff: 20 },
+      icon: 'trending_up',
+      drillDownUrl: null
+    },
+    {
+      id: 'demo-insight-3',
+      type: 'BEST_PARTNERSHIP',
+      category: 'PARTNERSHIP',
+      importance: 'MEDIUM',
+      titleKey: 'insights.bestPartnership.title',
+      descriptionKey: 'insights.bestPartnership.description',
+      params: { partnerId: 'demo-p2', partnerName: 'Bob', winRate: 78, matches: 9 },
+      icon: 'group',
+      drillDownUrl: '/statistics?tab=teams'
+    },
+    {
+      id: 'demo-insight-4',
+      type: 'POSITIONAL_MASTERY',
+      category: 'POSITION',
+      importance: 'MEDIUM',
+      titleKey: 'insights.positionalMastery.title',
+      descriptionKey: 'insights.positionalMastery.description',
+      params: { favoredPosition: 'Attacker', higherWinRate: 73, lowerWinRate: 50 },
+      icon: 'sports_score',
+      drillDownUrl: null
+    },
+    {
+      id: 'demo-insight-5',
+      type: 'MILESTONE_PROXIMITY',
+      category: 'MILESTONE',
+      importance: 'MEDIUM',
+      titleKey: 'insights.milestoneProximity.title',
+      descriptionKey: 'insights.milestoneProximity.description',
+      params: { badgeCode: 'MATCHES_10', remaining: 2, current: 8, target: 10 },
+      icon: 'military_tech',
+      drillDownUrl: '/cabinet'
+    }
+  ]
+}
+
 
 

@@ -392,5 +392,47 @@
       "title": "Heartbreaker",
       "description": "Fell short by just a single goal in the deciding game. So close, yet unforgettable!"
     }
+  },
+  "insights": {
+    "title": "Statistical Insights",
+    "empty": "Play at least 3 matches to unlock personalized gameplay insights.",
+    "insufficientData": "Play at least 3 matches to unlock personalized gameplay insights.",
+    "badgeStreak": "Streak",
+    "badgeTrend": "Form Trend",
+    "badgePosition": "Position",
+    "badgePartnership": "Partnership",
+    "badgeMilestone": "Milestone",
+    "badgeGeneral": "Insight",
+    "category": {
+      "streak": "Streak",
+      "trend": "Form Trend",
+      "position": "Position",
+      "partnership": "Partnership",
+      "milestone": "Milestone",
+      "general": "Insight"
+    },
+    "winStreak": {
+      "title": "On a Roll!",
+      "description": "You're currently on a {streak}-match winning streak."
+    },
+    "formTrend": {
+      "title": "Rising Form",
+      "description": "Your recent win rate ({recentWinRate}%) is {diff}% higher than your career average."
+    },
+    "positionalMastery": {
+      "title": "Positional Specialist",
+      "description": "You excel as {favoredPosition} with a {higherWinRate}% win rate compared to {lowerWinRate}% on the other position."
+    },
+    "bestPartnership": {
+      "title": "Dynamic Duo",
+      "description": "You and {partnerName} hold a stellar {winRate}% win rate across {matches} games."
+    },
+    "milestoneProximity": {
+      "title": "Milestone in Reach",
+      "description": "Only {remaining} more to unlock the next achievement badge!"
+    },
+    "drillDown": "View Details",
+    "celebrationTitle": "Recent Highlight"
   }
 }
+
