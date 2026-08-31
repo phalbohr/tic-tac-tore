@@ -4,7 +4,7 @@ baseline_commit: fd1456bd7ae74c098239e299fc23acb04b4596b5
 
 # Story 7.5: Auto-generated Statistical Insights
 
-Status: review
+Status: in-progress
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -228,3 +228,17 @@ so that I can understand my improvement over time, discover tactical strengths, 
 - `frontend/src/features/stats/stores/__tests__/useInsightStore.spec.ts`
 - `frontend/e2e/statistical-insights.spec.ts`
 
+
+### Review Findings
+- [ ] [Review][Patch] Positional Mastery ignores Defender stats in 1v1 matches [PositionalMasteryInsightGenerator.java:48]
+- [ ] [Review][Patch] BestPartnershipInsightGenerator has risky no-args constructor [BestPartnershipInsightGenerator.java:30]
+- [ ] [Review][Patch] tryParseOrGenerateUuid throws NPE on null [InsightController.java:88]
+- [ ] [Review][Patch] Form Trend is mathematically impossible to trigger before 11 matches [FormTrendInsightGenerator.java:29]
+- [ ] [Review][Patch] InsightServiceImpl duplicate COUNT query for matches [InsightServiceImpl.java:52]
+- [ ] [Review][Patch] Generated insights have transient random UUIDs [FormTrendInsightGenerator.java:47]
+- [ ] [Review][Patch] Flaky tests due to Instant.now() in tight loop [InsightGeneratorTest.java]
+- [ ] [Review][Patch] InsightController username null NPE [InsightController.java:72]
+- [ ] [Review][Patch] InsightServiceImpl unboxing NPE on sumGoalsAsAttacker [InsightServiceImpl.java:54]
+- [x] [Review][Defer] InsightController fetches user by email on every request [InsightController.java:72] — deferred, pre-existing
+- [x] [Review][Defer] InsightMatchUtils assumes winsA > winsB ignoring draws [InsightMatchUtils.java:22] — deferred, pre-existing
+- [x] [Review][Defer] isAnonymous uses magic string [InsightController.java:64] — deferred, pre-existing

@@ -444,3 +444,8 @@ status: open
 
 ## Deferred from: code review of 7-3-award-wall-and-progress-tracking (2026-08-30)
 - Test Endpoint Security Hazard [src/main/java/com/tictactore/controller/TestAuthController.java]: The Playwright E2E test relies on an open `GET /api/auth/test-login` endpoint. While guarded by specific profiles (test, e2e, dev), it presents a risk if misconfigured in higher environments.
+
+## Deferred from: code review of 7-5-auto-generated-statistical-insights.md (2026-08-31)
+- InsightController fetches user by email on every request [InsightController.java:72]
+- InsightMatchUtils assumes winsA > winsB ignoring draws [InsightMatchUtils.java:22]
+- isAnonymous uses magic string [InsightController.java:64]
