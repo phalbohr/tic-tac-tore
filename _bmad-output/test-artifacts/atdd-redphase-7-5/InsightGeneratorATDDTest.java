@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Story 7.5: Insight Generators ATDD Tests")
 class InsightGeneratorATDDTest {
+
+    private static final Instant BASE_TIME = Instant.parse("2026-08-31T10:00:00Z");
 
     private final UUID playerId = UUID.randomUUID();
     private final UUID partnerId = UUID.randomUUID();
@@ -289,7 +292,7 @@ class InsightGeneratorATDDTest {
                 .teamAAttackerId(pId)
                 .teamBAttackerId(oppId)
                 .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
+                .createdAt(BASE_TIME.minusSeconds(10L * 60L))
                 .build();
         var game = Game.builder()
                 .id(UUID.randomUUID())
@@ -312,7 +315,7 @@ class InsightGeneratorATDDTest {
                 .teamBAttackerId(opp1Id)
                 .teamBDefenderId(opp2Id)
                 .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
+                .createdAt(BASE_TIME.minusSeconds(20L * 60L))
                 .build();
         var game = Game.builder()
                 .id(UUID.randomUUID())
@@ -337,7 +340,7 @@ class InsightGeneratorATDDTest {
                 .teamBAttackerId(opp1Id)
                 .teamBDefenderId(opp2Id)
                 .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
+                .createdAt(BASE_TIME.minusSeconds(30L * 60L))
                 .build();
         var game = Game.builder()
                 .id(UUID.randomUUID())
@@ -428,6 +431,10 @@ class InsightGeneratorATDDTest {
             var defMatches = 0;
             var defWins = 0;
             for (var m : matches) {
+                var isDoubles = m.getTeamADefenderId() != null || m.getTeamBDefenderId() != null;
+                if (!isDoubles) {
+                    continue;
+                }
                 var isAtt = playerId.equals(m.getTeamAAttackerId()) || playerId.equals(m.getTeamBAttackerId());
                 var isDef = playerId.equals(m.getTeamADefenderId()) || playerId.equals(m.getTeamBDefenderId());
                 var won = isPlayerWinner(m, playerId);
@@ -471,9 +478,7 @@ class InsightGeneratorATDDTest {
 
     private static class StubBestPartnershipInsightGenerator {
         Optional<PlayerInsightDto> generate(UUID playerId, List<Match> matches, PlayerStatsContext stats, List<AchievementDto> achievements) {
-            var partnerMatches = 0;
-            var partnerWins = 0;
-            UUID foundPartner = null;
+            var partnerStatsMap = new HashMap<UUID, int[]>();
             for (var m : matches) {
                 if (m.getTeamADefenderId() != null && m.getTeamBDefenderId() != null) {
                     var inTeamA = playerId.equals(m.getTeamAAttackerId()) || playerId.equals(m.getTeamADefenderId());
@@ -481,23 +486,40 @@ class InsightGeneratorATDDTest {
                             ? (playerId.equals(m.getTeamAAttackerId()) ? m.getTeamADefenderId() : m.getTeamAAttackerId())
                             : (playerId.equals(m.getTeamBAttackerId()) ? m.getTeamBDefenderId() : m.getTeamBAttackerId());
                     if (partner != null) {
-                        foundPartner = partner;
-                        partnerMatches++;
-                        if (isPlayerWinner(m, playerId)) partnerWins++;
+                        var pair = partnerStatsMap.computeIfAbsent(partner, k -> new int[2]);
+                        pair[0]++;
+                        if (isPlayerWinner(m, playerId)) {
+                            pair[1]++;
+                        }
                     }
                 }
             }
-            if (partnerMatches < 3 || foundPartner == null) return Optional.empty();
-            var winRate = (double) partnerWins / partnerMatches * 100.0;
-            if (winRate >= 70.0) {
-                return Optional.of(new PlayerInsightDto(
-                        UUID.randomUUID(), InsightType.BEST_PARTNERSHIP, InsightCategory.PARTNERSHIP,
-                        InsightImportance.MEDIUM, "insights.bestPartnership.title", "insights.bestPartnership.description",
-                        Map.of("partnerId", foundPartner, "partnerName", "Partner", "winRate", Math.round(winRate), "matches", partnerMatches),
-                        "group", "/statistics?tab=teams"
-                ));
+
+            UUID bestPartner = null;
+            double bestWinRate = -1.0;
+            int bestMatches = 0;
+
+            for (var entry : partnerStatsMap.entrySet()) {
+                int pMatches = entry.getValue()[0];
+                int pWins = entry.getValue()[1];
+                if (pMatches >= 3) {
+                    double winRate = ((double) pWins / pMatches) * 100.0;
+                    if (winRate >= 70.0 && (winRate > bestWinRate || (Double.compare(winRate, bestWinRate) == 0 && pMatches > bestMatches))) {
+                        bestPartner = entry.getKey();
+                        bestWinRate = winRate;
+                        bestMatches = pMatches;
+                    }
+                }
             }
-            return Optional.empty();
+
+            if (bestPartner == null) return Optional.empty();
+
+            return Optional.of(new PlayerInsightDto(
+                    UUID.randomUUID(), InsightType.BEST_PARTNERSHIP, InsightCategory.PARTNERSHIP,
+                    InsightImportance.MEDIUM, "insights.bestPartnership.title", "insights.bestPartnership.description",
+                    Map.of("partnerId", bestPartner, "partnerName", "Partner", "winRate", Math.round(bestWinRate), "matches", bestMatches),
+                    "group", "/statistics?tab=teams"
+            ));
         }
 
         private boolean isPlayerWinner(Match match, UUID pId) {

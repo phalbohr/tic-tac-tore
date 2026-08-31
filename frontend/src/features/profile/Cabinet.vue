@@ -269,7 +269,7 @@ async function handleLogout() {
       <ProfileBadgesSection />
 
       <!-- Statistical Insights Section -->
-      <InsightsSection :player-id="authStore.profile?.id" />
+      <InsightsSection />
 
       <DemoDataToggle v-if="(statsStore.confirmedMatchesCount ?? 0) < 5" />
 
