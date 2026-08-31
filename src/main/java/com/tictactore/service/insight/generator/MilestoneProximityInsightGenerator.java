@@ -10,6 +10,7 @@ import com.tictactore.service.achievement.PlayerStatsContext;
 import com.tictactore.service.insight.InsightGenerator;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class MilestoneProximityInsightGenerator implements InsightGenerator {
         }
 
         return Optional.of(new PlayerInsightDto(
-                UUID.randomUUID(),
+                UUID.nameUUIDFromBytes((playerId + ":" + InsightType.MILESTONE_PROXIMITY.name() + ":" + closestBadge.code()).getBytes(StandardCharsets.UTF_8)),
                 InsightType.MILESTONE_PROXIMITY,
                 InsightCategory.MILESTONE,
                 InsightImportance.MEDIUM,

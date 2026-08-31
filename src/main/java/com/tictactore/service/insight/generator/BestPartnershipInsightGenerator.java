@@ -12,9 +12,9 @@ import com.tictactore.service.achievement.PlayerStatsContext;
 import com.tictactore.service.insight.InsightGenerator;
 import com.tictactore.service.insight.InsightMatchUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +22,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class BestPartnershipInsightGenerator implements InsightGenerator {
 
     private final UserRepository userRepository;
-
-    public BestPartnershipInsightGenerator() {
-        this.userRepository = null;
-    }
 
     @Override
     public Optional<PlayerInsightDto> generate(
@@ -103,7 +99,7 @@ public class BestPartnershipInsightGenerator implements InsightGenerator {
         }
 
         return Optional.of(new PlayerInsightDto(
-                UUID.randomUUID(),
+                UUID.nameUUIDFromBytes((playerId + ":" + InsightType.BEST_PARTNERSHIP.name() + ":" + bestPartnerId).getBytes(StandardCharsets.UTF_8)),
                 InsightType.BEST_PARTNERSHIP,
                 InsightCategory.PARTNERSHIP,
                 InsightImportance.MEDIUM,

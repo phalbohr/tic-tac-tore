@@ -11,6 +11,7 @@ import com.tictactore.service.insight.InsightGenerator;
 import com.tictactore.service.insight.InsightMatchUtils;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class WinStreakInsightGenerator implements InsightGenerator {
 
         if (streak >= 3) {
             return Optional.of(new PlayerInsightDto(
-                    UUID.randomUUID(),
+                    UUID.nameUUIDFromBytes((playerId + ":" + InsightType.WIN_STREAK.name()).getBytes(StandardCharsets.UTF_8)),
                     InsightType.WIN_STREAK,
                     InsightCategory.STREAK,
                     InsightImportance.HIGH,

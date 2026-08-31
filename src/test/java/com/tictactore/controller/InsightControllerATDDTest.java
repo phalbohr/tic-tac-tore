@@ -113,5 +113,14 @@ class InsightControllerATDDTest {
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @WithMockUser(username = "nonexistent-user@example.com")
+        @DisplayName("[P1] [AC4] should return 404 Not Found when authenticated principal is not found in database")
+        void shouldReturn404_whenAuthenticatedUserNotFound() throws Exception {
+            mockMvc.perform(get("/api/v1/statistics/insights")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound());
+        }
     }
 }

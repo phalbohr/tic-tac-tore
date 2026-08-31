@@ -11,6 +11,7 @@ import com.tictactore.service.insight.InsightGenerator;
 import com.tictactore.service.insight.InsightMatchUtils;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,11 +27,16 @@ public class FormTrendInsightGenerator implements InsightGenerator {
             PlayerStatsContext stats,
             List<AchievementDto> achievements
     ) {
-        if (stats == null || stats.totalMatches() < 10 || matches == null || matches.size() < 5) {
+        if (stats == null || stats.totalMatches() < 6 || matches == null || matches.size() < 5) {
             return Optional.empty();
         }
 
-        List<Match> recentMatches = matches.subList(0, Math.min(10, matches.size()));
+        int recentWindow = matches.size() >= 10 ? 10 : 5;
+        List<Match> recentMatches = matches.subList(0, Math.min(recentWindow, matches.size()));
+        if (stats.totalMatches() <= recentMatches.size()) {
+            return Optional.empty();
+        }
+
         int recentWins = 0;
         for (Match match : recentMatches) {
             if (InsightMatchUtils.isPlayerWinner(match, playerId)) {
@@ -44,7 +50,7 @@ public class FormTrendInsightGenerator implements InsightGenerator {
 
         if (diff >= 15.0) {
             return Optional.of(new PlayerInsightDto(
-                    UUID.randomUUID(),
+                    UUID.nameUUIDFromBytes((playerId + ":" + InsightType.FORM_TREND.name()).getBytes(StandardCharsets.UTF_8)),
                     InsightType.FORM_TREND,
                     InsightCategory.TREND,
                     InsightImportance.HIGH,

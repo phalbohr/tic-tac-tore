@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when;
 @DisplayName("Story 7.5: Insight Generators Unit Tests")
 class InsightGeneratorTest {
 
+    private static final Instant BASE_TIME = Instant.parse("2026-08-31T10:00:00Z");
+
     private final UUID playerId = UUID.randomUUID();
     private final UUID partnerId = UUID.randomUUID();
     private final UUID opponent1Id = UUID.randomUUID();
@@ -63,6 +65,10 @@ class InsightGeneratorTest {
             assertThat(insight.category()).isEqualTo(InsightCategory.STREAK);
             assertThat(insight.importance()).isEqualTo(InsightImportance.HIGH);
             assertThat(insight.params()).containsEntry("streak", 4);
+
+            var secondCall = generator.generate(playerId, matches, stats, Collections.emptyList());
+            assertThat(secondCall).isPresent();
+            assertThat(secondCall.get().id()).isEqualTo(insight.id());
         }
 
         @Test
@@ -80,10 +86,10 @@ class InsightGeneratorTest {
         @DisplayName("[P1] [AC2] should return empty Optional when recent match was a loss")
         void shouldReturnEmpty_whenRecentMatchWasLoss() {
             var matches = new ArrayList<Match>();
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 1, 2));
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 1, 2, 0));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, 1));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, 2));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, 3));
             var stats = new PlayerStatsContext(playerId, 10, 5, 10, 4);
 
             var result = generator.generate(playerId, matches, stats, Collections.emptyList());
@@ -103,7 +109,7 @@ class InsightGeneratorTest {
         void shouldGenerateFormTrendInsight_whenRecentWinRateExceedsCareerByGe15Percent() {
             var matches = new ArrayList<Match>();
             for (var i = 0; i < 6; i++) {
-                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
+                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, i));
             }
             var stats = new PlayerStatsContext(playerId, 20, 10, 30, 8);
 
@@ -115,6 +121,26 @@ class InsightGeneratorTest {
             assertThat(insight.category()).isEqualTo(InsightCategory.TREND);
             assertThat(insight.importance()).isEqualTo(InsightImportance.HIGH);
             assertThat(insight.params()).containsKey("diff");
+
+            var secondCall = generator.generate(playerId, matches, stats, Collections.emptyList());
+            assertThat(secondCall).isPresent();
+            assertThat(secondCall.get().id()).isEqualTo(insight.id());
+        }
+
+        @Test
+        @DisplayName("[P0] [AC2] should generate FORM_TREND insight with 6 total matches when recent 5 wins outpace career")
+        void shouldGenerateFormTrendInsight_withSixTotalMatches() {
+            var matches = new ArrayList<Match>();
+            for (var i = 0; i < 5; i++) {
+                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, i));
+            }
+            var stats = new PlayerStatsContext(playerId, 6, 4, 15, 3);
+
+            var result = generator.generate(playerId, matches, stats, Collections.emptyList());
+
+            assertThat(result).isPresent();
+            var insight = result.get();
+            assertThat(insight.type()).isEqualTo(InsightType.FORM_TREND);
         }
 
         @Test
@@ -122,7 +148,7 @@ class InsightGeneratorTest {
         void shouldReturnEmpty_whenFormTrendDeltaBelow15Percent() {
             var matches = new ArrayList<Match>();
             for (var i = 0; i < 5; i++) {
-                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 3 ? 2 : 0, i < 3 ? 0 : 2));
+                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 3 ? 2 : 0, i < 3 ? 0 : 2, i));
             }
             var stats = new PlayerStatsContext(playerId, 20, 11, 25, 10);
 
@@ -139,14 +165,14 @@ class InsightGeneratorTest {
         private final PositionalMasteryInsightGenerator generator = new PositionalMasteryInsightGenerator();
 
         @Test
-        @DisplayName("[P0] [AC2] should generate POSITIONAL_MASTERY insight when win rate delta >= 20% with min 5 matches each")
+        @DisplayName("[P0] [AC2] should generate POSITIONAL_MASTERY insight when win rate delta >= 20% with min 5 matches each in 2v2")
         void shouldGeneratePositionalMasteryInsight_whenDeltaGe20PercentAndMin5MatchesEach() {
             var matches = new ArrayList<Match>();
             for (var i = 0; i < 5; i++) {
-                matches.add(createAttackerMatch(playerId, opponent1Id, true));
+                matches.add(createAttackerMatch2v2(playerId, partnerId, opponent1Id, opponent2Id, true, i));
             }
             for (var i = 0; i < 5; i++) {
-                matches.add(createDefenderMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 2));
+                matches.add(createDefenderMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 2, i + 5));
             }
             var stats = new PlayerStatsContext(playerId, 10, 7, 25, 5);
 
@@ -157,6 +183,27 @@ class InsightGeneratorTest {
             assertThat(insight.type()).isEqualTo(InsightType.POSITIONAL_MASTERY);
             assertThat(insight.category()).isEqualTo(InsightCategory.POSITION);
             assertThat(insight.params()).containsEntry("favoredPosition", "Attacker");
+
+            var secondCall = generator.generate(playerId, matches, stats, Collections.emptyList());
+            assertThat(secondCall).isPresent();
+            assertThat(secondCall.get().id()).isEqualTo(insight.id());
+        }
+
+        @Test
+        @DisplayName("[P1] [AC2] should ignore 1v1 singles matches when evaluating positional mastery")
+        void shouldIgnoreSinglesMatches_whenEvaluatingPositionalMastery() {
+            var matches = new ArrayList<Match>();
+            for (var i = 0; i < 6; i++) {
+                matches.add(createSinglesMatch(playerId, opponent1Id, true, i));
+            }
+            for (var i = 0; i < 5; i++) {
+                matches.add(createDefenderMatch(playerId, partnerId, opponent1Id, opponent2Id, true, i + 6));
+            }
+            var stats = new PlayerStatsContext(playerId, 11, 11, 20, 5);
+
+            var result = generator.generate(playerId, matches, stats, Collections.emptyList());
+
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -164,10 +211,10 @@ class InsightGeneratorTest {
         void shouldReturnEmpty_whenFewerThan5MatchesInPosition() {
             var matches = new ArrayList<Match>();
             for (var i = 0; i < 6; i++) {
-                matches.add(createAttackerMatch(playerId, opponent1Id, true));
+                matches.add(createAttackerMatch2v2(playerId, partnerId, opponent1Id, opponent2Id, true, i));
             }
             for (var i = 0; i < 3; i++) {
-                matches.add(createDefenderMatch(playerId, partnerId, opponent1Id, opponent2Id, false));
+                matches.add(createDefenderMatch(playerId, partnerId, opponent1Id, opponent2Id, false, i + 6));
             }
             var stats = new PlayerStatsContext(playerId, 9, 6, 20, 3);
 
@@ -190,7 +237,7 @@ class InsightGeneratorTest {
             var generator = new BestPartnershipInsightGenerator(userRepository);
             var matches = new ArrayList<Match>();
             for (var i = 0; i < 4; i++) {
-                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 3 ? 2 : 0, i < 3 ? 0 : 2));
+                matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, i < 3 ? 2 : 0, i < 3 ? 0 : 2, i));
             }
             var stats = new PlayerStatsContext(playerId, 15, 8, 20, 6);
 
@@ -203,6 +250,10 @@ class InsightGeneratorTest {
             assertThat(insight.drillDownUrl()).isEqualTo("/statistics?tab=teams");
             assertThat(insight.params()).containsEntry("partnerId", partnerId);
             assertThat(insight.params()).containsEntry("partnerName", "AceStriker");
+
+            var secondCall = generator.generate(playerId, matches, stats, Collections.emptyList());
+            assertThat(secondCall).isPresent();
+            assertThat(secondCall.get().id()).isEqualTo(insight.id());
         }
 
         @Test
@@ -210,8 +261,8 @@ class InsightGeneratorTest {
         void shouldReturnEmpty_whenJointMatchesLessThan3() {
             var generator = new BestPartnershipInsightGenerator(userRepository);
             var matches = new ArrayList<Match>();
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
-            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, 0));
+            matches.add(createMatch(playerId, partnerId, opponent1Id, opponent2Id, 2, 0, 1));
             var stats = new PlayerStatsContext(playerId, 10, 5, 12, 4);
 
             var result = generator.generate(playerId, matches, stats, Collections.emptyList());
@@ -245,6 +296,10 @@ class InsightGeneratorTest {
             assertThat(insight.drillDownUrl()).isEqualTo("/cabinet");
             assertThat(insight.params()).containsEntry("badgeCode", "MATCHES_10");
             assertThat(insight.params()).containsEntry("remaining", 2L);
+
+            var secondCall = generator.generate(playerId, Collections.emptyList(), stats, List.of(badge));
+            assertThat(secondCall).isPresent();
+            assertThat(secondCall.get().id()).isEqualTo(insight.id());
         }
 
         @Test
@@ -271,19 +326,19 @@ class InsightGeneratorTest {
     private List<Match> createRecentConsecutiveMatches(UUID pId, int count, boolean win) {
         var list = new ArrayList<Match>();
         for (var i = 0; i < count; i++) {
-            list.add(createAttackerMatch(pId, opponent1Id, win));
+            list.add(createAttackerMatch2v2(pId, partnerId, opponent1Id, opponent2Id, win, i));
         }
         return list;
     }
 
-    private Match createAttackerMatch(UUID pId, UUID oppId, boolean win) {
+    private Match createSinglesMatch(UUID pId, UUID oppId, boolean win, int offsetMinutes) {
         var match = Match.builder()
                 .id(UUID.randomUUID())
                 .creatorId(pId)
                 .teamAAttackerId(pId)
                 .teamBAttackerId(oppId)
                 .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
+                .createdAt(BASE_TIME.minusSeconds(offsetMinutes * 60L))
                 .build();
         var game = Game.builder()
                 .id(UUID.randomUUID())
@@ -297,32 +352,7 @@ class InsightGeneratorTest {
         return match;
     }
 
-    private Match createDefenderMatch(UUID pId, UUID pPartnerId, UUID opp1Id, UUID opp2Id, boolean win) {
-        var match = Match.builder()
-                .id(UUID.randomUUID())
-                .creatorId(pId)
-                .teamAAttackerId(pPartnerId)
-                .teamADefenderId(pId)
-                .teamBAttackerId(opp1Id)
-                .teamBDefenderId(opp2Id)
-                .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
-                .build();
-        var game = Game.builder()
-                .id(UUID.randomUUID())
-                .gameOrder(1)
-                .teamAScore(win ? 10 : 5)
-                .teamBScore(win ? 5 : 10)
-                .teamAAttackerId(pPartnerId)
-                .teamADefenderId(pId)
-                .teamBAttackerId(opp1Id)
-                .teamBDefenderId(opp2Id)
-                .build();
-        match.addGame(game);
-        return match;
-    }
-
-    private Match createMatch(UUID pId, UUID pPartnerId, UUID opp1Id, UUID opp2Id, int scoreA, int scoreB) {
+    private Match createAttackerMatch2v2(UUID pId, UUID pPartnerId, UUID opp1Id, UUID opp2Id, boolean win, int offsetMinutes) {
         var match = Match.builder()
                 .id(UUID.randomUUID())
                 .creatorId(pId)
@@ -331,7 +361,57 @@ class InsightGeneratorTest {
                 .teamBAttackerId(opp1Id)
                 .teamBDefenderId(opp2Id)
                 .status(Match.STATUS_CONFIRMED)
-                .createdAt(Instant.now())
+                .createdAt(BASE_TIME.minusSeconds(offsetMinutes * 60L))
+                .build();
+        var game = Game.builder()
+                .id(UUID.randomUUID())
+                .gameOrder(1)
+                .teamAScore(win ? 10 : 5)
+                .teamBScore(win ? 5 : 10)
+                .teamAAttackerId(pId)
+                .teamADefenderId(pPartnerId)
+                .teamBAttackerId(opp1Id)
+                .teamBDefenderId(opp2Id)
+                .build();
+        match.addGame(game);
+        return match;
+    }
+
+    private Match createDefenderMatch(UUID pId, UUID pPartnerId, UUID opp1Id, UUID opp2Id, boolean win, int offsetMinutes) {
+        var match = Match.builder()
+                .id(UUID.randomUUID())
+                .creatorId(pId)
+                .teamAAttackerId(pPartnerId)
+                .teamADefenderId(pId)
+                .teamBAttackerId(opp1Id)
+                .teamBDefenderId(opp2Id)
+                .status(Match.STATUS_CONFIRMED)
+                .createdAt(BASE_TIME.minusSeconds(offsetMinutes * 60L))
+                .build();
+        var game = Game.builder()
+                .id(UUID.randomUUID())
+                .gameOrder(1)
+                .teamAScore(win ? 10 : 5)
+                .teamBScore(win ? 5 : 10)
+                .teamAAttackerId(pPartnerId)
+                .teamADefenderId(pId)
+                .teamBAttackerId(opp1Id)
+                .teamBDefenderId(opp2Id)
+                .build();
+        match.addGame(game);
+        return match;
+    }
+
+    private Match createMatch(UUID pId, UUID pPartnerId, UUID opp1Id, UUID opp2Id, int scoreA, int scoreB, int offsetMinutes) {
+        var match = Match.builder()
+                .id(UUID.randomUUID())
+                .creatorId(pId)
+                .teamAAttackerId(pId)
+                .teamADefenderId(pPartnerId)
+                .teamBAttackerId(opp1Id)
+                .teamBDefenderId(opp2Id)
+                .status(Match.STATUS_CONFIRMED)
+                .createdAt(BASE_TIME.minusSeconds(offsetMinutes * 60L))
                 .build();
         var game = Game.builder()
                 .id(UUID.randomUUID())

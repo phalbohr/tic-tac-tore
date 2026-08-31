@@ -11,6 +11,7 @@ import com.tictactore.service.insight.InsightGenerator;
 import com.tictactore.service.insight.InsightMatchUtils;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +37,11 @@ public class PositionalMasteryInsightGenerator implements InsightGenerator {
         int defWins = 0;
 
         for (Match match : matches) {
+            boolean isDoubles = match.getTeamADefenderId() != null || match.getTeamBDefenderId() != null;
+            if (!isDoubles) {
+                continue;
+            }
+
             boolean isAtt = playerId.equals(match.getTeamAAttackerId()) || playerId.equals(match.getTeamBAttackerId());
             boolean isDef = playerId.equals(match.getTeamADefenderId()) || playerId.equals(match.getTeamBDefenderId());
             boolean won = InsightMatchUtils.isPlayerWinner(match, playerId);
@@ -67,7 +73,7 @@ public class PositionalMasteryInsightGenerator implements InsightGenerator {
             long lower = Math.round(Math.min(attWinRate, defWinRate));
 
             return Optional.of(new PlayerInsightDto(
-                    UUID.randomUUID(),
+                    UUID.nameUUIDFromBytes((playerId + ":" + InsightType.POSITIONAL_MASTERY.name()).getBytes(StandardCharsets.UTF_8)),
                     InsightType.POSITIONAL_MASTERY,
                     InsightCategory.POSITION,
                     InsightImportance.MEDIUM,

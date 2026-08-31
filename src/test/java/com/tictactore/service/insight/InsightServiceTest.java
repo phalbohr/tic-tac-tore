@@ -100,6 +100,27 @@ class InsightServiceTest {
     }
 
     @Test
+    @DisplayName("[P1] [AC4] should safely handle null goals from repository without unboxing NPE")
+    void shouldHandleNullGoals_withoutUnboxingNpe() {
+        var playerId = UUID.randomUUID();
+        when(userRepository.existsById(playerId)).thenReturn(true);
+        var matches = List.of(
+                Match.builder().id(UUID.randomUUID()).build(),
+                Match.builder().id(UUID.randomUUID()).build(),
+                Match.builder().id(UUID.randomUUID()).build()
+        );
+        when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(matches);
+        when(matchRepository.sumGoalsAsAttacker(playerId)).thenReturn(null);
+        when(achievementService.getPlayerAchievements(playerId)).thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
+
+        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(), userRepository);
+        var response = service.getPlayerInsights(playerId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.playerId()).isEqualTo(playerId);
+    }
+
+    @Test
     @DisplayName("[P1] [AC4] should throw ResourceNotFoundException when user does not exist")
     void shouldThrowNotFound_whenUserDoesNotExist() {
         var playerId = UUID.randomUUID();

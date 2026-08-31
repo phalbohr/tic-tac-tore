@@ -4,7 +4,7 @@ baseline_commit: fd1456bd7ae74c098239e299fc23acb04b4596b5
 
 # Story 7.5: Auto-generated Statistical Insights
 
-Status: in-progress
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -208,6 +208,8 @@ so that I can understand my improvement over time, discover tactical strengths, 
 - `src/main/java/com/tictactore/service/insight/generator/MilestoneProximityInsightGenerator.java`
 - `src/main/java/com/tictactore/service/InsightService.java`
 - `src/main/java/com/tictactore/service/impl/InsightServiceImpl.java`
+- `src/main/java/com/tictactore/service/impl/AchievementServiceImpl.java`
+- `src/main/java/com/tictactore/repository/MatchRepository.java`
 - `src/main/java/com/tictactore/controller/InsightController.java`
 - `src/test/java/com/tictactore/service/insight/InsightGeneratorTest.java`
 - `src/test/java/com/tictactore/service/insight/InsightServiceTest.java`
@@ -229,16 +231,30 @@ so that I can understand my improvement over time, discover tactical strengths, 
 - `frontend/e2e/statistical-insights.spec.ts`
 
 
+### Completion Notes
+- ✅ Resolved review finding [Patch]: Positional Mastery ignores Defender stats in 1v1 matches (filtered only 2v2 doubles matches where positions exist).
+- ✅ Resolved review finding [Patch]: BestPartnershipInsightGenerator has risky no-args constructor (removed no-args constructor, retained required args constructor).
+- ✅ Resolved review finding [Patch]: tryParseOrGenerateUuid throws NPE on null (added null/blank guard).
+- ✅ Resolved review finding [Patch]: Form Trend is mathematically impossible to trigger before 11 matches (enabled evaluation for 6+ matches comparing recent 5 or 10 matches against career win rate).
+- ✅ Resolved review finding [Patch]: InsightServiceImpl duplicate COUNT query for matches (replaced count query with `matches.size()`).
+- ✅ Resolved review finding [Patch]: Generated insights have transient random UUIDs (switched to deterministic name-based UUIDs across all generators).
+- ✅ Resolved review finding [Patch]: Flaky tests due to Instant.now() in tight loop (replaced with deterministic timestamps and fixed offsets in tests).
+- ✅ Resolved review finding [Patch]: InsightController username null NPE (added null/blank check on UserDetails username).
+- ✅ Resolved review finding [Patch]: InsightServiceImpl unboxing NPE on sumGoalsAsAttacker (safely handled null return value before unboxing).
+
 ### Review Findings
-- [ ] [Review][Patch] Positional Mastery ignores Defender stats in 1v1 matches [PositionalMasteryInsightGenerator.java:48]
-- [ ] [Review][Patch] BestPartnershipInsightGenerator has risky no-args constructor [BestPartnershipInsightGenerator.java:30]
-- [ ] [Review][Patch] tryParseOrGenerateUuid throws NPE on null [InsightController.java:88]
-- [ ] [Review][Patch] Form Trend is mathematically impossible to trigger before 11 matches [FormTrendInsightGenerator.java:29]
-- [ ] [Review][Patch] InsightServiceImpl duplicate COUNT query for matches [InsightServiceImpl.java:52]
-- [ ] [Review][Patch] Generated insights have transient random UUIDs [FormTrendInsightGenerator.java:47]
-- [ ] [Review][Patch] Flaky tests due to Instant.now() in tight loop [InsightGeneratorTest.java]
-- [ ] [Review][Patch] InsightController username null NPE [InsightController.java:72]
-- [ ] [Review][Patch] InsightServiceImpl unboxing NPE on sumGoalsAsAttacker [InsightServiceImpl.java:54]
+- [x] [Review][Patch] Positional Mastery ignores Defender stats in 1v1 matches [PositionalMasteryInsightGenerator.java:48]
+- [x] [Review][Patch] BestPartnershipInsightGenerator has risky no-args constructor [BestPartnershipInsightGenerator.java:30]
+- [x] [Review][Patch] tryParseOrGenerateUuid throws NPE on null [InsightController.java:88]
+- [x] [Review][Patch] Form Trend is mathematically impossible to trigger before 11 matches [FormTrendInsightGenerator.java:29]
+- [x] [Review][Patch] InsightServiceImpl duplicate COUNT query for matches [InsightServiceImpl.java:52]
+- [x] [Review][Patch] Generated insights have transient random UUIDs [FormTrendInsightGenerator.java:47]
+- [x] [Review][Patch] Flaky tests due to Instant.now() in tight loop [InsightGeneratorTest.java]
+- [x] [Review][Patch] InsightController username null NPE [InsightController.java:72]
+- [x] [Review][Patch] InsightServiceImpl unboxing NPE on sumGoalsAsAttacker [InsightServiceImpl.java:54]
 - [x] [Review][Defer] InsightController fetches user by email on every request [InsightController.java:72] — deferred, pre-existing
 - [x] [Review][Defer] InsightMatchUtils assumes winsA > winsB ignoring draws [InsightMatchUtils.java:22] — deferred, pre-existing
 - [x] [Review][Defer] isAnonymous uses magic string [InsightController.java:64] — deferred, pre-existing
+
+### Change Log
+- Addressed code review findings - 9 items resolved (Date: 2026-08-31)

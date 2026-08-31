@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @RestController
@@ -69,11 +70,15 @@ public class InsightController {
             return user.getId();
         }
         if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
-            return userRepository.findByEmail(userDetails.getUsername())
+            String username = userDetails.getUsername();
+            if (username == null || username.isBlank()) {
+                return null;
+            }
+            return userRepository.findByEmail(username)
                     .map(User::getId)
-                    .orElseGet(() -> tryParseOrGenerateUuid(userDetails.getUsername()));
+                    .orElseGet(() -> tryParseOrGenerateUuid(username));
         }
-        if (principal instanceof String str && !"anonymousUser".equalsIgnoreCase(str)) {
+        if (principal instanceof String str && !str.isBlank() && !"anonymousUser".equalsIgnoreCase(str)) {
             return userRepository.findByEmail(str)
                     .map(User::getId)
                     .orElseGet(() -> tryParseOrGenerateUuid(str));
@@ -82,10 +87,13 @@ public class InsightController {
     }
 
     private UUID tryParseOrGenerateUuid(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
         try {
             return UUID.fromString(value);
         } catch (Exception ignored) {
-            return UUID.nameUUIDFromBytes(value.getBytes());
+            return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

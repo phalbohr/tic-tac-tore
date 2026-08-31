@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +50,10 @@ public class InsightServiceImpl implements InsightService {
                 .sorted(Comparator.comparing(Match::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
 
-        long totalMatches = matchRepository.countConfirmedMatchesByPlayerId(playerId);
+        long totalMatches = matches.size();
         long totalMatchesAsDefender = matchRepository.countConfirmedMatchesAsDefender(playerId);
-        long totalGoalsAsAttacker = matchRepository.sumGoalsAsAttacker(playerId);
+        Long goals = matchRepository.sumGoalsAsAttacker(playerId);
+        long totalGoalsAsAttacker = goals != null ? goals : 0L;
         long totalWins = matches.stream().filter(m -> InsightMatchUtils.isPlayerWinner(m, playerId)).count();
 
         PlayerStatsContext stats = new PlayerStatsContext(
@@ -76,7 +78,7 @@ public class InsightServiceImpl implements InsightService {
     ) {
         if (matches == null || matches.size() < 3) {
             PlayerInsightDto starterInsight = new PlayerInsightDto(
-                    UUID.randomUUID(),
+                    UUID.nameUUIDFromBytes((playerId + ":" + InsightType.INSUFFICIENT_DATA.name()).getBytes(StandardCharsets.UTF_8)),
                     InsightType.INSUFFICIENT_DATA,
                     InsightCategory.GENERAL,
                     InsightImportance.LOW,
