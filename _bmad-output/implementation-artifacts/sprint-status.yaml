@@ -105,7 +105,7 @@ development_status:
   epic-8: in-progress
   8-1-tournament-creation-and-configuration: in-progress
   8-2-team-registration-and-confirmation: review
-  8-3-automated-bracket-generation-and-seeding: backlog
+  8-3-automated-bracket-generation-and-seeding: ready-for-dev
   8-4-equal-match-distribution-2v2-random-pairing: backlog
   8-5-asynchronous-tournament-match-execution: backlog
   8-6-tournament-rule-system-enforcement: backlog
