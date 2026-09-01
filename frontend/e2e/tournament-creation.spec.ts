@@ -105,7 +105,7 @@ test.describe('Tournament Creation & Configuration E2E (Story 8.1)', () => {
 
         // Click "Registration Open" tab
         await page.getByRole('tab', { name: /Registration Open|Open/i }).click();
-        await expect(page.locator('.tournament-card')).toBeDefined();
+        await expect(page.getByTestId('tournament-card').first()).toBeVisible();
     });
 
     test.skip('[P2] should adhere to Clubhouse No-Line styling tokens in CreateTournamentModal (UX-DR3)', async ({ page }) => {

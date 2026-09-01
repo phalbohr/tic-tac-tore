@@ -1,36 +1,39 @@
 package com.tictactore.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.tictactore.config.ApplicationProperties;
+import com.tictactore.config.SecurityConfig;
 import com.tictactore.dto.CreateTournamentRequest;
 import com.tictactore.dto.RuleConfigurationResponse;
 import com.tictactore.dto.TournamentResponse;
-import com.tictactore.exception.GlobalExceptionHandler;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.TournamentFormat;
 import com.tictactore.model.TournamentMode;
 import com.tictactore.model.TournamentStatus;
 import com.tictactore.model.User;
+import com.tictactore.repository.UserRepository;
+import com.tictactore.security.CsrfCookieFilter;
+import com.tictactore.security.CustomOAuth2SuccessHandler;
+import com.tictactore.security.JwtAuthenticationFilter;
+import com.tictactore.service.JwtService;
+import com.tictactore.service.TokenRevocationService;
 import com.tictactore.service.TournamentService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -41,54 +44,62 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(TournamentController.class)
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CsrfCookieFilter.class})
 @DisplayName("TournamentController ATDD Specifications — Tournament Creation & Configuration (Story 8.1)")
 class TournamentControllerATDDTest {
 
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
+    @MockBean
     private TournamentService tournamentService;
 
-    @InjectMocks
-    private TournamentController tournamentController;
+    @MockBean
+    private TokenRevocationService tokenRevocationService;
+
+    @MockBean
+    private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private ApplicationProperties properties;
 
     private final UUID userId = UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d");
     private final UUID ruleConfigId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private final UUID tournamentId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
+    private User principalUser;
+    private UsernamePasswordAuthenticationToken auth;
+
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(tournamentController)
-                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        User mockUser = User.builder()
+        principalUser = User.builder()
                 .id(userId)
                 .email("organizer@example.com")
                 .nickname("TournamentMaster")
                 .build();
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                mockUser,
+        auth = new UsernamePasswordAuthenticationToken(
+                principalUser,
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
     }
 
     private RuleConfigurationResponse createSampleRuleConfigResponse() {
@@ -149,6 +160,8 @@ class TournamentControllerATDDTest {
                     .thenReturn(response);
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
@@ -181,6 +194,8 @@ class TournamentControllerATDDTest {
                     .thenReturn(response);
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
@@ -208,6 +223,8 @@ class TournamentControllerATDDTest {
                     .build();
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -227,6 +244,8 @@ class TournamentControllerATDDTest {
                     .build();
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -246,6 +265,8 @@ class TournamentControllerATDDTest {
                     .build();
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -265,6 +286,8 @@ class TournamentControllerATDDTest {
                     .build();
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -278,6 +301,8 @@ class TournamentControllerATDDTest {
                     .thenThrow(new IllegalArgumentException("minParticipants cannot be greater than maxParticipants"));
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -291,6 +316,8 @@ class TournamentControllerATDDTest {
                     .thenThrow(new IllegalArgumentException("2v2 tournaments require a minimum of 4 participants"));
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -304,6 +331,8 @@ class TournamentControllerATDDTest {
                     .thenThrow(new IllegalArgumentException("Championship format requires at least 1 round"));
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -317,6 +346,8 @@ class TournamentControllerATDDTest {
                     .thenThrow(new ResourceNotFoundException("RuleConfiguration", ruleConfigId.toString()));
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound());
@@ -330,6 +361,8 @@ class TournamentControllerATDDTest {
                     .thenThrow(new ResourceNotFoundException("User", userId.toString()));
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound());
@@ -341,31 +374,30 @@ class TournamentControllerATDDTest {
     class SecurityScenarios {
 
         @Test
+        @WithAnonymousUser
         @DisplayName("POST /api/v1/tournaments should return 401 Unauthorized when unauthenticated")
         void shouldReturn401_onPostTournaments_whenUnauthenticated() throws Exception {
-            SecurityContextHolder.clearContext();
             var request = createValidCupRequest();
 
             mockMvc.perform(post("/api/v1/tournaments")
+                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
+        @WithAnonymousUser
         @DisplayName("GET /api/v1/tournaments should return 401 Unauthorized when unauthenticated")
         void shouldReturn401_onGetTournaments_whenUnauthenticated() throws Exception {
-            SecurityContextHolder.clearContext();
-
             mockMvc.perform(get("/api/v1/tournaments"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
+        @WithAnonymousUser
         @DisplayName("GET /api/v1/tournaments/{id} should return 401 Unauthorized when unauthenticated")
         void shouldReturn401_onGetTournamentById_whenUnauthenticated() throws Exception {
-            SecurityContextHolder.clearContext();
-
             mockMvc.perform(get("/api/v1/tournaments/{id}", tournamentId))
                     .andExpect(status().isUnauthorized());
         }
@@ -383,7 +415,8 @@ class TournamentControllerATDDTest {
             when(tournamentService.listTournaments(eq(null)))
                     .thenReturn(List.of(cup, champ));
 
-            mockMvc.perform(get("/api/v1/tournaments"))
+            mockMvc.perform(get("/api/v1/tournaments")
+                            .with(authentication(auth)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(2))
                     .andExpect(jsonPath("$[0].name").value("Autumn Championship 2026"))
@@ -397,7 +430,9 @@ class TournamentControllerATDDTest {
             when(tournamentService.listTournaments(eq(TournamentStatus.REGISTRATION_OPEN)))
                     .thenReturn(List.of(cup));
 
-            mockMvc.perform(get("/api/v1/tournaments").param("status", "REGISTRATION_OPEN"))
+            mockMvc.perform(get("/api/v1/tournaments")
+                            .with(authentication(auth))
+                            .param("status", "REGISTRATION_OPEN"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(1))
                     .andExpect(jsonPath("$[0].status").value("REGISTRATION_OPEN"));
@@ -410,7 +445,8 @@ class TournamentControllerATDDTest {
             when(tournamentService.getTournamentById(eq(tournamentId)))
                     .thenReturn(cup);
 
-            mockMvc.perform(get("/api/v1/tournaments/{id}", tournamentId))
+            mockMvc.perform(get("/api/v1/tournaments/{id}", tournamentId)
+                            .with(authentication(auth)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(tournamentId.toString()))
                     .andExpect(jsonPath("$.name").value("Autumn Championship 2026"))
@@ -424,7 +460,8 @@ class TournamentControllerATDDTest {
             when(tournamentService.getTournamentById(eq(nonExistentId)))
                     .thenThrow(new ResourceNotFoundException("Tournament", nonExistentId.toString()));
 
-            mockMvc.perform(get("/api/v1/tournaments/{id}", nonExistentId))
+            mockMvc.perform(get("/api/v1/tournaments/{id}", nonExistentId)
+                            .with(authentication(auth)))
                     .andExpect(status().isNotFound());
         }
     }

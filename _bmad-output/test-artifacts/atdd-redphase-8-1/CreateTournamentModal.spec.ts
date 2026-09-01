@@ -48,10 +48,8 @@ describe('CreateTournamentModal.vue Component ATDD Specifications — Story 8.1'
             },
         });
 
-        // Default is CUP -> round count input not visible
         expect(wrapper.find('[data-testid="round-count-input"]').exists()).toBe(false);
 
-        // Select CHAMPIONSHIP format
         const championshipOption = wrapper.find('[data-testid="format-option-championship"]');
         if (championshipOption.exists()) {
             await championshipOption.trigger('click');
@@ -76,7 +74,6 @@ describe('CreateTournamentModal.vue Component ATDD Specifications — Story 8.1'
             },
         });
 
-        // Select 2v2 Fixed Teams
         const mode2v2 = wrapper.find('[data-testid="mode-option-2v2-fixed"]');
         if (mode2v2.exists()) {
             await mode2v2.trigger('click');
@@ -84,7 +81,6 @@ describe('CreateTournamentModal.vue Component ATDD Specifications — Story 8.1'
             await wrapper.find('[data-testid="mode-selector"]').setValue('TWO_VS_TWO_FIXED_TEAMS');
         }
 
-        // Set min participants to 2
         await wrapper.find('[data-testid="min-participants-input"]').setValue(2);
         await wrapper.find('[data-testid="create-tournament-submit-button"]').trigger('click');
 
