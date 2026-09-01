@@ -243,6 +243,14 @@ so that participants are seeded fairly based on statistical strength and competi
   - **Strict AAA Pattern:** All test methods adhere to Arrange-Act-Assert separated by a single blank line, with zero structural comments (`// Given`, `// When`, `// Then` are strictly forbidden).
   - Integration tests end with `IT` or `ATDDTest` / `Test` for unit tests.
 
+### ATDD Artifacts
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-8-3-automated-bracket-generation-and-seeding.md`
+- **Backend ATDD Test:** `_bmad-output/test-artifacts/atdd-redphase-8-3/TournamentBracketControllerATDDTest.java`
+- **API Tests:** `frontend/e2e/tests/api/tournament-bracket.spec.ts`
+- **E2E Tests:** `frontend/e2e/tournament-bracket.spec.ts`
+- **Component Tests:** `_bmad-output/test-artifacts/atdd-redphase-8-3/TournamentBracket.spec.ts`, `_bmad-output/test-artifacts/atdd-redphase-8-3/TournamentMatchCard.spec.ts`
+- **Store Tests:** `_bmad-output/test-artifacts/atdd-redphase-8-3/tournamentBracketStore.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md#FR41]
