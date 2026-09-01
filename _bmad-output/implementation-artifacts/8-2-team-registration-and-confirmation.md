@@ -4,7 +4,7 @@ baseline_commit: 4e6e6d16646180211d53ae7ce811b81c9f3d1755
 
 # Story 8.2: Team Registration & Confirmation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -52,8 +52,8 @@ so that we can participate and compete once the tournament starts.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & JPA Entities (AC1, AC2, AC3, AC4, AC5, AC6)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V19__create_tournament_registration_tables.sql`:
+- [x] Task 1: Database Migration & JPA Entities (AC1, AC2, AC3, AC4, AC5, AC6)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V19__create_tournament_registration_tables.sql`:
     - Create `tournament_registration` table:
       - `id UUID PRIMARY KEY`
       - `tournament_id UUID NOT NULL REFERENCES tournament(id) ON DELETE CASCADE`
@@ -71,9 +71,9 @@ so that we can participate and compete once the tournament starts.
     - Create unique partial indexes to prevent duplicate active registrations per tournament:
       - `CREATE UNIQUE INDEX uq_tournament_registration_player ON tournament_registration(tournament_id, player_id) WHERE status IN ('PENDING_CONFIRMATION', 'CONFIRMED');`
       - `CREATE UNIQUE INDEX uq_tournament_registration_partner ON tournament_registration(tournament_id, partner_id) WHERE status IN ('PENDING_CONFIRMATION', 'CONFIRMED') AND partner_id IS NOT NULL;`
-  - [ ] Create Enum `com.tictactore.model.RegistrationStatus.java`:
+  - [x] Create Enum `com.tictactore.model.RegistrationStatus.java`:
     - `PENDING_CONFIRMATION`, `CONFIRMED`, `DECLINED`, `CANCELLED`
-  - [ ] Create Entity `com.tictactore.model.TournamentRegistration.java`:
+  - [x] Create Entity `com.tictactore.model.TournamentRegistration.java`:
     - Annotations: `@Entity`, `@Table(name = "tournament_registration")`, `@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor(access = AccessLevel.PRIVATE)`
     - Fields:
       - `UUID id`
@@ -84,7 +84,7 @@ so that we can participate and compete once the tournament starts.
       - `@CreationTimestamp OffsetDateTime createdAt`
       - `@UpdateTimestamp OffsetDateTime updatedAt`
       - `@Version private Long version;` (no `@Column`, code-1-guide rule 2)
-  - [ ] Create Repository `com.tictactore.repository.TournamentRegistrationRepository.java`:
+  - [x] Create Repository `com.tictactore.repository.TournamentRegistrationRepository.java`:
     - `List<TournamentRegistration> findByTournamentId(UUID tournamentId)`
     - `List<TournamentRegistration> findByTournamentIdAndStatus(UUID tournamentId, RegistrationStatus status)`
     - `long countByTournamentIdAndStatus(UUID tournamentId, RegistrationStatus status)`
@@ -92,30 +92,30 @@ so that we can participate and compete once the tournament starts.
       `Optional<TournamentRegistration> findActiveUserRegistration(UUID tournamentId, UUID userId, Collection<RegistrationStatus> statuses)`
     - `@Query("SELECT r FROM TournamentRegistration r WHERE r.partner.id = :userId AND r.status = 'PENDING_CONFIRMATION'")`
       `List<TournamentRegistration> findPendingInvitationsForUser(UUID userId)`
-  - [ ] Repository test `src/test/java/com/tictactore/repository/TournamentRegistrationRepositoryTest.java` (`@DataJpaTest`).
+  - [x] Repository test `src/test/java/com/tictactore/repository/TournamentRegistrationRepositoryTest.java` (`@DataJpaTest`).
 
-- [ ] Task 2: Backend DTOs, Events, Push Notifications, Service & Controller (AC1–AC7)
-  - [ ] Create DTOs in `com.tictactore.dto`:
+- [x] Task 2: Backend DTOs, Events, Push Notifications, Service & Controller (AC1–AC7)
+  - [x] Create DTOs in `com.tictactore.dto`:
     - `RegisterTournamentRequest.java` record:
       - `UUID partnerId` (optional for 1v1 / 2v2 random, required for 2v2 fixed)
     - `TournamentRegistrationResponse.java` record:
       - `UUID id`, `UUID tournamentId`, `String tournamentName`, `UUID playerId`, `String playerNickname`, `String playerAvatarUrl`, `UUID partnerId`, `String partnerNickname`, `String partnerAvatarUrl`, `RegistrationStatus status`, `OffsetDateTime createdAt`, `OffsetDateTime updatedAt`
     - `MyRegistrationStatusResponse.java` record:
       - `boolean isRegistered`, `TournamentRegistrationResponse registration`, `boolean isPendingInvite`
-  - [ ] Create Events in `com.tictactore.event`:
+  - [x] Create Events in `com.tictactore.event`:
     - `TournamentInviteCreatedEvent.java` record (`UUID registrationId`, `UUID tournamentId`, `String tournamentName`, `UUID inviterId`, `String inviterNickname`, `UUID partnerId`)
     - `TournamentInviteAcceptedEvent.java` record (`UUID registrationId`, `UUID tournamentId`, `String tournamentName`, `UUID partnerId`, `String partnerNickname`, `UUID inviterId`)
     - `TournamentInviteDeclinedEvent.java` record (`UUID registrationId`, `UUID tournamentId`, `String tournamentName`, `UUID partnerId`, `String partnerNickname`, `UUID inviterId`)
-  - [ ] Update `com.tictactore.service.PushNotificationService.java` & `impl/PushNotificationServiceImpl.java`:
+  - [x] Update `com.tictactore.service.PushNotificationService.java` & `impl/PushNotificationServiceImpl.java`:
     - `void sendTournamentInviteNotification(UUID tournamentId, String tournamentName, String inviterName, User recipient)`
     - `void sendTournamentInviteAcceptedNotification(UUID tournamentId, String tournamentName, String partnerName, User recipient)`
     - `void sendTournamentInviteDeclinedNotification(UUID tournamentId, String tournamentName, String partnerName, User recipient)`
-  - [ ] Create Event Listener `com.tictactore.listener.TournamentRegistrationNotificationListener.java`:
+  - [x] Create Event Listener `com.tictactore.listener.TournamentRegistrationNotificationListener.java`:
     - `@Component`, `@RequiredArgsConstructor`, `@Slf4j`
     - `@Async @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) public void handleTournamentInviteCreated(TournamentInviteCreatedEvent event)`
     - `@Async @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) public void handleTournamentInviteAccepted(TournamentInviteAcceptedEvent event)`
     - `@Async @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) public void handleTournamentInviteDeclined(TournamentInviteDeclinedEvent event)`
-  - [ ] Create Service interface and implementation:
+  - [x] Create Service interface and implementation:
     - `com.tictactore.service.TournamentRegistrationService.java`
     - `com.tictactore.service.TournamentRegistrationServiceImpl.java`
     - Implement methods:
@@ -148,7 +148,7 @@ so that we can participate and compete once the tournament starts.
       - `List<TournamentRegistrationResponse> listRegistrations(UUID tournamentId, RegistrationStatus status)` (`@Transactional(readOnly = true)`)
       - `MyRegistrationStatusResponse getMyRegistrationStatus(UUID tournamentId, UUID userId)` (`@Transactional(readOnly = true)`)
       - `List<TournamentRegistrationResponse> getPendingInvitations(UUID userId)` (`@Transactional(readOnly = true)`)
-  - [ ] Create Controller `com.tictactore.controller.TournamentRegistrationController.java`:
+  - [x] Create Controller `com.tictactore.controller.TournamentRegistrationController.java`:
     - `@RestController @RequestMapping("/api/v1/tournaments/{tournamentId}/registrations")`
     - `POST /api/v1/tournaments/{tournamentId}/registrations`: `@Valid @RequestBody RegisterTournamentRequest request`, `@AuthenticationPrincipal User principal` -> `201 Created` with `TournamentRegistrationResponse`.
     - `GET /api/v1/tournaments/{tournamentId}/registrations`: `@RequestParam(required = false) RegistrationStatus status` -> `200 OK` with `List<TournamentRegistrationResponse>`.
@@ -157,18 +157,18 @@ so that we can participate and compete once the tournament starts.
     - `POST /api/v1/tournaments/{tournamentId}/registrations/{registrationId}/decline`: `@AuthenticationPrincipal User principal` -> `200 OK` with `TournamentRegistrationResponse`.
     - `DELETE /api/v1/tournaments/{tournamentId}/registrations/{registrationId}`: `@AuthenticationPrincipal User principal` -> `204 No Content`.
     - `GET /api/v1/tournaments/invitations/pending`: `@AuthenticationPrincipal User principal` -> `200 OK` with `List<TournamentRegistrationResponse>`.
-  - [ ] Backend Unit, Slice & Listener Tests:
+  - [x] Backend Unit, Slice & Listener Tests:
     - `src/test/java/com/tictactore/service/TournamentRegistrationServiceTest.java` (unit tests using strict AAA pattern, no section comments).
     - `src/test/java/com/tictactore/controller/TournamentRegistrationControllerTest.java` (WebMvcTest).
     - `src/test/java/com/tictactore/listener/TournamentRegistrationNotificationListenerTest.java`.
 
-- [ ] Task 3: Frontend Types, Service, Store & i18n (AC1–AC8)
-  - [ ] Create/Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
+- [x] Task 3: Frontend Types, Service, Store & i18n (AC1–AC8)
+  - [x] Create/Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
     - `type RegistrationStatus = 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'DECLINED' | 'CANCELLED'`
     - `interface TournamentRegistrationDto`
     - `interface RegisterTournamentPayload`
     - `interface MyRegistrationStatusDto`
-  - [ ] Create API service `frontend/src/features/tournament/services/tournamentRegistrationService.ts`:
+  - [x] Create API service `frontend/src/features/tournament/services/tournamentRegistrationService.ts`:
     - `registerForTournament(tournamentId: string, payload: RegisterTournamentPayload): Promise<TournamentRegistrationDto>`
     - `getTournamentRegistrations(tournamentId: string, status?: RegistrationStatus): Promise<TournamentRegistrationDto[]>`
     - `getMyRegistration(tournamentId: string): Promise<MyRegistrationStatusDto>`
@@ -176,49 +176,49 @@ so that we can participate and compete once the tournament starts.
     - `declineInvitation(tournamentId: string, registrationId: string): Promise<TournamentRegistrationDto>`
     - `cancelRegistration(tournamentId: string, registrationId: string): Promise<void>`
     - `getPendingInvitations(): Promise<TournamentRegistrationDto[]>`
-  - [ ] Update Pinia store `frontend/src/features/tournament/stores/tournamentStore.ts`:
+  - [x] Update Pinia store `frontend/src/features/tournament/stores/tournamentStore.ts`:
     - State: `registrations: Record<string, TournamentRegistrationDto[]>`, `myRegistrations: Record<string, MyRegistrationStatusDto>`, `pendingInvitations: TournamentRegistrationDto[]`
     - Actions: `register(tournamentId, payload)`, `acceptInvite(tournamentId, registrationId)`, `declineInvite(tournamentId, registrationId)`, `cancelRegistration(tournamentId, registrationId)`, `fetchRegistrations(tournamentId, status?)`, `fetchMyRegistration(tournamentId)`, `fetchPendingInvitations()`
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.registration.*` namespace (modal titles, partner selector placeholder, partner required warning, status badges, accept/decline action labels, success toasts, error messages).
-  - [ ] Frontend store tests in `frontend/src/features/tournament/stores/__tests__/tournamentRegistrationStore.spec.ts`.
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.registration.*` namespace (modal titles, partner selector placeholder, partner required warning, status badges, accept/decline action labels, success toasts, error messages).
+  - [x] Frontend store tests in `frontend/src/features/tournament/stores/__tests__/tournamentRegistrationStore.spec.ts`.
 
-- [ ] Task 4: Frontend UI Components & Views (AC1, AC2, AC3, AC4, AC5, AC8)
-  - [ ] Create `frontend/src/features/tournament/components/TournamentRegistrationModal.vue`:
+- [x] Task 4: Frontend UI Components & Views (AC1, AC2, AC3, AC4, AC5, AC8)
+  - [x] Create `frontend/src/features/tournament/components/TournamentRegistrationModal.vue`:
     - Clubhouse design token styling (`bg-surface-container-low`, `rounded-2xl`, elevation, no 1px solid borders per `UX-DR3`).
     - Dynamic mode-dependent UI:
       - For 1v1 or 2v2 random pairings: Solo registration confirmation prompt.
       - For 2v2 fixed teams: Partner search/selector input (with avatar, nickname, and favorites quick-picker).
     - Validation feedback, loading state on submit button, close on outside click or cancel.
-  - [ ] Create `frontend/src/features/tournament/components/TournamentInviteModal.vue` / `TournamentInviteCard.vue`:
+  - [x] Create `frontend/src/features/tournament/components/TournamentInviteModal.vue` / `TournamentInviteCard.vue`:
     - Invitation card/modal displaying inviter info, tournament name, format, mode, and rule set.
     - "Accept" (primary) and "Decline" (secondary/tonal) action buttons with loading states.
-  - [ ] Create `frontend/src/features/tournament/components/TournamentRoster.vue`:
+  - [x] Create `frontend/src/features/tournament/components/TournamentRoster.vue`:
     - Display list of confirmed participants/teams, count vs `maxParticipants`, pending invites indicator.
-  - [ ] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
+  - [x] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
     - Add "Register" CTA button on open tournament cards when current user is not registered.
     - Display "Registered" / "Invite Pending" status badge on cards.
     - Pending Invitations banner at the top of the view when user has pending invites.
-  - [ ] Component unit tests:
+  - [x] Component unit tests:
     - `frontend/src/features/tournament/components/__tests__/TournamentRegistrationModal.spec.ts`.
     - `frontend/src/features/tournament/components/__tests__/TournamentInviteModal.spec.ts`.
 
-- [ ] Task 5: Testing & Quality Verification
-  - [ ] Backend Unit & Slice Tests:
+- [x] Task 5: Testing & Quality Verification
+  - [x] Backend Unit & Slice Tests:
     - `TournamentRegistrationServiceTest.java` (strict AAA without section comments).
     - `TournamentRegistrationControllerTest.java` (WebMvcTest).
     - `TournamentRegistrationRepositoryTest.java` (@DataJpaTest).
     - `TournamentRegistrationNotificationListenerTest.java`.
-  - [ ] Frontend Unit/Component Tests:
+  - [x] Frontend Unit/Component Tests:
     - `tournamentRegistrationStore.spec.ts`.
     - `TournamentRegistrationModal.spec.ts`.
     - `TournamentInviteModal.spec.ts`.
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create `frontend/e2e/tournament-registration.spec.ts`:
       - Test 1 (1v1 Solo Registration): User registers for 1v1 tournament -> registration is confirmed -> tournament card shows "Registered".
       - Test 2 (2v2 Partner Invite & Acceptance): User A registers with User B -> User B sees pending invite -> User B accepts -> both see confirmed team registration.
       - Test 3 (2v2 Partner Decline): User A registers with User B -> User B declines -> status changes to declined -> User A can register again with another partner.
       - Test 4 (Capacity & Deadline Guards): Registration button is disabled or rejected when capacity is full or deadline has passed.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 

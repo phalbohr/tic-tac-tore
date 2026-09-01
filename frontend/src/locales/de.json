@@ -433,6 +433,45 @@
     },
     "drillDown": "Details anzeigen",
     "celebrationTitle": "Aktuelles Highlight"
+  },
+  "tournament": {
+    "title": "Turniere",
+    "subtitle": "Kämpfe in strukturierten Pokalen und Meisterschaften",
+    "create": "Turnier erstellen",
+    "empty": "Noch keine Turniere geplant.",
+    "registered": "Angemeldet",
+    "pendingInvite": "Einladung ausstehend",
+    "pendingConfirmation": "Warte auf Partner-Bestätigung",
+    "confirmed": "Bestätigt",
+    "declined": "Abgelehnt",
+    "cancelled": "Storniert",
+    "register": "Anmelden",
+    "withdraw": "Abmelden",
+    "accept": "Annehmen",
+    "decline": "Ablehnen",
+    "pendingInvitationsTitle": "Ausstehende Turniereinladungen",
+    "noPendingInvitations": "Keine ausstehenden Einladungen.",
+    "registration": {
+      "modalTitle": "Turnieranmeldung",
+      "confirmSoloTitle": "Einzelanmeldung",
+      "confirmSoloText": "Du meldest dich für {name} an. Bereit zum Antreten?",
+      "selectPartnerTitle": "Teampartner wählen",
+      "selectPartnerText": "Dieses 2v2-Turnier erfordert einen festen Partner. Wähle unten einen Mitspieler:",
+      "partnerSearchPlaceholder": "Spieler suchen oder Favorit wählen...",
+      "partnerRequired": "Bitte wähle einen Partner aus, um fortzufahren.",
+      "submitRegistration": "Anmeldung absenden",
+      "submitting": "Wird angemeldet...",
+      "successSolo": "Erfolgreich für das Turnier angemeldet!",
+      "successPartner": "Anmeldung eingereicht! Einladung an Partner gesendet.",
+      "acceptSuccess": "Turniereinladung angenommen! Ihr seid bestätigt.",
+      "declineSuccess": "Turniereinladung abgelehnt.",
+      "cancelSuccess": "Anmeldung erfolgreich zurückgezogen.",
+      "inviteModalTitle": "Turnier-Teameinladung",
+      "invitedBy": "{inviter} hat dich ins Team für {tournament} eingeladen",
+      "rosterTitle": "Teilnehmerliste",
+      "rosterEmpty": "Noch keine Teilnehmer angemeldet.",
+      "teamsCount": "{count} / {max} Angemeldet"
+    }
   }
 }
 

@@ -433,6 +433,45 @@
     },
     "drillDown": "View Details",
     "celebrationTitle": "Recent Highlight"
+  },
+  "tournament": {
+    "title": "Tournaments",
+    "subtitle": "Compete in structured cups and championships",
+    "create": "Create Tournament",
+    "empty": "No tournaments scheduled yet.",
+    "registered": "Registered",
+    "pendingInvite": "Invite Pending",
+    "pendingConfirmation": "Pending Partner Confirmation",
+    "confirmed": "Confirmed",
+    "declined": "Declined",
+    "cancelled": "Cancelled",
+    "register": "Register",
+    "withdraw": "Withdraw",
+    "accept": "Accept",
+    "decline": "Decline",
+    "pendingInvitationsTitle": "Pending Tournament Invitations",
+    "noPendingInvitations": "No pending invitations.",
+    "registration": {
+      "modalTitle": "Tournament Registration",
+      "confirmSoloTitle": "Solo Registration",
+      "confirmSoloText": "You are registering for {name}. Ready to compete?",
+      "selectPartnerTitle": "Select Team Partner",
+      "selectPartnerText": "This 2v2 fixed teams tournament requires a designated partner. Select a teammate below:",
+      "partnerSearchPlaceholder": "Search player or select favorite...",
+      "partnerRequired": "Please select a partner to continue.",
+      "submitRegistration": "Submit Registration",
+      "submitting": "Registering...",
+      "successSolo": "Successfully registered for tournament!",
+      "successPartner": "Registration submitted! Partner invitation sent.",
+      "acceptSuccess": "Tournament invitation accepted! You are confirmed.",
+      "declineSuccess": "Tournament invitation declined.",
+      "cancelSuccess": "Registration withdrawn successfully.",
+      "inviteModalTitle": "Tournament Team Invitation",
+      "invitedBy": "{inviter} invited you to join team for {tournament}",
+      "rosterTitle": "Participants Roster",
+      "rosterEmpty": "No participants registered yet.",
+      "teamsCount": "{count} / {max} Registered"
+    }
   }
 }
 

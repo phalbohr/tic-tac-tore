@@ -440,6 +440,144 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendTournamentInviteNotification(
+            UUID tournamentId,
+            String tournamentName,
+            String inviterName,
+            User recipient
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = inviterName + " invited you to team up for " + tournamentName;
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                null,
+                tournamentId,
+                "TOURNAMENT_INVITE",
+                inviterName,
+                summary,
+                "/tournaments?tournamentId=" + tournamentId,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament invite push notification payload for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_INVITE", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_INVITE", jsonPayload);
+        }
+    }
+
+    @Override
+    public void sendTournamentInviteAcceptedNotification(
+            UUID tournamentId,
+            String tournamentName,
+            String partnerName,
+            User recipient
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = partnerName + " accepted your team invitation for " + tournamentName + "!";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                null,
+                tournamentId,
+                "TOURNAMENT_INVITE_ACCEPTED",
+                partnerName,
+                summary,
+                "/tournaments?tournamentId=" + tournamentId,
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament invite accepted push notification payload for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_INVITE_ACCEPTED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_INVITE_ACCEPTED", jsonPayload);
+        }
+    }
+
+    @Override
+    public void sendTournamentInviteDeclinedNotification(
+            UUID tournamentId,
+            String tournamentName,
+            String partnerName,
+            User recipient
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = partnerName + " declined your team invitation for " + tournamentName + ".";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = new PushNotificationPayload(
+                null,
+                null,
+                null,
+                tournamentId,
+                "TOURNAMENT_INVITE_DECLINED",
+                partnerName,
+                summary,
+                "/tournaments",
+                false,
+                timestamp
+        );
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament invite declined push notification payload for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_INVITE_DECLINED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_INVITE_DECLINED", jsonPayload);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {
