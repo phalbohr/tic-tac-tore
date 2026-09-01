@@ -1,0 +1,197 @@
+package com.tictactore.repository;
+
+import com.tictactore.model.PointDistribution;
+import com.tictactore.model.PositionSwapRule;
+import com.tictactore.model.RegistrationStatus;
+import com.tictactore.model.RestartRule;
+import com.tictactore.model.RuleConfiguration;
+import com.tictactore.model.RuleConfigurationType;
+import com.tictactore.model.SideSwapRule;
+import com.tictactore.model.Tournament;
+import com.tictactore.model.TournamentFormat;
+import com.tictactore.model.TournamentMatch;
+import com.tictactore.model.TournamentMatchStatus;
+import com.tictactore.model.TournamentMode;
+import com.tictactore.model.TournamentRegistration;
+import com.tictactore.model.TournamentStatus;
+import com.tictactore.model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@DisplayName("TournamentMatchRepository Data JPA Tests")
+class TournamentMatchRepositoryTest {
+
+    @Autowired
+    private TournamentMatchRepository tournamentMatchRepository;
+
+    @Autowired
+    private TournamentRegistrationRepository registrationRepository;
+
+    @Autowired
+    private TournamentRepository tournamentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RuleConfigurationRepository ruleConfigurationRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private User player1;
+    private User player2;
+    private Tournament tournament;
+    private TournamentRegistration reg1;
+    private TournamentRegistration reg2;
+
+    @BeforeEach
+    void setUp() {
+        player1 = userRepository.save(User.builder().email("p1@example.com").nickname("PlayerOne").build());
+        player2 = userRepository.save(User.builder().email("p2@example.com").nickname("PlayerTwo").build());
+
+        var ruleConfig = ruleConfigurationRepository.save(RuleConfiguration.builder()
+                .name("Standard 5-Point")
+                .type(RuleConfigurationType.PRESET)
+                .goalLimit(5)
+                .gameLimit(1)
+                .winByTwo(false)
+                .timeoutsPerGame(2)
+                .timeoutDurationSeconds(30)
+                .possessionLimit5BarSeconds(10)
+                .possessionLimitOtherSeconds(15)
+                .sideSwapRule(SideSwapRule.BETWEEN_GAMES)
+                .restartRule(RestartRule.CONCEDING_TEAM)
+                .spinningAllowed(false)
+                .aerialsAllowed(false)
+                .positionSwapRule(PositionSwapRule.BETWEEN_GAMES)
+                .pointDistribution(PointDistribution.WIN_LOSS_3_0)
+                .createdBy(player1.getId())
+                .build());
+
+        tournament = tournamentRepository.save(Tournament.builder()
+                .name("Cup Tournament")
+                .format(TournamentFormat.CUP)
+                .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                .ruleConfiguration(ruleConfig)
+                .minParticipants(2)
+                .maxParticipants(8)
+                .registrationDeadline(Instant.now().plus(7, ChronoUnit.DAYS))
+                .status(TournamentStatus.IN_PROGRESS)
+                .creator(player1)
+                .build());
+
+        reg1 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player1)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(1)
+                .strengthScore(0.8)
+                .build());
+
+        reg2 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player2)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(2)
+                .strengthScore(0.6)
+                .build());
+    }
+
+    @Test
+    void shouldSaveAndQueryMatchesByTournamentIdAndRound() {
+        var match = tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .seed1(1)
+                .seed2(2)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var matches = tournamentMatchRepository.findByTournamentIdAndRoundOrderByMatchOrderAsc(tournament.getId(), 1);
+
+        assertThat(matches).hasSize(1);
+        assertThat(matches.get(0).getId()).isEqualTo(match.getId());
+        assertThat(matches.get(0).getStatus()).isEqualTo(TournamentMatchStatus.READY);
+        assertThat(matches.get(0).getSeed1()).isEqualTo(1);
+        assertThat(matches.get(0).getSeed2()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldQueryMatchesByStatus() {
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(2)
+                .matchOrder(1)
+                .status(TournamentMatchStatus.PENDING)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var readyMatches = tournamentMatchRepository.findByTournamentIdAndStatus(tournament.getId(), TournamentMatchStatus.READY);
+        var pendingMatches = tournamentMatchRepository.findByTournamentIdAndStatus(tournament.getId(), TournamentMatchStatus.PENDING);
+
+        assertThat(readyMatches).hasSize(1);
+        assertThat(pendingMatches).hasSize(1);
+    }
+
+    @Test
+    void shouldQueryMatchesByParticipantRegistrationId() {
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var matches = tournamentMatchRepository.findByParticipantRegistrationId(tournament.getId(), reg1.getId());
+
+        assertThat(matches).hasSize(1);
+        assertThat(matches.get(0).getParticipant1().getId()).isEqualTo(reg1.getId());
+    }
+
+    @Test
+    void shouldFindTournamentsByStatusAndRegistrationDeadline() {
+        tournament.setStatus(TournamentStatus.REGISTRATION_OPEN);
+        tournament.setRegistrationDeadline(Instant.now().minus(1, ChronoUnit.HOURS));
+        tournamentRepository.save(tournament);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Tournament> result = tournamentRepository.findByStatusAndRegistrationDeadlineLessThanEqual(
+                TournamentStatus.REGISTRATION_OPEN,
+                Instant.now()
+        );
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(tournament.getId());
+    }
+}

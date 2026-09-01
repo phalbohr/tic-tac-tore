@@ -449,6 +449,26 @@
     "withdraw": "Withdraw",
     "accept": "Accept",
     "decline": "Decline",
+    "viewBracket": "View Bracket",
+    "viewSchedule": "View Schedule",
+    "startTournament": "Start Tournament",
+    "startedSuccess": "Tournament started successfully!",
+    "bracket": {
+      "title": "Tournament Bracket",
+      "round": "Round {round}",
+      "final": "Final",
+      "semifinals": "Semifinals",
+      "quarterfinals": "Quarterfinals",
+      "bye": "BYE",
+      "ready": "READY",
+      "live": "LIVE",
+      "completed": "COMPLETED",
+      "pending": "PENDING"
+    },
+    "schedule": {
+      "title": "Tournament Schedule",
+      "roundSelector": "Select Round"
+    },
     "pendingInvitationsTitle": "Pending Tournament Invitations",
     "noPendingInvitations": "No pending invitations.",
     "registration": {

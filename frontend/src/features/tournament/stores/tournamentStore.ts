@@ -8,9 +8,12 @@ import type {
   RegisterTournamentPayload,
   MyRegistrationStatusDto,
   RegistrationStatus,
+  TournamentBracketDto,
+  TournamentMatchDto,
 } from '@/features/tournament/types/tournament';
 import * as tournamentService from '@/features/tournament/services/tournamentService';
 import * as registrationService from '@/features/tournament/services/tournamentRegistrationService';
+import * as bracketService from '@/features/tournament/services/tournamentBracketService';
 
 export const useTournamentStore = defineStore('tournament', () => {
   const tournaments = ref<TournamentDto[]>([]);
@@ -18,6 +21,8 @@ export const useTournamentStore = defineStore('tournament', () => {
   const registrations = ref<Record<string, TournamentRegistrationDto[]>>({});
   const myRegistrations = ref<Record<string, MyRegistrationStatusDto>>({});
   const pendingInvitations = ref<TournamentRegistrationDto[]>([]);
+  const brackets = ref<Record<string, TournamentBracketDto>>({});
+  const matches = ref<Record<string, TournamentMatchDto[]>>({});
   const isLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
 
@@ -225,12 +230,68 @@ export const useTournamentStore = defineStore('tournament', () => {
     }
   }
 
+  async function fetchBracket(tournamentId: string): Promise<TournamentBracketDto> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const result = await bracketService.getTournamentBracket(tournamentId);
+      brackets.value[tournamentId] = result;
+      return result;
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch tournament bracket';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function fetchMatches(
+    tournamentId: string,
+    round?: number
+  ): Promise<TournamentMatchDto[]> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const items = await bracketService.getTournamentMatches(tournamentId, round);
+      matches.value[tournamentId] = items;
+      return items;
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch tournament matches';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function startTournament(tournamentId: string): Promise<TournamentDto> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const result = await bracketService.startTournament(tournamentId);
+      const idx = tournaments.value.findIndex(t => t.id === tournamentId);
+      if (idx !== -1) {
+        tournaments.value[idx] = result;
+      }
+      if (currentTournament.value?.id === tournamentId) {
+        currentTournament.value = result;
+      }
+      return result;
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to start tournament';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     tournaments,
     currentTournament,
     registrations,
     myRegistrations,
     pendingInvitations,
+    brackets,
+    matches,
     isLoading,
     error,
     createTournament,
@@ -243,5 +304,8 @@ export const useTournamentStore = defineStore('tournament', () => {
     fetchRegistrations,
     fetchMyRegistration,
     fetchPendingInvitations,
+    fetchBracket,
+    fetchMatches,
+    startTournament,
   };
 });

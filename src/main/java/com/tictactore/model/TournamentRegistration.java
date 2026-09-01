@@ -55,6 +55,12 @@ public class TournamentRegistration {
     @Column(nullable = false, length = 30)
     private RegistrationStatus status;
 
+    @Column(name = "seed")
+    private Integer seed;
+
+    @Column(name = "strength_score")
+    private Double strengthScore;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

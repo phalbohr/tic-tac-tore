@@ -47,6 +47,7 @@ test.describe('Story 4.2: Global Leaderboard with Filtering (E2E)', () => {
     await page.goto('/leaderboard');
     await expect(page.getByText('No players match the current filters.')).toBeVisible();
 
+    await expect.poll(() => requestUrls.length).toBeGreaterThan(0);
     expect(requestUrls[0]).toContain('minMatches=5');
   });
 

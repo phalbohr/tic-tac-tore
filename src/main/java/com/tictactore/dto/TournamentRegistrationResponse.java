@@ -18,6 +18,8 @@ public record TournamentRegistrationResponse(
         String partnerNickname,
         String partnerAvatarUrl,
         RegistrationStatus status,
+        Integer seed,
+        Double strengthScore,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {}

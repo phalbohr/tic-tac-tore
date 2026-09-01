@@ -1,5 +1,6 @@
 ---
-status: ready-for-dev
+baseline_commit: 6951f59f8e762a282a5d8086d901a8431d2cad0c
+status: review
 ---
 
 # Story 8.3: Automated Bracket Generation & Seeding
@@ -48,8 +49,8 @@ so that participants are seeded fairly based on statistical strength and competi
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & JPA Entities (AC1, AC4, AC5)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V20__create_tournament_match_tables.sql`:
+- [x] Task 1: Database Migration & JPA Entities (AC1, AC4, AC5)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V20__create_tournament_match_tables.sql`:
     - Add `seed` (INT) and `strength_score` (DOUBLE PRECISION) columns to `tournament_registration` table.
     - Create `tournament_match` table:
       - `id UUID PRIMARY KEY`
@@ -73,27 +74,27 @@ so that participants are seeded fairly based on statistical strength and competi
       - `idx_tournament_match_status ON tournament_match(status)`
       - `idx_tournament_match_participant1 ON tournament_match(participant1_id)`
       - `idx_tournament_match_participant2 ON tournament_match(participant2_id)`
-  - [ ] Create Enum `com.tictactore.model.TournamentMatchStatus.java`:
+  - [x] Create Enum `com.tictactore.model.TournamentMatchStatus.java`:
     - `PENDING`, `READY`, `IN_PROGRESS`, `COMPLETED`, `BYE`, `CANCELLED`
-  - [ ] Create Entity `com.tictactore.model.TournamentMatch.java`:
+  - [x] Create Entity `com.tictactore.model.TournamentMatch.java`:
     - Annotations: `@Entity`, `@Table(name = "tournament_match")`, `@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor(access = AccessLevel.PRIVATE)`
     - Fields: `UUID id`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "tournament_id", nullable = false) Tournament tournament`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "match_id") Match match`, `int round`, `int matchOrder`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "participant1_id") TournamentRegistration participant1`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "participant2_id") TournamentRegistration participant2`, `Integer seed1`, `Integer seed2`, `@Enumerated(EnumType.STRING) @Column(nullable = false, length = 30) TournamentMatchStatus status`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "winner_id") TournamentRegistration winner`, `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "next_match_id") TournamentMatch nextMatch`, `@CreationTimestamp Instant createdAt`, `@UpdateTimestamp Instant updatedAt`, `@Version private Long version;` (no `@Column`, code-1-guide rule 2).
-  - [ ] Update Entity `com.tictactore.model.TournamentRegistration.java`:
+  - [x] Update Entity `com.tictactore.model.TournamentRegistration.java`:
     - Add fields: `Integer seed`, `Double strengthScore`.
-  - [ ] Create Repository `com.tictactore.repository.TournamentMatchRepository.java`:
+  - [x] Create Repository `com.tictactore.repository.TournamentMatchRepository.java`:
     - `List<TournamentMatch> findByTournamentIdOrderByRoundAscMatchOrderAsc(UUID tournamentId)`
     - `List<TournamentMatch> findByTournamentIdAndRoundOrderByMatchOrderAsc(UUID tournamentId, int round)`
     - `List<TournamentMatch> findByTournamentIdAndStatus(UUID tournamentId, TournamentMatchStatus status)`
     - `@Query("SELECT tm FROM TournamentMatch tm WHERE tm.tournament.id = :tournamentId AND (tm.participant1.id = :regId OR tm.participant2.id = :regId)") List<TournamentMatch> findByParticipantRegistrationId(UUID tournamentId, UUID regId)`
-  - [ ] Update Repository `com.tictactore.repository.TournamentRepository.java`:
+  - [x] Update Repository `com.tictactore.repository.TournamentRepository.java`:
     - `@Lock(LockModeType.PESSIMISTIC_WRITE) @Query("SELECT t FROM Tournament t WHERE t.id = :id") Optional<Tournament> findByIdWithLock(UUID id)`
     - `List<Tournament> findByStatusAndRegistrationDeadlineLessThanEqual(TournamentStatus status, Instant deadline)`
-  - [ ] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`).
+  - [x] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`).
 
-- [ ] Task 2: Seeding Strategy, Bracket Generators & Lifecycle Service (AC1, AC2, AC3, AC4, AC5, AC6)
-  - [ ] Create DTO `com.tictactore.dto.tournament.SeededParticipant.java` record:
+- [x] Task 2: Seeding Strategy, Bracket Generators & Lifecycle Service (AC1, AC2, AC3, AC4, AC5, AC6)
+  - [x] Create DTO `com.tictactore.dto.tournament.SeededParticipant.java` record:
     - `TournamentRegistration registration`, `int seed`, `double strengthScore`
-  - [ ] Create Seeding Strategy interface & implementations:
+  - [x] Create Seeding Strategy interface & implementations:
     - `com.tictactore.service.tournament.TournamentSeedingStrategy.java`:
       - `List<SeededParticipant> seed(Tournament tournament, List<TournamentRegistration> registrations)`
     - `com.tictactore.service.tournament.impl.StrengthBasedSeedingStrategy.java`:
@@ -102,7 +103,7 @@ so that participants are seeded fairly based on statistical strength and competi
       - Sort by strength score descending, tie-break by `createdAt` ascending, then `id`.
     - `com.tictactore.service.tournament.impl.RandomSeedingStrategy.java`:
       - Fallback shuffle seeding strategy.
-  - [ ] Create Bracket Generator interface & implementations:
+  - [x] Create Bracket Generator interface & implementations:
     - `com.tictactore.service.tournament.BracketGenerator.java`:
       - `List<TournamentMatch> generateBracket(Tournament tournament, List<SeededParticipant> seededParticipants)`
     - `com.tictactore.service.tournament.impl.CupBracketGenerator.java`:
@@ -113,7 +114,7 @@ so that participants are seeded fairly based on statistical strength and competi
     - `com.tictactore.service.tournament.impl.ChampionshipBracketGenerator.java`:
       - Generate Round Robin pairings using Berger circle algorithm for configured `roundCount`.
       - Set Round 1 matches to `READY`, subsequent rounds to `PENDING`.
-  - [ ] Create Lifecycle Service interface & implementation:
+  - [x] Create Lifecycle Service interface & implementation:
     - `com.tictactore.service.tournament.TournamentLifecycleService.java`
     - `com.tictactore.service.tournament.impl.TournamentLifecycleServiceImpl.java`:
       - `@Transactional public TournamentResponse startTournament(UUID tournamentId)`:
@@ -122,63 +123,63 @@ so that participants are seeded fairly based on statistical strength and competi
         - Query confirmed registrations.
         - If count < `minParticipants` -> transition status to `CANCELLED`, save, publish `TournamentCancelledEvent`.
         - If count >= `minParticipants` -> transition status to `IN_PROGRESS`, seed participants, generate bracket, save `TournamentMatch` records, publish `TournamentStartedEvent`.
-  - [ ] Create Scheduled Job `com.tictactore.scheduler.TournamentScheduler.java`:
+  - [x] Create Scheduled Job `com.tictactore.scheduler.TournamentScheduler.java`:
     - `@Component`, `@RequiredArgsConstructor`, `@Slf4j`
     - `@Scheduled(fixedDelayString = "${app.tournament.scheduler-interval-ms:60000}")`
     - Queries open tournaments past registration deadline and triggers `startTournament` for each.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/StrengthBasedSeedingStrategyTest.java`, `CupBracketGeneratorTest.java`, `ChampionshipBracketGeneratorTest.java`, `TournamentLifecycleServiceTest.java`.
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/StrengthBasedSeedingStrategyTest.java`, `CupBracketGeneratorTest.java`, `ChampionshipBracketGeneratorTest.java`, `TournamentLifecycleServiceTest.java`.
 
-- [ ] Task 3: Domain Events, Push Notifications, Controller & DTOs (AC1, AC2, AC6, AC7)
-  - [ ] Create Events in `com.tictactore.event`:
+- [x] Task 3: Domain Events, Push Notifications, Controller & DTOs (AC1, AC2, AC6, AC7)
+  - [x] Create Events in `com.tictactore.event`:
     - `TournamentStartedEvent.java` record (`UUID tournamentId`, `String tournamentName`, `TournamentFormat format`, `TournamentMode mode`, `List<UUID> participantUserIds`, `int totalMatches`)
     - `TournamentCancelledEvent.java` record (`UUID tournamentId`, `String tournamentName`, `String reason`, `List<UUID> participantUserIds`)
-  - [ ] Update `com.tictactore.service.PushNotificationService.java` & `impl/PushNotificationServiceImpl.java`:
+  - [x] Update `com.tictactore.service.PushNotificationService.java` & `impl/PushNotificationServiceImpl.java`:
     - `void sendTournamentStartedNotification(UUID tournamentId, String tournamentName, User recipient)`
     - `void sendTournamentCancelledNotification(UUID tournamentId, String tournamentName, String reason, User recipient)`
-  - [ ] Update Event Listener `com.tictactore.listener.TournamentNotificationListener.java`:
+  - [x] Update Event Listener `com.tictactore.listener.TournamentNotificationListener.java`:
     - `@Async @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) public void handleTournamentStarted(TournamentStartedEvent event)`
     - `@Async @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) public void handleTournamentCancelled(TournamentCancelledEvent event)`
-  - [ ] Create DTOs in `com.tictactore.dto`:
+  - [x] Create DTOs in `com.tictactore.dto`:
     - `TournamentMatchResponse.java` record:
       - `UUID id`, `UUID tournamentId`, `int round`, `int matchOrder`, `UUID matchId`, `TournamentRegistrationResponse participant1`, `TournamentRegistrationResponse participant2`, `Integer seed1`, `Integer seed2`, `TournamentMatchStatus status`, `UUID winnerRegistrationId`, `UUID nextMatchId`, `Instant createdAt`
     - `RoundMatchesResponse.java` record:
       - `int round`, `String roundName`, `List<TournamentMatchResponse> matches`
     - `TournamentBracketResponse.java` record:
       - `UUID tournamentId`, `String tournamentName`, `TournamentFormat format`, `TournamentMode mode`, `TournamentStatus status`, `int totalRounds`, `List<RoundMatchesResponse> rounds`, `List<TournamentRegistrationResponse> seededParticipants`
-  - [ ] Update Controller `com.tictactore.controller.TournamentController.java`:
+  - [x] Update Controller `com.tictactore.controller.TournamentController.java`:
     - `POST /api/v1/tournaments/{id}/start`: `@AuthenticationPrincipal User principal` -> `200 OK` with `TournamentResponse` (manual start trigger).
     - `GET /api/v1/tournaments/{id}/bracket`: returns `200 OK` with `TournamentBracketResponse`.
     - `GET /api/v1/tournaments/{id}/matches`: `@RequestParam(required = false) Integer round` -> returns `200 OK` with `List<TournamentMatchResponse>`.
-  - [ ] Controller WebMvcTest in `src/test/java/com/tictactore/controller/TournamentBracketControllerTest.java`.
+  - [x] Controller WebMvcTest in `src/test/java/com/tictactore/controller/TournamentBracketControllerTest.java`.
 
-- [ ] Task 4: Frontend Types, Service, Store, Components & i18n (AC7, AC8)
-  - [ ] Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
+- [x] Task 4: Frontend Types, Service, Store, Components & i18n (AC7, AC8)
+  - [x] Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
     - `type TournamentMatchStatus = 'PENDING' | 'READY' | 'IN_PROGRESS' | 'COMPLETED' | 'BYE' | 'CANCELLED'`
     - `interface TournamentMatchDto`
     - `interface RoundMatchesDto`
     - `interface TournamentBracketDto`
-  - [ ] Create API service `frontend/src/features/tournament/services/tournamentBracketService.ts`:
+  - [x] Create API service `frontend/src/features/tournament/services/tournamentBracketService.ts`:
     - `getTournamentBracket(tournamentId: string): Promise<TournamentBracketDto>`
     - `getTournamentMatches(tournamentId: string, round?: number): Promise<TournamentMatchDto[]>`
     - `startTournament(tournamentId: string): Promise<TournamentDto>`
-  - [ ] Update Pinia store `frontend/src/features/tournament/stores/tournamentStore.ts`:
+  - [x] Update Pinia store `frontend/src/features/tournament/stores/tournamentStore.ts`:
     - State: `brackets: Record<string, TournamentBracketDto>`, `matches: Record<string, TournamentMatchDto[]>`
     - Actions: `fetchBracket(tournamentId)`, `fetchMatches(tournamentId, round?)`, `startTournament(tournamentId)`
-  - [ ] Create UI components:
+  - [x] Create UI components:
     - `frontend/src/features/tournament/components/TournamentMatchCard.vue`:
       - Participant rows with seed number badge (#1, #2), avatar, nickname, status indicator (BYE, Ready, Score).
     - `frontend/src/features/tournament/components/TournamentBracket.vue`:
       - Multi-round column layout with bracket lines, scrolling support, and responsive scaling.
     - `frontend/src/features/tournament/components/TournamentSchedule.vue`:
       - Round-by-round accordion / tab schedule for Championship format.
-  - [ ] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
+  - [x] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
     - Add "View Bracket" / "Schedule" action button on active or completed tournaments.
     - Render modal or expanded view showing `TournamentBracket.vue` or `TournamentSchedule.vue`.
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.bracket.*` and `tournament.schedule.*` (Round names, BYE, Seed #, Start Tournament, Match Statuses).
-  - [ ] Frontend component tests in `frontend/src/features/tournament/components/__tests__/TournamentBracket.spec.ts` and `TournamentMatchCard.spec.ts`.
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.bracket.*` and `tournament.schedule.*` (Round names, BYE, Seed #, Start Tournament, Match Statuses).
+  - [x] Frontend component tests in `frontend/src/features/tournament/components/__tests__/TournamentBracket.spec.ts` and `TournamentMatchCard.spec.ts`.
 
-- [ ] Task 5: Testing & Quality Verification
-  - [ ] Backend Unit & Slice Tests:
+- [x] Task 5: Testing & Quality Verification
+  - [x] Backend Unit & Slice Tests:
     - `TournamentLifecycleServiceTest.java` (strict AAA without section comments).
     - `StrengthBasedSeedingStrategyTest.java`.
     - `CupBracketGeneratorTest.java` (powers of 2, non-power of 2 with BYEs, winner propagation).
@@ -187,16 +188,16 @@ so that participants are seeded fairly based on statistical strength and competi
     - `TournamentMatchRepositoryTest.java` (@DataJpaTest).
     - `TournamentBracketControllerTest.java` (WebMvcTest).
     - `TournamentNotificationListenerTest.java`.
-  - [ ] Frontend Unit/Component Tests:
+  - [x] Frontend Unit/Component Tests:
     - `tournamentStore.spec.ts` (bracket actions).
     - `TournamentBracket.spec.ts`.
     - `TournamentMatchCard.spec.ts`.
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create `frontend/e2e/tournament-bracket.spec.ts`:
       - Test 1 (Cup Bracket Generation): Create tournament -> register 6 players -> advance time/trigger start -> verify 8-slot bracket created with 2 BYEs, correct seeds #1 to #6, and Round 1 pairings.
       - Test 2 (Cancellation on Low Capacity): Create tournament with minParticipants=4 -> register 2 players -> start routine runs -> tournament transitions to CANCELLED and participants see cancellation status.
       - Test 3 (Championship Schedule): Create round robin tournament -> register 4 players -> start -> verify 3 rounds of pairings generated.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 
