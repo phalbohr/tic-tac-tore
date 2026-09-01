@@ -56,4 +56,14 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().message()).contains("Redis unavailable");
         assertThat(response.getBody().details()).containsEntry("retryAfter", 0);
     }
+
+    @Test
+    void shouldReturn409ForTournamentConflictException() {
+        var ex = new TournamentConflictException("Tournament capacity reached");
+
+        var response = handler.handlePoolConflict(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).containsEntry("message", "Tournament capacity reached");
+    }
 }

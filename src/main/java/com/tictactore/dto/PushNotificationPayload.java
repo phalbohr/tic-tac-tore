@@ -1,6 +1,7 @@
 package com.tictactore.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 
 import java.util.UUID;
 
@@ -10,18 +11,21 @@ import java.util.UUID;
  * @param matchId the unique identifier of the match awaiting confirmation
  * @param poolId the unique identifier of the matchmaking pool
  * @param challengeId the unique identifier of the match challenge
- * @param type the notification event type (e.g. POOL_CREATED, POOL_FILLED, CONFIRMATION_REQUEST, CHALLENGE_RECEIVED, CHALLENGE_ACCEPTED, CHALLENGE_DECLINED)
+ * @param tournamentId the unique identifier of the tournament
+ * @param type the notification event type (e.g. POOL_CREATED, POOL_FILLED, CONFIRMATION_REQUEST, CHALLENGE_RECEIVED, CHALLENGE_ACCEPTED, CHALLENGE_DECLINED, TOURNAMENT_INVITE, TOURNAMENT_INVITE_ACCEPTED, TOURNAMENT_INVITE_DECLINED, TOURNAMENT_REGISTRATION_CANCELLED)
  * @param creatorName the display name of the creator (or "A retired player" if pseudonymized)
- * @param summary summary description of the match/pool/challenge event
+ * @param summary summary description of the match/pool/challenge/tournament event
  * @param url target deep link URL
  * @param isDuplicateWarning flag indicating whether a duplicate match was detected
  * @param timestamp ISO-8601 formatted timestamp of push creation
  */
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PushNotificationPayload(
     UUID matchId,
     UUID poolId,
     UUID challengeId,
+    UUID tournamentId,
     String type,
     String creatorName,
     String summary,
@@ -32,6 +36,7 @@ public record PushNotificationPayload(
     public PushNotificationPayload(
         UUID matchId,
         UUID poolId,
+        UUID challengeId,
         String type,
         String creatorName,
         String summary,
@@ -39,7 +44,20 @@ public record PushNotificationPayload(
         boolean isDuplicateWarning,
         String timestamp
     ) {
-        this(matchId, poolId, null, type, creatorName, summary, url, isDuplicateWarning, timestamp);
+        this(matchId, poolId, challengeId, null, type, creatorName, summary, url, isDuplicateWarning, timestamp);
+    }
+
+    public PushNotificationPayload(
+        UUID matchId,
+        UUID poolId,
+        String type,
+        String creatorName,
+        String summary,
+        String url,
+        boolean isDuplicateWarning,
+        String timestamp
+    ) {
+        this(matchId, poolId, null, null, type, creatorName, summary, url, isDuplicateWarning, timestamp);
     }
 
     public PushNotificationPayload(
@@ -49,6 +67,6 @@ public record PushNotificationPayload(
         boolean isDuplicateWarning,
         String timestamp
     ) {
-        this(matchId, null, null, null, creatorName, summary, null, isDuplicateWarning, timestamp);
+        this(matchId, null, null, null, null, creatorName, summary, null, isDuplicateWarning, timestamp);
     }
 }

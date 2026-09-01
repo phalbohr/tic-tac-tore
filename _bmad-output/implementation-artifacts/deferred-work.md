@@ -456,3 +456,7 @@ status: open
 - [x] [Review][Defer] No Guardrails on Participant Limits [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
 - [x] [Review][Defer] Weak String Validation [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
 - [x] [Review][Defer] Boolean Unboxing Risk [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+
+## Deferred from: code review of 8-2-team-registration-and-confirmation (2026-09-01)
+- Отсутствие пагинации в listRegistrations [TournamentRegistrationServiceImpl.java:148] — Возвращает все записи сразу, что может стать проблемой при высокой нагрузке. Отложено, так как не является ошибкой в рамках текущего AC.
+- Игнорирование исключений при отправке пушей в Listener [TournamentRegistrationNotificationListener.java:37] — Silent Failures, нет механизма повторной отправки (retry) при сбое сети. Отложено, так как это системная проблема архитектуры пушей, а не только этого стори.

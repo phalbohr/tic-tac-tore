@@ -34,5 +34,13 @@ public interface PushNotificationService {
 
     void sendChallengeDeclinedNotification(UUID challengeId, String targetName, User challenger);
 
+    void sendTournamentInviteNotification(UUID tournamentId, String tournamentName, String inviterName, User recipient);
+
+    void sendTournamentInviteAcceptedNotification(UUID tournamentId, String tournamentName, String partnerName, User recipient);
+
+    void sendTournamentInviteDeclinedNotification(UUID tournamentId, String tournamentName, String partnerName, User recipient);
+
+    void sendTournamentRegistrationCancelledNotification(UUID tournamentId, String tournamentName, String cancellerName, User recipient);
+
     List<NotificationLogDto> getUserNotifications(UUID userId);
 }

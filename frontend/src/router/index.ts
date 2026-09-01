@@ -56,6 +56,11 @@ const router = createRouter({
       name: 'leaderboard',
       component: () => import('@/features/stats/views/LeaderboardView.vue'),
     },
+    {
+      path: '/tournaments',
+      name: 'tournaments',
+      component: () => import('@/features/tournament/views/TournamentsView.vue'),
+    },
   ],
 })
 
