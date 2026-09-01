@@ -256,6 +256,17 @@ so that we can participate and compete once the tournament starts.
   - **Strict AAA Pattern:** All test methods adhere to Arrange-Act-Assert separated by a single blank line, with zero structural comments (`// Given`, `// When`, `// Then` are strictly forbidden).
   - Integration tests end with `IT` or `ATDDTest` / `Test` for unit tests.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-8-2-team-registration-and-confirmation.md`
+- **Backend API Scaffolds:** `_bmad-output/test-artifacts/atdd-redphase-8-2/TournamentRegistrationControllerATDDTest.java`
+- **Frontend E2E Scaffolds:** `frontend/e2e/tournament-registration.spec.ts`
+- **Frontend Store Scaffolds:** `_bmad-output/test-artifacts/atdd-redphase-8-2/tournamentRegistrationStore.spec.ts`
+- **Frontend Component Scaffolds:**
+  - `_bmad-output/test-artifacts/atdd-redphase-8-2/TournamentRegistrationModal.spec.ts`
+  - `_bmad-output/test-artifacts/atdd-redphase-8-2/TournamentInviteModal.spec.ts`
+- **Fixtures:** `frontend/e2e/fixtures/tournament-registration-data.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md#FR42]
