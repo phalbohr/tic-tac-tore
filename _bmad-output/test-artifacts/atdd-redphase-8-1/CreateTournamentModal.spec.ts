@@ -105,15 +105,26 @@ describe('CreateTournamentModal.vue Component ATDD Specifications — Story 8.1'
             },
         });
 
-        const futureDate = new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 16);
+        const futureDate = new Date(Date.now() + 86400000 * 5);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const futureDateStr = `${futureDate.getFullYear()}-${pad(futureDate.getMonth() + 1)}-${pad(futureDate.getDate())}T${pad(futureDate.getHours())}:${pad(futureDate.getMinutes())}`;
 
         await wrapper.find('[data-testid="tournament-name-input"]').setValue('Championship 2026');
         await wrapper.find('[data-testid="min-participants-input"]').setValue(4);
         await wrapper.find('[data-testid="max-participants-input"]').setValue(16);
-        await wrapper.find('[data-testid="registration-deadline-input"]').setValue(futureDate);
+        await wrapper.find('[data-testid="registration-deadline-input"]').setValue(futureDateStr);
         await wrapper.find('[data-testid="create-tournament-submit-button"]').trigger('click');
 
         expect(wrapper.emitted('create')).toBeTruthy();
+        expect(wrapper.emitted('create')![0][0]).toEqual(expect.objectContaining({
+            name: 'Championship 2026',
+            format: 'CUP',
+            mode: 'ONE_VS_ONE_PERSONAL',
+            minParticipants: 4,
+            maxParticipants: 16,
+            ruleConfigurationId: mockRulePresets[0].id,
+            registrationDeadline: expect.any(String),
+        }));
     });
 
     it('should emit close event when cancel button or backdrop is clicked', async () => {

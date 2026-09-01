@@ -32,6 +32,7 @@ so that I can set up a structured competition and invite participants.
    - `registrationDeadline` is null or in the past (`<= Instant.now()`)
    - `minParticipants < 2` or `maxParticipants < minParticipants`
    - Mode is `TWO_VS_TWO_FIXED_TEAMS` or `TWO_VS_TWO_RANDOM_PAIRINGS` and `minParticipants < 4`
+   - Format is `CHAMPIONSHIP` and `roundCount` is null or `roundCount < 1`
    - `ruleConfigurationId` does not exist in `RuleConfigurationRepository`
    - Unauthenticated request
    **When** the request is received by `POST /api/v1/tournaments`
@@ -101,6 +102,7 @@ so that I can set up a structured competition and invite participants.
       - Fail-fast parameter validation:
         - `request.minParticipants() <= request.maxParticipants()`
         - If mode is 2v2 (`TWO_VS_TWO_FIXED_TEAMS` or `TWO_VS_TWO_RANDOM_PAIRINGS`), require `request.minParticipants() >= 4`
+        - If format is `CHAMPIONSHIP`, require `request.roundCount() != null && request.roundCount() >= 1`
         - Lookup `User creator` from `UserRepository` (throw `EntityNotFoundException` if missing)
         - Lookup `RuleConfiguration ruleConfig` from `RuleConfigurationRepository` (throw `EntityNotFoundException` if missing)
       - Instantiate and save `Tournament` entity with status `REGISTRATION_OPEN` (capture returned saved instance)
@@ -173,15 +175,15 @@ so that I can set up a structured competition and invite participants.
 
 ### Review Findings
 
-- [ ] [Review][Patch] Mocked Validation in ATDD Tests [`TournamentControllerATDDTest.java`]
-- [ ] [Review][Patch] Missing Unauthenticated Test Coverage [`TournamentControllerATDDTest.java`]
-- [ ] [Review][Patch] Missing Backend Validation Tests for AC4 Constraints [`TournamentControllerATDDTest.java`]
-- [ ] [Review][Patch] Missing Test for Creator Lookup Failure [`TournamentControllerATDDTest.java`]
-- [ ] [Review][Patch] E2E Tests Miss Required Fields & Contradict Descriptions [`frontend/e2e/tournament-creation.spec.ts`]
-- [ ] [Review][Patch] Broken Frontend Date Formatting in Component Tests [`CreateTournamentModal.spec.ts`]
-- [ ] [Review][Patch] Component Test Fails to Assert Emitted Payload [`CreateTournamentModal.spec.ts`]
-- [ ] [Review][Patch] Store Lacks Error State Handling Tests [`useTournamentStore.spec.ts`]
-- [ ] [Review][Patch] Missing Conditional Validation for Championships [`8-1-tournament-creation-and-configuration.md`]
+- [x] [Review][Patch] Mocked Validation in ATDD Tests [`TournamentControllerATDDTest.java`]
+- [x] [Review][Patch] Missing Unauthenticated Test Coverage [`TournamentControllerATDDTest.java`]
+- [x] [Review][Patch] Missing Backend Validation Tests for AC4 Constraints [`TournamentControllerATDDTest.java`]
+- [x] [Review][Patch] Missing Test for Creator Lookup Failure [`TournamentControllerATDDTest.java`]
+- [x] [Review][Patch] E2E Tests Miss Required Fields & Contradict Descriptions [`frontend/e2e/tournament-creation.spec.ts`]
+- [x] [Review][Patch] Broken Frontend Date Formatting in Component Tests [`CreateTournamentModal.spec.ts`]
+- [x] [Review][Patch] Component Test Fails to Assert Emitted Payload [`CreateTournamentModal.spec.ts`]
+- [x] [Review][Patch] Store Lacks Error State Handling Tests [`useTournamentStore.spec.ts`]
+- [x] [Review][Patch] Missing Conditional Validation for Championships [`8-1-tournament-creation-and-configuration.md`]
 - [x] [Review][Defer] Contradictory Tournament States Allowed [`TournamentControllerATDDTest.java`] — deferred, pre-existing
 - [x] [Review][Defer] Incomplete Indexing Strategy [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
 - [x] [Review][Defer] No Guardrails on Participant Limits [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
@@ -253,6 +255,7 @@ Gemini 3.7 Flash
 - Configured exact Flyway migration version `V18__create_tournament_tables.sql`.
 - Specified backend model package `com.tictactore.model`, service layer, DTO records, controller endpoints, and frontend Vue/Pinia feature architecture.
 - Added strict AAA testing requirements, Playwright E2E test plan, and `./scripts/ci-local.sh` verification gate.
+- Resolved all 9 code review findings across ATDD scaffolds, E2E specs, store specs, component specs, and story acceptance criteria.
 
 ### File List
 
@@ -283,3 +286,8 @@ Gemini 3.7 Flash
 - `frontend/src/features/tournament/stores/__tests__/tournamentStore.spec.ts` (NEW)
 - `frontend/src/features/tournament/components/__tests__/CreateTournamentModal.spec.ts` (NEW)
 - `frontend/e2e/tournament-creation.spec.ts` (NEW)
+
+### Change Log
+
+- 2026-09-01: Addressed code review findings - 9 items resolved (Bean validation in ATDD, unauthenticated test coverage, creator lookup failure, past deadline validation in E2E, date formatting and emitted payload assertions in component tests, store error state handling, conditional championship round count validation).
+

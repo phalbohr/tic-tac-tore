@@ -19,6 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -191,6 +193,83 @@ class TournamentControllerATDDTest {
     @DisplayName("AC 4: Validation Errors (POST /api/v1/tournaments)")
     class ValidationErrorScenarios {
 
+        @ParameterizedTest
+        @ValueSource(strings = {"", "  ", "ab", "a12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901"})
+        @DisplayName("POST /api/v1/tournaments should return 400 when name is blank or outside 3-100 characters")
+        void shouldReturn400_whenNameIsInvalid(String invalidName) throws Exception {
+            var request = CreateTournamentRequest.builder()
+                    .name(invalidName)
+                    .format(TournamentFormat.CUP)
+                    .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                    .ruleConfigurationId(ruleConfigId)
+                    .minParticipants(4)
+                    .maxParticipants(16)
+                    .registrationDeadline(Instant.now().plus(7, ChronoUnit.DAYS))
+                    .build();
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("POST /api/v1/tournaments should return 400 when registrationDeadline is in the past")
+        void shouldReturn400_whenRegistrationDeadlineInPast() throws Exception {
+            var request = CreateTournamentRequest.builder()
+                    .name("Autumn Cup 2026")
+                    .format(TournamentFormat.CUP)
+                    .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                    .ruleConfigurationId(ruleConfigId)
+                    .minParticipants(4)
+                    .maxParticipants(16)
+                    .registrationDeadline(Instant.now().minus(1, ChronoUnit.DAYS))
+                    .build();
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("POST /api/v1/tournaments should return 400 when minParticipants is less than 2")
+        void shouldReturn400_whenMinParticipantsLessThanTwo() throws Exception {
+            var request = CreateTournamentRequest.builder()
+                    .name("Autumn Cup 2026")
+                    .format(TournamentFormat.CUP)
+                    .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                    .ruleConfigurationId(ruleConfigId)
+                    .minParticipants(1)
+                    .maxParticipants(16)
+                    .registrationDeadline(Instant.now().plus(7, ChronoUnit.DAYS))
+                    .build();
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("POST /api/v1/tournaments should return 400 when required fields are null")
+        void shouldReturn400_whenRequiredFieldsNull() throws Exception {
+            var request = CreateTournamentRequest.builder()
+                    .name(null)
+                    .format(null)
+                    .mode(null)
+                    .ruleConfigurationId(null)
+                    .minParticipants(null)
+                    .maxParticipants(null)
+                    .registrationDeadline(null)
+                    .build();
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+        }
+
         @Test
         @DisplayName("POST /api/v1/tournaments should return 400 when minParticipants exceeds maxParticipants")
         void shouldReturn400_whenMinParticipantsExceedsMax() throws Exception {
@@ -218,6 +297,19 @@ class TournamentControllerATDDTest {
         }
 
         @Test
+        @DisplayName("POST /api/v1/tournaments should return 400 when championship format has null or invalid roundCount")
+        void shouldReturn400_whenChampionshipHasInvalidRoundCount() throws Exception {
+            var request = createValidCupRequest();
+            when(tournamentService.createTournament(eq(userId), any(CreateTournamentRequest.class)))
+                    .thenThrow(new IllegalArgumentException("Championship format requires at least 1 round"));
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
         @DisplayName("POST /api/v1/tournaments should return 404 when ruleConfigurationId does not exist")
         void shouldReturn404_whenRuleConfigurationNotFound() throws Exception {
             var request = createValidCupRequest();
@@ -228,6 +320,54 @@ class TournamentControllerATDDTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("POST /api/v1/tournaments should return 404 when creator user does not exist")
+        void shouldReturn404_whenCreatorNotFound() throws Exception {
+            var request = createValidCupRequest();
+            when(tournamentService.createTournament(eq(userId), any(CreateTournamentRequest.class)))
+                    .thenThrow(new ResourceNotFoundException("User", userId.toString()));
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("AC 4: Security & Authentication Specs")
+    class SecurityScenarios {
+
+        @Test
+        @DisplayName("POST /api/v1/tournaments should return 401 Unauthorized when unauthenticated")
+        void shouldReturn401_onPostTournaments_whenUnauthenticated() throws Exception {
+            SecurityContextHolder.clearContext();
+            var request = createValidCupRequest();
+
+            mockMvc.perform(post("/api/v1/tournaments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("GET /api/v1/tournaments should return 401 Unauthorized when unauthenticated")
+        void shouldReturn401_onGetTournaments_whenUnauthenticated() throws Exception {
+            SecurityContextHolder.clearContext();
+
+            mockMvc.perform(get("/api/v1/tournaments"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("GET /api/v1/tournaments/{id} should return 401 Unauthorized when unauthenticated")
+        void shouldReturn401_onGetTournamentById_whenUnauthenticated() throws Exception {
+            SecurityContextHolder.clearContext();
+
+            mockMvc.perform(get("/api/v1/tournaments/{id}", tournamentId))
+                    .andExpect(status().isUnauthorized());
         }
     }
 

@@ -30,6 +30,18 @@ test.describe('Tournament Creation & Configuration E2E (Story 8.1)', () => {
         await page.getByRole('button', { name: /Single Elimination|Cup/i }).click();
         await page.getByRole('button', { name: /1v1 Personal|1v1/i }).click();
 
+        // Select Rule System preset if selector exists
+        const ruleSelect = page.locator('[data-testid="rule-config-select"]');
+        if (await ruleSelect.isVisible()) {
+            await ruleSelect.selectOption({ index: 0 });
+        }
+
+        // Set future registration deadline
+        const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const futureDateStr = `${futureDate.getFullYear()}-${pad(futureDate.getMonth() + 1)}-${pad(futureDate.getDate())}T${pad(futureDate.getHours())}:${pad(futureDate.getMinutes())}`;
+        await page.getByLabel(/Registration Deadline/i).fill(futureDateStr);
+
         // Set participants
         await page.getByLabel(/Min Participants/i).fill('4');
         await page.getByLabel(/Max Participants/i).fill('16');
@@ -70,11 +82,15 @@ test.describe('Tournament Creation & Configuration E2E (Story 8.1)', () => {
         await page.getByRole('button', { name: /2v2 Fixed Teams|2v2/i }).click();
         await page.getByLabel(/Min Participants/i).fill('2');
 
+        // Fill past registration deadline
+        await page.getByLabel(/Registration Deadline/i).fill('2020-01-01T12:00');
+
         await page.getByRole('button', { name: /Create Tournament|Submit/i }).click();
 
         // Validation errors should be displayed
         await expect(page.getByText(/Name must be at least 3 characters/i)).toBeVisible();
         await expect(page.getByText(/2v2 modes require minimum 4 participants/i)).toBeVisible();
+        await expect(page.getByText(/Registration deadline must be in the future/i)).toBeVisible();
     });
 
     test.skip('[P1] should filter tournaments by status tabs (AC 5)', async ({ page }) => {

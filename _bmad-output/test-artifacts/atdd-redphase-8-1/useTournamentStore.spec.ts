@@ -125,6 +125,18 @@ describe('useTournamentStore ATDD Specs — Story 8.1', () => {
     expect(store.isLoading).toBe(false);
   });
 
+  it('should handle fetchTournaments error gracefully and set error state (AC 5)', async () => {
+    const store = useTournamentStore();
+    const errorMsg = 'Failed to fetch tournaments';
+
+    vi.mocked(tournamentService.getTournaments).mockRejectedValue(new Error(errorMsg));
+
+    await expect(store.fetchTournaments()).rejects.toThrow(errorMsg);
+
+    expect(store.isLoading).toBe(false);
+    expect(store.error).toBe(errorMsg);
+  });
+
   it('should fetch tournament by id and set currentTournament (AC 5)', async () => {
     const store = useTournamentStore();
     const mockTournament: TournamentDto = {
@@ -157,5 +169,17 @@ describe('useTournamentStore ATDD Specs — Story 8.1', () => {
     expect(tournamentService.getTournamentById).toHaveBeenCalledWith('tourn-uuid-1');
     expect(result).toEqual(mockTournament);
     expect(store.currentTournament).toEqual(mockTournament);
+  });
+
+  it('should handle fetchTournamentById error gracefully and set error state (AC 5)', async () => {
+    const store = useTournamentStore();
+    const errorMsg = 'Tournament not found';
+
+    vi.mocked(tournamentService.getTournamentById).mockRejectedValue(new Error(errorMsg));
+
+    await expect(store.fetchTournamentById('invalid-id')).rejects.toThrow(errorMsg);
+
+    expect(store.isLoading).toBe(false);
+    expect(store.error).toBe(errorMsg);
   });
 });
