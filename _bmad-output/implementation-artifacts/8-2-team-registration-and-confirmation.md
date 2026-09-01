@@ -4,7 +4,7 @@ baseline_commit: 4e6e6d16646180211d53ae7ce811b81c9f3d1755
 
 # Story 8.2: Team Registration & Confirmation
 
-Status: review
+Status: in-progress
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -324,3 +324,14 @@ Gemini 3.7 Flash
 - `frontend/src/features/tournament/components/__tests__/TournamentRegistrationModal.spec.ts` (NEW)
 - `frontend/src/features/tournament/components/__tests__/TournamentInviteModal.spec.ts` (NEW)
 - `frontend/e2e/tournament-registration.spec.ts` (NEW)
+
+### Review Findings
+- [ ] [Review][Patch] Отсутствие уведомления при отмене регистрации — Если один из участников отменяет регистрацию команды, второму не приходит пуш-уведомление. Это не описано в AC, но логически выглядит как недоработка.
+- [ ] [Review][Patch] Состояние гонки при проверке вместимости турнира (Overbooking) [TournamentRegistrationServiceImpl.java:227]
+- [ ] [Review][Patch] Состояние гонки: один пользователь может быть и player, и partner в двух разных командах одновременно [TournamentRegistrationServiceImpl.java:222]
+- [ ] [Review][Patch] Неверный HTTP-статус при отсутствии партнера (404 вместо ожидаемого 400 по AC6) [TournamentRegistrationServiceImpl.java:57]
+- [ ] [Review][Patch] Опасный перехват IllegalStateException с отдачей статуса 409 [GlobalExceptionHandler.java:84]
+- [ ] [Review][Patch] Нарушена структура конструктора в PushNotificationPayload при добавлении tournamentId [PushNotificationPayload.java:30]
+- [ ] [Review][Patch] Несоответствие URL в пуш-уведомлениях об отклонении инвайта [PushNotificationServiceImpl.java:556]
+- [x] [Review][Defer] Отсутствие пагинации в listRegistrations [TournamentRegistrationServiceImpl.java:148] — deferred, pre-existing
+- [x] [Review][Defer] Игнорирование исключений при отправке пушей в Listener [TournamentRegistrationNotificationListener.java:37] — deferred, pre-existing
