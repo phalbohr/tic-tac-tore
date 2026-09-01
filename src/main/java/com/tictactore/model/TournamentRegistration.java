@@ -68,7 +68,7 @@ public class TournamentRegistration {
 
     public void accept(UUID userId) {
         if (this.status != RegistrationStatus.PENDING_CONFIRMATION) {
-            throw new IllegalStateException("Cannot accept invitation in status " + this.status);
+            throw new com.tictactore.exception.TournamentConflictException("Cannot accept invitation in status " + this.status);
         }
         if (this.partner == null || !this.partner.getId().equals(userId)) {
             throw new AccessDeniedException("Only the invited partner can accept this invitation");
@@ -78,7 +78,7 @@ public class TournamentRegistration {
 
     public void decline(UUID userId) {
         if (this.status != RegistrationStatus.PENDING_CONFIRMATION) {
-            throw new IllegalStateException("Cannot decline invitation in status " + this.status);
+            throw new com.tictactore.exception.TournamentConflictException("Cannot decline invitation in status " + this.status);
         }
         if (this.partner == null || !this.partner.getId().equals(userId)) {
             throw new AccessDeniedException("Only the invited partner can decline this invitation");

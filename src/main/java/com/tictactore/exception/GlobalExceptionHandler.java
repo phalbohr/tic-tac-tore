@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(Map.of("message", "The record has been modified by another transaction"));
     }
 
-    @ExceptionHandler({PoolConflictException.class, ChallengeConflictException.class, IllegalStateException.class})
+    @ExceptionHandler({PoolConflictException.class, ChallengeConflictException.class, TournamentConflictException.class})
     public ResponseEntity<Map<String, String>> handlePoolConflict(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Conflict";
         return ResponseEntity.status(409).body(Map.of("message", msg));

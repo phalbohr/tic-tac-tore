@@ -3,6 +3,7 @@ package com.tictactore.listener;
 import com.tictactore.event.TournamentInviteAcceptedEvent;
 import com.tictactore.event.TournamentInviteCreatedEvent;
 import com.tictactore.event.TournamentInviteDeclinedEvent;
+import com.tictactore.event.TournamentRegistrationCancelledEvent;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.PushNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,25 @@ public class TournamentRegistrationNotificationListener {
             }
         } catch (Exception e) {
             log.error("Failed to process TournamentInviteDeclinedEvent for registration {}", event.registrationId(), e);
+        }
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleTournamentRegistrationCancelled(TournamentRegistrationCancelledEvent event) {
+        try {
+            if (event.notifyUserId() != null) {
+                userRepository.findById(event.notifyUserId()).ifPresent(recipient ->
+                        pushNotificationService.sendTournamentRegistrationCancelledNotification(
+                                event.tournamentId(),
+                                event.tournamentName(),
+                                event.cancelledByName(),
+                                recipient
+                        )
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to process TournamentRegistrationCancelledEvent for registration {}", event.registrationId(), e);
         }
     }
 }

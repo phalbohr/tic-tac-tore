@@ -1,6 +1,7 @@
 package com.tictactore.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 
 import java.util.UUID;
 
@@ -11,13 +12,14 @@ import java.util.UUID;
  * @param poolId the unique identifier of the matchmaking pool
  * @param challengeId the unique identifier of the match challenge
  * @param tournamentId the unique identifier of the tournament
- * @param type the notification event type (e.g. POOL_CREATED, POOL_FILLED, CONFIRMATION_REQUEST, CHALLENGE_RECEIVED, CHALLENGE_ACCEPTED, CHALLENGE_DECLINED, TOURNAMENT_INVITE, TOURNAMENT_INVITE_ACCEPTED, TOURNAMENT_INVITE_DECLINED)
+ * @param type the notification event type (e.g. POOL_CREATED, POOL_FILLED, CONFIRMATION_REQUEST, CHALLENGE_RECEIVED, CHALLENGE_ACCEPTED, CHALLENGE_DECLINED, TOURNAMENT_INVITE, TOURNAMENT_INVITE_ACCEPTED, TOURNAMENT_INVITE_DECLINED, TOURNAMENT_REGISTRATION_CANCELLED)
  * @param creatorName the display name of the creator (or "A retired player" if pseudonymized)
  * @param summary summary description of the match/pool/challenge/tournament event
  * @param url target deep link URL
  * @param isDuplicateWarning flag indicating whether a duplicate match was detected
  * @param timestamp ISO-8601 formatted timestamp of push creation
  */
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PushNotificationPayload(
     UUID matchId,

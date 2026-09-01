@@ -85,4 +85,22 @@ class TournamentRegistrationNotificationListenerTest {
             verify(pushNotificationService).sendTournamentInviteDeclinedNotification(tournamentId, "Cup 2026", "Partner", inviter);
         }
     }
+
+    @Nested
+    @DisplayName("TournamentRegistrationCancelledEvent Processing")
+    class TournamentRegistrationCancelledEventSpecs {
+
+        @Test
+        void shouldSendNotificationToTeammate_whenRegistrationCancelled() {
+            var teammate = User.builder().id(partnerId).nickname("Teammate").build();
+            var event = new com.tictactore.event.TournamentRegistrationCancelledEvent(
+                    registrationId, tournamentId, "Cup 2026", inviterId, "Inviter", partnerId
+            );
+            when(userRepository.findById(partnerId)).thenReturn(Optional.of(teammate));
+
+            listener.handleTournamentRegistrationCancelled(event);
+
+            verify(pushNotificationService).sendTournamentRegistrationCancelledNotification(tournamentId, "Cup 2026", "Inviter", teammate);
+        }
+    }
 }

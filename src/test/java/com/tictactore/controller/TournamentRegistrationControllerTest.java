@@ -267,7 +267,7 @@ class TournamentRegistrationControllerTest {
         void shouldReturn409_whenDuplicateRegistration() throws Exception {
             var request = new RegisterTournamentRequest(null);
             when(registrationService.register(eq(tournamentId), eq(userId), any(RegisterTournamentRequest.class)))
-                    .thenThrow(new IllegalStateException("User already has an active registration for this tournament"));
+                    .thenThrow(new com.tictactore.exception.TournamentConflictException("User already has an active registration for this tournament"));
 
             mockMvc.perform(post("/api/v1/tournaments/{tournamentId}/registrations", tournamentId)
                             .with(authentication(auth))

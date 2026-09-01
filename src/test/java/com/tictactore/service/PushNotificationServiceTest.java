@@ -401,4 +401,47 @@ class PushNotificationServiceTest {
             verify(notificationOperation, never()).saveNotificationLog(any());
         }
     }
+
+    @Nested
+    @DisplayName("Tournament Notifications Unit Specs")
+    class TournamentNotificationUnitSpecs {
+
+        @Test
+        void sendTournamentRegistrationCancelledNotification_shouldSkipWhenNoSubscriptions() {
+            var tournamentId = UUID.randomUUID();
+            var recipientId = UUID.randomUUID();
+            var recipient = User.builder().id(recipientId).nickname("Teammate").build();
+            when(notificationOperation.getSubscriptionsForUser(recipientId)).thenReturn(List.of());
+
+            pushNotificationService.sendTournamentRegistrationCancelledNotification(
+                    tournamentId, "Autumn Cup", "Player", recipient
+            );
+
+            ArgumentCaptor<NotificationLog> captor = ArgumentCaptor.forClass(NotificationLog.class);
+            verify(notificationOperation).saveNotificationLog(captor.capture());
+            NotificationLog log = captor.getValue();
+            assertThat(log.getStatus()).isEqualTo("SKIPPED");
+            assertThat(log.getType()).isEqualTo("TOURNAMENT_REGISTRATION_CANCELLED");
+            assertThat(log.getPayload()).contains("/tournaments?tournamentId=" + tournamentId);
+        }
+
+        @Test
+        void sendTournamentInviteDeclinedNotification_shouldIncludeCorrectTournamentUrl() {
+            var tournamentId = UUID.randomUUID();
+            var recipientId = UUID.randomUUID();
+            var recipient = User.builder().id(recipientId).nickname("Inviter").build();
+            when(notificationOperation.getSubscriptionsForUser(recipientId)).thenReturn(List.of());
+
+            pushNotificationService.sendTournamentInviteDeclinedNotification(
+                    tournamentId, "Autumn Cup", "Partner", recipient
+            );
+
+            ArgumentCaptor<NotificationLog> captor = ArgumentCaptor.forClass(NotificationLog.class);
+            verify(notificationOperation).saveNotificationLog(captor.capture());
+            NotificationLog log = captor.getValue();
+            assertThat(log.getStatus()).isEqualTo("SKIPPED");
+            assertThat(log.getType()).isEqualTo("TOURNAMENT_INVITE_DECLINED");
+            assertThat(log.getPayload()).contains("/tournaments?tournamentId=" + tournamentId);
+        }
+    }
 }

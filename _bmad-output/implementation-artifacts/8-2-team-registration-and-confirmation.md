@@ -4,7 +4,7 @@ baseline_commit: 4e6e6d16646180211d53ae7ce811b81c9f3d1755
 
 # Story 8.2: Team Registration & Confirmation
 
-Status: in-progress
+Status: review
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -295,12 +295,17 @@ Gemini 3.7 Flash
 - `src/main/java/com/tictactore/model/RegistrationStatus.java` (NEW)
 - `src/main/java/com/tictactore/model/TournamentRegistration.java` (NEW)
 - `src/main/java/com/tictactore/repository/TournamentRegistrationRepository.java` (NEW)
+- `src/main/java/com/tictactore/repository/TournamentRepository.java` (UPDATE)
 - `src/main/java/com/tictactore/dto/RegisterTournamentRequest.java` (NEW)
 - `src/main/java/com/tictactore/dto/TournamentRegistrationResponse.java` (NEW)
 - `src/main/java/com/tictactore/dto/MyRegistrationStatusResponse.java` (NEW)
+- `src/main/java/com/tictactore/dto/PushNotificationPayload.java` (UPDATE)
 - `src/main/java/com/tictactore/event/TournamentInviteCreatedEvent.java` (NEW)
 - `src/main/java/com/tictactore/event/TournamentInviteAcceptedEvent.java` (NEW)
 - `src/main/java/com/tictactore/event/TournamentInviteDeclinedEvent.java` (NEW)
+- `src/main/java/com/tictactore/event/TournamentRegistrationCancelledEvent.java` (NEW)
+- `src/main/java/com/tictactore/exception/TournamentConflictException.java` (NEW)
+- `src/main/java/com/tictactore/exception/GlobalExceptionHandler.java` (UPDATE)
 - `src/main/java/com/tictactore/listener/TournamentRegistrationNotificationListener.java` (NEW)
 - `src/main/java/com/tictactore/service/TournamentRegistrationService.java` (NEW)
 - `src/main/java/com/tictactore/service/TournamentRegistrationServiceImpl.java` (NEW)
@@ -320,18 +325,30 @@ Gemini 3.7 Flash
 - `src/test/java/com/tictactore/controller/TournamentRegistrationControllerTest.java` (NEW)
 - `src/test/java/com/tictactore/repository/TournamentRegistrationRepositoryTest.java` (NEW)
 - `src/test/java/com/tictactore/listener/TournamentRegistrationNotificationListenerTest.java` (NEW)
+- `src/test/java/com/tictactore/service/PushNotificationServiceTest.java` (UPDATE)
+- `src/test/java/com/tictactore/exception/GlobalExceptionHandlerTest.java` (UPDATE)
 - `frontend/src/features/tournament/stores/__tests__/tournamentRegistrationStore.spec.ts` (NEW)
 - `frontend/src/features/tournament/components/__tests__/TournamentRegistrationModal.spec.ts` (NEW)
 - `frontend/src/features/tournament/components/__tests__/TournamentInviteModal.spec.ts` (NEW)
 - `frontend/e2e/tournament-registration.spec.ts` (NEW)
 
 ### Review Findings
-- [ ] [Review][Patch] Отсутствие уведомления при отмене регистрации — Если один из участников отменяет регистрацию команды, второму не приходит пуш-уведомление. Это не описано в AC, но логически выглядит как недоработка.
-- [ ] [Review][Patch] Состояние гонки при проверке вместимости турнира (Overbooking) [TournamentRegistrationServiceImpl.java:227]
-- [ ] [Review][Patch] Состояние гонки: один пользователь может быть и player, и partner в двух разных командах одновременно [TournamentRegistrationServiceImpl.java:222]
-- [ ] [Review][Patch] Неверный HTTP-статус при отсутствии партнера (404 вместо ожидаемого 400 по AC6) [TournamentRegistrationServiceImpl.java:57]
-- [ ] [Review][Patch] Опасный перехват IllegalStateException с отдачей статуса 409 [GlobalExceptionHandler.java:84]
-- [ ] [Review][Patch] Нарушена структура конструктора в PushNotificationPayload при добавлении tournamentId [PushNotificationPayload.java:30]
-- [ ] [Review][Patch] Несоответствие URL в пуш-уведомлениях об отклонении инвайта [PushNotificationServiceImpl.java:556]
+- [x] [Review][Patch] Отсутствие уведомления при отмене регистрации — Если один из участников отменяет регистрацию команды, второму не приходит пуш-уведомление. Это не описано в AC, но логически выглядит как недоработка.
+- [x] [Review][Patch] Состояние гонки при проверке вместимости турнира (Overbooking) [TournamentRegistrationServiceImpl.java:227]
+- [x] [Review][Patch] Состояние гонки: один пользователь может быть и player, и partner в двух разных командах одновременно [TournamentRegistrationServiceImpl.java:222]
+- [x] [Review][Patch] Неверный HTTP-статус при отсутствии партнера (404 вместо ожидаемого 400 по AC6) [TournamentRegistrationServiceImpl.java:57]
+- [x] [Review][Patch] Опасный перехват IllegalStateException с отдачей статуса 409 [GlobalExceptionHandler.java:84]
+- [x] [Review][Patch] Нарушена структура конструктора в PushNotificationPayload при добавлении tournamentId [PushNotificationPayload.java:30]
+- [x] [Review][Patch] Несоответствие URL в пуш-уведомлениях об отклонении инвайта [PushNotificationServiceImpl.java:556]
 - [x] [Review][Defer] Отсутствие пагинации в listRegistrations [TournamentRegistrationServiceImpl.java:148] — deferred, pre-existing
 - [x] [Review][Defer] Игнорирование исключений при отправке пушей в Listener [TournamentRegistrationNotificationListener.java:37] — deferred, pre-existing
+
+### Change Log
+- 2026-09-01: Addressed code review findings - 7 items resolved:
+  - Added push notification & domain event `TournamentRegistrationCancelledEvent` on team registration cancellation
+  - Resolved capacity check race condition using `findByIdWithLock` (PESSIMISTIC_WRITE) on `Tournament`
+  - Resolved concurrent dual-role registration race condition with locking and validation in `acceptInvitation`
+  - Fixed HTTP status code to 400 Bad Request when partner user does not exist (AC6)
+  - Replaced dangerous global `IllegalStateException` handler with `TournamentConflictException`
+  - Added Lombok `@Builder` on `PushNotificationPayload` record
+  - Fixed URL deep link to `/tournaments?tournamentId={id}` in tournament invite declined push notification

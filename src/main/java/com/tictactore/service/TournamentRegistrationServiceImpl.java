@@ -6,7 +6,9 @@ import com.tictactore.dto.TournamentRegistrationResponse;
 import com.tictactore.event.TournamentInviteAcceptedEvent;
 import com.tictactore.event.TournamentInviteCreatedEvent;
 import com.tictactore.event.TournamentInviteDeclinedEvent;
+import com.tictactore.event.TournamentRegistrationCancelledEvent;
 import com.tictactore.exception.ResourceNotFoundException;
+import com.tictactore.exception.TournamentConflictException;
 import com.tictactore.model.RegistrationStatus;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentMode;
@@ -41,7 +43,7 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
 
     @Override
     public TournamentRegistrationResponse register(UUID tournamentId, UUID playerId, RegisterTournamentRequest request) {
-        var tournament = tournamentRepository.findById(tournamentId)
+        var tournament = tournamentRepository.findByIdWithLock(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament", tournamentId.toString()));
 
         validateTournamentOpenForRegistration(tournament);
@@ -55,7 +57,7 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
         User partner = null;
         if (request.partnerId() != null) {
             partner = userRepository.findById(request.partnerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User", request.partnerId().toString()));
+                    .orElseThrow(() -> new IllegalArgumentException("Partner not found: " + request.partnerId()));
         }
 
         var status = tournament.getMode() == TournamentMode.TWO_VS_TWO_FIXED_TEAMS
@@ -91,8 +93,13 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
                 .orElseThrow(() -> new ResourceNotFoundException("TournamentRegistration", registrationId.toString()));
 
         validateRegistrationTournament(registration, tournamentId);
-        validateTournamentOpenForRegistration(registration.getTournament());
-        validateCapacity(registration.getTournament());
+
+        var tournament = tournamentRepository.findByIdWithLock(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament", tournamentId.toString()));
+
+        validateTournamentOpenForRegistration(tournament);
+        validateCapacity(tournament);
+        validatePartnerNoConfirmedRegistration(tournamentId, partnerId, registrationId);
 
         registration.accept(partnerId);
         var saved = registrationRepository.save(registration);
@@ -139,8 +146,29 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
         validateRegistrationTournament(registration, tournamentId);
         validateTournamentOpenForRegistration(registration.getTournament());
 
+        User notifyRecipient = null;
+        String cancellerName = null;
+        if (registration.getPlayer() != null && registration.getPlayer().getId().equals(userId)) {
+            cancellerName = registration.getPlayer().getNickname();
+            notifyRecipient = registration.getPartner();
+        } else if (registration.getPartner() != null && registration.getPartner().getId().equals(userId)) {
+            cancellerName = registration.getPartner().getNickname();
+            notifyRecipient = registration.getPlayer();
+        }
+
         registration.cancel(userId);
-        registrationRepository.save(registration);
+        var saved = registrationRepository.save(registration);
+
+        if (notifyRecipient != null) {
+            eventPublisher.publishEvent(new TournamentRegistrationCancelledEvent(
+                    saved.getId(),
+                    tournamentId,
+                    saved.getTournament().getName(),
+                    userId,
+                    cancellerName != null ? cancellerName : "Teammate",
+                    notifyRecipient.getId()
+            ));
+        }
     }
 
     @Override
@@ -192,7 +220,7 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
 
     private void validateTournamentOpenForRegistration(Tournament tournament) {
         if (tournament.getStatus() != TournamentStatus.REGISTRATION_OPEN) {
-            throw new IllegalStateException("Tournament is not open for registration");
+            throw new TournamentConflictException("Tournament is not open for registration");
         }
         if (tournament.getRegistrationDeadline() != null && Instant.now().isAfter(tournament.getRegistrationDeadline())) {
             throw new IllegalArgumentException("Tournament registration deadline has passed");
@@ -217,17 +245,24 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
     private void validateNoActiveRegistration(UUID tournamentId, UUID playerId, UUID partnerId) {
         var activeStatuses = Set.of(RegistrationStatus.PENDING_CONFIRMATION, RegistrationStatus.CONFIRMED);
         if (registrationRepository.findActiveUserRegistration(tournamentId, playerId, activeStatuses).isPresent()) {
-            throw new IllegalStateException("User already has an active registration for this tournament");
+            throw new TournamentConflictException("User already has an active registration for this tournament");
         }
         if (partnerId != null && registrationRepository.findActiveUserRegistration(tournamentId, partnerId, activeStatuses).isPresent()) {
-            throw new IllegalStateException("Partner already has an active registration for this tournament");
+            throw new TournamentConflictException("Partner already has an active registration for this tournament");
+        }
+    }
+
+    private void validatePartnerNoConfirmedRegistration(UUID tournamentId, UUID partnerId, UUID registrationId) {
+        var confirmed = registrationRepository.findActiveUserRegistration(tournamentId, partnerId, Set.of(RegistrationStatus.CONFIRMED));
+        if (confirmed.isPresent() && !confirmed.get().getId().equals(registrationId)) {
+            throw new TournamentConflictException("Partner already has an active confirmed registration for this tournament");
         }
     }
 
     private void validateCapacity(Tournament tournament) {
         long confirmedCount = registrationRepository.countByTournamentIdAndStatus(tournament.getId(), RegistrationStatus.CONFIRMED);
         if (confirmedCount >= tournament.getMaxParticipants()) {
-            throw new IllegalStateException("Tournament has reached maximum participant capacity");
+            throw new TournamentConflictException("Tournament has reached maximum participant capacity");
         }
     }
 
