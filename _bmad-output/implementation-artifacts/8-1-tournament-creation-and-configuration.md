@@ -205,6 +205,15 @@ so that I can set up a structured competition and invite participants.
   - **Strict AAA Pattern:** All test methods adhere to Arrange-Act-Assert separated by a single blank line, with zero structural comments (`// Given`, `// When`, `// Then` are strictly forbidden).
   - Integration tests end with `IT` or `ATDDTest` / `Test` for unit tests.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-8-1-tournament-creation-and-configuration.md`
+- **Backend API Scaffolds:** `_bmad-output/test-artifacts/atdd-redphase-8-1/TournamentControllerATDDTest.java`
+- **Frontend E2E Scaffolds:** `frontend/e2e/tournament-creation.spec.ts`
+- **Frontend Store Scaffolds:** `_bmad-output/test-artifacts/atdd-redphase-8-1/useTournamentStore.spec.ts`
+- **Frontend Component Scaffolds:** `_bmad-output/test-artifacts/atdd-redphase-8-1/CreateTournamentModal.spec.ts`
+- **Fixtures:** `frontend/e2e/fixtures/tournament-data.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md#FR41]
