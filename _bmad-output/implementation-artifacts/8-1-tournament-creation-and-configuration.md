@@ -4,7 +4,7 @@ baseline_commit: c889be5256bccf1ad6a66f2d0c4a41a157409e39
 
 # Story 8.1: Tournament Creation & Configuration
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Comprehensive story context validated and optimized for dev-story execution. -->
 
@@ -170,6 +170,23 @@ so that I can set up a structured competition and invite participants.
       - Test 2: Form validation prevents submission with blank name or past deadline.
       - Test 3: 2v2 modes require minimum 4 participants.
   - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+
+### Review Findings
+
+- [ ] [Review][Patch] Mocked Validation in ATDD Tests [`TournamentControllerATDDTest.java`]
+- [ ] [Review][Patch] Missing Unauthenticated Test Coverage [`TournamentControllerATDDTest.java`]
+- [ ] [Review][Patch] Missing Backend Validation Tests for AC4 Constraints [`TournamentControllerATDDTest.java`]
+- [ ] [Review][Patch] Missing Test for Creator Lookup Failure [`TournamentControllerATDDTest.java`]
+- [ ] [Review][Patch] E2E Tests Miss Required Fields & Contradict Descriptions [`frontend/e2e/tournament-creation.spec.ts`]
+- [ ] [Review][Patch] Broken Frontend Date Formatting in Component Tests [`CreateTournamentModal.spec.ts`]
+- [ ] [Review][Patch] Component Test Fails to Assert Emitted Payload [`CreateTournamentModal.spec.ts`]
+- [ ] [Review][Patch] Store Lacks Error State Handling Tests [`useTournamentStore.spec.ts`]
+- [ ] [Review][Patch] Missing Conditional Validation for Championships [`8-1-tournament-creation-and-configuration.md`]
+- [x] [Review][Defer] Contradictory Tournament States Allowed [`TournamentControllerATDDTest.java`] — deferred, pre-existing
+- [x] [Review][Defer] Incomplete Indexing Strategy [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] No Guardrails on Participant Limits [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] Weak String Validation [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] Boolean Unboxing Risk [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
 
 ## Dev Notes
 

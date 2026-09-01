@@ -449,3 +449,10 @@ status: open
 - InsightController fetches user by email on every request [InsightController.java:72]
 - InsightMatchUtils assumes winsA > winsB ignoring draws [InsightMatchUtils.java:22]
 - isAnonymous uses magic string [InsightController.java:64]
+
+## Deferred from: code review of 8-1-tournament-creation-and-configuration (2026-09-01)
+- [x] [Review][Defer] Contradictory Tournament States Allowed [`TournamentControllerATDDTest.java`] — deferred, pre-existing
+- [x] [Review][Defer] Incomplete Indexing Strategy [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] No Guardrails on Participant Limits [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] Weak String Validation [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
+- [x] [Review][Defer] Boolean Unboxing Risk [`8-1-tournament-creation-and-configuration.md`] — deferred, pre-existing
