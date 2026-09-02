@@ -2,6 +2,7 @@ package com.tictactore.repository;
 
 import com.tictactore.model.TournamentMatch;
 import com.tictactore.model.TournamentMatchStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +14,30 @@ import java.util.UUID;
 @Repository
 public interface TournamentMatchRepository extends JpaRepository<TournamentMatch, UUID> {
 
+    @EntityGraph(attributePaths = {
+            "tournament",
+            "participant1",
+            "participant1.player",
+            "participant1.partner",
+            "participant2",
+            "participant2.player",
+            "participant2.partner",
+            "winner",
+            "nextMatch"
+    })
     List<TournamentMatch> findByTournamentIdOrderByRoundAscMatchOrderAsc(UUID tournamentId);
 
+    @EntityGraph(attributePaths = {
+            "tournament",
+            "participant1",
+            "participant1.player",
+            "participant1.partner",
+            "participant2",
+            "participant2.player",
+            "participant2.partner",
+            "winner",
+            "nextMatch"
+    })
     List<TournamentMatch> findByTournamentIdAndRoundOrderByMatchOrderAsc(UUID tournamentId, int round);
 
     List<TournamentMatch> findByTournamentIdAndStatus(UUID tournamentId, TournamentMatchStatus status);

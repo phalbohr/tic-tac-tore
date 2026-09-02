@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { TournamentBracketDto } from '@/features/tournament/types/tournament';
+import { useI18n } from 'vue-i18n';
+import type { TournamentBracketDto, RoundMatchesDto } from '@/features/tournament/types/tournament';
 import TournamentMatchCard from './TournamentMatchCard.vue';
 
 interface Props {
@@ -8,7 +9,19 @@ interface Props {
 }
 
 defineProps<Props>();
+const { t, te } = useI18n();
 const activeRound = ref(1);
+
+function getRoundDisplayName(round: RoundMatchesDto): string {
+  try {
+    if (te('tournament.bracket.round')) {
+      return t('tournament.bracket.round', { round: round.round });
+    }
+  } catch {
+    // Fallback for tests mounted without i18n
+  }
+  return round.roundName || `Round ${round.round}`;
+}
 </script>
 
 <template>
@@ -34,7 +47,7 @@ const activeRound = ref(1);
         :class="activeRound === round.round ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface hover:bg-surface-container'"
         @click="activeRound = round.round"
       >
-        {{ round.roundName }}
+        {{ getRoundDisplayName(round) }}
       </button>
     </div>
 

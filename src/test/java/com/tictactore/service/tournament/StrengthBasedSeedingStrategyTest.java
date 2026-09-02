@@ -139,6 +139,87 @@ class StrengthBasedSeedingStrategyTest {
         assertThat(result.get(1).strengthScore()).isEqualTo(0.5);
     }
 
+    @Test
+    void shouldSeedZeroMatchParticipantsBelowParticipantsWithMatchHistoryEvenWithZeroWins() {
+        var zeroMatchRegisteredFirst = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .player(player1)
+                .createdAt(Instant.parse("2026-09-01T08:00:00Z"))
+                .build();
+        var zeroWinsRegisteredSecond = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .player(player2)
+                .createdAt(Instant.parse("2026-09-01T09:00:00Z"))
+                .build();
+
+        when(matchRepository.findConfirmedMatchesByPlayerId(player1.getId())).thenReturn(List.of());
+        when(matchRepository.findConfirmedMatchesByPlayerId(player2.getId()))
+                .thenReturn(List.of(createMatch(UUID.randomUUID(), player2.getId(), 5, 2)));
+
+        var result = seedingStrategy.seed(tournament1v1, List.of(zeroMatchRegisteredFirst, zeroWinsRegisteredSecond));
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).registration().getId()).isEqualTo(zeroWinsRegisteredSecond.getId());
+        assertThat(result.get(0).seed()).isEqualTo(1);
+        assertThat(result.get(1).registration().getId()).isEqualTo(zeroMatchRegisteredFirst.getId());
+        assertThat(result.get(1).seed()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldNotPenalize2v2TeamWhenOnePartnerHasNoMatchHistory() {
+        User partner1 = User.builder().id(UUID.randomUUID()).nickname("NewbiePartner").build();
+        Tournament tournament2v2 = Tournament.builder()
+                .id(UUID.randomUUID())
+                .mode(TournamentMode.TWO_VS_TWO_FIXED_TEAMS)
+                .build();
+        var team = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .player(player1)
+                .partner(partner1)
+                .createdAt(Instant.parse("2026-09-01T10:00:00Z"))
+                .build();
+
+        when(matchRepository.findConfirmedMatchesByPlayerId(player1.getId()))
+                .thenReturn(List.of(createMatch(player1.getId(), UUID.randomUUID(), 5, 0)));
+        when(matchRepository.findConfirmedMatchesByPlayerId(partner1.getId()))
+                .thenReturn(List.of());
+
+        var result = seedingStrategy.seed(tournament2v2, List.of(team));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).seed()).isEqualTo(1);
+        assertThat(result.get(0).strengthScore()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldPreferPlayerMatchStatsProjectionWhenAvailable() {
+        var reg1 = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .player(player1)
+                .createdAt(Instant.parse("2026-09-01T10:00:00Z"))
+                .build();
+
+        com.tictactore.repository.projection.PlayerMatchStatsProjection mockProjection =
+                new com.tictactore.repository.projection.PlayerMatchStatsProjection() {
+                    @Override
+                    public long getTotalMatches() {
+                        return 10;
+                    }
+
+                    @Override
+                    public long getWins() {
+                        return 8;
+                    }
+                };
+        when(matchRepository.getPlayerMatchStats(player1.getId())).thenReturn(mockProjection);
+
+        var result = seedingStrategy.seed(tournament1v1, List.of(reg1));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).seed()).isEqualTo(1);
+        assertThat(result.get(0).strengthScore()).isEqualTo(0.8);
+    }
+
     private Match createMatch(UUID winnerId, UUID loserId, int winScore, int loseScore) {
         Match match = Match.builder()
                 .id(UUID.randomUUID())

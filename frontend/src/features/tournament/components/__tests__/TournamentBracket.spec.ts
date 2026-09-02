@@ -1,7 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import TournamentBracket from '@/features/tournament/components/TournamentBracket.vue';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string, params?: { round?: number }) => {
+      if (key === 'tournament.bracket.final') return 'Final';
+      if (key === 'tournament.bracket.semifinals') return 'Semifinals';
+      if (key === 'tournament.bracket.quarterfinals') return 'Quarterfinals';
+      if (key === 'tournament.bracket.round') return `Round ${params?.round}`;
+      return key;
+    },
+    te: () => true,
+  }),
+}));
 
 describe('TournamentBracket.vue (Story 8.3)', () => {
   beforeEach(() => {

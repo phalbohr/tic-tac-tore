@@ -113,6 +113,17 @@ class CupBracketGeneratorTest {
         assertThat(semi2.getStatus()).isEqualTo(TournamentMatchStatus.PENDING);
     }
 
+    @Test
+    void shouldHandleBoundaryParticipantCountsWithoutOverflow() {
+        var twoParticipants = createParticipants(2);
+
+        var matches = bracketGenerator.generateBracket(tournament, twoParticipants);
+
+        assertThat(matches).hasSize(1);
+        assertThat(matches.get(0).getRound()).isEqualTo(1);
+        assertThat(matches.get(0).getStatus()).isEqualTo(TournamentMatchStatus.READY);
+    }
+
     private List<SeededParticipant> createParticipants(int count) {
         List<SeededParticipant> list = new ArrayList<>();
         for (int i = 1; i <= count; i++) {

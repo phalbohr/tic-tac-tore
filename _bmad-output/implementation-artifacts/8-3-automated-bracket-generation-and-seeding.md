@@ -1,6 +1,6 @@
 ---
 baseline_commit: 6951f59f8e762a282a5d8086d901a8431d2cad0c
-status: in-progress
+status: review
 ---
 
 # Story 8.3: Automated Bracket Generation & Seeding
@@ -334,13 +334,13 @@ Gemini 3.7 Flash
 
 ### Review Findings
 
-- [ ] [Review][Patch] N+1 Query on Bracket Load [TournamentMatchQueryServiceImpl.java:50-54]
-- [ ] [Review][Patch] Memory-Crushing Strength Calculation [StrengthBasedSeedingStrategy.java:73]
-- [ ] [Review][Patch] Invalid 2v2 Win Rate Averaging [StrengthBasedSeedingStrategy.java:64]
-- [ ] [Review][Patch] Ghost BYEs in Championship Mode [ChampionshipBracketGenerator.java:38-40]
-- [ ] [Review][Patch] Pointless Manual Saves [TournamentLifecycleServiceImpl.java:78-80]
-- [ ] [Review][Patch] Hardcoded English Presentation Logic [TournamentMatchQueryServiceImpl.java:101-112]
-- [ ] [Review][Patch] Infinite loop on bit shift overflow [CupBracketGenerator.java:50-54]
-- [ ] [Review][Patch] Incorrect seeding priority for zero-match participants [StrengthBasedSeedingStrategy.java:114]
-- [ ] [Review][Patch] JPA Transient Persistence exception on bracket save [TournamentMatch.java:79]
+- [x] [Review][Patch] N+1 Query on Bracket Load [TournamentMatchQueryServiceImpl.java:50-54]
+- [x] [Review][Patch] Memory-Crushing Strength Calculation [StrengthBasedSeedingStrategy.java:73]
+- [x] [Review][Patch] Invalid 2v2 Win Rate Averaging [StrengthBasedSeedingStrategy.java:64]
+- [x] [Review][Patch] Ghost BYEs in Championship Mode [ChampionshipBracketGenerator.java:38-40]
+- [x] [Review][Patch] Pointless Manual Saves [TournamentLifecycleServiceImpl.java:78-80]
+- [x] [Review][Patch] Hardcoded English Presentation Logic [TournamentMatchQueryServiceImpl.java:101-112]
+- [x] [Review][Patch] Infinite loop on bit shift overflow [CupBracketGenerator.java:50-54]
+- [x] [Review][Patch] Incorrect seeding priority for zero-match participants [StrengthBasedSeedingStrategy.java:114]
+- [x] [Review][Patch] JPA Transient Persistence exception on bracket save [TournamentMatch.java:79]
 - [x] [Review][Defer] Untestable Random Seeding [RandomSeedingStrategy.java:20] — deferred, pre-existing

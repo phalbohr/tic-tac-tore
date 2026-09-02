@@ -47,10 +47,13 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         List<TournamentRegistration> registrations =
                 registrationRepository.findByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED);
 
+        Map<UUID, TournamentRegistrationResponse> registrationMap = registrations.stream()
+                .collect(Collectors.toMap(TournamentRegistration::getId, this::mapToRegistrationResponse, (a, b) -> a, java.util.HashMap::new));
+
         List<TournamentRegistrationResponse> seededParticipants = registrations.stream()
                 .filter(r -> r.getSeed() != null)
                 .sorted(Comparator.comparingInt(TournamentRegistration::getSeed))
-                .map(this::mapToRegistrationResponse)
+                .map(r -> registrationMap.get(r.getId()))
                 .toList();
 
         Map<Integer, List<TournamentMatch>> matchesByRound = allMatches.stream()
@@ -62,7 +65,7 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         for (Map.Entry<Integer, List<TournamentMatch>> entry : matchesByRound.entrySet()) {
             int roundNumber = entry.getKey();
             List<TournamentMatchResponse> matchResponses = entry.getValue().stream()
-                    .map(this::mapToMatchResponse)
+                    .map(m -> mapToMatchResponse(m, registrationMap))
                     .toList();
 
             String roundName = resolveRoundName(roundNumber, totalRounds, tournament.getFormat());
@@ -95,7 +98,8 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 ? tournamentMatchRepository.findByTournamentIdAndRoundOrderByMatchOrderAsc(tournamentId, round)
                 : tournamentMatchRepository.findByTournamentIdOrderByRoundAscMatchOrderAsc(tournamentId);
 
-        return matches.stream().map(this::mapToMatchResponse).toList();
+        Map<UUID, TournamentRegistrationResponse> registrationMap = new java.util.HashMap<>();
+        return matches.stream().map(m -> mapToMatchResponse(m, registrationMap)).toList();
     }
 
     private String resolveRoundName(int round, int totalRounds, TournamentFormat format) {
@@ -111,15 +115,25 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         return "Round " + round;
     }
 
-    private TournamentMatchResponse mapToMatchResponse(TournamentMatch match) {
+    private TournamentMatchResponse mapToMatchResponse(
+            TournamentMatch match,
+            Map<UUID, TournamentRegistrationResponse> registrationMap
+    ) {
+        TournamentRegistrationResponse part1 = match.getParticipant1() != null
+                ? registrationMap.computeIfAbsent(match.getParticipant1().getId(), k -> mapToRegistrationResponse(match.getParticipant1()))
+                : null;
+        TournamentRegistrationResponse part2 = match.getParticipant2() != null
+                ? registrationMap.computeIfAbsent(match.getParticipant2().getId(), k -> mapToRegistrationResponse(match.getParticipant2()))
+                : null;
+
         return TournamentMatchResponse.builder()
                 .id(match.getId())
                 .tournamentId(match.getTournament().getId())
                 .round(match.getRound())
                 .matchOrder(match.getMatchOrder())
                 .matchId(match.getMatch() != null ? match.getMatch().getId() : null)
-                .participant1(match.getParticipant1() != null ? mapToRegistrationResponse(match.getParticipant1()) : null)
-                .participant2(match.getParticipant2() != null ? mapToRegistrationResponse(match.getParticipant2()) : null)
+                .participant1(part1)
+                .participant2(part2)
                 .seed1(match.getSeed1())
                 .seed2(match.getSeed2())
                 .status(match.getStatus())

@@ -94,9 +94,6 @@ public class TournamentLifecycleServiceImpl implements TournamentLifecycleServic
         tournament.setStatus(TournamentStatus.IN_PROGRESS);
 
         var seededParticipants = seedingStrategy.seed(tournament, confirmedRegistrations);
-        for (var seeded : seededParticipants) {
-            registrationRepository.save(seeded.registration());
-        }
 
         BracketGenerator generator = (tournament.getFormat() == TournamentFormat.CHAMPIONSHIP)
                 ? championshipBracketGenerator

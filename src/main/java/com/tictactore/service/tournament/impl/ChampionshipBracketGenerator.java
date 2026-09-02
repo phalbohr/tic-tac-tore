@@ -52,6 +52,20 @@ public class ChampionshipBracketGenerator implements BracketGenerator {
                             .status(round == 1 ? TournamentMatchStatus.READY : TournamentMatchStatus.PENDING)
                             .build();
                     matches.add(match);
+                } else if (p1 != null || p2 != null) {
+                    SeededParticipant present = (p1 != null) ? p1 : p2;
+                    TournamentMatch byeMatch = TournamentMatch.builder()
+                            .tournament(tournament)
+                            .round(round)
+                            .matchOrder(matchOrder++)
+                            .participant1(present.registration())
+                            .participant2(null)
+                            .seed1(present.seed())
+                            .seed2(null)
+                            .status(TournamentMatchStatus.BYE)
+                            .winner(present.registration())
+                            .build();
+                    matches.add(byeMatch);
                 }
             }
             rotateSlots(slots);

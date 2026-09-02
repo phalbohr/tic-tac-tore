@@ -1,5 +1,6 @@
 package com.tictactore.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -74,7 +75,7 @@ public class TournamentMatch {
     @JoinColumn(name = "winner_id")
     private TournamentRegistration winner;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "next_match_id")
     private TournamentMatch nextMatch;
 

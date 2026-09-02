@@ -47,11 +47,14 @@ public class CupBracketGenerator implements BracketGenerator {
     }
 
     private int calculateSmallestPowerOfTwo(int n) {
-        int power = 1;
-        while (power < n) {
-            power <<= 1;
+        if (n <= 2) {
+            return 2;
         }
-        return Math.max(2, power);
+        if (n > (1 << 30)) {
+            throw new IllegalArgumentException("Participant count exceeds maximum supported bracket size: " + n);
+        }
+        int highestOneBit = Integer.highestOneBit(n);
+        return (n == highestOneBit) ? n : (highestOneBit << 1);
     }
 
     private Map<String, TournamentMatch> initializeMatchTree(Tournament tournament, int totalRounds, int bracketSize) {

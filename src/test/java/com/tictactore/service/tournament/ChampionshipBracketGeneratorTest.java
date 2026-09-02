@@ -63,10 +63,11 @@ class ChampionshipBracketGeneratorTest {
 
         List<TournamentMatch> matches = bracketGenerator.generateBracket(tournament, participants);
 
-        assertThat(matches).hasSize(3);
-        assertThat(matches.stream().filter(m -> m.getRound() == 1)).hasSize(1);
-        assertThat(matches.stream().filter(m -> m.getRound() == 2)).hasSize(1);
-        assertThat(matches.stream().filter(m -> m.getRound() == 3)).hasSize(1);
+        assertThat(matches).hasSize(6);
+        assertThat(matches.stream().filter(m -> m.getRound() == 1)).hasSize(2);
+        assertThat(matches.stream().filter(m -> m.getRound() == 2)).hasSize(2);
+        assertThat(matches.stream().filter(m -> m.getRound() == 3)).hasSize(2);
+        assertThat(matches.stream().filter(m -> m.getStatus() == TournamentMatchStatus.BYE)).hasSize(3);
     }
 
     private List<SeededParticipant> createParticipants(int count) {

@@ -4,6 +4,7 @@ import com.tictactore.model.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import com.tictactore.repository.projection.PlayerMatchStatsProjection;
 import com.tictactore.repository.projection.TeamPairStatsProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -272,4 +273,25 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
         AND (m.teamAAttackerId = :userId OR m.teamADefenderId = :userId OR m.teamBAttackerId = :userId OR m.teamBDefenderId = :userId)
         """)
     List<Match> findConfirmedMatchesByPlayerId(@Param("userId") UUID userId);
+
+    @Query(value = """
+        SELECT
+            COUNT(DISTINCT m.id) AS totalMatches,
+            COUNT(DISTINCT CASE
+                WHEN (m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId)
+                     AND COALESCE(g_a.wins, 0) > COALESCE(g_b.wins, 0) THEN m.id
+                WHEN (m.team_b_attacker_id = :userId OR m.team_b_defender_id = :userId)
+                     AND COALESCE(g_b.wins, 0) > COALESCE(g_a.wins, 0) THEN m.id
+            END) AS wins
+        FROM match m
+        LEFT JOIN (
+            SELECT match_id, COUNT(*) AS wins FROM game WHERE team_a_score > team_b_score GROUP BY match_id
+        ) g_a ON g_a.match_id = m.id
+        LEFT JOIN (
+            SELECT match_id, COUNT(*) AS wins FROM game WHERE team_b_score > team_a_score GROUP BY match_id
+        ) g_b ON g_b.match_id = m.id
+        WHERE m.status IN ('CONFIRMED', 'PUBLISHED')
+          AND (m.team_a_attacker_id = :userId OR m.team_a_defender_id = :userId OR m.team_b_attacker_id = :userId OR m.team_b_defender_id = :userId)
+        """, nativeQuery = true)
+    PlayerMatchStatsProjection getPlayerMatchStats(@Param("userId") UUID userId);
 }
