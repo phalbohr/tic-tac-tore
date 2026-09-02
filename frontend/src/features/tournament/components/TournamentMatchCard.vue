@@ -9,6 +9,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { t, te } = useI18n();
+
 const isBye = computed(() => props.match.status === 'BYE');
 
 const participant1Name = computed(() => {
@@ -33,13 +35,8 @@ const participant2Name = computed(() => {
 });
 
 const stubLabel = computed(() => {
-  try {
-    const { t, te } = useI18n();
-    if (te('tournament.stub_partner')) {
-      return t('tournament.stub_partner');
-    }
-  } catch {
-    // Fallback for environments mounted without i18n
+  if (te('tournament.stub_partner')) {
+    return t('tournament.stub_partner');
   }
   return 'Stub';
 });
