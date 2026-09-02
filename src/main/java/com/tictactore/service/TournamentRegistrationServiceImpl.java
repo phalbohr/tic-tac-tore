@@ -284,6 +284,8 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
                 .partnerNickname(reg.getPartner() != null ? reg.getPartner().getNickname() : null)
                 .partnerAvatarUrl(reg.getPartner() != null ? reg.getPartner().getAvatar() : null)
                 .status(reg.getStatus())
+                .seed(reg.getSeed())
+                .strengthScore(reg.getStrengthScore())
                 .createdAt(reg.getCreatedAt() != null ? reg.getCreatedAt().atOffset(ZoneOffset.UTC) : null)
                 .updatedAt(reg.getUpdatedAt() != null ? reg.getUpdatedAt().atOffset(ZoneOffset.UTC) : null)
                 .build();

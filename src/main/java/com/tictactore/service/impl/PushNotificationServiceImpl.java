@@ -612,6 +612,91 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendTournamentStartedNotification(
+            UUID tournamentId,
+            String tournamentName,
+            User recipient
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = tournamentName + " has started! Your initial matches are ready.";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = PushNotificationPayload.builder()
+                .tournamentId(tournamentId)
+                .type("TOURNAMENT_STARTED")
+                .creatorName("System")
+                .summary(summary)
+                .url("/tournaments?tournamentId=" + tournamentId)
+                .isDuplicateWarning(false)
+                .timestamp(timestamp)
+                .build();
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament started push notification payload for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_STARTED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_STARTED", jsonPayload);
+        }
+    }
+
+    @Override
+    public void sendTournamentCancelledNotification(
+            UUID tournamentId,
+            String tournamentName,
+            String reason,
+            User recipient
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = tournamentName + " has been cancelled. Reason: " + reason;
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = PushNotificationPayload.builder()
+                .tournamentId(tournamentId)
+                .type("TOURNAMENT_CANCELLED")
+                .creatorName("System")
+                .summary(summary)
+                .url("/tournaments?tournamentId=" + tournamentId)
+                .isDuplicateWarning(false)
+                .timestamp(timestamp)
+                .build();
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament cancelled push notification payload for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_CANCELLED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_CANCELLED", jsonPayload);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {

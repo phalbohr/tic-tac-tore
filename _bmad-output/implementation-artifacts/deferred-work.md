@@ -460,3 +460,6 @@ status: open
 ## Deferred from: code review of 8-2-team-registration-and-confirmation (2026-09-01)
 - Отсутствие пагинации в listRegistrations [TournamentRegistrationServiceImpl.java:148] — Возвращает все записи сразу, что может стать проблемой при высокой нагрузке. Отложено, так как не является ошибкой в рамках текущего AC.
 - Игнорирование исключений при отправке пушей в Listener [TournamentRegistrationNotificationListener.java:37] — Silent Failures, нет механизма повторной отправки (retry) при сбое сети. Отложено, так как это системная проблема архитектуры пушей, а не только этого стори.
+
+## Deferred from: code review of 8-3-automated-bracket-generation-and-seeding (2026-09-02)
+- Untestable Random Seeding [RandomSeedingStrategy.java:20]: `RandomSeedingStrategy` uses `Collections.shuffle()`, relying on a static pseudo-random number generator. This prevents providing a fixed seed for deterministic unit tests.

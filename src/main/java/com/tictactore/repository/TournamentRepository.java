@@ -25,4 +25,6 @@ public interface TournamentRepository extends JpaRepository<Tournament, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Tournament t WHERE t.id = :id")
     Optional<Tournament> findByIdWithLock(@Param("id") UUID id);
+
+    List<Tournament> findByStatusAndRegistrationDeadlineLessThanEqual(TournamentStatus status, java.time.Instant deadline);
 }

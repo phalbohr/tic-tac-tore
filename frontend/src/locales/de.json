@@ -449,6 +449,26 @@
     "withdraw": "Abmelden",
     "accept": "Annehmen",
     "decline": "Ablehnen",
+    "viewBracket": "Turnierbaum anzeigen",
+    "viewSchedule": "Spielplan anzeigen",
+    "startTournament": "Turnier starten",
+    "startedSuccess": "Turnier erfolgreich gestartet!",
+    "bracket": {
+      "title": "Turnierbaum",
+      "round": "Runde {round}",
+      "final": "Finale",
+      "semifinals": "Halbfinale",
+      "quarterfinals": "Viertelfinale",
+      "bye": "FREILOS",
+      "ready": "BEREIT",
+      "live": "LIVE",
+      "completed": "BEENDET",
+      "pending": "AUSSTEHEND"
+    },
+    "schedule": {
+      "title": "Turnier-Spielplan",
+      "roundSelector": "Runde wählen"
+    },
     "pendingInvitationsTitle": "Ausstehende Turniereinladungen",
     "noPendingInvitations": "Keine ausstehenden Einladungen.",
     "registration": {

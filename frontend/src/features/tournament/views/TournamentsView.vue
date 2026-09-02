@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTournamentStore } from '@/features/tournament/stores/tournamentStore';
 import type {
@@ -9,6 +9,8 @@ import type {
 } from '@/features/tournament/types/tournament';
 import TournamentRegistrationModal from '@/features/tournament/components/TournamentRegistrationModal.vue';
 import TournamentInviteModal from '@/features/tournament/components/TournamentInviteModal.vue';
+import TournamentBracket from '@/features/tournament/components/TournamentBracket.vue';
+import TournamentSchedule from '@/features/tournament/components/TournamentSchedule.vue';
 
 const { t } = useI18n();
 const tournamentStore = useTournamentStore();
@@ -18,6 +20,14 @@ const isRegistrationModalOpen = ref(false);
 
 const selectedInvite = ref<TournamentRegistrationDto | null>(null);
 const isInviteModalOpen = ref(false);
+
+const activeBracketTournament = ref<TournamentDto | null>(null);
+const isBracketModalOpen = ref(false);
+
+const activeBracket = computed(() => {
+  if (!activeBracketTournament.value) return null;
+  return tournamentStore.brackets[activeBracketTournament.value.id] ?? null;
+});
 
 const toastMessage = ref('');
 const isSubmitting = ref(false);
@@ -48,6 +58,29 @@ function openRegistration(tourn: TournamentDto) {
 function openInvite(invite: TournamentRegistrationDto) {
   selectedInvite.value = invite;
   isInviteModalOpen.value = true;
+}
+
+async function openBracket(tourn: TournamentDto) {
+  activeBracketTournament.value = tourn;
+  try {
+    await tournamentStore.fetchBracket(tourn.id);
+    isBracketModalOpen.value = true;
+  } catch (err: unknown) {
+    showToast(err instanceof Error ? err.message : 'Failed to load bracket');
+  }
+}
+
+async function handleStartTournament(tourn: TournamentDto) {
+  isSubmitting.value = true;
+  try {
+    const updated = await tournamentStore.startTournament(tourn.id);
+    showToast(t('tournament.startedSuccess'));
+    await openBracket(updated);
+  } catch (err: unknown) {
+    showToast(err instanceof Error ? err.message : 'Failed to start tournament');
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 async function handleRegister(payload: RegisterTournamentPayload) {
@@ -190,9 +223,30 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
           </div>
 
           <!-- Status badge -->
-          <div>
+          <div class="flex items-center gap-2">
             <span
-              v-if="tournamentStore.myRegistrations[tourn.id]?.isRegistered"
+              v-if="tourn.status === 'CANCELLED'"
+              class="text-xs font-semibold px-2.5 py-1 rounded-full bg-error/10 text-error"
+              data-testid="tournament-status-badge"
+            >
+              {{ t('tournament.cancelled') }}
+            </span>
+            <span
+              v-else-if="tourn.status === 'IN_PROGRESS'"
+              class="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary"
+              data-testid="tournament-status-badge"
+            >
+              {{ t('tournament.bracket.live') }}
+            </span>
+            <span
+              v-else-if="tourn.status === 'COMPLETED'"
+              class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface"
+              data-testid="tournament-status-badge"
+            >
+              {{ t('tournament.bracket.completed') }}
+            </span>
+            <span
+              v-else-if="tournamentStore.myRegistrations[tourn.id]?.isRegistered"
               class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
               data-testid="tournament-status-badge"
             >
@@ -208,9 +262,24 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
         <div class="text-xs text-on-surface-variant space-y-1">
           <div>Participants: {{ tourn.minParticipants }} - {{ tourn.maxParticipants }}</div>
           <div>Deadline: {{ new Date(tourn.registrationDeadline).toLocaleDateString() }}</div>
+          <div v-if="tourn.cancellationReason" class="text-error font-medium">
+            {{ tourn.cancellationReason }}
+          </div>
         </div>
 
         <div class="pt-2 border-t border-outline-variant/10 flex items-center justify-end gap-2">
+          <!-- View Bracket/Schedule Button for IN_PROGRESS or COMPLETED -->
+          <button
+            v-if="tourn.status === 'IN_PROGRESS' || tourn.status === 'COMPLETED'"
+            :data-testid="tourn.format === 'CHAMPIONSHIP' ? 'view-schedule-btn' : 'view-bracket-btn'"
+            type="button"
+            class="px-4 py-2 text-xs font-semibold text-on-primary bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-sm"
+            @click="openBracket(tourn)"
+          >
+            {{ tourn.format === 'CHAMPIONSHIP' ? t('tournament.viewSchedule') : t('tournament.viewBracket') }}
+          </button>
+
+          <!-- Register button -->
           <button
             v-if="!tournamentStore.myRegistrations[tourn.id]?.isRegistered && tourn.status === 'REGISTRATION_OPEN'"
             data-testid="register-tournament-btn"
@@ -221,8 +290,20 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
             {{ t('tournament.register') }}
           </button>
 
+          <!-- Start Tournament button (manual trigger) -->
           <button
-            v-else-if="tournamentStore.myRegistrations[tourn.id]?.isRegistered && tourn.status === 'REGISTRATION_OPEN'"
+            v-if="tourn.status === 'REGISTRATION_OPEN'"
+            data-testid="start-tournament-btn"
+            type="button"
+            class="px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-xl transition-colors"
+            @click="handleStartTournament(tourn)"
+          >
+            {{ t('tournament.startTournament') }}
+          </button>
+
+          <!-- Withdraw button -->
+          <button
+            v-if="tournamentStore.myRegistrations[tourn.id]?.isRegistered && tourn.status === 'REGISTRATION_OPEN'"
             data-testid="withdraw-registration-btn"
             type="button"
             class="px-3 py-1.5 text-xs font-medium text-error hover:bg-error/10 rounded-xl transition-colors"
@@ -257,5 +338,33 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
       @accept="handleAcceptInvite"
       @decline="handleDeclineInvite"
     />
+
+    <!-- Bracket Modal -->
+    <div
+      v-if="isBracketModalOpen && activeBracketTournament && activeBracket"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm"
+      data-testid="bracket-modal"
+    >
+      <div class="bg-surface rounded-3xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+        <div class="flex justify-end">
+          <button
+            type="button"
+            class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-on-surface"
+            @click="isBracketModalOpen = false"
+          >
+            ✕
+          </button>
+        </div>
+
+        <TournamentSchedule
+          v-if="activeBracketTournament.format === 'CHAMPIONSHIP'"
+          :bracket="activeBracket"
+        />
+        <TournamentBracket
+          v-else
+          :bracket="activeBracket"
+        />
+      </div>
+    </div>
   </div>
 </template>

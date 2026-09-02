@@ -49,6 +49,7 @@ export interface TournamentDto {
   roundCount?: number | null;
   hasPlayoff: boolean;
   status: TournamentStatus;
+  cancellationReason?: string | null;
   creatorId: string;
   creatorNickname: string;
   createdAt: string;
@@ -69,6 +70,8 @@ export interface TournamentRegistrationDto {
   partnerNickname?: string | null;
   partnerAvatarUrl?: string | null;
   status: RegistrationStatus;
+  seed?: number | null;
+  strengthScore?: number | null;
   createdAt: string;
   updatedAt?: string | null;
 }
@@ -77,4 +80,45 @@ export interface MyRegistrationStatusDto {
   isRegistered: boolean;
   registration?: TournamentRegistrationDto | null;
   isPendingInvite: boolean;
+}
+
+export type TournamentMatchStatus =
+  | 'PENDING'
+  | 'READY'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'BYE'
+  | 'CANCELLED';
+
+export interface TournamentMatchDto {
+  id: string;
+  tournamentId: string;
+  round: number;
+  matchOrder: number;
+  matchId?: string | null;
+  participant1?: TournamentRegistrationDto | null;
+  participant2?: TournamentRegistrationDto | null;
+  seed1?: number | null;
+  seed2?: number | null;
+  status: TournamentMatchStatus;
+  winnerRegistrationId?: string | null;
+  nextMatchId?: string | null;
+  createdAt?: string;
+}
+
+export interface RoundMatchesDto {
+  round: number;
+  roundName: string;
+  matches: TournamentMatchDto[];
+}
+
+export interface TournamentBracketDto {
+  tournamentId: string;
+  tournamentName: string;
+  format: TournamentFormat;
+  mode: TournamentMode;
+  status: TournamentStatus;
+  totalRounds: number;
+  rounds: RoundMatchesDto[];
+  seededParticipants: TournamentRegistrationDto[];
 }
