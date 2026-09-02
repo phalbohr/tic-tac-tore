@@ -107,7 +107,7 @@ development_status:
   8-2-team-registration-and-confirmation: review
   8-3-automated-bracket-generation-and-seeding: in-progress
   8-4-equal-match-distribution-2v2-random-pairing: in-progress
-  8-5-asynchronous-tournament-match-execution: backlog
+  8-5-asynchronous-tournament-match-execution: ready-for-dev
   8-6-tournament-rule-system-enforcement: backlog
   8-7-tournament-standings-and-archive: backlog
   8-8-tournament-confirmation-deadline: backlog
