@@ -1,6 +1,6 @@
 ---
 baseline_commit: a13cf109496d851fa35bd29538fdcb8f104d2d36
-status: ready-for-dev
+status: review
 ---
 
 # Story 8.4: Equal Match Distribution (2v2 Random Pairing)
@@ -46,8 +46,8 @@ so that every participant receives an equal number of matches, maximum partner v
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Entity Enhancements (AC1, AC2, AC3)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V21__add_partners_and_stubs_to_tournament_match.sql`:
+- [x] Task 1: Database Migration & Entity Enhancements (AC1, AC2, AC3)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V21__add_partners_and_stubs_to_tournament_match.sql`:
     - Add column `participant1_partner_id UUID REFERENCES tournament_registration(id) ON DELETE CASCADE`
     - Add column `participant2_partner_id UUID REFERENCES tournament_registration(id) ON DELETE CASCADE`
     - Add column `is_participant1_stub BOOLEAN NOT NULL DEFAULT FALSE`
@@ -55,26 +55,26 @@ so that every participant receives an equal number of matches, maximum partner v
     - Create indexes:
       - `idx_tournament_match_part1_partner ON tournament_match(participant1_partner_id)`
       - `idx_tournament_match_part2_partner ON tournament_match(participant2_partner_id)`
-  - [ ] Update Entity `com.tictactore.model.TournamentMatch.java`:
+  - [x] Update Entity `com.tictactore.model.TournamentMatch.java`:
     - Add fields:
       - `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "participant1_partner_id") private TournamentRegistration participant1Partner;`
       - `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "participant2_partner_id") private TournamentRegistration participant2Partner;`
       - `@Column(name = "is_participant1_stub", nullable = false) private boolean isParticipant1Stub;`
       - `@Column(name = "is_participant2_stub", nullable = false) private boolean isParticipant2Stub;`
-  - [ ] Update Repository `com.tictactore.repository.TournamentMatchRepository.java`:
+  - [x] Update Repository `com.tictactore.repository.TournamentMatchRepository.java`:
     - `@Query("SELECT tm FROM TournamentMatch tm WHERE tm.tournament.id = :tournamentId AND (tm.participant1.id = :regId OR tm.participant2.id = :regId OR tm.participant1Partner.id = :regId OR tm.participant2Partner.id = :regId)") List<TournamentMatch> findByAnyParticipantRegistrationId(UUID tournamentId, UUID regId)`
     - `List<TournamentMatch> findByTournamentIdAndStatusIn(UUID tournamentId, Collection<TournamentMatchStatus> statuses)`
-  - [ ] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`).
+  - [x] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`).
 
-- [ ] Task 2: 2v2 Random Pairing Algorithm & Bracket Generator (AC1, AC2, AC5)
-  - [ ] Create `com.tictactore.service.tournament.impl.RandomPairingBracketGenerator.java` implementing `BracketGenerator`:
+- [x] Task 2: 2v2 Random Pairing Algorithm & Bracket Generator (AC1, AC2, AC5)
+  - [x] Create `com.tictactore.service.tournament.impl.RandomPairingBracketGenerator.java` implementing `BracketGenerator`:
     - Implement Whist tournament / Social Golfer 4-tuple round-robin scheduling algorithm for $N \ge 4$ participants.
     - Calculate rounds such that each player participates in exactly $M$ matches (equal distribution).
     - Partition players each round into 4-player matches: Team 1 $(P_1, P_2)$ vs Team 2 $(P_3, P_4)$.
     - Optimize pairing matrix to minimize partner duplication and balance opponent frequencies.
     - Use deterministic pseudo-random sequence seeded with `tournament.getId().getMostSignificantBits()` for reproducible ordering.
     - Set Round 1 matches to `TournamentMatchStatus.READY`, subsequent rounds to `PENDING`.
-  - [ ] Update `com.tictactore.service.tournament.impl.TournamentLifecycleServiceImpl.java`:
+  - [x] Update `com.tictactore.service.tournament.impl.TournamentLifecycleServiceImpl.java`:
     - Inject `@Qualifier("randomPairingBracketGenerator") private final BracketGenerator randomPairingBracketGenerator`.
     - Route bracket generation:
       ```java
@@ -82,66 +82,66 @@ so that every participant receives an equal number of matches, maximum partner v
               ? randomPairingBracketGenerator
               : (tournament.getFormat() == TournamentFormat.CHAMPIONSHIP ? championshipBracketGenerator : cupBracketGenerator);
       ```
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/RandomPairingBracketGeneratorTest.java`:
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/RandomPairingBracketGeneratorTest.java`:
     - Test $N = 4, 5, 6, 8, 12, 16$ participants verifying equal match counts per player.
     - Test partner diversity and deterministic reproducibility.
 
-- [ ] Task 3: Stub Partner Selection & Account Deletion Protocol (AC3, AC4)
-  - [ ] Create `com.tictactore.service.tournament.StubPartnerSelector.java` & `impl/StubPartnerSelectorImpl.java`:
+- [x] Task 3: Stub Partner Selection & Account Deletion Protocol (AC3, AC4)
+  - [x] Create `com.tictactore.service.tournament.StubPartnerSelector.java` & `impl/StubPartnerSelectorImpl.java`:
     - `TournamentRegistration selectStubPartner(Tournament tournament, TournamentRegistration deletedRegistration, List<TournamentRegistration> candidatePool)`
     - Evaluate candidate pool by closest frozen `strengthScore`: $|\text{candidate.strengthScore} - \text{deletedRegistration.strengthScore}| \to \min$.
     - Exclude current match partner from candidates to prevent duplicate player in same match.
     - Deterministic tie-breaking by `registration.getId()`.
-  - [ ] Create `com.tictactore.service.tournament.TournamentAccountDeletionHandler.java` & implementation:
+  - [x] Create `com.tictactore.service.tournament.TournamentAccountDeletionHandler.java` & implementation:
     - Query active/pending matches in the tournament for the deleted user.
     - For 2v2 random pairings: replace slot with selected stub partner and set `isParticipant1Stub = true` or `isParticipant2Stub = true`.
     - For 1v1 / 2v2 fixed teams: mark remaining matches as technical defeat (`COMPLETED` with forfeit).
-  - [ ] Create Event `com.tictactore.event.TournamentStubPartnerAssignedEvent.java` record:
+  - [x] Create Event `com.tictactore.event.TournamentStubPartnerAssignedEvent.java` record:
     - `UUID tournamentId`, `UUID matchId`, `UUID deletedUserId`, `UUID teammateUserId`, `UUID stubPartnerUserId`
-  - [ ] Update `com.tictactore.listener.TournamentNotificationListener.java`:
+  - [x] Update `com.tictactore.listener.TournamentNotificationListener.java`:
     - Send push notification informing the teammate and the assigned stub partner.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/StubPartnerSelectorTest.java` and `TournamentAccountDeletionHandlerTest.java`.
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/StubPartnerSelectorTest.java` and `TournamentAccountDeletionHandlerTest.java`.
 
-- [ ] Task 4: DTOs, Query Service & Controller Updates (AC2, AC6)
-  - [ ] Update `com.tictactore.dto.TournamentMatchResponse.java` record:
+- [x] Task 4: DTOs, Query Service & Controller Updates (AC2, AC6)
+  - [x] Update `com.tictactore.dto.TournamentMatchResponse.java` record:
     - Add `TournamentRegistrationResponse participant1Partner`
     - Add `TournamentRegistrationResponse participant2Partner`
     - Add `boolean isParticipant1Stub`
     - Add `boolean isParticipant2Stub`
-  - [ ] Update `com.tictactore.service.tournament.impl.TournamentMatchQueryServiceImpl.java`:
+  - [x] Update `com.tictactore.service.tournament.impl.TournamentMatchQueryServiceImpl.java`:
     - Map `participant1Partner`, `participant2Partner`, `isParticipant1Stub`, `isParticipant2Stub` in `mapToTournamentMatchResponse`.
-  - [ ] Update WebMvcTest in `src/test/java/com/tictactore/controller/TournamentBracketControllerTest.java`.
+  - [x] Update WebMvcTest in `src/test/java/com/tictactore/controller/TournamentBracketControllerTest.java`.
 
-- [ ] Task 5: Frontend Types, Components & i18n (AC6)
-  - [ ] Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
+- [x] Task 5: Frontend Types, Components & i18n (AC6)
+  - [x] Update TypeScript types `frontend/src/features/tournament/types/tournament.ts`:
     - Add `participant1Partner?: TournamentRegistrationDto | null`
     - Add `participant2Partner?: TournamentRegistrationDto | null`
     - Add `isParticipant1Stub?: boolean`
     - Add `isParticipant2Stub?: boolean` to `TournamentMatchDto`.
-  - [ ] Update `frontend/src/features/tournament/components/TournamentMatchCard.vue`:
+  - [x] Update `frontend/src/features/tournament/components/TournamentMatchCard.vue`:
     - Compute `participant1Name` and `participant2Name` to include dynamic match partner for 2v2 random mode:
       `${p.playerNickname} & ${pPartner.playerNickname}`.
     - Render `(Stub)` badge when `isParticipant1Stub` or `isParticipant2Stub` is true.
-  - [ ] Update `frontend/src/features/tournament/components/TournamentSchedule.vue` to support 2v2 random pairing match cards.
-  - [ ] Add translation strings to `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.stub_partner` / `tournament.substitute`.
-  - [ ] Frontend component tests in `frontend/src/features/tournament/components/__tests__/TournamentMatchCard.spec.ts`.
+  - [x] Update `frontend/src/features/tournament/components/TournamentSchedule.vue` to support 2v2 random pairing match cards.
+  - [x] Add translation strings to `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.stub_partner` / `tournament.substitute`.
+  - [x] Frontend component tests in `frontend/src/features/tournament/components/__tests__/TournamentMatchCard.spec.ts`.
 
-- [ ] Task 6: Testing & Quality Verification
-  - [ ] Backend Unit & Slice Tests:
+- [x] Task 6: Testing & Quality Verification
+  - [x] Backend Unit & Slice Tests:
     - `RandomPairingBracketGeneratorTest.java` (strict AAA without section comments).
     - `StubPartnerSelectorTest.java`.
     - `TournamentAccountDeletionHandlerTest.java`.
     - `TournamentMatchRepositoryTest.java` (@DataJpaTest).
     - `TournamentLifecycleServiceTest.java`.
     - `TournamentBracketControllerTest.java` (WebMvcTest).
-  - [ ] Frontend Unit/Component Tests:
+  - [x] Frontend Unit/Component Tests:
     - `TournamentMatchCard.spec.ts` (2v2 random pairing rendering, stub badges).
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create `frontend/e2e/tournament-random-pairing.spec.ts`:
       - Test 1: Create 2v2 random pairing tournament -> register 8 players -> start tournament -> verify equal match distribution across all rounds.
       - Test 2: Verify match cards render 4 players per match (2 vs 2).
       - Test 3: Simulate participant deletion -> verify stub partner assigned with stub indicator without disrupting remaining schedule.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 

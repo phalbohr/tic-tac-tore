@@ -194,4 +194,120 @@ class TournamentMatchRepositoryTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(tournament.getId());
     }
+
+    @Test
+    void shouldSaveAndQueryMatchWithPartnersAndStubs() {
+        var player3 = userRepository.save(User.builder().email("p3@example.com").nickname("PlayerThree").build());
+        var player4 = userRepository.save(User.builder().email("p4@example.com").nickname("PlayerFour").build());
+        var reg3 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player3)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(3)
+                .strengthScore(0.5)
+                .build());
+        var reg4 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player4)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(4)
+                .strengthScore(0.4)
+                .build());
+        var match = tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant1Partner(reg3)
+                .participant2(reg2)
+                .participant2Partner(reg4)
+                .isParticipant1Stub(false)
+                .isParticipant2Stub(true)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var foundMatch = tournamentMatchRepository.findById(match.getId()).orElseThrow();
+
+        assertThat(foundMatch.getParticipant1Partner()).isNotNull();
+        assertThat(foundMatch.getParticipant1Partner().getId()).isEqualTo(reg3.getId());
+        assertThat(foundMatch.getParticipant2Partner()).isNotNull();
+        assertThat(foundMatch.getParticipant2Partner().getId()).isEqualTo(reg4.getId());
+        assertThat(foundMatch.isParticipant1Stub()).isFalse();
+        assertThat(foundMatch.isParticipant2Stub()).isTrue();
+    }
+
+    @Test
+    void shouldFindMatchesByAnyParticipantRegistrationIdWhenPartner() {
+        var player3 = userRepository.save(User.builder().email("p3_any@example.com").nickname("PlayerThreeAny").build());
+        var player4 = userRepository.save(User.builder().email("p4_any@example.com").nickname("PlayerFourAny").build());
+        var reg3 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player3)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(3)
+                .strengthScore(0.5)
+                .build());
+        var reg4 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player4)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(4)
+                .strengthScore(0.4)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant1Partner(reg3)
+                .participant2(reg2)
+                .participant2Partner(reg4)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var matchesAsPartner1 = tournamentMatchRepository.findByAnyParticipantRegistrationId(tournament.getId(), reg3.getId());
+        var matchesAsPartner2 = tournamentMatchRepository.findByAnyParticipantRegistrationId(tournament.getId(), reg4.getId());
+        var matchesAsPrimary1 = tournamentMatchRepository.findByAnyParticipantRegistrationId(tournament.getId(), reg1.getId());
+
+        assertThat(matchesAsPartner1).hasSize(1);
+        assertThat(matchesAsPartner2).hasSize(1);
+        assertThat(matchesAsPrimary1).hasSize(1);
+    }
+
+    @Test
+    void shouldFindMatchesByTournamentIdAndStatusIn() {
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(2)
+                .matchOrder(1)
+                .status(TournamentMatchStatus.PENDING)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(3)
+                .matchOrder(1)
+                .status(TournamentMatchStatus.COMPLETED)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var activeMatches = tournamentMatchRepository.findByTournamentIdAndStatusIn(
+                tournament.getId(),
+                List.of(TournamentMatchStatus.READY, TournamentMatchStatus.PENDING)
+        );
+
+        assertThat(activeMatches).hasSize(2);
+    }
 }

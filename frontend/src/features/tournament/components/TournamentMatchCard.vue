@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { TournamentMatchDto } from '@/features/tournament/types/tournament';
 
 interface Props {
@@ -13,6 +14,10 @@ const isBye = computed(() => props.match.status === 'BYE');
 const participant1Name = computed(() => {
   if (!props.match.participant1) return isBye.value ? 'BYE' : 'TBD';
   const p = props.match.participant1;
+  const partner = props.match.participant1Partner;
+  if (partner) {
+    return `${p.playerNickname} & ${partner.playerNickname}`;
+  }
   return p.partnerNickname ? `${p.playerNickname} & ${p.partnerNickname}` : p.playerNickname;
 });
 
@@ -20,7 +25,23 @@ const participant2Name = computed(() => {
   if (isBye.value) return 'BYE';
   if (!props.match.participant2) return 'TBD';
   const p = props.match.participant2;
+  const partner = props.match.participant2Partner;
+  if (partner) {
+    return `${p.playerNickname} & ${partner.playerNickname}`;
+  }
   return p.partnerNickname ? `${p.playerNickname} & ${p.partnerNickname}` : p.playerNickname;
+});
+
+const stubLabel = computed(() => {
+  try {
+    const { t, te } = useI18n();
+    if (te('tournament.stub_partner')) {
+      return t('tournament.stub_partner');
+    }
+  } catch {
+    // Fallback for environments mounted without i18n
+  }
+  return 'Stub';
 });
 </script>
 
@@ -82,6 +103,13 @@ const participant2Name = computed(() => {
         </div>
         <span class="truncate font-medium text-on-surface">{{ participant1Name }}</span>
       </div>
+      <span
+        v-if="match.isParticipant1Stub"
+        data-testid="stub-partner-badge"
+        class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"
+      >
+        {{ stubLabel }}
+      </span>
     </div>
 
     <!-- Participant 2 -->
@@ -105,6 +133,13 @@ const participant2Name = computed(() => {
         </div>
         <span class="truncate font-medium text-on-surface">{{ participant2Name }}</span>
       </div>
+      <span
+        v-if="match.isParticipant2Stub"
+        data-testid="stub-partner-badge"
+        class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"
+      >
+        {{ stubLabel }}
+      </span>
     </div>
   </div>
 </template>

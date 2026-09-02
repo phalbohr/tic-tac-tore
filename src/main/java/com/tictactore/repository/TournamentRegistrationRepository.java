@@ -63,4 +63,19 @@ public interface TournamentRegistrationRepository extends JpaRepository<Tourname
            "LEFT JOIN FETCH r.partner " +
            "WHERE r.id = :id")
     Optional<TournamentRegistration> findByIdWithDetails(@Param("id") UUID id);
+
+    @Query("SELECT r FROM TournamentRegistration r " +
+           "JOIN FETCH r.tournament t " +
+           "LEFT JOIN FETCH r.player " +
+           "LEFT JOIN FETCH r.partner " +
+           "WHERE (r.player.id = :userId OR (r.partner IS NOT NULL AND r.partner.id = :userId)) " +
+           "AND t.status IN (com.tictactore.model.TournamentStatus.IN_PROGRESS, com.tictactore.model.TournamentStatus.REGISTRATION_OPEN) " +
+           "AND r.status = com.tictactore.model.RegistrationStatus.CONFIRMED")
+    List<TournamentRegistration> findByUserIdAndActiveTournament(@Param("userId") UUID userId);
+
+    @Query("SELECT r FROM TournamentRegistration r " +
+           "LEFT JOIN FETCH r.player " +
+           "LEFT JOIN FETCH r.partner " +
+           "WHERE r.tournament.id = :tournamentId AND r.status = com.tictactore.model.RegistrationStatus.CONFIRMED")
+    List<TournamentRegistration> findAllActiveInTournament(@Param("tournamentId") UUID tournamentId);
 }

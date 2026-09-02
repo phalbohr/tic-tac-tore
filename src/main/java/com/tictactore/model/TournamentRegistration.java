@@ -72,6 +72,10 @@ public class TournamentRegistration {
     @Version
     private Long version;
 
+    public User getUser() {
+        return this.player;
+    }
+
     public void accept(UUID userId) {
         if (this.status != RegistrationStatus.PENDING_CONFIRMATION) {
             throw new com.tictactore.exception.TournamentConflictException("Cannot accept invitation in status " + this.status);

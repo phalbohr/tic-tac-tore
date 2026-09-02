@@ -80,4 +80,32 @@ class TournamentNotificationListenerTest {
 
         verify(pushNotificationService).sendTournamentCancelledNotification(tournamentId, "Spring Open", "Low capacity", user1);
     }
+
+    @Test
+    void shouldSendStubPartnerAssignedNotificationToTeammateAndStub() {
+        UUID tournamentId = UUID.randomUUID();
+        UUID matchId = UUID.randomUUID();
+        UUID deletedId = UUID.randomUUID();
+        UUID teammateId = UUID.randomUUID();
+        UUID stubId = UUID.randomUUID();
+
+        User teammate = User.builder().id(teammateId).nickname("Teammate").build();
+        User stub = User.builder().id(stubId).nickname("Stub").build();
+
+        when(userRepository.findById(teammateId)).thenReturn(Optional.of(teammate));
+        when(userRepository.findById(stubId)).thenReturn(Optional.of(stub));
+
+        var event = new com.tictactore.event.TournamentStubPartnerAssignedEvent(
+                tournamentId,
+                matchId,
+                deletedId,
+                teammateId,
+                stubId
+        );
+
+        listener.handleTournamentStubPartnerAssigned(event);
+
+        verify(pushNotificationService).sendTournamentStubPartnerAssignedNotification(tournamentId, "Tournament", matchId, teammate, false);
+        verify(pushNotificationService).sendTournamentStubPartnerAssignedNotification(tournamentId, "Tournament", matchId, stub, true);
+    }
 }

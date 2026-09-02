@@ -97,7 +97,11 @@ export interface TournamentMatchDto {
   matchOrder: number;
   matchId?: string | null;
   participant1?: TournamentRegistrationDto | null;
+  participant1Partner?: TournamentRegistrationDto | null;
   participant2?: TournamentRegistrationDto | null;
+  participant2Partner?: TournamentRegistrationDto | null;
+  isParticipant1Stub?: boolean;
+  isParticipant2Stub?: boolean;
   seed1?: number | null;
   seed2?: number | null;
   status: TournamentMatchStatus;

@@ -61,4 +61,35 @@ public class TournamentNotificationListener {
             log.error("Failed to process TournamentCancelledEvent for tournament {}", event.tournamentId(), e);
         }
     }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleTournamentStubPartnerAssigned(com.tictactore.event.TournamentStubPartnerAssignedEvent event) {
+        try {
+            if (event.teammateUserId() != null) {
+                userRepository.findById(event.teammateUserId()).ifPresent(recipient ->
+                        pushNotificationService.sendTournamentStubPartnerAssignedNotification(
+                                event.tournamentId(),
+                                "Tournament",
+                                event.matchId(),
+                                recipient,
+                                false
+                        )
+                );
+            }
+            if (event.stubPartnerUserId() != null) {
+                userRepository.findById(event.stubPartnerUserId()).ifPresent(recipient ->
+                        pushNotificationService.sendTournamentStubPartnerAssignedNotification(
+                                event.tournamentId(),
+                                "Tournament",
+                                event.matchId(),
+                                recipient,
+                                true
+                        )
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to process TournamentStubPartnerAssignedEvent for match {}", event.matchId(), e);
+        }
+    }
 }

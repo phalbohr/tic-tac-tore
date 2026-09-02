@@ -697,6 +697,52 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     }
 
     @Override
+    public void sendTournamentStubPartnerAssignedNotification(
+            UUID tournamentId,
+            String tournamentName,
+            UUID matchId,
+            User recipient,
+            boolean isStub
+    ) {
+        if (recipient == null || recipient.getId() == null) {
+            return;
+        }
+
+        String summary = isStub
+                ? "You have been assigned as a substitute partner in " + tournamentName + "."
+                : "A substitute partner has been assigned to your match in " + tournamentName + ".";
+        String timestamp = Instant.now().toString();
+
+        PushNotificationPayload payloadDto = PushNotificationPayload.builder()
+                .tournamentId(tournamentId)
+                .type("TOURNAMENT_STUB_PARTNER_ASSIGNED")
+                .creatorName("System")
+                .summary(summary)
+                .url("/tournaments?tournamentId=" + tournamentId)
+                .isDuplicateWarning(false)
+                .timestamp(timestamp)
+                .build();
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payloadDto);
+        } catch (Exception e) {
+            log.error("Failed to serialize tournament stub partner push notification for tournament {}", tournamentId, e);
+            return;
+        }
+
+        List<PushSubscription> subscriptions = notificationOperation.getSubscriptionsForUser(recipient.getId());
+        if (subscriptions.isEmpty()) {
+            recordNotificationLog(recipient.getId(), null, null, null, "TOURNAMENT_STUB_PARTNER_ASSIGNED", jsonPayload, "SKIPPED", "No push subscription registered");
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            dispatchPushNotification(sub, recipient.getId(), null, null, null, "TOURNAMENT_STUB_PARTNER_ASSIGNED", jsonPayload);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationLogDto> getUserNotifications(UUID userId) {
         if (userId == null) {

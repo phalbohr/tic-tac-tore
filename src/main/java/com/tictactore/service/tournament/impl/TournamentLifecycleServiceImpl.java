@@ -9,6 +9,7 @@ import com.tictactore.model.RegistrationStatus;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentFormat;
 import com.tictactore.model.TournamentMatch;
+import com.tictactore.model.TournamentMode;
 import com.tictactore.model.TournamentRegistration;
 import com.tictactore.model.TournamentStatus;
 import com.tictactore.repository.TournamentMatchRepository;
@@ -41,6 +42,8 @@ public class TournamentLifecycleServiceImpl implements TournamentLifecycleServic
     private final BracketGenerator cupBracketGenerator;
     @Qualifier("championshipBracketGenerator")
     private final BracketGenerator championshipBracketGenerator;
+    @Qualifier("randomPairingBracketGenerator")
+    private final BracketGenerator randomPairingBracketGenerator;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -95,9 +98,9 @@ public class TournamentLifecycleServiceImpl implements TournamentLifecycleServic
 
         var seededParticipants = seedingStrategy.seed(tournament, confirmedRegistrations);
 
-        BracketGenerator generator = (tournament.getFormat() == TournamentFormat.CHAMPIONSHIP)
-                ? championshipBracketGenerator
-                : cupBracketGenerator;
+        BracketGenerator generator = (tournament.getMode() == TournamentMode.TWO_VS_TWO_RANDOM_PAIRINGS)
+                ? randomPairingBracketGenerator
+                : (tournament.getFormat() == TournamentFormat.CHAMPIONSHIP ? championshipBracketGenerator : cupBracketGenerator);
 
         List<TournamentMatch> matches = generator.generateBracket(tournament, seededParticipants);
         tournamentMatchRepository.saveAll(matches);
