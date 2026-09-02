@@ -1,5 +1,5 @@
-ALTER TABLE tournament_match ADD COLUMN participant1_partner_id UUID REFERENCES tournament_registration(id) ON DELETE CASCADE;
-ALTER TABLE tournament_match ADD COLUMN participant2_partner_id UUID REFERENCES tournament_registration(id) ON DELETE CASCADE;
+ALTER TABLE tournament_match ADD COLUMN participant1_partner_id UUID REFERENCES tournament_registration(id) ON DELETE SET NULL;
+ALTER TABLE tournament_match ADD COLUMN participant2_partner_id UUID REFERENCES tournament_registration(id) ON DELETE SET NULL;
 ALTER TABLE tournament_match ADD COLUMN is_participant1_stub BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE tournament_match ADD COLUMN is_participant2_stub BOOLEAN NOT NULL DEFAULT FALSE;
 

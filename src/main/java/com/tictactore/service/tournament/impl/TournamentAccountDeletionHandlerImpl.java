@@ -76,30 +76,42 @@ public class TournamentAccountDeletionHandlerImpl implements TournamentAccountDe
         UUID deletedId = deletedReg.getId();
         TournamentRegistration teammate = null;
 
-        if (isSameRegistration(match.getParticipant1(), deletedId)) {
-            teammate = match.getParticipant1Partner();
-            TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
-            match.setParticipant1(stub);
-            match.setParticipant1Stub(true);
-            saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
-        } else if (isSameRegistration(match.getParticipant1Partner(), deletedId)) {
-            teammate = match.getParticipant1();
-            TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
-            match.setParticipant1Partner(stub);
-            match.setParticipant1Stub(true);
-            saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
-        } else if (isSameRegistration(match.getParticipant2(), deletedId)) {
-            teammate = match.getParticipant2Partner();
-            TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
-            match.setParticipant2(stub);
-            match.setParticipant2Stub(true);
-            saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
-        } else if (isSameRegistration(match.getParticipant2Partner(), deletedId)) {
-            teammate = match.getParticipant2();
-            TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
-            match.setParticipant2Partner(stub);
-            match.setParticipant2Stub(true);
-            saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
+        try {
+            if (isSameRegistration(match.getParticipant1(), deletedId)) {
+                teammate = match.getParticipant1Partner();
+                TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
+                match.setParticipant1(teammate);
+                match.setParticipant1Partner(stub);
+                match.setParticipant1Stub(true);
+                match.setStatus(TournamentMatchStatus.PENDING);
+                saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
+            } else if (isSameRegistration(match.getParticipant1Partner(), deletedId)) {
+                teammate = match.getParticipant1();
+                TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
+                match.setParticipant1Partner(stub);
+                match.setParticipant1Stub(true);
+                match.setStatus(TournamentMatchStatus.PENDING);
+                saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
+            } else if (isSameRegistration(match.getParticipant2(), deletedId)) {
+                teammate = match.getParticipant2Partner();
+                TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
+                match.setParticipant2(teammate);
+                match.setParticipant2Partner(stub);
+                match.setParticipant2Stub(true);
+                match.setStatus(TournamentMatchStatus.PENDING);
+                saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
+            } else if (isSameRegistration(match.getParticipant2Partner(), deletedId)) {
+                teammate = match.getParticipant2();
+                TournamentRegistration stub = selectStub(tournament, deletedReg, teammate, activeCandidates);
+                match.setParticipant2Partner(stub);
+                match.setParticipant2Stub(true);
+                match.setStatus(TournamentMatchStatus.PENDING);
+                saveMatchAndPublishEvent(tournament, match, deletedUserId, teammate, stub);
+            }
+        } catch (IllegalStateException e) {
+            log.warn("No eligible stub partner available for deleted user {} in tournament {}. Awarding technical defeat.",
+                    deletedUserId, tournament.getId(), e);
+            handleTechnicalDefeat(match, deletedReg);
         }
     }
 
@@ -147,11 +159,13 @@ public class TournamentAccountDeletionHandlerImpl implements TournamentAccountDe
 
     private void handleTechnicalDefeat(TournamentMatch match, TournamentRegistration deletedReg) {
         UUID deletedId = deletedReg.getId();
-        if (isSameRegistration(match.getParticipant1(), deletedId)) {
+        if (isSameRegistration(match.getParticipant1(), deletedId)
+                || isSameRegistration(match.getParticipant1Partner(), deletedId)) {
             match.setWinner(match.getParticipant2());
             match.setStatus(TournamentMatchStatus.COMPLETED);
             tournamentMatchRepository.save(match);
-        } else if (isSameRegistration(match.getParticipant2(), deletedId)) {
+        } else if (isSameRegistration(match.getParticipant2(), deletedId)
+                || isSameRegistration(match.getParticipant2Partner(), deletedId)) {
             match.setWinner(match.getParticipant1());
             match.setStatus(TournamentMatchStatus.COMPLETED);
             tournamentMatchRepository.save(match);

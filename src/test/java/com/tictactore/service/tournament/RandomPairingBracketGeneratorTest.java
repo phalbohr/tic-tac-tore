@@ -53,7 +53,7 @@ class RandomPairingBracketGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {4, 6, 8, 12, 16})
+    @ValueSource(ints = {4, 5, 6, 7, 8, 9, 12, 16})
     void shouldGuaranteeEqualMatchDistributionForParticipants(int participantCount) {
         List<SeededParticipant> participants = createParticipants(participantCount);
 

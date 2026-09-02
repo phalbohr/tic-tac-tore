@@ -125,8 +125,10 @@ class TournamentAccountDeletionHandlerTest {
 
         handler.handleUserDeletion(deletedUser.getId());
 
-        assertThat(match.getParticipant1()).isEqualTo(stubReg);
+        assertThat(match.getParticipant1()).isEqualTo(partner1);
+        assertThat(match.getParticipant1Partner()).isEqualTo(stubReg);
         assertThat(match.isParticipant1Stub()).isTrue();
+        assertThat(match.getStatus()).isEqualTo(TournamentMatchStatus.PENDING);
         verify(tournamentMatchRepository).save(match);
 
         ArgumentCaptor<TournamentStubPartnerAssignedEvent> captor = ArgumentCaptor.forClass(TournamentStubPartnerAssignedEvent.class);
@@ -165,7 +167,7 @@ class TournamentAccountDeletionHandlerTest {
                 .participant1Partner(team1Partner)
                 .participant2(team2Player)
                 .participant2Partner(deletedReg)
-                .status(TournamentMatchStatus.PENDING)
+                .status(TournamentMatchStatus.READY)
                 .round(2)
                 .build();
 
@@ -180,8 +182,97 @@ class TournamentAccountDeletionHandlerTest {
 
         handler.handleUserDeletion(deletedUser.getId());
 
+        assertThat(match.getParticipant2()).isEqualTo(team2Player);
         assertThat(match.getParticipant2Partner()).isEqualTo(stubReg);
         assertThat(match.isParticipant2Stub()).isTrue();
+        assertThat(match.getStatus()).isEqualTo(TournamentMatchStatus.PENDING);
+        verify(tournamentMatchRepository).save(match);
+    }
+
+    @Test
+    void shouldAwardTechnicalDefeatWhenStubPoolIsEmpty() {
+        TournamentRegistration partner1 = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("Teammate").build())
+                .build();
+        TournamentRegistration opponent1 = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("Opp1").build())
+                .build();
+        TournamentRegistration opponent2 = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("Opp2").build())
+                .build();
+
+        TournamentMatch match = TournamentMatch.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .participant1(deletedReg)
+                .participant1Partner(partner1)
+                .participant2(opponent1)
+                .participant2Partner(opponent2)
+                .status(TournamentMatchStatus.READY)
+                .round(1)
+                .build();
+
+        when(tournamentRegistrationRepository.findByUserIdAndActiveTournament(deletedUser.getId()))
+                .thenReturn(List.of(deletedReg));
+        when(tournamentMatchRepository.findByAnyParticipantRegistrationId(tournament.getId(), deletedReg.getId()))
+                .thenReturn(List.of(match));
+        when(tournamentRegistrationRepository.findAllActiveInTournament(tournament.getId()))
+                .thenReturn(List.of(deletedReg, partner1, opponent1, opponent2));
+        when(stubPartnerSelector.selectStubPartner(eq(tournament), eq(deletedReg), eq(partner1.getId()), any()))
+                .thenThrow(new IllegalStateException("No eligible stub partner candidates"));
+
+        handler.handleUserDeletion(deletedUser.getId());
+
+        assertThat(match.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
+        assertThat(match.getWinner()).isEqualTo(opponent1);
+        verify(tournamentMatchRepository).save(match);
+    }
+
+    @Test
+    void shouldAwardTechnicalDefeatWhenPartnerInFixed2v2IsDeleted() {
+        tournament.setMode(TournamentMode.TWO_VS_TWO_FIXED_TEAMS);
+        TournamentRegistration team1Player = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("T1P").build())
+                .build();
+        TournamentRegistration team2Player = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("T2P").build())
+                .build();
+        TournamentRegistration team2Partner = TournamentRegistration.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .player(User.builder().id(UUID.randomUUID()).nickname("T2Partner").build())
+                .build();
+
+        TournamentMatch match = TournamentMatch.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .participant1(team1Player)
+                .participant1Partner(deletedReg)
+                .participant2(team2Player)
+                .participant2Partner(team2Partner)
+                .status(TournamentMatchStatus.READY)
+                .round(1)
+                .build();
+
+        when(tournamentRegistrationRepository.findByUserIdAndActiveTournament(deletedUser.getId()))
+                .thenReturn(List.of(deletedReg));
+        when(tournamentMatchRepository.findByAnyParticipantRegistrationId(tournament.getId(), deletedReg.getId()))
+                .thenReturn(List.of(match));
+
+        handler.handleUserDeletion(deletedUser.getId());
+
+        assertThat(match.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
+        assertThat(match.getWinner()).isEqualTo(team2Player);
         verify(tournamentMatchRepository).save(match);
     }
 

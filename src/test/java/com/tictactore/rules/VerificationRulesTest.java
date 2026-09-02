@@ -120,8 +120,8 @@ class VerificationRulesTest {
         }
 
         @Test
-        @DisplayName("[P0] 2v2 random participant-entered does NOT support partial")
-        void shouldReturnFalseForDoublesRandomParticipant() {
+        @DisplayName("[P0] 2v2 random participant-entered supports partial confirmation for individual verification")
+        void shouldReturnTrueForDoublesRandomParticipant() {
             Match match = Match.builder()
                     .creatorId(p1)
                     .teamAAttackerId(p1)
@@ -132,7 +132,7 @@ class VerificationRulesTest {
                     .matchFormat(Match.MATCH_FORMAT_RANDOM)
                     .build();
 
-            assertThat(VerificationRules.supportsPartialConfirmation(match)).isFalse();
+            assertThat(VerificationRules.supportsPartialConfirmation(match)).isTrue();
         }
 
         @Test
