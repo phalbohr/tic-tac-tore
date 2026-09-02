@@ -1,6 +1,6 @@
 ---
 baseline_commit: a13cf109496d851fa35bd29538fdcb8f104d2d36
-status: review
+status: in-progress
 ---
 
 # Story 8.4: Equal Match Distribution (2v2 Random Pairing)
@@ -217,3 +217,15 @@ N/A
 
 ### Review Findings
 N/A
+
+### Review Findings
+
+- [ ] [Review][Patch] Match status should revert to PENDING when stub partner is assigned
+- [ ] [Review][Patch] Database migration silently deletes match on partner deletion [src/main/resources/db/migration/V21__add_partners_and_stubs_to_tournament_match.sql:1]
+- [ ] [Review][Patch] Missing Exception Handling when Stub Pool is Empty [src/main/java/com/tictactore/service/tournament/impl/TournamentAccountDeletionHandlerImpl.java:69]
+- [ ] [Review][Patch] Fixed 2v2 Teams Not Receiving Technical Defeats on Partner Deletion [src/main/java/com/tictactore/service/tournament/impl/TournamentAccountDeletionHandlerImpl.java:148]
+- [ ] [Review][Patch] Missing Statistics Isolation and Knockout Immunity for Stub Partners [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsService.java]
+- [ ] [Review][Patch] Missing Individual Match Confirmation Logic for 2v2 Random Pairing [src/main/java/com/tictactore/service/tournament/VerificationRules.java]
+- [ ] [Review][Patch] Bracket generator tests avoid odd participant numbers [src/test/java/com/tictactore/service/tournament/RandomPairingBracketGeneratorTest.java]
+- [ ] [Review][Patch] PushNotificationServiceImpl.java exceeds 500 lines [src/main/java/com/tictactore/service/impl/PushNotificationServiceImpl.java]
+- [x] [Review][Defer] Missing notification to opposing team of stub assignment [src/main/java/com/tictactore/service/tournament/impl/TournamentAccountDeletionHandlerImpl.java:136] — deferred, pre-existing

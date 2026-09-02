@@ -463,3 +463,6 @@ status: open
 
 ## Deferred from: code review of 8-3-automated-bracket-generation-and-seeding (2026-09-02)
 - Untestable Random Seeding [RandomSeedingStrategy.java:20]: `RandomSeedingStrategy` uses `Collections.shuffle()`, relying on a static pseudo-random number generator. This prevents providing a fixed seed for deterministic unit tests.
+
+## Deferred from: code review (2026-09-02)
+- Missing notification to opposing team of stub assignment
