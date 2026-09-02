@@ -172,16 +172,16 @@ test.describe('Tournament Bracket Generation & Seeding E2E (Story 8.3)', () => {
 
     await page.goto('/tournaments');
 
-    const tournamentCard = page.locator('[data-testid="tournament-card"]').first();
+    const tournamentCard = page.getByTestId('tournament-card').first();
     await expect(tournamentCard).toBeVisible();
 
     // Click View Bracket button
-    const viewBracketBtn = tournamentCard.locator('[data-testid="view-bracket-btn"]');
+    const viewBracketBtn = tournamentCard.getByTestId('view-bracket-btn');
     await expect(viewBracketBtn).toBeVisible();
     await viewBracketBtn.click();
 
     // TournamentBracket modal or view renders
-    const bracketContainer = page.locator('[data-testid="tournament-bracket-view"]');
+    const bracketContainer = page.getByTestId('tournament-bracket-view');
     await expect(bracketContainer).toBeVisible();
 
     // Verify seed badges and participants
@@ -320,14 +320,14 @@ test.describe('Tournament Bracket Generation & Seeding E2E (Story 8.3)', () => {
 
     await page.goto('/tournaments');
 
-    const tournamentCard = page.locator('[data-testid="tournament-card"]').first();
+    const tournamentCard = page.getByTestId('tournament-card').first();
     await expect(tournamentCard).toBeVisible();
 
-    const viewScheduleBtn = tournamentCard.locator('[data-testid="view-schedule-btn"]');
+    const viewScheduleBtn = tournamentCard.getByTestId('view-schedule-btn');
     await expect(viewScheduleBtn).toBeVisible();
     await viewScheduleBtn.click();
 
-    const scheduleContainer = page.locator('[data-testid="tournament-schedule-view"]');
+    const scheduleContainer = page.getByTestId('tournament-schedule-view');
     await expect(scheduleContainer).toBeVisible();
 
     await expect(scheduleContainer.getByText('Round 1')).toBeVisible();
@@ -369,10 +369,10 @@ test.describe('Tournament Bracket Generation & Seeding E2E (Story 8.3)', () => {
 
     await page.goto('/tournaments');
 
-    const tournamentCard = page.locator('[data-testid="tournament-card"]').first();
+    const tournamentCard = page.getByTestId('tournament-card').first();
     await expect(tournamentCard).toBeVisible();
 
-    const statusBadge = tournamentCard.locator('[data-testid="tournament-status-badge"]');
+    const statusBadge = tournamentCard.getByTestId('tournament-status-badge');
     await expect(statusBadge).toHaveText(/CANCELLED/i);
     await expect(tournamentCard.getByText(/Insufficient confirmed participants/i)).toBeVisible();
   });
