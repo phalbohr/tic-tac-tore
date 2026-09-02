@@ -43,6 +43,7 @@ public class UserOperation {
     private final PlayerGroupRepository playerGroupRepository;
     private final RuleConfigurationRepository ruleConfigurationRepository;
     private final Clock clock;
+    private final java.util.Optional<com.tictactore.service.tournament.TournamentAccountDeletionHandler> tournamentAccountDeletionHandler;
 
     private String sanitizeNickname(String nickname) {
         if (nickname == null) {
@@ -180,5 +181,9 @@ public class UserOperation {
         user.setLastNicknameUpdate(null);
 
         userRepository.flush();
+
+        if (tournamentAccountDeletionHandler != null) {
+            tournamentAccountDeletionHandler.ifPresent(h -> h.handleUserDeletion(userId));
+        }
     }
 }

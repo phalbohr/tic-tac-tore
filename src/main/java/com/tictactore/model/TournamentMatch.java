@@ -58,8 +58,22 @@ public class TournamentMatch {
     private TournamentRegistration participant1;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "participant1_partner_id")
+    private TournamentRegistration participant1Partner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "participant2_id")
     private TournamentRegistration participant2;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "participant2_partner_id")
+    private TournamentRegistration participant2Partner;
+
+    @Column(name = "is_participant1_stub", nullable = false)
+    private boolean isParticipant1Stub;
+
+    @Column(name = "is_participant2_stub", nullable = false)
+    private boolean isParticipant2Stub;
 
     @Column(name = "seed1")
     private Integer seed1;

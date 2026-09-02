@@ -222,5 +222,59 @@ class TournamentBracketControllerTest {
                     .andExpect(jsonPath("$[0].round").value(1))
                     .andExpect(jsonPath("$[0].status").value("READY"));
         }
+
+        @Test
+        @WithMockUser
+        @DisplayName("Should return tournament matches with partners and stub flags for 2v2 random pairing")
+        void shouldReturnMatchesWithPartnersAndStubsFor2v2RandomPairing() throws Exception {
+            UUID tournamentId = UUID.randomUUID();
+            UUID matchId = UUID.randomUUID();
+
+            TournamentRegistrationResponse part1 = TournamentRegistrationResponse.builder()
+                    .id(UUID.randomUUID())
+                    .playerNickname("P1")
+                    .build();
+            TournamentRegistrationResponse part1Partner = TournamentRegistrationResponse.builder()
+                    .id(UUID.randomUUID())
+                    .playerNickname("P1Partner")
+                    .build();
+            TournamentRegistrationResponse part2 = TournamentRegistrationResponse.builder()
+                    .id(UUID.randomUUID())
+                    .playerNickname("P2")
+                    .build();
+            TournamentRegistrationResponse part2Partner = TournamentRegistrationResponse.builder()
+                    .id(UUID.randomUUID())
+                    .playerNickname("P2Partner")
+                    .build();
+
+            TournamentMatchResponse matchResponse = TournamentMatchResponse.builder()
+                    .id(matchId)
+                    .tournamentId(tournamentId)
+                    .round(1)
+                    .matchOrder(1)
+                    .participant1(part1)
+                    .participant1Partner(part1Partner)
+                    .participant2(part2)
+                    .participant2Partner(part2Partner)
+                    .isParticipant1Stub(false)
+                    .isParticipant2Stub(true)
+                    .status(TournamentMatchStatus.READY)
+                    .build();
+
+            given(tournamentMatchQueryService.getTournamentMatches(eq(tournamentId), eq(1)))
+                    .willReturn(List.of(matchResponse));
+
+            mockMvc.perform(get("/api/v1/tournaments/{id}/matches", tournamentId)
+                            .param("round", "1")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(matchId.toString()))
+                    .andExpect(jsonPath("$[0].participant1.playerNickname").value("P1"))
+                    .andExpect(jsonPath("$[0].participant1Partner.playerNickname").value("P1Partner"))
+                    .andExpect(jsonPath("$[0].participant2.playerNickname").value("P2"))
+                    .andExpect(jsonPath("$[0].participant2Partner.playerNickname").value("P2Partner"))
+                    .andExpect(jsonPath("$[0].isParticipant1Stub").value(false))
+                    .andExpect(jsonPath("$[0].isParticipant2Stub").value(true));
+        }
     }
 }

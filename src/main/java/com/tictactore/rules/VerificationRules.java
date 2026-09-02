@@ -30,7 +30,8 @@ public final class VerificationRules {
         boolean isDoubles = match.getTeamADefenderId() != null;
         return isDoubles
             && isParticipantEntered(match)
-            && Match.MATCH_FORMAT_STANDARD.equals(match.getMatchFormat());
+            && (Match.MATCH_FORMAT_STANDARD.equals(match.getMatchFormat())
+                || Match.MATCH_FORMAT_RANDOM.equals(match.getMatchFormat()));
     }
 
     public static boolean requiresCooldown(Match match) {

@@ -122,8 +122,14 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         TournamentRegistrationResponse part1 = match.getParticipant1() != null
                 ? registrationMap.computeIfAbsent(match.getParticipant1().getId(), k -> mapToRegistrationResponse(match.getParticipant1()))
                 : null;
+        TournamentRegistrationResponse part1Partner = match.getParticipant1Partner() != null
+                ? registrationMap.computeIfAbsent(match.getParticipant1Partner().getId(), k -> mapToRegistrationResponse(match.getParticipant1Partner()))
+                : null;
         TournamentRegistrationResponse part2 = match.getParticipant2() != null
                 ? registrationMap.computeIfAbsent(match.getParticipant2().getId(), k -> mapToRegistrationResponse(match.getParticipant2()))
+                : null;
+        TournamentRegistrationResponse part2Partner = match.getParticipant2Partner() != null
+                ? registrationMap.computeIfAbsent(match.getParticipant2Partner().getId(), k -> mapToRegistrationResponse(match.getParticipant2Partner()))
                 : null;
 
         return TournamentMatchResponse.builder()
@@ -133,7 +139,11 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 .matchOrder(match.getMatchOrder())
                 .matchId(match.getMatch() != null ? match.getMatch().getId() : null)
                 .participant1(part1)
+                .participant1Partner(part1Partner)
                 .participant2(part2)
+                .participant2Partner(part2Partner)
+                .isParticipant1Stub(match.isParticipant1Stub())
+                .isParticipant2Stub(match.isParticipant2Stub())
                 .seed1(match.getSeed1())
                 .seed2(match.getSeed2())
                 .status(match.getStatus())

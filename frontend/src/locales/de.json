@@ -471,6 +471,8 @@
     },
     "pendingInvitationsTitle": "Ausstehende Turniereinladungen",
     "noPendingInvitations": "Keine ausstehenden Einladungen.",
+    "stub_partner": "Ersatz",
+    "substitute": "Ersatzspieler",
     "registration": {
       "modalTitle": "Turnieranmeldung",
       "confirmSoloTitle": "Einzelanmeldung",

@@ -471,6 +471,8 @@
     },
     "pendingInvitationsTitle": "Pending Tournament Invitations",
     "noPendingInvitations": "No pending invitations.",
+    "stub_partner": "Stub",
+    "substitute": "Substitute",
     "registration": {
       "modalTitle": "Tournament Registration",
       "confirmSoloTitle": "Solo Registration",

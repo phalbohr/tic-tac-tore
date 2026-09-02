@@ -63,6 +63,9 @@ class TournamentLifecycleServiceTest {
     private BracketGenerator championshipBracketGenerator;
 
     @Mock
+    private BracketGenerator randomPairingBracketGenerator;
+
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     private TournamentLifecycleServiceImpl lifecycleService;
@@ -79,6 +82,7 @@ class TournamentLifecycleServiceTest {
                 seedingStrategy,
                 cupBracketGenerator,
                 championshipBracketGenerator,
+                randomPairingBracketGenerator,
                 eventPublisher
         );
 
@@ -177,5 +181,43 @@ class TournamentLifecycleServiceTest {
         verify(eventPublisher).publishEvent(captor.capture());
         assertThat(captor.getValue().tournamentId()).isEqualTo(tournamentId);
         assertThat(captor.getValue().totalMatches()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldStartTournamentAndUseRandomPairingBracketGeneratorWhenModeIs2v2Random() {
+        tournament.setMode(TournamentMode.TWO_VS_TWO_RANDOM_PAIRINGS);
+        when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament));
+        when(tournamentRepository.save(any(Tournament.class))).thenAnswer(i -> i.getArgument(0));
+
+        User p1 = User.builder().id(UUID.randomUUID()).nickname("Player1").build();
+        User p2 = User.builder().id(UUID.randomUUID()).nickname("Player2").build();
+        User p3 = User.builder().id(UUID.randomUUID()).nickname("Player3").build();
+        User p4 = User.builder().id(UUID.randomUUID()).nickname("Player4").build();
+
+        TournamentRegistration reg1 = TournamentRegistration.builder().id(UUID.randomUUID()).player(p1).status(RegistrationStatus.CONFIRMED).build();
+        TournamentRegistration reg2 = TournamentRegistration.builder().id(UUID.randomUUID()).player(p2).status(RegistrationStatus.CONFIRMED).build();
+        TournamentRegistration reg3 = TournamentRegistration.builder().id(UUID.randomUUID()).player(p3).status(RegistrationStatus.CONFIRMED).build();
+        TournamentRegistration reg4 = TournamentRegistration.builder().id(UUID.randomUUID()).player(p4).status(RegistrationStatus.CONFIRMED).build();
+
+        List<TournamentRegistration> confirmed = List.of(reg1, reg2, reg3, reg4);
+        when(registrationRepository.findByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED))
+                .thenReturn(confirmed);
+
+        List<SeededParticipant> seeded = List.of(
+                new SeededParticipant(reg1, 1, 1.0),
+                new SeededParticipant(reg2, 2, 0.8),
+                new SeededParticipant(reg3, 3, 0.6),
+                new SeededParticipant(reg4, 4, 0.4)
+        );
+        when(seedingStrategy.seed(tournament, confirmed)).thenReturn(seeded);
+
+        TournamentMatch m1 = TournamentMatch.builder().round(1).matchOrder(1).status(TournamentMatchStatus.READY).build();
+        when(randomPairingBracketGenerator.generateBracket(tournament, seeded)).thenReturn(List.of(m1));
+
+        TournamentResponse response = lifecycleService.startTournament(tournamentId);
+
+        assertThat(response.status()).isEqualTo(TournamentStatus.IN_PROGRESS);
+        verify(randomPairingBracketGenerator).generateBracket(tournament, seeded);
+        verify(tournamentMatchRepository).saveAll(List.of(m1));
     }
 }
