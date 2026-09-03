@@ -48,9 +48,10 @@ onMounted(async () => {
 
     if (!rawPlayerIds || rawPlayerIds.length === 0 || !matchTypeParam || !ruleConfigId) {
       try {
+        const safeTournId = encodeURIComponent(tournId)
         const [matchesRes, tournRes] = await Promise.all([
-          fetch(`/api/v1/tournaments/${tournId}/matches`),
-          fetch(`/api/v1/tournaments/${tournId}`),
+          fetch(`/api/v1/tournaments/${safeTournId}/matches`),
+          fetch(`/api/v1/tournaments/${safeTournId}`),
         ])
         if (matchesRes.ok) {
           const matches: any[] = await matchesRes.json()

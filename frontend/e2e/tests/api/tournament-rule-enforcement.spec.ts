@@ -26,96 +26,48 @@ test.describe('Tournament Rule System Enforcement API Tests (ATDD)', () => {
     )
   })
 
-  test('[P0] should reject match creation with 409 Conflict when ruleConfigId mismatches tournament rule configuration (AC5)', async ({
+  // Skipped: Requires real DB seed fixtures for tournament_match and rule_configuration entities.
+  // Real verification is covered in backend slice/unit tests (TournamentMatchValidatorTest, MatchServiceTest).
+  test.skip('[P0] should reject match creation with 409 Conflict when ruleConfigId mismatches tournament rule configuration (AC5)', async ({
     page,
   }) => {
-    await page.route('**/api/v1/matches', async (route) => {
-      const postData = route.request().postDataJSON()
-      if (
-        postData.tournamentMatchId &&
-        postData.ruleConfigId !== '00000000-0000-0000-0000-000000000111'
-      ) {
-        await route.fulfill({
-          status: 409,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            message: 'Match rule configuration does not match tournament rule configuration',
-          }),
-        })
-        return
-      }
-      await route.continue()
+    const response = await page.request.post('/api/v1/matches', {
+      data: {
+        idempotencyKey: crypto.randomUUID(),
+        creatorId: '00000000-0000-0000-0000-000000000001',
+        teamAAttackerId: '00000000-0000-0000-0000-000000000001',
+        teamBAttackerId: '00000000-0000-0000-0000-000000000002',
+        tournamentMatchId: '00000000-0000-0000-0000-000000000100',
+        ruleConfigId: '00000000-0000-0000-0000-000000000999',
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+        entryMode: 'MANUAL',
+        matchFormat: '1v1',
+      },
     })
 
-    const result = await page.evaluate(async () => {
-      const res = await fetch('/api/v1/matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idempotencyKey: crypto.randomUUID(),
-          creatorId: '00000000-0000-0000-0000-000000000001',
-          teamAAttackerId: '00000000-0000-0000-0000-000000000001',
-          teamBAttackerId: '00000000-0000-0000-0000-000000000002',
-          tournamentMatchId: '00000000-0000-0000-0000-000000000100',
-          ruleConfigId: '00000000-0000-0000-0000-000000000999',
-          games: [{ teamAScore: 10, teamBScore: 8 }],
-          entryMode: 'MANUAL',
-          matchFormat: '1v1',
-        }),
-      })
-      return {
-        status: res.status,
-        body: await res.json(),
-      }
-    })
-
-    expect(result.status).toBe(409)
-    expect(result.body.message).toContain('rule configuration')
+    expect(response.status()).toBe(409)
+    const body = await response.json()
+    expect(body.message).toContain('rule configuration')
   })
 
-  test('[P0] should accept match creation when ruleConfigId strictly matches tournament rule configuration (AC5)', async ({
+  // Skipped: Requires real DB seed fixtures for tournament_match and rule_configuration entities.
+  test.skip('[P0] should accept match creation when ruleConfigId strictly matches tournament rule configuration (AC5)', async ({
     page,
   }) => {
-    await page.route('**/api/v1/matches', async (route) => {
-      const postData = route.request().postDataJSON()
-      if (
-        postData.tournamentMatchId &&
-        postData.ruleConfigId === '00000000-0000-0000-0000-000000000111'
-      ) {
-        await route.fulfill({
-          status: 201,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: '00000000-0000-0000-0000-000000000555',
-            status: 'PENDING_APPROVAL',
-          }),
-        })
-        return
-      }
-      await route.continue()
+    const response = await page.request.post('/api/v1/matches', {
+      data: {
+        idempotencyKey: crypto.randomUUID(),
+        creatorId: '00000000-0000-0000-0000-000000000001',
+        teamAAttackerId: '00000000-0000-0000-0000-000000000001',
+        teamBAttackerId: '00000000-0000-0000-0000-000000000002',
+        tournamentMatchId: '00000000-0000-0000-0000-000000000100',
+        ruleConfigId: '00000000-0000-0000-0000-000000000111',
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+        entryMode: 'MANUAL',
+        matchFormat: '1v1',
+      },
     })
 
-    const result = await page.evaluate(async () => {
-      const res = await fetch('/api/v1/matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idempotencyKey: crypto.randomUUID(),
-          creatorId: '00000000-0000-0000-0000-000000000001',
-          teamAAttackerId: '00000000-0000-0000-0000-000000000001',
-          teamBAttackerId: '00000000-0000-0000-0000-000000000002',
-          tournamentMatchId: '00000000-0000-0000-0000-000000000100',
-          ruleConfigId: '00000000-0000-0000-0000-000000000111',
-          games: [{ teamAScore: 10, teamBScore: 8 }],
-          entryMode: 'MANUAL',
-          matchFormat: '1v1',
-        }),
-      })
-      return {
-        status: res.status,
-      }
-    })
-
-    expect(result.status).toBe(201)
+    expect(response.status()).toBe(201)
   })
 })
