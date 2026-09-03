@@ -192,6 +192,13 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 && match.getStatus() != TournamentMatchStatus.CANCELLED
                 && match.getStatus() != TournamentMatchStatus.IN_PROGRESS;
 
+        UUID ruleConfigId = match.getTournament() != null && match.getTournament().getRuleConfiguration() != null
+                ? match.getTournament().getRuleConfiguration().getId()
+                : null;
+        String ruleConfigName = match.getTournament() != null && match.getTournament().getRuleConfiguration() != null
+                ? match.getTournament().getRuleConfiguration().getName()
+                : null;
+
         return TournamentMatchResponse.builder()
                 .id(match.getId())
                 .tournamentId(match.getTournament().getId())
@@ -213,6 +220,8 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 .isAvailable(isAvailable)
                 .isOpponentBusy(isOpponentBusy)
                 .busyParticipantNicknames(busyNicknames)
+                .ruleConfigurationId(ruleConfigId)
+                .ruleConfigurationName(ruleConfigName)
                 .build();
     }
 

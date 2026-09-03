@@ -13,15 +13,24 @@ import com.tictactore.exception.ParticipantNotFoundException;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
+import com.tictactore.model.RuleConfiguration;
+import com.tictactore.model.TournamentMatch;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
+import com.tictactore.repository.PlayerGroupRepository;
+import com.tictactore.repository.RuleConfigurationRepository;
+import com.tictactore.repository.TournamentMatchRepository;
 import com.tictactore.repository.UserRepository;
+import com.tictactore.rules.VerificationRules;
+import com.tictactore.service.MatchScoreValidator;
 import com.tictactore.service.MatchService;
 import com.tictactore.service.PushNotificationService;
 import com.tictactore.service.RateLimitService;
 import com.tictactore.service.operation.MatchOperation;
-import lombok.RequiredArgsConstructor;
+import com.tictactore.service.operation.MatchResponseMapper;
+import com.tictactore.service.tournament.TournamentMatchValidator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -39,29 +48,38 @@ public class MatchServiceImpl implements MatchService {
     private final MatchOperation matchOperation;
     private final PushNotificationService pushNotificationService;
     private final RateLimitService rateLimitService;
-    private final com.tictactore.service.operation.MatchResponseMapper matchResponseMapper;
-    private final com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
-    private final com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository;
+    private final MatchResponseMapper matchResponseMapper;
+    private final PlayerGroupRepository playerGroupRepository;
+    private final TournamentMatchRepository tournamentMatchRepository;
+    private final TournamentMatchValidator tournamentMatchValidator;
+    private final RuleConfigurationRepository ruleConfigurationRepository;
+    private final MatchScoreValidator matchScoreValidator;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public MatchServiceImpl(
             MatchRepository matchRepository,
             UserRepository userRepository,
             MatchOperation matchOperation,
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService,
-            com.tictactore.service.operation.MatchResponseMapper matchResponseMapper,
-            com.tictactore.repository.PlayerGroupRepository playerGroupRepository,
-            com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository
+            MatchResponseMapper matchResponseMapper,
+            PlayerGroupRepository playerGroupRepository,
+            TournamentMatchRepository tournamentMatchRepository,
+            TournamentMatchValidator tournamentMatchValidator,
+            RuleConfigurationRepository ruleConfigurationRepository,
+            MatchScoreValidator matchScoreValidator
     ) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.matchOperation = matchOperation;
         this.pushNotificationService = pushNotificationService;
         this.rateLimitService = rateLimitService;
-        this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new com.tictactore.service.operation.MatchResponseMapper(userRepository);
+        this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new MatchResponseMapper(userRepository);
         this.playerGroupRepository = playerGroupRepository;
         this.tournamentMatchRepository = tournamentMatchRepository;
+        this.tournamentMatchValidator = tournamentMatchValidator;
+        this.ruleConfigurationRepository = ruleConfigurationRepository;
+        this.matchScoreValidator = matchScoreValidator != null ? matchScoreValidator : new MatchScoreValidatorImpl();
     }
 
     public MatchServiceImpl(
@@ -71,7 +89,7 @@ public class MatchServiceImpl implements MatchService {
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService
     ) {
-        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null, null);
+        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new MatchResponseMapper(userRepository), null, null, null, null, new MatchScoreValidatorImpl());
     }
 
     @Override
@@ -93,6 +111,18 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidPositionException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
         }
 
+        TournamentMatch tournamentMatch = null;
+        if (request.tournamentMatchId() != null) {
+            if (tournamentMatchRepository == null) {
+                throw new ResourceNotFoundException("TournamentMatch", request.tournamentMatchId().toString());
+            }
+            tournamentMatch = tournamentMatchRepository.findById(request.tournamentMatchId())
+                    .orElseThrow(() -> new ResourceNotFoundException("TournamentMatch", request.tournamentMatchId().toString()));
+            if (tournamentMatchValidator != null) {
+                tournamentMatchValidator.validateTournamentMatchCreation(tournamentMatch, request);
+            }
+        }
+
         List<UUID> playerIds = new ArrayList<>();
         playerIds.add(request.teamAAttackerId());
         if (request.teamADefenderId() != null) playerIds.add(request.teamADefenderId());
@@ -104,7 +134,6 @@ public class MatchServiceImpl implements MatchService {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
         }
 
-
         List<User> foundUsers = userRepository.findAllById(playerIds);
         if (foundUsers.size() != playerIds.size()) {
             Set<UUID> foundIds = foundUsers.stream().map(User::getId).collect(Collectors.toSet());
@@ -112,15 +141,17 @@ public class MatchServiceImpl implements MatchService {
             throw new ParticipantNotFoundException("Player not found with ID: " + missingId);
         }
 
-        if (request.games() == null || request.games().isEmpty() || request.games().size() > 3) {
-            throw new InvalidMatchScoreException("Match must have between 1 and 3 games");
+        RuleConfiguration ruleConfig = null;
+        if (request.ruleConfigId() != null) {
+            if (ruleConfigurationRepository == null) {
+                throw new ResourceNotFoundException("RuleConfiguration", request.ruleConfigId().toString());
+            }
+            ruleConfig = ruleConfigurationRepository.findById(request.ruleConfigId())
+                    .orElseThrow(() -> new ResourceNotFoundException("RuleConfiguration", request.ruleConfigId().toString()));
         }
 
-        for (GameDto gameDto : request.games()) {
-            if (gameDto.teamAScore() < 0 || gameDto.teamAScore() > 100 ||
-                gameDto.teamBScore() < 0 || gameDto.teamBScore() > 100) {
-                throw new InvalidMatchScoreException("Game scores must be between 0 and 100");
-            }
+        if (matchScoreValidator != null) {
+            matchScoreValidator.validateScores(ruleConfig, request.games());
         }
 
         UUID creator = request.creatorId() != null ? request.creatorId() : request.teamAAttackerId();
@@ -144,6 +175,7 @@ public class MatchServiceImpl implements MatchService {
                 .status("PENDING_APPROVAL")
                 .entryMode(entryMode)
                 .matchFormat(matchFormat)
+                .ruleConfigId(request.ruleConfigId())
                 .createdAt(Instant.now())
                 .build();
 
@@ -196,11 +228,9 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Match savedMatch = matchOperation.saveMatch(match);
-        if (request.tournamentMatchId() != null && tournamentMatchRepository != null) {
-            tournamentMatchRepository.findById(request.tournamentMatchId()).ifPresent(tm -> {
-                tm.setMatch(savedMatch);
-                tournamentMatchRepository.save(tm);
-            });
+        if (tournamentMatch != null) {
+            tournamentMatch.setMatch(savedMatch);
+            tournamentMatchRepository.save(tournamentMatch);
         }
 
         try {
@@ -216,9 +246,9 @@ public class MatchServiceImpl implements MatchService {
 
             boolean isDuplicateWarning = candidateDuplicates.stream()
                     .filter(m -> !m.getId().equals(savedMatch.getId()))
-                    .anyMatch(m -> isIdenticalMatch(m, savedMatch, uniqueIds));
+                    .anyMatch(m -> VerificationRules.isIdenticalMatch(m, savedMatch, uniqueIds));
 
-            List<UUID> opponentIds = resolveOpponentIds(request, uniqueIds);
+            List<UUID> opponentIds = VerificationRules.resolveOpponentIds(request, uniqueIds);
             List<User> opponents = userRepository.findAllById(opponentIds);
             pushNotificationService.sendConfirmationRequest(savedMatch, opponents, isDuplicateWarning);
         } catch (Exception e) {
@@ -239,7 +269,7 @@ public class MatchServiceImpl implements MatchService {
 
         List<Match> userPendingMatches = new ArrayList<>();
         pendingMatches.stream()
-                .filter(m -> isUserPendingApprover(m, currentUserId))
+                .filter(m -> VerificationRules.isUserPendingApprover(m, currentUserId))
                 .forEach(userPendingMatches::add);
         if (rejectedMatches != null) {
             userPendingMatches.addAll(rejectedMatches);
@@ -270,52 +300,6 @@ public class MatchServiceImpl implements MatchService {
                 .toList();
 
         return new com.tictactore.dto.PendingMatchesResponse(userPendingResponses.size(), userPendingResponses);
-    }
-
-    private boolean isUserPendingApprover(Match match, UUID userId) {
-        if (userId == null || userId.equals(match.getCreatorId())) {
-            return false;
-        }
-        if (match.hasConfirmed(userId)) {
-            return false;
-        }
-        UUID creatorId = match.getCreatorId();
-        boolean creatorOnTeamA = creatorId != null && (creatorId.equals(match.getTeamAAttackerId()) || creatorId.equals(match.getTeamADefenderId()));
-        boolean creatorOnTeamB = creatorId != null && (creatorId.equals(match.getTeamBAttackerId()) || creatorId.equals(match.getTeamBDefenderId()));
-
-        if (creatorOnTeamA) {
-            return userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
-        } else if (creatorOnTeamB) {
-            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId());
-        } else {
-            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId())
-                || userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
-        }
-    }
-
-    private List<UUID> resolveOpponentIds(CreateMatchRequest request, Collection<UUID> allParticipants) {
-        UUID creatorId = request.creatorId();
-        boolean isOnTeamA = creatorId != null && (creatorId.equals(request.teamAAttackerId()) || creatorId.equals(request.teamADefenderId()));
-        boolean isOnTeamB = creatorId != null && (creatorId.equals(request.teamBAttackerId()) || creatorId.equals(request.teamBDefenderId()));
-
-        List<UUID> opponents = new ArrayList<>();
-        if (isOnTeamA) {
-            if (request.teamBAttackerId() != null) opponents.add(request.teamBAttackerId());
-            if (request.teamBDefenderId() != null) opponents.add(request.teamBDefenderId());
-        } else if (isOnTeamB) {
-            if (request.teamAAttackerId() != null) opponents.add(request.teamAAttackerId());
-            if (request.teamADefenderId() != null) opponents.add(request.teamADefenderId());
-        } else {
-            opponents.addAll(allParticipants);
-            if (creatorId != null) {
-                opponents.remove(creatorId);
-            }
-        }
-        return opponents;
-    }
-
-    private boolean isIdenticalMatch(Match candidate, Match current, Collection<UUID> currentParticipants) {
-        return new HashSet<>(candidate.getParticipantIds()).equals(new HashSet<>(currentParticipants));
     }
 
     @Override
@@ -371,7 +355,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
-            throw new InvalidMatchStateException("Match is already confirmed");
+            throw new InvalidMatchStateException("Cannot reject a confirmed match");
         }
 
         var reason = request != null ? request.reason() : null;

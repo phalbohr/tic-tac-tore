@@ -10,7 +10,7 @@ const LOGOUT_ENDPOINT = '/api/auth/logout'
 const PROFILE_ENDPOINT = '/api/v1/profile/me'
 const METHOD_POST = 'POST'
 
-interface UserProfile {
+export interface UserProfile {
   id?: string
   nickname: string
   avatar: string

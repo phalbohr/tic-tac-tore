@@ -470,3 +470,10 @@ status: open
 ## Deferred from: code review of 8-5-asynchronous-tournament-match-execution.md (2026-09-03)
 - Tournament status completion check on final match conclusion [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:197] — deferred, pre-existing
 - Optimistic locking retry mechanism for concurrent feeder completion in Cup bracket [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:238] — deferred, pre-existing
+
+## Deferred from: code review of 8-6-tournament-rule-system-enforcement.md (2026-09-03)
+- Missing authorization check on tournament match submission (referee mode) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:142] — Any user not participating can submit as referee; pre-existing design across match creations.
+- MatchResponse and MatchResponseMapper omit ruleConfigId [src/main/java/com/tictactore/dto/MatchResponse.java] — ruleConfigId is stored on Match entity but not in MatchResponse; out of scope for story 8.6.
+- Ambiguous participant array indexing in 2v2 submissions [frontend/src/features/match/stores/matchDraftStore.ts:701] — Pre-existing indexing convention in store.
+- Playwright skipped tests in api/tournament-rule-enforcement.spec.ts [frontend/e2e/tests/api/tournament-rule-enforcement.spec.ts:29] — Skipped due to lack of DB seed fixtures for API integration test.
+

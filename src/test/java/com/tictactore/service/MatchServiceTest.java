@@ -56,6 +56,15 @@ class MatchServiceTest {
     @Mock
     private com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository;
 
+    @Mock
+    private com.tictactore.service.tournament.TournamentMatchValidator tournamentMatchValidator;
+
+    @Mock
+    private com.tictactore.repository.RuleConfigurationRepository ruleConfigurationRepository;
+
+    @org.mockito.Spy
+    private MatchScoreValidator matchScoreValidator = new com.tictactore.service.impl.MatchScoreValidatorImpl();
+
     @InjectMocks
     private MatchServiceImpl matchService;
 
@@ -194,6 +203,77 @@ class MatchServiceTest {
                     .hasMessageContaining("Game scores must be between 0 and 100");
 
             verifyNoInteractions(matchOperation);
+        }
+
+        @Test
+        @DisplayName("[P0] Should validate tournament match creation and associate ruleConfigId with Match entity")
+        void shouldCreateTournamentMatchSuccessfullyAndValidateRuleConfig() {
+            var tournamentMatchId = UUID.randomUUID();
+            var ruleConfigId = UUID.randomUUID();
+            var tm = com.tictactore.model.TournamentMatch.builder().id(tournamentMatchId).build();
+            var ruleConfig = com.tictactore.model.RuleConfiguration.builder()
+                    .id(ruleConfigId)
+                    .gameLimit(3)
+                    .goalLimit(10)
+                    .build();
+
+            var request = new CreateMatchRequest(
+                    "idemp-tourn-1",
+                    p1, p1, null, p2, null,
+                    List.of(new GameDto(10, 8, null, null, null, null)),
+                    "MANUAL", "1v1", tournamentMatchId, ruleConfigId
+            );
+
+            when(matchRepository.findByIdempotencyKey("idemp-tourn-1")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build()
+            ));
+            when(tournamentMatchRepository.findById(tournamentMatchId)).thenReturn(Optional.of(tm));
+            when(ruleConfigurationRepository.findById(ruleConfigId)).thenReturn(Optional.of(ruleConfig));
+            when(matchOperation.saveMatch(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var response = matchService.createMatch(request);
+
+            verify(tournamentMatchValidator).validateTournamentMatchCreation(tm, request);
+            verify(tournamentMatchRepository).save(tm);
+            assertThat(response).isNotNull();
+        }
+
+        @Test
+        @DisplayName("[P0] Should enforce rule configuration gameLimit dynamically")
+        void shouldEnforceRuleConfigGameLimitDynamically() {
+            var ruleConfigId = UUID.randomUUID();
+            var ruleConfig = com.tictactore.model.RuleConfiguration.builder()
+                    .id(ruleConfigId)
+                    .gameLimit(5)
+                    .goalLimit(10)
+                    .build();
+
+            var request = new CreateMatchRequest(
+                    "idemp-5-games",
+                    p1, p1, null, p2, null,
+                    List.of(
+                            new GameDto(10, 8, null, null, null, null),
+                            new GameDto(8, 10, null, null, null, null),
+                            new GameDto(10, 5, null, null, null, null),
+                            new GameDto(5, 10, null, null, null, null),
+                            new GameDto(10, 9, null, null, null, null)
+                    ),
+                    "MANUAL", "1v1", null, ruleConfigId
+            );
+
+            when(matchRepository.findByIdempotencyKey("idemp-5-games")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p2).build()
+            ));
+            when(ruleConfigurationRepository.findById(ruleConfigId)).thenReturn(Optional.of(ruleConfig));
+            when(matchOperation.saveMatch(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var response = matchService.createMatch(request);
+
+            assertThat(response).isNotNull();
         }
 
         @Test
