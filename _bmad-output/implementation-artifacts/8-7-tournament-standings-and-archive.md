@@ -203,10 +203,29 @@ so that I can track competition progress, identify champions, and retain histori
 - **From Story 8.5**: Match completion is handled via `TournamentMatchServiceImpl.completeMatch` and triggered by `TournamentMatchEventListener` when core `MatchConfirmedEvent` arrives.
 - **From Story 8.6**: Tournament match rules are strictly locked to `RuleConfiguration`.
 
+### ATDD Artifacts
+
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-8-7-tournament-standings-and-archive.md`
+- Backend ATDD Scaffolds: `_bmad-output/test-artifacts/atdd-redphase-8-7/`
+  - `TournamentStandingResponseTest.java`
+  - `TournamentCompletedEventTest.java`
+  - `TournamentArchiveRepositoryTest.java`
+  - `TournamentStandingsServiceTest.java`
+  - `TournamentMatchServiceCompletionTest.java`
+  - `TournamentStandingsControllerTest.java`
+- Frontend Component & Store ATDD Scaffolds: `_bmad-output/test-artifacts/atdd-redphase-8-7/`
+  - `TournamentStandings.spec.ts`
+  - `tournamentStore.archive.spec.ts`
+  - `TournamentsView.archive.spec.ts`
+- Playwright Tests:
+  - `frontend/e2e/tests/api/tournament-standings-archive.spec.ts`
+  - `frontend/e2e/tournament-standings-archive.spec.ts`
+
 ## References
 
 - [Source: _bmad-output/planning-artifacts/epics.md#Story 8.7]
 - [Source: _bmad-output/planning-artifacts/prd.md#FR26, FR46, FR33]
 - [Source: _bmad-output/planning-artifacts/ux-design-specification.md]
 - [Source: src/main/java/com/tictactore/service/tournament/TournamentStandingsService.java]
+
 
