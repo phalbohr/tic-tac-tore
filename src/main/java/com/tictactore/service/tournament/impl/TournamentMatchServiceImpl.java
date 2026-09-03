@@ -105,7 +105,6 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         }
 
         tournamentMatchRepository.save(tournamentMatch);
-        tournamentStandingsService.calculateStandings(tournamentMatch.getTournament().getId());
         checkAndCompleteTournament(tournamentMatch);
     }
 
@@ -119,9 +118,9 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         UUID winnerRegistrationId = null;
 
         if (tournament.getFormat() == TournamentFormat.CUP) {
-            if (completedMatch.getNextMatch() == null) {
+            if (completedMatch.getNextMatch() == null && completedMatch.getWinner() != null) {
                 isCompleted = true;
-                winnerRegistrationId = completedMatch.getWinner() != null ? completedMatch.getWinner().getId() : null;
+                winnerRegistrationId = completedMatch.getWinner().getId();
             }
         } else {
             List<TournamentMatch> allMatches = tournamentMatchRepository.findByTournamentId(tournament.getId());
@@ -312,28 +311,69 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         TournamentRegistration part1 = tournamentMatch.getParticipant1();
         TournamentRegistration part2 = tournamentMatch.getParticipant2();
 
-        if (isRegistrationInTeamA(part1, match)) {
+        boolean side1IsTeamA = isSide1TeamA(tournamentMatch, match);
+        if (side1IsTeamA) {
             return teamAWon ? part1 : part2;
-        }
-        if (isRegistrationInTeamA(part2, match)) {
+        } else {
             return teamAWon ? part2 : part1;
         }
-        return teamAWon ? part1 : part2;
+    }
+
+    private boolean isSide1TeamA(TournamentMatch tournamentMatch, Match match) {
+        if (tournamentMatch == null || match == null) {
+            return true;
+        }
+        if (isRegistrationInTeamA(tournamentMatch.getParticipant1(), match)
+                || isRegistrationInTeamA(tournamentMatch.getParticipant1Partner(), match)) {
+            return true;
+        }
+        if (isRegistrationInTeamB(tournamentMatch.getParticipant1(), match)
+                || isRegistrationInTeamB(tournamentMatch.getParticipant1Partner(), match)) {
+            return false;
+        }
+        if (isRegistrationInTeamA(tournamentMatch.getParticipant2(), match)
+                || isRegistrationInTeamA(tournamentMatch.getParticipant2Partner(), match)) {
+            return false;
+        }
+        if (isRegistrationInTeamB(tournamentMatch.getParticipant2(), match)
+                || isRegistrationInTeamB(tournamentMatch.getParticipant2Partner(), match)) {
+            return true;
+        }
+        return true;
     }
 
     private boolean isRegistrationInTeamA(TournamentRegistration reg, Match match) {
         if (reg == null || match == null) {
             return false;
         }
-        if (reg.getPlayer() != null) {
+        if (reg.getPlayer() != null && reg.getPlayer().getId() != null) {
             UUID playerId = reg.getPlayer().getId();
             if (playerId.equals(match.getTeamAAttackerId()) || playerId.equals(match.getTeamADefenderId())) {
                 return true;
             }
         }
-        if (reg.getPartner() != null) {
+        if (reg.getPartner() != null && reg.getPartner().getId() != null) {
             UUID partnerId = reg.getPartner().getId();
             if (partnerId.equals(match.getTeamAAttackerId()) || partnerId.equals(match.getTeamADefenderId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isRegistrationInTeamB(TournamentRegistration reg, Match match) {
+        if (reg == null || match == null) {
+            return false;
+        }
+        if (reg.getPlayer() != null && reg.getPlayer().getId() != null) {
+            UUID playerId = reg.getPlayer().getId();
+            if (playerId.equals(match.getTeamBAttackerId()) || playerId.equals(match.getTeamBDefenderId())) {
+                return true;
+            }
+        }
+        if (reg.getPartner() != null && reg.getPartner().getId() != null) {
+            UUID partnerId = reg.getPartner().getId();
+            if (partnerId.equals(match.getTeamBAttackerId()) || partnerId.equals(match.getTeamBDefenderId())) {
                 return true;
             }
         }

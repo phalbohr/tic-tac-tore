@@ -60,6 +60,12 @@ function formatGameDiff(diff: number): string {
                 {{ t('tournament.standings.losses') }}
               </th>
               <th scope="col" class="py-3.5 px-3 text-center">
+                {{ t('tournament.standings.gamesWon') }}
+              </th>
+              <th scope="col" class="py-3.5 px-3 text-center">
+                {{ t('tournament.standings.gamesLost') }}
+              </th>
+              <th scope="col" class="py-3.5 px-3 text-center">
                 {{ t('tournament.standings.gameDiff') }}
               </th>
               <th scope="col" class="py-3.5 px-3 text-center font-bold text-on-surface">
@@ -156,6 +162,16 @@ function formatGameDiff(diff: number): string {
                 {{ standing.losses }}
               </td>
 
+              <!-- Games Won -->
+              <td class="py-3.5 px-3 text-center text-on-surface font-medium">
+                {{ standing.gamesWon }}
+              </td>
+
+              <!-- Games Lost -->
+              <td class="py-3.5 px-3 text-center text-on-surface font-medium">
+                {{ standing.gamesLost }}
+              </td>
+
               <!-- Game Difference -->
               <td
                 class="py-3.5 px-3 text-center font-medium"
@@ -188,6 +204,13 @@ function formatGameDiff(diff: number): string {
                   class="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                 >
                   {{ t('tournament.standings.eliminatedBadge') }}
+                </span>
+                <span
+                  v-else-if="isCompleted"
+                  data-testid="standing-badge-completed"
+                  class="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface border border-outline-variant/10"
+                >
+                  {{ t('tournament.standings.completedBadge') }}
                 </span>
                 <span
                   v-else

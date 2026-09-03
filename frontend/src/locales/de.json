@@ -528,12 +528,15 @@
       "played": "Sp",
       "wins": "S",
       "losses": "N",
+      "gamesWon": "GS",
+      "gamesLost": "GN",
       "gameDiff": "+/-",
       "points": "Pkt",
       "status": "Status",
       "winnerBadge": "Gewinner",
       "activeBadge": "Aktiv",
       "eliminatedBadge": "Ausgeschieden",
+      "completedBadge": "Beendet",
       "empty": "Noch keine Tabellendaten verfügbar."
     }
   }

@@ -324,7 +324,6 @@ class TournamentMatchServiceTest {
             assertThat(nextMatch.getStatus()).isEqualTo(TournamentMatchStatus.READY);
             verify(tournamentMatchRepository).save(tournamentMatch);
             verify(tournamentMatchRepository).save(nextMatch);
-            verify(tournamentStandingsService).calculateStandings(tournamentId);
         }
 
         @Test
@@ -382,7 +381,6 @@ class TournamentMatchServiceTest {
 
             assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
             assertThat(tournamentMatch.getWinner()).isNull();
-            verify(tournamentStandingsService).calculateStandings(tournamentId);
         }
     }
 }

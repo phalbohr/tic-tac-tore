@@ -15,12 +15,15 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'tournament.standings.played': 'P',
           'tournament.standings.wins': 'W',
           'tournament.standings.losses': 'L',
+          'tournament.standings.gamesWon': 'GW',
+          'tournament.standings.gamesLost': 'GL',
           'tournament.standings.gameDiff': '+/-',
           'tournament.standings.points': 'Pts',
           'tournament.standings.status': 'Status',
           'tournament.standings.winnerBadge': 'Winner',
           'tournament.standings.activeBadge': 'Active',
           'tournament.standings.eliminatedBadge': 'Eliminated',
+          'tournament.standings.completedBadge': 'Completed',
           'tournament.standings.empty': 'No standings data available yet.',
         }
         return translations[key] || defaultVal || key
@@ -78,7 +81,7 @@ describe('TournamentStandings.vue', () => {
     },
   ]
 
-  it('renders standings table with ranks, nicknames, games, and points', () => {
+  it('renders standings table with ranks, nicknames, GW, GL, game difference, and points', () => {
     const wrapper = mount(TournamentStandings, {
       props: {
         standings: mockStandings,
@@ -89,15 +92,19 @@ describe('TournamentStandings.vue', () => {
     expect(wrapper.text()).toContain('Alice Champion')
     expect(wrapper.text()).toContain('Bob RunnerUp')
     expect(wrapper.text()).toContain('Charlie Knockout')
+    expect(wrapper.text()).toContain('GW')
+    expect(wrapper.text()).toContain('GL')
 
     const firstRow = wrapper.findAll('tbody tr')[0]
     expect(firstRow).toBeDefined()
     expect(firstRow!.text()).toContain('1')
+    expect(firstRow!.text()).toContain('10')
+    expect(firstRow!.text()).toContain('2')
     expect(firstRow!.text()).toContain('15')
     expect(firstRow!.text()).toContain('+8')
   })
 
-  it('displays winner badge for rank 1 in completed tournaments', () => {
+  it('displays winner badge for rank 1 and completed badge for non-eliminated rank > 1 in completed tournaments', () => {
     const wrapper = mount(TournamentStandings, {
       props: {
         standings: mockStandings,
@@ -107,6 +114,10 @@ describe('TournamentStandings.vue', () => {
 
     const winnerBadge = wrapper.find('[data-testid="standing-badge-winner"]')
     expect(winnerBadge.exists()).toBe(true)
+
+    const completedBadge = wrapper.find('[data-testid="standing-badge-completed"]')
+    expect(completedBadge.exists()).toBe(true)
+    expect(completedBadge.text()).toContain('Completed')
   })
 
   it('displays eliminated badge for eliminated participants in cup tournaments', () => {

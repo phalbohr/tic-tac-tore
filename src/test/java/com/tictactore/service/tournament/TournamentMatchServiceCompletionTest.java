@@ -170,4 +170,27 @@ class TournamentMatchServiceCompletionTest {
         verify(eventPublisher, never()).publishEvent(any(TournamentCompletedEvent.class));
         assertThat(tournament.getStatus()).isEqualTo(TournamentStatus.IN_PROGRESS);
     }
+
+    @Test
+    @DisplayName("Should not complete CUP tournament when final match concludes without a declared winner")
+    void shouldNotCompleteCupTournamentWhenFinalMatchHasNoWinner() {
+        var finalMatchId = UUID.randomUUID();
+        var finalMatch = TournamentMatch.builder()
+                .id(finalMatchId)
+                .tournament(tournament)
+                .participant1(regAlice)
+                .participant2(regBob)
+                .winner(null)
+                .nextMatch(null)
+                .status(TournamentMatchStatus.READY)
+                .build();
+
+        when(tournamentMatchRepository.findById(finalMatchId)).thenReturn(Optional.of(finalMatch));
+
+        tournamentMatchService.completeMatch(finalMatchId, null);
+
+        verify(tournamentRepository, never()).save(tournament);
+        verify(eventPublisher, never()).publishEvent(any(TournamentCompletedEvent.class));
+        assertThat(tournament.getStatus()).isEqualTo(TournamentStatus.IN_PROGRESS);
+    }
 }

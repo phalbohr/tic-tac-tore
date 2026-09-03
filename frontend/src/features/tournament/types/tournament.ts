@@ -45,6 +45,7 @@ export interface TournamentDto {
   creatorId: string
   creatorNickname: string
   createdAt: string
+  updatedAt?: string | null
 }
 
 export interface RegisterTournamentPayload {

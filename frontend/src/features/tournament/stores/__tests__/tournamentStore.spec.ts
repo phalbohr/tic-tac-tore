@@ -28,12 +28,18 @@ describe('tournamentStore archive & standings actions', () => {
       },
     ]
 
-    vi.spyOn(tournamentService, 'getTournamentStandings').mockResolvedValue(mockStandings)
+    vi.spyOn(tournamentService, 'getTournamentStandings').mockImplementation(async () => {
+      expect(store.isStandingsLoading).toBe(true)
+      expect(store.isLoading).toBe(false)
+      return mockStandings
+    })
 
     await store.fetchStandings('tourn-uuid-1')
 
     expect(tournamentService.getTournamentStandings).toHaveBeenCalledWith('tourn-uuid-1')
     expect(store.standings['tourn-uuid-1']).toEqual(mockStandings)
+    expect(store.isStandingsLoading).toBe(false)
+    expect(store.isLoading).toBe(false)
   })
 
   it('fetchArchive should retrieve paginated completed tournaments and update state', async () => {

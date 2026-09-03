@@ -30,6 +30,7 @@ export const useTournamentStore = defineStore('tournament', () => {
   const archiveTotalPages = ref<number>(0)
   const archiveTotalElements = ref<number>(0)
   const isArchiveLoading = ref<boolean>(false)
+  const isStandingsLoading = ref<boolean>(false)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
@@ -81,7 +82,7 @@ export const useTournamentStore = defineStore('tournament', () => {
   }
 
   async function fetchStandings(tournamentId: string): Promise<TournamentStandingDto[]> {
-    isLoading.value = true
+    isStandingsLoading.value = true
     error.value = null
     try {
       const items = await tournamentService.getTournamentStandings(tournamentId)
@@ -91,7 +92,7 @@ export const useTournamentStore = defineStore('tournament', () => {
       error.value = err instanceof Error ? err.message : 'Failed to fetch tournament standings'
       throw err
     } finally {
-      isLoading.value = false
+      isStandingsLoading.value = false
     }
   }
 
@@ -376,6 +377,7 @@ export const useTournamentStore = defineStore('tournament', () => {
     archiveTotalPages,
     archiveTotalElements,
     isArchiveLoading,
+    isStandingsLoading,
     isLoading,
     error,
     createTournament,

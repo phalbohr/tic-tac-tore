@@ -102,10 +102,21 @@ async function openBracket(tourn: TournamentDto, defaultTab: 'bracket' | 'standi
   activeBracketTournament.value = tourn
   activeModalTab.value = tourn.status === 'COMPLETED' ? 'standings' : defaultTab
   try {
-    await Promise.allSettled([
+    const results = await Promise.allSettled([
       tournamentStore.fetchBracket(tourn.id),
       tournamentStore.fetchStandings(tourn.id),
     ])
+    const errors = results
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .map((r) => (r.reason instanceof Error ? r.reason.message : 'Failed to load tournament data'))
+
+    if (errors.length === results.length) {
+      showToast(errors[0] ?? 'Failed to load tournament details')
+      return
+    }
+    if (errors.length > 0 && errors[0]) {
+      showToast(errors[0])
+    }
     isBracketModalOpen.value = true
   } catch (err: unknown) {
     showToast(err instanceof Error ? err.message : 'Failed to load tournament details')
@@ -515,7 +526,7 @@ async function handleStartMatch(matchId: string) {
 
             <div class="text-xs text-on-surface-variant space-y-1">
               <div>{{ t('tournament.archive.participants', { count: `${tourn.minParticipants} - ${tourn.maxParticipants}` }) }}</div>
-              <div>{{ t('tournament.archive.completedDate', { date: new Date(tourn.createdAt).toLocaleDateString() }) }}</div>
+              <div>{{ t('tournament.archive.completedDate', { date: new Date(tourn.updatedAt || tourn.createdAt).toLocaleDateString() }) }}</div>
             </div>
 
             <div class="pt-2 border-t border-outline-variant/10 flex items-center justify-end gap-2">

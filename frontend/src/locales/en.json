@@ -528,12 +528,15 @@
       "played": "P",
       "wins": "W",
       "losses": "L",
+      "gamesWon": "GW",
+      "gamesLost": "GL",
       "gameDiff": "+/-",
       "points": "Pts",
       "status": "Status",
       "winnerBadge": "Winner",
       "activeBadge": "Active",
       "eliminatedBadge": "Eliminated",
+      "completedBadge": "Completed",
       "empty": "No standings data available yet."
     }
   }

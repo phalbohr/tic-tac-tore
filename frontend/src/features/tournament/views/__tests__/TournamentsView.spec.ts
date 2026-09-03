@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import TournamentsView from '@/features/tournament/views/TournamentsView.vue'
 import { useTournamentStore } from '@/features/tournament/stores/tournamentStore'
-import { useAuthStore } from '@/stores/auth'
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -82,5 +81,34 @@ describe('TournamentsView.vue Archive & Standings Integration', () => {
 
     expect(wrapper.text()).toContain('Historic Tournament 2025')
     expect(wrapper.find('[data-testid="tournament-status-badge"]').text()).toBe('COMPLETED')
+  })
+
+  it('handles rejected promises in openBracket gracefully without opening broken modal', async () => {
+    const store = useTournamentStore()
+    vi.spyOn(store, 'fetchBracket').mockRejectedValue(new Error('Network error'))
+    vi.spyOn(store, 'fetchStandings').mockRejectedValue(new Error('Network error'))
+
+    const wrapper = mount(TournamentsView)
+    const tourn = {
+      id: 't-err-1',
+      name: 'Broken Tournament',
+      status: 'COMPLETED' as const,
+      format: 'CUP' as const,
+      mode: 'ONE_VS_ONE_PERSONAL' as const,
+      ruleConfiguration: { id: 'rc-1', name: 'Default', goalLimit: 5, gameLimit: 1, winByTwo: false },
+      minParticipants: 4,
+      maxParticipants: 8,
+      registrationDeadline: '2026-01-01T00:00:00Z',
+      hasPlayoff: false,
+      creatorId: 'u-1',
+      creatorNickname: 'Host',
+      createdAt: '2026-01-01T00:00:00Z',
+    }
+
+    // Call component openBracket via vm
+    // @ts-expect-error vm access
+    await wrapper.vm.openBracket(tourn, 'standings')
+
+    expect(wrapper.find('[data-testid="bracket-modal"]').exists()).toBe(false)
   })
 })
