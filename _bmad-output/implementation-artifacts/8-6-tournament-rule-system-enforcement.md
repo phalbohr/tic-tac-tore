@@ -1,6 +1,6 @@
 ---
 baseline_commit: fed5a89
-status: review
+status: in-progress
 ---
 
 # Story 8.6: Tournament Rule System Enforcement
@@ -134,6 +134,22 @@ so that all tournament matches remain consistent, compliant with tournament sett
       - Verify rule chips cannot be toggled.
       - Complete match entry and verify successful submission.
   - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+
+### Review Findings
+
+- [ ] [Review][Patch] Pre-populate participants and format in match entry flow from tournament bracket [frontend/src/features/tournament/views/TournamentsView.vue:150, frontend/src/features/match/components/NewMatchFlow.vue:23]
+- [ ] [Review][Patch] Enforce team side roster validation in 2v2 tournament matches [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:43]
+- [ ] [Review][Patch] Enforce game score validation against RuleConfiguration parameters (goalLimit, winByTwo, absoluteScoreCap) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:124]
+- [ ] [Review][Patch] RulePicker.vue ignores tournament ruleConfigurationId and selects user profile default rule [frontend/src/features/match/components/RulePicker.vue:30]
+- [ ] [Review][Patch] matchDraftStore does not reset ruleConfigurationId, causing state leakage into subsequent matches [frontend/src/features/match/stores/matchDraftStore.ts:725]
+- [ ] [Review][Patch] Tournament match status and duplicate execution check missing in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:24]
+- [ ] [Review][Patch] Leaking requirement identifier (FR45) in UI banner [frontend/src/features/match/components/RulePicker.vue:134]
+- [ ] [Review][Patch] Non-surgical formatting / line condensing in MatchServiceImpl.java [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:270]
+- [ ] [Review][Patch] Tournament mode vs match format mismatch validation in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:25]
+- [x] [Review][Defer] Missing authorization check on tournament match submission (referee mode) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:142] — deferred, pre-existing
+- [x] [Review][Defer] MatchResponse and MatchResponseMapper omit ruleConfigId [src/main/java/com/tictactore/dto/MatchResponse.java] — deferred, pre-existing
+- [x] [Review][Defer] Ambiguous participant array indexing in 2v2 submissions [frontend/src/features/match/stores/matchDraftStore.ts:701] — deferred, pre-existing
+- [x] [Review][Defer] Playwright skipped tests in api/tournament-rule-enforcement.spec.ts [frontend/e2e/tests/api/tournament-rule-enforcement.spec.ts:29] — deferred, pre-existing
 
 ## Dev Notes
 
