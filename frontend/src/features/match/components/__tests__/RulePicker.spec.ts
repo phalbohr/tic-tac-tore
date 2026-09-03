@@ -17,7 +17,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'rules.pickerTitle': 'Rule System',
           'rules.createCustom': '+ Custom Rule',
           'rules.setAsDefault': 'Set as default',
-          'rules.lockedTournamentNotice': 'Rule system is locked to tournament settings (FR45)',
+          'rules.lockedTournamentNotice': 'Rule system is locked to tournament settings',
           'rules.tournamentBadge': 'Tournament Rule',
           'common.default': 'Default',
           'common.error': 'An error occurred',

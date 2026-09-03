@@ -727,6 +727,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectedPlayers.value = []
     initDraft()
     ruleConfig.value = null
+    ruleConfigurationId.value = null
+    ruleSystem.value = 'STANDARD'
     tournamentId.value = null
     tournamentMatchId.value = null
     games.value = []

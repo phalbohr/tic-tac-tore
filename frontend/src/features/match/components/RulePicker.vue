@@ -28,14 +28,30 @@ const draftStore = useMatchDraftStore()
 const effectivelyLocked = computed(() => Boolean(props.isLocked || draftStore.isTournamentMatch))
 
 const selectedRuleId = ref<string | null>(
-  ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null,
+  draftStore.ruleConfigurationId || ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null,
 )
 const isModalOpen = ref(false)
 const modalError = ref('')
 
 watch(
+  () => draftStore.ruleConfigurationId,
+  (newId) => {
+    if (newId) {
+      selectedRuleId.value = newId
+      const found = ruleStore.allRules.find((r) => r.id === newId)
+      if (found) {
+        ruleStore.selectRule(found.id)
+        draftStore.ruleSystem = found.name
+      }
+    }
+  },
+  { immediate: true },
+)
+
+watch(
   () => authStore.profile?.defaultRuleConfigurationId,
   (newDef) => {
+    if (effectivelyLocked.value || draftStore.ruleConfigurationId) return
     if (newDef && !selectedRuleId.value) {
       const defaultRule = ruleStore.allRules.find((r) => r.id === newDef)
       if (defaultRule) {
@@ -53,7 +69,16 @@ onMounted(async () => {
       // ignore
     }
   }
-  if (!selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
+  if (draftStore.ruleConfigurationId) {
+    const targetRule = ruleStore.allRules.find((r) => r.id === draftStore.ruleConfigurationId)
+    if (targetRule) {
+      selectedRuleId.value = targetRule.id
+      ruleStore.selectRule(targetRule.id)
+      draftStore.ruleSystem = targetRule.name
+    } else {
+      selectedRuleId.value = draftStore.ruleConfigurationId
+    }
+  } else if (!selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
     const defaultRule = ruleStore.allRules.find(
       (r) => r.id === authStore.profile?.defaultRuleConfigurationId,
     )
@@ -64,6 +89,10 @@ onMounted(async () => {
 })
 
 const selectedRule = computed(() => {
+  if (draftStore.ruleConfigurationId) {
+    const found = ruleStore.allRules.find((r) => r.id === draftStore.ruleConfigurationId)
+    if (found) return found
+  }
   if (selectedRuleId.value) {
     const found = ruleStore.allRules.find((r) => r.id === selectedRuleId.value)
     if (found) return found
@@ -79,6 +108,9 @@ const selectedRule = computed(() => {
 })
 
 function isSelected(rule: { id: string; name: string }) {
+  if (draftStore.ruleConfigurationId) {
+    return draftStore.ruleConfigurationId === rule.id
+  }
   return (
     selectedRuleId.value === rule.id ||
     ruleStore.selectedRuleId === rule.id ||
@@ -97,6 +129,7 @@ function selectRule(ruleId: string, ruleName: string) {
   if (effectivelyLocked.value && selectedRuleId.value && selectedRuleId.value !== ruleId) return
   selectedRuleId.value = ruleId
   ruleStore.selectRule(ruleId)
+  draftStore.ruleConfigurationId = ruleId
   draftStore.ruleSystem = ruleName
   draftStore.loadRuleConfig()
 }
@@ -131,7 +164,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
       data-testid="locked-rule-notice"
     >
       <span class="material-symbols-outlined text-sm text-primary">lock</span>
-      <span>{{ t('rules.lockedTournamentNotice', 'Rule system is locked to tournament settings (FR45)') }}</span>
+      <span>{{ t('rules.lockedTournamentNotice', 'Rule system is locked to tournament settings') }}</span>
     </div>
 
     <div class="flex justify-between items-center mb-1">

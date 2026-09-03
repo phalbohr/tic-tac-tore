@@ -1,7 +1,11 @@
 package com.tictactore.rules;
 
+import com.tictactore.dto.CreateMatchRequest;
 import com.tictactore.model.Match;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,6 +87,52 @@ public final class VerificationRules {
             return false;
         }
         return Match.STATUS_PARTIALLY_CONFIRMED.equals(match.getStatus());
+    }
+
+    public static boolean isUserPendingApprover(Match match, UUID userId) {
+        if (userId == null || userId.equals(match.getCreatorId())) {
+            return false;
+        }
+        if (match.hasConfirmed(userId)) {
+            return false;
+        }
+        UUID creatorId = match.getCreatorId();
+        boolean creatorOnTeamA = creatorId != null && (creatorId.equals(match.getTeamAAttackerId()) || creatorId.equals(match.getTeamADefenderId()));
+        boolean creatorOnTeamB = creatorId != null && (creatorId.equals(match.getTeamBAttackerId()) || creatorId.equals(match.getTeamBDefenderId()));
+
+        if (creatorOnTeamA) {
+            return userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
+        } else if (creatorOnTeamB) {
+            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId());
+        } else {
+            return userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId())
+                    || userId.equals(match.getTeamBAttackerId()) || userId.equals(match.getTeamBDefenderId());
+        }
+    }
+
+    public static List<UUID> resolveOpponentIds(CreateMatchRequest request, Collection<UUID> allParticipants) {
+        UUID creatorId = request.creatorId();
+        boolean isOnTeamA = creatorId != null && (creatorId.equals(request.teamAAttackerId()) || creatorId.equals(request.teamADefenderId()));
+        boolean isOnTeamB = creatorId != null && (creatorId.equals(request.teamBAttackerId()) || creatorId.equals(request.teamBDefenderId()));
+
+        List<UUID> opponents = new ArrayList<>();
+        if (isOnTeamA) {
+            if (request.teamBAttackerId() != null) opponents.add(request.teamBAttackerId());
+            if (request.teamBDefenderId() != null) opponents.add(request.teamBDefenderId());
+        } else if (isOnTeamB) {
+            if (request.teamAAttackerId() != null) opponents.add(request.teamAAttackerId());
+            if (request.teamADefenderId() != null) opponents.add(request.teamADefenderId());
+        } else {
+            opponents.addAll(allParticipants);
+            if (creatorId != null) {
+                opponents.remove(creatorId);
+            }
+        }
+        return opponents;
+    }
+
+    public static boolean isIdenticalMatch(Match candidate, Match current, Collection<UUID> currentParticipants) {
+        return new HashSet<>(candidate.getParticipantIds()).equals(new HashSet<>(currentParticipants));
     }
 
     private static boolean isParticipantEntered(Match match) {

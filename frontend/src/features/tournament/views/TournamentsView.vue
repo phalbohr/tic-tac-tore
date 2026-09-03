@@ -8,6 +8,7 @@ import type {
   TournamentDto,
   TournamentRegistrationDto,
   RegisterTournamentPayload,
+  TournamentMatchDto,
 } from '@/features/tournament/types/tournament'
 import TournamentRegistrationModal from '@/features/tournament/components/TournamentRegistrationModal.vue'
 import TournamentInviteModal from '@/features/tournament/components/TournamentInviteModal.vue'
@@ -147,6 +148,37 @@ async function handleStartMatch(matchId: string) {
   try {
     await tournamentStore.startMatch(activeBracketTournament.value.id, matchId)
     isBracketModalOpen.value = false
+
+    let matchDto: TournamentMatchDto | undefined
+    if (activeBracket.value) {
+      for (const round of activeBracket.value.rounds) {
+        const found = round.matches.find((m) => m.id === matchId)
+        if (found) {
+          matchDto = found
+          break
+        }
+      }
+    }
+
+    const is2v2 = activeBracketTournament.value.mode !== 'ONE_VS_ONE_PERSONAL'
+    const playerIds: string[] = []
+    if (matchDto) {
+      const p1Id = matchDto.participant1?.playerId
+      const p1PartnerId = matchDto.participant1Partner?.playerId || matchDto.participant1?.partnerId
+      const p2Id = matchDto.participant2?.playerId
+      const p2PartnerId = matchDto.participant2Partner?.playerId || matchDto.participant2?.partnerId
+
+      if (is2v2) {
+        if (p1PartnerId) playerIds.push(p1PartnerId)
+        if (p1Id) playerIds.push(p1Id)
+        if (p2PartnerId) playerIds.push(p2PartnerId)
+        if (p2Id) playerIds.push(p2Id)
+      } else {
+        if (p1Id) playerIds.push(p1Id)
+        if (p2Id) playerIds.push(p2Id)
+      }
+    }
+
     router.push({
       path: '/matches/new',
       query: {
@@ -154,6 +186,8 @@ async function handleStartMatch(matchId: string) {
         tournamentMatchId: matchId,
         ruleConfigId: activeBracketTournament.value.ruleConfiguration?.id,
         ruleSystemName: activeBracketTournament.value.ruleConfiguration?.name,
+        matchType: is2v2 ? '2v2' : '1v1',
+        ...(playerIds.length > 0 ? { playerIds: playerIds.join(',') } : {}),
       },
     })
   } catch (err: unknown) {

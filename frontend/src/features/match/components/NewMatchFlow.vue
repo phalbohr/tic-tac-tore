@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMatchDraftStore } from '../stores/matchDraftStore'
+import { useMatchDraftStore, MatchType } from '../stores/matchDraftStore'
 import { useAuthStore } from '@/stores/auth'
 import MatchTypePicker from './MatchTypePicker.vue'
 import RulePicker from './RulePicker.vue'
@@ -21,11 +21,18 @@ onMounted(() => {
   store.fetchDefaults()
   authStore.fetchProfile()
   if (route.query.tournamentId && route.query.tournamentMatchId) {
+    const rawPlayerIds = route.query.playerIds
+      ? String(route.query.playerIds).split(',').filter(Boolean)
+      : undefined
+    const matchTypeParam =
+      route.query.matchType === '2v2' ? MatchType.TWO_VS_TWO : MatchType.ONE_VS_ONE
     store.setTournamentContext({
       tournamentId: String(route.query.tournamentId),
       tournamentMatchId: String(route.query.tournamentMatchId),
       ruleConfigId: route.query.ruleConfigId ? String(route.query.ruleConfigId) : undefined,
       ruleSystemName: route.query.ruleSystemName ? String(route.query.ruleSystemName) : undefined,
+      matchType: matchTypeParam,
+      playerIds: rawPlayerIds,
     })
   } else {
     if (route.query.tournamentId) {

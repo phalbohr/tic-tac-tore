@@ -62,6 +62,9 @@ class MatchServiceTest {
     @Mock
     private com.tictactore.repository.RuleConfigurationRepository ruleConfigurationRepository;
 
+    @org.mockito.Spy
+    private MatchScoreValidator matchScoreValidator = new com.tictactore.service.impl.MatchScoreValidatorImpl();
+
     @InjectMocks
     private MatchServiceImpl matchService;
 

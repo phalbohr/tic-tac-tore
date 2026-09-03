@@ -1,6 +1,6 @@
 ---
 baseline_commit: fed5a89
-status: in-progress
+status: review
 ---
 
 # Story 8.6: Tournament Rule System Enforcement
@@ -137,15 +137,15 @@ so that all tournament matches remain consistent, compliant with tournament sett
 
 ### Review Findings
 
-- [ ] [Review][Patch] Pre-populate participants and format in match entry flow from tournament bracket [frontend/src/features/tournament/views/TournamentsView.vue:150, frontend/src/features/match/components/NewMatchFlow.vue:23]
-- [ ] [Review][Patch] Enforce team side roster validation in 2v2 tournament matches [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:43]
-- [ ] [Review][Patch] Enforce game score validation against RuleConfiguration parameters (goalLimit, winByTwo, absoluteScoreCap) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:124]
-- [ ] [Review][Patch] RulePicker.vue ignores tournament ruleConfigurationId and selects user profile default rule [frontend/src/features/match/components/RulePicker.vue:30]
-- [ ] [Review][Patch] matchDraftStore does not reset ruleConfigurationId, causing state leakage into subsequent matches [frontend/src/features/match/stores/matchDraftStore.ts:725]
-- [ ] [Review][Patch] Tournament match status and duplicate execution check missing in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:24]
-- [ ] [Review][Patch] Leaking requirement identifier (FR45) in UI banner [frontend/src/features/match/components/RulePicker.vue:134]
-- [ ] [Review][Patch] Non-surgical formatting / line condensing in MatchServiceImpl.java [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:270]
-- [ ] [Review][Patch] Tournament mode vs match format mismatch validation in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:25]
+- [x] [Review][Patch] Pre-populate participants and format in match entry flow from tournament bracket [frontend/src/features/tournament/views/TournamentsView.vue:150, frontend/src/features/match/components/NewMatchFlow.vue:23]
+- [x] [Review][Patch] Enforce team side roster validation in 2v2 tournament matches [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:43]
+- [x] [Review][Patch] Enforce game score validation against RuleConfiguration parameters (goalLimit, winByTwo, absoluteScoreCap) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:124]
+- [x] [Review][Patch] RulePicker.vue ignores tournament ruleConfigurationId and selects user profile default rule [frontend/src/features/match/components/RulePicker.vue:30]
+- [x] [Review][Patch] matchDraftStore does not reset ruleConfigurationId, causing state leakage into subsequent matches [frontend/src/features/match/stores/matchDraftStore.ts:725]
+- [x] [Review][Patch] Tournament match status and duplicate execution check missing in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:24]
+- [x] [Review][Patch] Leaking requirement identifier (FR45) in UI banner [frontend/src/features/match/components/RulePicker.vue:134]
+- [x] [Review][Patch] Non-surgical formatting / line condensing in MatchServiceImpl.java [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:270]
+- [x] [Review][Patch] Tournament mode vs match format mismatch validation in TournamentMatchValidatorImpl [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java:25]
 - [x] [Review][Defer] Missing authorization check on tournament match submission (referee mode) [src/main/java/com/tictactore/service/impl/MatchServiceImpl.java:142] — deferred, pre-existing
 - [x] [Review][Defer] MatchResponse and MatchResponseMapper omit ruleConfigId [src/main/java/com/tictactore/dto/MatchResponse.java] — deferred, pre-existing
 - [x] [Review][Defer] Ambiguous participant array indexing in 2v2 submissions [frontend/src/features/match/stores/matchDraftStore.ts:701] — deferred, pre-existing
@@ -212,3 +212,31 @@ Auto (Antigravity Assistant)
 ### Debug Log References
 - Story validation against `checklist.md` completed.
 - Full context enrichment applied.
+- Addressed code review findings (9 findings resolved, 4 deferred).
+- Verification via `./scripts/ci-local.sh` passed 100%.
+
+### Completion Notes
+- Fixed Finding 1: Pre-populated participants and format in match entry flow from tournament bracket via query parameters in `TournamentsView.vue` and `NewMatchFlow.vue`.
+- Fixed Finding 2: Enforced team side roster validation in 2v2 tournament matches in `TournamentMatchValidatorImpl.java`.
+- Fixed Finding 3: Extracted and enforced comprehensive game score validation against `RuleConfiguration` parameters (`goalLimit`, `winByTwo`, `absoluteScoreCap`, `gameLimit`) in `MatchScoreValidatorImpl.java` and `MatchServiceImpl.java`.
+- Fixed Finding 4: Updated `RulePicker.vue` to prioritize tournament `ruleConfigurationId` over user profile default rule, watch for changes, and prevent overrides when locked.
+- Fixed Finding 5: Reset `ruleConfigurationId` and `ruleSystem` in `matchDraftStore.ts:resetDraftStateOnly()` to prevent state leakage.
+- Fixed Finding 6: Added tournament match status check (`READY` or `IN_PROGRESS`) and duplicate execution check (`match != null` / `COMPLETED`) in `TournamentMatchValidatorImpl.java`.
+- Fixed Finding 7: Removed requirement ID `(FR45)` from UI banner in `RulePicker.vue`.
+- Fixed Finding 8: Restored surgical formatting across all methods in `MatchServiceImpl.java` and delegated validation logic to stay at 478 lines (< 500 lines).
+- Fixed Finding 9: Added tournament mode vs match format mismatch validation in `TournamentMatchValidatorImpl.java`.
+
+### File List
+- `src/main/java/com/tictactore/service/MatchScoreValidator.java`
+- `src/main/java/com/tictactore/service/impl/MatchScoreValidatorImpl.java`
+- `src/main/java/com/tictactore/service/tournament/impl/TournamentMatchValidatorImpl.java`
+- `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`
+- `src/main/java/com/tictactore/rules/VerificationRules.java`
+- `src/test/java/com/tictactore/service/MatchScoreValidatorTest.java`
+- `src/test/java/com/tictactore/service/tournament/TournamentMatchValidatorTest.java`
+- `src/test/java/com/tictactore/service/MatchServiceTest.java`
+- `frontend/src/features/match/stores/matchDraftStore.ts`
+- `frontend/src/features/match/components/RulePicker.vue`
+- `frontend/src/features/match/components/NewMatchFlow.vue`
+- `frontend/src/features/tournament/views/TournamentsView.vue`
+- `frontend/src/features/match/components/__tests__/RulePicker.spec.ts`
