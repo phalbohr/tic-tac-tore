@@ -9,16 +9,16 @@ const mockReplace = vi.fn()
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
-    query: { tab: 'confirmed' }
+    query: { tab: 'confirmed' },
   }),
   useRouter: () => ({
     push: mockPush,
-    replace: mockReplace
+    replace: mockReplace,
   }),
   RouterLink: {
     template: '<a :href="to"><slot /></a>',
-    props: ['to']
-  }
+    props: ['to'],
+  },
 }))
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -33,11 +33,11 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'history.tabs.pending': 'Pending',
           'history.filters.all': 'All',
           'history.filters.player': 'Filter by Player',
-          'match.submit': 'Submit Match'
+          'match.submit': 'Submit Match',
         }
         return translations[key] || defaultVal || key
-      }
-    })
+      },
+    }),
   }
 })
 
@@ -53,10 +53,10 @@ describe('MyMatchesView.vue', () => {
         stubs: {
           RouterLink: {
             template: '<a :href="to"><slot /></a>',
-            props: ['to']
-          }
-        }
-      }
+            props: ['to'],
+          },
+        },
+      },
     })
 
     expect(wrapper.find('[data-testid="history-title"]').text()).toBe('My Matches')
@@ -71,10 +71,10 @@ describe('MyMatchesView.vue', () => {
         stubs: {
           RouterLink: {
             template: '<a :href="to"><slot /></a>',
-            props: ['to']
-          }
-        }
-      }
+            props: ['to'],
+          },
+        },
+      },
     })
 
     await wrapper.find('[data-testid="tab-pending"]').trigger('click')

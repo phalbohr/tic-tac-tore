@@ -1,1 +1,1 @@
-export * from '@/features/group/stores/usePlayerGroupStore';
+export * from '@/features/group/stores/usePlayerGroupStore'

@@ -20,7 +20,7 @@ async function loadData() {
     minMatches: minMatches.value,
     page: currentPage.value,
     size: pageSize.value,
-    playerId: playerIdFilter.value.trim() || undefined
+    playerId: playerIdFilter.value.trim() || undefined,
   })
 }
 
@@ -57,16 +57,23 @@ function nextPage() {
         {{ t('teamStats.title', 'Team Statistics') }}
       </h1>
       <p class="text-sm text-on-surface-variant">
-        {{ t('teamStats.subtitle', 'Analyze your synergy with different teammates across positions') }}
+        {{
+          t('teamStats.subtitle', 'Analyze your synergy with different teammates across positions')
+        }}
       </p>
     </div>
 
     <!-- Filters Bar (No-Line Rule: tonal surfaces) -->
-    <div class="ch-filter-bar bg-surface-container-low p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-xs">
+    <div
+      class="ch-filter-bar bg-surface-container-low p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-xs"
+    >
       <div class="flex flex-wrap gap-4 items-center">
         <!-- Period Filter -->
         <div class="flex items-center gap-2">
-          <label for="period-select" class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+          <label
+            for="period-select"
+            class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider"
+          >
             {{ t('teamStats.filterPeriod', 'Period') }}:
           </label>
           <select
@@ -84,7 +91,10 @@ function nextPage() {
 
         <!-- Min Matches Filter -->
         <div class="flex items-center gap-2">
-          <label for="min-matches-select" class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+          <label
+            for="min-matches-select"
+            class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider"
+          >
             {{ t('teamStats.filterMinMatches', 'Min Matches') }}:
           </label>
           <select
@@ -102,7 +112,9 @@ function nextPage() {
 
       <!-- Demo mode indicator -->
       <div v-if="statsStore.isDemoModeEnabled" class="flex items-center gap-2">
-        <span class="text-xs text-orange-400 font-headline uppercase tracking-widest font-bold bg-orange-400/10 px-2.5 py-1 rounded-full">
+        <span
+          class="text-xs text-orange-400 font-headline uppercase tracking-widest font-bold bg-orange-400/10 px-2.5 py-1 rounded-full"
+        >
           {{ t('teamStats.demoData', 'Demo Data') }}
         </span>
       </div>
@@ -110,7 +122,11 @@ function nextPage() {
 
     <!-- Loading Skeleton -->
     <div v-if="statsStore.isTeamPairsLoading" class="flex flex-col gap-3">
-      <div v-for="n in 3" :key="n" class="h-24 bg-surface-container-low animate-pulse rounded-2xl"></div>
+      <div
+        v-for="n in 3"
+        :key="n"
+        class="h-24 bg-surface-container-low animate-pulse rounded-2xl"
+      ></div>
     </div>
 
     <!-- Empty State -->
@@ -118,14 +134,21 @@ function nextPage() {
       v-else-if="!statsStore.teamPairStats || statsStore.teamPairStats.length === 0"
       class="ch-empty-state bg-surface-container-low p-8 rounded-2xl text-center flex flex-col items-center gap-3"
     >
-      <div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant text-xl font-bold">
+      <div
+        class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant text-xl font-bold"
+      >
         👥
       </div>
       <h3 class="text-lg font-bold text-on-surface">
         {{ t('teamStats.noData', 'No team pair statistics found') }}
       </h3>
       <p class="text-sm text-on-surface-variant max-w-md">
-        {{ t('teamStats.noDataDescription', 'Try adjusting your filters or record more 2v2 matches to see synergy insights.') }}
+        {{
+          t(
+            'teamStats.noDataDescription',
+            'Try adjusting your filters or record more 2v2 matches to see synergy insights.',
+          )
+        }}
       </p>
     </div>
 
@@ -146,12 +169,17 @@ function nextPage() {
 
           <div class="flex flex-col gap-0.5">
             <div class="flex flex-wrap items-center gap-1.5 text-sm font-bold text-on-surface">
-              <span class="text-primary">{{ pair.attackerName }} ({{ t('teamStats.attacker', 'Attacker') }})</span>
+              <span class="text-primary"
+                >{{ pair.attackerName }} ({{ t('teamStats.attacker', 'Attacker') }})</span
+              >
               <span class="text-on-surface-variant font-normal">&amp;</span>
-              <span class="text-secondary">{{ pair.defenderName }} ({{ t('teamStats.defender', 'Defender') }})</span>
+              <span class="text-secondary"
+                >{{ pair.defenderName }} ({{ t('teamStats.defender', 'Defender') }})</span
+              >
             </div>
             <div class="text-xs text-on-surface-variant">
-              {{ pair.matches }} {{ t('teamStats.matches', 'Matches') }} ({{ pair.wins }}W - {{ pair.losses }}L)
+              {{ pair.matches }} {{ t('teamStats.matches', 'Matches') }} ({{ pair.wins }}W -
+              {{ pair.losses }}L)
             </div>
           </div>
         </div>
@@ -159,9 +187,7 @@ function nextPage() {
         <!-- Win Rate & Stats Progress -->
         <div class="flex items-center gap-4 justify-between sm:justify-end">
           <div class="flex flex-col items-end">
-            <span class="text-xl font-headline font-bold text-primary">
-              {{ pair.winRate }}%
-            </span>
+            <span class="text-xl font-headline font-bold text-primary"> {{ pair.winRate }}% </span>
             <span class="text-[11px] text-on-surface-variant uppercase tracking-wider">
               {{ t('teamStats.winRate', 'Win Rate') }}
             </span>
@@ -193,7 +219,12 @@ function nextPage() {
       </button>
 
       <span class="text-xs text-on-surface-variant font-medium">
-        {{ t('teamStats.page', { current: currentPage + 1, total: statsStore.teamPairPage.totalPages }) }}
+        {{
+          t('teamStats.page', {
+            current: currentPage + 1,
+            total: statsStore.teamPairPage.totalPages,
+          })
+        }}
       </span>
 
       <button

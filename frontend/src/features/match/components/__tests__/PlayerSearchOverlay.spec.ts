@@ -4,11 +4,13 @@ import { createTestingPinia } from '@pinia/testing'
 import PlayerSearchOverlay from '../PlayerSearchOverlay.vue'
 import { useMatchDraftStore } from '../../stores/matchDraftStore'
 
-function createTestPlayer(overrides: Partial<{ id: string; nickname: string; avatar: string }> = {}) {
+function createTestPlayer(
+  overrides: Partial<{ id: string; nickname: string; avatar: string }> = {},
+) {
   return {
     id: overrides.id ?? 'test-player-id',
     nickname: overrides.nickname ?? 'Test Player',
-    avatar: overrides.avatar ?? 'test-avatar'
+    avatar: overrides.avatar ?? 'test-avatar',
   }
 }
 
@@ -30,9 +32,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] renders overlay when isOpen is true', () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     expect(wrapper.find('[data-testid="player-search-overlay"]').exists()).toBe(true)
@@ -41,9 +43,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] does not render overlay when isOpen is false', () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: false }
+      props: { isOpen: false },
     })
 
     expect(wrapper.find('[data-testid="player-search-overlay"]').exists()).toBe(false)
@@ -52,9 +54,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] auto-focuses search input when overlay opens', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: false }
+      props: { isOpen: false },
     })
 
     await wrapper.setProps({ isOpen: true })
@@ -67,15 +69,13 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] emits select event when result row is clicked', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
-    store.searchResults = [
-      createTestPlayer({ id: 'player-1', nickname: 'Alice' })
-    ]
+    store.searchResults = [createTestPlayer({ id: 'player-1', nickname: 'Alice' })]
 
     await wrapper.vm.$nextTick()
 
@@ -90,12 +90,12 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] emits select and close events in customSelect mode without mutating draft store', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
       props: {
         isOpen: true,
-        customSelect: true
-      }
+        customSelect: true,
+      },
     })
 
     const store = useMatchDraftStore()
@@ -117,9 +117,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] emits close event when backdrop is clicked', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
@@ -132,9 +132,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P0] emits close event when Escape key is pressed', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
@@ -146,9 +146,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P1] displays loading state while searching', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
@@ -162,9 +162,9 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P1] displays error message when search fails', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
@@ -173,15 +173,17 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('[data-testid="search-error"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="search-error"]').text()).toBe('Search service unavailable. Please try again later.')
+    expect(wrapper.find('[data-testid="search-error"]').text()).toBe(
+      'Search service unavailable. Please try again later.',
+    )
   })
 
   it('[P1] displays empty state when no results found', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
@@ -196,18 +198,14 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P1] orders frequent opponents before other results', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
-    store.frequentOpponents = [
-      createTestPlayer({ id: 'frequent-1', nickname: 'Frank' })
-    ]
-    store.searchResults = [
-      createTestPlayer({ id: 'other-1', nickname: 'Alice' })
-    ]
+    store.frequentOpponents = [createTestPlayer({ id: 'frequent-1', nickname: 'Frank' })]
+    store.searchResults = [createTestPlayer({ id: 'other-1', nickname: 'Alice' })]
     store.searchQuery = ''
     await wrapper.vm.$nextTick()
 
@@ -220,16 +218,14 @@ describe('PlayerSearchOverlay.vue (ATDD)', () => {
   it('[P1] does not add player when all slots are filled', async () => {
     const wrapper = mount(PlayerSearchOverlay, {
       global: {
-        plugins: [testingPinia]
+        plugins: [testingPinia],
       },
-      props: { isOpen: true }
+      props: { isOpen: true },
     })
 
     const store = useMatchDraftStore()
     store.selectedPlayers = ['player-1', 'player-2']
-    store.searchResults = [
-      createTestPlayer({ id: 'player-3', nickname: 'Charlie' })
-    ]
+    store.searchResults = [createTestPlayer({ id: 'player-3', nickname: 'Charlie' })]
     store.searchQuery = ''
     await wrapper.vm.$nextTick()
 

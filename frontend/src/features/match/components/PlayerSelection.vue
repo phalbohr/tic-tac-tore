@@ -23,7 +23,7 @@ const selectedGroupId = ref<string | null>(
   authStore.profile?.defaultGroupId ||
     playerGroupStore.selectedGroupId ||
     store.selectedGroupId ||
-    null
+    null,
 )
 
 watch(
@@ -32,7 +32,7 @@ watch(
     if (newDef && !selectedGroupId.value) {
       selectedGroupId.value = newDef
     }
-  }
+  },
 )
 
 onMounted(async () => {
@@ -45,9 +45,7 @@ onMounted(async () => {
   }
   if (
     !selectedGroupId.value &&
-    (authStore.profile?.defaultGroupId ||
-      playerGroupStore.selectedGroupId ||
-      store.selectedGroupId)
+    (authStore.profile?.defaultGroupId || playerGroupStore.selectedGroupId || store.selectedGroupId)
   ) {
     selectedGroupId.value =
       authStore.profile?.defaultGroupId ||
@@ -96,7 +94,11 @@ async function handleSetAsDefaultGroup(groupId: string) {
   }
 }
 
-async function handleSaveGroup(payload: { name: string; isFavorite: boolean; memberIds: string[] }) {
+async function handleSaveGroup(payload: {
+  name: string
+  isFavorite: boolean
+  memberIds: string[]
+}) {
   try {
     const newGroup = await playerGroupStore.createGroup(payload)
     selectedGroupId.value = newGroup.id
@@ -154,7 +156,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
         :class="[
           selectedGroupId === group.id
             ? 'bg-primary text-background shadow-md active'
-            : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
+            : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80',
         ]"
         :data-testid="`group-chip-${group.id}`"
       >
@@ -166,7 +168,9 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
         >
           push_pin
         </span>
-        <span v-else-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
+        <span v-else-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400"
+          >star</span
+        >
         <span v-else class="material-symbols-outlined text-xs">groups</span>
         <span>{{ group.name }}</span>
       </button>
@@ -179,11 +183,18 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
       data-testid="player-slot"
       class="player-slot h-16 flex items-center px-4 bg-surface-container-highest rounded-xl gap-4 mb-2"
     >
-      <div v-if="maxPlayers === 4" class="w-4 text-center font-bold text-on-surface-variant text-sm">
+      <div
+        v-if="maxPlayers === 4"
+        class="w-4 text-center font-bold text-on-surface-variant text-sm"
+      >
         {{ index % 2 !== 0 ? 'D' : 'A' }}
       </div>
-      <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
-        <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{ index }}</span>
+      <div
+        class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden"
+      >
+        <span v-if="!store.selectedPlayers[index - 1]" class="text-on-surface-variant font-bold">{{
+          index
+        }}</span>
         <AvatarBase
           v-else
           :avatar="getPlayer(store.selectedPlayers[index - 1])?.avatar"
@@ -194,7 +205,8 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
       <span class="text-on-surface flex-1 truncate">
         {{
           store.selectedPlayers[index - 1]
-            ? getPlayer(store.selectedPlayers[index - 1])?.nickname || t('match.playerFallback', 'Player')
+            ? getPlayer(store.selectedPlayers[index - 1])?.nickname ||
+              t('match.playerFallback', 'Player')
             : t('match.selectPlayer', 'Select Player')
         }}
       </span>
@@ -219,16 +231,9 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
     </div>
 
     <!-- Quick Player Selection (Filtered by group or Frequent Opponents) -->
-    <div
-      v-if="quickPlayers.length > 0 && store.selectedPlayers.length < maxPlayers"
-      class="mt-4"
-    >
+    <div v-if="quickPlayers.length > 0 && store.selectedPlayers.length < maxPlayers" class="mt-4">
       <h3 class="text-on-surface-variant font-bold text-sm mb-2">
-        {{
-          activeGroup
-            ? activeGroup.name
-            : t('match.frequentOpponents', 'Frequent Opponents')
-        }}
+        {{ activeGroup ? activeGroup.name : t('match.frequentOpponents', 'Frequent Opponents') }}
       </h3>
       <div class="flex gap-2 overflow-x-auto pb-2">
         <button
@@ -240,13 +245,11 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
           class="flex flex-col items-center gap-1 min-w-[72px] opacity-100 disabled:opacity-50 cursor-pointer"
         >
           <div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden">
-            <AvatarBase
-              :avatar="opponent.avatar"
-              :name="opponent.nickname"
-              shape="circle"
-            />
+            <AvatarBase :avatar="opponent.avatar" :name="opponent.nickname" shape="circle" />
           </div>
-          <span class="text-xs text-on-surface truncate w-full text-center">{{ opponent.nickname }}</span>
+          <span class="text-xs text-on-surface truncate w-full text-center">{{
+            opponent.nickname
+          }}</span>
         </button>
       </div>
     </div>
@@ -254,10 +257,7 @@ async function handleSaveGroup(payload: { name: string; isFavorite: boolean; mem
     <PlayerSearchOverlay :is-open="store.isSearchOpen" @close="store.closeSearch()" />
 
     <!-- Inline Group Modal -->
-    <PlayerGroupModal
-      v-model="isGroupModalOpen"
-      @save="handleSaveGroup"
-    />
+    <PlayerGroupModal v-model="isGroupModalOpen" @save="handleSaveGroup" />
   </div>
 </template>
 

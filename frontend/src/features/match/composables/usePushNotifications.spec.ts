@@ -19,7 +19,10 @@ describe('usePushNotifications', () => {
     })
     const mockGetSubscription = vi.fn().mockResolvedValue(null)
 
-    vi.stubGlobal('Notification', { permission: 'default', requestPermission: mockRequestPermission })
+    vi.stubGlobal('Notification', {
+      permission: 'default',
+      requestPermission: mockRequestPermission,
+    })
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }))
 
     Object.defineProperty(navigator, 'serviceWorker', {

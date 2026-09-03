@@ -12,7 +12,11 @@ vi.mock('vue-i18n', async (importOriginal) => {
   return {
     ...actual,
     useI18n: () => ({
-      t: (key: string, values?: Record<string, unknown> | number, options?: { named?: Record<string, unknown> }) => {
+      t: (
+        key: string,
+        values?: Record<string, unknown> | number,
+        options?: { named?: Record<string, unknown> },
+      ) => {
         const map: Record<string, string> = {
           'achievements.title': 'Achievements',
           'achievements.filterAll': 'All',
@@ -26,7 +30,8 @@ vi.mock('vue-i18n', async (importOriginal) => {
           return `Progress: ${values.current} / ${values.target}`
         }
         if (key === 'achievements.remaining') {
-          const count = typeof values === 'number' ? values : (values?.count ?? options?.named?.count)
+          const count =
+            typeof values === 'number' ? values : (values?.count ?? options?.named?.count)
           return `${count} remaining`
         }
         return map[key] || key

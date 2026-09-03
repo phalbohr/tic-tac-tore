@@ -113,7 +113,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ ruleSystem: 'RANDOM', page: 0 })
+      expect.objectContaining({ ruleSystem: 'RANDOM', page: 0 }),
     )
   })
 
@@ -134,7 +134,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ matchType: '1v1', page: 0 })
+      expect.objectContaining({ matchType: '1v1', page: 0 }),
     )
   })
 
@@ -155,7 +155,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ period: 'WEEKLY', page: 0 })
+      expect.objectContaining({ period: 'WEEKLY', page: 0 }),
     )
   })
 
@@ -172,7 +172,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenCalledWith(
-      expect.objectContaining({ minMatches: 5 })
+      expect.objectContaining({ minMatches: 5 }),
     )
   })
 
@@ -212,7 +212,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 1 })
+      expect.objectContaining({ page: 1 }),
     )
   })
 
@@ -237,7 +237,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 0 })
+      expect.objectContaining({ page: 0 }),
     )
   })
 
@@ -262,7 +262,7 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
     await flushPromises()
 
     expect(statisticsService.getLeaderboard).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 0, ruleSystem: 'STANDARD' })
+      expect.objectContaining({ page: 0, ruleSystem: 'STANDARD' }),
     )
   })
 
@@ -273,8 +273,22 @@ describe('[Story 4.2] LeaderboardView.vue', () => {
 
     vi.mocked(statisticsService.getLeaderboard).mockResolvedValue({
       content: [
-        { playerId: 'my-user-id', playerName: 'Me', totalMatches: 10, wins: 8, losses: 2, winRate: 0.8 },
-        { playerId: 'opponent-id', playerName: 'Opponent', totalMatches: 5, wins: 2, losses: 3, winRate: 0.4 },
+        {
+          playerId: 'my-user-id',
+          playerName: 'Me',
+          totalMatches: 10,
+          wins: 8,
+          losses: 2,
+          winRate: 0.8,
+        },
+        {
+          playerId: 'opponent-id',
+          playerName: 'Opponent',
+          totalMatches: 5,
+          wins: 2,
+          losses: 3,
+          winRate: 0.4,
+        },
       ],
       totalPages: 1,
       totalElements: 2,

@@ -1,4 +1,4 @@
-import type { CreatePoolPayload, PoolResponse } from '../types/pool';
+import type { CreatePoolPayload, PoolResponse } from '../types/pool'
 
 export async function createPool(payload: CreatePoolPayload): Promise<PoolResponse> {
   const res = await fetch('/api/v1/pools', {
@@ -8,14 +8,14 @@ export async function createPool(payload: CreatePoolPayload): Promise<PoolRespon
       Accept: 'application/json',
     },
     body: JSON.stringify(payload),
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to create pool (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to create pool (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 export async function fetchActivePools(): Promise<PoolResponse[]> {
@@ -23,14 +23,14 @@ export async function fetchActivePools(): Promise<PoolResponse[]> {
     headers: {
       Accept: 'application/json',
     },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch active pools (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch active pools (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 export async function joinPool(id: string): Promise<PoolResponse> {
@@ -39,14 +39,14 @@ export async function joinPool(id: string): Promise<PoolResponse> {
     headers: {
       Accept: 'application/json',
     },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to join pool (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to join pool (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 export async function fetchPoolById(id: string): Promise<PoolResponse> {
@@ -54,12 +54,12 @@ export async function fetchPoolById(id: string): Promise<PoolResponse> {
     headers: {
       Accept: 'application/json',
     },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch pool (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch pool (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }

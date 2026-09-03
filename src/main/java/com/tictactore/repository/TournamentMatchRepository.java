@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -52,6 +53,21 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
     List<TournamentMatch> findByTournamentIdAndStatus(UUID tournamentId, TournamentMatchStatus status);
 
     List<TournamentMatch> findByTournamentIdAndStatusIn(UUID tournamentId, Collection<TournamentMatchStatus> statuses);
+
+    Optional<TournamentMatch> findByMatchId(UUID matchId);
+
+    @Query("SELECT tm FROM TournamentMatch tm " +
+           "WHERE tm.tournament.id = :tournamentId " +
+           "AND tm.status = :status " +
+           "AND (tm.participant1.id IN :regIds " +
+           "OR tm.participant2.id IN :regIds " +
+           "OR tm.participant1Partner.id IN :regIds " +
+           "OR tm.participant2Partner.id IN :regIds)")
+    List<TournamentMatch> findActiveMatchesForParticipants(
+            @Param("tournamentId") UUID tournamentId,
+            @Param("status") TournamentMatchStatus status,
+            @Param("regIds") Collection<UUID> regIds
+    );
 
     @Query("SELECT tm FROM TournamentMatch tm " +
            "WHERE tm.tournament.id = :tournamentId " +

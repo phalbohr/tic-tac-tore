@@ -18,8 +18,8 @@ describe('PlayerSelection.vue', () => {
     const pinia = createPinia()
     const wrapper = mount(PlayerSelection, {
       global: {
-        plugins: [pinia]
-      }
+        plugins: [pinia],
+      },
     })
 
     expect(wrapper.findAll('.player-slot')).toHaveLength(2)
@@ -29,8 +29,8 @@ describe('PlayerSelection.vue', () => {
     const pinia = createPinia()
     const wrapper = mount(PlayerSelection, {
       global: {
-        plugins: [pinia]
-      }
+        plugins: [pinia],
+      },
     })
 
     const searchBtn = wrapper.find('[data-testid="open-search-button"]')
@@ -44,8 +44,8 @@ describe('PlayerSelection.vue', () => {
     const pinia = createPinia()
     const wrapper = mount(PlayerSelection, {
       global: {
-        plugins: [pinia]
-      }
+        plugins: [pinia],
+      },
     })
 
     const searchBtn = wrapper.find('[data-testid="open-search-button"]')
@@ -56,9 +56,7 @@ describe('PlayerSelection.vue', () => {
     expect(overlay.exists()).toBe(true)
 
     const store = (wrapper.vm as any).$.setupState.store
-    store.searchResults = [
-      { id: 'player-1', nickname: 'Alice', avatar: 'avatar-1' }
-    ]
+    store.searchResults = [{ id: 'player-1', nickname: 'Alice', avatar: 'avatar-1' }]
     await wrapper.vm.$nextTick()
 
     const row = overlay.find('[data-testid="search-result-row"]')

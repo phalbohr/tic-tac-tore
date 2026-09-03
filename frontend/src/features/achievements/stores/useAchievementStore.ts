@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { AchievementDto, PlayerAchievementsSummaryResponse } from '@/services/achievementService'
+import type {
+  AchievementDto,
+  PlayerAchievementsSummaryResponse,
+} from '@/services/achievementService'
 import * as achievementService from '@/services/achievementService'
 
 export const useAchievementStore = defineStore('achievement', () => {
@@ -12,15 +15,23 @@ export const useAchievementStore = defineStore('achievement', () => {
 
   const unlockedList = computed(() => achievements.value.filter((a) => a.isUnlocked))
   const lockedList = computed(() => achievements.value.filter((a) => !a.isUnlocked))
-  const badgesList = computed(() => achievements.value.filter((a) => a.category !== 'ANTI_ACHIEVEMENT'))
-  const antiAchievementsList = computed(() => achievements.value.filter((a) => a.category === 'ANTI_ACHIEVEMENT'))
+  const badgesList = computed(() =>
+    achievements.value.filter((a) => a.category !== 'ANTI_ACHIEVEMENT'),
+  )
+  const antiAchievementsList = computed(() =>
+    achievements.value.filter((a) => a.category === 'ANTI_ACHIEVEMENT'),
+  )
 
   const badgesUnlockedCount = computed(() => badgesList.value.filter((a) => a.isUnlocked).length)
   const badgesTotalCount = computed(() => badgesList.value.length)
-  const antiAchievementsUnlockedCount = computed(() => antiAchievementsList.value.filter((a) => a.isUnlocked).length)
+  const antiAchievementsUnlockedCount = computed(
+    () => antiAchievementsList.value.filter((a) => a.isUnlocked).length,
+  )
   const antiAchievementsTotalCount = computed(() => antiAchievementsList.value.length)
 
-  async function fetchPlayerAchievements(playerId: string): Promise<PlayerAchievementsSummaryResponse> {
+  async function fetchPlayerAchievements(
+    playerId: string,
+  ): Promise<PlayerAchievementsSummaryResponse> {
     loading.value = true
     error.value = null
     try {

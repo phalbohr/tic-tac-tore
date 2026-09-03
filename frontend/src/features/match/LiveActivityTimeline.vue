@@ -21,7 +21,8 @@ const timelineGoals = computed(() => [...props.goals].reverse())
 
 const formatTime = (timestamp: number) => {
   const firstGoal = props.goals[0]
-  const base = props.startTime ?? (firstGoal && firstGoal.timestamp > 1000000000 ? firstGoal.timestamp : 0)
+  const base =
+    props.startTime ?? (firstGoal && firstGoal.timestamp > 1000000000 ? firstGoal.timestamp : 0)
   const elapsedMs = timestamp >= base ? timestamp - base : timestamp
   const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000))
   const minutes = Math.floor(totalSeconds / 60)
@@ -51,7 +52,9 @@ const formatTime = (timestamp: number) => {
     >
       <span class="font-semibold">{{ goal.playerName }}</span>
       <span class="ch-text-gray-400 text-[11px]">({{ goal.quadrantRole }})</span>
-      <span class="ch-text-gray-400 text-[10px] pl-1 font-mono">{{ formatTime(goal.timestamp) }}</span>
+      <span class="ch-text-gray-400 text-[10px] pl-1 font-mono">{{
+        formatTime(goal.timestamp)
+      }}</span>
     </div>
   </div>
 </template>

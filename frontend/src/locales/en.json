@@ -469,6 +469,19 @@
       "title": "Tournament Schedule",
       "roundSelector": "Select Round"
     },
+    "match": {
+      "start": "Start Match",
+      "starting": "Starting...",
+      "cancel": "Cancel Match",
+      "opponent_busy": "Opponent Busy",
+      "live": "LIVE",
+      "completed": "COMPLETED",
+      "ready": "READY",
+      "pending": "PENDING",
+      "allRounds": "All Rounds",
+      "myMatches": "My Matches",
+      "available": "Available to Play"
+    },
     "pendingInvitationsTitle": "Pending Tournament Invitations",
     "noPendingInvitations": "No pending invitations.",
     "stub_partner": "Stub",
@@ -496,4 +509,3 @@
     }
   }
 }
-

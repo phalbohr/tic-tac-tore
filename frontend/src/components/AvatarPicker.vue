@@ -32,10 +32,10 @@ function handleKeyDown(event: KeyboardEvent) {
   } else if (event.key === 'Tab') {
     if (!modalRef.value) return
     const focusableElements = modalRef.value.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     )
     if (focusableElements.length === 0) return
-    
+
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
     if (!firstElement || !lastElement) return
@@ -107,7 +107,7 @@ function handleGridKeyDown(event: KeyboardEvent, index: number) {
   }
 
   event.preventDefault()
-  
+
   const buttons = modalRef.value?.querySelectorAll<HTMLElement>('[data-testid^="avatar-option-"]')
   if (buttons && buttons.length > newIndex) {
     const btn = buttons[newIndex]
@@ -119,7 +119,9 @@ onMounted(() => {
   previouslyFocusedElement = document.activeElement as HTMLElement
   nextTick(() => {
     if (selected.value && modalRef.value) {
-      const selectedBtn = modalRef.value.querySelector<HTMLElement>(`[data-testid="avatar-option-${selected.value}"]`)
+      const selectedBtn = modalRef.value.querySelector<HTMLElement>(
+        `[data-testid="avatar-option-${selected.value}"]`,
+      )
       if (selectedBtn) {
         selectedBtn.focus()
       } else {
@@ -141,23 +143,24 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div 
+  <div
     ref="modalRef"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md" 
-    role="dialog" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
+    role="dialog"
     aria-modal="true"
     tabindex="-1"
     @click.self="emit('close')"
     data-testid="avatar-picker-backdrop"
   >
-    <div class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-6 flex flex-col max-h-[90vh]">
-      
+    <div
+      class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-6 flex flex-col max-h-[90vh]"
+    >
       <!-- Header -->
       <div class="flex justify-between items-center">
         <h2 class="font-headline text-lg font-bold text-on-surface tracking-tight">
           {{ t('avatarPicker.title') }}
         </h2>
-        <button 
+        <button
           @click="emit('close')"
           class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           data-testid="close-picker-icon-button"
@@ -179,7 +182,9 @@ onBeforeUnmount(() => {
           :class="[
             'aspect-square p-2.5 rounded-xl bg-surface-container-highest transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm hover:shadow-md hover:translate-y-[-2px]',
             'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
-            selected === avatar ? 'bg-primary/20 scale-105 shadow-md ring-2 ring-primary' : 'hover:bg-surface-container-highest/80'
+            selected === avatar
+              ? 'bg-primary/20 scale-105 shadow-md ring-2 ring-primary'
+              : 'hover:bg-surface-container-highest/80',
           ]"
         >
           <div class="w-full h-full flex items-center justify-center">
@@ -192,7 +197,7 @@ onBeforeUnmount(() => {
 
       <!-- Action Button -->
       <div class="pt-2">
-        <button 
+        <button
           @click="emit('close')"
           class="w-full py-3 rounded-xl bg-surface-container-highest text-on-surface font-headline font-bold text-sm hover:bg-surface-container-highest/80 active:scale-95 transition-colors"
           data-testid="cancel-picker-button"
@@ -200,7 +205,6 @@ onBeforeUnmount(() => {
           {{ t('common.cancel') }}
         </button>
       </div>
-
     </div>
   </div>
 </template>

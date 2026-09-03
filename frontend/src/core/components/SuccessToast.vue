@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import BaseButton from '@/core/components/BaseButton.vue';
+import { useI18n } from 'vue-i18n'
+import BaseButton from '@/core/components/BaseButton.vue'
 
 defineProps<{
-  message: string;
-}>();
+  message: string
+}>()
 
 const emit = defineEmits<{
-  (e: 'dismiss'): void;
-}>();
+  (e: 'dismiss'): void
+}>()
 
-const { t } = useI18n();
+const { t } = useI18n()
 </script>
 
 <template>
@@ -43,7 +43,9 @@ const { t } = useI18n();
 <style scoped>
 .toast-slide-enter-active,
 .toast-slide-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .toast-slide-enter-from,

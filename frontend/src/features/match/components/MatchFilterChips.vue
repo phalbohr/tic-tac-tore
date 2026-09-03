@@ -71,7 +71,10 @@ function handleReset() {
 
 <template>
   <div class="w-full flex flex-col gap-2">
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar select-none" data-testid="match-filter-chips">
+    <div
+      class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar select-none"
+      data-testid="match-filter-chips"
+    >
       <!-- All Chip -->
       <button
         type="button"
@@ -152,7 +155,9 @@ function handleReset() {
           @click="selectGroup(group.id)"
           :data-testid="`filter-group-${group.id}`"
         >
-          <span v-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400">star</span>
+          <span v-if="group.isFavorite" class="material-symbols-outlined text-xs text-yellow-400"
+            >star</span
+          >
           <span v-else class="material-symbols-outlined text-xs">groups</span>
           <span>{{ group.name }}</span>
         </button>
@@ -176,7 +181,9 @@ function handleReset() {
         data-testid="filter-player-active-chip"
       >
         <span class="material-symbols-outlined text-sm">person</span>
-        <span>{{ selectedPlayerNickname || t('history.filters.playerSelected', 'Player Filtered') }}</span>
+        <span>{{
+          selectedPlayerNickname || t('history.filters.playerSelected', 'Player Filtered')
+        }}</span>
         <button
           type="button"
           class="hover:opacity-70 cursor-pointer ml-1 flex items-center"

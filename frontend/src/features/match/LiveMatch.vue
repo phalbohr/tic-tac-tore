@@ -79,10 +79,12 @@ const startMatch = async () => {
     try {
       if (liveMatchContainer.value.requestFullscreen) {
         await liveMatchContainer.value.requestFullscreen()
-      } else if ((liveMatchContainer.value as any).webkitRequestFullscreen) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      } else if ((liveMatchContainer.value as any).webkitRequestFullscreen) {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         await (liveMatchContainer.value as any).webkitRequestFullscreen() // eslint-disable-line @typescript-eslint/no-explicit-any
       }
-      if (typeof screen !== 'undefined' && screen.orientation && (screen.orientation as any).lock) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (typeof screen !== 'undefined' && screen.orientation && (screen.orientation as any).lock) {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         const orientationMode = matchStore.isRefereeMode ? 'portrait' : 'landscape'
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (screen.orientation as any).lock(orientationMode)
@@ -108,7 +110,10 @@ const onSwap = (team: 'teamA' | 'teamB') => {
 </script>
 
 <template>
-  <div ref="liveMatchContainer" class="ch-bg-gray-900 ch-text-white w-screen h-screen overflow-hidden">
+  <div
+    ref="liveMatchContainer"
+    class="ch-bg-gray-900 ch-text-white w-screen h-screen overflow-hidden"
+  >
     <div
       v-if="isMatchStarted && !matchStore.isRefereeMode"
       data-testid="rotation-warning-overlay"
@@ -117,12 +122,20 @@ const onSwap = (team: 'teamA' | 'teamB') => {
       <p class="text-xl">Please rotate your device to landscape mode</p>
     </div>
     <div v-if="!isMatchStarted" class="flex items-center justify-center w-full h-full">
-      <button @click="startMatch" data-testid="start-match-btn" class="ch-bg-primary ch-text-white px-6 py-3 rounded text-xl">Start Match</button>
+      <button
+        @click="startMatch"
+        data-testid="start-match-btn"
+        class="ch-bg-primary ch-text-white px-6 py-3 rounded text-xl"
+      >
+        Start Match
+      </button>
     </div>
-    
+
     <div v-else class="flex flex-col w-full h-full">
       <!-- Top strip: Timeline + Undo button -->
-      <header class="flex items-center justify-between gap-3 px-3 py-1.5 ch-bg-gray-800 border-b ch-border-gray-700 z-30 flex-none shadow-md">
+      <header
+        class="flex items-center justify-between gap-3 px-3 py-1.5 ch-bg-gray-800 border-b ch-border-gray-700 z-30 flex-none shadow-md"
+      >
         <div class="flex-1 min-w-0 overflow-x-auto">
           <LiveActivityTimeline
             :goals="matchStore.goalTimeline"
@@ -137,15 +150,29 @@ const onSwap = (team: 'teamA' | 'teamB') => {
             data-testid="undo-goal-btn"
             class="px-3 py-1.5 rounded-lg font-medium text-xs transition-all ch-bg-gray-700 border ch-border-gray-600 ch-text-white shadow flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+              />
             </svg>
             <span>Undo</span>
           </button>
         </div>
       </header>
 
-      <div class="relative grid grid-cols-2 grid-rows-2 flex-1 w-full min-h-0" data-testid="match-grid">
+      <div
+        class="relative grid grid-cols-2 grid-rows-2 flex-1 w-full min-h-0"
+        data-testid="match-grid"
+      >
         <template v-if="matchStore.isRefereeMode">
           <!-- Referee Mode: 2x2 grid representing table viewed from the end -->
           <!-- Row 1: Left = Team B Defender, Right = Team A Attacker -->
@@ -228,8 +255,19 @@ const onSwap = (team: 'teamA' | 'teamB') => {
             aria-label="Swap Team B Positions"
             class="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full ch-bg-gray-700 border-2 ch-border-gray-600 ch-text-white shadow-lg flex items-center justify-center cursor-pointer hover:ch-bg-gray-600 active:scale-95 transition-all"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-7 h-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+              />
             </svg>
           </button>
         </div>
@@ -247,8 +285,19 @@ const onSwap = (team: 'teamA' | 'teamB') => {
             aria-label="Swap Team A Positions"
             class="w-14 h-14 min-w-[56px] min-h-[56px] rounded-full ch-bg-gray-700 border-2 ch-border-gray-600 ch-text-white shadow-lg flex items-center justify-center cursor-pointer hover:ch-bg-gray-600 active:scale-95 transition-all"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-7 h-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+              />
             </svg>
           </button>
         </div>

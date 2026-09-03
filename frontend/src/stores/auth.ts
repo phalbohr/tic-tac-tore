@@ -22,7 +22,6 @@ interface UserProfile {
   version?: number
 }
 
-
 export const useAuthStore = defineStore('auth', () => {
   const isMaybeAuthenticated = ref(!!getCookie(SESSION_COOKIE_NAME))
   const profile = ref<UserProfile | null>(null)
@@ -100,7 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
       defaultRuleConfigurationId,
       clearDefaultGroup,
       clearDefaultRuleConfiguration,
-      poolNotificationsEnabled
+      poolNotificationsEnabled,
     } = options
     const previousProfile = { ...profile.value }
 
@@ -161,7 +160,9 @@ export const useAuthStore = defineStore('auth', () => {
           defaultRuleConfigurationId,
           poolNotificationsEnabled,
           clearDefaultGroup: clearDefaultGroup ?? (defaultGroupId === null ? true : undefined),
-          clearDefaultRuleConfiguration: clearDefaultRuleConfiguration ?? (defaultRuleConfigurationId === null ? true : undefined)
+          clearDefaultRuleConfiguration:
+            clearDefaultRuleConfiguration ??
+            (defaultRuleConfigurationId === null ? true : undefined),
         }),
       })
 

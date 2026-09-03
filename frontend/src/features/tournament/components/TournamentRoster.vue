@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { TournamentRegistrationDto } from '@/features/tournament/types/tournament';
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type { TournamentRegistrationDto } from '@/features/tournament/types/tournament'
 
 interface Props {
-  registrations: TournamentRegistrationDto[];
-  maxParticipants: number;
+  registrations: TournamentRegistrationDto[]
+  maxParticipants: number
 }
 
-const props = defineProps<Props>();
-const { t } = useI18n();
+const props = defineProps<Props>()
+const { t } = useI18n()
 
 const confirmedCount = computed(() => {
-  return props.registrations.filter((r) => r.status === 'CONFIRMED').length;
-});
+  return props.registrations.filter((r) => r.status === 'CONFIRMED').length
+})
 </script>
 
 <template>
@@ -22,8 +22,12 @@ const confirmedCount = computed(() => {
       <h3 class="text-base font-semibold text-on-surface">
         {{ t('tournament.registration.rosterTitle') }}
       </h3>
-      <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant">
-        {{ t('tournament.registration.teamsCount', { count: confirmedCount, max: maxParticipants }) }}
+      <span
+        class="text-xs font-medium px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant"
+      >
+        {{
+          t('tournament.registration.teamsCount', { count: confirmedCount, max: maxParticipants })
+        }}
       </span>
     </div>
 

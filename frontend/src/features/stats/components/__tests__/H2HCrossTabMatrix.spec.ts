@@ -104,6 +104,6 @@ describe('H2HCrossTabMatrix.vue component tests', () => {
     const text = wrapper.text()
     expect(text).toContain('+6') // 10 - 4
     expect(text).toContain('-4') // 3 - 7
-    expect(text).toContain('0')  // 5 - 5
+    expect(text).toContain('0') // 5 - 5
   })
 })

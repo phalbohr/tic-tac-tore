@@ -5,16 +5,16 @@ import { useMatchDraftStore, MatchType } from './matchDraftStore'
 describe('matchDraftStore', () => {
   let fetchMock: Mock
 
-  const originalFetch = globalThis.fetch;
+  const originalFetch = globalThis.fetch
   beforeEach(() => {
     setActivePinia(createPinia())
     fetchMock = vi.fn()
     globalThis.fetch = fetchMock as unknown as typeof fetch
   })
-  
+
   afterEach(() => {
-    globalThis.fetch = originalFetch;
-    vi.restoreAllMocks();
+    globalThis.fetch = originalFetch
+    vi.restoreAllMocks()
   })
 
   it('initializes with default values', () => {
@@ -31,10 +31,10 @@ describe('matchDraftStore', () => {
     store.addPlayer('p1')
     store.addPlayer('p2')
     store.addPlayer('p3')
-    
+
     expect(store.matchType).toBe(MatchType.TWO_VS_TWO)
     expect(store.selectedPlayers.length).toBe(3)
-    
+
     store.setMatchType(MatchType.ONE_VS_ONE)
     expect(store.selectedPlayers.length).toBe(2)
   })
@@ -115,7 +115,7 @@ describe('matchDraftStore', () => {
       store.addPlayer('p4')
 
       store.beginScoreEntry()
-      
+
       store.swapPositions(1)
       expect(store.currentGame.teamADefenderId).toBe('p2')
       expect(store.currentGame.teamAAttackerId).toBe('p1')
@@ -159,20 +159,30 @@ describe('matchDraftStore', () => {
     it('handles successful loadRuleConfig', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true })
+        json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true }),
       })
       const store = useMatchDraftStore()
       await store.loadRuleConfig()
-      expect(store.ruleConfig).toEqual({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true })
+      expect(store.ruleConfig).toEqual({
+        scoreLimit: 5,
+        gameLimit: 3,
+        winsNeeded: 2,
+        winByTwo: true,
+      })
     })
 
     it('handles API error in loadRuleConfig by falling back to standard', async () => {
       fetchMock.mockResolvedValueOnce({
-        ok: false
+        ok: false,
       })
       const store = useMatchDraftStore()
       await store.loadRuleConfig()
-      expect(store.ruleConfig).toEqual({ scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false })
+      expect(store.ruleConfig).toEqual({
+        scoreLimit: 10,
+        gameLimit: 3,
+        winsNeeded: 2,
+        winByTwo: false,
+      })
     })
 
     it('increments score but caps at scoreLimit, requires manual complete', async () => {
@@ -180,12 +190,12 @@ describe('matchDraftStore', () => {
       store.ruleConfig = { scoreLimit: 5, gameLimit: 1, winsNeeded: 1, winByTwo: false }
       store.incrementScore(1, 1)
       expect(store.currentGame.team1Score).toBe(1)
-      
+
       store.incrementScore(1, 5) // Should cap at 5
       expect(store.currentGame.team1Score).toBe(5)
       expect(store.isGameComplete).toBe(true)
       expect(store.games.length).toBe(0)
-      
+
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
       expect(store.games[0]?.team1Score).toBe(5)
@@ -235,7 +245,7 @@ describe('matchDraftStore', () => {
       store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
       store.incrementScore(1, 5)
       expect(store.isGameComplete).toBe(true)
-      
+
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
       expect(store.games[0]?.team1Score).toBe(5)
@@ -246,38 +256,36 @@ describe('matchDraftStore', () => {
     it('manually completes match when winsNeeded is reached', () => {
       const store = useMatchDraftStore()
       store.ruleConfig = { scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: false }
-      
+
       // Game 1
       store.incrementScore(1, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
       expect(store.matchState).toBe('score_entry')
-      
+
       // Game 2
       store.incrementScore(1, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(2)
       expect(store.matchState).toBe('ready_for_submission')
     })
-    
+
     it('manually completes match when gameLimit is reached', () => {
       const store = useMatchDraftStore()
       store.ruleConfig = { scoreLimit: 5, gameLimit: 2, winsNeeded: 3, winByTwo: false }
-      
+
       // Game 1
       store.incrementScore(2, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(1)
       expect(store.matchState).toBe('score_entry')
-      
+
       // Game 2
       store.incrementScore(2, 5)
       store.completeCurrentGame()
       expect(store.games.length).toBe(2)
       expect(store.matchState).toBe('ready_for_submission')
     })
-
-
   })
 
   describe('Submission Timer & Undo Window', () => {
@@ -323,9 +331,12 @@ describe('matchDraftStore', () => {
       await Promise.resolve()
       await Promise.resolve()
 
-      expect(fetchMock).toHaveBeenCalledWith('/api/v1/matches', expect.objectContaining({
-        method: 'POST'
-      }))
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/v1/matches',
+        expect.objectContaining({
+          method: 'POST',
+        }),
+      )
       expect(store.isPendingSubmission).toBe(false)
       expect(store.pendingSubmission).toBeNull()
     })
@@ -349,8 +360,14 @@ describe('matchDraftStore', () => {
       store.startSubmissionTimer()
 
       expect(store.pendingSubmission).not.toBeNull()
-      const payload = store.pendingSubmission?.payload as { teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string; games: Array<Record<string, unknown>> }
-      
+      const payload = store.pendingSubmission?.payload as {
+        teamAAttackerId?: string
+        teamADefenderId?: string
+        teamBAttackerId?: string
+        teamBDefenderId?: string
+        games: Array<Record<string, unknown>>
+      }
+
       // The overall match attackers/defenders come from selectedPlayers
       expect(payload?.teamADefenderId).toBe('p1')
       expect(payload?.teamAAttackerId).toBe('p2')
@@ -393,8 +410,8 @@ describe('matchDraftStore', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 10, teamBScore: 8 },
-          { teamAScore: 7, teamBScore: 10 }
-        ]
+          { teamAScore: 7, teamBScore: 10 },
+        ],
       }
 
       store.loadFromRejectedMatch(sampleRejected)
@@ -415,8 +432,8 @@ describe('matchDraftStore', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 5, teamBScore: 8 },
-          { teamAScore: 7, teamBScore: 10 }
-        ]
+          { teamAScore: 7, teamBScore: 10 },
+        ],
       })
 
       // Select Game 1 to edit (index 0)
@@ -474,8 +491,8 @@ describe('matchDraftStore', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 10, teamBScore: 5 },
-          { teamAScore: 10, teamBScore: 8 }
-        ]
+          { teamAScore: 10, teamBScore: 8 },
+        ],
       })
 
       // Select Game 1 to edit (index 0)
@@ -497,5 +514,3 @@ describe('matchDraftStore', () => {
     })
   })
 })
-
-

@@ -65,7 +65,16 @@ const { t } = useI18n()
 
 const matchIdToDelete = ref<string | null>(null)
 
-const pendingApprovalMatches = computed(() => props.pendingMatches.filter((m) => m.status !== 'REJECTED'))
+function confirmDelete() {
+  if (matchIdToDelete.value) {
+    emit('delete-rejection', matchIdToDelete.value)
+    matchIdToDelete.value = null
+  }
+}
+
+const pendingApprovalMatches = computed(() =>
+  props.pendingMatches.filter((m) => m.status !== 'REJECTED'),
+)
 const rejectedMatches = computed(() => props.pendingMatches.filter((m) => m.status === 'REJECTED'))
 
 function isPendingConfirmation(matchId: string): boolean {
@@ -103,13 +112,29 @@ function getCooldownRemaining(match: PendingMatchItem): string {
 function getPlayerDisplayInfo(
   match: PendingMatchItem,
   playerId?: string,
-  fallbackMatchRoleName?: string
-): { name: string, avatar?: string } | undefined {
+  fallbackMatchRoleName?: string,
+): { name: string; avatar?: string } | undefined {
   if (playerId) {
-    if (playerId === match.teamAAttackerId) return { name: match.teamAAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamAAttackerAvatar }
-    if (playerId === match.teamADefenderId) return { name: match.teamADefenderNickname || fallbackMatchRoleName || '', avatar: match.teamADefenderAvatar }
-    if (playerId === match.teamBAttackerId) return { name: match.teamBAttackerNickname || fallbackMatchRoleName || '', avatar: match.teamBAttackerAvatar }
-    if (playerId === match.teamBDefenderId) return { name: match.teamBDefenderNickname || fallbackMatchRoleName || '', avatar: match.teamBDefenderAvatar }
+    if (playerId === match.teamAAttackerId)
+      return {
+        name: match.teamAAttackerNickname || fallbackMatchRoleName || '',
+        avatar: match.teamAAttackerAvatar,
+      }
+    if (playerId === match.teamADefenderId)
+      return {
+        name: match.teamADefenderNickname || fallbackMatchRoleName || '',
+        avatar: match.teamADefenderAvatar,
+      }
+    if (playerId === match.teamBAttackerId)
+      return {
+        name: match.teamBAttackerNickname || fallbackMatchRoleName || '',
+        avatar: match.teamBAttackerAvatar,
+      }
+    if (playerId === match.teamBDefenderId)
+      return {
+        name: match.teamBDefenderNickname || fallbackMatchRoleName || '',
+        avatar: match.teamBDefenderAvatar,
+      }
   }
   return fallbackMatchRoleName ? { name: fallbackMatchRoleName } : undefined
 }
@@ -118,18 +143,20 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
   if (match.games && match.games.length > 0) {
     return match.games
   }
-  return [{
-    teamAScore: match.teamAScore ?? 0,
-    teamBScore: match.teamBScore ?? 0,
-    teamAAttackerId: match.teamAAttackerId,
-    teamADefenderId: match.teamADefenderId,
-    teamBAttackerId: match.teamBAttackerId,
-    teamBDefenderId: match.teamBDefenderId,
-    teamAAttackerNickname: match.teamAAttackerNickname,
-    teamADefenderNickname: match.teamADefenderNickname,
-    teamBAttackerNickname: match.teamBAttackerNickname,
-    teamBDefenderNickname: match.teamBDefenderNickname
-  }]
+  return [
+    {
+      teamAScore: match.teamAScore ?? 0,
+      teamBScore: match.teamBScore ?? 0,
+      teamAAttackerId: match.teamAAttackerId,
+      teamADefenderId: match.teamADefenderId,
+      teamBAttackerId: match.teamBAttackerId,
+      teamBDefenderId: match.teamBDefenderId,
+      teamAAttackerNickname: match.teamAAttackerNickname,
+      teamADefenderNickname: match.teamADefenderNickname,
+      teamBAttackerNickname: match.teamBAttackerNickname,
+      teamBDefenderNickname: match.teamBDefenderNickname,
+    },
+  ]
 }
 </script>
 
@@ -164,7 +191,12 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
             </span>
             <div class="flex flex-col items-end gap-1">
               <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
-                {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                {{
+                  new Date(match.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                }}
               </span>
               <span
                 v-if="match.status === 'PARTIALLY_CONFIRMED' && match.cooldownExpiresAt"
@@ -178,7 +210,9 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
 
           <!-- Shared Game Row Layout -->
           <div class="flex flex-col w-full">
-            <div class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+            <div
+              class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"
+            >
               <span>{{ t('match.teamA', 'Team A') }}</span>
               <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
               <span>{{ t('match.teamB', 'Team B') }}</span>
@@ -187,10 +221,18 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
               <MatchGameRow
                 v-for="(game, gIdx) in getMatchGames(match)"
                 :key="gIdx"
-                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
-                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
-                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
-                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
+                :team-a-defender="
+                  getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])
+                "
+                :team-a-attacker="
+                  getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])
+                "
+                :team-b-defender="
+                  getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])
+                "
+                :team-b-attacker="
+                  getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])
+                "
                 :team-a-score="game.teamAScore"
                 :team-b-score="game.teamBScore"
                 :show-score="true"
@@ -256,13 +298,20 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
               {{ t('match.rejected') }} {{ mIdx + 1 }}
             </span>
             <span v-if="match.createdAt" class="text-xs text-on-surface-variant">
-              {{ new Date(match.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              {{
+                new Date(match.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              }}
             </span>
           </div>
 
           <!-- Shared Game Row Layout -->
           <div class="flex flex-col w-full">
-            <div class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+            <div
+              class="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"
+            >
               <span>{{ t('match.teamA', 'Team A') }}</span>
               <span class="text-center">{{ t('match.scores', 'Scores') }}</span>
               <span>{{ t('match.teamB', 'Team B') }}</span>
@@ -271,10 +320,18 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
               <MatchGameRow
                 v-for="(game, gIdx) in getMatchGames(match)"
                 :key="gIdx"
-                :team-a-defender="getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])"
-                :team-a-attacker="getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])"
-                :team-b-defender="getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])"
-                :team-b-attacker="getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])"
+                :team-a-defender="
+                  getPlayerDisplayInfo(match, game.teamADefenderId, match.teamANames?.[1])
+                "
+                :team-a-attacker="
+                  getPlayerDisplayInfo(match, game.teamAAttackerId, match.teamANames?.[0])
+                "
+                :team-b-defender="
+                  getPlayerDisplayInfo(match, game.teamBDefenderId, match.teamBNames?.[1])
+                "
+                :team-b-attacker="
+                  getPlayerDisplayInfo(match, game.teamBAttackerId, match.teamBNames?.[0])
+                "
                 :team-a-score="game.teamAScore"
                 :team-b-score="game.teamBScore"
                 :show-score="true"
@@ -288,7 +345,10 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
               class="w-full flex flex-col gap-2 text-xs text-red-400 font-medium bg-surface-container/60 p-3 rounded-xl border border-red-500/20"
               :data-testid="`rejection-reason-${match.id}`"
             >
-              <div>{{ t('match.rejectionReasonLabel', 'Rejection reason') }}: {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}</div>
+              <div>
+                {{ t('match.rejectionReasonLabel', 'Rejection reason') }}:
+                {{ match.rejectionReason || t('match.noReasonGiven', 'No reason provided') }}
+              </div>
               <div class="grid grid-cols-3 gap-2 w-full mt-2">
                 <button
                   type="button"
@@ -332,12 +392,12 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
       >
         <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl">
           <div class="text-center space-y-2">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2">
+            <div
+              class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2"
+            >
               <span class="material-symbols-outlined text-2xl">warning</span>
             </div>
-            <h2 class="font-headline text-lg font-bold text-on-surface">
-              Cancel Match
-            </h2>
+            <h2 class="font-headline text-lg font-bold text-on-surface">Cancel Match</h2>
             <p class="text-xs text-on-surface-variant leading-relaxed">
               Are you sure you want to delete this match? All recorded scores will be lost.
             </p>
@@ -345,7 +405,7 @@ function getMatchGames(match: PendingMatchItem): GameScoreItem[] {
 
           <div class="flex flex-col gap-2">
             <BaseButton
-              @click="emit('delete-rejection', matchIdToDelete); matchIdToDelete = null"
+              @click="confirmDelete"
               class="w-full !bg-red-600 hover:!bg-red-700 !text-white font-headline font-extrabold uppercase tracking-wider text-xs !h-12"
               data-testid="confirm-delete-btn"
             >

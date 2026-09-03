@@ -4,7 +4,7 @@ import {
   useConfirmationTimer,
   ConfirmationResult,
   defaultCommitConfirmation,
-  type PendingConfirmationPayload
+  type PendingConfirmationPayload,
 } from '../composables/useConfirmationTimer'
 
 export const useMatchConfirmationStore = defineStore('matchConfirmation', () => {
@@ -32,13 +32,13 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
     pendingConfirmation,
     startConfirmationTimer,
     cancelConfirmationTimer,
-    clearTimer
+    clearTimer,
   } = useConfirmationTimer(executeCommit, handleSuccess)
 
   function commitConfirmation(
     matchId: string,
     matchNumberOrIdempotencyKey?: number | string,
-    idempotencyKey?: string
+    idempotencyKey?: string,
   ) {
     confirmError.value = null
     startConfirmationTimer(matchId, matchNumberOrIdempotencyKey, idempotencyKey)
@@ -56,6 +56,6 @@ export const useMatchConfirmationStore = defineStore('matchConfirmation', () => 
     commitConfirmation,
     startConfirmationTimer,
     cancelConfirmationTimer,
-    clearTimer
+    clearTimer,
   }
 })

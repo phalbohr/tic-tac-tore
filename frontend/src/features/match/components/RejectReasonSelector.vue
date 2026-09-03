@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 
-const props = withDefaults(defineProps<{
-  isOpen: boolean
-  isSubmitting?: boolean
-}>(), {
-  isSubmitting: false
-})
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean
+    isSubmitting?: boolean
+  }>(),
+  {
+    isSubmitting: false,
+  },
+)
 
 const emit = defineEmits<{
   (e: 'submit', payload: { reason: string; customReason: string }): void
@@ -27,14 +30,14 @@ watch(
       await nextTick()
       rootRef.value?.focus()
     }
-  }
+  },
 )
 
 const predefinedReasons = [
   { value: 'Wrong score', key: 'match.reasonWrongScore' },
   { value: 'Wrong players', key: 'match.reasonWrongPlayers' },
   { value: 'Did not play', key: 'match.reasonDidNotPlay' },
-  { value: 'Other', key: 'match.reasonOther' }
+  { value: 'Other', key: 'match.reasonOther' },
 ]
 
 const isSubmitDisabled = computed(() => {
@@ -48,7 +51,7 @@ function handleSubmit() {
   if (isSubmitDisabled.value) return
   emit('submit', {
     reason: selectedReason.value,
-    customReason: customReason.value.trim()
+    customReason: customReason.value.trim(),
   })
 }
 
@@ -99,7 +102,7 @@ function handleCancel() {
             'flex items-center gap-3 px-4 min-h-12 rounded-xl cursor-pointer transition-all border-none text-base font-medium select-none',
             selectedReason === reasonObj.value
               ? 'bg-red-500/20 text-red-300 ring-2 ring-red-500/50'
-              : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-750'
+              : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-750',
           ]"
         >
           <input
@@ -123,9 +126,7 @@ function handleCancel() {
           data-testid="rejection-free-text"
           data-test-id="reject-free-text-field"
         ></textarea>
-        <div class="text-right text-xs text-neutral-500">
-          {{ customReason.length }}/200
-        </div>
+        <div class="text-right text-xs text-neutral-500">{{ customReason.length }}/200</div>
       </div>
 
       <div class="flex items-center gap-3 pt-2">
@@ -144,7 +145,7 @@ function handleCancel() {
             'flex-1 min-h-12 rounded-xl font-semibold transition-all',
             isSubmitDisabled
               ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed opacity-50'
-              : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30'
+              : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30',
           ]"
           data-testid="submit-rejection-btn"
           @click="handleSubmit"

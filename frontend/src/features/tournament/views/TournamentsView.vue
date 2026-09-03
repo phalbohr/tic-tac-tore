@@ -1,138 +1,161 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useTournamentStore } from '@/features/tournament/stores/tournamentStore';
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useTournamentStore } from '@/features/tournament/stores/tournamentStore'
+import { useAuthStore } from '@/stores/auth'
 import type {
   TournamentDto,
   TournamentRegistrationDto,
   RegisterTournamentPayload,
-} from '@/features/tournament/types/tournament';
-import TournamentRegistrationModal from '@/features/tournament/components/TournamentRegistrationModal.vue';
-import TournamentInviteModal from '@/features/tournament/components/TournamentInviteModal.vue';
-import TournamentBracket from '@/features/tournament/components/TournamentBracket.vue';
-import TournamentSchedule from '@/features/tournament/components/TournamentSchedule.vue';
+} from '@/features/tournament/types/tournament'
+import TournamentRegistrationModal from '@/features/tournament/components/TournamentRegistrationModal.vue'
+import TournamentInviteModal from '@/features/tournament/components/TournamentInviteModal.vue'
+import TournamentBracket from '@/features/tournament/components/TournamentBracket.vue'
+import TournamentSchedule from '@/features/tournament/components/TournamentSchedule.vue'
 
-const { t } = useI18n();
-const tournamentStore = useTournamentStore();
+const { t } = useI18n()
+const router = useRouter()
+const authStore = useAuthStore()
+const tournamentStore = useTournamentStore()
+const currentUserId = computed(() => authStore.profile?.id)
 
-const selectedTournament = ref<TournamentDto | null>(null);
-const isRegistrationModalOpen = ref(false);
+const selectedTournament = ref<TournamentDto | null>(null)
+const isRegistrationModalOpen = ref(false)
 
-const selectedInvite = ref<TournamentRegistrationDto | null>(null);
-const isInviteModalOpen = ref(false);
+const selectedInvite = ref<TournamentRegistrationDto | null>(null)
+const isInviteModalOpen = ref(false)
 
-const activeBracketTournament = ref<TournamentDto | null>(null);
-const isBracketModalOpen = ref(false);
+const activeBracketTournament = ref<TournamentDto | null>(null)
+const isBracketModalOpen = ref(false)
 
 const activeBracket = computed(() => {
-  if (!activeBracketTournament.value) return null;
-  return tournamentStore.brackets[activeBracketTournament.value.id] ?? null;
-});
+  if (!activeBracketTournament.value) return null
+  return tournamentStore.brackets[activeBracketTournament.value.id] ?? null
+})
 
-const toastMessage = ref('');
-const isSubmitting = ref(false);
+const toastMessage = ref('')
+const isSubmitting = ref(false)
 
 function showToast(msg: string) {
-  toastMessage.value = msg;
+  toastMessage.value = msg
   setTimeout(() => {
-    toastMessage.value = '';
-  }, 4000);
+    toastMessage.value = ''
+  }, 4000)
 }
 
 onMounted(async () => {
   await Promise.allSettled([
+    authStore.fetchProfile(),
     tournamentStore.fetchTournaments(),
     tournamentStore.fetchPendingInvitations(),
-  ]);
+  ])
 
   for (const tourn of tournamentStore.tournaments) {
-    tournamentStore.fetchMyRegistration(tourn.id).catch(() => {});
+    tournamentStore.fetchMyRegistration(tourn.id).catch(() => {})
   }
-});
+})
 
 function openRegistration(tourn: TournamentDto) {
-  selectedTournament.value = tourn;
-  isRegistrationModalOpen.value = true;
+  selectedTournament.value = tourn
+  isRegistrationModalOpen.value = true
 }
 
 function openInvite(invite: TournamentRegistrationDto) {
-  selectedInvite.value = invite;
-  isInviteModalOpen.value = true;
+  selectedInvite.value = invite
+  isInviteModalOpen.value = true
 }
 
 async function openBracket(tourn: TournamentDto) {
-  activeBracketTournament.value = tourn;
+  activeBracketTournament.value = tourn
   try {
-    await tournamentStore.fetchBracket(tourn.id);
-    isBracketModalOpen.value = true;
+    await tournamentStore.fetchBracket(tourn.id)
+    isBracketModalOpen.value = true
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Failed to load bracket');
+    showToast(err instanceof Error ? err.message : 'Failed to load bracket')
   }
 }
 
 async function handleStartTournament(tourn: TournamentDto) {
-  isSubmitting.value = true;
+  isSubmitting.value = true
   try {
-    const updated = await tournamentStore.startTournament(tourn.id);
-    showToast(t('tournament.startedSuccess'));
-    await openBracket(updated);
+    const updated = await tournamentStore.startTournament(tourn.id)
+    showToast(t('tournament.startedSuccess'))
+    await openBracket(updated)
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Failed to start tournament');
+    showToast(err instanceof Error ? err.message : 'Failed to start tournament')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 
 async function handleRegister(payload: RegisterTournamentPayload) {
-  if (!selectedTournament.value) return;
-  isSubmitting.value = true;
+  if (!selectedTournament.value) return
+  isSubmitting.value = true
   try {
-    const result = await tournamentStore.register(selectedTournament.value.id, payload);
-    isRegistrationModalOpen.value = false;
+    const result = await tournamentStore.register(selectedTournament.value.id, payload)
+    isRegistrationModalOpen.value = false
     if (result.status === 'PENDING_CONFIRMATION') {
-      showToast(t('tournament.registration.successPartner'));
+      showToast(t('tournament.registration.successPartner'))
     } else {
-      showToast(t('tournament.registration.successSolo'));
+      showToast(t('tournament.registration.successSolo'))
     }
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Registration failed');
+    showToast(err instanceof Error ? err.message : 'Registration failed')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 
 async function handleAcceptInvite(invite: TournamentRegistrationDto) {
-  isSubmitting.value = true;
+  isSubmitting.value = true
   try {
-    await tournamentStore.acceptInvite(invite.tournamentId, invite.id);
-    isInviteModalOpen.value = false;
-    showToast(t('tournament.registration.acceptSuccess'));
+    await tournamentStore.acceptInvite(invite.tournamentId, invite.id)
+    isInviteModalOpen.value = false
+    showToast(t('tournament.registration.acceptSuccess'))
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Failed to accept');
+    showToast(err instanceof Error ? err.message : 'Failed to accept')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 
 async function handleDeclineInvite(invite: TournamentRegistrationDto) {
-  isSubmitting.value = true;
+  isSubmitting.value = true
   try {
-    await tournamentStore.declineInvite(invite.tournamentId, invite.id);
-    isInviteModalOpen.value = false;
-    showToast(t('tournament.registration.declineSuccess'));
+    await tournamentStore.declineInvite(invite.tournamentId, invite.id)
+    isInviteModalOpen.value = false
+    showToast(t('tournament.registration.declineSuccess'))
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Failed to decline');
+    showToast(err instanceof Error ? err.message : 'Failed to decline')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 
 async function handleWithdraw(tournamentId: string, registrationId: string) {
   try {
-    await tournamentStore.cancelRegistration(tournamentId, registrationId);
-    showToast(t('tournament.registration.cancelSuccess'));
+    await tournamentStore.cancelRegistration(tournamentId, registrationId)
+    showToast(t('tournament.registration.cancelSuccess'))
   } catch (err: unknown) {
-    showToast(err instanceof Error ? err.message : 'Failed to withdraw');
+    showToast(err instanceof Error ? err.message : 'Failed to withdraw')
+  }
+}
+
+async function handleStartMatch(matchId: string) {
+  if (!activeBracketTournament.value) return
+  try {
+    await tournamentStore.startMatch(activeBracketTournament.value.id, matchId)
+    isBracketModalOpen.value = false
+    router.push({
+      path: '/matches/new',
+      query: {
+        tournamentId: activeBracketTournament.value.id,
+        tournamentMatchId: matchId,
+      },
+    })
+  } catch (err: unknown) {
+    showToast(err instanceof Error ? err.message : 'Failed to start match')
   }
 }
 </script>
@@ -181,7 +204,12 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
               {{ inv.tournamentName }}
             </div>
             <div class="text-xs text-on-surface-variant">
-              {{ t('tournament.registration.invitedBy', { inviter: inv.playerNickname, tournament: inv.tournamentName }) }}
+              {{
+                t('tournament.registration.invitedBy', {
+                  inviter: inv.playerNickname,
+                  tournament: inv.tournamentName,
+                })
+              }}
             </div>
           </div>
           <button
@@ -201,7 +229,10 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
       {{ t('common.loading') }}
     </div>
 
-    <div v-else-if="tournamentStore.tournaments.length === 0" class="text-center py-12 text-on-surface-variant">
+    <div
+      v-else-if="tournamentStore.tournaments.length === 0"
+      class="text-center py-12 text-on-surface-variant"
+    >
       {{ t('tournament.empty') }}
     </div>
 
@@ -217,9 +248,7 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
             <h2 class="text-lg font-bold text-on-surface">
               {{ tourn.name }}
             </h2>
-            <div class="text-xs text-on-surface-variant">
-              {{ tourn.format }} • {{ tourn.mode }}
-            </div>
+            <div class="text-xs text-on-surface-variant">{{ tourn.format }} • {{ tourn.mode }}</div>
           </div>
 
           <!-- Status badge -->
@@ -271,17 +300,26 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
           <!-- View Bracket/Schedule Button for IN_PROGRESS or COMPLETED -->
           <button
             v-if="tourn.status === 'IN_PROGRESS' || tourn.status === 'COMPLETED'"
-            :data-testid="tourn.format === 'CHAMPIONSHIP' ? 'view-schedule-btn' : 'view-bracket-btn'"
+            :data-testid="
+              tourn.format === 'CHAMPIONSHIP' ? 'view-schedule-btn' : 'view-bracket-btn'
+            "
             type="button"
             class="px-4 py-2 text-xs font-semibold text-on-primary bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-sm"
             @click="openBracket(tourn)"
           >
-            {{ tourn.format === 'CHAMPIONSHIP' ? t('tournament.viewSchedule') : t('tournament.viewBracket') }}
+            {{
+              tourn.format === 'CHAMPIONSHIP'
+                ? t('tournament.viewSchedule')
+                : t('tournament.viewBracket')
+            }}
           </button>
 
           <!-- Register button -->
           <button
-            v-if="!tournamentStore.myRegistrations[tourn.id]?.isRegistered && tourn.status === 'REGISTRATION_OPEN'"
+            v-if="
+              !tournamentStore.myRegistrations[tourn.id]?.isRegistered &&
+              tourn.status === 'REGISTRATION_OPEN'
+            "
             data-testid="register-tournament-btn"
             type="button"
             class="px-4 py-2 text-xs font-semibold text-on-primary bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-sm"
@@ -303,16 +341,16 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
 
           <!-- Withdraw button -->
           <button
-            v-if="tournamentStore.myRegistrations[tourn.id]?.isRegistered && tourn.status === 'REGISTRATION_OPEN'"
+            v-if="
+              tournamentStore.myRegistrations[tourn.id]?.isRegistered &&
+              tourn.status === 'REGISTRATION_OPEN'
+            "
             data-testid="withdraw-registration-btn"
             type="button"
             class="px-3 py-1.5 text-xs font-medium text-error hover:bg-error/10 rounded-xl transition-colors"
             @click="
               tournamentStore.myRegistrations[tourn.id]?.registration &&
-              handleWithdraw(
-                tourn.id,
-                tournamentStore.myRegistrations[tourn.id]!.registration!.id
-              )
+              handleWithdraw(tourn.id, tournamentStore.myRegistrations[tourn.id]!.registration!.id)
             "
           >
             {{ t('tournament.withdraw') }}
@@ -345,7 +383,9 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm"
       data-testid="bracket-modal"
     >
-      <div class="bg-surface rounded-3xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+      <div
+        class="bg-surface rounded-3xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl"
+      >
         <div class="flex justify-end">
           <button
             type="button"
@@ -359,10 +399,14 @@ async function handleWithdraw(tournamentId: string, registrationId: string) {
         <TournamentSchedule
           v-if="activeBracketTournament.format === 'CHAMPIONSHIP'"
           :bracket="activeBracket"
+          :current-user-id="currentUserId"
+          @start-match="handleStartMatch"
         />
         <TournamentBracket
           v-else
           :bracket="activeBracket"
+          :current-user-id="currentUserId"
+          @start-match="handleStartMatch"
         />
       </div>
     </div>

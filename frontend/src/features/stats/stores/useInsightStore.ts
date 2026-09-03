@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import {
-  type PlayerInsight,
-  getPlayerInsights,
-  getMyInsights
-} from '@/services/insightService'
+import { type PlayerInsight, getPlayerInsights, getMyInsights } from '@/services/insightService'
 import { generateDemoInsights } from '../utils/demoDataGenerator'
 import { useStatsStore } from './useStatsStore'
 
@@ -22,7 +18,11 @@ export const useInsightStore = defineStore('insight', () => {
   })
 
   const topInsights = computed<PlayerInsight[]>(() => {
-    if (shouldShowDemoData.value && (realInsights.value.length === 0 || (realInsights.value.length === 1 && realInsights.value[0]?.type === 'INSUFFICIENT_DATA'))) {
+    if (
+      shouldShowDemoData.value &&
+      (realInsights.value.length === 0 ||
+        (realInsights.value.length === 1 && realInsights.value[0]?.type === 'INSUFFICIENT_DATA'))
+    ) {
       return generateDemoInsights().slice(0, 5)
     }
     return insights.value.slice(0, 5)
@@ -37,7 +37,7 @@ export const useInsightStore = defineStore('insight', () => {
       (insight) =>
         insight.importance === 'HIGH' &&
         insight.type !== 'INSUFFICIENT_DATA' &&
-        !dismissedCelebrationIds.value.has(insight.id)
+        !dismissedCelebrationIds.value.has(insight.id),
     )
     return celebrationCandidate || null
   })
@@ -47,9 +47,7 @@ export const useInsightStore = defineStore('insight', () => {
     error.value = null
 
     try {
-      const response = playerId
-        ? await getPlayerInsights(playerId)
-        : await getMyInsights()
+      const response = playerId ? await getPlayerInsights(playerId) : await getMyInsights()
 
       realInsights.value = response.insights || []
       insights.value = response.insights || []
@@ -84,6 +82,6 @@ export const useInsightStore = defineStore('insight', () => {
     shouldShowDemoData,
     fetchInsights,
     dismissCelebration,
-    reset
+    reset,
   }
 })

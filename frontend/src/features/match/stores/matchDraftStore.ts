@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 
 export enum MatchType {
   ONE_VS_ONE = '1v1',
-  TWO_VS_TWO = '2v2'
+  TWO_VS_TWO = '2v2',
 }
 
 export interface PlayerDto {
@@ -104,9 +104,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     debounceTimer = setTimeout(async () => {
       searchAbortController = new AbortController()
       try {
-        const res = await fetch(`/api/users/me/players/search?q=${encodeURIComponent(query.trim())}`, {
-          signal: searchAbortController.signal
-        })
+        const res = await fetch(
+          `/api/users/me/players/search?q=${encodeURIComponent(query.trim())}`,
+          {
+            signal: searchAbortController.signal,
+          },
+        )
         if (res.ok) {
           try {
             searchResults.value = await res.json()
@@ -174,14 +177,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     try {
       const results = await Promise.allSettled([
         fetch('/api/users/me/frequent-opponents'),
-        fetch('/api/users/me/preferences/last-rule-system')
+        fetch('/api/users/me/preferences/last-rule-system'),
       ])
-      
+
       const opponentsRes = results[0]
       if (opponentsRes.status === 'fulfilled' && opponentsRes.value.ok) {
         frequentOpponents.value = await opponentsRes.value.json()
       }
-      
+
       const prefsRes = results[1]
       if (prefsRes.status === 'fulfilled' && prefsRes.value.ok) {
         const data = await prefsRes.value.json()
@@ -200,35 +203,40 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       if (res.ok) {
         const data = await res.json()
         if (Array.isArray(data)) {
-          const preset = data.find((p: { name?: string; id?: string }) => p.name?.toUpperCase() === ruleSystem.value.toUpperCase() || p.id === ruleSystem.value) || data[0]
+          const preset =
+            data.find(
+              (p: { name?: string; id?: string }) =>
+                p.name?.toUpperCase() === ruleSystem.value.toUpperCase() ||
+                p.id === ruleSystem.value,
+            ) || data[0]
           if (preset) {
             const gameLimit = Number(preset.gameLimit ?? 3)
             ruleConfig.value = {
               scoreLimit: Number(preset.goalLimit ?? preset.scoreLimit ?? 10),
               gameLimit: gameLimit,
               winsNeeded: Number(preset.winsNeeded ?? Math.floor(gameLimit / 2) + 1),
-              winByTwo: Boolean(preset.winByTwo)
+              winByTwo: Boolean(preset.winByTwo),
             }
           } else {
             throw new Error('Preset not found')
           }
         } else {
           if (typeof data.scoreLimit !== 'number' && typeof data.scoreLimit !== 'string') {
-             throw new Error('Invalid numeric fields in rule config')
+            throw new Error('Invalid numeric fields in rule config')
           }
-          ruleConfig.value = { 
-            scoreLimit: Number(data.scoreLimit), 
-            gameLimit: Number(data.gameLimit), 
+          ruleConfig.value = {
+            scoreLimit: Number(data.scoreLimit),
+            gameLimit: Number(data.gameLimit),
             winsNeeded: Number(data.winsNeeded),
-            winByTwo: Boolean(data.winByTwo)
+            winByTwo: Boolean(data.winByTwo),
           }
         }
       } else {
         throw new Error('API failed')
       }
     } catch (error) {
-      const e = error as Error;
-      if (e.name === 'AbortError') throw e;
+      const e = error as Error
+      if (e.name === 'AbortError') throw e
       console.warn('Failed to load rule config, falling back to Best of 3 rules', e)
       ruleConfig.value = { scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false }
     }
@@ -241,21 +249,21 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
   }
 
-    async function fetchPlayer(id: string) {
-    if (frequentOpponents.value.find(o => o.id === id)) return;
-    if (fetchedPlayers.value[id]) return;
+  async function fetchPlayer(id: string) {
+    if (frequentOpponents.value.find((o) => o.id === id)) return
+    if (fetchedPlayers.value[id]) return
     try {
-      const res = await fetch(`/api/v1/players/${id}`);
+      const res = await fetch(`/api/v1/players/${id}`)
       if (res.ok) {
-        fetchedPlayers.value[id] = await res.json();
+        fetchedPlayers.value[id] = await res.json()
       }
     } catch (e) {
-      console.warn('Failed to fetch player profile', e);
+      console.warn('Failed to fetch player profile', e)
     }
   }
 
   function addPlayer(playerId: string) {
-    if (!playerId.trim()) return;
+    if (!playerId.trim()) return
     const maxPlayers = matchType.value === MatchType.ONE_VS_ONE ? 2 : 4
     if (selectedPlayers.value.length < maxPlayers && !selectedPlayers.value.includes(playerId)) {
       selectedPlayers.value.push(playerId)
@@ -264,14 +272,13 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   }
 
   function removePlayer(playerId: string) {
-    selectedPlayers.value = selectedPlayers.value.filter(id => id !== playerId)
+    selectedPlayers.value = selectedPlayers.value.filter((id) => id !== playerId)
   }
-
-  
 
   const isGameComplete = computed(() => {
     const limit = ruleConfig.value?.scoreLimit ?? 10
-    const reachedLimit = currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit
+    const reachedLimit =
+      currentGame.value.team1Score >= limit || currentGame.value.team2Score >= limit
     if (!reachedLimit) return false
 
     if (ruleConfig.value?.winByTwo) {
@@ -316,11 +323,13 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     return t1w >= winsNeeded || t2w >= winsNeeded || totalCompletedGames >= gameLimit
   })
 
-  const currentActiveIndex = computed(() => (activeGameIndex.value >= 0 ? activeGameIndex.value : games.value.length))
+  const currentActiveIndex = computed(() =>
+    activeGameIndex.value >= 0 ? activeGameIndex.value : games.value.length,
+  )
 
   function selectGameToEdit(index: number) {
     if (index < 0 || index > games.value.length) return
-    
+
     if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
       games.value[activeGameIndex.value] = { ...currentGame.value }
     } else if (activeGameIndex.value === -1) {
@@ -342,7 +351,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
 
   function incrementScore(team: 1 | 2, amount: number) {
     if (matchState.value === 'ready_for_submission') return
-    
+
     const limit = ruleConfig.value?.scoreLimit ?? 10
     const winByTwo = ruleConfig.value?.winByTwo ?? false
 
@@ -389,59 +398,66 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   }
 
   function completeCurrentGame() {
-    if (!isGameComplete.value) return;
+    if (!isGameComplete.value) return
 
     if (activeGameIndex.value >= 0 && activeGameIndex.value < games.value.length) {
-      games.value[activeGameIndex.value] = { ...currentGame.value };
+      games.value[activeGameIndex.value] = { ...currentGame.value }
 
       if (activeGameIndex.value < games.value.length - 1) {
-        const nextIndex = activeGameIndex.value + 1;
-        activeGameIndex.value = nextIndex;
-        const nextGame = games.value[nextIndex];
+        const nextIndex = activeGameIndex.value + 1
+        activeGameIndex.value = nextIndex
+        const nextGame = games.value[nextIndex]
         if (nextGame) {
-          currentGame.value = { ...nextGame };
+          currentGame.value = { ...nextGame }
         }
-        return;
+        return
       }
 
       if (isMatchComplete.value) {
-        matchState.value = 'ready_for_submission';
-        return;
+        matchState.value = 'ready_for_submission'
+        return
       }
 
-      activeGameIndex.value = -1;
-      currentGame.value = { ...savedNewGame.value };
-      return;
+      activeGameIndex.value = -1
+      currentGame.value = { ...savedNewGame.value }
+      return
     }
 
-    const wasMatchComplete = isMatchComplete.value;
-    games.value.push({ ...currentGame.value });
-    const prevGame = currentGame.value;
+    const wasMatchComplete = isMatchComplete.value
+    games.value.push({ ...currentGame.value })
+    const prevGame = currentGame.value
     savedNewGame.value = {
       team1Score: 0,
       team2Score: 0,
       teamAAttackerId: prevGame.teamAAttackerId,
       teamADefenderId: prevGame.teamADefenderId,
       teamBAttackerId: prevGame.teamBAttackerId,
-      teamBDefenderId: prevGame.teamBDefenderId
-    };
-    currentGame.value = { ...savedNewGame.value };
-    activeGameIndex.value = -1;
+      teamBDefenderId: prevGame.teamBDefenderId,
+    }
+    currentGame.value = { ...savedNewGame.value }
+    activeGameIndex.value = -1
 
     if (wasMatchComplete) {
-      matchState.value = 'ready_for_submission';
+      matchState.value = 'ready_for_submission'
     } else {
-      matchState.value = 'score_entry';
+      matchState.value = 'score_entry'
     }
   }
 
   function loadFromRejectedMatch(matchItem: {
-    id?: string;
-    teamAAttackerId?: string;
-    teamADefenderId?: string;
-    teamBAttackerId?: string;
-    teamBDefenderId?: string;
-    games?: Array<{ teamAScore: number; teamBScore: number; teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string }>;
+    id?: string
+    teamAAttackerId?: string
+    teamADefenderId?: string
+    teamBAttackerId?: string
+    teamBDefenderId?: string
+    games?: Array<{
+      teamAScore: number
+      teamBScore: number
+      teamAAttackerId?: string
+      teamADefenderId?: string
+      teamBAttackerId?: string
+      teamBDefenderId?: string
+    }>
   }) {
     editingMatchId.value = matchItem.id || null
     const teamAPlayers: string[] = []
@@ -459,16 +475,16 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     }
 
     selectedPlayers.value = [...teamAPlayers, ...teamBPlayers]
-    selectedPlayers.value.forEach(id => fetchPlayer(id))
+    selectedPlayers.value.forEach((id) => fetchPlayer(id))
 
     if (matchItem.games && matchItem.games.length > 0) {
-      games.value = matchItem.games.map(g => ({
+      games.value = matchItem.games.map((g) => ({
         team1Score: g.teamAScore,
         team2Score: g.teamBScore,
         teamAAttackerId: g.teamAAttackerId,
         teamADefenderId: g.teamADefenderId,
         teamBAttackerId: g.teamBAttackerId,
-        teamBDefenderId: g.teamBDefenderId
+        teamBDefenderId: g.teamBDefenderId,
       }))
       activeGameIndex.value = games.value.length - 1
       const lastGame = games.value[activeGameIndex.value]
@@ -545,23 +561,26 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     matchState.value = 'draft'
   }
 
-  async function executeCommit(item: { idempotencyKey: string; payload: Record<string, unknown> }): Promise<SubmissionResult> {
+  async function executeCommit(item: {
+    idempotencyKey: string
+    payload: Record<string, unknown>
+  }): Promise<SubmissionResult> {
     try {
       const res = await fetch('/api/v1/matches', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Idempotency-Key': item.idempotencyKey,
-          ...getCsrfHeaders()
+          ...getCsrfHeaders(),
         },
-        body: JSON.stringify(item.payload)
+        body: JSON.stringify(item.payload),
       })
       if (res.ok) {
         if (editingMatchId.value) {
           try {
             const delRes = await fetch(`/api/v1/matches/${editingMatchId.value}`, {
               method: 'DELETE',
-              headers: { ...getCsrfHeaders() }
+              headers: { ...getCsrfHeaders() },
             })
             if (!delRes.ok) {
               console.warn(`Failed to delete editing match: ${delRes.status}`)
@@ -620,12 +639,12 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     pendingSubmission,
     startTimer,
     cancelTimer,
-    clearTimer
+    clearTimer,
   } = useSubmissionTimer(executeCommit)
 
   function startSubmissionTimer() {
     clearSubmitError()
-    
+
     const requiredPlayers = matchType.value === MatchType.TWO_VS_TWO ? 4 : 2
     if (selectedPlayers.value.length < requiredPlayers) return
 
@@ -635,11 +654,15 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     if (games.value.length === 0) return
 
     const idempotencyKey = crypto.randomUUID()
-    
-    const teamAAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : selectedPlayers.value[0]
-    const teamADefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[0] : undefined
-    const teamBAttackerId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : selectedPlayers.value[1]
-    const teamBDefenderId = matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : undefined
+
+    const teamAAttackerId =
+      matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[1] : selectedPlayers.value[0]
+    const teamADefenderId =
+      matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[0] : undefined
+    const teamBAttackerId =
+      matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[3] : selectedPlayers.value[1]
+    const teamBDefenderId =
+      matchType.value === MatchType.TWO_VS_TWO ? selectedPlayers.value[2] : undefined
 
     const creatorId = authStore.profile?.id || teamAAttackerId
     const payload = {
@@ -649,14 +672,14 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamADefenderId,
       teamBAttackerId,
       teamBDefenderId,
-      games: games.value.map(g => ({
+      games: games.value.map((g) => ({
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
         teamAAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamAAttackerId : undefined,
         teamADefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamADefenderId : undefined,
         teamBAttackerId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBAttackerId : undefined,
-        teamBDefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBDefenderId : undefined
-      }))
+        teamBDefenderId: matchType.value === MatchType.TWO_VS_TWO ? g.teamBDefenderId : undefined,
+      })),
     }
 
     startTimer({ idempotencyKey, payload })
@@ -737,6 +760,6 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     isSearchOpen,
     openSearch,
     closeSearch,
-    searchPlayers
+    searchPlayers,
   }
 })

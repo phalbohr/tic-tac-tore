@@ -11,9 +11,11 @@ vi.mock('vue-i18n', () => ({
         'achievements.generous_host.title': 'Generous Host',
         'achievements.generous_host.description': 'Conceded 10 or more points in a single game.',
         'achievements.sieve_defense.title': 'Sieve Defense',
-        'achievements.sieve_defense.description': 'Conceded 15+ goals in a match while playing Defender.',
+        'achievements.sieve_defense.description':
+          'Conceded 15+ goals in a match while playing Defender.',
         'achievements.heartbreaker.title': 'Heartbreaker',
-        'achievements.heartbreaker.description': 'Lost the match in the deciding game by exactly 1 goal.',
+        'achievements.heartbreaker.description':
+          'Lost the match in the deciding game by exactly 1 goal.',
         'achievements.unlocked': 'Unlocked',
         'achievements.locked': 'Locked',
       }

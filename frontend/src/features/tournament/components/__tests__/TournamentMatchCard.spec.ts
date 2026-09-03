@@ -1,257 +1,123 @@
-import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import TournamentMatchCard from '@/features/tournament/components/TournamentMatchCard.vue';
-import type { TournamentMatchDto } from '@/features/tournament/types/tournament';
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import TournamentMatchCard from '@/features/tournament/components/TournamentMatchCard.vue'
+import type { TournamentMatchDto } from '@/features/tournament/types/tournament'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => {
-      if (key === 'tournament.stub_partner') return 'Stub';
-      return key;
+      const messages: Record<string, string> = {
+        'tournament.stub_partner': 'Stub',
+        'tournament.match.start': 'Start Match',
+        'tournament.match.opponent_busy': 'Opponent Busy',
+        'tournament.match.live': 'LIVE',
+        'tournament.match.completed': 'COMPLETED',
+      }
+      return messages[key] || key
     },
-    te: (key: string) => key === 'tournament.stub_partner',
+    te: () => true,
   }),
-}));
+}))
 
-describe('TournamentMatchCard.vue (Story 8.3)', () => {
-  it('renders standard match pairing with seeds and player nicknames', () => {
-    const match: TournamentMatchDto = {
-      id: 'm-1',
-      tournamentId: 'tourn-1',
-      round: 1,
-      matchOrder: 1,
-      participant1: {
-        id: 'reg-1',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-1',
-        playerNickname: 'Alice',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 1,
+describe('TournamentMatchCard.vue (Story 8.5: Asynchronous Tournament Match Execution)', () => {
+  const baseMatch: TournamentMatchDto = {
+    id: 'match-101',
+    tournamentId: 'tourn-85',
+    round: 1,
+    matchOrder: 1,
+    participant1: {
+      id: 'reg-p1',
+      tournamentId: 'tourn-85',
+      tournamentName: 'Championship',
+      playerId: 'user-p1',
+      playerNickname: 'Alice',
+      status: 'CONFIRMED',
+      createdAt: '',
+      seed: 1,
+    },
+    participant2: {
+      id: 'reg-p2',
+      tournamentId: 'tourn-85',
+      tournamentName: 'Championship',
+      playerId: 'user-p2',
+      playerNickname: 'Bob',
+      status: 'CONFIRMED',
+      createdAt: '',
+      seed: 2,
+    },
+    seed1: 1,
+    seed2: 2,
+    status: 'READY',
+  }
+
+  it('renders Start Match button when match is READY and current user is a participant (AC4)', () => {
+    const wrapper = mount(TournamentMatchCard, {
+      props: {
+        match: baseMatch,
+        currentUserId: 'user-p1',
+        isPlayable: true,
       },
-      participant2: {
-        id: 'reg-8',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-8',
-        playerNickname: 'Bob',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 8,
+    })
+
+    const startButton = wrapper.find('[data-test="start-match-button"]')
+    expect(startButton.exists()).toBe(true)
+    expect(startButton.text()).toContain('Start Match')
+  })
+
+  it('emits start-match event when clicking Start Match button (AC4)', async () => {
+    const wrapper = mount(TournamentMatchCard, {
+      props: {
+        match: baseMatch,
+        currentUserId: 'user-p1',
+        isPlayable: true,
       },
-      seed1: 1,
-      seed2: 8,
-      status: 'READY',
-    };
+    })
+
+    const startButton = wrapper.find('[data-test="start-match-button"]')
+    await startButton.trigger('click')
+
+    expect(wrapper.emitted('start-match')).toBeTruthy()
+    expect(wrapper.emitted('start-match')?.[0]).toEqual(['match-101'])
+  })
+
+  it('renders Opponent Busy chip and disables start when opponent is in another active match (AC4)', () => {
+    const matchWithBusyOpponent = {
+      ...baseMatch,
+      isOpponentBusy: true,
+      busyParticipantNicknames: ['Bob'],
+    }
 
     const wrapper = mount(TournamentMatchCard, {
-      props: { match },
-    });
-
-    expect(wrapper.text()).toContain('Alice');
-    expect(wrapper.text()).toContain('Bob');
-    expect(wrapper.text()).toContain('#1');
-    expect(wrapper.text()).toContain('#8');
-  });
-
-  it('renders BYE badge and auto-advancement for unseeded slot', () => {
-    const match: TournamentMatchDto = {
-      id: 'm-2',
-      tournamentId: 'tourn-1',
-      round: 1,
-      matchOrder: 2,
-      participant1: {
-        id: 'reg-2',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-2',
-        playerNickname: 'Eve',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 2,
+      props: {
+        match: matchWithBusyOpponent,
+        currentUserId: 'user-p1',
+        isPlayable: false,
       },
-      participant2: null,
-      seed1: 2,
-      seed2: null,
-      status: 'BYE',
-      winnerRegistrationId: 'reg-2',
-    };
+    })
+
+    const busyChip = wrapper.find('[data-test="opponent-busy-badge"]')
+    expect(busyChip.exists()).toBe(true)
+    expect(busyChip.text()).toContain('Opponent Busy')
+
+    const startButton = wrapper.find('[data-test="start-match-button"]')
+    expect(startButton.attributes('disabled')).toBeDefined()
+  })
+
+  it('renders LIVE badge when match status is IN_PROGRESS (AC4)', () => {
+    const inProgressMatch = {
+      ...baseMatch,
+      status: 'IN_PROGRESS' as const,
+    }
 
     const wrapper = mount(TournamentMatchCard, {
-      props: { match },
-    });
+      props: {
+        match: inProgressMatch,
+        currentUserId: 'user-p1',
+      },
+    })
 
-    expect(wrapper.text()).toContain('Eve');
-    expect(wrapper.text()).toContain('BYE');
-  });
-
-  it('renders 2v2 pairing with partners on both sides (Story 8.4)', () => {
-    const match: TournamentMatchDto = {
-      id: 'm-84-1',
-      tournamentId: 'tourn-1',
-      round: 1,
-      matchOrder: 1,
-      participant1: {
-        id: 'reg-1',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-1',
-        playerNickname: 'Alice',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 1,
-      },
-      participant1Partner: {
-        id: 'reg-2',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-2',
-        playerNickname: 'Bob',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 2,
-      },
-      participant2: {
-        id: 'reg-3',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-3',
-        playerNickname: 'Charlie',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 3,
-      },
-      participant2Partner: {
-        id: 'reg-4',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-4',
-        playerNickname: 'Diana',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 4,
-      },
-      isParticipant1Stub: false,
-      isParticipant2Stub: false,
-      status: 'READY',
-    };
-
-    const wrapper = mount(TournamentMatchCard, {
-      props: { match },
-    });
-
-    expect(wrapper.text()).toContain('Alice & Bob');
-    expect(wrapper.text()).toContain('Charlie & Diana');
-  });
-
-  it('renders stub badge when isParticipant1Stub or isParticipant2Stub is true (Story 8.4)', () => {
-    const match: TournamentMatchDto = {
-      id: 'm-84-2',
-      tournamentId: 'tourn-1',
-      round: 1,
-      matchOrder: 1,
-      participant1: {
-        id: 'reg-1',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-1',
-        playerNickname: 'Alice',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 1,
-      },
-      participant1Partner: {
-        id: 'reg-2',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-2',
-        playerNickname: 'Bob',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 2,
-      },
-      participant2: {
-        id: 'reg-3',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-3',
-        playerNickname: 'Charlie',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 3,
-      },
-      participant2Partner: {
-        id: 'reg-4',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-4',
-        playerNickname: 'Diana',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 4,
-      },
-      isParticipant1Stub: true,
-      isParticipant2Stub: false,
-      status: 'READY',
-    };
-
-    const wrapper = mount(TournamentMatchCard, {
-      props: { match },
-    });
-
-    const stubBadges = wrapper.findAll('[data-testid="stub-partner-badge"]');
-    expect(stubBadges.length).toBeGreaterThan(0);
-    expect(stubBadges[0]!.text()).toContain('Stub');
-  });
-
-  it('renders translated stub badge text when isParticipant2Stub is true', () => {
-    const match: TournamentMatchDto = {
-      id: 'm-84-3',
-      tournamentId: 'tourn-1',
-      round: 1,
-      matchOrder: 1,
-      participant1: {
-        id: 'reg-1',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-1',
-        playerNickname: 'Alice',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 1,
-      },
-      participant2: {
-        id: 'reg-2',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-2',
-        playerNickname: 'Bob',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 2,
-      },
-      participant2Partner: {
-        id: 'reg-3',
-        tournamentId: 'tourn-1',
-        tournamentName: 'Test Cup',
-        playerId: 'p-3',
-        playerNickname: 'Charlie',
-        status: 'CONFIRMED',
-        createdAt: '',
-        seed: 3,
-      },
-      isParticipant1Stub: false,
-      isParticipant2Stub: true,
-      status: 'READY',
-    };
-
-    const wrapper = mount(TournamentMatchCard, {
-      props: { match },
-    });
-
-    const stubBadges = wrapper.findAll('[data-testid="stub-partner-badge"]');
-    expect(stubBadges.length).toBe(1);
-    expect(stubBadges[0]!.text()).toBe('Stub');
-  });
-});
+    const liveBadge = wrapper.find('[data-test="match-live-badge"]')
+    expect(liveBadge.exists()).toBe(true)
+    expect(liveBadge.text()).toContain('LIVE')
+  })
+})

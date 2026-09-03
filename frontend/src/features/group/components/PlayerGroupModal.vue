@@ -41,7 +41,7 @@ watch(
     }
     error.value = ''
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -53,7 +53,7 @@ watch(
       members.value = []
       error.value = ''
     }
-  }
+  },
 )
 
 function handleClose() {
@@ -119,7 +119,9 @@ function handleSubmit() {
       >
         <div class="flex justify-between items-center">
           <h2 class="font-headline text-lg font-bold text-on-surface">
-            {{ isEdit ? t('groups.editTitle', 'Edit Group') : t('groups.createTitle', 'Create Group') }}
+            {{
+              isEdit ? t('groups.editTitle', 'Edit Group') : t('groups.createTitle', 'Create Group')
+            }}
           </h2>
           <button
             type="button"
@@ -139,7 +141,10 @@ function handleSubmit() {
 
           <!-- Group Name Input -->
           <div class="space-y-1">
-            <label for="group-name" class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+            <label
+              for="group-name"
+              class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+            >
               {{ t('groups.nameLabel', 'Group Name') }}
             </label>
             <input
@@ -163,7 +168,10 @@ function handleSubmit() {
               data-testid="group-favorite-checkbox"
               class="w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer"
             />
-            <label for="is-favorite" class="font-headline text-xs font-medium text-on-surface cursor-pointer select-none">
+            <label
+              for="is-favorite"
+              class="font-headline text-xs font-medium text-on-surface cursor-pointer select-none"
+            >
               {{ t('groups.isFavoriteLabel', 'Mark as Favorites') }}
             </label>
           </div>
@@ -171,7 +179,9 @@ function handleSubmit() {
           <!-- Members List -->
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+              <span
+                class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+              >
                 {{ t('groups.membersLabel', 'Members') }} ({{ members.length }})
               </span>
               <button
@@ -185,7 +195,10 @@ function handleSubmit() {
               </button>
             </div>
 
-            <div v-if="members.length === 0" class="p-4 rounded-xl bg-surface-container-highest/30 text-center text-xs text-on-surface-variant">
+            <div
+              v-if="members.length === 0"
+              class="p-4 rounded-xl bg-surface-container-highest/30 text-center text-xs text-on-surface-variant"
+            >
               {{ t('groups.noMembers', 'No members added yet') }}
             </div>
 
@@ -196,10 +209,14 @@ function handleSubmit() {
                 class="flex items-center justify-between p-2 rounded-xl bg-surface-container-highest/70"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <div class="w-8 h-8 rounded-full bg-surface-container-low overflow-hidden shrink-0">
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-container-low overflow-hidden shrink-0"
+                  >
                     <AvatarBase :avatar="member.avatar" :name="member.nickname" shape="circle" />
                   </div>
-                  <span class="text-xs font-medium text-on-surface truncate">{{ member.nickname }}</span>
+                  <span class="text-xs font-medium text-on-surface truncate">{{
+                    member.nickname
+                  }}</span>
                 </div>
                 <button
                   type="button"

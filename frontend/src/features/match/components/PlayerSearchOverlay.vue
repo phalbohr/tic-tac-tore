@@ -9,8 +9,8 @@ const props = withDefaults(
     customSelect?: boolean
   }>(),
   {
-    customSelect: false
-  }
+    customSelect: false,
+  },
 )
 
 const emit = defineEmits<{
@@ -21,25 +21,31 @@ const emit = defineEmits<{
 const store = useMatchDraftStore()
 const searchInput = ref<HTMLInputElement | null>(null)
 
-watch(() => props.isOpen, async (newVal) => {
-  if (newVal) {
-    store.openSearch()
-    await nextTick()
-    searchInput.value?.focus()
-  } else {
-    store.closeSearch()
-  }
-})
+watch(
+  () => props.isOpen,
+  async (newVal) => {
+    if (newVal) {
+      store.openSearch()
+      await nextTick()
+      searchInput.value?.focus()
+    } else {
+      store.closeSearch()
+    }
+  },
+)
 
-watch(() => store.searchQuery, (newQuery) => {
-  store.searchPlayers(newQuery)
-})
+watch(
+  () => store.searchQuery,
+  (newQuery) => {
+    store.searchPlayers(newQuery)
+  },
+)
 
 const displayResults = computed(() => {
   const frequent = store.frequentOpponents || []
   const others = store.searchResults || []
-  const frequentIds = new Set(frequent.map(p => p.id))
-  const otherResults = others.filter(p => !frequentIds.has(p.id))
+  const frequentIds = new Set(frequent.map((p) => p.id))
+  const otherResults = others.filter((p) => !frequentIds.has(p.id))
   const combined = [...frequent, ...otherResults]
   combined.sort((a, b) => {
     if (frequentIds.has(a.id) && !frequentIds.has(b.id)) return -1
@@ -85,7 +91,9 @@ function handleKeyDown(event: KeyboardEvent) {
     @keydown.escape="handleKeyDown"
     data-testid="player-search-overlay"
   >
-    <div class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+    <div
+      class="w-full max-w-md bg-surface-container-low rounded-2xl p-6 shadow-2xl space-y-4 flex flex-col max-h-[90vh]"
+    >
       <h2 class="font-headline text-lg font-bold text-on-surface">Find Player</h2>
 
       <input
@@ -97,7 +105,11 @@ function handleKeyDown(event: KeyboardEvent) {
         data-testid="player-search-input"
       />
 
-      <div v-if="store.searchLoading" class="text-center text-on-surface-variant py-4" data-testid="search-loading">
+      <div
+        v-if="store.searchLoading"
+        class="text-center text-on-surface-variant py-4"
+        data-testid="search-loading"
+      >
         Searching...
       </div>
 
@@ -105,7 +117,11 @@ function handleKeyDown(event: KeyboardEvent) {
         <p class="text-error">{{ store.searchError }}</p>
       </div>
 
-      <div v-else-if="displayResults.length === 0 && store.searchQuery" class="text-center text-on-surface-variant py-4" data-testid="no-results">
+      <div
+        v-else-if="displayResults.length === 0 && store.searchQuery"
+        class="text-center text-on-surface-variant py-4"
+        data-testid="no-results"
+      >
         No players found
       </div>
 
@@ -117,7 +133,9 @@ function handleKeyDown(event: KeyboardEvent) {
           @click="handleSelect(player)"
           data-testid="search-result-row"
         >
-          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden">
+          <div
+            class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden"
+          >
             <AvatarBase :avatar="player.avatar" :name="player.nickname" shape="circle" />
           </div>
           <span class="text-on-surface flex-1 text-left">{{ player.nickname }}</span>
@@ -140,7 +158,11 @@ function handleKeyDown(event: KeyboardEvent) {
   animation: fadeIn 0.15s ease-out;
 }
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

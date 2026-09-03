@@ -59,12 +59,12 @@ describe('AvatarBase', () => {
 
   it('renders rounded-full for circle shape and rounded-xl for square shape', () => {
     const circleWrapper = mount(AvatarBase, {
-      props: { shape: 'circle' }
+      props: { shape: 'circle' },
     })
     expect(circleWrapper.classes()).toContain('rounded-full')
 
     const squareWrapper = mount(AvatarBase, {
-      props: { shape: 'square' }
+      props: { shape: 'square' },
     })
     expect(squareWrapper.classes()).toContain('rounded-xl')
   })
@@ -72,7 +72,7 @@ describe('AvatarBase', () => {
   it('renders an img element when a valid HTTP/HTTPS URL is provided as avatar', () => {
     const avatarUrl = 'https://lh3.googleusercontent.com/a/default-user'
     const wrapper = mount(AvatarBase, {
-      props: { avatar: avatarUrl, name: 'John Doe' }
+      props: { avatar: avatarUrl, name: 'John Doe' },
     })
 
     const img = wrapper.find('[data-testid="avatar-img"]')
@@ -82,4 +82,3 @@ describe('AvatarBase', () => {
     expect(wrapper.find('[data-testid="avatar-initials"]').exists()).toBe(false)
   })
 })
-

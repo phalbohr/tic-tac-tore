@@ -28,7 +28,7 @@ describe('matchConfirmationStore', () => {
     expect(store.pendingConfirmation).toEqual({
       matchId: 'match-123',
       matchNumber: 1,
-      idempotencyKey: 'idempotency-abc'
+      idempotencyKey: 'idempotency-abc',
     })
   })
 
@@ -44,7 +44,7 @@ describe('matchConfirmationStore', () => {
     expect(saved).toEqual({
       matchId: 'match-123',
       matchNumber: 1,
-      idempotencyKey: 'idempotency-abc'
+      idempotencyKey: 'idempotency-abc',
     })
   })
 
@@ -85,7 +85,7 @@ describe('matchConfirmationStore', () => {
   it('dispatches POST /api/v1/matches/{id}/confirm when 15s timer reaches 0', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 'CONFIRMED' })
+      json: async () => ({ status: 'CONFIRMED' }),
     })
 
     const store = useMatchConfirmationStore()
@@ -98,8 +98,8 @@ describe('matchConfirmationStore', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Idempotency-Key': 'idempotency-abc'
-      }
+        'Idempotency-Key': 'idempotency-abc',
+      },
     })
     expect(store.isPending).toBe(false)
     expect(store.lastConfirmedMatchId).toBe('match-123')

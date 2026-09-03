@@ -137,9 +137,12 @@ describe('usePlayerGroupStore (ATDD Red Phase)', () => {
       isFavorite: true,
     })
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/player-groups/group-1', expect.objectContaining({
-      method: 'PUT',
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/player-groups/group-1',
+      expect.objectContaining({
+        method: 'PUT',
+      }),
+    )
     expect(store.getGroupById('group-1')?.name).toBe('New Name')
     expect(store.getGroupById('group-1')?.isFavorite).toBe(true)
   })
@@ -164,9 +167,12 @@ describe('usePlayerGroupStore (ATDD Red Phase)', () => {
 
     await store.deleteGroup('group-to-delete')
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/player-groups/group-to-delete', expect.objectContaining({
-      method: 'DELETE',
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/player-groups/group-to-delete',
+      expect.objectContaining({
+        method: 'DELETE',
+      }),
+    )
     expect(store.groups).toHaveLength(0)
   })
 

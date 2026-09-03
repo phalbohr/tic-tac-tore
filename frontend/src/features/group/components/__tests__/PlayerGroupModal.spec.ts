@@ -95,7 +95,11 @@ describe('PlayerGroupModal.vue (ATDD Red Phase)', () => {
     await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('save')).toBeTruthy()
-    const payload = wrapper.emitted('save')?.[0]?.[0] as { name: string; isFavorite: boolean; memberIds: string[] }
+    const payload = wrapper.emitted('save')?.[0]?.[0] as {
+      name: string
+      isFavorite: boolean
+      memberIds: string[]
+    }
     expect(payload.name).toBe('Weekend Squad')
   })
 

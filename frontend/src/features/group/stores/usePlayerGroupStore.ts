@@ -66,7 +66,7 @@ export const usePlayerGroupStore = defineStore('playerGroup', () => {
 
   async function updateGroup(
     id: string,
-    payload: UpdatePlayerGroupRequest
+    payload: UpdatePlayerGroupRequest,
   ): Promise<PlayerGroupResponse> {
     loading.value = true
     error.value = null

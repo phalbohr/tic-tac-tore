@@ -12,7 +12,9 @@ function handleConfirmationUndo(matchId?: string) {
 
 function getConfirmationToastMessage(matchNumber: number): string {
   const msg = t('match.matchConfirmedTapUndo', { number: matchNumber })
-  return msg !== 'match.matchConfirmedTapUndo' ? msg : `Match ${matchNumber} confirmed. Tap to undo.`
+  return msg !== 'match.matchConfirmedTapUndo'
+    ? msg
+    : `Match ${matchNumber} confirmed. Tap to undo.`
 }
 </script>
 
@@ -32,11 +34,17 @@ function getConfirmationToastMessage(matchNumber: number): string {
         :data-testid="`confirmation-toast-${item.matchId}`"
       >
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+          <div
+            class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm"
+          >
             {{ item.countdown }}s
           </div>
           <span class="text-sm font-medium">
-            {{ item.isOfflinePending ? t('match.willRetryOnline') : getConfirmationToastMessage(item.matchNumber) }}
+            {{
+              item.isOfflinePending
+                ? t('match.willRetryOnline')
+                : getConfirmationToastMessage(item.matchNumber)
+            }}
           </span>
         </div>
 

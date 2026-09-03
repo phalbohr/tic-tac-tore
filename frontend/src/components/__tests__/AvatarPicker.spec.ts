@@ -56,7 +56,7 @@ describe('AvatarPicker', () => {
   it('handles Shift+Tab correctly when modal container is focused', async () => {
     const wrapper = mount(AvatarPicker, {
       global: { plugins: [testI18n] },
-      attachTo: document.body
+      attachTo: document.body,
     })
 
     const modalRef = wrapper.find('[data-testid="avatar-picker-backdrop"]')
@@ -71,7 +71,7 @@ describe('AvatarPicker', () => {
       key: 'Tab',
       shiftKey: true,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     })
 
     // dispatch event on the window, since event listener is attached to window

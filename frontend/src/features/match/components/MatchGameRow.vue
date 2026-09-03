@@ -22,8 +22,8 @@ withDefaults(
   }>(),
   {
     showScore: true,
-    allowSwap: false
-  }
+    allowSwap: false,
+  },
 )
 
 const { t } = useI18n()
@@ -40,7 +40,11 @@ const emit = defineEmits<{
       <div class="flex items-center gap-1 shrink-0">
         <div v-if="teamADefender" class="flex flex-col items-center relative">
           <span class="text-[9px] font-bold text-on-surface-variant absolute -top-3">D</span>
-          <div class="w-8 h-8 rounded-full overflow-hidden" :title="teamADefender?.name || 'Team A Defender'" data-testid="team-a-defender-avatar">
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden"
+            :title="teamADefender?.name || 'Team A Defender'"
+            data-testid="team-a-defender-avatar"
+          >
             <AvatarBase :name="teamADefender?.name" :avatar="teamADefender?.avatar" />
           </div>
         </div>
@@ -55,15 +59,26 @@ const emit = defineEmits<{
           <span class="material-symbols-outlined text-[14px]">sync_alt</span>
         </button>
         <div v-if="teamAAttacker" class="flex flex-col items-center relative">
-          <span v-if="teamADefender" class="text-[9px] font-bold text-on-surface-variant absolute -top-3">A</span>
-          <div class="w-8 h-8 rounded-full overflow-hidden" :title="teamAAttacker?.name || 'Team A Attacker'" data-testid="team-a-attacker-avatar">
+          <span
+            v-if="teamADefender"
+            class="text-[9px] font-bold text-on-surface-variant absolute -top-3"
+            >A</span
+          >
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden"
+            :title="teamAAttacker?.name || 'Team A Attacker'"
+            data-testid="team-a-attacker-avatar"
+          >
             <AvatarBase :name="teamAAttacker?.name" :avatar="teamAAttacker?.avatar" />
           </div>
         </div>
       </div>
 
       <!-- Center: Score or VS -->
-      <div class="flex-1 text-center font-headline font-bold text-base text-primary leading-tight px-2" data-testid="score-vs-display">
+      <div
+        class="flex-1 text-center font-headline font-bold text-base text-primary leading-tight px-2"
+        data-testid="score-vs-display"
+      >
         <template v-if="showScore && teamAScore !== undefined && teamBScore !== undefined">
           {{ teamAScore }} : {{ teamBScore }}
         </template>
@@ -76,7 +91,11 @@ const emit = defineEmits<{
       <div class="flex items-center gap-1 shrink-0">
         <div v-if="teamBDefender" class="flex flex-col items-center relative">
           <span class="text-[9px] font-bold text-on-surface-variant absolute -top-3">D</span>
-          <div class="w-8 h-8 rounded-full overflow-hidden" :title="teamBDefender?.name || 'Team B Defender'" data-testid="team-b-defender-avatar">
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden"
+            :title="teamBDefender?.name || 'Team B Defender'"
+            data-testid="team-b-defender-avatar"
+          >
             <AvatarBase :name="teamBDefender?.name" :avatar="teamBDefender?.avatar" />
           </div>
         </div>
@@ -91,8 +110,16 @@ const emit = defineEmits<{
           <span class="material-symbols-outlined text-[14px]">sync_alt</span>
         </button>
         <div v-if="teamBAttacker" class="flex flex-col items-center relative">
-          <span v-if="teamBDefender" class="text-[9px] font-bold text-on-surface-variant absolute -top-3">A</span>
-          <div class="w-8 h-8 rounded-full overflow-hidden" :title="teamBAttacker?.name || 'Team B Attacker'" data-testid="team-b-attacker-avatar">
+          <span
+            v-if="teamBDefender"
+            class="text-[9px] font-bold text-on-surface-variant absolute -top-3"
+            >A</span
+          >
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden"
+            :title="teamBAttacker?.name || 'Team B Attacker'"
+            data-testid="team-b-attacker-avatar"
+          >
             <AvatarBase :name="teamBAttacker?.name" :avatar="teamBAttacker?.avatar" />
           </div>
         </div>

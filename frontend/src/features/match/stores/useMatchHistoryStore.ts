@@ -26,7 +26,9 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
   const pendingMatches = ref<any[]>([])
   const isConfirmedLoading = ref(false)
   const isPendingLoading = ref(false)
-  const loading = computed(() => (activeTab.value === 'confirmed' ? isConfirmedLoading.value : isPendingLoading.value))
+  const loading = computed(() =>
+    activeTab.value === 'confirmed' ? isConfirmedLoading.value : isPendingLoading.value,
+  )
   const error = ref<string | null>(null)
   const isDemoMode = ref(false)
 
@@ -36,21 +38,26 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     totalElements: 0,
     totalPages: 0,
     first: true,
-    last: true
+    last: true,
   })
 
   const filters = ref<MatchHistoryFilters>({
     playerId: null,
     groupId: null,
     matchType: null,
-    ruleConfigId: null
+    ruleConfigId: null,
   })
 
   let confirmedAbortController: AbortController | null = null
   let pendingAbortController: AbortController | null = null
 
   const hasFilters = computed(() => {
-    return !!(filters.value.playerId || filters.value.groupId || filters.value.matchType || filters.value.ruleConfigId)
+    return !!(
+      filters.value.playerId ||
+      filters.value.groupId ||
+      filters.value.matchType ||
+      filters.value.ruleConfigId
+    )
   })
 
   async function fetchConfirmedHistory(): Promise<void> {
@@ -66,7 +73,11 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     try {
       if (isDemoMode.value) {
         const authStore = useAuthStore()
-        const demo = generateDemoMatchHistory(authStore.profile ? { id: authStore.profile.id, nickname: authStore.profile.nickname } : undefined)
+        const demo = generateDemoMatchHistory(
+          authStore.profile
+            ? { id: authStore.profile.id, nickname: authStore.profile.nickname }
+            : undefined,
+        )
         confirmedMatches.value = demo.content
         pagination.value = {
           page: demo.page,
@@ -74,7 +85,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
           totalElements: demo.totalElements,
           totalPages: demo.totalPages,
           first: demo.first ?? true,
-          last: demo.last ?? true
+          last: demo.last ?? true,
         }
         return
       }
@@ -87,7 +98,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
         ruleConfigId: filters.value.ruleConfigId,
         page: pagination.value.page,
         size: pagination.value.size,
-        signal: abortController.signal
+        signal: abortController.signal,
       })
 
       if (abortController.signal.aborted) {
@@ -100,8 +111,8 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
         size: res.size ?? 10,
         totalElements: res.totalElements ?? 0,
         totalPages: res.totalPages ?? 0,
-        first: res.first ?? (res.page === 0),
-        last: res.last ?? ((res.page ?? 0) >= (res.totalPages ?? 1) - 1)
+        first: res.first ?? res.page === 0,
+        last: res.last ?? (res.page ?? 0) >= (res.totalPages ?? 1) - 1,
       }
     } catch (err: any) {
       if (err.name === 'AbortError' || abortController.signal.aborted) {
@@ -127,7 +138,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     error.value = null
     try {
       const res = await fetch('/api/v1/matches/pending', {
-        signal: abortController.signal
+        signal: abortController.signal,
       })
       if (abortController.signal.aborted) {
         return
@@ -153,7 +164,10 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     }
   }
 
-  function setFilter<K extends keyof MatchHistoryFilters>(key: K, value: MatchHistoryFilters[K]): void {
+  function setFilter<K extends keyof MatchHistoryFilters>(
+    key: K,
+    value: MatchHistoryFilters[K],
+  ): void {
     filters.value[key] = value
     pagination.value.page = 0
     fetchConfirmedHistory()
@@ -164,7 +178,7 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
       playerId: null,
       groupId: null,
       matchType: null,
-      ruleConfigId: null
+      ruleConfigId: null,
     }
     pagination.value.page = 0
     fetchConfirmedHistory()
@@ -221,6 +235,6 @@ export const useMatchHistoryStore = defineStore('matchHistory', () => {
     setTab,
     setPage,
     enableDemoMode,
-    toggleDemoMode
+    toggleDemoMode,
   }
 })

@@ -18,28 +18,29 @@ function toggleDemoMode() {
     <div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
       <div class="flex flex-col">
         <span class="text-on-surface font-headline font-semibold text-sm">Enable Demo Data</span>
-        <span class="text-on-surface-variant text-[10px]">Show mock statistics when you have no matches</span>
+        <span class="text-on-surface-variant text-[10px]"
+          >Show mock statistics when you have no matches</span
+        >
       </div>
-      
-      <button 
+
+      <button
         @click="toggleDemoMode"
         :class="[
           'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
-          isDemoEnabled ? 'bg-primary' : 'bg-surface-container-highest'
+          isDemoEnabled ? 'bg-primary' : 'bg-surface-container-highest',
         ]"
         role="switch"
         :aria-checked="isDemoEnabled"
         data-testid="demo-mode-toggle"
       >
         <span class="sr-only">Toggle Demo Mode</span>
-        <span 
+        <span
           :class="[
             'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-            isDemoEnabled ? 'translate-x-6' : 'translate-x-1'
+            isDemoEnabled ? 'translate-x-6' : 'translate-x-1',
           ]"
         />
       </button>
     </div>
   </section>
 </template>
-

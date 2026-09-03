@@ -70,7 +70,11 @@ export interface PersonalStatsParams {
 
 const API_BASE_URL = '/api/v1'
 
-async function apiFetch<T>(endpoint: string, params: Record<string, string | number | undefined>, options: { token?: string, signal?: AbortSignal }): Promise<T> {
+async function apiFetch<T>(
+  endpoint: string,
+  params: Record<string, string | number | undefined>,
+  options: { token?: string; signal?: AbortSignal },
+): Promise<T> {
   const queryParams = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined) queryParams.append(key, value.toString())
@@ -86,7 +90,7 @@ async function apiFetch<T>(endpoint: string, params: Record<string, string | num
 
   const response = await fetch(url, {
     headers,
-    signal: options.signal
+    signal: options.signal,
   })
 
   if (!response.ok) {
@@ -103,15 +107,19 @@ export async function getPersonalStats(params: PersonalStatsParams): Promise<Pla
 }
 
 export async function getLeaderboard(params: LeaderboardParams): Promise<Page<LeaderboardEntry>> {
-  return apiFetch<Page<LeaderboardEntry>>('/statistics/leaderboard', {
-    type: params.type,
-    period: params.period,
-    minMatches: params.minMatches,
-    matchFormat: params.ruleSystem,
-    matchType: params.matchType,
-    page: params.page,
-    size: params.size
-  }, params)
+  return apiFetch<Page<LeaderboardEntry>>(
+    '/statistics/leaderboard',
+    {
+      type: params.type,
+      period: params.period,
+      minMatches: params.minMatches,
+      matchFormat: params.ruleSystem,
+      matchType: params.matchType,
+      page: params.page,
+      size: params.size,
+    },
+    params,
+  )
 }
 
 export interface TeamPairStats {
@@ -139,18 +147,22 @@ export interface TeamPairStatsParams {
 }
 
 export async function getH2HStats(params: PersonalStatsParams): Promise<Page<H2HStats>> {
-  const res = await apiFetch<Page<H2HStats> | H2HStats[]>('/statistics/h2h', { 
-    period: params.period,
-    myPosition: params.myPosition,
-    opponentPosition: params.opponentPosition,
-    page: params.page,
-    size: params.size
-  }, params)
-  
+  const res = await apiFetch<Page<H2HStats> | H2HStats[]>(
+    '/statistics/h2h',
+    {
+      period: params.period,
+      myPosition: params.myPosition,
+      opponentPosition: params.opponentPosition,
+      page: params.page,
+      size: params.size,
+    },
+    params,
+  )
+
   if ('content' in res && Array.isArray(res.content)) {
     return res
   }
-  
+
   // Fallback for non-paged response
   const content = res as H2HStats[]
   return {
@@ -158,19 +170,25 @@ export async function getH2HStats(params: PersonalStatsParams): Promise<Page<H2H
     totalPages: 1,
     totalElements: content.length,
     size: content.length,
-    number: 0
+    number: 0,
   }
 }
 
-export async function getTeamPairStats(params: TeamPairStatsParams = {}): Promise<Page<TeamPairStats>> {
-  return apiFetch<Page<TeamPairStats>>('/statistics/team-pairs', {
-    playerId: params.playerId,
-    period: params.period,
-    ruleConfigId: params.ruleConfigId,
-    minMatches: params.minMatches,
-    page: params.page,
-    size: params.size
-  }, params)
+export async function getTeamPairStats(
+  params: TeamPairStatsParams = {},
+): Promise<Page<TeamPairStats>> {
+  return apiFetch<Page<TeamPairStats>>(
+    '/statistics/team-pairs',
+    {
+      playerId: params.playerId,
+      period: params.period,
+      ruleConfigId: params.ruleConfigId,
+      minMatches: params.minMatches,
+      page: params.page,
+      size: params.size,
+    },
+    params,
+  )
 }
 
 export interface H2HOpponent {
@@ -227,13 +245,20 @@ export interface H2HParams {
   signal?: AbortSignal
 }
 
-export async function getHeadToHeadStats(opponentId: string, params: H2HParams = {}): Promise<H2HStatsResponse> {
-  return apiFetch<H2HStatsResponse>('/statistics/head-to-head', {
-    opponentId,
-    period: params.period,
-    ruleConfigId: params.ruleConfigId,
-    matchType: params.matchType,
-  }, params)
+export async function getHeadToHeadStats(
+  opponentId: string,
+  params: H2HParams = {},
+): Promise<H2HStatsResponse> {
+  return apiFetch<H2HStatsResponse>(
+    '/statistics/head-to-head',
+    {
+      opponentId,
+      period: params.period,
+      ruleConfigId: params.ruleConfigId,
+      matchType: params.matchType,
+    },
+    params,
+  )
 }
 
 export interface PlayerSearchResult {
@@ -242,7 +267,10 @@ export interface PlayerSearchResult {
   avatar?: string
 }
 
-export async function searchPlayers(query: string, options: { signal?: AbortSignal; token?: string } = {}): Promise<PlayerSearchResult[]> {
+export async function searchPlayers(
+  query: string,
+  options: { signal?: AbortSignal; token?: string } = {},
+): Promise<PlayerSearchResult[]> {
   const url = `/api/users/me/players/search?q=${encodeURIComponent(query)}`
   const headers: Record<string, string> = {}
   if (options.token) {
@@ -261,6 +289,3 @@ export async function searchPlayers(query: string, options: { signal?: AbortSign
 
   return response.json()
 }
-
-
-

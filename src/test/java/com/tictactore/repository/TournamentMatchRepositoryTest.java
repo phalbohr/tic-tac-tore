@@ -25,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -309,5 +310,92 @@ class TournamentMatchRepositoryTest {
         );
 
         assertThat(activeMatches).hasSize(2);
+    }
+
+    @Test
+    void shouldFindMatchByLinkedMatchId() {
+        var matchEntity = entityManager.persist(com.tictactore.model.Match.builder()
+                .creatorId(player1.getId())
+                .teamAAttackerId(player1.getId())
+                .teamBAttackerId(player2.getId())
+                .status(com.tictactore.model.Match.STATUS_CONFIRMED)
+                .createdAt(Instant.now())
+                .build());
+        var tournamentMatch = tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.COMPLETED)
+                .match(matchEntity)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var result = tournamentMatchRepository.findByMatchId(matchEntity.getId());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(tournamentMatch.getId());
+    }
+
+    @Test
+    void shouldFindActiveMatchesForParticipants() {
+        var player3 = userRepository.save(User.builder().email("p3_active@example.com").nickname("PlayerThreeActive").build());
+        var player4 = userRepository.save(User.builder().email("p4_active@example.com").nickname("PlayerFourActive").build());
+        var reg3 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player3)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(3)
+                .strengthScore(0.5)
+                .build());
+        var reg4 = registrationRepository.save(TournamentRegistration.builder()
+                .tournament(tournament)
+                .player(player4)
+                .status(RegistrationStatus.CONFIRMED)
+                .seed(4)
+                .strengthScore(0.4)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant1Partner(reg3)
+                .participant2(reg2)
+                .participant2Partner(reg4)
+                .status(TournamentMatchStatus.IN_PROGRESS)
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(2)
+                .participant1(reg3)
+                .participant2(reg4)
+                .status(TournamentMatchStatus.READY)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var activeForReg1 = tournamentMatchRepository.findActiveMatchesForParticipants(
+                tournament.getId(),
+                TournamentMatchStatus.IN_PROGRESS,
+                List.of(reg1.getId())
+        );
+        var activeForReg4 = tournamentMatchRepository.findActiveMatchesForParticipants(
+                tournament.getId(),
+                TournamentMatchStatus.IN_PROGRESS,
+                List.of(reg4.getId())
+        );
+        var activeForNonBusy = tournamentMatchRepository.findActiveMatchesForParticipants(
+                tournament.getId(),
+                TournamentMatchStatus.IN_PROGRESS,
+                List.of(UUID.randomUUID())
+        );
+
+        assertThat(activeForReg1).hasSize(1);
+        assertThat(activeForReg4).hasSize(1);
+        assertThat(activeForNonBusy).isEmpty();
     }
 }

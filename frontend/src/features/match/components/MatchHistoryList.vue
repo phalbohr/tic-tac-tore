@@ -67,8 +67,13 @@ function enableDemoData() {
     </div>
 
     <!-- Loading State -->
-    <div v-if="store.loading" class="w-full flex flex-col gap-3 py-6 items-center justify-center text-on-surface-variant">
-      <div class="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+    <div
+      v-if="store.loading"
+      class="w-full flex flex-col gap-3 py-6 items-center justify-center text-on-surface-variant"
+    >
+      <div
+        class="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"
+      ></div>
       <span class="text-xs font-medium">{{ t('common.loading', 'Loading...') }}</span>
     </div>
 
@@ -78,7 +83,9 @@ function enableDemoData() {
       class="w-full flex flex-col items-center justify-center p-8 bg-surface-container-low rounded-2xl text-center space-y-4 shadow-xl"
       data-testid="filtered-empty-state"
     >
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-container-highest text-on-surface-variant">
+      <div
+        class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-container-highest text-on-surface-variant"
+      >
         <span class="material-symbols-outlined text-2xl">search_off</span>
       </div>
       <div>
@@ -105,7 +112,9 @@ function enableDemoData() {
       class="w-full flex flex-col items-center justify-center p-8 bg-surface-container-low rounded-2xl text-center space-y-6 shadow-2xl"
       data-testid="confirmed-empty-state"
     >
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-primary mb-1">
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-primary mb-1"
+      >
         <span class="material-symbols-outlined text-3xl">sports_soccer</span>
       </div>
 
@@ -114,7 +123,12 @@ function enableDemoData() {
           {{ t('history.empty.confirmedTitle', 'No confirmed matches yet') }}
         </h2>
         <p class="text-xs text-on-surface-variant leading-relaxed max-w-xs">
-          {{ t('stats.emptyStateDescription', 'Record your first match to start tracking your statistics and climb the leaderboard!') }}
+          {{
+            t(
+              'stats.emptyStateDescription',
+              'Record your first match to start tracking your statistics and climb the leaderboard!',
+            )
+          }}
         </p>
       </div>
 
@@ -143,11 +157,7 @@ function enableDemoData() {
     <!-- Match Cards List -->
     <template v-else>
       <div class="flex flex-col gap-3 w-full">
-        <MatchCard
-          v-for="match in store.confirmedMatches"
-          :key="match.id"
-          :match="match"
-        />
+        <MatchCard v-for="match in store.confirmedMatches" :key="match.id" :match="match" />
       </div>
 
       <!-- Pagination Controls -->
@@ -168,7 +178,12 @@ function enableDemoData() {
         </button>
 
         <span class="font-medium" data-testid="pagination-page-info">
-          {{ t('history.pagination.page', { current: store.pagination.page + 1, total: store.pagination.totalPages }) }}
+          {{
+            t('history.pagination.page', {
+              current: store.pagination.page + 1,
+              total: store.pagination.totalPages,
+            })
+          }}
         </span>
 
         <button

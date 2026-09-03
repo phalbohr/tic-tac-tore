@@ -5,7 +5,7 @@ import { useMatchDraftStore, MatchType } from './matchDraftStore'
 describe('matchDraftStore state transitions', () => {
   let fetchMock: Mock
 
-  const originalFetch = globalThis.fetch;
+  const originalFetch = globalThis.fetch
   beforeEach(() => {
     setActivePinia(createPinia())
     fetchMock = vi.fn()
@@ -13,8 +13,8 @@ describe('matchDraftStore state transitions', () => {
   })
 
   afterEach(() => {
-    globalThis.fetch = originalFetch;
-    vi.restoreAllMocks();
+    globalThis.fetch = originalFetch
+    vi.restoreAllMocks()
   })
 
   it('initializes with default values', () => {
@@ -295,7 +295,13 @@ describe('matchDraftStore state transitions', () => {
       store.startSubmissionTimer()
 
       expect(store.pendingSubmission).not.toBeNull()
-      const payload = store.pendingSubmission?.payload as { teamAAttackerId?: string; teamADefenderId?: string; teamBAttackerId?: string; teamBDefenderId?: string; games: Array<Record<string, unknown>> }
+      const payload = store.pendingSubmission?.payload as {
+        teamAAttackerId?: string
+        teamADefenderId?: string
+        teamBAttackerId?: string
+        teamBDefenderId?: string
+        games: Array<Record<string, unknown>>
+      }
 
       expect(payload?.teamADefenderId).toBe('p1')
       expect(payload?.teamAAttackerId).toBe('p2')
@@ -337,8 +343,8 @@ describe('matchDraftStore state transitions', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 10, teamBScore: 8 },
-          { teamAScore: 7, teamBScore: 10 }
-        ]
+          { teamAScore: 7, teamBScore: 10 },
+        ],
       }
 
       store.loadFromRejectedMatch(sampleRejected)
@@ -359,8 +365,8 @@ describe('matchDraftStore state transitions', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 5, teamBScore: 8 },
-          { teamAScore: 7, teamBScore: 10 }
-        ]
+          { teamAScore: 7, teamBScore: 10 },
+        ],
       })
 
       store.selectGameToEdit(0)
@@ -411,8 +417,8 @@ describe('matchDraftStore state transitions', () => {
         teamBAttackerId: 'p2',
         games: [
           { teamAScore: 10, teamBScore: 5 },
-          { teamAScore: 10, teamBScore: 8 }
-        ]
+          { teamAScore: 10, teamBScore: 8 },
+        ],
       })
 
       store.selectGameToEdit(0)

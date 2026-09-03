@@ -6,18 +6,19 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       if (key === 'match.pendingMatch') return `Match ${params?.number ?? 1}`
-      if (key === 'match.partialConfirmation') return `${params?.confirmed ?? 1} of ${params?.required ?? 2} confirmed`
+      if (key === 'match.partialConfirmation')
+        return `${params?.confirmed ?? 1} of ${params?.required ?? 2} confirmed`
       const translations: Record<string, string> = {
         'match.pending': 'Pending Confirmation',
         'match.confirm': 'Confirm',
         'match.confirmedTapUndo': 'Match confirmed. Tap to undo.',
         'match.teamA': 'Team A',
         'match.teamB': 'Team B',
-        'match.scores': 'Scores'
+        'match.scores': 'Scores',
       }
       return translations[key] || key
-    }
-  })
+    },
+  }),
 }))
 
 describe('PendingMatches.vue Cooldown Countdown (ATDD Red Phase)', () => {
@@ -41,12 +42,12 @@ describe('PendingMatches.vue Cooldown Countdown (ATDD Red Phase)', () => {
         requiredConfirmations: 2,
         teamANames: ['A1'],
         teamBNames: ['B1'],
-        games: [{ teamAScore: 10, teamBScore: 8 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: matches }
+      props: { pendingMatches: matches },
     })
 
     expect(wrapper.html()).toContain('Auto-publish in')
@@ -63,12 +64,12 @@ describe('PendingMatches.vue Cooldown Countdown (ATDD Red Phase)', () => {
         requiredConfirmations: 2,
         teamANames: ['A1'],
         teamBNames: ['B1'],
-        games: [{ teamAScore: 10, teamBScore: 8 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: matches }
+      props: { pendingMatches: matches },
     })
 
     expect(wrapper.html()).toContain('Auto-publishing soon')
@@ -83,12 +84,12 @@ describe('PendingMatches.vue Cooldown Countdown (ATDD Red Phase)', () => {
         requiredConfirmations: 2,
         teamANames: ['A1'],
         teamBNames: ['B1'],
-        games: [{ teamAScore: 10, teamBScore: 8 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: matches }
+      props: { pendingMatches: matches },
     })
 
     expect(wrapper.html()).not.toContain('Auto-publish in')
@@ -104,12 +105,12 @@ describe('PendingMatches.vue Cooldown Countdown (ATDD Red Phase)', () => {
         requiredConfirmations: 2,
         teamANames: ['A1'],
         teamBNames: ['B1'],
-        games: [{ teamAScore: 10, teamBScore: 8 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: matches }
+      props: { pendingMatches: matches },
     })
 
     expect(wrapper.text()).toContain('1 of 2 confirmed')

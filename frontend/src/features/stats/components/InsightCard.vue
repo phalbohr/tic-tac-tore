@@ -72,22 +72,19 @@ function handleDrillDown() {
         </div>
       </div>
 
-      <h4
-        class="text-base font-semibold text-ch-text-bright mb-1"
-        data-testid="insight-title"
-      >
+      <h4 class="text-base font-semibold text-ch-text-bright mb-1" data-testid="insight-title">
         {{ localizedTitle }}
       </h4>
 
-      <p
-        class="text-sm text-ch-text-secondary leading-relaxed"
-        data-testid="insight-description"
-      >
+      <p class="text-sm text-ch-text-secondary leading-relaxed" data-testid="insight-description">
         {{ localizedDescription }}
       </p>
     </div>
 
-    <div v-if="insight.drillDownUrl" class="mt-4 pt-3 border-t border-ch-border/50 flex justify-end">
+    <div
+      v-if="insight.drillDownUrl"
+      class="mt-4 pt-3 border-t border-ch-border/50 flex justify-end"
+    >
       <button
         type="button"
         class="inline-flex items-center gap-1.5 text-xs font-medium text-ch-primary hover:text-ch-primary-hover transition-colors focus:outline-none"

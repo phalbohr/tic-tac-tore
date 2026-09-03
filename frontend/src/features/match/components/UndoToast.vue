@@ -24,11 +24,15 @@ const { t } = useI18n()
       aria-live="polite"
     >
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+        <div
+          class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm"
+        >
           {{ countdown }}s
         </div>
         <span class="text-sm font-medium">
-          {{ message ? message : (isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo')) }}
+          {{
+            message ? message : isOffline ? t('match.willRetryOnline') : t('match.submittedTapUndo')
+          }}
         </span>
       </div>
 
@@ -47,7 +51,9 @@ const { t } = useI18n()
 <style scoped>
 .toast-slide-enter-active,
 .toast-slide-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .toast-slide-enter-from,

@@ -1,19 +1,23 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
-import { useTournamentStore } from '@/features/tournament/stores/tournamentStore';
-import * as bracketService from '@/features/tournament/services/tournamentBracketService';
-import type { TournamentBracketDto, TournamentDto, TournamentMatchDto } from '@/features/tournament/types/tournament';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useTournamentStore } from '@/features/tournament/stores/tournamentStore'
+import * as bracketService from '@/features/tournament/services/tournamentBracketService'
+import type {
+  TournamentBracketDto,
+  TournamentDto,
+  TournamentMatchDto,
+} from '@/features/tournament/types/tournament'
 
-vi.mock('@/features/tournament/services/tournamentBracketService');
+vi.mock('@/features/tournament/services/tournamentBracketService')
 
 describe('tournamentStore - Bracket & Matches (Story 8.3)', () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-    vi.clearAllMocks();
-  });
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
 
   it('fetchBracket should store bracket data by tournamentId', async () => {
-    const tournamentId = 'tourn-123';
+    const tournamentId = 'tourn-123'
     const mockBracket: TournamentBracketDto = {
       tournamentId,
       tournamentName: 'Summer Cup',
@@ -23,34 +27,34 @@ describe('tournamentStore - Bracket & Matches (Story 8.3)', () => {
       totalRounds: 3,
       rounds: [],
       seededParticipants: [],
-    };
+    }
 
-    vi.spyOn(bracketService, 'getTournamentBracket').mockResolvedValue(mockBracket);
+    vi.spyOn(bracketService, 'getTournamentBracket').mockResolvedValue(mockBracket)
 
-    const store = useTournamentStore();
-    await store.fetchBracket(tournamentId);
+    const store = useTournamentStore()
+    await store.fetchBracket(tournamentId)
 
-    expect(store.brackets[tournamentId]).toEqual(mockBracket);
-    expect(bracketService.getTournamentBracket).toHaveBeenCalledWith(tournamentId);
-  });
+    expect(store.brackets[tournamentId]).toEqual(mockBracket)
+    expect(bracketService.getTournamentBracket).toHaveBeenCalledWith(tournamentId)
+  })
 
   it('fetchMatches should store matches by tournamentId and optional round', async () => {
-    const tournamentId = 'tourn-123';
+    const tournamentId = 'tourn-123'
     const mockMatches: TournamentMatchDto[] = [
       { id: 'm-1', tournamentId, round: 1, matchOrder: 1, status: 'READY' },
-    ];
+    ]
 
-    vi.spyOn(bracketService, 'getTournamentMatches').mockResolvedValue(mockMatches);
+    vi.spyOn(bracketService, 'getTournamentMatches').mockResolvedValue(mockMatches)
 
-    const store = useTournamentStore();
-    await store.fetchMatches(tournamentId, 1);
+    const store = useTournamentStore()
+    await store.fetchMatches(tournamentId, 1)
 
-    expect(store.matches[tournamentId]).toEqual(mockMatches);
-    expect(bracketService.getTournamentMatches).toHaveBeenCalledWith(tournamentId, 1);
-  });
+    expect(store.matches[tournamentId]).toEqual(mockMatches)
+    expect(bracketService.getTournamentMatches).toHaveBeenCalledWith(tournamentId, 1)
+  })
 
   it('startTournament should trigger lifecycle start and update tournament status in store', async () => {
-    const tournamentId = 'tourn-123';
+    const tournamentId = 'tourn-123'
     const mockUpdatedTournament: TournamentDto = {
       id: tournamentId,
       name: 'Summer Cup',
@@ -71,16 +75,77 @@ describe('tournamentStore - Bracket & Matches (Story 8.3)', () => {
       creatorId: 'c-1',
       creatorNickname: 'Creator',
       createdAt: '',
-    };
+    }
 
-    vi.spyOn(bracketService, 'startTournament').mockResolvedValue(mockUpdatedTournament);
+    vi.spyOn(bracketService, 'startTournament').mockResolvedValue(mockUpdatedTournament)
 
-    const store = useTournamentStore();
-    store.tournaments = [{ ...mockUpdatedTournament, status: 'REGISTRATION_OPEN' }];
+    const store = useTournamentStore()
+    store.tournaments = [{ ...mockUpdatedTournament, status: 'REGISTRATION_OPEN' }]
 
-    await store.startTournament(tournamentId);
+    await store.startTournament(tournamentId)
 
-    const tournament = store.tournaments.find((t) => t.id === tournamentId);
-    expect(tournament?.status).toBe('IN_PROGRESS');
-  });
-});
+    const tournament = store.tournaments.find((t) => t.id === tournamentId)
+    expect(tournament?.status).toBe('IN_PROGRESS')
+  })
+
+  it('startMatch should trigger startTournamentMatch and update match status in store', async () => {
+    const tournamentId = 'tourn-123'
+    const matchId = 'm-1'
+    const mockStartedMatch: TournamentMatchDto = {
+      id: matchId,
+      tournamentId,
+      round: 1,
+      matchOrder: 1,
+      status: 'IN_PROGRESS',
+      isAvailable: false,
+      isOpponentBusy: false,
+    }
+
+    vi.spyOn(bracketService, 'startTournamentMatch').mockResolvedValue(mockStartedMatch)
+
+    const store = useTournamentStore()
+    store.matches[tournamentId] = [
+      { id: matchId, tournamentId, round: 1, matchOrder: 1, status: 'READY', isAvailable: true },
+    ]
+
+    const result = await store.startMatch(tournamentId, matchId)
+
+    expect(result.status).toBe('IN_PROGRESS')
+    expect(store.matches[tournamentId]![0]!.status).toBe('IN_PROGRESS')
+    expect(bracketService.startTournamentMatch).toHaveBeenCalledWith(tournamentId, matchId)
+  })
+
+  it('cancelMatch should trigger cancelTournamentMatch and update match status to READY', async () => {
+    const tournamentId = 'tourn-123'
+    const matchId = 'm-1'
+    const mockCancelledMatch: TournamentMatchDto = {
+      id: matchId,
+      tournamentId,
+      round: 1,
+      matchOrder: 1,
+      status: 'READY',
+      isAvailable: true,
+      isOpponentBusy: false,
+    }
+
+    vi.spyOn(bracketService, 'cancelTournamentMatch').mockResolvedValue(mockCancelledMatch)
+
+    const store = useTournamentStore()
+    store.matches[tournamentId] = [
+      {
+        id: matchId,
+        tournamentId,
+        round: 1,
+        matchOrder: 1,
+        status: 'IN_PROGRESS',
+        isAvailable: false,
+      },
+    ]
+
+    const result = await store.cancelMatch(tournamentId, matchId)
+
+    expect(result.status).toBe('READY')
+    expect(store.matches[tournamentId]![0]!.status).toBe('READY')
+    expect(bracketService.cancelTournamentMatch).toHaveBeenCalledWith(tournamentId, matchId)
+  })
+})

@@ -18,7 +18,7 @@ describe('matchDraftStore search (ATDD)', () => {
 
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([])
+      json: () => Promise.resolve([]),
     } as Response)
 
     store.searchPlayers('ali')
@@ -27,7 +27,10 @@ describe('matchDraftStore search (ATDD)', () => {
 
     vi.advanceTimersByTime(300)
 
-    expect(fetchSpy).toHaveBeenCalledWith('/api/users/me/players/search?q=ali', expect.objectContaining({ signal: expect.any(AbortSignal) }))
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/users/me/players/search?q=ali',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    )
   })
 
   it('[P0] searchPlayers clears results when query is empty', async () => {
@@ -47,13 +50,11 @@ describe('matchDraftStore search (ATDD)', () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = []
 
-    const mockResults = [
-      { id: '1', nickname: 'Alice', avatar: 'avatar-1' }
-    ]
+    const mockResults = [{ id: '1', nickname: 'Alice', avatar: 'avatar-1' }]
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(mockResults)
+      json: () => Promise.resolve(mockResults),
     } as Response)
 
     store.searchPlayers('ali')
@@ -71,7 +72,7 @@ describe('matchDraftStore search (ATDD)', () => {
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
-      status: 500
+      status: 500,
     } as Response)
 
     store.searchPlayers('ali')
@@ -104,7 +105,7 @@ describe('matchDraftStore search (ATDD)', () => {
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([])
+      json: () => Promise.resolve([]),
     } as Response)
 
     store.searchPlayers('ali')

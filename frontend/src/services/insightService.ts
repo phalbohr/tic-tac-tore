@@ -6,7 +6,13 @@ export type InsightType =
   | 'MILESTONE_PROXIMITY'
   | 'INSUFFICIENT_DATA'
 
-export type InsightCategory = 'STREAK' | 'TREND' | 'POSITION' | 'PARTNERSHIP' | 'MILESTONE' | 'GENERAL'
+export type InsightCategory =
+  | 'STREAK'
+  | 'TREND'
+  | 'POSITION'
+  | 'PARTNERSHIP'
+  | 'MILESTONE'
+  | 'GENERAL'
 
 export type InsightImportance = 'HIGH' | 'MEDIUM' | 'LOW'
 
@@ -28,7 +34,10 @@ export interface PlayerInsightsResponse {
   insights: PlayerInsight[]
 }
 
-export async function getPlayerInsights(playerId: string, options: { token?: string; signal?: AbortSignal } = {}): Promise<PlayerInsightsResponse> {
+export async function getPlayerInsights(
+  playerId: string,
+  options: { token?: string; signal?: AbortSignal } = {},
+): Promise<PlayerInsightsResponse> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   const token = options.token || localStorage.getItem('token')
   if (token) {
@@ -45,7 +54,9 @@ export async function getPlayerInsights(playerId: string, options: { token?: str
   return res.json()
 }
 
-export async function getMyInsights(options: { token?: string; signal?: AbortSignal } = {}): Promise<PlayerInsightsResponse> {
+export async function getMyInsights(
+  options: { token?: string; signal?: AbortSignal } = {},
+): Promise<PlayerInsightsResponse> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   const token = options.token || localStorage.getItem('token')
   if (token) {
