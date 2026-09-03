@@ -506,6 +506,35 @@
       "rosterTitle": "Teilnehmerliste",
       "rosterEmpty": "Noch keine Teilnehmer angemeldet.",
       "teamsCount": "{count} / {max} Angemeldet"
+    },
+    "tabs": {
+      "active": "Aktiv & Kommend",
+      "archive": "Archiv"
+    },
+    "archive": {
+      "title": "Turnierarchiv",
+      "empty": "Keine beendeten Turniere im Archiv.",
+      "completedDate": "Beendet: {date}",
+      "participants": "Teilnehmer: {count}",
+      "winner": "Gewinner: {winner}",
+      "viewDetails": "Details & Tabelle anzeigen"
+    },
+    "standings": {
+      "title": "Turniertabelle",
+      "tabTitle": "Tabelle",
+      "bracketTab": "Turnierbaum & Spielplan",
+      "rank": "#",
+      "player": "Spieler / Team",
+      "played": "Sp",
+      "wins": "S",
+      "losses": "N",
+      "gameDiff": "+/-",
+      "points": "Pkt",
+      "status": "Status",
+      "winnerBadge": "Gewinner",
+      "activeBadge": "Aktiv",
+      "eliminatedBadge": "Ausgeschieden",
+      "empty": "Noch keine Tabellendaten verfügbar."
     }
   }
 }

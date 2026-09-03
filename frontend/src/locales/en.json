@@ -506,6 +506,35 @@
       "rosterTitle": "Participants Roster",
       "rosterEmpty": "No participants registered yet.",
       "teamsCount": "{count} / {max} Registered"
+    },
+    "tabs": {
+      "active": "Active & Upcoming",
+      "archive": "Archive"
+    },
+    "archive": {
+      "title": "Tournament Archive",
+      "empty": "No completed tournaments in archive.",
+      "completedDate": "Completed: {date}",
+      "participants": "Participants: {count}",
+      "winner": "Winner: {winner}",
+      "viewDetails": "View Details & Standings"
+    },
+    "standings": {
+      "title": "Tournament Standings",
+      "tabTitle": "Standings",
+      "bracketTab": "Bracket & Schedule",
+      "rank": "#",
+      "player": "Player / Team",
+      "played": "P",
+      "wins": "W",
+      "losses": "L",
+      "gameDiff": "+/-",
+      "points": "Pts",
+      "status": "Status",
+      "winnerBadge": "Winner",
+      "activeBadge": "Active",
+      "eliminatedBadge": "Eliminated",
+      "empty": "No standings data available yet."
     }
   }
 }

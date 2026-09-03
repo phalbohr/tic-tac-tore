@@ -1,12 +1,14 @@
 package com.tictactore.service.tournament;
 
-import com.tictactore.dto.tournament.TournamentStandingResponse;
+import com.tictactore.model.Game;
+import com.tictactore.model.Match;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentFormat;
 import com.tictactore.model.TournamentMatch;
 import com.tictactore.model.TournamentMatchStatus;
 import com.tictactore.model.TournamentMode;
 import com.tictactore.model.TournamentRegistration;
+import com.tictactore.model.TournamentStatus;
 import com.tictactore.model.User;
 import com.tictactore.repository.TournamentMatchRepository;
 import com.tictactore.repository.TournamentRegistrationRepository;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -25,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("TournamentStandingsService Tests")
+@DisplayName("TournamentStandingsServiceImpl Unit Tests")
 class TournamentStandingsServiceTest {
 
     @Mock
@@ -34,121 +37,215 @@ class TournamentStandingsServiceTest {
     @Mock
     private TournamentMatchRepository tournamentMatchRepository;
 
-    private TournamentStandingsService standingsService;
+    @InjectMocks
+    private TournamentStandingsServiceImpl standingsService;
 
+    private UUID tournamentId;
     private Tournament tournament;
-    private TournamentRegistration reg1;
-    private TournamentRegistration reg2;
-    private TournamentRegistration reg3;
-    private TournamentRegistration reg4;
-    private TournamentRegistration stubReg;
+    private User aliceUser;
+    private User bobUser;
+    private User charlieUser;
+    private TournamentRegistration regAlice;
+    private TournamentRegistration regBob;
+    private TournamentRegistration regCharlie;
 
     @BeforeEach
     void setUp() {
-        standingsService = new TournamentStandingsServiceImpl(registrationRepository, tournamentMatchRepository);
-
+        tournamentId = UUID.randomUUID();
         tournament = Tournament.builder()
+                .id(tournamentId)
+                .name("Championship 2026")
+                .format(TournamentFormat.CHAMPIONSHIP)
+                .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                .status(TournamentStatus.IN_PROGRESS)
+                .build();
+
+        aliceUser = User.builder().id(UUID.randomUUID()).nickname("Alice").avatar("alice.png").build();
+        bobUser = User.builder().id(UUID.randomUUID()).nickname("Bob").avatar("bob.png").build();
+        charlieUser = User.builder().id(UUID.randomUUID()).nickname("Charlie").avatar("charlie.png").build();
+
+        regAlice = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(aliceUser).build();
+        regBob = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(bobUser).build();
+        regCharlie = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(charlieUser).build();
+    }
+
+    @Test
+    @DisplayName("Should calculate points, game difference, and rank participants using multi-tier tie-breakers")
+    void shouldCalculatePointsAndRankWithMultiTierTieBreakers() {
+        when(registrationRepository.findByTournamentId(tournamentId)).thenReturn(List.of(regAlice, regBob, regCharlie));
+
+        var match1Game1 = Game.builder().teamAScore(10).teamBScore(5).build();
+        var match1Game2 = Game.builder().teamAScore(10).teamBScore(8).build();
+        var match1Core = Match.builder()
                 .id(UUID.randomUUID())
-                .name("Test Cup")
-                .format(TournamentFormat.CUP)
+                .teamAAttackerId(aliceUser.getId())
+                .teamBAttackerId(bobUser.getId())
+                .games(List.of(match1Game1, match1Game2))
+                .build();
+
+        var tm1 = TournamentMatch.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .participant1(regAlice)
+                .participant2(regBob)
+                .winner(regAlice)
+                .match(match1Core)
+                .status(TournamentMatchStatus.COMPLETED)
+                .build();
+
+        var match2Game1 = Game.builder().teamAScore(10).teamBScore(4).build();
+        var match2Game2 = Game.builder().teamAScore(6).teamBScore(10).build();
+        var match2Game3 = Game.builder().teamAScore(10).teamBScore(7).build();
+        var match2Core = Match.builder()
+                .id(UUID.randomUUID())
+                .teamAAttackerId(bobUser.getId())
+                .teamBAttackerId(charlieUser.getId())
+                .games(List.of(match2Game1, match2Game2, match2Game3))
+                .build();
+
+        var tm2 = TournamentMatch.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .participant1(regBob)
+                .participant2(regCharlie)
+                .winner(regBob)
+                .match(match2Core)
+                .status(TournamentMatchStatus.COMPLETED)
+                .build();
+
+        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournamentId, List.of(TournamentMatchStatus.COMPLETED)))
+                .thenReturn(List.of(tm1, tm2));
+
+        var standings = standingsService.calculateStandings(tournamentId);
+
+        assertThat(standings).hasSize(3);
+
+        var first = standings.get(0);
+        assertThat(first.registrationId()).isEqualTo(regAlice.getId());
+        assertThat(first.nickname()).isEqualTo("Alice");
+        assertThat(first.matchesPlayed()).isEqualTo(1);
+        assertThat(first.wins()).isEqualTo(1);
+        assertThat(first.losses()).isEqualTo(0);
+        assertThat(first.gamesWon()).isEqualTo(2);
+        assertThat(first.gamesLost()).isEqualTo(0);
+        assertThat(first.gameDifference()).isEqualTo(2);
+        assertThat(first.points()).isEqualTo(3);
+        assertThat(first.rank()).isEqualTo(1);
+
+        var second = standings.get(1);
+        assertThat(second.registrationId()).isEqualTo(regBob.getId());
+        assertThat(second.nickname()).isEqualTo("Bob");
+        assertThat(second.matchesPlayed()).isEqualTo(2);
+        assertThat(second.wins()).isEqualTo(1);
+        assertThat(second.losses()).isEqualTo(1);
+        assertThat(second.points()).isEqualTo(3);
+        assertThat(second.rank()).isEqualTo(2);
+
+        var third = standings.get(2);
+        assertThat(third.registrationId()).isEqualTo(regCharlie.getId());
+        assertThat(third.nickname()).isEqualTo("Charlie");
+        assertThat(third.matchesPlayed()).isEqualTo(1);
+        assertThat(third.wins()).isEqualTo(0);
+        assertThat(third.losses()).isEqualTo(1);
+        assertThat(third.points()).isEqualTo(0);
+        assertThat(third.rank()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("Should exclude stub substitute match points and stats in 2v2 random pairing mode")
+    void shouldExcludeStubPartnerSubstituteMatchesFromStubPlayerStandings() {
+        var randomPairingTournament = Tournament.builder()
+                .id(tournamentId)
+                .name("Random 2v2")
+                .format(TournamentFormat.CHAMPIONSHIP)
                 .mode(TournamentMode.TWO_VS_TWO_RANDOM_PAIRINGS)
+                .status(TournamentStatus.IN_PROGRESS)
                 .build();
 
-        reg1 = createReg("Player1");
-        reg2 = createReg("Player2");
-        reg3 = createReg("Player3");
-        reg4 = createReg("Player4");
-        stubReg = createReg("StubPlayer");
-    }
+        var daveUser = User.builder().id(UUID.randomUUID()).nickname("Dave").avatar("dave.png").build();
+        var regDave = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(randomPairingTournament).player(daveUser).build();
 
-    @Test
-    void shouldIsolateStubPartnerStatisticsFromSubstituteMatch() {
-        TournamentMatch match = TournamentMatch.builder()
+        when(registrationRepository.findByTournamentId(tournamentId)).thenReturn(List.of(regAlice, regBob, regCharlie, regDave));
+
+        var tm = TournamentMatch.builder()
                 .id(UUID.randomUUID())
-                .tournament(tournament)
-                .participant1(reg1)
-                .participant1Partner(stubReg)
-                .participant2(reg2)
-                .participant2Partner(reg3)
+                .tournament(randomPairingTournament)
+                .participant1(regAlice)
+                .participant1Partner(regDave)
                 .isParticipant1Stub(true)
-                .winner(reg1)
+                .participant2(regBob)
+                .participant2Partner(regCharlie)
+                .isParticipant2Stub(false)
+                .winner(regAlice)
                 .status(TournamentMatchStatus.COMPLETED)
                 .build();
 
-        when(registrationRepository.findByTournamentId(tournament.getId()))
-                .thenReturn(List.of(reg1, reg2, reg3, stubReg));
-        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournament.getId(), List.of(TournamentMatchStatus.COMPLETED)))
-                .thenReturn(List.of(match));
+        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournamentId, List.of(TournamentMatchStatus.COMPLETED)))
+                .thenReturn(List.of(tm));
 
-        List<TournamentStandingResponse> standings = standingsService.calculateStandings(tournament.getId());
+        var standings = standingsService.calculateStandings(tournamentId);
 
-        TournamentStandingResponse stubStanding = standings.stream()
-                .filter(s -> s.registrationId().equals(stubReg.getId()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(stubStanding.matchesPlayed()).isZero();
-        assertThat(stubStanding.wins()).isZero();
-        assertThat(stubStanding.points()).isZero();
+        var aliceStanding = standings.stream().filter(s -> s.registrationId().equals(regAlice.getId())).findFirst().orElseThrow();
+        var daveStanding = standings.stream().filter(s -> s.registrationId().equals(regDave.getId())).findFirst().orElseThrow();
 
-        TournamentStandingResponse reg1Standing = standings.stream()
-                .filter(s -> s.registrationId().equals(reg1.getId()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(reg1Standing.matchesPlayed()).isEqualTo(1);
-        assertThat(reg1Standing.wins()).isEqualTo(1);
-        assertThat(reg1Standing.points()).isEqualTo(3);
+        assertThat(aliceStanding.points()).isEqualTo(3);
+        assertThat(aliceStanding.matchesPlayed()).isEqualTo(1);
+        assertThat(daveStanding.points()).isEqualTo(0);
+        assertThat(daveStanding.matchesPlayed()).isEqualTo(0);
     }
 
     @Test
-    void shouldGrantKnockoutImmunityToStubPartnerWhenSubstituteTeamLoses() {
-        TournamentMatch match = TournamentMatch.builder()
+    @DisplayName("Should flag eliminated participants in CUP knockout tournaments")
+    void shouldFlagEliminatedParticipantsInKnockoutFormat() {
+        var cupTournament = Tournament.builder()
+                .id(tournamentId)
+                .name("Summer Cup")
+                .format(TournamentFormat.CUP)
+                .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                .status(TournamentStatus.IN_PROGRESS)
+                .build();
+
+        when(registrationRepository.findByTournamentId(tournamentId)).thenReturn(List.of(regAlice, regBob));
+
+        var tm = TournamentMatch.builder()
                 .id(UUID.randomUUID())
-                .tournament(tournament)
-                .participant1(reg1)
-                .participant1Partner(stubReg)
-                .participant2(reg2)
-                .participant2Partner(reg3)
-                .isParticipant1Stub(true)
-                .winner(reg2)
+                .tournament(cupTournament)
+                .participant1(regAlice)
+                .participant2(regBob)
+                .winner(regAlice)
                 .status(TournamentMatchStatus.COMPLETED)
                 .build();
 
-        when(registrationRepository.findByTournamentId(tournament.getId()))
-                .thenReturn(List.of(reg1, reg2, reg3, stubReg));
-        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournament.getId(), List.of(TournamentMatchStatus.COMPLETED)))
-                .thenReturn(List.of(match));
+        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournamentId, List.of(TournamentMatchStatus.COMPLETED)))
+                .thenReturn(List.of(tm));
 
-        List<TournamentStandingResponse> standings = standingsService.calculateStandings(tournament.getId());
+        var standings = standingsService.calculateStandings(tournamentId);
 
-        TournamentStandingResponse stubStanding = standings.stream()
-                .filter(s -> s.registrationId().equals(stubReg.getId()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(stubStanding.isEliminated()).isFalse();
+        var aliceStanding = standings.stream().filter(s -> s.registrationId().equals(regAlice.getId())).findFirst().orElseThrow();
+        var bobStanding = standings.stream().filter(s -> s.registrationId().equals(regBob.getId())).findFirst().orElseThrow();
 
-        TournamentStandingResponse reg1Standing = standings.stream()
-                .filter(s -> s.registrationId().equals(reg1.getId()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(reg1Standing.isEliminated()).isTrue();
+        assertThat(aliceStanding.isEliminated()).isFalse();
+        assertThat(bobStanding.isEliminated()).isTrue();
     }
 
     @Test
-    void shouldReturnEmptyListWhenTournamentIdIsNull() {
-        List<TournamentStandingResponse> standings = standingsService.calculateStandings(null);
-
-        assertThat(standings).isEmpty();
-    }
-
-    private TournamentRegistration createReg(String nickname) {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .nickname(nickname)
-                .build();
-        return TournamentRegistration.builder()
+    @DisplayName("Should gracefully handle GDPR deleted users by returning Anonymous and default placeholder")
+    void shouldHandleGdprDeletedUsersGracefully() {
+        var regDeleted = TournamentRegistration.builder()
                 .id(UUID.randomUUID())
                 .tournament(tournament)
-                .player(user)
+                .player(null)
                 .build();
+
+        when(registrationRepository.findByTournamentId(tournamentId)).thenReturn(List.of(regDeleted));
+        when(tournamentMatchRepository.findByTournamentIdAndStatusIn(tournamentId, List.of(TournamentMatchStatus.COMPLETED)))
+                .thenReturn(List.of());
+
+        var standings = standingsService.calculateStandings(tournamentId);
+
+        assertThat(standings).hasSize(1);
+        var standing = standings.get(0);
+        assertThat(standing.nickname()).isEqualTo("Anonymous");
+        assertThat(standing.avatarUrl()).isNull();
     }
 }

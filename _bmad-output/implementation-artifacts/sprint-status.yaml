@@ -109,6 +109,6 @@ development_status:
   8-4-equal-match-distribution-2v2-random-pairing: in-progress
   8-5-asynchronous-tournament-match-execution: review
   8-6-tournament-rule-system-enforcement: review
-  8-7-tournament-standings-and-archive: ready-for-dev
+  8-7-tournament-standings-and-archive: review
   8-8-tournament-confirmation-deadline: backlog
   epic-8-retrospective: optional

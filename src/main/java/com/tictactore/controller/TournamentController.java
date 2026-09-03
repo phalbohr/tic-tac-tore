@@ -3,11 +3,18 @@ package com.tictactore.controller;
 import com.tictactore.dto.TournamentBracketResponse;
 import com.tictactore.dto.TournamentMatchResponse;
 import com.tictactore.dto.TournamentResponse;
+import com.tictactore.dto.tournament.TournamentStandingResponse;
+import com.tictactore.model.TournamentStatus;
 import com.tictactore.model.User;
 import com.tictactore.service.tournament.TournamentLifecycleService;
 import com.tictactore.service.tournament.TournamentMatchQueryService;
 import com.tictactore.service.tournament.TournamentMatchService;
+import com.tictactore.service.tournament.TournamentStandingsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +37,22 @@ public class TournamentController {
     private final TournamentLifecycleService tournamentLifecycleService;
     private final TournamentMatchQueryService tournamentMatchQueryService;
     private final TournamentMatchService tournamentMatchService;
+    private final TournamentStandingsService tournamentStandingsService;
+
+    @GetMapping
+    public ResponseEntity<Page<TournamentResponse>> getTournaments(
+            @RequestParam(required = false) TournamentStatus status,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<TournamentResponse> response = tournamentLifecycleService.getTournaments(status, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/standings")
+    public ResponseEntity<List<TournamentStandingResponse>> getTournamentStandings(@PathVariable UUID id) {
+        List<TournamentStandingResponse> response = tournamentStandingsService.calculateStandings(id);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/{id}/start")
     public ResponseEntity<TournamentResponse> startTournament(@PathVariable UUID id) {

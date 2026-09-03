@@ -2,6 +2,8 @@ package com.tictactore.service.tournament.impl;
 
 import com.tictactore.dto.TournamentMatchResponse;
 import com.tictactore.dto.TournamentRegistrationResponse;
+import com.tictactore.dto.tournament.TournamentStandingResponse;
+import com.tictactore.event.TournamentCompletedEvent;
 import com.tictactore.event.TournamentMatchCancelledEvent;
 import com.tictactore.event.TournamentMatchStartedEvent;
 import com.tictactore.exception.InvalidMatchStateException;
@@ -26,6 +28,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +106,45 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 
         tournamentMatchRepository.save(tournamentMatch);
         tournamentStandingsService.calculateStandings(tournamentMatch.getTournament().getId());
+        checkAndCompleteTournament(tournamentMatch);
+    }
+
+    private void checkAndCompleteTournament(TournamentMatch completedMatch) {
+        Tournament tournament = completedMatch.getTournament();
+        if (tournament == null || tournament.getStatus() != TournamentStatus.IN_PROGRESS) {
+            return;
+        }
+
+        boolean isCompleted = false;
+        UUID winnerRegistrationId = null;
+
+        if (tournament.getFormat() == TournamentFormat.CUP) {
+            if (completedMatch.getNextMatch() == null) {
+                isCompleted = true;
+                winnerRegistrationId = completedMatch.getWinner() != null ? completedMatch.getWinner().getId() : null;
+            }
+        } else {
+            List<TournamentMatch> allMatches = tournamentMatchRepository.findByTournamentId(tournament.getId());
+            boolean allMatchesConcluded = !allMatches.isEmpty() && allMatches.stream().allMatch(m ->
+                    m.getStatus() == TournamentMatchStatus.COMPLETED
+                            || m.getStatus() == TournamentMatchStatus.BYE
+                            || m.getStatus() == TournamentMatchStatus.CANCELLED);
+
+            if (allMatchesConcluded) {
+                isCompleted = true;
+                List<TournamentStandingResponse> standings =
+                        tournamentStandingsService.calculateStandings(tournament.getId());
+                if (!standings.isEmpty()) {
+                    winnerRegistrationId = standings.get(0).registrationId();
+                }
+            }
+        }
+
+        if (isCompleted) {
+            tournament.setStatus(TournamentStatus.COMPLETED);
+            tournamentRepository.save(tournament);
+            eventPublisher.publishEvent(new TournamentCompletedEvent(tournament.getId(), winnerRegistrationId, Instant.now()));
+        }
     }
 
     private Tournament getTournament(UUID tournamentId) {
@@ -249,7 +291,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     private TournamentRegistration determineWinner(TournamentMatch tournamentMatch) {
         Match match = tournamentMatch.getMatch();
         if (match == null || match.getGames() == null || match.getGames().isEmpty()) {
-            return null;
+            return tournamentMatch.getWinner();
         }
 
         int teamAWins = 0;

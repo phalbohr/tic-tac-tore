@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +66,15 @@ public class TournamentLifecycleServiceImpl implements TournamentLifecycleServic
         }
 
         return proceedStartTournament(tournament, confirmedRegistrations);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TournamentResponse> getTournaments(TournamentStatus status, Pageable pageable) {
+        Page<Tournament> tournaments = (status != null)
+                ? tournamentRepository.findByStatus(status, pageable)
+                : tournamentRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return tournaments.map(this::mapToTournamentResponse);
     }
 
     private TournamentResponse cancelTournamentDueToLowCapacity(

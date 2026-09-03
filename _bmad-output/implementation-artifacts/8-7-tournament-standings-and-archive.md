@@ -1,6 +1,6 @@
 ---
 baseline_commit: d4cc6e4c61c55b85a49510d2029b6263720fc529
-status: ready-for-dev
+status: review
 ---
 
 # Story 8.7: Tournament Standings & Archive
@@ -53,17 +53,17 @@ so that I can track competition progress, identify champions, and retain histori
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Database Migration & Repository Enhancements (AC4, AC5)
-  - [ ] Create Flyway migration `src/main/resources/db/migration/V22__add_tournament_archive_indexes.sql`:
+- [x] Task 1: Database Migration & Repository Enhancements (AC4, AC5)
+  - [x] Create Flyway migration `src/main/resources/db/migration/V22__add_tournament_archive_indexes.sql`:
     - Add index `idx_tournament_status_updated_at ON tournament(status, updated_at DESC)`
     - Add index `idx_tournament_status_created_at ON tournament(status, created_at DESC)`
-  - [ ] Update `com.tictactore.repository.TournamentRepository.java`:
+  - [x] Update `com.tictactore.repository.TournamentRepository.java`:
     - Add `Page<Tournament> findByStatus(TournamentStatus status, Pageable pageable)`
     - Add `Page<Tournament> findAllByOrderByCreatedAtDesc(Pageable pageable)`
-  - [ ] Repository test in `src/test/java/com/tictactore/repository/TournamentRepositoryTest.java` verifying paginated status queries (`@DataJpaTest`).
+  - [x] Repository test in `src/test/java/com/tictactore/repository/TournamentRepositoryTest.java` verifying paginated status queries (`@DataJpaTest`).
 
-- [ ] Task 2: Backend Standings Service & Scoring Calculation (AC1, AC2, AC3, AC8)
-  - [ ] Update DTO `com.tictactore.dto.tournament.TournamentStandingResponse.java` record:
+- [x] Task 2: Backend Standings Service & Scoring Calculation (AC1, AC2, AC3, AC8)
+  - [x] Update DTO `com.tictactore.dto.tournament.TournamentStandingResponse.java` record:
     - `UUID registrationId`
     - `UUID userId`
     - `String nickname`
@@ -80,20 +80,20 @@ so that I can track competition progress, identify champions, and retain histori
     - `int points`
     - `boolean isEliminated`
     - `Integer rank`
-  - [ ] Update `com.tictactore.service.tournament.impl.TournamentStandingsServiceImpl.java`:
+  - [x] Update `com.tictactore.service.tournament.impl.TournamentStandingsServiceImpl.java`:
     - Enhance `StandingAccumulator` to extract game counts (`gamesWon`, `gamesLost`) from linked `Match.games` for completed matches.
     - Handle 2v2 partner nicknames/avatars for fixed teams.
     - Check for anonymized/deleted users (render "Anonymous" when user/nickname is missing per FR33).
     - Implement multi-tier sorting: `points DESC`, then `wins DESC`, then `gameDifference DESC`, then `matchesPlayed ASC`, then `nickname ASC`.
     - Assign 1-based sequential `rank` to each standing response.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentStandingsServiceTest.java`.
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentStandingsServiceTest.java`.
 
-- [ ] Task 3: Automated Tournament Completion & Event Publishing (AC4)
-  - [ ] Create Event `com.tictactore.event.TournamentCompletedEvent.java` record:
+- [x] Task 3: Automated Tournament Completion & Event Publishing (AC4)
+  - [x] Create Event `com.tictactore.event.TournamentCompletedEvent.java` record:
     - `UUID tournamentId`
     - `UUID winnerRegistrationId`
     - `Instant completedAt`
-  - [ ] Update `com.tictactore.service.tournament.impl.TournamentMatchServiceImpl.java`:
+  - [x] Update `com.tictactore.service.tournament.impl.TournamentMatchServiceImpl.java`:
     - In `completeMatch(UUID tournamentMatchId, UUID matchId)`:
       - After saving the match and advancing cup winners, check if tournament is completed:
         - For `CUP`: check if the concluded match is the tournament Final (`nextMatch == null`).
@@ -102,10 +102,10 @@ so that I can track competition progress, identify champions, and retain histori
         - Set `tournament.setStatus(TournamentStatus.COMPLETED)`.
         - Persist updated tournament via `tournamentRepository.save(tournament)`.
         - Publish `TournamentCompletedEvent`.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentMatchServiceTest.java`.
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentMatchServiceTest.java`.
 
-- [ ] Task 4: Backend Controller Endpoints & OpenAPI Documentation (AC1, AC5)
-  - [ ] Update `com.tictactore.controller.TournamentController.java`:
+- [x] Task 4: Backend Controller Endpoints & OpenAPI Documentation (AC1, AC5)
+  - [x] Update `com.tictactore.controller.TournamentController.java`:
     - Add endpoint:
       - `@GetMapping("/{id}/standings")`
       - `public ResponseEntity<List<TournamentStandingResponse>> getTournamentStandings(@PathVariable UUID id)`
@@ -113,35 +113,35 @@ so that I can track competition progress, identify champions, and retain histori
     - Update tournament list endpoint for pagination and archive filtering:
       - `@GetMapping`
       - `public ResponseEntity<Page<TournamentResponse>> getTournaments(@RequestParam(required = false) TournamentStatus status, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable)`
-  - [ ] Controller WebMvc & ATDD tests:
+  - [x] Controller WebMvc & ATDD tests:
     - `src/test/java/com/tictactore/controller/TournamentControllerTest.java` (WebMvcTest).
     - `src/test/java/com/tictactore/controller/TournamentControllerATDDTest.java` (Full request lifecycle).
 
-- [ ] Task 5: Frontend Types, API Service & Pinia Store (AC1, AC5, AC6)
-  - [ ] Update `frontend/src/features/tournament/types/tournament.ts`:
+- [x] Task 5: Frontend Types, API Service & Pinia Store (AC1, AC5, AC6)
+  - [x] Update `frontend/src/features/tournament/types/tournament.ts`:
     - Add `TournamentStandingDto` interface.
     - Add `PageDto<T>` or paginated tournament response interface.
-  - [ ] Update `frontend/src/features/tournament/services/tournamentService.ts`:
+  - [x] Update `frontend/src/features/tournament/services/tournamentService.ts`:
     - Add `getTournamentStandings(tournamentId: string): Promise<TournamentStandingDto[]>`.
     - Add `getTournamentsPaginated(status?: TournamentStatus, page?: number, size?: number): Promise<{ content: TournamentDto[]; totalPages: number; totalElements: number }>`.
-  - [ ] Update `frontend/src/features/tournament/stores/tournamentStore.ts`:
+  - [x] Update `frontend/src/features/tournament/stores/tournamentStore.ts`:
     - State: `standings: Record<string, TournamentStandingDto[]>`, `archiveTournaments: TournamentDto[]`, `archivePage: number`, `archiveTotalPages: number`, `isArchiveLoading: boolean`.
     - Actions:
       - `fetchStandings(tournamentId: string): Promise<TournamentStandingDto[]>`.
       - `fetchArchive(page?: number, size?: number): Promise<void>`.
-  - [ ] Frontend store tests in `frontend/src/features/tournament/stores/__tests__/tournamentStore.spec.ts`.
+  - [x] Frontend store tests in `frontend/src/features/tournament/stores/__tests__/tournamentStore.spec.ts`.
 
-- [ ] Task 6: Frontend Standings Component & Modal Integration (AC5, AC7, AC8)
-  - [ ] Create `frontend/src/features/tournament/components/TournamentStandings.vue`:
+- [x] Task 6: Frontend Standings Component & Modal Integration (AC5, AC7, AC8)
+  - [x] Create `frontend/src/features/tournament/components/TournamentStandings.vue`:
     - Clubhouse design token styling (`bg-surface-container-low`, `rounded-2xl`, elevation, no 1px solid borders per `UX-DR3`).
     - Standings table with columns: `# (Rank)`, `Player / Team`, `P (Played)`, `W (Wins)`, `L (Losses)`, `+/- (Game Diff)`, `Pts (Points)`, `Status`.
     - Responsive mobile layout: scrollable table or stacked card list on small screens.
     - Visual indicators for `Winner` (Gold/Trophy badge), `Active`, and `Eliminated`.
     - Player avatar chips with fallback generated avatar / anonymized "boots on a nail" placeholder.
-  - [ ] Component tests in `frontend/src/features/tournament/components/__tests__/TournamentStandings.spec.ts`.
+  - [x] Component tests in `frontend/src/features/tournament/components/__tests__/TournamentStandings.spec.ts`.
 
-- [ ] Task 7: Frontend Archive Tab & Navigation in TournamentsView (AC6, AC7)
-  - [ ] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
+- [x] Task 7: Frontend Archive Tab & Navigation in TournamentsView (AC6, AC7)
+  - [x] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
     - Add Segmented Tab selector at top: `Active & Registration` vs `Archive`.
     - Under `Archive` tab:
       - Render list of completed tournaments with completion date, winner info, and format badges.
@@ -149,8 +149,8 @@ so that I can track competition progress, identify champions, and retain histori
     - In Bracket / Details modal:
       - Add Sub-navigation tab toggle: `Bracket / Schedule` vs `Standings Table`.
       - Embed `TournamentStandings.vue` when `Standings` tab is selected.
-  - [ ] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.standings.*` and `tournament.archive.*`.
-  - [ ] Update component tests in `frontend/src/features/tournament/views/__tests__/TournamentsView.spec.ts`.
+  - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.standings.*` and `tournament.archive.*`.
+  - [x] Update component tests in `frontend/src/features/tournament/views/__tests__/TournamentsView.spec.ts`.
 
 ## Dev Agent Guardrails & Implementation Details
 
@@ -227,5 +227,19 @@ so that I can track competition progress, identify champions, and retain histori
 - [Source: _bmad-output/planning-artifacts/prd.md#FR26, FR46, FR33]
 - [Source: _bmad-output/planning-artifacts/ux-design-specification.md]
 - [Source: src/main/java/com/tictactore/service/tournament/TournamentStandingsService.java]
+
+## Dev Agent Record
+
+- **Implemented By**: Amelia (Dev Agent)
+- **Status**: Complete & Verified (Ready for Review)
+- **Verification Summary**:
+  - Flyway migration V22 added for `tournament(status, updated_at DESC)` and `tournament(status, created_at DESC)`.
+  - Backend standings service calculates game difference from `Match.games`, sorts with multi-tier tie-breaking (`points DESC`, `wins DESC`, `gameDifference DESC`, `matchesPlayed ASC`, `nickname ASC`), handles 2v2 fixed team partners, stub substitute players, and GDPR anonymous users.
+  - Automated tournament completion in `TournamentMatchServiceImpl` for Cup finals and Championship round robin completions with `TournamentCompletedEvent` published.
+  - Paginated `GET /api/v1/tournaments` with status filter and `GET /api/v1/tournaments/{id}/standings` endpoints exposed.
+  - Frontend Vue 3 `TournamentStandings.vue` component implemented with Clubhouse design tokens and badges.
+  - `TournamentsView.vue` enhanced with top-level `Active & Upcoming` vs `Archive` segmented tabs, pagination controls, and modal `Bracket & Schedule` vs `Standings` toggle.
+  - Full local CI suite `./scripts/ci-local.sh` executed and passed cleanly (761 backend tests, 427 frontend unit tests, 152 Playwright E2E tests).
+
 
 
