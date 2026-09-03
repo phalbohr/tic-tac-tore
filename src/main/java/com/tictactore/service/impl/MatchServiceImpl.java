@@ -41,6 +41,7 @@ public class MatchServiceImpl implements MatchService {
     private final RateLimitService rateLimitService;
     private final com.tictactore.service.operation.MatchResponseMapper matchResponseMapper;
     private final com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
+    private final com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository;
 
     @org.springframework.beans.factory.annotation.Autowired
     public MatchServiceImpl(
@@ -50,7 +51,8 @@ public class MatchServiceImpl implements MatchService {
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService,
             com.tictactore.service.operation.MatchResponseMapper matchResponseMapper,
-            com.tictactore.repository.PlayerGroupRepository playerGroupRepository
+            com.tictactore.repository.PlayerGroupRepository playerGroupRepository,
+            com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository
     ) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
@@ -59,6 +61,7 @@ public class MatchServiceImpl implements MatchService {
         this.rateLimitService = rateLimitService;
         this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new com.tictactore.service.operation.MatchResponseMapper(userRepository);
         this.playerGroupRepository = playerGroupRepository;
+        this.tournamentMatchRepository = tournamentMatchRepository;
     }
 
     public MatchServiceImpl(
@@ -68,7 +71,7 @@ public class MatchServiceImpl implements MatchService {
             PushNotificationService pushNotificationService,
             RateLimitService rateLimitService
     ) {
-        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null);
+        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null, null);
     }
 
     @Override
@@ -193,6 +196,12 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Match savedMatch = matchOperation.saveMatch(match);
+        if (request.tournamentMatchId() != null && tournamentMatchRepository != null) {
+            tournamentMatchRepository.findById(request.tournamentMatchId()).ifPresent(tm -> {
+                tm.setMatch(savedMatch);
+                tournamentMatchRepository.save(tm);
+            });
+        }
 
         try {
             java.time.ZonedDateTime nowUtc = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC);
@@ -238,11 +247,8 @@ public class MatchServiceImpl implements MatchService {
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : userPendingMatches) {
+            allUserIds.addAll(m.getParticipantIds());
             if (m.getCreatorId() != null) allUserIds.add(m.getCreatorId());
-            if (m.getTeamAAttackerId() != null) allUserIds.add(m.getTeamAAttackerId());
-            if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
-            if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
-            if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
             if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
         }
 
@@ -309,16 +315,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     private boolean isIdenticalMatch(Match candidate, Match current, Collection<UUID> currentParticipants) {
-        List<UUID> candidateParticipants = new ArrayList<>();
-        if (candidate.getTeamAAttackerId() != null) candidateParticipants.add(candidate.getTeamAAttackerId());
-        if (candidate.getTeamADefenderId() != null) candidateParticipants.add(candidate.getTeamADefenderId());
-        if (candidate.getTeamBAttackerId() != null) candidateParticipants.add(candidate.getTeamBAttackerId());
-        if (candidate.getTeamBDefenderId() != null) candidateParticipants.add(candidate.getTeamBDefenderId());
-
-        if (new HashSet<>(candidateParticipants).equals(new HashSet<>(currentParticipants))) {
-            return true;
-        }
-        return false;
+        return new HashSet<>(candidate.getParticipantIds()).equals(new HashSet<>(currentParticipants));
     }
 
     @Override

@@ -1,6 +1,6 @@
 ---
 baseline_commit: 5f3c00e5f950c67ab11c4064e5db0e22fd05d12e
-status: in-progress
+status: review
 ---
 
 # Story 8.5: Asynchronous Tournament Match Execution
@@ -137,17 +137,17 @@ so that the tournament proceeds smoothly without bottlenecks, table starvation, 
 
 ### Review Findings
 
-- [ ] [Review][Patch] Link Match to TournamentMatch via optional tournamentMatchId in CreateMatchRequest (Resolved Decision: Pass tournamentMatchId from match entry flow into CreateMatchRequest and link tournamentMatch.setMatch(savedMatch) in MatchService to enable deterministic confirmation lookup)
-- [ ] [Review][Patch] Fix Cup winner seed propagation in advanceWinnerInCup [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:226]
-- [ ] [Review][Patch] Fix determineWinner team-to-participant mapping and tie handling [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:207]
-- [ ] [Review][Patch] Allow round 2+ matches to be available in Championship and 2v2 modes [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
-- [ ] [Review][Patch] Allow doubles partners to start/cancel matches and include them in event user IDs [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:585]
-- [ ] [Review][Patch] Delegate match completion to TournamentMatchService.completeMatch and replace @Autowired(required=false) with constructor injection [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:481]
-- [ ] [Review][Patch] Use dynamic availability calculation in TournamentMatchServiceImpl.mapToMatchResponse [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:746]
-- [ ] [Review][Patch] Exclude stub (BYE) matches from being marked available for play [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
-- [ ] [Review][Patch] Add validateTournamentInProgress guard to cancelMatch [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:514]
-- [ ] [Review][Patch] Guard advanceWinnerInCup against overwriting already started or completed matches [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:234]
-- [ ] [Review][Patch] Add null check for authPrincipal.getName() in TournamentController.resolveUserId [src/main/java/com/tictactore/controller/TournamentController.java:77]
+- [x] [Review][Patch] Link Match to TournamentMatch via optional tournamentMatchId in CreateMatchRequest (Resolved Decision: Pass tournamentMatchId from match entry flow into CreateMatchRequest and link tournamentMatch.setMatch(savedMatch) in MatchService to enable deterministic confirmation lookup)
+- [x] [Review][Patch] Fix Cup winner seed propagation in advanceWinnerInCup [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:226]
+- [x] [Review][Patch] Fix determineWinner team-to-participant mapping and tie handling [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:207]
+- [x] [Review][Patch] Allow round 2+ matches to be available in Championship and 2v2 modes [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
+- [x] [Review][Patch] Allow doubles partners to start/cancel matches and include them in event user IDs [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:585]
+- [x] [Review][Patch] Delegate match completion to TournamentMatchService.completeMatch and replace @Autowired(required=false) with constructor injection [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:481]
+- [x] [Review][Patch] Use dynamic availability calculation in TournamentMatchServiceImpl.mapToMatchResponse [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:746]
+- [x] [Review][Patch] Exclude stub (BYE) matches from being marked available for play [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
+- [x] [Review][Patch] Add validateTournamentInProgress guard to cancelMatch [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:514]
+- [x] [Review][Patch] Guard advanceWinnerInCup against overwriting already started or completed matches [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:234]
+- [x] [Review][Patch] Add null check for authPrincipal.getName() in TournamentController.resolveUserId [src/main/java/com/tictactore/controller/TournamentController.java:77]
 - [x] [Review][Defer] Tournament status completion check on final match conclusion [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:197] — deferred, pre-existing
 - [x] [Review][Defer] Optimistic locking retry mechanism for concurrent feeder completion in Cup bracket [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:238] — deferred, pre-existing
 
@@ -204,6 +204,16 @@ Auto (Antigravity Assistant)
 - Implemented backend asynchronous tournament match execution lifecycle: `TournamentMatchService`, start/cancel endpoints, `ParticipantBusyException` on 409 Conflict, and `TournamentMatchEventListener` handling `MatchConfirmedEvent` for automatic Cup winner advancement.
 - Enhanced DTOs and query service with participant busy metadata (`isAvailable`, `isOpponentBusy`, `busyParticipantNicknames`).
 - Created frontend store actions, match cards with "Start Match" / "Opponent Busy" / "LIVE" badges, schedule filtering by "All Rounds" / "My Matches" / "Available to Play", and seamless integration with `/matches/new` entry flow.
+- Resolved code review findings:
+  - Added optional `tournamentMatchId` to `CreateMatchRequest` and linked `TournamentMatch.match` on creation.
+  - Fixed Cup winner seed propagation and guarded against overwriting in-progress or completed matches.
+  - Implemented robust `determineWinner` team-to-participant mapping and tie handling.
+  - Enabled round 2+ matches in Championship and 2v2 modes to be `READY` / available for play out of sequence.
+  - Enabled doubles partners to start/cancel matches and included them in event participant lists.
+  - Delegated match completion to `TournamentMatchService.completeMatch` and replaced `@Autowired(required=false)` with constructor injection.
+  - Implemented dynamic availability and opponent busy computation in `TournamentMatchServiceImpl.mapToMatchResponse`.
+  - Added `validateTournamentInProgress` guard to `cancelMatch`.
+  - Added null check for `authPrincipal.getName()` in `TournamentController.resolveUserId`.
 - Verified 100% test coverage with strict AAA standards across unit, component, integration, and E2E suites.
 
 ### File List
@@ -211,14 +221,23 @@ Auto (Antigravity Assistant)
 - `src/main/java/com/tictactore/service/tournament/TournamentMatchService.java`
 - `src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java`
 - `src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java`
+- `src/main/java/com/tictactore/service/tournament/impl/ChampionshipBracketGenerator.java`
+- `src/main/java/com/tictactore/service/tournament/impl/RandomPairingBracketGenerator.java`
+- `src/main/java/com/tictactore/service/impl/MatchServiceImpl.java`
 - `src/main/java/com/tictactore/exception/ParticipantBusyException.java`
 - `src/main/java/com/tictactore/event/TournamentMatchStartedEvent.java`
 - `src/main/java/com/tictactore/event/TournamentMatchCancelledEvent.java`
 - `src/main/java/com/tictactore/listener/TournamentMatchEventListener.java`
 - `src/main/java/com/tictactore/controller/TournamentController.java`
+- `src/main/java/com/tictactore/controller/MatchController.java`
 - `src/main/java/com/tictactore/dto/TournamentMatchResponse.java`
+- `src/main/java/com/tictactore/dto/CreateMatchRequest.java`
 - `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java`
 - `src/test/java/com/tictactore/service/tournament/TournamentMatchServiceTest.java`
+- `src/test/java/com/tictactore/service/tournament/TournamentMatchQueryServiceTest.java`
+- `src/test/java/com/tictactore/service/tournament/ChampionshipBracketGeneratorTest.java`
+- `src/test/java/com/tictactore/service/tournament/RandomPairingBracketGeneratorTest.java`
+- `src/test/java/com/tictactore/service/MatchServiceTest.java`
 - `src/test/java/com/tictactore/listener/TournamentMatchEventListenerTest.java`
 - `src/test/java/com/tictactore/controller/TournamentControllerTest.java`
 - `src/test/java/com/tictactore/controller/TournamentBracketControllerTest.java`
@@ -232,9 +251,12 @@ Auto (Antigravity Assistant)
 - `frontend/src/features/tournament/components/__tests__/TournamentMatchCard.spec.ts`
 - `frontend/src/features/tournament/components/__tests__/TournamentSchedule.spec.ts`
 - `frontend/src/features/tournament/views/TournamentsView.vue`
+- `frontend/src/features/match/stores/matchDraftStore.ts`
+- `frontend/src/features/match/components/NewMatchFlow.vue`
 - `frontend/src/locales/en.json`
 - `frontend/src/locales/de.json`
 - `frontend/e2e/tournament-async-execution.spec.ts`
 
 ## Change Log
 - 2026-09-03: Story 8.5 implemented, validated and verified with 100% CI pass rate.
+- 2026-09-03: Addressed code review findings - 11 items resolved (Date: 2026-09-03).

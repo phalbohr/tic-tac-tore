@@ -53,6 +53,9 @@ class MatchServiceTest {
     @Mock
     private RateLimitService rateLimitService;
 
+    @Mock
+    private com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository;
+
     @InjectMocks
     private MatchServiceImpl matchService;
 
@@ -111,6 +114,41 @@ class MatchServiceTest {
             assertThat(response.status()).isEqualTo("PENDING_APPROVAL");
             assertThat(response.idempotencyKey()).isEqualTo("idempotency-123");
             verify(matchOperation).saveMatch(any(Match.class));
+        }
+
+        @Test
+        void shouldLinkTournamentMatch_whenTournamentMatchIdProvided() {
+            var tournamentMatchId = UUID.randomUUID();
+            var tournamentMatch = com.tictactore.model.TournamentMatch.builder().id(tournamentMatchId).build();
+            CreateMatchRequest request = new CreateMatchRequest(
+                    "idempotency-tm",
+                    p1, p1, null, p3, null,
+                    List.of(new GameDto(10, 8, null, null, null, null)),
+                    null, null, tournamentMatchId
+            );
+
+            when(matchRepository.findByIdempotencyKey("idempotency-tm")).thenReturn(Optional.empty());
+            when(userRepository.findAllById(any())).thenReturn(List.of(
+                    User.builder().id(p1).build(),
+                    User.builder().id(p3).build()
+            ));
+            Match saved = Match.builder()
+                    .id(UUID.randomUUID())
+                    .idempotencyKey("idempotency-tm")
+                    .creatorId(p1)
+                    .teamAAttackerId(p1)
+                    .teamBAttackerId(p3)
+                    .status("PENDING_APPROVAL")
+                    .createdAt(Instant.now())
+                    .build();
+            when(matchOperation.saveMatch(any(Match.class))).thenReturn(saved);
+            when(tournamentMatchRepository.findById(tournamentMatchId)).thenReturn(Optional.of(tournamentMatch));
+
+            MatchResponse response = matchService.createMatch(request);
+
+            assertThat(response).isNotNull();
+            assertThat(tournamentMatch.getMatch()).isEqualTo(saved);
+            verify(tournamentMatchRepository).save(tournamentMatch);
         }
 
         @Test

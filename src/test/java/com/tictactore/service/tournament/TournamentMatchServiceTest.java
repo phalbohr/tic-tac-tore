@@ -5,6 +5,8 @@ import com.tictactore.event.TournamentMatchStartedEvent;
 import com.tictactore.exception.InvalidMatchStateException;
 import com.tictactore.exception.ParticipantBusyException;
 import com.tictactore.exception.UnauthorizedMatchActionException;
+import com.tictactore.model.Game;
+import com.tictactore.model.Match;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentFormat;
 import com.tictactore.model.TournamentMatch;
@@ -12,6 +14,7 @@ import com.tictactore.model.TournamentMatchStatus;
 import com.tictactore.model.TournamentRegistration;
 import com.tictactore.model.TournamentStatus;
 import com.tictactore.model.User;
+import com.tictactore.repository.MatchRepository;
 import com.tictactore.repository.TournamentMatchRepository;
 import com.tictactore.repository.TournamentRepository;
 import com.tictactore.service.tournament.impl.TournamentMatchServiceImpl;
@@ -35,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +51,12 @@ class TournamentMatchServiceTest {
 
     @Mock
     private TournamentMatchRepository tournamentMatchRepository;
+
+    @Mock
+    private MatchRepository matchRepository;
+
+    @Mock
+    private TournamentStandingsService tournamentStandingsService;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -89,8 +99,8 @@ class TournamentMatchServiceTest {
         var partner1 = User.builder().id(partner1Id).nickname("Charlie").build();
         var partner2 = User.builder().id(partner2Id).nickname("David").build();
 
-        reg1 = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(user1).build();
-        reg2 = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(user2).build();
+        reg1 = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(user1).partner(partner1).seed(1).build();
+        reg2 = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(user2).partner(partner2).seed(4).build();
         reg1Partner = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(partner1).build();
         reg2Partner = TournamentRegistration.builder().id(UUID.randomUUID()).tournament(tournament).player(partner2).build();
 
@@ -101,6 +111,8 @@ class TournamentMatchServiceTest {
                 .matchOrder(1)
                 .participant1(reg1)
                 .participant2(reg2)
+                .seed1(1)
+                .seed2(4)
                 .status(TournamentMatchStatus.READY)
                 .build();
     }
@@ -125,6 +137,20 @@ class TournamentMatchServiceTest {
             verify(eventPublisher).publishEvent(eventCaptor.capture());
             assertThat(eventCaptor.getValue().matchId()).isEqualTo(matchId);
             assertThat(eventCaptor.getValue().tournamentId()).isEqualTo(tournamentId);
+        }
+
+        @Test
+        void shouldStartMatch_whenInvokedByDoublesPartner() {
+            when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
+            when(tournamentMatchRepository.findById(matchId)).thenReturn(Optional.of(tournamentMatch));
+            when(tournamentMatchRepository.findActiveMatchesForParticipants(eq(tournamentId), eq(TournamentMatchStatus.IN_PROGRESS), any()))
+                    .thenReturn(Collections.emptyList());
+            when(tournamentMatchRepository.save(any(TournamentMatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var response = tournamentMatchService.startMatch(tournamentId, matchId, partner1Id);
+
+            assertThat(response).isNotNull();
+            assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.IN_PROGRESS);
         }
 
         @Test
@@ -222,6 +248,19 @@ class TournamentMatchServiceTest {
         }
 
         @Test
+        void shouldAllowDoublesPartnerToCancelMatch() {
+            tournamentMatch.setStatus(TournamentMatchStatus.IN_PROGRESS);
+            when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
+            when(tournamentMatchRepository.findById(matchId)).thenReturn(Optional.of(tournamentMatch));
+            when(tournamentMatchRepository.save(any(TournamentMatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            var response = tournamentMatchService.cancelMatch(tournamentId, matchId, partner1Id);
+
+            assertThat(response).isNotNull();
+            assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.READY);
+        }
+
+        @Test
         void shouldThrowException_whenCancellingNonInProgressMatch() {
             tournamentMatch.setStatus(TournamentMatchStatus.READY);
             when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
@@ -230,6 +269,120 @@ class TournamentMatchServiceTest {
             assertThatThrownBy(() -> tournamentMatchService.cancelMatch(tournamentId, matchId, user1Id))
                     .isInstanceOf(InvalidMatchStateException.class)
                     .hasMessageContaining("Only in-progress matches can be cancelled");
+        }
+
+        @Test
+        void shouldThrowException_whenTournamentNotInProgressOnCancel() {
+            tournament.setStatus(TournamentStatus.COMPLETED);
+            when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
+
+            assertThatThrownBy(() -> tournamentMatchService.cancelMatch(tournamentId, matchId, user1Id))
+                    .isInstanceOf(InvalidMatchStateException.class)
+                    .hasMessageContaining("Tournament is not in progress");
+        }
+    }
+
+    @Nested
+    @DisplayName("Complete Match Specifications (AC2, AC6)")
+    class CompleteMatchSpecs {
+
+        @Test
+        void shouldCompleteMatch_andAdvanceWinnerInCupWithPropagatedSeed() {
+            tournament.setFormat(TournamentFormat.CUP);
+            var nextMatch = TournamentMatch.builder()
+                    .id(UUID.randomUUID())
+                    .tournament(tournament)
+                    .round(2)
+                    .matchOrder(1)
+                    .participant2(reg2)
+                    .seed2(4)
+                    .status(TournamentMatchStatus.PENDING)
+                    .build();
+            tournamentMatch.setNextMatch(nextMatch);
+            tournamentMatch.setMatchOrder(1);
+
+            var coreMatchId = UUID.randomUUID();
+            var coreMatch = Match.builder()
+                    .id(coreMatchId)
+                    .teamAAttackerId(user2Id)
+                    .teamBAttackerId(user1Id)
+                    .games(List.of(
+                            Game.builder().gameOrder(1).teamAScore(10).teamBScore(4).build(),
+                            Game.builder().gameOrder(2).teamAScore(10).teamBScore(5).build()
+                    ))
+                    .build();
+
+            when(tournamentMatchRepository.findById(matchId)).thenReturn(Optional.of(tournamentMatch));
+            when(matchRepository.findById(coreMatchId)).thenReturn(Optional.of(coreMatch));
+
+            tournamentMatchService.completeMatch(matchId, coreMatchId);
+
+            assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
+            assertThat(tournamentMatch.getWinner()).isEqualTo(reg2);
+            assertThat(nextMatch.getParticipant1()).isEqualTo(reg2);
+            assertThat(nextMatch.getSeed1()).isEqualTo(4);
+            assertThat(nextMatch.getStatus()).isEqualTo(TournamentMatchStatus.READY);
+            verify(tournamentMatchRepository).save(tournamentMatch);
+            verify(tournamentMatchRepository).save(nextMatch);
+            verify(tournamentStandingsService).calculateStandings(tournamentId);
+        }
+
+        @Test
+        void shouldNotOverwriteNextMatch_whenNextMatchAlreadyStartedOrCompleted() {
+            tournament.setFormat(TournamentFormat.CUP);
+            var nextMatch = TournamentMatch.builder()
+                    .id(UUID.randomUUID())
+                    .tournament(tournament)
+                    .round(2)
+                    .matchOrder(1)
+                    .participant1(reg1)
+                    .participant2(reg2)
+                    .status(TournamentMatchStatus.IN_PROGRESS)
+                    .build();
+            tournamentMatch.setNextMatch(nextMatch);
+            tournamentMatch.setMatchOrder(1);
+
+            var coreMatchId = UUID.randomUUID();
+            var coreMatch = Match.builder()
+                    .id(coreMatchId)
+                    .teamAAttackerId(user1Id)
+                    .teamBAttackerId(user2Id)
+                    .games(List.of(
+                            Game.builder().gameOrder(1).teamAScore(10).teamBScore(4).build()
+                    ))
+                    .build();
+
+            when(tournamentMatchRepository.findById(matchId)).thenReturn(Optional.of(tournamentMatch));
+            when(matchRepository.findById(coreMatchId)).thenReturn(Optional.of(coreMatch));
+
+            tournamentMatchService.completeMatch(matchId, coreMatchId);
+
+            assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
+            assertThat(tournamentMatch.getWinner()).isEqualTo(reg1);
+            verify(tournamentMatchRepository, never()).save(nextMatch);
+        }
+
+        @Test
+        void shouldHandleTie_bySettingWinnerToNull() {
+            var coreMatchId = UUID.randomUUID();
+            var coreMatch = Match.builder()
+                    .id(coreMatchId)
+                    .teamAAttackerId(user1Id)
+                    .teamBAttackerId(user2Id)
+                    .games(List.of(
+                            Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build(),
+                            Game.builder().gameOrder(2).teamAScore(5).teamBScore(10).build()
+                    ))
+                    .build();
+
+            when(tournamentMatchRepository.findById(matchId)).thenReturn(Optional.of(tournamentMatch));
+            when(matchRepository.findById(coreMatchId)).thenReturn(Optional.of(coreMatch));
+
+            tournamentMatchService.completeMatch(matchId, coreMatchId);
+
+            assertThat(tournamentMatch.getStatus()).isEqualTo(TournamentMatchStatus.COMPLETED);
+            assertThat(tournamentMatch.getWinner()).isNull();
+            verify(tournamentStandingsService).calculateStandings(tournamentId);
         }
     }
 }

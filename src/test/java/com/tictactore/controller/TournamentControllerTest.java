@@ -134,6 +134,18 @@ class TournamentControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @WithMockUser(username = "invalid-non-uuid-user")
+        void shouldReturn401_whenPrincipalNameNotUuid() throws Exception {
+            var tournamentId = UUID.randomUUID();
+            var matchId = UUID.randomUUID();
+
+            mockMvc.perform(post("/api/v1/tournaments/{id}/matches/{matchId}/start", tournamentId, matchId)
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Nested

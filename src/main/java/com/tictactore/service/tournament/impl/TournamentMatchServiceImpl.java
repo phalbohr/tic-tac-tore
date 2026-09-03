@@ -8,6 +8,7 @@ import com.tictactore.exception.InvalidMatchStateException;
 import com.tictactore.exception.ParticipantBusyException;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.exception.UnauthorizedMatchActionException;
+import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentFormat;
@@ -21,7 +22,6 @@ import com.tictactore.repository.TournamentRepository;
 import com.tictactore.service.tournament.TournamentMatchService;
 import com.tictactore.service.tournament.TournamentStandingsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,13 +39,9 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 
     private final TournamentRepository tournamentRepository;
     private final TournamentMatchRepository tournamentMatchRepository;
+    private final MatchRepository matchRepository;
+    private final TournamentStandingsService tournamentStandingsService;
     private final ApplicationEventPublisher eventPublisher;
-
-    @Autowired(required = false)
-    private MatchRepository matchRepository;
-
-    @Autowired(required = false)
-    private TournamentStandingsService tournamentStandingsService;
 
     @Override
     public TournamentMatchResponse startMatch(UUID tournamentId, UUID tournamentMatchId, UUID currentUserId) {
@@ -70,6 +66,8 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     @Override
     public TournamentMatchResponse cancelMatch(UUID tournamentId, UUID tournamentMatchId, UUID currentUserId) {
         Tournament tournament = getTournament(tournamentId);
+        validateTournamentInProgress(tournament);
+
         TournamentMatch match = getTournamentMatch(tournamentMatchId);
         validateMatchBelongsToTournament(match, tournamentId);
         validateUserAuthorizedForMatch(match, tournament, currentUserId);
@@ -89,7 +87,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     @Override
     public void completeMatch(UUID tournamentMatchId, UUID matchId) {
         TournamentMatch tournamentMatch = getTournamentMatch(tournamentMatchId);
-        if (matchRepository != null && matchId != null) {
+        if (matchId != null) {
             Match coreMatch = matchRepository.findById(matchId)
                     .orElseThrow(() -> new ResourceNotFoundException("Match", matchId.toString()));
             tournamentMatch.setMatch(coreMatch);
@@ -104,10 +102,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         }
 
         tournamentMatchRepository.save(tournamentMatch);
-
-        if (tournamentStandingsService != null) {
-            tournamentStandingsService.calculateStandings(tournamentMatch.getTournament().getId());
-        }
+        tournamentStandingsService.calculateStandings(tournamentMatch.getTournament().getId());
     }
 
     private Tournament getTournament(UUID tournamentId) {
@@ -146,22 +141,17 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     }
 
     private boolean isUserParticipantInMatch(TournamentMatch match, UUID userId) {
-        if (match.getParticipant1() != null && match.getParticipant1().getPlayer() != null
-                && userId.equals(match.getParticipant1().getPlayer().getId())) {
-            return true;
-        }
-        if (match.getParticipant1Partner() != null && match.getParticipant1Partner().getPlayer() != null
-                && userId.equals(match.getParticipant1Partner().getPlayer().getId())) {
-            return true;
-        }
-        if (match.getParticipant2() != null && match.getParticipant2().getPlayer() != null
-                && userId.equals(match.getParticipant2().getPlayer().getId())) {
-            return true;
-        }
-        if (match.getParticipant2Partner() != null && match.getParticipant2Partner().getPlayer() != null
-                && userId.equals(match.getParticipant2Partner().getPlayer().getId())) {
-            return true;
-        }
+        if (userId == null) return false;
+        return isRegistrationUser(match.getParticipant1(), userId)
+                || isRegistrationUser(match.getParticipant1Partner(), userId)
+                || isRegistrationUser(match.getParticipant2(), userId)
+                || isRegistrationUser(match.getParticipant2Partner(), userId);
+    }
+
+    private boolean isRegistrationUser(TournamentRegistration reg, UUID userId) {
+        if (reg == null) return false;
+        if (reg.getPlayer() != null && userId.equals(reg.getPlayer().getId())) return true;
+        if (reg.getPartner() != null && userId.equals(reg.getPartner().getId())) return true;
         return false;
     }
 
@@ -239,45 +229,94 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 
     private List<UUID> extractParticipantUserIds(TournamentMatch match) {
         List<UUID> userIds = new ArrayList<>();
-        if (match.getParticipant1() != null && match.getParticipant1().getPlayer() != null) {
-            userIds.add(match.getParticipant1().getPlayer().getId());
-        }
-        if (match.getParticipant1Partner() != null && match.getParticipant1Partner().getPlayer() != null) {
-            userIds.add(match.getParticipant1Partner().getPlayer().getId());
-        }
-        if (match.getParticipant2() != null && match.getParticipant2().getPlayer() != null) {
-            userIds.add(match.getParticipant2().getPlayer().getId());
-        }
-        if (match.getParticipant2Partner() != null && match.getParticipant2Partner().getPlayer() != null) {
-            userIds.add(match.getParticipant2Partner().getPlayer().getId());
-        }
+        addRegistrationUserIds(userIds, match.getParticipant1());
+        addRegistrationUserIds(userIds, match.getParticipant1Partner());
+        addRegistrationUserIds(userIds, match.getParticipant2());
+        addRegistrationUserIds(userIds, match.getParticipant2Partner());
         return userIds;
     }
 
-    private TournamentRegistration determineWinner(TournamentMatch tournamentMatch) {
-        if (tournamentMatch.getMatch() == null || tournamentMatch.getMatch().getGames() == null) {
-            return tournamentMatch.getParticipant1();
+    private void addRegistrationUserIds(List<UUID> userIds, TournamentRegistration reg) {
+        if (reg == null) return;
+        if (reg.getPlayer() != null && reg.getPlayer().getId() != null && !userIds.contains(reg.getPlayer().getId())) {
+            userIds.add(reg.getPlayer().getId());
         }
+        if (reg.getPartner() != null && reg.getPartner().getId() != null && !userIds.contains(reg.getPartner().getId())) {
+            userIds.add(reg.getPartner().getId());
+        }
+    }
+
+    private TournamentRegistration determineWinner(TournamentMatch tournamentMatch) {
+        Match match = tournamentMatch.getMatch();
+        if (match == null || match.getGames() == null || match.getGames().isEmpty()) {
+            return null;
+        }
+
         int teamAWins = 0;
         int teamBWins = 0;
-        for (var game : tournamentMatch.getMatch().getGames()) {
+        for (Game game : match.getGames()) {
             if (game.getTeamAScore() > game.getTeamBScore()) {
                 teamAWins++;
             } else if (game.getTeamBScore() > game.getTeamAScore()) {
                 teamBWins++;
             }
         }
-        return teamAWins >= teamBWins ? tournamentMatch.getParticipant1() : tournamentMatch.getParticipant2();
+
+        if (teamAWins == teamBWins) {
+            return null;
+        }
+
+        boolean teamAWon = teamAWins > teamBWins;
+        TournamentRegistration part1 = tournamentMatch.getParticipant1();
+        TournamentRegistration part2 = tournamentMatch.getParticipant2();
+
+        if (isRegistrationInTeamA(part1, match)) {
+            return teamAWon ? part1 : part2;
+        }
+        if (isRegistrationInTeamA(part2, match)) {
+            return teamAWon ? part2 : part1;
+        }
+        return teamAWon ? part1 : part2;
+    }
+
+    private boolean isRegistrationInTeamA(TournamentRegistration reg, Match match) {
+        if (reg == null || match == null) {
+            return false;
+        }
+        if (reg.getPlayer() != null) {
+            UUID playerId = reg.getPlayer().getId();
+            if (playerId.equals(match.getTeamAAttackerId()) || playerId.equals(match.getTeamADefenderId())) {
+                return true;
+            }
+        }
+        if (reg.getPartner() != null) {
+            UUID partnerId = reg.getPartner().getId();
+            if (partnerId.equals(match.getTeamAAttackerId()) || partnerId.equals(match.getTeamADefenderId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void advanceWinnerInCup(TournamentMatch tournamentMatch, TournamentRegistration winner) {
         TournamentMatch nextMatch = tournamentMatch.getNextMatch();
+        if (nextMatch == null || winner == null) {
+            return;
+        }
+        if (nextMatch.getStatus() == TournamentMatchStatus.IN_PROGRESS || nextMatch.getStatus() == TournamentMatchStatus.COMPLETED) {
+            return;
+        }
+
+        Integer winnerSeed = winner.equals(tournamentMatch.getParticipant1())
+                ? tournamentMatch.getSeed1()
+                : tournamentMatch.getSeed2();
+
         if (tournamentMatch.getMatchOrder() % 2 == 1) {
             nextMatch.setParticipant1(winner);
-            nextMatch.setSeed1(tournamentMatch.getSeed1());
+            nextMatch.setSeed1(winnerSeed);
         } else {
             nextMatch.setParticipant2(winner);
-            nextMatch.setSeed2(tournamentMatch.getSeed2());
+            nextMatch.setSeed2(winnerSeed);
         }
 
         if (nextMatch.getParticipant1() != null && nextMatch.getParticipant2() != null
@@ -288,6 +327,42 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     }
 
     private TournamentMatchResponse mapToMatchResponse(TournamentMatch match) {
+        List<String> busyNicknames = new ArrayList<>();
+        if (match.getStatus() == TournamentMatchStatus.READY || match.getStatus() == TournamentMatchStatus.PENDING) {
+            List<UUID> regIds = extractRegistrationIds(match);
+            if (!regIds.isEmpty()) {
+                List<TournamentMatch> activeMatches = tournamentMatchRepository.findActiveMatchesForParticipants(
+                        match.getTournament().getId(),
+                        TournamentMatchStatus.IN_PROGRESS,
+                        regIds
+                );
+                List<TournamentMatch> otherActive = activeMatches.stream()
+                        .filter(m -> !Objects.equals(m.getId(), match.getId()))
+                        .toList();
+                for (TournamentMatch activeMatch : otherActive) {
+                    String busy = findBusyParticipantNickname(match, List.of(activeMatch));
+                    if (!"Unknown".equals(busy) && !busyNicknames.contains(busy)) {
+                        busyNicknames.add(busy);
+                    }
+                }
+            }
+        }
+
+        boolean isOpponentBusy = !busyNicknames.isEmpty();
+        boolean isStub = match.isParticipant1Stub() || match.isParticipant2Stub();
+        boolean hasBothParticipants = match.getParticipant1() != null && match.getParticipant2() != null;
+        boolean isPlayableStatus = match.getStatus() == TournamentMatchStatus.READY
+                || (match.getStatus() == TournamentMatchStatus.PENDING && hasBothParticipants && match.getTournament().getFormat() != TournamentFormat.CUP);
+
+        boolean isAvailable = isPlayableStatus
+                && !isOpponentBusy
+                && !isStub
+                && hasBothParticipants
+                && match.getStatus() != TournamentMatchStatus.BYE
+                && match.getStatus() != TournamentMatchStatus.COMPLETED
+                && match.getStatus() != TournamentMatchStatus.CANCELLED
+                && match.getStatus() != TournamentMatchStatus.IN_PROGRESS;
+
         return TournamentMatchResponse.builder()
                 .id(match.getId())
                 .tournamentId(match.getTournament().getId())
@@ -306,9 +381,9 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
                 .winnerRegistrationId(match.getWinner() != null ? match.getWinner().getId() : null)
                 .nextMatchId(match.getNextMatch() != null ? match.getNextMatch().getId() : null)
                 .createdAt(match.getCreatedAt())
-                .isAvailable(match.getStatus() == TournamentMatchStatus.READY)
-                .isOpponentBusy(false)
-                .busyParticipantNicknames(List.of())
+                .isAvailable(isAvailable)
+                .isOpponentBusy(isOpponentBusy)
+                .busyParticipantNicknames(busyNicknames)
                 .build();
     }
 

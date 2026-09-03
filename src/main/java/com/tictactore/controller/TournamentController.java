@@ -86,7 +86,7 @@ public class TournamentController {
         if (principal instanceof User user) {
             return user.getId();
         }
-        if (authPrincipal != null) {
+        if (authPrincipal != null && authPrincipal.getName() != null) {
             try {
                 return UUID.fromString(authPrincipal.getName());
             } catch (IllegalArgumentException ignored) {

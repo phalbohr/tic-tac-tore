@@ -85,7 +85,7 @@ public class RandomPairingBracketGenerator implements BracketGenerator {
                         .participant2Partner(p2Partner.registration())
                         .seed1(p1.seed())
                         .seed2(p2.seed())
-                        .status(round == 1 ? TournamentMatchStatus.READY : TournamentMatchStatus.PENDING)
+                        .status(TournamentMatchStatus.READY)
                         .build();
 
                 allMatches.add(match);
@@ -223,7 +223,7 @@ public class RandomPairingBracketGenerator implements BracketGenerator {
                     .participant2Partner(p2Partner.registration())
                     .seed1(p1.seed())
                     .seed2(p2.seed())
-                    .status(round == 1 ? TournamentMatchStatus.READY : TournamentMatchStatus.PENDING)
+                    .status(TournamentMatchStatus.READY)
                     .build());
         }
 

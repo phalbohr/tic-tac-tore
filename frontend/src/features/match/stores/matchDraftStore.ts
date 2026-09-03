@@ -39,6 +39,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const selectedPlayers = ref<string[]>([])
   const selectedGroupId = ref<string | null>(null)
   const ruleConfigurationId = ref<string | null>(null)
+  const tournamentId = ref<string | null>(null)
+  const tournamentMatchId = ref<string | null>(null)
   const ruleSystem = ref<string>('STANDARD')
   const frequentOpponents = ref<PlayerDto[]>([])
   const fetchedPlayers = ref<Record<string, PlayerDto>>({})
@@ -672,6 +674,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamADefenderId,
       teamBAttackerId,
       teamBDefenderId,
+      tournamentMatchId: tournamentMatchId.value || undefined,
       games: games.value.map((g) => ({
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
@@ -695,6 +698,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectedPlayers.value = []
     initDraft()
     ruleConfig.value = null
+    tournamentId.value = null
+    tournamentMatchId.value = null
     games.value = []
     currentGame.value = { team1Score: 0, team2Score: 0 }
     activeGameIndex.value = -1
@@ -714,6 +719,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     selectedPlayers,
     selectedGroupId,
     ruleConfigurationId,
+    tournamentId,
+    tournamentMatchId,
     ruleSystem,
     frequentOpponents,
     fetchedPlayers,

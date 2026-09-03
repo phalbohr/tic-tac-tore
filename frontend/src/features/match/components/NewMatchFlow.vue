@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useMatchDraftStore } from '../stores/matchDraftStore'
 import { useAuthStore } from '@/stores/auth'
 import MatchTypePicker from './MatchTypePicker.vue'
@@ -10,6 +11,7 @@ import BaseButton from '@/core/components/BaseButton.vue'
 
 const store = useMatchDraftStore()
 const authStore = useAuthStore()
+const route = useRoute()
 const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'complete'): void
@@ -18,6 +20,12 @@ const emit = defineEmits<{
 onMounted(() => {
   store.fetchDefaults()
   authStore.fetchProfile()
+  if (route.query.tournamentId) {
+    store.tournamentId = String(route.query.tournamentId)
+  }
+  if (route.query.tournamentMatchId) {
+    store.tournamentMatchId = String(route.query.tournamentMatchId)
+  }
 })
 
 onUnmounted(() => {

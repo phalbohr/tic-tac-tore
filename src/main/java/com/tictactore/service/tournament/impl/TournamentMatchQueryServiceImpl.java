@@ -124,11 +124,17 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
     }
 
     private void addBusyRegistration(Map<UUID, String> busyMap, TournamentRegistration reg) {
-        if (reg != null && reg.getId() != null) {
-            String nickname = (reg.getPlayer() != null && reg.getPlayer().getNickname() != null)
-                    ? reg.getPlayer().getNickname()
-                    : "Player";
-            busyMap.put(reg.getId(), nickname);
+        if (reg != null) {
+            if (reg.getId() != null) {
+                String nickname = (reg.getPlayer() != null && reg.getPlayer().getNickname() != null)
+                        ? reg.getPlayer().getNickname()
+                        : "Player";
+                busyMap.put(reg.getId(), nickname);
+            }
+            if (reg.getPartner() != null && reg.getPartner().getId() != null) {
+                String nickname = reg.getPartner().getNickname() != null ? reg.getPartner().getNickname() : "Partner";
+                busyMap.put(reg.getPartner().getId(), nickname);
+            }
         }
     }
 
@@ -172,10 +178,19 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         }
 
         boolean isOpponentBusy = !busyNicknames.isEmpty();
-        boolean isAvailable = match.getStatus() == TournamentMatchStatus.READY
+        boolean isStub = match.isParticipant1Stub() || match.isParticipant2Stub();
+        boolean hasBothParticipants = match.getParticipant1() != null && match.getParticipant2() != null;
+        boolean isPlayableStatus = match.getStatus() == TournamentMatchStatus.READY
+                || (match.getStatus() == TournamentMatchStatus.PENDING && hasBothParticipants && match.getTournament().getFormat() != TournamentFormat.CUP);
+
+        boolean isAvailable = isPlayableStatus
                 && !isOpponentBusy
-                && match.getParticipant1() != null
-                && match.getParticipant2() != null;
+                && !isStub
+                && hasBothParticipants
+                && match.getStatus() != TournamentMatchStatus.BYE
+                && match.getStatus() != TournamentMatchStatus.COMPLETED
+                && match.getStatus() != TournamentMatchStatus.CANCELLED
+                && match.getStatus() != TournamentMatchStatus.IN_PROGRESS;
 
         return TournamentMatchResponse.builder()
                 .id(match.getId())
@@ -202,8 +217,15 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
     }
 
     private void checkBusy(TournamentRegistration reg, Map<UUID, String> busyMap, List<String> busyNicknames) {
-        if (reg != null && reg.getId() != null && busyMap.containsKey(reg.getId())) {
+        if (reg == null) return;
+        if (reg.getId() != null && busyMap.containsKey(reg.getId())) {
             String name = busyMap.get(reg.getId());
+            if (!busyNicknames.contains(name)) {
+                busyNicknames.add(name);
+            }
+        }
+        if (reg.getPartner() != null && reg.getPartner().getId() != null && busyMap.containsKey(reg.getPartner().getId())) {
+            String name = busyMap.get(reg.getPartner().getId());
             if (!busyNicknames.contains(name)) {
                 busyNicknames.add(name);
             }

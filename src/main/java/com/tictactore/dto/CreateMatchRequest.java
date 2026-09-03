@@ -15,5 +15,20 @@ public record CreateMatchRequest(
     UUID teamBDefenderId,
     @NotEmpty List<@Valid GameDto> games,
     String entryMode,
-    String matchFormat
-) {}
+    String matchFormat,
+    UUID tournamentMatchId
+) {
+    public CreateMatchRequest(
+        String idempotencyKey,
+        UUID creatorId,
+        UUID teamAAttackerId,
+        UUID teamADefenderId,
+        UUID teamBAttackerId,
+        UUID teamBDefenderId,
+        List<GameDto> games,
+        String entryMode,
+        String matchFormat
+    ) {
+        this(idempotencyKey, creatorId, teamAAttackerId, teamADefenderId, teamBAttackerId, teamBDefenderId, games, entryMode, matchFormat, null);
+    }
+}
