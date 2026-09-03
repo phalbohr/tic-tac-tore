@@ -168,6 +168,22 @@ so that all tournament matches remain consistent, compliant with tournament sett
   - Zero structural section comments (`// Given`, `// When`, `// Then` are strictly forbidden).
   - Test classes must end in `Test.java` (unit), `ATDDTest.java` / `IT.java` (integration).
 
+### ATDD Artifacts
+
+- Checklist: `_bmad-output/test-artifacts/atdd-checklist-8-6-tournament-rule-system-enforcement.md`
+- Backend DTO & Service ATDD Scaffolds: `_bmad-output/test-artifacts/atdd-redphase-8-6/`
+  - `CreateMatchRequestTest.java`
+  - `TournamentMatchResponseTest.java`
+  - `TournamentMatchValidatorTest.java`
+  - `TournamentMatchQueryServiceTest.java`
+- Frontend Component & Store ATDD Scaffolds: `_bmad-output/test-artifacts/atdd-redphase-8-6/`
+  - `matchDraftStore.spec.ts`
+  - `RulePicker.spec.ts`
+  - `NewMatchFlow.spec.ts`
+- Playwright Tests:
+  - `frontend/e2e/tests/api/tournament-rule-enforcement.spec.ts`
+  - `frontend/e2e/tournament-rule-enforcement.spec.ts`
+
 ### References
 
 - [Source: _bmad-output/planning-artifacts/prd.md#Functional Requirements] (FR44, FR45)
