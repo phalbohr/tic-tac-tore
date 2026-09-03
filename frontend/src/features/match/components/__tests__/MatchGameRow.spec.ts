@@ -7,8 +7,8 @@ vi.mock('vue-i18n', async (importOriginal) => {
   return {
     ...actual,
     useI18n: () => ({
-      t: (key: string, defaultMessage?: string) => defaultMessage || key
-    })
+      t: (key: string, defaultMessage?: string) => defaultMessage || key,
+    }),
   }
 })
 
@@ -22,8 +22,8 @@ describe('MatchGameRow', () => {
         teamBAttacker: { name: 'Attacker B' },
         teamAScore: 5,
         teamBScore: 3,
-        showScore: true
-      }
+        showScore: true,
+      },
     })
 
     expect(wrapper.find('[data-testid="score-vs-display"]').text()).toBe('5 : 3')
@@ -36,8 +36,8 @@ describe('MatchGameRow', () => {
   it('renders VS when showScore is false', () => {
     const wrapper = mount(MatchGameRow, {
       props: {
-        showScore: false
-      }
+        showScore: false,
+      },
     })
 
     expect(wrapper.find('[data-testid="score-vs-display"]').text()).toBe('VS')
@@ -48,8 +48,8 @@ describe('MatchGameRow', () => {
       props: {
         teamADefender: { name: 'Defender A' },
         teamAAttacker: { name: 'Attacker A' },
-        allowSwap: false
-      }
+        allowSwap: false,
+      },
     })
 
     expect(wrapper.find('[data-testid="swap-team-a-btn"]').exists()).toBe(false)
@@ -60,8 +60,8 @@ describe('MatchGameRow', () => {
       props: {
         teamADefender: { name: 'Defender A' },
         teamAAttacker: { name: 'Attacker A' },
-        allowSwap: true
-      }
+        allowSwap: true,
+      },
     })
 
     const swapBtn = wrapper.find('[data-testid="swap-team-a-btn"]')

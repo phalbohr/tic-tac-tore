@@ -10,8 +10,8 @@ vi.mock('vue-i18n', async (importOriginal) => {
   return {
     ...actual,
     useI18n: () => ({
-      t: (key: string, fallback?: string) => fallback || key
-    })
+      t: (key: string, fallback?: string) => fallback || key,
+    }),
   }
 })
 
@@ -34,15 +34,15 @@ describe('ScoreEntry.vue', () => {
                 ruleConfig: { gameLimit: 3 },
                 frequentOpponents: [],
                 fetchedPlayers: {},
-                selectedPlayers: ['p1', 'p2']
-              }
-            }
-          })
-        ]
-      }
+                selectedPlayers: ['p1', 'p2'],
+              },
+            },
+          }),
+        ],
+      },
     })
 
-    const backButton = wrapper.findAll('button').find(w => w.text().includes('Back'))
+    const backButton = wrapper.findAll('button').find((w) => w.text().includes('Back'))
     expect(backButton).toBeDefined()
     await backButton!.trigger('click')
 
@@ -53,7 +53,7 @@ describe('ScoreEntry.vue', () => {
     const store = useMatchDraftStore()
     store.frequentOpponents = [
       { id: 'p1', nickname: 'Alice', avatar: '' },
-      { id: 'p2', nickname: 'Bob', avatar: '' }
+      { id: 'p2', nickname: 'Bob', avatar: '' },
     ]
     store.selectedPlayers = ['p1', 'p2']
     store.matchType = MatchType.ONE_VS_ONE
@@ -69,7 +69,9 @@ describe('ScoreEntry.vue', () => {
     store.matchState = 'score_entry'
 
     const wrapper = mount(ScoreEntry)
-    const actionBtn = wrapper.findAll('button').find(w => w.text().includes('Next Game') || w.text().includes('Complete Match'))
+    const actionBtn = wrapper
+      .findAll('button')
+      .find((w) => w.text().includes('Next Game') || w.text().includes('Complete Match'))
     expect(actionBtn).toBeDefined()
     expect(actionBtn!.attributes('disabled')).toBeDefined()
 
@@ -84,14 +86,14 @@ describe('ScoreEntry.vue', () => {
     store.selectedPlayers = ['p1', 'p2']
     store.games = [
       { team1Score: 10, team2Score: 5 },
-      { team1Score: 5, team2Score: 10 }
+      { team1Score: 5, team2Score: 10 },
     ]
     store.activeGameIndex = -1
     store.currentGame = { team1Score: 10, team2Score: 2 }
     store.matchState = 'score_entry'
 
     const wrapper = mount(ScoreEntry)
-    const actionBtn = wrapper.findAll('button').find(w => w.text().includes('Complete Match'))
+    const actionBtn = wrapper.findAll('button').find((w) => w.text().includes('Complete Match'))
     expect(actionBtn).toBeDefined()
   })
 })

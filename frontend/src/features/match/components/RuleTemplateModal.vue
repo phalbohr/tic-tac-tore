@@ -1,125 +1,143 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { RuleConfig, CreateRuleConfigRequest, SideSwapRule, RestartRule, PositionSwapRule, PointDistribution } from '@/services/ruleConfigService';
-import BaseButton from '@/core/components/BaseButton.vue';
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type {
+  RuleConfig,
+  CreateRuleConfigRequest,
+  SideSwapRule,
+  RestartRule,
+  PositionSwapRule,
+  PointDistribution,
+} from '@/services/ruleConfigService'
+import BaseButton from '@/core/components/BaseButton.vue'
 
 defineOptions({
   name: 'RuleTemplateModal',
-});
+})
 
 const props = defineProps<{
-  isOpen: boolean;
-  initialTemplate?: RuleConfig | null;
-  errorMessage?: string;
-}>();
+  isOpen: boolean
+  initialTemplate?: RuleConfig | null
+  errorMessage?: string
+}>()
 
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'save', payload: CreateRuleConfigRequest): void;
-}>();
+  (e: 'close'): void
+  (e: 'save', payload: CreateRuleConfigRequest): void
+}>()
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const name = ref('');
-const goalLimit = ref(5);
-const gameLimit = ref(3);
-const winByTwo = ref(true);
-const absoluteScoreCap = ref<number | null>(8);
-const timeoutsPerGame = ref(2);
-const timeoutDurationSeconds = ref(30);
-const possessionLimit5BarSeconds = ref(10);
-const possessionLimitOtherSeconds = ref(15);
-const sideSwapRule = ref<SideSwapRule>('BETWEEN_GAMES');
-const restartRule = ref<RestartRule>('CONCEDING_TEAM');
-const spinningAllowed = ref(false);
-const aerialsAllowed = ref(false);
-const positionSwapRule = ref<PositionSwapRule>('BETWEEN_GAMES');
-const pointDistribution = ref<PointDistribution>('WIN_LOSS_3_0');
+const name = ref('')
+const goalLimit = ref(5)
+const gameLimit = ref(3)
+const winByTwo = ref(true)
+const absoluteScoreCap = ref<number | null>(8)
+const timeoutsPerGame = ref(2)
+const timeoutDurationSeconds = ref(30)
+const possessionLimit5BarSeconds = ref(10)
+const possessionLimitOtherSeconds = ref(15)
+const sideSwapRule = ref<SideSwapRule>('BETWEEN_GAMES')
+const restartRule = ref<RestartRule>('CONCEDING_TEAM')
+const spinningAllowed = ref(false)
+const aerialsAllowed = ref(false)
+const positionSwapRule = ref<PositionSwapRule>('BETWEEN_GAMES')
+const pointDistribution = ref<PointDistribution>('WIN_LOSS_3_0')
 
-const formError = ref('');
+const formError = ref('')
 
 function resetForm() {
   if (props.initialTemplate) {
-    name.value = props.initialTemplate.name || '';
-    goalLimit.value = props.initialTemplate.goalLimit ?? 5;
-    gameLimit.value = props.initialTemplate.gameLimit ?? 3;
-    winByTwo.value = props.initialTemplate.winByTwo ?? true;
-    absoluteScoreCap.value = props.initialTemplate.absoluteScoreCap ?? null;
-    timeoutsPerGame.value = props.initialTemplate.timeoutsPerGame ?? 2;
-    timeoutDurationSeconds.value = props.initialTemplate.timeoutDurationSeconds ?? 30;
-    possessionLimit5BarSeconds.value = props.initialTemplate.possessionLimit5BarSeconds ?? 10;
-    possessionLimitOtherSeconds.value = props.initialTemplate.possessionLimitOtherSeconds ?? 15;
-    sideSwapRule.value = props.initialTemplate.sideSwapRule ?? 'BETWEEN_GAMES';
-    restartRule.value = props.initialTemplate.restartRule ?? 'CONCEDING_TEAM';
-    spinningAllowed.value = props.initialTemplate.spinningAllowed ?? false;
-    aerialsAllowed.value = props.initialTemplate.aerialsAllowed ?? false;
-    positionSwapRule.value = props.initialTemplate.positionSwapRule ?? 'BETWEEN_GAMES';
-    pointDistribution.value = props.initialTemplate.pointDistribution ?? 'WIN_LOSS_3_0';
+    name.value = props.initialTemplate.name || ''
+    goalLimit.value = props.initialTemplate.goalLimit ?? 5
+    gameLimit.value = props.initialTemplate.gameLimit ?? 3
+    winByTwo.value = props.initialTemplate.winByTwo ?? true
+    absoluteScoreCap.value = props.initialTemplate.absoluteScoreCap ?? null
+    timeoutsPerGame.value = props.initialTemplate.timeoutsPerGame ?? 2
+    timeoutDurationSeconds.value = props.initialTemplate.timeoutDurationSeconds ?? 30
+    possessionLimit5BarSeconds.value = props.initialTemplate.possessionLimit5BarSeconds ?? 10
+    possessionLimitOtherSeconds.value = props.initialTemplate.possessionLimitOtherSeconds ?? 15
+    sideSwapRule.value = props.initialTemplate.sideSwapRule ?? 'BETWEEN_GAMES'
+    restartRule.value = props.initialTemplate.restartRule ?? 'CONCEDING_TEAM'
+    spinningAllowed.value = props.initialTemplate.spinningAllowed ?? false
+    aerialsAllowed.value = props.initialTemplate.aerialsAllowed ?? false
+    positionSwapRule.value = props.initialTemplate.positionSwapRule ?? 'BETWEEN_GAMES'
+    pointDistribution.value = props.initialTemplate.pointDistribution ?? 'WIN_LOSS_3_0'
   } else {
-    name.value = '';
-    goalLimit.value = 5;
-    gameLimit.value = 3;
-    winByTwo.value = true;
-    absoluteScoreCap.value = 8;
-    timeoutsPerGame.value = 2;
-    timeoutDurationSeconds.value = 30;
-    possessionLimit5BarSeconds.value = 10;
-    possessionLimitOtherSeconds.value = 15;
-    sideSwapRule.value = 'BETWEEN_GAMES';
-    restartRule.value = 'CONCEDING_TEAM';
-    spinningAllowed.value = false;
-    aerialsAllowed.value = false;
-    positionSwapRule.value = 'BETWEEN_GAMES';
-    pointDistribution.value = 'WIN_LOSS_3_0';
+    name.value = ''
+    goalLimit.value = 5
+    gameLimit.value = 3
+    winByTwo.value = true
+    absoluteScoreCap.value = 8
+    timeoutsPerGame.value = 2
+    timeoutDurationSeconds.value = 30
+    possessionLimit5BarSeconds.value = 10
+    possessionLimitOtherSeconds.value = 15
+    sideSwapRule.value = 'BETWEEN_GAMES'
+    restartRule.value = 'CONCEDING_TEAM'
+    spinningAllowed.value = false
+    aerialsAllowed.value = false
+    positionSwapRule.value = 'BETWEEN_GAMES'
+    pointDistribution.value = 'WIN_LOSS_3_0'
   }
-  formError.value = '';
+  formError.value = ''
 }
 
 watch(
   () => props.isOpen,
   (val) => {
     if (val) {
-      resetForm();
+      resetForm()
     }
   },
-  { immediate: true }
-);
+  { immediate: true },
+)
 
 watch(
   () => props.initialTemplate,
   () => {
     if (props.isOpen) {
-      resetForm();
+      resetForm()
     }
-  }
-);
+  },
+)
 
 watch(
   () => props.errorMessage,
   (val) => {
     if (val) {
-      formError.value = val;
+      formError.value = val
     }
-  }
-);
+  },
+)
 
 watch(goalLimit, (newVal) => {
-  if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(newVal)) {
-    absoluteScoreCap.value = Number(newVal) + 3;
+  if (
+    winByTwo.value &&
+    absoluteScoreCap.value &&
+    Number(absoluteScoreCap.value) <= Number(newVal)
+  ) {
+    absoluteScoreCap.value = Number(newVal) + 3
   }
-});
+})
 
 function handleSave() {
-  const trimmedName = name.value.trim();
+  const trimmedName = name.value.trim()
   if (!trimmedName || trimmedName.length > 50) {
-    formError.value = t('rules.validation.nameRequired', 'Name is required (max 50 characters)');
-    return;
+    formError.value = t('rules.validation.nameRequired', 'Name is required (max 50 characters)')
+    return
   }
 
-  if (winByTwo.value && absoluteScoreCap.value && Number(absoluteScoreCap.value) <= Number(goalLimit.value)) {
-    formError.value = t('rules.validation.capMustBeGreater', 'Absolute score cap must be greater than goal limit');
-    return;
+  if (
+    winByTwo.value &&
+    absoluteScoreCap.value &&
+    Number(absoluteScoreCap.value) <= Number(goalLimit.value)
+  ) {
+    formError.value = t(
+      'rules.validation.capMustBeGreater',
+      'Absolute score cap must be greater than goal limit',
+    )
+    return
   }
 
   const payload: CreateRuleConfigRequest = {
@@ -127,7 +145,8 @@ function handleSave() {
     goalLimit: Number(goalLimit.value),
     gameLimit: Number(gameLimit.value),
     winByTwo: Boolean(winByTwo.value),
-    absoluteScoreCap: winByTwo.value && absoluteScoreCap.value ? Number(absoluteScoreCap.value) : null,
+    absoluteScoreCap:
+      winByTwo.value && absoluteScoreCap.value ? Number(absoluteScoreCap.value) : null,
     timeoutsPerGame: Number(timeoutsPerGame.value),
     timeoutDurationSeconds: Number(timeoutDurationSeconds.value),
     possessionLimit5BarSeconds: Number(possessionLimit5BarSeconds.value),
@@ -138,13 +157,13 @@ function handleSave() {
     aerialsAllowed: Boolean(aerialsAllowed.value),
     positionSwapRule: positionSwapRule.value,
     pointDistribution: pointDistribution.value,
-  };
+  }
 
-  emit('save', payload);
+  emit('save', payload)
 }
 
 function handleClose() {
-  emit('close');
+  emit('close')
 }
 </script>
 
@@ -156,15 +175,23 @@ function handleClose() {
   >
     <div
       role="dialog"
-      :aria-label="initialTemplate ? t('rules.modal.editAsNew', 'Edit Rule Template as New') : t('rules.modal.createTitle', 'Create Rule Template')"
+      :aria-label="
+        initialTemplate
+          ? t('rules.modal.editAsNew', 'Edit Rule Template as New')
+          : t('rules.modal.createTitle', 'Create Rule Template')
+      "
       class="bg-surface-container-low rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border-0"
-      style="border-width: 0px; border-bottom-width: 0px;"
+      style="border-width: 0px; border-bottom-width: 0px"
       data-testid="rule-template-modal"
     >
       <!-- Modal Header -->
       <div class="flex items-center justify-between p-4 bg-surface-container">
         <h2 class="text-lg font-bold text-on-surface">
-          {{ initialTemplate ? t('rules.modal.editAsNew', 'Edit Rule Template as New') : t('rules.modal.createTitle', 'Create Rule Template') }}
+          {{
+            initialTemplate
+              ? t('rules.modal.editAsNew', 'Edit Rule Template as New')
+              : t('rules.modal.createTitle', 'Create Rule Template')
+          }}
         </h2>
         <button
           type="button"
@@ -186,7 +213,10 @@ function handleClose() {
           </h3>
 
           <div>
-            <label for="template-name-input" class="block text-xs font-semibold text-on-surface mb-1">
+            <label
+              for="template-name-input"
+              class="block text-xs font-semibold text-on-surface mb-1"
+            >
               {{ t('rules.fields.name', 'Template Name') }} *
             </label>
             <input
@@ -209,7 +239,10 @@ function handleClose() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="goal-limit-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="goal-limit-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.goalLimit', 'Goal Limit') }} (1–100)
               </label>
               <input
@@ -224,7 +257,10 @@ function handleClose() {
             </div>
 
             <div>
-              <label for="game-limit-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="game-limit-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.gameLimit', 'Game Limit') }} (1–15)
               </label>
               <input
@@ -247,7 +283,10 @@ function handleClose() {
           </h3>
 
           <div class="flex items-center justify-between py-1">
-            <label for="win-by-two-checkbox" class="text-sm text-on-surface font-medium cursor-pointer">
+            <label
+              for="win-by-two-checkbox"
+              class="text-sm text-on-surface font-medium cursor-pointer"
+            >
               {{ t('rules.fields.winByTwo', 'Win by 2 Goals') }}
             </label>
             <input
@@ -260,7 +299,10 @@ function handleClose() {
           </div>
 
           <div v-if="winByTwo">
-            <label for="absolute-score-cap-input" class="block text-xs font-semibold text-on-surface mb-1">
+            <label
+              for="absolute-score-cap-input"
+              class="block text-xs font-semibold text-on-surface mb-1"
+            >
               {{ t('rules.fields.absoluteCap', 'Absolute Score Cap') }}
             </label>
             <input
@@ -277,7 +319,10 @@ function handleClose() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="timeouts-per-game-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="timeouts-per-game-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.timeouts', 'Timeouts / Game') }}
               </label>
               <input
@@ -292,7 +337,10 @@ function handleClose() {
             </div>
 
             <div>
-              <label for="timeout-duration-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="timeout-duration-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.timeoutDuration', 'Duration (s)') }}
               </label>
               <input
@@ -309,7 +357,10 @@ function handleClose() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="possession-5bar-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="possession-5bar-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.possession5Bar', '5-Bar Limit (s)') }}
               </label>
               <input
@@ -324,7 +375,10 @@ function handleClose() {
             </div>
 
             <div>
-              <label for="possession-other-input" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="possession-other-input"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.possessionOther', 'Other Rods (s)') }}
               </label>
               <input
@@ -348,7 +402,10 @@ function handleClose() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="side-swap-rule-select" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="side-swap-rule-select"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.sideSwap', 'Side Swap') }}
               </label>
               <select
@@ -364,7 +421,10 @@ function handleClose() {
             </div>
 
             <div>
-              <label for="restart-rule-select" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="restart-rule-select"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.restart', 'Restart Rule') }}
               </label>
               <select
@@ -381,7 +441,10 @@ function handleClose() {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="position-swap-rule-select" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="position-swap-rule-select"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.positionSwap', 'Position Swap') }}
               </label>
               <select
@@ -397,7 +460,10 @@ function handleClose() {
             </div>
 
             <div>
-              <label for="point-distribution-select" class="block text-xs font-semibold text-on-surface mb-1">
+              <label
+                for="point-distribution-select"
+                class="block text-xs font-semibold text-on-surface mb-1"
+              >
                 {{ t('rules.fields.points', 'Points Dist.') }}
               </label>
               <select
@@ -443,18 +509,10 @@ function handleClose() {
 
       <!-- Modal Footer Actions -->
       <div class="p-4 bg-surface-container flex gap-3 justify-end">
-        <BaseButton
-          variant="secondary"
-          @click="handleClose"
-          data-testid="cancel-template-button"
-        >
+        <BaseButton variant="secondary" @click="handleClose" data-testid="cancel-template-button">
           {{ t('common.cancel', 'Cancel') }}
         </BaseButton>
-        <BaseButton
-          variant="primary"
-          @click="handleSave"
-          data-testid="save-template-button"
-        >
+        <BaseButton variant="primary" @click="handleSave" data-testid="save-template-button">
           {{ t('rules.modal.saveButton', 'Save Template') }}
         </BaseButton>
       </div>

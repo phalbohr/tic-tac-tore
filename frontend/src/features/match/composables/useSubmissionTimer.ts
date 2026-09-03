@@ -8,10 +8,12 @@ export interface PendingSubmissionPayload {
 export enum SubmissionResult {
   SUCCESS = 'SUCCESS',
   CLIENT_ERROR = 'CLIENT_ERROR',
-  SERVER_OR_NETWORK_ERROR = 'SERVER_OR_NETWORK_ERROR'
+  SERVER_OR_NETWORK_ERROR = 'SERVER_OR_NETWORK_ERROR',
 }
 
-export function useSubmissionTimer(commitCallback: (payload: PendingSubmissionPayload) => Promise<SubmissionResult>) {
+export function useSubmissionTimer(
+  commitCallback: (payload: PendingSubmissionPayload) => Promise<SubmissionResult>,
+) {
   const countdown = ref<number>(15)
   const isPending = ref<boolean>(false)
   const isOfflinePending = ref<boolean>(false)
@@ -82,6 +84,6 @@ export function useSubmissionTimer(commitCallback: (payload: PendingSubmissionPa
     pendingSubmission,
     startTimer,
     cancelTimer,
-    clearTimer
+    clearTimer,
   }
 }

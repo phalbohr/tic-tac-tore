@@ -25,10 +25,7 @@ const outgoingList = computed(() => challengeStore.outgoingChallenges)
 
 onMounted(async () => {
   try {
-    await Promise.all([
-      challengeStore.fetchIncoming(),
-      challengeStore.fetchOutgoing(),
-    ])
+    await Promise.all([challengeStore.fetchIncoming(), challengeStore.fetchOutgoing()])
   } catch (err) {
     console.error('Failed to load challenges', err)
   }
@@ -41,7 +38,8 @@ async function handleAccept(challenge: ChallengeItem) {
     await challengeStore.acceptChallenge(challenge.id)
     emit('challengeAccepted', challenge)
   } catch (err: any) {
-    actionError.value = err.message || t('challenge.errors.acceptFailed', 'Failed to accept challenge')
+    actionError.value =
+      err.message || t('challenge.errors.acceptFailed', 'Failed to accept challenge')
   } finally {
     processingId.value = null
   }
@@ -54,7 +52,8 @@ async function handleDecline(challenge: ChallengeItem) {
     await challengeStore.declineChallenge(challenge.id)
     emit('challengeDeclined', challenge)
   } catch (err: any) {
-    actionError.value = err.message || t('challenge.errors.declineFailed', 'Failed to decline challenge')
+    actionError.value =
+      err.message || t('challenge.errors.declineFailed', 'Failed to decline challenge')
   } finally {
     processingId.value = null
   }
@@ -67,7 +66,8 @@ async function handleCancel(challenge: ChallengeItem) {
     await challengeStore.cancelChallenge(challenge.id)
     emit('challengeCancelled', challenge)
   } catch (err: any) {
-    actionError.value = err.message || t('challenge.errors.cancelFailed', 'Failed to cancel challenge')
+    actionError.value =
+      err.message || t('challenge.errors.cancelFailed', 'Failed to cancel challenge')
   } finally {
     processingId.value = null
   }
@@ -110,7 +110,7 @@ function formatTime(isoString: string): string {
             'px-3 py-1 rounded-lg text-xs font-headline font-bold transition-all cursor-pointer',
             activeTab === 'incoming'
               ? 'bg-primary text-background shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
+              : 'text-on-surface-variant hover:text-on-surface',
           ]"
         >
           {{ t('challenge.incomingTab', 'Incoming') }} ({{ incomingList.length }})
@@ -123,7 +123,7 @@ function formatTime(isoString: string): string {
             'px-3 py-1 rounded-lg text-xs font-headline font-bold transition-all cursor-pointer',
             activeTab === 'outgoing'
               ? 'bg-primary text-background shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
+              : 'text-on-surface-variant hover:text-on-surface',
           ]"
         >
           {{ t('challenge.outgoingTab', 'Sent') }} ({{ outgoingList.length }})
@@ -154,12 +154,21 @@ function formatTime(isoString: string): string {
       >
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0">
-              <AvatarBase :avatar="challenge.challengerAvatar" :name="challenge.challengerNickname" shape="circle" />
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0"
+            >
+              <AvatarBase
+                :avatar="challenge.challengerAvatar"
+                :name="challenge.challengerNickname"
+                shape="circle"
+              />
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-bold text-on-surface truncate" data-testid="challenger-name">
+                <span
+                  class="text-sm font-bold text-on-surface truncate"
+                  data-testid="challenger-name"
+                >
                   {{ challenge.challengerNickname }}
                 </span>
                 <span
@@ -183,7 +192,10 @@ function formatTime(isoString: string): string {
           </div>
         </div>
 
-        <div v-if="challenge.message" class="text-xs text-on-surface bg-surface-container-highest/50 p-2.5 rounded-xl italic">
+        <div
+          v-if="challenge.message"
+          class="text-xs text-on-surface bg-surface-container-highest/50 p-2.5 rounded-xl italic"
+        >
           "{{ challenge.message }}"
         </div>
 
@@ -230,7 +242,9 @@ function formatTime(isoString: string): string {
       >
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0"
+            >
               <AvatarBase
                 :avatar="challenge.targetPlayerAvatar"
                 :name="challenge.targetPlayerNickname || challenge.targetGroupName || 'Target'"
@@ -242,10 +256,14 @@ function formatTime(isoString: string): string {
                 <span class="text-sm font-bold text-on-surface truncate">
                   {{ challenge.targetPlayerNickname || challenge.targetGroupName }}
                 </span>
-                <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold font-headline">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold font-headline"
+                >
                   {{ challenge.matchType === 'TWO_VS_TWO' ? '2v2' : '1v1' }}
                 </span>
-                <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold"
+                >
                   {{ t('challenge.pending', 'Pending') }}
                 </span>
               </div>

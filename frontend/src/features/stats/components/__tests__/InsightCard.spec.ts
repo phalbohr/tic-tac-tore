@@ -20,7 +20,8 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'insights.winStreak.title': 'On a Roll!',
           'insights.winStreak.description': 'You are currently on a {streak}-match winning streak.',
           'insights.bestPartnership.title': 'Dynamic Duo',
-          'insights.bestPartnership.description': 'You and {partnerName} hold a stellar {winRate}% win rate across {matches} games.',
+          'insights.bestPartnership.description':
+            'You and {partnerName} hold a stellar {winRate}% win rate across {matches} games.',
           'insights.category.streak': 'Streak',
           'insights.category.partnership': 'Partnership',
           'insights.drillDown': 'View Details',
@@ -76,7 +77,9 @@ describe('[Story 7.5 ATDD] InsightCard.vue Component Tests', () => {
 
     expect(wrapper.find('[data-testid="insight-icon"]').text()).toContain('local_fire_department')
     expect(wrapper.find('[data-testid="insight-title"]').text()).toContain('On a Roll!')
-    expect(wrapper.find('[data-testid="insight-description"]').text()).toContain('You are currently on a 4-match winning streak.')
+    expect(wrapper.find('[data-testid="insight-description"]').text()).toContain(
+      'You are currently on a 4-match winning streak.',
+    )
     expect(wrapper.find('[data-testid="insight-category"]').text()).toContain('Streak')
     expect(wrapper.find('[data-testid="insight-drilldown-btn"]').exists()).toBe(false)
   })

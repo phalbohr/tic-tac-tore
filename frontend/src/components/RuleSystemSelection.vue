@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue';
+import { useRouter } from 'vue-router'
+import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
 
 defineOptions({
-  name: 'RuleSystemSelection'
-});
+  name: 'RuleSystemSelection',
+})
 
-const router = useRouter();
+const router = useRouter()
 
 function handleCancel() {
-  router.push('/');
+  router.push('/')
 }
 
 function handleComplete() {
-  router.push('/');
+  router.push('/')
 }
 </script>
 

@@ -28,11 +28,7 @@ const { t } = useI18n()
         </span>
       </div>
 
-      <BaseButton
-        variant="secondary"
-        @click="emit('dismiss')"
-        class="!h-10 px-4 text-xs font-bold"
-      >
+      <BaseButton variant="secondary" @click="emit('dismiss')" class="!h-10 px-4 text-xs font-bold">
         {{ t('common.close', 'Close') }}
       </BaseButton>
     </div>
@@ -42,7 +38,9 @@ const { t } = useI18n()
 <style scoped>
 .toast-slide-enter-active,
 .toast-slide-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .toast-slide-enter-from,

@@ -28,18 +28,20 @@ describe('usePendingMatches', () => {
   it('[P1] should populate partiallyConfirmedMatches when fetch includes PARTIALLY_CONFIRMED status', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        count: 2,
-        matches: [
-          { id: 'm1', status: 'PENDING_APPROVAL' },
-          { id: 'm2', status: 'PARTIALLY_CONFIRMED' },
-          { id: 'm3', status: 'PARTIALLY_CONFIRMED' }
-        ]
-      }),
+      json: () =>
+        Promise.resolve({
+          count: 2,
+          matches: [
+            { id: 'm1', status: 'PENDING_APPROVAL' },
+            { id: 'm2', status: 'PARTIALLY_CONFIRMED' },
+            { id: 'm3', status: 'PARTIALLY_CONFIRMED' },
+          ],
+        }),
     })
     vi.stubGlobal('fetch', mockFetch)
 
-    const { fetchPendingCount, partiallyConfirmedMatches, getPartiallyConfirmedCount } = usePendingMatches()
+    const { fetchPendingCount, partiallyConfirmedMatches, getPartiallyConfirmedCount } =
+      usePendingMatches()
     await fetchPendingCount()
 
     expect(partiallyConfirmedMatches.value).toHaveLength(2)
@@ -51,12 +53,13 @@ describe('usePendingMatches', () => {
     const futureExpiry = new Date(Date.now() + 3600_000).toISOString()
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        count: 1,
-        matches: [
-          { id: 'm-cooldown', status: 'PARTIALLY_CONFIRMED', cooldownExpiresAt: futureExpiry }
-        ]
-      }),
+      json: () =>
+        Promise.resolve({
+          count: 1,
+          matches: [
+            { id: 'm-cooldown', status: 'PARTIALLY_CONFIRMED', cooldownExpiresAt: futureExpiry },
+          ],
+        }),
     })
     vi.stubGlobal('fetch', mockFetch)
 
@@ -124,9 +127,9 @@ describe('usePendingMatches', () => {
       headers: {
         'Content-Type': 'application/json',
         'Idempotency-Key': '12345678-1234-4234-8234-1234567890ab',
-        'X-XSRF-TOKEN': 'test-csrf-token'
+        'X-XSRF-TOKEN': 'test-csrf-token',
       },
-      body: JSON.stringify({ reason: 'Wrong score', customReason: 'Detailed reason' })
+      body: JSON.stringify({ reason: 'Wrong score', customReason: 'Detailed reason' }),
     })
     document.cookie = 'XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
   })
@@ -142,7 +145,9 @@ describe('usePendingMatches', () => {
     const { rejectMatch } = usePendingMatches()
     const result1 = await rejectMatch('match-2', 'Wrong score')
     const result2 = await rejectMatch('match-2', 'Wrong score')
-    const rejectCalls = mockFetch.mock.calls.filter((call) => typeof call[0] === 'string' && call[0].includes('/reject'))
+    const rejectCalls = mockFetch.mock.calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].includes('/reject'),
+    )
     const opts1 = rejectCalls[0]?.[1] as { headers?: Record<string, string> } | undefined
     const opts2 = rejectCalls[1]?.[1] as { headers?: Record<string, string> } | undefined
     const key1 = opts1?.headers?.['Idempotency-Key']
@@ -158,7 +163,7 @@ describe('usePendingMatches', () => {
   it('should return error message when server responds with non-ok error payload or undefined if absent', async () => {
     const mockFetchWithError = vi.fn().mockResolvedValue({
       ok: false,
-      json: () => Promise.resolve({ message: 'Already processed' })
+      json: () => Promise.resolve({ message: 'Already processed' }),
     })
     vi.stubGlobal('fetch', mockFetchWithError)
 
@@ -169,7 +174,7 @@ describe('usePendingMatches', () => {
 
     const mockFetchWithoutMsg = vi.fn().mockResolvedValue({
       ok: false,
-      json: () => Promise.reject(new Error('SyntaxError'))
+      json: () => Promise.reject(new Error('SyntaxError')),
     })
     vi.stubGlobal('fetch', mockFetchWithoutMsg)
     const res2 = await rejectMatch('m2', 'Wrong score')
@@ -193,7 +198,7 @@ describe('usePendingMatches', () => {
     expect(result.data.status).toBe('CONFIRMED')
 
     const confirmCall = mockFetch.mock.calls.find(
-      (call) => typeof call[0] === 'string' && call[0].includes('/confirm')
+      (call) => typeof call[0] === 'string' && call[0].includes('/confirm'),
     )
     expect(confirmCall).toBeDefined()
     expect(confirmCall![0]).toBe('/api/v1/matches/match-1/confirm')

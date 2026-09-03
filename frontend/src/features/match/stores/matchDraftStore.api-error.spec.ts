@@ -5,7 +5,7 @@ import { useMatchDraftStore } from './matchDraftStore'
 describe('matchDraftStore API error handling', () => {
   let fetchMock: Mock
 
-  const originalFetch = globalThis.fetch;
+  const originalFetch = globalThis.fetch
   beforeEach(() => {
     setActivePinia(createPinia())
     fetchMock = vi.fn()
@@ -13,15 +13,15 @@ describe('matchDraftStore API error handling', () => {
   })
 
   afterEach(() => {
-    globalThis.fetch = originalFetch;
-    vi.restoreAllMocks();
-    vi.useRealTimers();
+    globalThis.fetch = originalFetch
+    vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   it('handles successful loadRuleConfig', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true })
+      json: async () => ({ scoreLimit: 5, gameLimit: 3, winsNeeded: 2, winByTwo: true }),
     })
     const store = useMatchDraftStore()
     await store.loadRuleConfig()
@@ -30,11 +30,16 @@ describe('matchDraftStore API error handling', () => {
 
   it('handles API error in loadRuleConfig by falling back to standard', async () => {
     fetchMock.mockResolvedValueOnce({
-      ok: false
+      ok: false,
     })
     const store = useMatchDraftStore()
     await store.loadRuleConfig()
-    expect(store.ruleConfig).toEqual({ scoreLimit: 10, gameLimit: 3, winsNeeded: 2, winByTwo: false })
+    expect(store.ruleConfig).toEqual({
+      scoreLimit: 10,
+      gameLimit: 3,
+      winsNeeded: 2,
+      winByTwo: false,
+    })
   })
 
   it('executes HTTP POST and resets store when 15 seconds timer expires', async () => {
@@ -56,9 +61,12 @@ describe('matchDraftStore API error handling', () => {
     await Promise.resolve()
     await Promise.resolve()
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/matches', expect.objectContaining({
-      method: 'POST'
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/matches',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    )
     expect(store.isPendingSubmission).toBe(false)
     expect(store.pendingSubmission).toBeNull()
   })
@@ -77,8 +85,8 @@ describe('matchDraftStore API error handling', () => {
       json: async () => ({
         code: 'RATE_LIMIT_EXCEEDED',
         message: 'Rate limit exceeded: too many match submissions. Please try again in 42 seconds.',
-        details: { retryAfter: 42 }
-      })
+        details: { retryAfter: 42 },
+      }),
     })
 
     vi.useFakeTimers()
@@ -88,9 +96,12 @@ describe('matchDraftStore API error handling', () => {
     vi.advanceTimersByTime(15000)
     await vi.runAllTimersAsync()
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/matches', expect.objectContaining({
-      method: 'POST'
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/matches',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    )
     expect(store.isPendingSubmission).toBe(false)
     expect(store.pendingSubmission).toBeNull()
   })
@@ -109,8 +120,8 @@ describe('matchDraftStore API error handling', () => {
       json: async () => ({
         code: 'RATE_LIMIT_EXCEEDED',
         message: 'Rate limit exceeded: too many match submissions. Please try again in 42 seconds.',
-        details: { retryAfter: 42 }
-      })
+        details: { retryAfter: 42 },
+      }),
     })
 
     vi.useFakeTimers()
@@ -139,8 +150,8 @@ describe('matchDraftStore API error handling', () => {
       json: async () => ({
         code: 'RATE_LIMIT_UNAVAILABLE',
         message: 'Redis unavailable during rate-limit check',
-        details: { retryAfter: 0 }
-      })
+        details: { retryAfter: 0 },
+      }),
     })
 
     vi.useFakeTimers()
@@ -168,8 +179,8 @@ describe('matchDraftStore API error handling', () => {
       json: async () => ({
         code: 'RATE_LIMIT_UNAVAILABLE',
         message: 'Redis unavailable during rate-limit check',
-        details: { retryAfter: 0 }
-      })
+        details: { retryAfter: 0 },
+      }),
     })
 
     vi.useFakeTimers()

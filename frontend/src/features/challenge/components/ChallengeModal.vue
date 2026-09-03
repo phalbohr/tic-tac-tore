@@ -39,7 +39,10 @@ function resetForm() {
   } else {
     matchType.value = 'ONE_VS_ONE'
   }
-  if (authStore.profile?.defaultRuleConfigurationId && ruleConfigs.value.some((r) => r.id === authStore.profile?.defaultRuleConfigurationId)) {
+  if (
+    authStore.profile?.defaultRuleConfigurationId &&
+    ruleConfigs.value.some((r) => r.id === authStore.profile?.defaultRuleConfigurationId)
+  ) {
     selectedRuleConfigId.value = authStore.profile.defaultRuleConfigurationId
   } else {
     selectedRuleConfigId.value = ''
@@ -50,7 +53,9 @@ async function loadRuleConfigs() {
   try {
     ruleConfigs.value = await getRuleConfigurations()
     if (authStore.profile?.defaultRuleConfigurationId) {
-      const exists = ruleConfigs.value.some((r) => r.id === authStore.profile?.defaultRuleConfigurationId)
+      const exists = ruleConfigs.value.some(
+        (r) => r.id === authStore.profile?.defaultRuleConfigurationId,
+      )
       if (exists) {
         selectedRuleConfigId.value = authStore.profile.defaultRuleConfigurationId
       }
@@ -73,7 +78,7 @@ watch(
     if (isOpen) {
       resetForm()
     }
-  }
+  },
 )
 
 function handleClose() {
@@ -138,26 +143,38 @@ async function handleSubmit() {
         <div class="p-3 bg-surface-container-highest/60 rounded-xl flex items-center gap-3">
           <template v-if="targetPlayer">
             <div class="w-10 h-10 rounded-full bg-surface-container-low overflow-hidden shrink-0">
-              <AvatarBase :avatar="targetPlayer.avatar" :name="targetPlayer.nickname" shape="circle" />
+              <AvatarBase
+                :avatar="targetPlayer.avatar"
+                :name="targetPlayer.nickname"
+                shape="circle"
+              />
             </div>
             <div class="min-w-0">
               <div class="text-xs text-on-surface-variant font-medium">
                 {{ t('challenge.challengingPlayer', 'Challenging player') }}
               </div>
-              <div class="text-sm font-bold text-on-surface truncate" data-testid="target-player-name">
+              <div
+                class="text-sm font-bold text-on-surface truncate"
+                data-testid="target-player-name"
+              >
                 {{ targetPlayer.nickname }}
               </div>
             </div>
           </template>
           <template v-else-if="targetGroup">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div
+              class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"
+            >
               <span class="material-symbols-outlined text-xl">groups</span>
             </div>
             <div class="min-w-0">
               <div class="text-xs text-on-surface-variant font-medium">
                 {{ t('challenge.challengingGroup', 'Challenging group') }}
               </div>
-              <div class="text-sm font-bold text-on-surface truncate" data-testid="target-group-name">
+              <div
+                class="text-sm font-bold text-on-surface truncate"
+                data-testid="target-group-name"
+              >
                 {{ targetGroup.name }}
               </div>
             </div>
@@ -166,7 +183,11 @@ async function handleSubmit() {
 
         <form @submit.prevent="handleSubmit" class="space-y-4 flex-grow overflow-y-auto pr-1">
           <!-- Error banner -->
-          <div v-if="error" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold" data-testid="challenge-error">
+          <div
+            v-if="error"
+            class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold"
+            data-testid="challenge-error"
+          >
             {{ error }}
           </div>
 
@@ -184,7 +205,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-xl font-headline text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5',
                   matchType === 'ONE_VS_ONE'
                     ? 'bg-primary text-background shadow-md'
-                    : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
+                    : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80',
                 ]"
               >
                 <span class="material-symbols-outlined text-sm">person</span>
@@ -198,7 +219,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-xl font-headline text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5',
                   matchType === 'TWO_VS_TWO'
                     ? 'bg-primary text-background shadow-md'
-                    : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
+                    : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80',
                 ]"
               >
                 <span class="material-symbols-outlined text-sm">group</span>
@@ -209,7 +230,10 @@ async function handleSubmit() {
 
           <!-- Rule Template Selector -->
           <div class="space-y-1.5">
-            <label for="challenge-rule-config" class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+            <label
+              for="challenge-rule-config"
+              class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+            >
               {{ t('challenge.ruleTemplateLabel', 'Rule Configuration (Optional)') }}
             </label>
             <select
@@ -218,7 +242,9 @@ async function handleSubmit() {
               data-testid="challenge-rule-select"
               class="w-full bg-surface-container-highest text-on-surface px-4 py-3 rounded-xl font-headline text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer"
             >
-              <option value="">{{ t('challenge.defaultRules', 'Default / Standard Rules') }}</option>
+              <option value="">
+                {{ t('challenge.defaultRules', 'Default / Standard Rules') }}
+              </option>
               <option v-for="rule in ruleConfigs" :key="rule.id" :value="rule.id">
                 {{ rule.name }} ({{ rule.goalLimit }} {{ t('match.goals', 'goals') }})
               </option>
@@ -228,7 +254,10 @@ async function handleSubmit() {
           <!-- Custom Message Input -->
           <div class="space-y-1.5">
             <div class="flex justify-between items-center">
-              <label for="challenge-message" class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+              <label
+                for="challenge-message"
+                class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+              >
                 {{ t('challenge.messageLabel', 'Message (Optional)') }}
               </label>
               <span class="text-[10px] text-on-surface-variant font-mono">
@@ -240,7 +269,9 @@ async function handleSubmit() {
               v-model="message"
               maxlength="255"
               rows="2"
-              :placeholder="t('challenge.messagePlaceholder', 'e.g. Ready for a rematch? Head to table 1!')"
+              :placeholder="
+                t('challenge.messagePlaceholder', 'e.g. Ready for a rematch? Head to table 1!')
+              "
               data-testid="challenge-message-input"
               class="w-full bg-surface-container-highest text-on-surface px-4 py-2.5 rounded-xl font-headline text-xs focus:outline-none focus:ring-2 focus:ring-primary transition-all placeholder:text-on-surface-variant/50 resize-none"
             />
@@ -255,7 +286,11 @@ async function handleSubmit() {
               class="flex-1 py-3 rounded-xl bg-primary text-background font-headline font-bold text-xs uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <span class="material-symbols-outlined text-sm">send</span>
-              <span>{{ isSubmitting ? t('common.sending', 'Sending...') : t('challenge.sendChallenge', 'Send Challenge') }}</span>
+              <span>{{
+                isSubmitting
+                  ? t('common.sending', 'Sending...')
+                  : t('challenge.sendChallenge', 'Send Challenge')
+              }}</span>
             </button>
             <button
               type="button"

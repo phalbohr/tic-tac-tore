@@ -36,7 +36,9 @@ export async function getPlayerGroups(): Promise<PlayerGroupResponse[]> {
   return res.json()
 }
 
-export async function createPlayerGroup(data: CreatePlayerGroupRequest): Promise<PlayerGroupResponse> {
+export async function createPlayerGroup(
+  data: CreatePlayerGroupRequest,
+): Promise<PlayerGroupResponse> {
   const res = await fetch('/api/v1/player-groups', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -49,7 +51,10 @@ export async function createPlayerGroup(data: CreatePlayerGroupRequest): Promise
   return res.json()
 }
 
-export async function updatePlayerGroup(id: string, data: UpdatePlayerGroupRequest): Promise<PlayerGroupResponse> {
+export async function updatePlayerGroup(
+  id: string,
+  data: UpdatePlayerGroupRequest,
+): Promise<PlayerGroupResponse> {
   const res = await fetch(`/api/v1/player-groups/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

@@ -51,15 +51,23 @@ export function mapApiMatchItem(m: ApiMatchItem): PendingMatchItem {
   const idToNickname = new Map<string, string>()
   const idToAvatar = new Map<string, string>()
 
-  if (m.teamAAttackerId && m.teamAAttackerNickname) idToNickname.set(m.teamAAttackerId, m.teamAAttackerNickname)
-  if (m.teamADefenderId && m.teamADefenderNickname) idToNickname.set(m.teamADefenderId, m.teamADefenderNickname)
-  if (m.teamBAttackerId && m.teamBAttackerNickname) idToNickname.set(m.teamBAttackerId, m.teamBAttackerNickname)
-  if (m.teamBDefenderId && m.teamBDefenderNickname) idToNickname.set(m.teamBDefenderId, m.teamBDefenderNickname)
+  if (m.teamAAttackerId && m.teamAAttackerNickname)
+    idToNickname.set(m.teamAAttackerId, m.teamAAttackerNickname)
+  if (m.teamADefenderId && m.teamADefenderNickname)
+    idToNickname.set(m.teamADefenderId, m.teamADefenderNickname)
+  if (m.teamBAttackerId && m.teamBAttackerNickname)
+    idToNickname.set(m.teamBAttackerId, m.teamBAttackerNickname)
+  if (m.teamBDefenderId && m.teamBDefenderNickname)
+    idToNickname.set(m.teamBDefenderId, m.teamBDefenderNickname)
 
-  if (m.teamAAttackerId && m.teamAAttackerAvatar) idToAvatar.set(m.teamAAttackerId, m.teamAAttackerAvatar)
-  if (m.teamADefenderId && m.teamADefenderAvatar) idToAvatar.set(m.teamADefenderId, m.teamADefenderAvatar)
-  if (m.teamBAttackerId && m.teamBAttackerAvatar) idToAvatar.set(m.teamBAttackerId, m.teamBAttackerAvatar)
-  if (m.teamBDefenderId && m.teamBDefenderAvatar) idToAvatar.set(m.teamBDefenderId, m.teamBDefenderAvatar)
+  if (m.teamAAttackerId && m.teamAAttackerAvatar)
+    idToAvatar.set(m.teamAAttackerId, m.teamAAttackerAvatar)
+  if (m.teamADefenderId && m.teamADefenderAvatar)
+    idToAvatar.set(m.teamADefenderId, m.teamADefenderAvatar)
+  if (m.teamBAttackerId && m.teamBAttackerAvatar)
+    idToAvatar.set(m.teamBAttackerId, m.teamBAttackerAvatar)
+  if (m.teamBDefenderId && m.teamBDefenderAvatar)
+    idToAvatar.set(m.teamBDefenderId, m.teamBDefenderAvatar)
 
   const games = (m.games || []).map((g) => {
     const aAttId = g.teamAAttackerId || m.teamAAttackerId
@@ -74,10 +82,18 @@ export function mapApiMatchItem(m: ApiMatchItem): PendingMatchItem {
       teamADefenderId: aDefId,
       teamBAttackerId: bAttId,
       teamBDefenderId: bDefId,
-      teamAAttackerNickname: aAttId ? idToNickname.get(aAttId) || m.teamAAttackerNickname : undefined,
-      teamADefenderNickname: aDefId ? idToNickname.get(aDefId) || m.teamADefenderNickname : undefined,
-      teamBAttackerNickname: bAttId ? idToNickname.get(bAttId) || m.teamBAttackerNickname : undefined,
-      teamBDefenderNickname: bDefId ? idToNickname.get(bDefId) || m.teamBDefenderNickname : undefined,
+      teamAAttackerNickname: aAttId
+        ? idToNickname.get(aAttId) || m.teamAAttackerNickname
+        : undefined,
+      teamADefenderNickname: aDefId
+        ? idToNickname.get(aDefId) || m.teamADefenderNickname
+        : undefined,
+      teamBAttackerNickname: bAttId
+        ? idToNickname.get(bAttId) || m.teamBAttackerNickname
+        : undefined,
+      teamBDefenderNickname: bDefId
+        ? idToNickname.get(bDefId) || m.teamBDefenderNickname
+        : undefined,
     }
   })
 
@@ -99,8 +115,8 @@ export function mapApiMatchItem(m: ApiMatchItem): PendingMatchItem {
     teamADefenderAvatar: m.teamADefenderAvatar,
     teamBAttackerAvatar: m.teamBAttackerAvatar,
     teamBDefenderAvatar: m.teamBDefenderAvatar,
-    teamANames: teamANames.length > 0 ? teamANames : (m.teamANames || undefined),
-    teamBNames: teamBNames.length > 0 ? teamBNames : (m.teamBNames || undefined),
+    teamANames: teamANames.length > 0 ? teamANames : m.teamANames || undefined,
+    teamBNames: teamBNames.length > 0 ? teamBNames : m.teamBNames || undefined,
     teamAScore: games[0]?.teamAScore ?? m.teamAScore,
     teamBScore: games[0]?.teamBScore ?? m.teamBScore,
     games: games.length > 0 ? games : undefined,

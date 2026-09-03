@@ -75,17 +75,29 @@ onMounted(async () => {
     <h2 class="text-on-surface font-headline font-bold text-xl">Leaderboard</h2>
 
     <div class="flex flex-wrap gap-2 w-full max-w-2xl">
-      <select v-model="filters.matchFormat" @change="setPage(0)" class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline">
+      <select
+        v-model="filters.matchFormat"
+        @change="setPage(0)"
+        class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline"
+      >
         <option value="">All Formats</option>
         <option value="STANDARD">Standard</option>
         <option value="RANDOM">Random</option>
       </select>
-      <select v-model="filters.matchType" @change="setPage(0)" class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline">
+      <select
+        v-model="filters.matchType"
+        @change="setPage(0)"
+        class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline"
+      >
         <option value="">All Types</option>
         <option value="1v1">1v1</option>
         <option value="2v2">2v2</option>
       </select>
-      <select v-model="filters.period" @change="setPage(0)" class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline">
+      <select
+        v-model="filters.period"
+        @change="setPage(0)"
+        class="bg-surface-container-low text-on-surface rounded-lg px-3 py-2 border border-outline"
+      >
         <option value="ALL_TIME">All Time</option>
         <option value="WEEKLY">Weekly</option>
         <option value="MONTHLY">Monthly</option>
@@ -119,8 +131,14 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(entry, index) in entries" :key="entry.playerId" class="border-b border-outline/30 hover:bg-surface-container-low/50">
-            <td class="py-3 px-3 font-bold text-primary">{{ currentPage * pageSize + index + 1 }}</td>
+          <tr
+            v-for="(entry, index) in entries"
+            :key="entry.playerId"
+            class="border-b border-outline/30 hover:bg-surface-container-low/50"
+          >
+            <td class="py-3 px-3 font-bold text-primary">
+              {{ currentPage * pageSize + index + 1 }}
+            </td>
             <td class="py-3 px-3 font-medium">{{ entry.playerName }}</td>
             <td class="py-3 px-3 text-right">{{ entry.totalMatches }}</td>
             <td class="py-3 px-3 text-right text-green-400">{{ entry.wins }}</td>
@@ -152,7 +170,9 @@ onMounted(async () => {
       >
         Previous
       </button>
-      <span class="text-on-surface-variant self-center">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <span class="text-on-surface-variant self-center"
+        >Page {{ currentPage + 1 }} of {{ totalPages }}</span
+      >
       <button
         :disabled="currentPage >= totalPages - 1"
         @click="setPage(currentPage + 1)"
@@ -163,9 +183,6 @@ onMounted(async () => {
     </div>
 
     <!-- Challenge Modal -->
-    <ChallengeModal
-      v-model="isChallengeModalOpen"
-      :target-player="selectedTargetPlayer"
-    />
+    <ChallengeModal v-model="isChallengeModalOpen" :target-player="selectedTargetPlayer" />
   </div>
 </template>

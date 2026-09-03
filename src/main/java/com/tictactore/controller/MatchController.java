@@ -41,7 +41,8 @@ public class MatchController {
                     request.teamBDefenderId(),
                     request.games(),
                     request.entryMode(),
-                    request.matchFormat()
+                    request.matchFormat(),
+                    request.tournamentMatchId()
             );
         }
 

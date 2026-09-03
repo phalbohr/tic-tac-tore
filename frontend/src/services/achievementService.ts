@@ -19,7 +19,9 @@ export interface PlayerAchievementsSummaryResponse {
   achievements: AchievementDto[]
 }
 
-export async function getPlayerAchievements(playerId: string): Promise<PlayerAchievementsSummaryResponse> {
+export async function getPlayerAchievements(
+  playerId: string,
+): Promise<PlayerAchievementsSummaryResponse> {
   const res = await fetch(`/api/v1/players/${playerId}/achievements`, {
     headers: { Accept: 'application/json' },
   })

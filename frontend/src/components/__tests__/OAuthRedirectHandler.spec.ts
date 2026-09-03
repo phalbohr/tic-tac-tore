@@ -16,7 +16,7 @@ vi.mock('vue-router', async () => {
   return {
     ...actual,
     useRoute: () => ({
-      query: { }, // Security: JWT Leaked in URL - Token removed from query
+      query: {}, // Security: JWT Leaked in URL - Token removed from query
     }),
     useRouter: () => ({ push: mockPush }),
   }

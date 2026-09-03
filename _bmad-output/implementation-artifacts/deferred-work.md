@@ -466,3 +466,7 @@ status: open
 
 ## Deferred from: code review (2026-09-02)
 - Missing notification to opposing team of stub assignment
+
+## Deferred from: code review of 8-5-asynchronous-tournament-match-execution.md (2026-09-03)
+- Tournament status completion check on final match conclusion [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:197] — deferred, pre-existing
+- Optimistic locking retry mechanism for concurrent feeder completion in Cup bracket [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:238] — deferred, pre-existing

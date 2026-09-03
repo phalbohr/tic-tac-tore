@@ -1,71 +1,71 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth';
-import { useRuleConfigStore } from '@/stores/useRuleConfigStore';
-import { useMatchDraftStore } from '../stores/matchDraftStore';
-import type { CreateRuleConfigRequest } from '@/services/ruleConfigService';
-import RuleTemplateModal from './RuleTemplateModal.vue';
+import { ref, computed, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
+import { useRuleConfigStore } from '@/stores/useRuleConfigStore'
+import { useMatchDraftStore } from '../stores/matchDraftStore'
+import type { CreateRuleConfigRequest } from '@/services/ruleConfigService'
+import RuleTemplateModal from './RuleTemplateModal.vue'
 
 defineOptions({
   name: 'RulePicker',
-});
+})
 
-const { t } = useI18n();
-const authStore = useAuthStore();
-const ruleStore = useRuleConfigStore();
-const draftStore = useMatchDraftStore();
+const { t } = useI18n()
+const authStore = useAuthStore()
+const ruleStore = useRuleConfigStore()
+const draftStore = useMatchDraftStore()
 
 const selectedRuleId = ref<string | null>(
-  ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null
-);
-const isModalOpen = ref(false);
-const modalError = ref('');
+  ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null,
+)
+const isModalOpen = ref(false)
+const modalError = ref('')
 
 watch(
   () => authStore.profile?.defaultRuleConfigurationId,
   (newDef) => {
     if (newDef && !selectedRuleId.value) {
-      const defaultRule = ruleStore.allRules.find((r) => r.id === newDef);
+      const defaultRule = ruleStore.allRules.find((r) => r.id === newDef)
       if (defaultRule) {
-        selectRule(defaultRule.id, defaultRule.name);
+        selectRule(defaultRule.id, defaultRule.name)
       }
     }
-  }
-);
+  },
+)
 
 onMounted(async () => {
   if (ruleStore.allRules.length === 0) {
     try {
-      await ruleStore.fetchAllRules();
+      await ruleStore.fetchAllRules()
     } catch {
       // ignore
     }
   }
   if (!selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
     const defaultRule = ruleStore.allRules.find(
-      (r) => r.id === authStore.profile?.defaultRuleConfigurationId
-    );
+      (r) => r.id === authStore.profile?.defaultRuleConfigurationId,
+    )
     if (defaultRule) {
-      selectRule(defaultRule.id, defaultRule.name);
+      selectRule(defaultRule.id, defaultRule.name)
     }
   }
-});
+})
 
 const selectedRule = computed(() => {
   if (selectedRuleId.value) {
-    const found = ruleStore.allRules.find((r) => r.id === selectedRuleId.value);
-    if (found) return found;
+    const found = ruleStore.allRules.find((r) => r.id === selectedRuleId.value)
+    if (found) return found
   }
   return (
     ruleStore.allRules.find(
       (r) =>
         ruleStore.selectedRuleId === r.id ||
         draftStore.ruleSystem?.toUpperCase() === r.name?.toUpperCase() ||
-        draftStore.ruleSystem === r.id
+        draftStore.ruleSystem === r.id,
     ) || null
-  );
-});
+  )
+})
 
 function isSelected(rule: { id: string; name: string }) {
   return (
@@ -73,37 +73,37 @@ function isSelected(rule: { id: string; name: string }) {
     ruleStore.selectedRuleId === rule.id ||
     draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase() ||
     draftStore.ruleSystem === rule.id
-  );
+  )
 }
 
 function openModal() {
-  modalError.value = '';
-  isModalOpen.value = true;
+  modalError.value = ''
+  isModalOpen.value = true
 }
 
 function selectRule(ruleId: string, ruleName: string) {
-  selectedRuleId.value = ruleId;
-  ruleStore.selectRule(ruleId);
-  draftStore.ruleSystem = ruleName;
-  draftStore.loadRuleConfig();
+  selectedRuleId.value = ruleId
+  ruleStore.selectRule(ruleId)
+  draftStore.ruleSystem = ruleName
+  draftStore.loadRuleConfig()
 }
 
 async function handleSetAsDefault(ruleId: string) {
   try {
-    await authStore.updateProfile({ defaultRuleConfigurationId: ruleId });
+    await authStore.updateProfile({ defaultRuleConfigurationId: ruleId })
   } catch (error) {
-    console.error('Failed to set default rule', error);
+    console.error('Failed to set default rule', error)
   }
 }
 
 async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
-  modalError.value = '';
+  modalError.value = ''
   try {
-    const created = await ruleStore.createCustomRule(payload);
-    isModalOpen.value = false;
-    selectRule(created.id, created.name);
+    const created = await ruleStore.createCustomRule(payload)
+    isModalOpen.value = false
+    selectRule(created.id, created.name)
   } catch (err: unknown) {
-    modalError.value = err instanceof Error ? err.message : t('common.error', 'An error occurred');
+    modalError.value = err instanceof Error ? err.message : t('common.error', 'An error occurred')
   }
 }
 </script>
@@ -153,7 +153,7 @@ async function handleSaveCustomRule(payload: CreateRuleConfigRequest) {
         :class="[
           isSelected(rule)
             ? 'bg-primary text-background shadow-md active'
-            : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80'
+            : 'bg-surface-container-highest text-on-surface hover:bg-surface-container-highest/80',
         ]"
         :data-testid="`rule-chip-${rule.id}`"
       >

@@ -1,78 +1,81 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { usePoolStore } from '../stores/poolStore';
-import type { MatchType, StartCondition, SkillLevel, PoolResponse } from '../types/pool';
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePoolStore } from '../stores/poolStore'
+import type { MatchType, StartCondition, SkillLevel, PoolResponse } from '../types/pool'
 
 interface Props {
-  isOpen: boolean;
+  isOpen: boolean
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'created', pool: PoolResponse): void;
-}>();
+  (e: 'close'): void
+  (e: 'created', pool: PoolResponse): void
+}>()
 
-const { t } = useI18n();
-const poolStore = usePoolStore();
+const { t } = useI18n()
+const poolStore = usePoolStore()
 
-const matchType = ref<MatchType>('ONE_VS_ONE');
-const startCondition = ref<StartCondition>('FILL_BASED');
-const scheduledTime = ref<string>('');
-const skillLevel = ref<SkillLevel>('OPEN_FOR_ALL');
-const errorMessage = ref<string | null>(null);
-const isSubmitting = ref(false);
+const matchType = ref<MatchType>('ONE_VS_ONE')
+const startCondition = ref<StartCondition>('FILL_BASED')
+const scheduledTime = ref<string>('')
+const skillLevel = ref<SkillLevel>('OPEN_FOR_ALL')
+const errorMessage = ref<string | null>(null)
+const isSubmitting = ref(false)
 
 watch(
   () => props.isOpen,
   (open) => {
     if (open) {
-      matchType.value = 'ONE_VS_ONE';
-      startCondition.value = 'FILL_BASED';
-      scheduledTime.value = '';
-      skillLevel.value = 'OPEN_FOR_ALL';
-      errorMessage.value = null;
-      isSubmitting.value = false;
+      matchType.value = 'ONE_VS_ONE'
+      startCondition.value = 'FILL_BASED'
+      scheduledTime.value = ''
+      skillLevel.value = 'OPEN_FOR_ALL'
+      errorMessage.value = null
+      isSubmitting.value = false
     }
-  }
-);
+  },
+)
 
 function handleClose() {
-  emit('close');
+  emit('close')
 }
 
 async function handleSubmit() {
-  errorMessage.value = null;
-  let isoScheduledTime: string | null = null;
+  errorMessage.value = null
+  let isoScheduledTime: string | null = null
 
   if (startCondition.value === 'SCHEDULED_TIME') {
     if (!scheduledTime.value) {
-      errorMessage.value = t('pool.scheduledTimeRequired', 'Scheduled time is required for scheduled pools');
-      return;
+      errorMessage.value = t(
+        'pool.scheduledTimeRequired',
+        'Scheduled time is required for scheduled pools',
+      )
+      return
     }
-    const parsedDate = new Date(scheduledTime.value);
+    const parsedDate = new Date(scheduledTime.value)
     if (isNaN(parsedDate.getTime())) {
-      errorMessage.value = t('pool.invalidDate', 'Invalid scheduled date format');
-      return;
+      errorMessage.value = t('pool.invalidDate', 'Invalid scheduled date format')
+      return
     }
-    isoScheduledTime = parsedDate.toISOString();
+    isoScheduledTime = parsedDate.toISOString()
   }
 
-  isSubmitting.value = true;
+  isSubmitting.value = true
   try {
     const created = await poolStore.createPool({
       matchType: matchType.value,
       startCondition: startCondition.value,
       scheduledTime: isoScheduledTime,
       skillLevel: skillLevel.value,
-    });
-    emit('created', created);
-    emit('close');
+    })
+    emit('created', created)
+    emit('close')
   } catch (err: any) {
-    errorMessage.value = err.message || t('common.error', 'Something went wrong');
+    errorMessage.value = err.message || t('common.error', 'Something went wrong')
   } finally {
-    isSubmitting.value = false;
+    isSubmitting.value = false
   }
 }
 </script>
@@ -105,7 +108,11 @@ async function handleSubmit() {
         </div>
 
         <form @submit.prevent="handleSubmit" class="space-y-5 flex-grow overflow-y-auto pr-1">
-          <div v-if="errorMessage" data-test="error-banner" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold">
+          <div
+            v-if="errorMessage"
+            data-test="error-banner"
+            class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold"
+          >
             {{ errorMessage }}
           </div>
 
@@ -122,7 +129,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-lg font-headline text-xs font-bold transition-all cursor-pointer text-center',
                   matchType === 'ONE_VS_ONE'
                     ? 'active bg-primary text-background shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    : 'text-on-surface-variant hover:text-on-surface',
                 ]"
                 @click="matchType = 'ONE_VS_ONE'"
               >
@@ -135,7 +142,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-lg font-headline text-xs font-bold transition-all cursor-pointer text-center',
                   matchType === 'TWO_VS_TWO'
                     ? 'active bg-primary text-background shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    : 'text-on-surface-variant hover:text-on-surface',
                 ]"
                 @click="matchType = 'TWO_VS_TWO'"
               >
@@ -157,7 +164,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-lg font-headline text-xs font-bold transition-all cursor-pointer text-center',
                   startCondition === 'FILL_BASED'
                     ? 'active bg-primary text-background shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    : 'text-on-surface-variant hover:text-on-surface',
                 ]"
                 @click="startCondition = 'FILL_BASED'"
               >
@@ -170,7 +177,7 @@ async function handleSubmit() {
                   'py-2.5 rounded-lg font-headline text-xs font-bold transition-all cursor-pointer text-center',
                   startCondition === 'SCHEDULED_TIME'
                     ? 'active bg-primary text-background shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    : 'text-on-surface-variant hover:text-on-surface',
                 ]"
                 @click="startCondition = 'SCHEDULED_TIME'"
               >
@@ -181,7 +188,10 @@ async function handleSubmit() {
 
           <!-- DateTime Picker for Scheduled Pool -->
           <div v-if="startCondition === 'SCHEDULED_TIME'" class="space-y-2">
-            <label for="scheduled-time" class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+            <label
+              for="scheduled-time"
+              class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+            >
               {{ t('pool.scheduledTimeLabel', 'Start Date & Time') }}
             </label>
             <input
@@ -196,7 +206,10 @@ async function handleSubmit() {
 
           <!-- Skill Level Selector -->
           <div class="space-y-2">
-            <label for="skill-level" class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80">
+            <label
+              for="skill-level"
+              class="font-headline text-xs font-bold uppercase tracking-wider text-primary/80"
+            >
               {{ t('pool.skillLevel', 'Skill Level Filter') }}
             </label>
             <select
@@ -207,7 +220,9 @@ async function handleSubmit() {
             >
               <option value="OPEN_FOR_ALL">{{ t('pool.skillOpenForAll', 'Open for All') }}</option>
               <option value="BEGINNER">{{ t('pool.skillBeginner', 'Beginner') }}</option>
-              <option value="INTERMEDIATE">{{ t('pool.skillIntermediate', 'Intermediate') }}</option>
+              <option value="INTERMEDIATE">
+                {{ t('pool.skillIntermediate', 'Intermediate') }}
+              </option>
               <option value="ADVANCED">{{ t('pool.skillAdvanced', 'Advanced') }}</option>
             </select>
           </div>
@@ -221,7 +236,11 @@ async function handleSubmit() {
               @click="handleSubmit"
               class="flex-1 py-3 rounded-xl bg-primary text-background font-headline font-bold text-xs uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
             >
-              <span>{{ isSubmitting ? t('common.loading', 'Loading...') : t('pool.createPool', 'Create Pool') }}</span>
+              <span>{{
+                isSubmitting
+                  ? t('common.loading', 'Loading...')
+                  : t('pool.createPool', 'Create Pool')
+              }}</span>
             </button>
             <button
               type="button"

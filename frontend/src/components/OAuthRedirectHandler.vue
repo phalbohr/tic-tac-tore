@@ -11,7 +11,7 @@ const authStore = useAuthStore()
 onMounted(() => {
   // Security: JWT Leaked in URL - Removed token extraction from URL parameters.
   // The backend now sets the JWT in an HttpOnly cookie during the redirect.
-  
+
   // We assume the cookie is set if we reached this handler via the OAuth2 flow.
   authStore.setAuthenticated(true)
 
@@ -21,7 +21,9 @@ onMounted(() => {
     if (!intentUrl.startsWith('/')) intentUrl = '/'
     if (intentUrl === router.currentRoute.value.path) intentUrl = '/'
     sessionStorage.removeItem('intent_url')
-  } catch { console.warn('sessionStorage disabled') }
+  } catch {
+    console.warn('sessionStorage disabled')
+  }
 
   router.push(intentUrl || '/')
 })

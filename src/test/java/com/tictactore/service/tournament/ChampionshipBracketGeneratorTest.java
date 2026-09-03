@@ -51,10 +51,8 @@ class ChampionshipBracketGeneratorTest {
         assertThat(round2Matches).isEqualTo(2);
         assertThat(round3Matches).isEqualTo(2);
 
-        assertThat(matches.stream().filter(m -> m.getRound() == 1))
+        assertThat(matches.stream())
                 .allMatch(m -> m.getStatus() == TournamentMatchStatus.READY);
-        assertThat(matches.stream().filter(m -> m.getRound() > 1))
-                .allMatch(m -> m.getStatus() == TournamentMatchStatus.PENDING);
     }
 
     @Test

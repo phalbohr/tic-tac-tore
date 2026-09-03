@@ -1,8 +1,12 @@
 <template>
-  <div class="min-h-screen bg-surface text-on-surface p-6 flex flex-col items-center justify-center text-center">
+  <div
+    class="min-h-screen bg-surface text-on-surface p-6 flex flex-col items-center justify-center text-center"
+  >
     <div class="max-w-md w-full bg-surface-container-highest p-6 rounded-2xl shadow-lg space-y-4">
       <div v-if="isProcessed" class="space-y-2">
-        <div class="w-16 h-16 bg-success-container text-on-success-container rounded-full mx-auto flex items-center justify-center text-2xl font-bold">
+        <div
+          class="w-16 h-16 bg-success-container text-on-success-container rounded-full mx-auto flex items-center justify-center text-2xl font-bold"
+        >
           ✓
         </div>
         <h1 class="text-xl font-bold">Match Processed</h1>

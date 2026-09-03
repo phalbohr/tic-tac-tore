@@ -1,88 +1,89 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { usePoolStore } from '../stores/poolStore';
-import { useAuthStore } from '@/stores/auth';
-import AvatarBase from '@/components/AvatarBase.vue';
-import BaseButton from '@/core/components/BaseButton.vue';
-import type { PoolResponse, SkillLevel } from '../types/pool';
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePoolStore } from '../stores/poolStore'
+import { useAuthStore } from '@/stores/auth'
+import AvatarBase from '@/components/AvatarBase.vue'
+import BaseButton from '@/core/components/BaseButton.vue'
+import type { PoolResponse, SkillLevel } from '../types/pool'
 
 const emit = defineEmits<{
-  (e: 'joined', pool: PoolResponse): void;
-}>();
+  (e: 'joined', pool: PoolResponse): void
+}>()
 
-const { t, locale } = useI18n();
-const poolStore = usePoolStore();
-const authStore = useAuthStore();
+const { t, locale } = useI18n()
+const poolStore = usePoolStore()
+const authStore = useAuthStore()
 
-const joiningPoolId = ref<string | null>(null);
-const initialLoading = ref(true);
-const fetchError = ref<string | null>(null);
-const joinError = ref<string | null>(null);
+const joiningPoolId = ref<string | null>(null)
+const initialLoading = ref(true)
+const fetchError = ref<string | null>(null)
+const joinError = ref<string | null>(null)
 
 async function loadPools() {
-  fetchError.value = null;
+  fetchError.value = null
   try {
-    await poolStore.fetchActivePools();
+    await poolStore.fetchActivePools()
   } catch (err: any) {
-    fetchError.value = err?.message || poolStore.error || t('pool.fetchFailed', 'Failed to load matchmaking pools');
+    fetchError.value =
+      err?.message || poolStore.error || t('pool.fetchFailed', 'Failed to load matchmaking pools')
   } finally {
-    initialLoading.value = false;
+    initialLoading.value = false
   }
 }
 
 onMounted(() => {
-  loadPools();
-});
+  loadPools()
+})
 
 function isUserParticipant(pool: PoolResponse): boolean {
-  if (!authStore.profile?.id) return false;
-  return pool.participants.some((p) => p.userId === authStore.profile?.id);
+  if (!authStore.profile?.id) return false
+  return pool.participants.some((p) => p.userId === authStore.profile?.id)
 }
 
 function getHostParticipant(pool: PoolResponse) {
-  return pool.participants.find((p) => p.role === 'HOST') || pool.participants[0];
+  return pool.participants.find((p) => p.role === 'HOST') || pool.participants[0]
 }
 
 function formatScheduledTime(dateStr?: string | null): string {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return dateStr;
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
   return date.toLocaleString(locale.value, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  })
 }
 
 function getSkillLevelLabel(skill: SkillLevel): string {
   switch (skill) {
     case 'BEGINNER':
-      return t('pool.skillBeginner', 'Beginner');
+      return t('pool.skillBeginner', 'Beginner')
     case 'INTERMEDIATE':
-      return t('pool.skillIntermediate', 'Intermediate');
+      return t('pool.skillIntermediate', 'Intermediate')
     case 'ADVANCED':
-      return t('pool.skillAdvanced', 'Advanced');
+      return t('pool.skillAdvanced', 'Advanced')
     case 'OPEN_FOR_ALL':
     default:
-      return t('pool.skillOpenForAll', 'Open for All');
+      return t('pool.skillOpenForAll', 'Open for All')
   }
 }
 
 async function handleJoin(poolId: string) {
   if (joiningPoolId.value || poolStore.isLoading) {
-    return;
+    return
   }
-  joiningPoolId.value = poolId;
-  joinError.value = null;
+  joiningPoolId.value = poolId
+  joinError.value = null
   try {
-    const updated = await poolStore.joinPool(poolId);
-    emit('joined', updated);
+    const updated = await poolStore.joinPool(poolId)
+    emit('joined', updated)
   } catch (e: any) {
-    joinError.value = e?.message || poolStore.error || t('pool.joinFailed', 'Failed to join pool');
+    joinError.value = e?.message || poolStore.error || t('pool.joinFailed', 'Failed to join pool')
   } finally {
-    joiningPoolId.value = null;
+    joiningPoolId.value = null
   }
 }
 </script>
@@ -151,7 +152,9 @@ async function handleJoin(poolId: string) {
       class="w-full bg-surface-container-low rounded-2xl p-6 text-center shadow-sm flex flex-col items-center gap-2"
       data-testid="empty-pools-state"
     >
-      <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-xl mb-1">
+      <div
+        class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-xl mb-1"
+      >
         ⚽
       </div>
       <p class="text-sm text-on-surface-variant font-medium">
@@ -170,7 +173,9 @@ async function handleJoin(poolId: string) {
         <!-- Header: Creator Info & Format / Skill Badges -->
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl overflow-hidden bg-surface-container-high flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-xl overflow-hidden bg-surface-container-high flex-shrink-0"
+            >
               <AvatarBase
                 :avatar="getHostParticipant(pool)?.avatar"
                 :name="pool.creatorNickname"
@@ -182,17 +187,25 @@ async function handleJoin(poolId: string) {
                 {{ pool.creatorNickname }}
               </span>
               <span class="text-xs text-on-surface-variant">
-                {{ pool.startCondition === 'FILL_BASED' ? t('pool.fillBased', 'Immediate') : formatScheduledTime(pool.scheduledTime) }}
+                {{
+                  pool.startCondition === 'FILL_BASED'
+                    ? t('pool.fillBased', 'Immediate')
+                    : formatScheduledTime(pool.scheduledTime)
+                }}
               </span>
             </div>
           </div>
 
           <!-- Format & Skill Badges -->
           <div class="flex items-center gap-1.5 flex-wrap justify-end">
-            <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-secondary-container text-on-secondary-container">
+            <span
+              class="px-2 py-0.5 rounded-lg text-xs font-bold bg-secondary-container text-on-secondary-container"
+            >
               {{ pool.matchType === 'ONE_VS_ONE' ? '1v1' : '2v2' }}
             </span>
-            <span class="px-2 py-0.5 rounded-lg text-xs font-medium bg-surface-container-high text-on-surface-variant">
+            <span
+              class="px-2 py-0.5 rounded-lg text-xs font-medium bg-surface-container-high text-on-surface-variant"
+            >
               {{ getSkillLevelLabel(pool.skillLevel) }}
             </span>
           </div>

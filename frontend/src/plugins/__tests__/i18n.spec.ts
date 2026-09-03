@@ -14,7 +14,11 @@ describe('detectLocale() — AC4', () => {
 
   // Task 7.1 — AC4: browser language prefix 'de' from 'de-AT'
   it('[P1]returns "de" when navigator.language is "de-AT"', () => {
-    vi.stubGlobal('localStorage', { getItem: vi.fn().mockReturnValue(null), setItem: vi.fn(), removeItem: vi.fn() })
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn().mockReturnValue(null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
     vi.stubGlobal('navigator', { language: 'de-AT' })
 
     expect(detectLocale()).toBe('de')
@@ -22,7 +26,11 @@ describe('detectLocale() — AC4', () => {
 
   // Task 7.2 — AC4: unsupported locale falls back to 'en'
   it('[P1]returns "en" for unsupported browser locale "fr-FR"', () => {
-    vi.stubGlobal('localStorage', { getItem: vi.fn().mockReturnValue(null), setItem: vi.fn(), removeItem: vi.fn() })
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn().mockReturnValue(null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
     vi.stubGlobal('navigator', { language: 'fr-FR' })
 
     expect(detectLocale()).toBe('en')
@@ -30,7 +38,11 @@ describe('detectLocale() — AC4', () => {
 
   // Task 7.3 — AC3/AC4: localStorage value takes precedence over browser language
   it('[P1]returns stored locale from localStorage when key ttt_locale is present', () => {
-    vi.stubGlobal('localStorage', { getItem: vi.fn().mockReturnValue('de'), setItem: vi.fn(), removeItem: vi.fn() })
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn().mockReturnValue('de'),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
     vi.stubGlobal('navigator', { language: 'en-US' })
 
     expect(detectLocale()).toBe('de')
@@ -39,7 +51,9 @@ describe('detectLocale() — AC4', () => {
   // Task 7.7 — fail-closed: localStorage.getItem throws → return 'en'
   it('[P1]returns "en" when localStorage.getItem throws (fail-closed / SSR context)', () => {
     vi.stubGlobal('localStorage', {
-      getItem: vi.fn().mockImplementation(() => { throw new Error('localStorage blocked') }),
+      getItem: vi.fn().mockImplementation(() => {
+        throw new Error('localStorage blocked')
+      }),
       setItem: vi.fn(),
       removeItem: vi.fn(),
     })
@@ -50,7 +64,11 @@ describe('detectLocale() — AC4', () => {
 
   // Edge case: invalid stored value rejected, falls back to browser language
   it('[P1]ignores invalid stored locale and falls back to browser language', () => {
-    vi.stubGlobal('localStorage', { getItem: vi.fn().mockReturnValue('zh'), setItem: vi.fn(), removeItem: vi.fn() })
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn().mockReturnValue('zh'),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
     vi.stubGlobal('navigator', { language: 'de' })
 
     expect(detectLocale()).toBe('de')

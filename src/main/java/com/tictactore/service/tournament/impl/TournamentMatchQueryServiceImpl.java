@@ -9,6 +9,7 @@ import com.tictactore.model.RegistrationStatus;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentFormat;
 import com.tictactore.model.TournamentMatch;
+import com.tictactore.model.TournamentMatchStatus;
 import com.tictactore.model.TournamentRegistration;
 import com.tictactore.repository.TournamentMatchRepository;
 import com.tictactore.repository.TournamentRegistrationRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +50,15 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 registrationRepository.findByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED);
 
         Map<UUID, TournamentRegistrationResponse> registrationMap = registrations.stream()
-                .collect(Collectors.toMap(TournamentRegistration::getId, this::mapToRegistrationResponse, (a, b) -> a, java.util.HashMap::new));
+                .collect(Collectors.toMap(TournamentRegistration::getId, this::mapToRegistrationResponse, (a, b) -> a, HashMap::new));
 
         List<TournamentRegistrationResponse> seededParticipants = registrations.stream()
                 .filter(r -> r.getSeed() != null)
                 .sorted(Comparator.comparingInt(TournamentRegistration::getSeed))
                 .map(r -> registrationMap.get(r.getId()))
                 .toList();
+
+        Map<UUID, String> busyParticipantMap = buildBusyParticipantMap(tournamentId);
 
         Map<Integer, List<TournamentMatch>> matchesByRound = allMatches.stream()
                 .collect(Collectors.groupingBy(TournamentMatch::getRound, LinkedHashMap::new, Collectors.toList()));
@@ -65,7 +69,7 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         for (Map.Entry<Integer, List<TournamentMatch>> entry : matchesByRound.entrySet()) {
             int roundNumber = entry.getKey();
             List<TournamentMatchResponse> matchResponses = entry.getValue().stream()
-                    .map(m -> mapToMatchResponse(m, registrationMap))
+                    .map(m -> mapToMatchResponse(m, registrationMap, busyParticipantMap))
                     .toList();
 
             String roundName = resolveRoundName(roundNumber, totalRounds, tournament.getFormat());
@@ -98,8 +102,40 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 ? tournamentMatchRepository.findByTournamentIdAndRoundOrderByMatchOrderAsc(tournamentId, round)
                 : tournamentMatchRepository.findByTournamentIdOrderByRoundAscMatchOrderAsc(tournamentId);
 
-        Map<UUID, TournamentRegistrationResponse> registrationMap = new java.util.HashMap<>();
-        return matches.stream().map(m -> mapToMatchResponse(m, registrationMap)).toList();
+        Map<UUID, TournamentRegistrationResponse> registrationMap = new HashMap<>();
+        Map<UUID, String> busyParticipantMap = buildBusyParticipantMap(tournamentId);
+
+        return matches.stream()
+                .map(m -> mapToMatchResponse(m, registrationMap, busyParticipantMap))
+                .toList();
+    }
+
+    private Map<UUID, String> buildBusyParticipantMap(UUID tournamentId) {
+        List<TournamentMatch> activeMatches =
+                tournamentMatchRepository.findByTournamentIdAndStatus(tournamentId, TournamentMatchStatus.IN_PROGRESS);
+        Map<UUID, String> busyMap = new HashMap<>();
+        for (TournamentMatch activeMatch : activeMatches) {
+            addBusyRegistration(busyMap, activeMatch.getParticipant1());
+            addBusyRegistration(busyMap, activeMatch.getParticipant1Partner());
+            addBusyRegistration(busyMap, activeMatch.getParticipant2());
+            addBusyRegistration(busyMap, activeMatch.getParticipant2Partner());
+        }
+        return busyMap;
+    }
+
+    private void addBusyRegistration(Map<UUID, String> busyMap, TournamentRegistration reg) {
+        if (reg != null) {
+            if (reg.getId() != null) {
+                String nickname = (reg.getPlayer() != null && reg.getPlayer().getNickname() != null)
+                        ? reg.getPlayer().getNickname()
+                        : "Player";
+                busyMap.put(reg.getId(), nickname);
+            }
+            if (reg.getPartner() != null && reg.getPartner().getId() != null) {
+                String nickname = reg.getPartner().getNickname() != null ? reg.getPartner().getNickname() : "Partner";
+                busyMap.put(reg.getPartner().getId(), nickname);
+            }
+        }
     }
 
     private String resolveRoundName(int round, int totalRounds, TournamentFormat format) {
@@ -117,7 +153,8 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
 
     private TournamentMatchResponse mapToMatchResponse(
             TournamentMatch match,
-            Map<UUID, TournamentRegistrationResponse> registrationMap
+            Map<UUID, TournamentRegistrationResponse> registrationMap,
+            Map<UUID, String> busyParticipantMap
     ) {
         TournamentRegistrationResponse part1 = match.getParticipant1() != null
                 ? registrationMap.computeIfAbsent(match.getParticipant1().getId(), k -> mapToRegistrationResponse(match.getParticipant1()))
@@ -131,6 +168,29 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
         TournamentRegistrationResponse part2Partner = match.getParticipant2Partner() != null
                 ? registrationMap.computeIfAbsent(match.getParticipant2Partner().getId(), k -> mapToRegistrationResponse(match.getParticipant2Partner()))
                 : null;
+
+        List<String> busyNicknames = new ArrayList<>();
+        if (match.getStatus() == TournamentMatchStatus.READY || match.getStatus() == TournamentMatchStatus.PENDING) {
+            checkBusy(match.getParticipant1(), busyParticipantMap, busyNicknames);
+            checkBusy(match.getParticipant1Partner(), busyParticipantMap, busyNicknames);
+            checkBusy(match.getParticipant2(), busyParticipantMap, busyNicknames);
+            checkBusy(match.getParticipant2Partner(), busyParticipantMap, busyNicknames);
+        }
+
+        boolean isOpponentBusy = !busyNicknames.isEmpty();
+        boolean isStub = match.isParticipant1Stub() || match.isParticipant2Stub();
+        boolean hasBothParticipants = match.getParticipant1() != null && match.getParticipant2() != null;
+        boolean isPlayableStatus = match.getStatus() == TournamentMatchStatus.READY
+                || (match.getStatus() == TournamentMatchStatus.PENDING && hasBothParticipants && match.getTournament().getFormat() != TournamentFormat.CUP);
+
+        boolean isAvailable = isPlayableStatus
+                && !isOpponentBusy
+                && !isStub
+                && hasBothParticipants
+                && match.getStatus() != TournamentMatchStatus.BYE
+                && match.getStatus() != TournamentMatchStatus.COMPLETED
+                && match.getStatus() != TournamentMatchStatus.CANCELLED
+                && match.getStatus() != TournamentMatchStatus.IN_PROGRESS;
 
         return TournamentMatchResponse.builder()
                 .id(match.getId())
@@ -150,7 +210,26 @@ public class TournamentMatchQueryServiceImpl implements TournamentMatchQueryServ
                 .winnerRegistrationId(match.getWinner() != null ? match.getWinner().getId() : null)
                 .nextMatchId(match.getNextMatch() != null ? match.getNextMatch().getId() : null)
                 .createdAt(match.getCreatedAt())
+                .isAvailable(isAvailable)
+                .isOpponentBusy(isOpponentBusy)
+                .busyParticipantNicknames(busyNicknames)
                 .build();
+    }
+
+    private void checkBusy(TournamentRegistration reg, Map<UUID, String> busyMap, List<String> busyNicknames) {
+        if (reg == null) return;
+        if (reg.getId() != null && busyMap.containsKey(reg.getId())) {
+            String name = busyMap.get(reg.getId());
+            if (!busyNicknames.contains(name)) {
+                busyNicknames.add(name);
+            }
+        }
+        if (reg.getPartner() != null && reg.getPartner().getId() != null && busyMap.containsKey(reg.getPartner().getId())) {
+            String name = busyMap.get(reg.getPartner().getId());
+            if (!busyNicknames.contains(name)) {
+                busyNicknames.add(name);
+            }
+        }
     }
 
     private TournamentRegistrationResponse mapToRegistrationResponse(TournamentRegistration reg) {

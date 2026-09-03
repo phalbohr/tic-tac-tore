@@ -469,6 +469,19 @@
       "title": "Turnier-Spielplan",
       "roundSelector": "Runde wählen"
     },
+    "match": {
+      "start": "Spiel starten",
+      "starting": "Wird gestartet...",
+      "cancel": "Spiel abbrechen",
+      "opponent_busy": "Gegner beschäftigt",
+      "live": "LIVE",
+      "completed": "BEENDET",
+      "ready": "BEREIT",
+      "pending": "AUSSTEHEND",
+      "allRounds": "Alle Runden",
+      "myMatches": "Meine Spiele",
+      "available": "Spielbereit"
+    },
     "pendingInvitationsTitle": "Ausstehende Turniereinladungen",
     "noPendingInvitations": "Keine ausstehenden Einladungen.",
     "stub_partner": "Ersatz",
@@ -496,4 +509,3 @@
     }
   }
 }
-

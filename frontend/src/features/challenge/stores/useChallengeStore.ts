@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { ChallengeItem, CreateChallengePayload, ChallengeActionResponse } from '@/services/challengeService'
+import type {
+  ChallengeItem,
+  CreateChallengePayload,
+  ChallengeActionResponse,
+} from '@/services/challengeService'
 import * as challengeService from '@/services/challengeService'
 
 export const useChallengeStore = defineStore('challenge', () => {

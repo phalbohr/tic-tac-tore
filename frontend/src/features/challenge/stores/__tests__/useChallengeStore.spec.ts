@@ -133,14 +133,21 @@ describe('useChallengeStore', () => {
 
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ challengeId: 'challenge-accept-1', status: 'ACCEPTED', message: 'Accepted' }),
+      json: async () => ({
+        challengeId: 'challenge-accept-1',
+        status: 'ACCEPTED',
+        message: 'Accepted',
+      }),
     })
 
     await store.acceptChallenge('challenge-accept-1')
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/challenges/challenge-accept-1/accept', expect.objectContaining({
-      method: 'POST',
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/challenges/challenge-accept-1/accept',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    )
     expect(store.incomingChallenges).toHaveLength(0)
   })
 
@@ -160,14 +167,21 @@ describe('useChallengeStore', () => {
 
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ challengeId: 'challenge-decline-1', status: 'DECLINED', message: 'Declined' }),
+      json: async () => ({
+        challengeId: 'challenge-decline-1',
+        status: 'DECLINED',
+        message: 'Declined',
+      }),
     })
 
     await store.declineChallenge('challenge-decline-1')
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/challenges/challenge-decline-1/decline', expect.objectContaining({
-      method: 'POST',
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/challenges/challenge-decline-1/decline',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    )
     expect(store.incomingChallenges).toHaveLength(0)
   })
 
@@ -187,14 +201,21 @@ describe('useChallengeStore', () => {
 
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ challengeId: 'challenge-cancel-1', status: 'CANCELLED', message: 'Cancelled' }),
+      json: async () => ({
+        challengeId: 'challenge-cancel-1',
+        status: 'CANCELLED',
+        message: 'Cancelled',
+      }),
     })
 
     await store.cancelChallenge('challenge-cancel-1')
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/challenges/challenge-cancel-1/cancel', expect.objectContaining({
-      method: 'POST',
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/challenges/challenge-cancel-1/cancel',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    )
     expect(store.outgoingChallenges).toHaveLength(0)
   })
 })

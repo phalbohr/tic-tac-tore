@@ -117,14 +117,17 @@ describe('ChallengeModal.vue', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/challenges', expect.objectContaining({
-      method: 'POST',
-      body: JSON.stringify({
-        targetPlayerId: 'player-1',
-        matchType: 'ONE_VS_ONE',
-        message: 'Ready for a rematch?',
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/challenges',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          targetPlayerId: 'player-1',
+          matchType: 'ONE_VS_ONE',
+          message: 'Ready for a rematch?',
+        }),
       }),
-    }))
+    )
 
     expect(wrapper.emitted('challengeSent')).toBeTruthy()
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false])

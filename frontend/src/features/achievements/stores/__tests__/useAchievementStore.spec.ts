@@ -119,7 +119,9 @@ describe('[Story 7.1] useAchievementStore', () => {
   })
 
   it('[P1] should handle error gracefully when achievement API fails', async () => {
-    vi.mocked(achievementService.getPlayerAchievements).mockRejectedValueOnce(new Error('Network error'))
+    vi.mocked(achievementService.getPlayerAchievements).mockRejectedValueOnce(
+      new Error('Network error'),
+    )
 
     const store = useAchievementStore()
     await expect(store.fetchPlayerAchievements('user-123')).rejects.toThrow('Network error')

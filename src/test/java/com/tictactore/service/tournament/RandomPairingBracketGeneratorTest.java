@@ -123,18 +123,14 @@ class RandomPairingBracketGeneratorTest {
     }
 
     @Test
-    void shouldSetRoundOneToReadyAndSubsequentRoundsToPending() {
+    void shouldSetAllMatchesToReady() {
         List<SeededParticipant> participants = createParticipants(4);
 
         List<TournamentMatch> matches = generator.generateBracket(tournament, participants);
 
-        assertThat(matches.stream().filter(m -> m.getRound() == 1))
+        assertThat(matches)
                 .isNotEmpty()
                 .allMatch(m -> m.getStatus() == TournamentMatchStatus.READY);
-
-        assertThat(matches.stream().filter(m -> m.getRound() > 1))
-                .isNotEmpty()
-                .allMatch(m -> m.getStatus() == TournamentMatchStatus.PENDING);
     }
 
     private void recordPair(Map<String, Integer> pairCounts, UUID p1, UUID p2) {

@@ -6,38 +6,55 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       if (key === 'match.pendingMatch') return `Match ${params?.number ?? 1}`
-       if (key === 'match.matchConfirmedTapUndo') return `Match ${params?.number ?? 1} confirmed. Tap to undo.`
-       if (key === 'match.partialConfirmation') return `${params?.confirmed ?? 1} of ${params?.required ?? 2} confirmed`
-       const translations: Record<string, string> = {
+      if (key === 'match.matchConfirmedTapUndo')
+        return `Match ${params?.number ?? 1} confirmed. Tap to undo.`
+      if (key === 'match.partialConfirmation')
+        return `${params?.confirmed ?? 1} of ${params?.required ?? 2} confirmed`
+      const translations: Record<string, string> = {
         'match.pending': 'Pending Confirmation',
         'match.confirm': 'Confirm',
         'match.confirmedTapUndo': 'Match confirmed. Tap to undo.',
         'match.teamA': 'Team A',
         'match.teamB': 'Team B',
-        'match.scores': 'Scores'
+        'match.scores': 'Scores',
       }
       return translations[key] || key
-    }
-  })
+    },
+  }),
 }))
 
 describe('PendingMatches.vue', () => {
   it('renders nothing when pendingMatches is empty', () => {
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: [] }
+      props: { pendingMatches: [] },
     })
     expect(wrapper.html()).toBe('<!--v-if-->')
   })
 
   it('renders sequential match numbers for cards in queue order', () => {
     const sampleMatches: PendingMatchItem[] = [
-      { id: 'm1', teamANames: ['A1'], teamBNames: ['B1'], games: [{ teamAScore: 10, teamBScore: 5 }] },
-      { id: 'm2', teamANames: ['A2'], teamBNames: ['B2'], games: [{ teamAScore: 10, teamBScore: 8 }] },
-      { id: 'm3', teamANames: ['A3'], teamBNames: ['B3'], games: [{ teamAScore: 7, teamBScore: 10 }] }
+      {
+        id: 'm1',
+        teamANames: ['A1'],
+        teamBNames: ['B1'],
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
+      {
+        id: 'm2',
+        teamANames: ['A2'],
+        teamBNames: ['B2'],
+        games: [{ teamAScore: 10, teamBScore: 8 }],
+      },
+      {
+        id: 'm3',
+        teamANames: ['A3'],
+        teamBNames: ['B3'],
+        games: [{ teamAScore: 7, teamBScore: 10 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     expect(wrapper.text()).toContain('Match 1')
@@ -55,14 +72,14 @@ describe('PendingMatches.vue', () => {
         games: [
           { teamAScore: 10, teamBScore: 8 },
           { teamAScore: 7, teamBScore: 10 },
-          { teamAScore: 10, teamBScore: 5 }
+          { teamAScore: 10, teamBScore: 5 },
         ],
-        createdAt: new Date().toISOString()
-      }
+        createdAt: new Date().toISOString(),
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     expect(wrapper.text()).toContain('Team A')
@@ -84,12 +101,12 @@ describe('PendingMatches.vue', () => {
         id: 'match-99',
         teamANames: ['Player 1'],
         teamBNames: ['Player 2'],
-        games: [{ teamAScore: 10, teamBScore: 6 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 6 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const btn = wrapper.find('[data-testid="confirm-match-btn-match-99"]')
@@ -102,15 +119,25 @@ describe('PendingMatches.vue', () => {
 
   it('displays confirmed status when match ID is in pendingConfirmationIds prop array', () => {
     const sampleMatches: PendingMatchItem[] = [
-      { id: 'match-1', teamANames: ['P1'], teamBNames: ['P2'], games: [{ teamAScore: 10, teamBScore: 2 }] },
-      { id: 'match-2', teamANames: ['P3'], teamBNames: ['P4'], games: [{ teamAScore: 10, teamBScore: 5 }] }
+      {
+        id: 'match-1',
+        teamANames: ['P1'],
+        teamBNames: ['P2'],
+        games: [{ teamAScore: 10, teamBScore: 2 }],
+      },
+      {
+        id: 'match-2',
+        teamANames: ['P3'],
+        teamBNames: ['P4'],
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
       props: {
         pendingMatches: sampleMatches,
-        pendingConfirmationIds: ['match-1']
-      }
+        pendingConfirmationIds: ['match-1'],
+      },
     })
 
     const card1 = wrapper.find('[data-testid="pending-match-card-match-1"]')
@@ -129,12 +156,12 @@ describe('PendingMatches.vue', () => {
         requiredConfirmations: 2,
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const badge = wrapper.find('[data-testid="partially-confirmed-badge-match-partial"]')
@@ -153,12 +180,12 @@ describe('PendingMatches.vue', () => {
         cooldownExpiresAt: futureExpiry,
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const timer = wrapper.find('[data-testid="cooldown-timer-match-cooldown"]')
@@ -175,12 +202,12 @@ describe('PendingMatches.vue', () => {
         requiredConfirmations: 2,
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const timer = wrapper.find('[data-testid="cooldown-timer-match-no-cooldown"]')
@@ -195,12 +222,12 @@ describe('PendingMatches.vue', () => {
         rejectionReason: 'Wrong score',
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const rejectionReasonEl = wrapper.find('[data-testid="rejection-reason-match-rej"]')
@@ -226,12 +253,12 @@ describe('PendingMatches.vue', () => {
         rejectionReason: 'Wrong score',
         teamANames: ['Attacker A', 'Defender A'],
         teamBNames: ['Attacker B', 'Defender B'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const gameRow = wrapper.findComponent({ name: 'MatchGameRow' })
@@ -248,12 +275,12 @@ describe('PendingMatches.vue', () => {
         rejectionReason: 'Wrong score',
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const editBtn = wrapper.find('[data-testid="edit-rejection-btn-match-edit-1"]')
@@ -272,12 +299,12 @@ describe('PendingMatches.vue', () => {
         rejectionReason: 'Wrong score',
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const deleteBtn = wrapper.find('[data-testid="delete-rejection-btn-match-del-1"]')
@@ -287,7 +314,9 @@ describe('PendingMatches.vue', () => {
     let modal = wrapper.find('[data-testid="delete-confirmation-modal"]')
     expect(modal.exists()).toBe(true)
     expect(modal.text()).toContain('Cancel Match')
-    expect(modal.text()).toContain('Are you sure you want to delete this match? All recorded scores will be lost.')
+    expect(modal.text()).toContain(
+      'Are you sure you want to delete this match? All recorded scores will be lost.',
+    )
     expect(wrapper.emitted('delete-rejection')).toBeFalsy()
 
     // Test Keep Editing button
@@ -321,12 +350,12 @@ describe('PendingMatches.vue', () => {
         id: 'match-close-1',
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const rejectBtn = wrapper.find('[data-testid="reject-match-btn-match-close-1"]')
@@ -354,12 +383,12 @@ describe('PendingMatches.vue', () => {
         rejectionReason: 'Wrong players',
         teamANames: ['P1'],
         teamBNames: ['P2'],
-        games: [{ teamAScore: 10, teamBScore: 5 }]
-      }
+        games: [{ teamAScore: 10, teamBScore: 5 }],
+      },
     ]
 
     const wrapper = mount(PendingMatches, {
-      props: { pendingMatches: sampleMatches }
+      props: { pendingMatches: sampleMatches },
     })
 
     const editBtn = wrapper.find('[data-testid="edit-rejection-btn-match-close-2"]')

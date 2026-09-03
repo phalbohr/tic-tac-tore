@@ -22,7 +22,7 @@ export const AVATAR_KEYS = [
   'snack-pizza',
   'jersey-red',
   'jersey-blue',
-  'crown'
-] as const;
+  'crown',
+] as const
 
-export type AvatarKey = typeof AVATAR_KEYS[number];
+export type AvatarKey = (typeof AVATAR_KEYS)[number]

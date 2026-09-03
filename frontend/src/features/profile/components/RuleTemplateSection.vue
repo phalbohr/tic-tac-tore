@@ -1,71 +1,71 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRuleConfigStore } from '@/stores/useRuleConfigStore';
-import type { RuleConfig, CreateRuleConfigRequest } from '@/services/ruleConfigService';
-import RuleTemplateModal from '@/features/match/components/RuleTemplateModal.vue';
-import BaseButton from '@/core/components/BaseButton.vue';
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRuleConfigStore } from '@/stores/useRuleConfigStore'
+import type { RuleConfig, CreateRuleConfigRequest } from '@/services/ruleConfigService'
+import RuleTemplateModal from '@/features/match/components/RuleTemplateModal.vue'
+import BaseButton from '@/core/components/BaseButton.vue'
 
 defineOptions({
   name: 'RuleTemplateSection',
-});
+})
 
-const { t } = useI18n();
-const ruleStore = useRuleConfigStore();
+const { t } = useI18n()
+const ruleStore = useRuleConfigStore()
 
-const isModalOpen = ref(false);
-const editingTemplate = ref<RuleConfig | null>(null);
-const error = ref('');
+const isModalOpen = ref(false)
+const editingTemplate = ref<RuleConfig | null>(null)
+const error = ref('')
 
-const showDeleteConfirm = ref(false);
-const deletingRuleId = ref<string | null>(null);
+const showDeleteConfirm = ref(false)
+const deletingRuleId = ref<string | null>(null)
 
 onMounted(async () => {
   if (ruleStore.presets.length === 0 && ruleStore.customRules.length === 0) {
     try {
-      await ruleStore.fetchAllRules();
+      await ruleStore.fetchAllRules()
     } catch {
       // ignore fetch error if unauthenticated
     }
   }
-});
+})
 
 function openCreateModal() {
-  editingTemplate.value = null;
-  error.value = '';
-  isModalOpen.value = true;
+  editingTemplate.value = null
+  error.value = ''
+  isModalOpen.value = true
 }
 
 function openEditAsNewModal(template: RuleConfig) {
-  editingTemplate.value = template;
-  error.value = '';
-  isModalOpen.value = true;
+  editingTemplate.value = template
+  error.value = ''
+  isModalOpen.value = true
 }
 
 async function handleSaveTemplate(payload: CreateRuleConfigRequest) {
-  error.value = '';
+  error.value = ''
   try {
-    await ruleStore.createCustomRule(payload);
-    isModalOpen.value = false;
+    await ruleStore.createCustomRule(payload)
+    isModalOpen.value = false
   } catch (err: any) {
-    error.value = err.message || t('common.error', 'An error occurred');
+    error.value = err.message || t('common.error', 'An error occurred')
   }
 }
 
 function promptDelete(id: string) {
-  deletingRuleId.value = id;
-  showDeleteConfirm.value = true;
+  deletingRuleId.value = id
+  showDeleteConfirm.value = true
 }
 
 async function confirmDelete() {
-  if (!deletingRuleId.value) return;
-  error.value = '';
+  if (!deletingRuleId.value) return
+  error.value = ''
   try {
-    await ruleStore.deleteCustomRule(deletingRuleId.value);
-    showDeleteConfirm.value = false;
-    deletingRuleId.value = null;
+    await ruleStore.deleteCustomRule(deletingRuleId.value)
+    showDeleteConfirm.value = false
+    deletingRuleId.value = null
   } catch (err: any) {
-    error.value = err.message || t('common.error', 'An error occurred');
+    error.value = err.message || t('common.error', 'An error occurred')
   }
 }
 </script>
@@ -87,14 +87,15 @@ async function confirmDelete() {
       </button>
     </div>
 
-    <div v-if="error" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold" data-testid="rule-section-error">
+    <div
+      v-if="error"
+      class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold"
+      data-testid="rule-section-error"
+    >
       {{ error }}
     </div>
 
-    <div
-      class="rule-template-list space-y-2"
-      data-testid="rule-template-list"
-    >
+    <div class="rule-template-list space-y-2" data-testid="rule-template-list">
       <div
         v-if="ruleStore.loading && ruleStore.allRules.length === 0"
         class="p-4 rounded-xl bg-surface-container-low text-center text-xs text-on-surface-variant flex items-center justify-center gap-2"
@@ -120,11 +121,17 @@ async function confirmDelete() {
           <div class="flex items-center gap-2">
             <span
               class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider"
-              :class="rule.type === 'PRESET' ? 'bg-primary/20 text-primary' : 'bg-secondary/20 text-secondary'"
+              :class="
+                rule.type === 'PRESET'
+                  ? 'bg-primary/20 text-primary'
+                  : 'bg-secondary/20 text-secondary'
+              "
             >
               {{ rule.type }}
             </span>
-            <span class="font-headline font-bold text-sm text-on-surface truncate">{{ rule.name }}</span>
+            <span class="font-headline font-bold text-sm text-on-surface truncate">{{
+              rule.name
+            }}</span>
           </div>
           <div class="text-[11px] text-on-surface-variant flex flex-wrap gap-x-2 gap-y-0.5">
             <span>Best of {{ rule.gameLimit }}</span>
@@ -179,12 +186,26 @@ async function confirmDelete() {
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       data-testid="delete-rule-confirm-modal"
     >
-      <div class="bg-surface-container-low rounded-2xl p-5 max-w-xs w-full shadow-2xl space-y-4 text-center">
+      <div
+        class="bg-surface-container-low rounded-2xl p-5 max-w-xs w-full shadow-2xl space-y-4 text-center"
+      >
         <h3 class="font-bold text-base text-on-surface">Delete Rule Template?</h3>
-        <p class="text-xs text-on-surface-variant">This template will be removed from your available selections.</p>
+        <p class="text-xs text-on-surface-variant">
+          This template will be removed from your available selections.
+        </p>
         <div class="flex gap-2 justify-end">
-          <BaseButton variant="secondary" @click="showDeleteConfirm = false" data-testid="cancel-delete-rule-button">Cancel</BaseButton>
-          <BaseButton variant="primary" @click="confirmDelete" data-testid="confirm-delete-rule-button">Delete</BaseButton>
+          <BaseButton
+            variant="secondary"
+            @click="showDeleteConfirm = false"
+            data-testid="cancel-delete-rule-button"
+            >Cancel</BaseButton
+          >
+          <BaseButton
+            variant="primary"
+            @click="confirmDelete"
+            data-testid="confirm-delete-rule-button"
+            >Delete</BaseButton
+          >
         </div>
       </div>
     </div>

@@ -107,11 +107,7 @@ async function togglePoolNotifications() {
           class="w-full bg-surface-container-highest text-on-surface px-3.5 py-2.5 rounded-xl font-headline text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-pointer"
         >
           <option value="">{{ t('common.none', 'None') }}</option>
-          <option
-            v-for="group in playerGroupStore.groups"
-            :key="group.id"
-            :value="group.id"
-          >
+          <option v-for="group in playerGroupStore.groups" :key="group.id" :value="group.id">
             {{ group.name }} (Team)
           </option>
         </select>
@@ -136,11 +132,7 @@ async function togglePoolNotifications() {
             v-if="ruleConfigStore.presets.length > 0"
             :label="t('rules.presets', 'Presets')"
           >
-            <option
-              v-for="preset in ruleConfigStore.presets"
-              :key="preset.id"
-              :value="preset.id"
-            >
+            <option v-for="preset in ruleConfigStore.presets" :key="preset.id" :value="preset.id">
               {{ preset.name }} (Preset)
             </option>
           </optgroup>
@@ -148,11 +140,7 @@ async function togglePoolNotifications() {
             v-if="ruleConfigStore.customRules.length > 0"
             :label="t('rules.custom', 'Custom Templates')"
           >
-            <option
-              v-for="rule in ruleConfigStore.customRules"
-              :key="rule.id"
-              :value="rule.id"
-            >
+            <option v-for="rule in ruleConfigStore.customRules" :key="rule.id" :value="rule.id">
               {{ rule.name }} (Custom)
             </option>
           </optgroup>
@@ -166,7 +154,12 @@ async function togglePoolNotifications() {
             {{ t('cabinet.poolNotifications', 'Matchmaking Pool Notifications') }}
           </span>
           <span class="text-on-surface-variant text-[10px]">
-            {{ t('cabinet.poolNotificationsDesc', 'Receive push notifications when new matchmaking pools are created') }}
+            {{
+              t(
+                'cabinet.poolNotificationsDesc',
+                'Receive push notifications when new matchmaking pools are created',
+              )
+            }}
           </span>
         </div>
 
@@ -181,14 +174,14 @@ async function togglePoolNotifications() {
           :class="[
             'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
             isUpdating ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
-            poolNotificationsEnabled ? 'bg-primary' : 'bg-surface-container-highest'
+            poolNotificationsEnabled ? 'bg-primary' : 'bg-surface-container-highest',
           ]"
         >
           <span class="sr-only">Toggle Matchmaking Pool Notifications</span>
           <span
             :class="[
               'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-              poolNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+              poolNotificationsEnabled ? 'translate-x-6' : 'translate-x-1',
             ]"
           />
         </button>

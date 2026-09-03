@@ -10,7 +10,9 @@ export function detectLocale(): SupportedLocale {
   try {
     const stored = localStorage.getItem(LOCALE_KEY) as SupportedLocale | null
     if (stored && SUPPORTED_LOCALES.includes(stored)) return stored
-    const browser = ((navigator?.language ?? '').split('-')[0] ?? '').toLowerCase() as SupportedLocale
+    const browser = (
+      (navigator?.language ?? '').split('-')[0] ?? ''
+    ).toLowerCase() as SupportedLocale
     return SUPPORTED_LOCALES.includes(browser) ? browser : 'en'
   } catch {
     return 'en'

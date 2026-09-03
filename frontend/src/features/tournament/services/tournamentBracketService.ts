@@ -2,58 +2,95 @@ import type {
   TournamentBracketDto,
   TournamentMatchDto,
   TournamentDto,
-} from '@/features/tournament/types/tournament';
+} from '@/features/tournament/types/tournament'
 
-export async function getTournamentBracket(
-  tournamentId: string
-): Promise<TournamentBracketDto> {
+export async function getTournamentBracket(tournamentId: string): Promise<TournamentBracketDto> {
   const res = await fetch(`/api/v1/tournaments/${tournamentId}/bracket`, {
     headers: { Accept: 'application/json' },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch tournament bracket (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch tournament bracket (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 export async function getTournamentMatches(
   tournamentId: string,
-  round?: number
+  round?: number,
 ): Promise<TournamentMatchDto[]> {
-  const url = round !== undefined
-    ? `/api/v1/tournaments/${tournamentId}/matches?round=${round}`
-    : `/api/v1/tournaments/${tournamentId}/matches`;
+  const url =
+    round !== undefined
+      ? `/api/v1/tournaments/${tournamentId}/matches?round=${round}`
+      : `/api/v1/tournaments/${tournamentId}/matches`
 
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch tournament matches (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch tournament matches (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
 }
 
-export async function startTournament(
-  tournamentId: string
-): Promise<TournamentDto> {
+export async function startTournament(tournamentId: string): Promise<TournamentDto> {
   const res = await fetch(`/api/v1/tournaments/${tournamentId}/start`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-  });
+  })
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to start tournament (${res.status})`);
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to start tournament (${res.status})`)
   }
 
-  return res.json();
+  return res.json()
+}
+
+export async function startTournamentMatch(
+  tournamentId: string,
+  matchId: string,
+): Promise<TournamentMatchDto> {
+  const res = await fetch(`/api/v1/tournaments/${tournamentId}/matches/${matchId}/start`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to start tournament match (${res.status})`)
+  }
+
+  return res.json()
+}
+
+export async function cancelTournamentMatch(
+  tournamentId: string,
+  matchId: string,
+): Promise<TournamentMatchDto> {
+  const res = await fetch(`/api/v1/tournaments/${tournamentId}/matches/${matchId}/cancel`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to cancel tournament match (${res.status})`)
+  }
+
+  return res.json()
 }

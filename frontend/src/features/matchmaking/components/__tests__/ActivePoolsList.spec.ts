@@ -1,22 +1,22 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount, flushPromises } from '@vue/test-utils';
-import { createTestingPinia } from '@pinia/testing';
-import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue';
-import { usePoolStore } from '@/features/matchmaking/stores/poolStore';
-import type { PoolResponse } from '@/features/matchmaking/types/pool';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
+import { createTestingPinia } from '@pinia/testing'
+import ActivePoolsList from '@/features/matchmaking/components/ActivePoolsList.vue'
+import { usePoolStore } from '@/features/matchmaking/stores/poolStore'
+import type { PoolResponse } from '@/features/matchmaking/types/pool'
 
 vi.mock('vue-i18n', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('vue-i18n')>();
+  const actual = await importOriginal<typeof import('vue-i18n')>()
   return {
     ...actual,
     useI18n: () => ({
       t: (key: string, defaultVal?: string) => defaultVal || key,
     }),
-  };
-});
+  }
+})
 
 describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
-  let pinia: any;
+  let pinia: any
 
   const mockOpenPool: PoolResponse = {
     id: 'pool-101',
@@ -39,7 +39,7 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
       },
     ],
     createdAt: '2026-08-28T10:00:00Z',
-  };
+  }
 
   beforeEach(() => {
     pinia = createTestingPinia({
@@ -55,8 +55,8 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           error: null,
         },
       },
-    });
-  });
+    })
+  })
 
   it('renders active pool card with details and Join button for non-participants (AC 1, AC 2)', async () => {
     const wrapper = mount(ActivePoolsList, {
@@ -66,16 +66,16 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
+    })
 
-    expect(wrapper.text()).toContain('HostPlayer');
-    expect(wrapper.text()).toContain('1v1');
-    expect(wrapper.text()).toContain('1/2');
+    expect(wrapper.text()).toContain('HostPlayer')
+    expect(wrapper.text()).toContain('1v1')
+    expect(wrapper.text()).toContain('1/2')
 
-    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]');
-    expect(joinButton.exists()).toBe(true);
-    expect(joinButton.text()).toContain('Join');
-  });
+    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]')
+    expect(joinButton.exists()).toBe(true)
+    expect(joinButton.text()).toContain('Join')
+  })
 
   it('renders "Joined" badge instead of "Join" button when authenticated user is a participant (AC 1, AC 7)', async () => {
     const poolWithCurrentUser: PoolResponse = {
@@ -92,7 +92,7 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
         },
       ],
       currentPlayers: 2,
-    };
+    }
 
     pinia = createTestingPinia({
       createSpy: vi.fn,
@@ -107,7 +107,7 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           error: null,
         },
       },
-    });
+    })
 
     const wrapper = mount(ActivePoolsList, {
       global: {
@@ -116,15 +116,15 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
+    })
 
-    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-102"]');
-    expect(joinButton.exists()).toBe(false);
+    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-102"]')
+    expect(joinButton.exists()).toBe(false)
 
-    const joinedBadge = wrapper.find('[data-testid="joined-pool-badge-pool-102"]');
-    expect(joinedBadge.exists()).toBe(true);
-    expect(joinedBadge.text()).toContain('Joined');
-  });
+    const joinedBadge = wrapper.find('[data-testid="joined-pool-badge-pool-102"]')
+    expect(joinedBadge.exists()).toBe(true)
+    expect(joinedBadge.text()).toContain('Joined')
+  })
 
   it('triggers store join action upon clicking Join button (AC 2, AC 7)', async () => {
     const wrapper = mount(ActivePoolsList, {
@@ -134,14 +134,14 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
+    })
 
-    const poolStore = usePoolStore();
-    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]');
-    await joinButton.trigger('click');
+    const poolStore = usePoolStore()
+    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]')
+    await joinButton.trigger('click')
 
-    expect(poolStore.joinPool).toHaveBeenCalledWith('pool-101');
-  });
+    expect(poolStore.joinPool).toHaveBeenCalledWith('pool-101')
+  })
 
   it('renders clean empty state when there are no active pools (AC 8)', async () => {
     pinia = createTestingPinia({
@@ -157,7 +157,7 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           error: null,
         },
       },
-    });
+    })
 
     const wrapper = mount(ActivePoolsList, {
       global: {
@@ -166,11 +166,11 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
-    await flushPromises();
+    })
+    await flushPromises()
 
-    expect(wrapper.find('[data-testid="empty-pools-state"]').exists()).toBe(true);
-  });
+    expect(wrapper.find('[data-testid="empty-pools-state"]').exists()).toBe(true)
+  })
 
   it('renders join error feedback banner when joinPool fails', async () => {
     const wrapper = mount(ActivePoolsList, {
@@ -180,23 +180,25 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
+    })
 
-    const poolStore = usePoolStore();
-    vi.mocked(poolStore.joinPool).mockRejectedValueOnce(new Error('User is already a participant in this pool'));
+    const poolStore = usePoolStore()
+    vi.mocked(poolStore.joinPool).mockRejectedValueOnce(
+      new Error('User is already a participant in this pool'),
+    )
 
-    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]');
-    await joinButton.trigger('click');
-    await flushPromises();
+    const joinButton = wrapper.find('[data-testid="join-pool-btn-pool-101"]')
+    await joinButton.trigger('click')
+    await flushPromises()
 
-    const errorBanner = wrapper.find('[data-testid="join-error-banner"]');
-    expect(errorBanner.exists()).toBe(true);
-    expect(errorBanner.text()).toContain('User is already a participant in this pool');
-  });
+    const errorBanner = wrapper.find('[data-testid="join-error-banner"]')
+    expect(errorBanner.exists()).toBe(true)
+    expect(errorBanner.text()).toContain('User is already a participant in this pool')
+  })
 
   it('renders fetch error banner when active pools fetch fails', async () => {
-    const store = usePoolStore();
-    vi.mocked(store.fetchActivePools).mockRejectedValueOnce(new Error('Network error'));
+    const store = usePoolStore()
+    vi.mocked(store.fetchActivePools).mockRejectedValueOnce(new Error('Network error'))
 
     const wrapper = mount(ActivePoolsList, {
       global: {
@@ -205,12 +207,12 @@ describe('ActivePoolsList Component ATDD Specs — Story 6.4', () => {
           t: (key: string, fallback?: string) => fallback || key,
         },
       },
-    });
+    })
 
-    await flushPromises();
+    await flushPromises()
 
-    const fetchErrorBanner = wrapper.find('[data-testid="fetch-error-banner"]');
-    expect(fetchErrorBanner.exists()).toBe(true);
-    expect(fetchErrorBanner.text()).toContain('Network error');
-  });
-});
+    const fetchErrorBanner = wrapper.find('[data-testid="fetch-error-banner"]')
+    expect(fetchErrorBanner.exists()).toBe(true)
+    expect(fetchErrorBanner.text()).toContain('Network error')
+  })
+})

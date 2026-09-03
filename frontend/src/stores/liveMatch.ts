@@ -56,7 +56,7 @@ export const useLiveMatchStore = defineStore('liveMatch', () => {
   }
 
   const goalTimeline = computed<TimelineGoal[]>(() => {
-    return goals.value.map(g => ({
+    return goals.value.map((g) => ({
       ...g,
       playerName: g.playerName || getPlayerName(g.playerId),
     }))

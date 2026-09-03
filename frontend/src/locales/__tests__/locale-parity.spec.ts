@@ -26,13 +26,13 @@ describe('Locale file parity — AC5 (Task 7.6)', () => {
 
   // Every English key must exist in German
   it('[P1]all keys in en.json have a corresponding key in de.json', () => {
-    const missing = enKeys.filter(k => !deKeySet.has(k))
+    const missing = enKeys.filter((k) => !deKeySet.has(k))
     expect(missing).toEqual([])
   })
 
   // Every German key must exist in English (no orphaned translations)
   it('[P1]all keys in de.json have a corresponding key in en.json (no orphans)', () => {
-    const orphans = deKeys.filter(k => !enKeySet.has(k))
+    const orphans = deKeys.filter((k) => !enKeySet.has(k))
     expect(orphans).toEqual([])
   })
 

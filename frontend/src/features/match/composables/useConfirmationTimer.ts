@@ -20,14 +20,16 @@ export interface ActiveConfirmationItem {
 export enum ConfirmationResult {
   SUCCESS = 'SUCCESS',
   CLIENT_ERROR = 'CLIENT_ERROR',
-  SERVER_OR_NETWORK_ERROR = 'SERVER_OR_NETWORK_ERROR'
+  SERVER_OR_NETWORK_ERROR = 'SERVER_OR_NETWORK_ERROR',
 }
 
-export async function defaultCommitConfirmation(payload: PendingConfirmationPayload): Promise<ConfirmationResult> {
+export async function defaultCommitConfirmation(
+  payload: PendingConfirmationPayload,
+): Promise<ConfirmationResult> {
   try {
     const csrfToken = getCookie('XSRF-TOKEN')
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     }
     if (payload.idempotencyKey) {
       headers['Idempotency-Key'] = payload.idempotencyKey
@@ -38,7 +40,7 @@ export async function defaultCommitConfirmation(payload: PendingConfirmationPayl
 
     const res = await fetch(`/api/v1/matches/${payload.matchId}/confirm`, {
       method: 'POST',
-      headers
+      headers,
     })
 
     if (res.ok) {
@@ -54,15 +56,17 @@ export async function defaultCommitConfirmation(payload: PendingConfirmationPayl
 }
 
 export function useConfirmationTimer(
-  commitCallback: (payload: PendingConfirmationPayload) => Promise<ConfirmationResult> = defaultCommitConfirmation,
-  onSuccess?: (payload: PendingConfirmationPayload) => void
+  commitCallback: (
+    payload: PendingConfirmationPayload,
+  ) => Promise<ConfirmationResult> = defaultCommitConfirmation,
+  onSuccess?: (payload: PendingConfirmationPayload) => void,
 ) {
   const activeConfirmations = ref<ActiveConfirmationItem[]>([])
 
   function startConfirmationTimer(
     matchId: string,
     matchNumberOrIdempotencyKey?: number | string,
-    idempotencyKey?: string
+    idempotencyKey?: string,
   ) {
     let matchNumber = 1
     let key: string | undefined = idempotencyKey
@@ -76,7 +80,9 @@ export function useConfirmationTimer(
     // Clear any previous timer for the exact same matchId if re-triggered
     cancelConfirmationTimer(matchId)
 
-    const finalKey = key || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'idempotency-key')
+    const finalKey =
+      key ||
+      (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'idempotency-key')
 
     const item = reactive<ActiveConfirmationItem>({
       matchId,
@@ -85,7 +91,7 @@ export function useConfirmationTimer(
       countdown: 15,
       isPending: true,
       isOfflinePending: false,
-      timerId: null
+      timerId: null,
     })
 
     item.timerId = setInterval(async () => {
@@ -100,14 +106,14 @@ export function useConfirmationTimer(
         const payload: PendingConfirmationPayload = {
           matchId: item.matchId,
           matchNumber: item.matchNumber,
-          idempotencyKey: item.idempotencyKey
+          idempotencyKey: item.idempotencyKey,
         }
         try {
           const result = await commitCallback(payload)
           if (result === ConfirmationResult.SERVER_OR_NETWORK_ERROR) {
             item.isOfflinePending = true
           } else {
-            const idx = activeConfirmations.value.findIndex(c => c.matchId === matchId)
+            const idx = activeConfirmations.value.findIndex((c) => c.matchId === matchId)
             if (idx !== -1) {
               activeConfirmations.value.splice(idx, 1)
             }
@@ -129,7 +135,7 @@ export function useConfirmationTimer(
 
     let targetIdx = -1
     if (targetMatchId) {
-      targetIdx = activeConfirmations.value.findIndex(item => item.matchId === targetMatchId)
+      targetIdx = activeConfirmations.value.findIndex((item) => item.matchId === targetMatchId)
     } else {
       targetIdx = activeConfirmations.value.length - 1
     }
@@ -147,12 +153,12 @@ export function useConfirmationTimer(
     return {
       matchId: removed.matchId,
       matchNumber: removed.matchNumber,
-      idempotencyKey: removed.idempotencyKey
+      idempotencyKey: removed.idempotencyKey,
     }
   }
 
   function clearTimer() {
-    activeConfirmations.value.forEach(item => {
+    activeConfirmations.value.forEach((item) => {
       if (item.timerId !== null) {
         clearInterval(item.timerId)
         item.timerId = null
@@ -161,8 +167,10 @@ export function useConfirmationTimer(
     activeConfirmations.value = []
   }
 
-  const isPending = computed(() => activeConfirmations.value.some(i => i.isPending && !i.isOfflinePending))
-  const isOfflinePending = computed(() => activeConfirmations.value.some(i => i.isOfflinePending))
+  const isPending = computed(() =>
+    activeConfirmations.value.some((i) => i.isPending && !i.isOfflinePending),
+  )
+  const isOfflinePending = computed(() => activeConfirmations.value.some((i) => i.isOfflinePending))
   const pendingConfirmation = computed<PendingConfirmationPayload | null>(() => {
     if (activeConfirmations.value.length === 0) return null
     const first = activeConfirmations.value[0]
@@ -170,7 +178,7 @@ export function useConfirmationTimer(
     return {
       matchId: first.matchId,
       matchNumber: first.matchNumber,
-      idempotencyKey: first.idempotencyKey
+      idempotencyKey: first.idempotencyKey,
     }
   })
   const countdown = computed<number>(() => {
@@ -178,7 +186,7 @@ export function useConfirmationTimer(
     return first ? first.countdown : 15
   })
   const pendingConfirmationIds = computed<string[]>(() => {
-    return activeConfirmations.value.map(i => i.matchId)
+    return activeConfirmations.value.map((i) => i.matchId)
   })
 
   if (getCurrentInstance()) {
@@ -196,6 +204,6 @@ export function useConfirmationTimer(
     pendingConfirmation,
     startConfirmationTimer,
     cancelConfirmationTimer,
-    clearTimer
+    clearTimer,
   }
 }

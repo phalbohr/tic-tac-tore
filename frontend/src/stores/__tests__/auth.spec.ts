@@ -5,8 +5,8 @@ import { useAuthStore } from '../auth'
 vi.mock('../locale', () => ({
   useLocaleStore: vi.fn(() => ({
     locale: 'en',
-    setLocale: vi.fn()
-  }))
+    setLocale: vi.fn(),
+  })),
 }))
 
 const SESSION_COOKIE_NAME = 'TTT_SESSION'
@@ -32,7 +32,8 @@ describe('useAuthStore', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: () => Promise.resolve({ nickname: 'OldNick', avatar: 'old.png', tutorialCompleted: undefined })
+        json: () =>
+          Promise.resolve({ nickname: 'OldNick', avatar: 'old.png', tutorialCompleted: undefined }),
       }) as Mock
       await store.fetchProfile()
 
@@ -40,15 +41,17 @@ describe('useAuthStore', () => {
         ok: false,
         status: 500,
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: () => Promise.resolve({ message: 'Internal Server Error' })
+        json: () => Promise.resolve({ message: 'Internal Server Error' }),
       }) as Mock
 
-      await expect(store.updateProfile({ nickname: 'NewNick' })).rejects.toThrow('Internal Server Error')
+      await expect(store.updateProfile({ nickname: 'NewNick' })).rejects.toThrow(
+        'Internal Server Error',
+      )
 
       expect(store.profile).toEqual({
         nickname: 'OldNick',
         avatar: 'old.png',
-        tutorialCompleted: undefined
+        tutorialCompleted: undefined,
       })
     })
 
@@ -56,18 +59,18 @@ describe('useAuthStore', () => {
       const store = useAuthStore()
       store.profile = { nickname: 'old', avatar: '1' }
 
-      await expect(store.updateProfile({ nickname: '' }))
-        .rejects
-        .toThrow('Nickname cannot be empty')
+      await expect(store.updateProfile({ nickname: '' })).rejects.toThrow(
+        'Nickname cannot be empty',
+      )
     })
 
     it('throws error when nickname is whitespace string', async () => {
       const store = useAuthStore()
       store.profile = { nickname: 'old', avatar: '1' }
 
-      await expect(store.updateProfile({ nickname: '   ' }))
-        .rejects
-        .toThrow('Nickname cannot be empty')
+      await expect(store.updateProfile({ nickname: '   ' })).rejects.toThrow(
+        'Nickname cannot be empty',
+      )
     })
 
     it('updates poolNotificationsEnabled and sends in payload', async () => {
@@ -77,7 +80,8 @@ describe('useAuthStore', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: () => Promise.resolve({ nickname: 'PlayerOne', avatar: '1', poolNotificationsEnabled: false })
+        json: () =>
+          Promise.resolve({ nickname: 'PlayerOne', avatar: '1', poolNotificationsEnabled: false }),
       }) as Mock
 
       await store.updateProfile({ poolNotificationsEnabled: false })
@@ -86,8 +90,8 @@ describe('useAuthStore', () => {
         '/api/v1/profile/me',
         expect.objectContaining({
           method: 'PATCH',
-          body: expect.stringContaining('"poolNotificationsEnabled":false')
-        })
+          body: expect.stringContaining('"poolNotificationsEnabled":false'),
+        }),
       )
       expect(store.profile?.poolNotificationsEnabled).toBe(false)
     })

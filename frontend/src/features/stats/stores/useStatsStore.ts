@@ -10,15 +10,20 @@ import {
   type TeamPairStatsParams,
   type H2HStatsResponse,
   type H2HParams,
-  type Page
+  type Page,
 } from '@/services/statisticsService'
-import { generateDemoData, generateDemoTeamPairStats, generateDemoH2HStats } from '../utils/demoDataGenerator'
+import {
+  generateDemoData,
+  generateDemoTeamPairStats,
+  generateDemoH2HStats,
+} from '../utils/demoDataGenerator'
 import { useAuthStore } from '@/stores/auth'
 
 export const useStatsStore = defineStore('stats', () => {
   const authStore = useAuthStore()
-  
-  const getDemoModeKey = () => `tictactore.demoModeEnabled_${authStore.profile?.nickname || 'guest'}`
+
+  const getDemoModeKey = () =>
+    `tictactore.demoModeEnabled_${authStore.profile?.nickname || 'guest'}`
 
   const stats = ref<PlayerStats | null>(null)
   const realStats = ref<PlayerStats | null>(null)
@@ -38,14 +43,20 @@ export const useStatsStore = defineStore('stats', () => {
 
   const rawDemoModeSetting = ref<string | null>(localStorage.getItem(getDemoModeKey()))
 
-  watch(() => authStore.profile?.nickname, () => {
-    rawDemoModeSetting.value = localStorage.getItem(getDemoModeKey())
-  })
+  watch(
+    () => authStore.profile?.nickname,
+    () => {
+      rawDemoModeSetting.value = localStorage.getItem(getDemoModeKey())
+    },
+  )
 
   const shouldShowDemoData = computed(() => {
     const isExplicitlyDisabled = rawDemoModeSetting.value === 'false'
     const isExplicitlyEnabled = rawDemoModeSetting.value === 'true'
-    const implicitDemo = confirmedMatchesCount.value !== null && confirmedMatchesCount.value < 5 && !isExplicitlyDisabled
+    const implicitDemo =
+      confirmedMatchesCount.value !== null &&
+      confirmedMatchesCount.value < 5 &&
+      !isExplicitlyDisabled
     return isExplicitlyEnabled || implicitDemo
   })
 
@@ -56,9 +67,9 @@ export const useStatsStore = defineStore('stats', () => {
     try {
       const fetchedStats = await getPersonalStats(params)
       realStats.value = fetchedStats
-      
+
       confirmedMatchesCount.value = fetchedStats.overall.matches
-      
+
       if (confirmedMatchesCount.value >= 5) {
         localStorage.setItem(getDemoModeKey(), 'false')
         rawDemoModeSetting.value = 'false'
@@ -69,7 +80,7 @@ export const useStatsStore = defineStore('stats', () => {
       } else {
         stats.value = fetchedStats
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch statistics'
       if (shouldShowDemoData.value) {
@@ -100,7 +111,7 @@ export const useStatsStore = defineStore('stats', () => {
         teamPairStats.value = pagedResult.content || []
       }
       return pagedResult
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch team pair statistics'
       if (shouldShowDemoData.value) {
@@ -133,7 +144,7 @@ export const useStatsStore = defineStore('stats', () => {
         h2hStats.value = fetchedStats
       }
       return fetchedStats
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       h2hError.value = err.message || 'Failed to fetch head-to-head statistics'
       if (shouldShowDemoData.value) {
@@ -181,7 +192,6 @@ export const useStatsStore = defineStore('stats', () => {
     fetchStats,
     fetchTeamPairStats,
     fetchH2HStats,
-    toggleDemoMode
+    toggleDemoMode,
   }
 })
-

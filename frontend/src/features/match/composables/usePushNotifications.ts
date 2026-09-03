@@ -43,7 +43,8 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.register('/sw.js')
       await navigator.serviceWorker.ready
 
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'dummy_public_key_string_for_testing_purposes'
+      const vapidPublicKey =
+        import.meta.env.VITE_VAPID_PUBLIC_KEY || 'dummy_public_key_string_for_testing_purposes'
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource
 
       let subscription = await registration.pushManager.getSubscription()

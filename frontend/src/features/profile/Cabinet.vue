@@ -14,7 +14,7 @@ import ProfileBadgesSection from '@/features/achievements/components/ProfileBadg
 import InsightsSection from '@/features/stats/components/InsightsSection.vue'
 
 defineOptions({
-  name: 'CabinetView'
+  name: 'CabinetView',
 })
 
 const { t } = useI18n()
@@ -138,50 +138,85 @@ async function handleLogout() {
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center">
     <!-- Top Bar -->
-    <header class="bg-surface-container-low/80 backdrop-blur-xl text-primary font-headline tracking-tight top-0 sticky z-50 flex justify-between items-center w-full max-w-md px-6 py-4">
-      <button @click="goBack" class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center">
+    <header
+      class="bg-surface-container-low/80 backdrop-blur-xl text-primary font-headline tracking-tight top-0 sticky z-50 flex justify-between items-center w-full max-w-md px-6 py-4"
+    >
+      <button
+        @click="goBack"
+        class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center"
+      >
         <span class="material-symbols-outlined text-on-surface text-xl">home</span>
       </button>
-      <h1 class="text-lg font-bold text-on-surface tracking-tight text-center flex-1">{{ t('cabinet.title') }}</h1>
-      <button @click="goBack" class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center">
+      <h1 class="text-lg font-bold text-on-surface tracking-tight text-center flex-1">
+        {{ t('cabinet.title') }}
+      </h1>
+      <button
+        @click="goBack"
+        class="hover:opacity-80 transition-opacity active:scale-95 flex items-center justify-center"
+      >
         <span class="material-symbols-outlined text-on-surface text-xl">arrow_back</span>
       </button>
     </header>
 
-    <main v-if="!authStore.profile" class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center">
+    <main
+      v-if="!authStore.profile"
+      class="w-full max-w-md px-6 py-6 flex-grow flex items-center justify-center"
+    >
       <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
     </main>
     <main v-else class="w-full max-w-md px-6 py-6 flex-grow space-y-6">
       <!-- Avatar Section -->
       <section class="flex flex-col items-center">
-        <button 
-          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300" 
-          @click="isAvatarPickerOpen = true" 
+        <button
+          class="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+          @click="isAvatarPickerOpen = true"
           :disabled="isUpdating"
           aria-haspopup="dialog"
-          aria-label="Change avatar" 
+          aria-label="Change avatar"
           data-testid="change-avatar-button"
         >
-          <div class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center">
-            <AvatarBase :avatar="authStore.profile?.avatar" :name="authStore.profile?.nickname" shape="square" />
+          <div
+            class="w-24 h-24 rounded-xl overflow-hidden shadow-2xl bg-surface-container-low transition-transform duration-200 hover:scale-105 group-active:scale-95 flex items-center justify-center"
+          >
+            <AvatarBase
+              :avatar="authStore.profile?.avatar"
+              :name="authStore.profile?.nickname"
+              shape="square"
+            />
           </div>
           <!-- Edit Overlay Icon -->
-          <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none">
+          <div
+            class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white pointer-events-none"
+          >
             <span class="material-symbols-outlined text-2xl">edit</span>
           </div>
         </button>
         <div class="mt-3 text-center" v-if="authStore.profile">
-          <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">{{ authStore.profile.nickname }}</h2>
-          <p class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70">Clubhouse Member</p>
+          <h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">
+            {{ authStore.profile.nickname }}
+          </h2>
+          <p
+            class="text-secondary font-headline text-[10px] uppercase tracking-[0.2em] mt-0.5 opacity-70"
+          >
+            Clubhouse Member
+          </p>
         </div>
       </section>
 
       <!-- Feedback Messages -->
       <div class="min-h-[40px] flex flex-col justify-center w-full transition-all duration-300">
-        <div v-if="message" data-testid="success-message" class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center">
+        <div
+          v-if="message"
+          data-testid="success-message"
+          class="p-3 bg-primary-container/20 text-primary rounded-xl text-xs font-semibold text-center"
+        >
           {{ message }}
         </div>
-        <div v-else-if="error" data-testid="error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
+        <div
+          v-else-if="error"
+          data-testid="error-message"
+          class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center"
+        >
           {{ error }}
         </div>
       </div>
@@ -190,10 +225,13 @@ async function handleLogout() {
       <div class="space-y-6">
         <!-- Nickname Field -->
         <div class="space-y-2">
-          <label for="nickname" class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">
+          <label
+            for="nickname"
+            class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1"
+          >
             {{ t('cabinet.nickname') }}
           </label>
-          <input 
+          <input
             id="nickname"
             data-testid="nickname-input"
             v-model="nickname"
@@ -201,7 +239,9 @@ async function handleLogout() {
             class="w-full bg-surface-container-highest text-on-surface px-4 py-2.5 rounded-lg focus:outline-none focus:ring-0 font-headline text-base transition-all"
             placeholder="Enter nickname"
           />
-          <p class="text-[9px] text-on-surface-variant font-headline italic flex items-center gap-2 px-1">
+          <p
+            class="text-[9px] text-on-surface-variant font-headline italic flex items-center gap-2 px-1"
+          >
             <span class="material-symbols-outlined text-[12px]">info</span>
             {{ t('cabinet.cooldownMessage') }}
           </p>
@@ -209,12 +249,14 @@ async function handleLogout() {
 
         <!-- Language Selection -->
         <div class="space-y-2">
-          <label class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">
+          <label
+            class="font-headline text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1"
+          >
             {{ t('cabinet.language') }}
           </label>
-          
+
           <div class="relative">
-            <button 
+            <button
               role="button"
               aria-haspopup="listbox"
               aria-label="Language"
@@ -223,17 +265,19 @@ async function handleLogout() {
               data-testid="language-select"
               class="w-full flex justify-between items-center bg-surface-container-low text-on-surface px-4 py-2.5 rounded-lg font-headline text-sm hover:bg-surface-container-highest/50 transition-colors"
             >
-              <span>{{ selectedLanguage === 'EN' ? t('cabinet.english') : t('cabinet.german') }}</span>
+              <span>{{
+                selectedLanguage === 'EN' ? t('cabinet.english') : t('cabinet.german')
+              }}</span>
               <span class="material-symbols-outlined text-sm">expand_more</span>
             </button>
 
             <!-- Dropdown Options -->
-            <div 
+            <div
               v-if="isDropdownOpen"
               role="listbox"
               class="absolute z-10 w-full mt-1 bg-surface-container-highest rounded-lg shadow-xl py-1 overflow-hidden"
             >
-              <div 
+              <div
                 role="option"
                 data-testid="lang-en"
                 :aria-selected="selectedLanguage === 'EN'"
@@ -242,7 +286,7 @@ async function handleLogout() {
               >
                 {{ t('cabinet.english') }}
               </div>
-              <div 
+              <div
                 role="option"
                 data-testid="lang-de"
                 :aria-selected="selectedLanguage === 'DE'"
@@ -275,7 +319,7 @@ async function handleLogout() {
 
       <!-- Sign Out -->
       <section class="pt-2">
-        <button 
+        <button
           @click="handleLogout"
           data-testid="sign-out-button"
           class="w-full py-3 rounded-lg bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
@@ -290,7 +334,7 @@ async function handleLogout() {
         <h3 class="font-headline text-[10px] font-bold uppercase tracking-widest text-red-400 ml-1">
           {{ t('cabinet.dangerZone') }}
         </h3>
-        <button 
+        <button
           @click="openDeleteModal"
           data-testid="delete-account-button"
           class="w-full py-3 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 font-headline font-bold text-sm transition-colors flex items-center justify-center gap-2"
@@ -303,7 +347,7 @@ async function handleLogout() {
 
     <!-- Footer Action -->
     <footer v-if="authStore.profile" class="w-full max-w-md px-6 pb-6 pt-2">
-      <button 
+      <button
         @click="handleSave"
         data-testid="save-button"
         :disabled="isUpdating"
@@ -317,22 +361,26 @@ async function handleLogout() {
           <span aria-hidden="true" class="material-symbols-outlined font-bold">check_circle</span>
         </template>
       </button>
-      <p class="text-center mt-3 text-[9px] text-on-surface-variant font-headline uppercase tracking-widest opacity-40">
+      <p
+        class="text-center mt-3 text-[9px] text-on-surface-variant font-headline uppercase tracking-widest opacity-40"
+      >
         Tic-Tac-Tore • Clubhouse Edition
       </p>
     </footer>
 
     <!-- Delete Confirmation Modal -->
     <Transition name="fade">
-      <div 
-        v-if="showDeleteModal" 
+      <div
+        v-if="showDeleteModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-md"
         role="dialog"
         aria-modal="true"
       >
         <div class="w-full max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-6 shadow-2xl">
           <div class="text-center space-y-2">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2">
+            <div
+              class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/30 text-red-400 mb-2"
+            >
               <span class="material-symbols-outlined text-2xl">warning</span>
             </div>
             <h2 class="font-headline text-lg font-bold text-on-surface">
@@ -343,22 +391,28 @@ async function handleLogout() {
             </p>
           </div>
 
-          <div v-if="error" data-testid="modal-error-message" class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center">
+          <div
+            v-if="error"
+            data-testid="modal-error-message"
+            class="p-3 bg-red-950/40 text-red-400 rounded-xl text-xs font-semibold text-center"
+          >
             {{ error }}
           </div>
 
           <div class="flex flex-col gap-2">
-            <button 
+            <button
               @click="confirmDelete"
               data-testid="confirm-delete-button"
               :disabled="isDeleting"
               class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-headline font-extrabold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span v-if="isDeleting" class="animate-spin material-symbols-outlined text-sm">sync</span>
+              <span v-if="isDeleting" class="animate-spin material-symbols-outlined text-sm"
+                >sync</span
+              >
               <span v-else>{{ t('cabinet.confirmDelete') }}</span>
             </button>
-            
-            <button 
+
+            <button
               @click="showDeleteModal = false"
               :disabled="isDeleting"
               class="w-full py-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-highest/80 text-on-surface font-headline font-bold text-xs transition-colors"
@@ -372,7 +426,7 @@ async function handleLogout() {
 
     <!-- Avatar Picker Modal -->
     <Transition name="fade">
-      <AvatarPicker 
+      <AvatarPicker
         v-if="isAvatarPickerOpen"
         :current-avatar="authStore.profile?.avatar"
         @select="handleAvatarSelect"

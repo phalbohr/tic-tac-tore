@@ -4,7 +4,9 @@ import { getCookie, deleteCookie } from '../cookieUtils'
 describe('cookieUtils Tests', () => {
   beforeEach(() => {
     document.cookie.split(';').forEach((cookie) => {
-      document.cookie = cookie.replace(/^ +/, '').replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
+      document.cookie = cookie
+        .replace(/^ +/, '')
+        .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
     })
   })
 

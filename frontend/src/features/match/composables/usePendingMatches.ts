@@ -44,7 +44,7 @@ export function usePendingMatches() {
       const res = await fetch('/api/v1/matches/pending')
       if (res.ok) {
         const data = await res.json()
-        pendingCount.value = typeof data.count === 'number' ? data.count : (data.matches?.length || 0)
+        pendingCount.value = typeof data.count === 'number' ? data.count : data.matches?.length || 0
         partiallyConfirmedMatches.value =
           data.matches?.filter((m: PendingMatchItem) => m.status === 'PARTIALLY_CONFIRMED') || []
       }
@@ -58,18 +58,20 @@ export function usePendingMatches() {
     return partiallyConfirmedMatches.value.length
   }
 
-  async function confirmOpponent(matchId: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async function confirmOpponent(
+    matchId: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     const idempotencyKey = generateUUID()
     const headers: Record<string, string> = {
       'Idempotency-Key': idempotencyKey,
-      ...getCsrfHeaders()
+      ...getCsrfHeaders(),
     }
 
     try {
       const res = await fetch(`/api/v1/matches/${matchId}/confirm`, {
         method: 'POST',
         headers,
-        credentials: 'include'
+        credentials: 'include',
       })
 
       if (res.ok) {
@@ -106,7 +108,11 @@ export function usePendingMatches() {
     })
   }
 
-  async function rejectMatch(matchId: string, reason: string, customReason?: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async function rejectMatch(
+    matchId: string,
+    reason: string,
+    customReason?: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     const trimmedReason = reason ? reason.trim() : ''
     const trimmedCustomReason = customReason ? customReason.trim() : ''
     const idempotencyKey = generateUUID()
@@ -114,14 +120,14 @@ export function usePendingMatches() {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Idempotency-Key': idempotencyKey,
-      ...getCsrfHeaders()
+      ...getCsrfHeaders(),
     }
 
     try {
       const res = await fetch(`/api/v1/matches/${matchId}/reject`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ reason: trimmedReason, customReason: trimmedCustomReason })
+        body: JSON.stringify({ reason: trimmedReason, customReason: trimmedCustomReason }),
       })
 
       if (res.ok) {
@@ -143,7 +149,7 @@ export function usePendingMatches() {
     try {
       const res = await fetch(`/api/v1/matches/${matchId}`, {
         method: 'DELETE',
-        headers
+        headers,
       })
 
       if (res.ok || res.status === 204) {
@@ -185,7 +191,6 @@ export function usePendingMatches() {
     collapsedMatchIds,
     collapseMatch,
     expandAllMatches,
-    cleanupCollapsedMatches
+    cleanupCollapsedMatches,
   }
 }
-

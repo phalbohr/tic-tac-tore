@@ -49,7 +49,7 @@ public class ChampionshipBracketGenerator implements BracketGenerator {
                             .participant2(p2.registration())
                             .seed1(p1.seed())
                             .seed2(p2.seed())
-                            .status(round == 1 ? TournamentMatchStatus.READY : TournamentMatchStatus.PENDING)
+                            .status(TournamentMatchStatus.READY)
                             .build();
                     matches.add(match);
                 } else if (p1 != null || p2 != null) {

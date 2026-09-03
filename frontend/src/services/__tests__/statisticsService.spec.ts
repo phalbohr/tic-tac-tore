@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getLeaderboard, getPersonalStats, getH2HStats, searchPlayers, type PlayerStats } from '../statisticsService'
+import {
+  getLeaderboard,
+  getPersonalStats,
+  getH2HStats,
+  searchPlayers,
+  type PlayerStats,
+} from '../statisticsService'
 
 describe('statisticsService', () => {
   beforeEach(() => {
@@ -15,32 +21,32 @@ describe('statisticsService', () => {
           matches: 5,
           wins: 3,
           losses: 2,
-          winRate: 60.0
-        }
+          winRate: 60.0,
+        },
       ],
       totalPages: 1,
       totalElements: 1,
       size: 10,
-      number: 0
+      number: 0,
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockH2H
+      json: async () => mockH2H,
     } as Response)
 
-    const result = await getH2HStats({ 
+    const result = await getH2HStats({
       period: 'YEARLY',
-      token: 'test-token' 
+      token: 'test-token',
     })
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/statistics/h2h?period=YEARLY'),
       expect.objectContaining({
         headers: {
-          'Authorization': 'Bearer test-token'
-        }
-      })
+          Authorization: 'Bearer test-token',
+        },
+      }),
     )
     expect(result).toEqual(mockH2H)
   })
@@ -53,7 +59,7 @@ describe('statisticsService', () => {
         matches: 5,
         wins: 3,
         losses: 2,
-        winRate: 60.0
+        winRate: 60.0,
       },
       {
         opponentId: 'opp-2',
@@ -61,34 +67,34 @@ describe('statisticsService', () => {
         matches: 10,
         wins: 5,
         losses: 5,
-        winRate: 50.0
-      }
+        winRate: 50.0,
+      },
     ]
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockH2HArray
+      json: async () => mockH2HArray,
     } as Response)
 
     const result = await getH2HStats({
       period: 'ALL_TIME',
-      token: 'test-token'
+      token: 'test-token',
     })
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/statistics/h2h?period=ALL_TIME'),
       expect.objectContaining({
         headers: {
-          'Authorization': 'Bearer test-token'
-        }
-      })
+          Authorization: 'Bearer test-token',
+        },
+      }),
     )
     expect(result).toEqual({
       content: mockH2HArray,
       totalPages: 1,
       totalElements: 2,
       size: 2,
-      number: 0
+      number: 0,
     })
   })
 
@@ -98,26 +104,26 @@ describe('statisticsService', () => {
       playerName: 'Current Player',
       overall: { matches: 20, wins: 15, losses: 5, winRate: 75 },
       attacker: { matches: 10, wins: 8, losses: 2, winRate: 80 },
-      defender: { matches: 10, wins: 7, losses: 3, winRate: 70 }
+      defender: { matches: 10, wins: 7, losses: 3, winRate: 70 },
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockStats
+      json: async () => mockStats,
     } as Response)
 
-    const result = await getPersonalStats({ 
+    const result = await getPersonalStats({
       period: 'MONTHLY',
-      token: 'test-token' 
+      token: 'test-token',
     })
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/statistics/me?period=MONTHLY'),
       expect.objectContaining({
         headers: {
-          'Authorization': 'Bearer test-token'
-        }
-      })
+          Authorization: 'Bearer test-token',
+        },
+      }),
     )
     expect(result).toEqual(mockStats)
   })
@@ -132,34 +138,34 @@ describe('statisticsService', () => {
           totalMatches: 10,
           wins: 8,
           losses: 2,
-          winRate: 80.0
-        }
+          winRate: 80.0,
+        },
       ],
       totalPages: 1,
       totalElements: 1,
       size: 10,
-      number: 0
+      number: 0,
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockData
+      json: async () => mockData,
     } as Response)
 
-    const result = await getLeaderboard({ 
-      type: 'OVERALL', 
-      page: 0, 
+    const result = await getLeaderboard({
+      type: 'OVERALL',
+      page: 0,
       size: 10,
-      token: 'test-token' 
+      token: 'test-token',
     })
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('/statistics/leaderboard?type=OVERALL&page=0&size=10'),
       expect.objectContaining({
         headers: {
-          'Authorization': 'Bearer test-token'
-        }
-      })
+          Authorization: 'Bearer test-token',
+        },
+      }),
     )
     expect(result).toEqual(mockData)
   })
@@ -168,7 +174,7 @@ describe('statisticsService', () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 400,
-      json: async () => ({ message: 'Invalid parameters' })
+      json: async () => ({ message: 'Invalid parameters' }),
     } as Response)
 
     await expect(getLeaderboard({})).rejects.toThrow('Invalid parameters')
@@ -180,7 +186,7 @@ describe('statisticsService', () => {
       status: 400,
       json: async () => {
         throw new Error('Invalid JSON')
-      }
+      },
     } as unknown as Response)
 
     await expect(getLeaderboard({})).rejects.toThrow('API error: 400')
@@ -190,7 +196,7 @@ describe('statisticsService', () => {
     const mockPlayers = [{ id: 'p1', nickname: 'Alex', avatar: 'avatar1' }]
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockPlayers
+      json: async () => mockPlayers,
     } as Response)
 
     const controller = new AbortController()
@@ -201,9 +207,9 @@ describe('statisticsService', () => {
       expect.objectContaining({
         signal: controller.signal,
         headers: {
-          'Authorization': 'Bearer auth-token'
-        }
-      })
+          Authorization: 'Bearer auth-token',
+        },
+      }),
     )
     expect(result).toEqual(mockPlayers)
   })
@@ -212,7 +218,7 @@ describe('statisticsService', () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 500,
-      json: async () => ({ message: 'Search failure' })
+      json: async () => ({ message: 'Search failure' }),
     } as Response)
 
     await expect(searchPlayers('test')).rejects.toThrow('Search failure')

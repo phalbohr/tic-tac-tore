@@ -11,7 +11,9 @@ import StatsDashboard from '@/features/stats/components/StatsDashboard.vue'
 import EmptyStateCTA from '@/features/stats/components/EmptyStateCTA.vue'
 import NewMatchFlow from '@/features/match/components/NewMatchFlow.vue'
 import RejectReasonSelector from '@/features/match/components/RejectReasonSelector.vue'
-import PendingMatches, { type PendingMatchItem } from '@/features/match/components/PendingMatches.vue'
+import PendingMatches, {
+  type PendingMatchItem,
+} from '@/features/match/components/PendingMatches.vue'
 import UndoToast from '@/features/match/components/UndoToast.vue'
 import ErrorToast from '@/features/match/components/ErrorToast.vue'
 import SuccessToast from '@/core/components/SuccessToast.vue'
@@ -37,7 +39,16 @@ const statsStore = useStatsStore()
 const matchStore = useMatchDraftStore()
 const insightStore = useInsightStore()
 const { permissionState, requestPermissionAndSubscribe } = usePushNotifications()
-const { pendingCount, fetchPendingCount, rejectMatch, deleteMatch, collapsedMatchIds, collapseMatch, expandAllMatches, cleanupCollapsedMatches } = usePendingMatches()
+const {
+  pendingCount,
+  fetchPendingCount,
+  rejectMatch,
+  deleteMatch,
+  collapsedMatchIds,
+  collapseMatch,
+  expandAllMatches,
+  cleanupCollapsedMatches,
+} = usePendingMatches()
 const confirmationStore = useMatchConfirmationStore()
 
 const pendingMatches = ref<PendingMatchItem[]>([])
@@ -67,15 +78,18 @@ watch(pendingCount, (newVal, oldVal) => {
   }
 })
 
-watch(() => confirmationStore.lastConfirmedMatchId, async (confirmedId) => {
-  if (confirmedId) {
-    pendingMatches.value = pendingMatches.value.filter((m) => m.id !== confirmedId)
-    await fetchPendingCount(true)
-    await statsStore.fetchStats()
-    await insightStore.fetchInsights()
-    await fetchPendingMatches()
-  }
-})
+watch(
+  () => confirmationStore.lastConfirmedMatchId,
+  async (confirmedId) => {
+    if (confirmedId) {
+      pendingMatches.value = pendingMatches.value.filter((m) => m.id !== confirmedId)
+      await fetchPendingCount(true)
+      await statsStore.fetchStats()
+      await insightStore.fetchInsights()
+      await fetchPendingMatches()
+    }
+  },
+)
 
 function handleMatchComplete() {
   showNewMatch.value = false
@@ -112,15 +126,16 @@ async function handleSubmitRejection(payload: { reason: string; customReason: st
     pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
     await fetchPendingCount(true)
   } else {
-    const errorMsg = res.error || t('match.alreadyProcessed', 'Match was already processed by another opponent')
+    const errorMsg =
+      res.error || t('match.alreadyProcessed', 'Match was already processed by another opponent')
     rejectToastError.value = errorMsg
-    
+
     if (res.error === undefined || res.error.includes('already processed')) {
-       isRejectModalOpen.value = false
-       selectedRejectMatchId.value = null
-       pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
-       await fetchPendingCount(true)
-       await fetchPendingMatches()
+      isRejectModalOpen.value = false
+      selectedRejectMatchId.value = null
+      pendingMatches.value = pendingMatches.value.filter((m) => m.id !== matchId)
+      await fetchPendingCount(true)
+      await fetchPendingMatches()
     }
 
     setTimeout(() => {
@@ -149,11 +164,14 @@ function handlePoolJoined() {
   }, 4000)
 }
 
-watch(() => matchStore.submitError, (newVal) => {
-  if (newVal) {
-    showNewMatch.value = true
-  }
-})
+watch(
+  () => matchStore.submitError,
+  (newVal) => {
+    if (newVal) {
+      showNewMatch.value = true
+    }
+  },
+)
 
 async function fetchPendingMatches() {
   if (!authStore.isAuthenticated) return
@@ -161,7 +179,7 @@ async function fetchPendingMatches() {
     const res = await fetch('/api/v1/matches/pending')
     if (res.ok) {
       const data = await res.json()
-      const list: ApiMatchItem[] = Array.isArray(data) ? data : (data.matches || [])
+      const list: ApiMatchItem[] = Array.isArray(data) ? data : data.matches || []
       pendingMatches.value = list.map(mapApiMatchItem)
     }
   } catch (e) {
@@ -225,34 +243,51 @@ onUnmounted(() => {
   }
 })
 
-watch(() => authStore.isAuthenticated, async (newVal) => {
-  if (newVal && !authStore.profile) {
-    await authStore.fetchProfile()
-    await insightStore.fetchInsights()
-    await fetchPendingMatches()
-  }
-})
+watch(
+  () => authStore.isAuthenticated,
+  async (newVal) => {
+    if (newVal && !authStore.profile) {
+      await authStore.fetchProfile()
+      await insightStore.fetchInsights()
+      await fetchPendingMatches()
+    }
+  },
+)
 </script>
-
 
 <template>
   <div class="min-h-screen bg-background text-on-surface flex flex-col items-center w-full">
     <!-- Tutorial Overlay -->
     <Transition name="fade">
-      <TutorialCarousel v-if="authStore.isAuthenticated && authStore.profile && !authStore.profile.tutorialCompleted" />
+      <TutorialCarousel
+        v-if="
+          authStore.isAuthenticated && authStore.profile && !authStore.profile.tutorialCompleted
+        "
+      />
     </Transition>
 
     <!-- Header -->
-    <header v-if="authStore.isAuthenticated && authStore.profile" class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50">
-      <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">{{ t('home.title') }}</h1>
+    <header
+      v-if="authStore.isAuthenticated && authStore.profile"
+      class="w-full max-w-md bg-surface-container-low/80 backdrop-blur-xl py-3 px-6 flex justify-between items-center top-0 sticky z-50"
+    >
+      <h1 class="text-lg font-bold text-on-surface font-headline tracking-tight">
+        {{ t('home.title') }}
+      </h1>
       <RouterLink to="/cabinet" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <div class="w-8 h-8 rounded-lg overflow-hidden bg-white">
-          <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
+          <AvatarBase
+            :avatar="authStore.profile.avatar"
+            :name="authStore.profile.nickname"
+            shape="square"
+          />
         </div>
       </RouterLink>
     </header>
 
-    <main class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8 p-6 text-center">
+    <main
+      class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8 p-6 text-center"
+    >
       <!-- Micro Celebration Banner -->
       <MicroCelebrationBanner
         v-if="!showNewMatch && authStore.isAuthenticated && insightStore.latestCelebrationInsight"
@@ -270,7 +305,8 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           <span>⚠️ Push notifications disabled</span>
         </div>
         <p>
-          Push notifications are disabled. You may miss match confirmation requests. Enable notifications in your browser settings.
+          Push notifications are disabled. You may miss match confirmation requests. Enable
+          notifications in your browser settings.
         </p>
       </div>
 
@@ -282,12 +318,19 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
         data-testid="enable-notifications-btn"
       >
         <span>🔔 Enable push notifications for match verification</span>
-        <span class="font-bold text-xs bg-primary text-on-primary px-2 py-1 rounded-lg">Enable</span>
+        <span class="font-bold text-xs bg-primary text-on-primary px-2 py-1 rounded-lg"
+          >Enable</span
+        >
       </button>
 
-      <div v-if="!authStore.isAuthenticated" class="text-center flex flex-col items-center gap-6 mt-12">
+      <div
+        v-if="!authStore.isAuthenticated"
+        class="text-center flex flex-col items-center gap-6 mt-12"
+      >
         <div>
-          <h1 class="text-4xl font-bold text-on-surface mb-2 font-headline">{{ t('home.title') }}</h1>
+          <h1 class="text-4xl font-bold text-on-surface mb-2 font-headline">
+            {{ t('home.title') }}
+          </h1>
           <p class="text-on-surface-variant text-lg font-body">{{ t('home.subtitle') }}</p>
         </div>
         <p class="text-on-surface-variant font-body">{{ t('home.signInMessage') }}</p>
@@ -296,8 +339,14 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
 
       <div v-else class="flex flex-col items-center gap-6 mt-12 w-full">
         <div v-if="authStore.profile" class="flex flex-col items-center gap-3">
-          <div class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden relative">
-            <AvatarBase :avatar="authStore.profile.avatar" :name="authStore.profile.nickname" shape="square" />
+          <div
+            class="w-24 h-24 rounded-xl shadow-2xl bg-surface-container-low overflow-hidden relative"
+          >
+            <AvatarBase
+              :avatar="authStore.profile.avatar"
+              :name="authStore.profile.nickname"
+              shape="square"
+            />
             <div
               v-if="pendingCount > 0"
               class="absolute top-1.5 right-1.5 min-w-6 h-6 px-1 flex items-center justify-center bg-error text-on-error rounded-full text-xs font-bold shadow-md leading-none cursor-pointer"
@@ -336,24 +385,26 @@ watch(() => authStore.isAuthenticated, async (newVal) => {
           />
         </Transition>
 
-
         <template v-if="statsStore.isLoading">
           <div class="animate-pulse flex flex-col items-center w-full gap-4">
             <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
           </div>
         </template>
-        <template v-else-if="statsStore.confirmedMatchesCount !== null && statsStore.confirmedMatchesCount < 1 && !statsStore.shouldShowDemoData">
+        <template
+          v-else-if="
+            statsStore.confirmedMatchesCount !== null &&
+            statsStore.confirmedMatchesCount < 1 &&
+            !statsStore.shouldShowDemoData
+          "
+        >
           <EmptyStateCTA />
         </template>
         <template v-else>
           <StatsDashboard v-if="!showNewMatch" />
-          
+
           <div v-if="!showNewMatch" class="w-full flex flex-col gap-4">
             <PendingChallenges class="w-full text-left" />
-            <BaseButton 
-              @click="showNewMatch = true"
-              class="w-full mt-4 rounded-full"
-            >
+            <BaseButton @click="showNewMatch = true" class="w-full mt-4 rounded-full">
               New Match
             </BaseButton>
             <BaseButton

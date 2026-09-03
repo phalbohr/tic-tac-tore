@@ -15,11 +15,11 @@ vi.mock('vue-i18n', async (importOriginal) => {
           'history.outcome.win': 'Win',
           'history.outcome.loss': 'Loss',
           'history.outcome.draw': 'Draw',
-          'history.retiredPlayer': 'Retired Player'
+          'history.retiredPlayer': 'Retired Player',
         }
         return translations[key] || defaultVal || key
-      }
-    })
+      },
+    }),
   }
 })
 
@@ -36,12 +36,12 @@ describe('MatchCard.vue', () => {
     status: 'CONFIRMED',
     games: [
       { teamAScore: 10, teamBScore: 6 },
-      { teamAScore: 10, teamBScore: 8 }
+      { teamAScore: 10, teamBScore: 8 },
     ],
     createdAt: '2026-08-19T10:00:00Z',
     teamAAttackerNickname: 'Alice',
     teamBAttackerNickname: 'Bob',
-    matchFormat: 'STANDARD'
+    matchFormat: 'STANDARD',
   }
 
   it('renders match format, scores, player names, and WIN badge for winner', () => {
@@ -50,8 +50,8 @@ describe('MatchCard.vue', () => {
 
     const wrapper = mount(MatchCard, {
       props: {
-        match: sample1v1Match
-      }
+        match: sample1v1Match,
+      },
     })
 
     expect(wrapper.text()).toContain('Alice')
@@ -68,8 +68,8 @@ describe('MatchCard.vue', () => {
 
     const wrapper = mount(MatchCard, {
       props: {
-        match: sample1v1Match
-      }
+        match: sample1v1Match,
+      },
     })
 
     expect(wrapper.find('[data-testid="outcome-badge-match-1"]').text()).toBe('Loss')
@@ -78,13 +78,13 @@ describe('MatchCard.vue', () => {
   it('safely renders Retired Player when player has retired ex-player prefix', () => {
     const retiredMatch: MatchResponse = {
       ...sample1v1Match,
-      teamBAttackerNickname: 'ex-player-9999'
+      teamBAttackerNickname: 'ex-player-9999',
     }
 
     const wrapper = mount(MatchCard, {
       props: {
-        match: retiredMatch
-      }
+        match: retiredMatch,
+      },
     })
 
     expect(wrapper.text()).toContain('Retired Player')
@@ -97,8 +97,8 @@ describe('MatchCard.vue', () => {
 
     const wrapper = mount(MatchCard, {
       props: {
-        match: sample1v1Match
-      }
+        match: sample1v1Match,
+      },
     })
 
     expect(wrapper.find('[data-testid="outcome-badge-match-1"]').text()).toBe('Completed')
@@ -107,13 +107,13 @@ describe('MatchCard.vue', () => {
   it('handles invalid date strings gracefully without throwing', () => {
     const invalidDateMatch: MatchResponse = {
       ...sample1v1Match,
-      createdAt: 'not-a-valid-date'
+      createdAt: 'not-a-valid-date',
     }
 
     const wrapper = mount(MatchCard, {
       props: {
-        match: invalidDateMatch
-      }
+        match: invalidDateMatch,
+      },
     })
 
     expect(wrapper.exists()).toBe(true)

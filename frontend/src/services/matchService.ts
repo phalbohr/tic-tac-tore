@@ -64,7 +64,9 @@ export interface MatchHistoryParams {
 
 const API_BASE_URL = '/api/v1'
 
-export async function getMatchHistory(params: MatchHistoryParams = {}): Promise<PagedResponse<MatchResponse>> {
+export async function getMatchHistory(
+  params: MatchHistoryParams = {},
+): Promise<PagedResponse<MatchResponse>> {
   const queryParams = new URLSearchParams()
   if (params.status) queryParams.append('status', params.status)
   if (params.playerId) queryParams.append('playerId', params.playerId)
@@ -84,7 +86,7 @@ export async function getMatchHistory(params: MatchHistoryParams = {}): Promise<
 
   const response = await fetch(url, {
     headers,
-    signal: params.signal
+    signal: params.signal,
   })
 
   if (!response.ok) {

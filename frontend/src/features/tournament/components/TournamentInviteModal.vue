@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import type { TournamentRegistrationDto } from '@/features/tournament/types/tournament';
+import { useI18n } from 'vue-i18n'
+import type { TournamentRegistrationDto } from '@/features/tournament/types/tournament'
 
 interface Props {
-  isOpen: boolean;
-  invite: TournamentRegistrationDto | null;
-  loading?: boolean;
+  isOpen: boolean
+  invite: TournamentRegistrationDto | null
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-});
+})
 
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'accept', invite: TournamentRegistrationDto): void;
-  (e: 'decline', invite: TournamentRegistrationDto): void;
-}>();
+  (e: 'close'): void
+  (e: 'accept', invite: TournamentRegistrationDto): void
+  (e: 'decline', invite: TournamentRegistrationDto): void
+}>()
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 function handleAccept() {
   if (props.invite) {
-    emit('accept', props.invite);
+    emit('accept', props.invite)
   }
 }
 
 function handleDecline() {
   if (props.invite) {
-    emit('decline', props.invite);
+    emit('decline', props.invite)
   }
 }
 
 function handleClose() {
-  emit('close');
+  emit('close')
 }
 </script>
 
@@ -59,12 +59,19 @@ function handleClose() {
             {{ invite.tournamentName }}
           </div>
           <p class="text-sm text-on-surface">
-            {{ t('tournament.registration.invitedBy', { inviter: invite.playerNickname, tournament: invite.tournamentName }) }}
+            {{
+              t('tournament.registration.invitedBy', {
+                inviter: invite.playerNickname,
+                tournament: invite.tournamentName,
+              })
+            }}
           </p>
         </div>
       </div>
 
-      <div class="px-6 py-4 flex items-center justify-end gap-3 bg-surface-container-low border-t border-outline-variant/10">
+      <div
+        class="px-6 py-4 flex items-center justify-end gap-3 bg-surface-container-low border-t border-outline-variant/10"
+      >
         <button
           data-testid="decline-invite-btn"
           type="button"
@@ -81,7 +88,10 @@ function handleClose() {
           class="px-5 py-2 text-sm font-medium text-on-primary bg-primary hover:bg-primary/90 disabled:opacity-50 rounded-xl transition-colors shadow-sm flex items-center gap-2"
           @click="handleAccept"
         >
-          <span v-if="loading" class="inline-block w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+          <span
+            v-if="loading"
+            class="inline-block w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"
+          ></span>
           {{ t('tournament.accept') }}
         </button>
       </div>

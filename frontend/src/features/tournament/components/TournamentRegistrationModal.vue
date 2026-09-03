@@ -1,59 +1,62 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { TournamentDto, RegisterTournamentPayload } from '@/features/tournament/types/tournament';
+import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type {
+  TournamentDto,
+  RegisterTournamentPayload,
+} from '@/features/tournament/types/tournament'
 
 interface Props {
-  isOpen: boolean;
-  tournament: TournamentDto | null;
-  loading?: boolean;
+  isOpen: boolean
+  tournament: TournamentDto | null
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-});
+})
 
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'register', payload: RegisterTournamentPayload): void;
-}>();
+  (e: 'close'): void
+  (e: 'register', payload: RegisterTournamentPayload): void
+}>()
 
-const { t } = useI18n();
+const { t } = useI18n()
 
-const partnerId = ref('');
-const partnerNickname = ref('');
-const error = ref('');
+const partnerId = ref('')
+const partnerNickname = ref('')
+const error = ref('')
 
 const isFixed2v2 = computed(() => {
-  return props.tournament?.mode === 'TWO_VS_TWO_FIXED_TEAMS';
-});
+  return props.tournament?.mode === 'TWO_VS_TWO_FIXED_TEAMS'
+})
 
 watch(
   () => props.isOpen,
   (open) => {
     if (open) {
-      partnerId.value = '';
-      partnerNickname.value = '';
-      error.value = '';
+      partnerId.value = ''
+      partnerNickname.value = ''
+      error.value = ''
     }
-  }
-);
+  },
+)
 
 function handleClose() {
-  emit('close');
+  emit('close')
 }
 
 function handleSubmit() {
-  error.value = '';
+  error.value = ''
 
   if (isFixed2v2.value) {
     if (!partnerId.value.trim()) {
-      error.value = t('tournament.registration.partnerRequired');
-      return;
+      error.value = t('tournament.registration.partnerRequired')
+      return
     }
-    emit('register', { partnerId: partnerId.value.trim() });
+    emit('register', { partnerId: partnerId.value.trim() })
   } else {
-    emit('register', { partnerId: null });
+    emit('register', { partnerId: null })
   }
 }
 </script>
@@ -80,7 +83,12 @@ function handleSubmit() {
         >
           <span class="sr-only">{{ t('common.close') }}</span>
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -137,7 +145,9 @@ function handleSubmit() {
         </div>
       </div>
 
-      <div class="px-6 py-4 flex items-center justify-end gap-3 bg-surface-container-low border-t border-outline-variant/10">
+      <div
+        class="px-6 py-4 flex items-center justify-end gap-3 bg-surface-container-low border-t border-outline-variant/10"
+      >
         <button
           type="button"
           class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface rounded-xl transition-colors"
@@ -152,8 +162,15 @@ function handleSubmit() {
           class="px-5 py-2 text-sm font-medium text-on-primary bg-primary hover:bg-primary/90 disabled:opacity-50 rounded-xl transition-colors shadow-sm flex items-center gap-2"
           @click="handleSubmit"
         >
-          <span v-if="loading" class="inline-block w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
-          {{ loading ? t('tournament.registration.submitting') : t('tournament.registration.submitRegistration') }}
+          <span
+            v-if="loading"
+            class="inline-block w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"
+          ></span>
+          {{
+            loading
+              ? t('tournament.registration.submitting')
+              : t('tournament.registration.submitRegistration')
+          }}
         </button>
       </div>
     </div>

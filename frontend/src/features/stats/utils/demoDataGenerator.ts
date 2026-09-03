@@ -1,4 +1,9 @@
-import type { PlayerStats, TeamPairStats, Page, H2HStatsResponse } from '@/services/statisticsService'
+import type {
+  PlayerStats,
+  TeamPairStats,
+  Page,
+  H2HStatsResponse,
+} from '@/services/statisticsService'
 import type { MatchResponse, PagedResponse } from '@/services/matchService'
 import type { PlayerInsight } from '@/services/insightService'
 
@@ -10,20 +15,20 @@ export function generateDemoData(): PlayerStats {
       matches: 42,
       wins: 28,
       losses: 14,
-      winRate: 66.67
+      winRate: 66.67,
     },
     attacker: {
       matches: 22,
       wins: 16,
       losses: 6,
-      winRate: 72.73
+      winRate: 72.73,
     },
     defender: {
       matches: 20,
       wins: 12,
       losses: 8,
-      winRate: 60.00
-    }
+      winRate: 60.0,
+    },
   }
 }
 
@@ -39,7 +44,7 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
       matches: 18,
       wins: 14,
       losses: 4,
-      winRate: 77.78
+      winRate: 77.78,
     },
     {
       attackerId: 'demo-p2',
@@ -51,7 +56,7 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
       matches: 12,
       wins: 7,
       losses: 5,
-      winRate: 58.33
+      winRate: 58.33,
     },
     {
       attackerId: 'demo-p1',
@@ -63,7 +68,7 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
       matches: 10,
       wins: 6,
       losses: 4,
-      winRate: 60.0
+      winRate: 60.0,
     },
     {
       attackerId: 'demo-p4',
@@ -75,8 +80,8 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
       matches: 8,
       wins: 4,
       losses: 4,
-      winRate: 50.0
-    }
+      winRate: 50.0,
+    },
   ]
 
   return {
@@ -85,7 +90,7 @@ export function generateDemoTeamPairStats(): Page<TeamPairStats> {
     size: 10,
     totalElements: content.length,
     totalPages: 1,
-    number: 0
+    number: 0,
   }
 }
 
@@ -113,7 +118,10 @@ export function generateDemoH2HStats(opponentId?: string): H2HStatsResponse {
   }
 }
 
-export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?: string }): PagedResponse<MatchResponse> {
+export function generateDemoMatchHistory(currentUser?: {
+  id?: string
+  nickname?: string
+}): PagedResponse<MatchResponse> {
   const myId = currentUser?.id || 'demo-user-123'
   const myNick = currentUser?.nickname || 'Demo Player'
 
@@ -132,7 +140,7 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
       teamBAttackerNickname: 'Alice',
       teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
       teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
-      matchFormat: 'STANDARD'
+      matchFormat: 'STANDARD',
     },
     {
       id: 'demo-match-2',
@@ -143,9 +151,30 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
       teamBDefenderId: 'demo-p4',
       status: 'CONFIRMED',
       games: [
-        { teamAScore: 10, teamBScore: 8, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
-        { teamAScore: 6, teamBScore: 10, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' },
-        { teamAScore: 10, teamBScore: 5, teamAAttackerId: myId, teamADefenderId: 'demo-p3', teamBAttackerId: 'demo-p2', teamBDefenderId: 'demo-p4' }
+        {
+          teamAScore: 10,
+          teamBScore: 8,
+          teamAAttackerId: myId,
+          teamADefenderId: 'demo-p3',
+          teamBAttackerId: 'demo-p2',
+          teamBDefenderId: 'demo-p4',
+        },
+        {
+          teamAScore: 6,
+          teamBScore: 10,
+          teamAAttackerId: myId,
+          teamADefenderId: 'demo-p3',
+          teamBAttackerId: 'demo-p2',
+          teamBDefenderId: 'demo-p4',
+        },
+        {
+          teamAScore: 10,
+          teamBScore: 5,
+          teamAAttackerId: myId,
+          teamADefenderId: 'demo-p3',
+          teamBAttackerId: 'demo-p2',
+          teamBDefenderId: 'demo-p4',
+        },
       ],
       createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
       teamAAttackerNickname: myNick,
@@ -156,7 +185,7 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
       teamADefenderAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Charlie',
       teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Bob',
       teamBDefenderAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Diana',
-      matchFormat: 'STANDARD'
+      matchFormat: 'STANDARD',
     },
     {
       id: 'demo-match-3',
@@ -172,8 +201,8 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
       teamBAttackerNickname: myNick,
       teamAAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Alice',
       teamBAttackerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Demo',
-      matchFormat: 'STANDARD'
-    }
+      matchFormat: 'STANDARD',
+    },
   ]
 
   return {
@@ -183,7 +212,7 @@ export function generateDemoMatchHistory(currentUser?: { id?: string; nickname?:
     totalElements: content.length,
     totalPages: 1,
     first: true,
-    last: true
+    last: true,
   }
 }
 
@@ -198,7 +227,7 @@ export function generateDemoInsights(): PlayerInsight[] {
       descriptionKey: 'insights.winStreak.description',
       params: { streak: 4 },
       icon: 'local_fire_department',
-      drillDownUrl: null
+      drillDownUrl: null,
     },
     {
       id: 'demo-insight-2',
@@ -209,7 +238,7 @@ export function generateDemoInsights(): PlayerInsight[] {
       descriptionKey: 'insights.formTrend.description',
       params: { recentWinRate: 80, careerWinRate: 60, diff: 20 },
       icon: 'trending_up',
-      drillDownUrl: null
+      drillDownUrl: null,
     },
     {
       id: 'demo-insight-3',
@@ -220,7 +249,7 @@ export function generateDemoInsights(): PlayerInsight[] {
       descriptionKey: 'insights.bestPartnership.description',
       params: { partnerId: 'demo-p2', partnerName: 'Bob', winRate: 78, matches: 9 },
       icon: 'group',
-      drillDownUrl: '/statistics?tab=teams'
+      drillDownUrl: '/statistics?tab=teams',
     },
     {
       id: 'demo-insight-4',
@@ -231,7 +260,7 @@ export function generateDemoInsights(): PlayerInsight[] {
       descriptionKey: 'insights.positionalMastery.description',
       params: { favoredPosition: 'Attacker', higherWinRate: 73, lowerWinRate: 50 },
       icon: 'sports_score',
-      drillDownUrl: null
+      drillDownUrl: null,
     },
     {
       id: 'demo-insight-5',
@@ -242,10 +271,7 @@ export function generateDemoInsights(): PlayerInsight[] {
       descriptionKey: 'insights.milestoneProximity.description',
       params: { badgeCode: 'MATCHES_10', remaining: 2, current: 8, target: 10 },
       icon: 'military_tech',
-      drillDownUrl: '/cabinet'
-    }
+      drillDownUrl: '/cabinet',
+    },
   ]
 }
-
-
-

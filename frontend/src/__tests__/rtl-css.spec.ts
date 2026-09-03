@@ -59,6 +59,9 @@ describe('RTL-neutral CSS — AC7', () => {
       }
     })
 
-    expect(violations, `Physical direction CSS found in ${relativePath}:\n${violations.join('\n')}`).toEqual([])
+    expect(
+      violations,
+      `Physical direction CSS found in ${relativePath}:\n${violations.join('\n')}`,
+    ).toEqual([])
   })
 })

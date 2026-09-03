@@ -19,7 +19,7 @@ watch(
   () => props.playerId,
   (newId) => {
     insightStore.fetchInsights(newId)
-  }
+  },
 )
 
 const hasInsights = computed(() => {

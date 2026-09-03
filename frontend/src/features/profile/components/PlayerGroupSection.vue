@@ -47,7 +47,11 @@ function openEditModal(group: PlayerGroupResponse) {
   isModalOpen.value = true
 }
 
-async function handleSaveGroup(payload: { name: string; isFavorite: boolean; memberIds: string[] }) {
+async function handleSaveGroup(payload: {
+  name: string
+  isFavorite: boolean
+  memberIds: string[]
+}) {
   error.value = ''
   try {
     if (editingGroup.value) {
@@ -92,10 +96,7 @@ async function handleDeleteGroup(id: string) {
       {{ error }}
     </div>
 
-    <div
-      class="player-group-list space-y-2"
-      data-testid="player-group-list"
-    >
+    <div class="player-group-list space-y-2" data-testid="player-group-list">
       <div
         v-if="store.loading && store.groups.length === 0"
         class="p-4 rounded-xl bg-surface-container-low text-center text-xs text-on-surface-variant flex items-center justify-center gap-2"
@@ -119,8 +120,12 @@ async function handleDeleteGroup(id: string) {
       >
         <div class="space-y-1.5 min-w-0 flex-1 mr-2">
           <div class="flex items-center gap-1.5">
-            <span v-if="group.isFavorite" class="material-symbols-outlined text-sm text-yellow-400">star</span>
-            <span class="font-headline font-bold text-sm text-on-surface truncate">{{ group.name }}</span>
+            <span v-if="group.isFavorite" class="material-symbols-outlined text-sm text-yellow-400"
+              >star</span
+            >
+            <span class="font-headline font-bold text-sm text-on-surface truncate">{{
+              group.name
+            }}</span>
           </div>
           <div v-if="group.members && group.members.length > 0" class="flex items-center gap-1">
             <div class="flex -space-x-1.5 overflow-hidden">
@@ -175,17 +180,10 @@ async function handleDeleteGroup(id: string) {
     </div>
 
     <!-- Create/Edit Modal -->
-    <PlayerGroupModal
-      v-model="isModalOpen"
-      :group="editingGroup"
-      @save="handleSaveGroup"
-    />
+    <PlayerGroupModal v-model="isModalOpen" :group="editingGroup" @save="handleSaveGroup" />
 
     <!-- Challenge Group Modal -->
-    <ChallengeModal
-      v-model="isChallengeModalOpen"
-      :target-group="selectedChallengeGroup"
-    />
+    <ChallengeModal v-model="isChallengeModalOpen" :target-group="selectedChallengeGroup" />
   </section>
 </template>
 

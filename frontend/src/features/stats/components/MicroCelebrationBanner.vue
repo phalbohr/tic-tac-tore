@@ -60,7 +60,9 @@ function handleDrillDown() {
     data-testid="micro-celebration-banner"
   >
     <div class="flex items-start gap-3 flex-1 min-w-0">
-      <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+      <div
+        class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0"
+      >
         <span class="material-symbols-outlined text-xl">
           {{ insight.icon || 'celebration' }}
         </span>

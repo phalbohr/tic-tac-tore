@@ -32,13 +32,15 @@ const userTeam = computed<'A' | 'B' | 'NONE'>(() => {
 
   const isTeamA =
     (uid && (props.match.teamAAttackerId === uid || props.match.teamADefenderId === uid)) ||
-    (nick && (props.match.teamAAttackerNickname === nick || props.match.teamADefenderNickname === nick))
+    (nick &&
+      (props.match.teamAAttackerNickname === nick || props.match.teamADefenderNickname === nick))
 
   if (isTeamA) return 'A'
 
   const isTeamB =
     (uid && (props.match.teamBAttackerId === uid || props.match.teamBDefenderId === uid)) ||
-    (nick && (props.match.teamBAttackerNickname === nick || props.match.teamBDefenderNickname === nick))
+    (nick &&
+      (props.match.teamBAttackerNickname === nick || props.match.teamBDefenderNickname === nick))
 
   if (isTeamB) return 'B'
 
@@ -169,7 +171,9 @@ const scoreSummary = computed(() => {
       <!-- Team A -->
       <div class="flex items-center gap-2 flex-1 min-w-0">
         <div class="flex -space-x-2 shrink-0">
-          <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-low ring-2 ring-surface-container-highest">
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-low ring-2 ring-surface-container-highest"
+          >
             <AvatarBase
               :avatar="match.teamAAttackerAvatar"
               :name="formatPlayerName(match.teamAAttackerNickname)"
@@ -199,8 +203,13 @@ const scoreSummary = computed(() => {
       </div>
 
       <!-- Score Display -->
-      <div class="flex flex-col items-center justify-center shrink-0 px-3 py-1.5 rounded-xl bg-surface-container-low">
-        <span class="text-sm font-black tracking-tight text-on-surface" :data-testid="`match-score-${match.id}`">
+      <div
+        class="flex flex-col items-center justify-center shrink-0 px-3 py-1.5 rounded-xl bg-surface-container-low"
+      >
+        <span
+          class="text-sm font-black tracking-tight text-on-surface"
+          :data-testid="`match-score-${match.id}`"
+        >
           {{ scoreSummary }}
         </span>
       </div>
@@ -219,7 +228,9 @@ const scoreSummary = computed(() => {
           </span>
         </div>
         <div class="flex -space-x-2 shrink-0">
-          <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-low ring-2 ring-surface-container-highest">
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-low ring-2 ring-surface-container-highest"
+          >
             <AvatarBase
               :avatar="match.teamBAttackerAvatar"
               :name="formatPlayerName(match.teamBAttackerNickname)"

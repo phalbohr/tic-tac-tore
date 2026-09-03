@@ -44,7 +44,12 @@ function syncFromQuery() {
 }
 
 watch(
-  () => [store.activeTab, store.filters.playerId, store.filters.matchType, store.filters.ruleConfigId],
+  () => [
+    store.activeTab,
+    store.filters.playerId,
+    store.filters.matchType,
+    store.filters.ruleConfigId,
+  ],
   ([tab, playerId, matchType, ruleConfigId]) => {
     const query: Record<string, string> = { tab: tab as string }
     if (playerId) query.playerId = playerId as string
@@ -52,9 +57,8 @@ watch(
     if (ruleConfigId) query.ruleConfigId = ruleConfigId as string
 
     router.replace({ query })
-  }
+  },
 )
-
 
 const authStore = useAuthStore()
 
@@ -98,7 +102,7 @@ async function handleRejectionSubmit(payload: { reason: string; customReason: st
     const res = await pendingHelper.rejectMatch(
       rejectingMatchId.value,
       payload.reason,
-      payload.customReason
+      payload.customReason,
     )
     if (res.success) {
       isRejectModalOpen.value = false
@@ -141,7 +145,10 @@ function handleUndo() {
   <div class="w-full max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6" data-testid="my-matches-view">
     <!-- View Header -->
     <div class="flex items-center justify-between">
-      <h1 class="font-headline text-2xl font-black text-on-surface tracking-tight" data-testid="history-title">
+      <h1
+        class="font-headline text-2xl font-black text-on-surface tracking-tight"
+        data-testid="history-title"
+      >
         {{ t('history.title', 'My Matches') }}
       </h1>
 
@@ -252,7 +259,9 @@ function handleUndo() {
         class="w-full flex flex-col items-center justify-center p-12 bg-surface-container-low rounded-2xl text-center space-y-4 shadow-xl"
         data-testid="pending-empty-state"
       >
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-highest text-emerald-400">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-highest text-emerald-400"
+        >
           <span class="material-symbols-outlined text-3xl">task_alt</span>
         </div>
         <div class="space-y-1">
@@ -284,5 +293,4 @@ function handleUndo() {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

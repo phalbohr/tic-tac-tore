@@ -17,7 +17,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (e.defaultPrevented) return
   const target = e.target as HTMLElement
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return
-  
+
   if (e.key === 'Escape') {
     completeTutorial()
   } else if (e.key === 'ArrowRight' || e.key === ' ') {
@@ -54,13 +54,13 @@ const scrollToSlide = (index: number) => {
   if (!carouselRef.value) return
   isScrolling.value = true
   currentSlide.value = Math.max(0, Math.min(totalSlides - 1, index))
-  
+
   const targetScrollLeft = carouselRef.value.clientWidth * currentSlide.value
   carouselRef.value.scrollTo({
     left: targetScrollLeft,
     behavior: 'smooth',
   })
-  
+
   let frameCount = 0
   const checkScroll = () => {
     frameCount++
@@ -86,7 +86,8 @@ const completeTutorial = async () => {
   } catch (error) {
     console.error('Failed to complete tutorial', error)
     const errStr = t('tutorial.error')
-    errorMessage.value = errStr === 'tutorial.error' ? 'Failed to complete tutorial. Please try again.' : errStr
+    errorMessage.value =
+      errStr === 'tutorial.error' ? 'Failed to complete tutorial. Please try again.' : errStr
   } finally {
     isCompleting.value = false
   }
@@ -136,7 +137,9 @@ onUnmounted(() => {
         :aria-hidden="currentSlide !== 0"
       >
         <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-primary" style="font-size: 10rem;">add_circle</span>
+          <span class="material-symbols-outlined text-primary" style="font-size: 10rem"
+            >add_circle</span
+          >
         </div>
         <div class="text-center space-y-4 max-w-xs">
           <h2 class="text-3xl font-headline font-bold text-on-surface">
@@ -155,7 +158,9 @@ onUnmounted(() => {
         :aria-hidden="currentSlide !== 1"
       >
         <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-primary" style="font-size: 10rem;">notifications_active</span>
+          <span class="material-symbols-outlined text-primary" style="font-size: 10rem"
+            >notifications_active</span
+          >
         </div>
         <div class="text-center space-y-4 max-w-xs">
           <h2 class="text-3xl font-headline font-bold text-on-surface">
@@ -174,7 +179,9 @@ onUnmounted(() => {
         :aria-hidden="currentSlide !== 2"
       >
         <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-primary" style="font-size: 10rem;">leaderboard</span>
+          <span class="material-symbols-outlined text-primary" style="font-size: 10rem"
+            >leaderboard</span
+          >
         </div>
         <div class="text-center space-y-4 max-w-xs">
           <h2 class="text-3xl font-headline font-bold text-on-surface">

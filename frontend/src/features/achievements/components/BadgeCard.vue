@@ -67,7 +67,9 @@ const statusClasses = computed(() => {
   return isAntiAchievement.value ? 'text-ch-secondary' : 'text-ch-primary'
 })
 
-const showProgress = computed(() => Boolean(props.badge.hasProgress && !props.badge.isUnlocked && props.badge.targetValue))
+const showProgress = computed(() =>
+  Boolean(props.badge.hasProgress && !props.badge.isUnlocked && props.badge.targetValue),
+)
 
 const progressPercentage = computed(() => {
   if (!props.badge.targetValue || props.badge.targetValue <= 0) return 0
@@ -114,11 +116,7 @@ const progressRatioText = computed(() => {
     </span>
 
     <!-- Mini Progress Bar for Locked Progressive Badges -->
-    <div
-      v-if="showProgress"
-      class="w-full mt-2 space-y-1"
-      data-testid="badge-progress-container"
-    >
+    <div v-if="showProgress" class="w-full mt-2 space-y-1" data-testid="badge-progress-container">
       <div
         data-testid="badge-progress-bar"
         class="w-full h-1.5 rounded-full bg-ch-surface-highest overflow-hidden"
