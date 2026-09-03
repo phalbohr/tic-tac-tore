@@ -1,6 +1,6 @@
 ---
 baseline_commit: 5f3c00e5f950c67ab11c4064e5db0e22fd05d12e
-status: review
+status: in-progress
 ---
 
 # Story 8.5: Asynchronous Tournament Match Execution
@@ -134,6 +134,23 @@ so that the tournament proceeds smoothly without bottlenecks, table starvation, 
       - Test 3: Match cancellation -> verify match status reverts to READY.
       - Test 4: Match completion -> submit and confirm match result, verify tournament match status becomes COMPLETED, standings update, and in Cup format next round match becomes READY.
   - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+
+### Review Findings
+
+- [ ] [Review][Patch] Link Match to TournamentMatch via optional tournamentMatchId in CreateMatchRequest (Resolved Decision: Pass tournamentMatchId from match entry flow into CreateMatchRequest and link tournamentMatch.setMatch(savedMatch) in MatchService to enable deterministic confirmation lookup)
+- [ ] [Review][Patch] Fix Cup winner seed propagation in advanceWinnerInCup [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:226]
+- [ ] [Review][Patch] Fix determineWinner team-to-participant mapping and tie handling [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:207]
+- [ ] [Review][Patch] Allow round 2+ matches to be available in Championship and 2v2 modes [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
+- [ ] [Review][Patch] Allow doubles partners to start/cancel matches and include them in event user IDs [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:585]
+- [ ] [Review][Patch] Delegate match completion to TournamentMatchService.completeMatch and replace @Autowired(required=false) with constructor injection [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:481]
+- [ ] [Review][Patch] Use dynamic availability calculation in TournamentMatchServiceImpl.mapToMatchResponse [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:746]
+- [ ] [Review][Patch] Exclude stub (BYE) matches from being marked available for play [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchQueryServiceImpl.java:402]
+- [ ] [Review][Patch] Add validateTournamentInProgress guard to cancelMatch [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:514]
+- [ ] [Review][Patch] Guard advanceWinnerInCup against overwriting already started or completed matches [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:234]
+- [ ] [Review][Patch] Add null check for authPrincipal.getName() in TournamentController.resolveUserId [src/main/java/com/tictactore/controller/TournamentController.java:77]
+- [x] [Review][Defer] Tournament status completion check on final match conclusion [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:197] — deferred, pre-existing
+- [x] [Review][Defer] Optimistic locking retry mechanism for concurrent feeder completion in Cup bracket [src/main/java/com/tictactore/listener/TournamentMatchEventListener.java:238] — deferred, pre-existing
+
 
 ## Dev Notes
 
