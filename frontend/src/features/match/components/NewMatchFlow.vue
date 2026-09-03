@@ -17,21 +17,113 @@ const emit = defineEmits<{
   (e: 'complete'): void
 }>()
 
-onMounted(() => {
+onMounted(async () => {
   store.fetchDefaults()
   authStore.fetchProfile()
   if (route.query.tournamentId && route.query.tournamentMatchId) {
-    const rawPlayerIds = route.query.playerIds
+    const tournId = String(route.query.tournamentId)
+    const matchId = String(route.query.tournamentMatchId)
+
+    let rawPlayerIds = route.query.playerIds
       ? String(route.query.playerIds).split(',').filter(Boolean)
       : undefined
-    const matchTypeParam =
-      route.query.matchType === '2v2' ? MatchType.TWO_VS_TWO : MatchType.ONE_VS_ONE
+    let matchTypeParam =
+      route.query.matchType === '2v2'
+        ? MatchType.TWO_VS_TWO
+        : route.query.matchType === '1v1'
+          ? MatchType.ONE_VS_ONE
+          : undefined
+    let ruleConfigId = route.query.ruleConfigId ? String(route.query.ruleConfigId) : undefined
+    let ruleSystemName = route.query.ruleSystemName ? String(route.query.ruleSystemName) : undefined
+
+    // Immediate synchronous context initialization from route query
     store.setTournamentContext({
-      tournamentId: String(route.query.tournamentId),
-      tournamentMatchId: String(route.query.tournamentMatchId),
-      ruleConfigId: route.query.ruleConfigId ? String(route.query.ruleConfigId) : undefined,
-      ruleSystemName: route.query.ruleSystemName ? String(route.query.ruleSystemName) : undefined,
-      matchType: matchTypeParam,
+      tournamentId: tournId,
+      tournamentMatchId: matchId,
+      ruleConfigId,
+      ruleSystemName,
+      matchType: matchTypeParam || MatchType.ONE_VS_ONE,
+      playerIds: rawPlayerIds,
+    })
+
+    if (!rawPlayerIds || rawPlayerIds.length === 0 || !matchTypeParam || !ruleConfigId) {
+      try {
+        const [matchesRes, tournRes] = await Promise.all([
+          fetch(`/api/v1/tournaments/${tournId}/matches`),
+          fetch(`/api/v1/tournaments/${tournId}`),
+        ])
+        if (matchesRes.ok) {
+          const matches: any[] = await matchesRes.json()
+          const targetMatch = matches.find((m) => m.id === matchId)
+          if (targetMatch) {
+            if (!ruleConfigId && targetMatch.ruleConfigurationId) {
+              ruleConfigId = targetMatch.ruleConfigurationId
+            }
+            if (!ruleSystemName && targetMatch.ruleConfigurationName) {
+              ruleSystemName = targetMatch.ruleConfigurationName
+            }
+
+            let is2v2 = matchTypeParam === MatchType.TWO_VS_TWO
+            if (!matchTypeParam && tournRes.ok) {
+              const tourn = await tournRes.json()
+              is2v2 = tourn.mode !== 'ONE_VS_ONE_PERSONAL'
+              matchTypeParam = is2v2 ? MatchType.TWO_VS_TWO : MatchType.ONE_VS_ONE
+            } else if (!matchTypeParam) {
+              is2v2 = Boolean(
+                targetMatch.participant1Partner ||
+                  targetMatch.participant2Partner ||
+                  targetMatch.participant1?.partnerId,
+              )
+              matchTypeParam = is2v2 ? MatchType.TWO_VS_TWO : MatchType.ONE_VS_ONE
+            }
+
+            if (!rawPlayerIds || rawPlayerIds.length === 0) {
+              const p1Id = targetMatch.participant1?.playerId || targetMatch.participant1?.player?.id
+              const p1PartnerId =
+                targetMatch.participant1Partner?.playerId ||
+                targetMatch.participant1Partner?.player?.id ||
+                targetMatch.participant1?.partnerId ||
+                targetMatch.participant1?.partner?.id
+              const p2Id = targetMatch.participant2?.playerId || targetMatch.participant2?.player?.id
+              const p2PartnerId =
+                targetMatch.participant2Partner?.playerId ||
+                targetMatch.participant2Partner?.player?.id ||
+                targetMatch.participant2?.partnerId ||
+                targetMatch.participant2?.partner?.id
+
+              if (is2v2) {
+                rawPlayerIds = [p1PartnerId, p1Id, p2PartnerId, p2Id].filter(Boolean)
+              } else {
+                rawPlayerIds = [p1Id, p2Id].filter(Boolean)
+              }
+            }
+
+            const populatePlayer = (part: any) => {
+              if (!part) return
+              const id = part.playerId || part.player?.id
+              const nickname = part.playerNickname || part.player?.nickname || 'Player'
+              const avatar = part.playerAvatarUrl || part.player?.avatarUrl || ''
+              if (id) {
+                store.fetchedPlayers[id] = { id, nickname, avatar }
+              }
+            }
+            populatePlayer(targetMatch.participant1)
+            populatePlayer(targetMatch.participant1Partner)
+            populatePlayer(targetMatch.participant2)
+            populatePlayer(targetMatch.participant2Partner)
+          }
+        }
+      } catch {
+        // Fallback gracefully
+      }
+    }
+
+    store.setTournamentContext({
+      tournamentId: tournId,
+      tournamentMatchId: matchId,
+      ruleConfigId,
+      ruleSystemName,
+      matchType: matchTypeParam || MatchType.ONE_VS_ONE,
       playerIds: rawPlayerIds,
     })
   } else {

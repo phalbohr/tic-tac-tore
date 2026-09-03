@@ -28,7 +28,10 @@ const draftStore = useMatchDraftStore()
 const effectivelyLocked = computed(() => Boolean(props.isLocked || draftStore.isTournamentMatch))
 
 const selectedRuleId = ref<string | null>(
-  draftStore.ruleConfigurationId || ruleStore.selectedRuleId || authStore.profile?.defaultRuleConfigurationId || null,
+  draftStore.ruleConfigurationId ||
+    ruleStore.selectedRuleId ||
+    (!effectivelyLocked.value ? authStore.profile?.defaultRuleConfigurationId : null) ||
+    null,
 )
 const isModalOpen = ref(false)
 const modalError = ref('')
@@ -70,15 +73,23 @@ onMounted(async () => {
     }
   }
   if (draftStore.ruleConfigurationId) {
+    selectedRuleId.value = draftStore.ruleConfigurationId
     const targetRule = ruleStore.allRules.find((r) => r.id === draftStore.ruleConfigurationId)
+    if (targetRule) {
+      ruleStore.selectRule(targetRule.id)
+      draftStore.ruleSystem = targetRule.name
+    }
+  } else if (draftStore.ruleSystem) {
+    const targetRule = ruleStore.allRules.find(
+      (r) =>
+        r.id === draftStore.ruleSystem ||
+        r.name?.toUpperCase() === draftStore.ruleSystem?.toUpperCase(),
+    )
     if (targetRule) {
       selectedRuleId.value = targetRule.id
       ruleStore.selectRule(targetRule.id)
-      draftStore.ruleSystem = targetRule.name
-    } else {
-      selectedRuleId.value = draftStore.ruleConfigurationId
     }
-  } else if (!selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
+  } else if (!effectivelyLocked.value && !selectedRuleId.value && authStore.profile?.defaultRuleConfigurationId) {
     const defaultRule = ruleStore.allRules.find(
       (r) => r.id === authStore.profile?.defaultRuleConfigurationId,
     )
@@ -89,12 +100,9 @@ onMounted(async () => {
 })
 
 const selectedRule = computed(() => {
-  if (draftStore.ruleConfigurationId) {
-    const found = ruleStore.allRules.find((r) => r.id === draftStore.ruleConfigurationId)
-    if (found) return found
-  }
-  if (selectedRuleId.value) {
-    const found = ruleStore.allRules.find((r) => r.id === selectedRuleId.value)
+  const targetId = draftStore.ruleConfigurationId || selectedRuleId.value
+  if (targetId) {
+    const found = ruleStore.allRules.find((r) => r.id === targetId)
     if (found) return found
   }
   return (
@@ -111,8 +119,10 @@ function isSelected(rule: { id: string; name: string }) {
   if (draftStore.ruleConfigurationId) {
     return draftStore.ruleConfigurationId === rule.id
   }
+  if (selectedRuleId.value) {
+    return selectedRuleId.value === rule.id
+  }
   return (
-    selectedRuleId.value === rule.id ||
     ruleStore.selectedRuleId === rule.id ||
     draftStore.ruleSystem?.toUpperCase() === rule.name?.toUpperCase() ||
     draftStore.ruleSystem === rule.id
