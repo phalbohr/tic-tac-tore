@@ -16,6 +16,8 @@ import java.util.UUID;
 @Repository
 public interface TournamentMatchRepository extends JpaRepository<TournamentMatch, UUID> {
 
+    List<TournamentMatch> findByTournamentId(UUID tournamentId);
+
     @EntityGraph(attributePaths = {
             "tournament",
             "participant1",

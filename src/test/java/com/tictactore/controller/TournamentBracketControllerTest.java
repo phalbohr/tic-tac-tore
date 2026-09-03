@@ -65,6 +65,9 @@ class TournamentBracketControllerTest {
     private com.tictactore.service.tournament.TournamentMatchService tournamentMatchService;
 
     @MockBean
+    private com.tictactore.service.tournament.TournamentStandingsService tournamentStandingsService;
+
+    @MockBean
     private TokenRevocationService tokenRevocationService;
 
     @MockBean

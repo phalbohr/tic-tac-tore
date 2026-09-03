@@ -10,6 +10,7 @@ import type {
   RegistrationStatus,
   TournamentBracketDto,
   TournamentMatchDto,
+  TournamentStandingDto,
 } from '@/features/tournament/types/tournament'
 import * as tournamentService from '@/features/tournament/services/tournamentService'
 import * as registrationService from '@/features/tournament/services/tournamentRegistrationService'
@@ -23,6 +24,13 @@ export const useTournamentStore = defineStore('tournament', () => {
   const pendingInvitations = ref<TournamentRegistrationDto[]>([])
   const brackets = ref<Record<string, TournamentBracketDto>>({})
   const matches = ref<Record<string, TournamentMatchDto[]>>({})
+  const standings = ref<Record<string, TournamentStandingDto[]>>({})
+  const archiveTournaments = ref<TournamentDto[]>([])
+  const archivePage = ref<number>(0)
+  const archiveTotalPages = ref<number>(0)
+  const archiveTotalElements = ref<number>(0)
+  const isArchiveLoading = ref<boolean>(false)
+  const isStandingsLoading = ref<boolean>(false)
   const isLoading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
@@ -53,6 +61,38 @@ export const useTournamentStore = defineStore('tournament', () => {
       throw err
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function fetchArchive(page: number = 0, size: number = 10): Promise<void> {
+    isArchiveLoading.value = true
+    error.value = null
+    try {
+      const res = await tournamentService.getTournamentsPaginated('COMPLETED', page, size)
+      archiveTournaments.value = res.content
+      archivePage.value = res.number
+      archiveTotalPages.value = res.totalPages
+      archiveTotalElements.value = res.totalElements
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch tournament archive'
+      throw err
+    } finally {
+      isArchiveLoading.value = false
+    }
+  }
+
+  async function fetchStandings(tournamentId: string): Promise<TournamentStandingDto[]> {
+    isStandingsLoading.value = true
+    error.value = null
+    try {
+      const items = await tournamentService.getTournamentStandings(tournamentId)
+      standings.value[tournamentId] = items
+      return items
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch tournament standings'
+      throw err
+    } finally {
+      isStandingsLoading.value = false
     }
   }
 
@@ -331,10 +371,19 @@ export const useTournamentStore = defineStore('tournament', () => {
     pendingInvitations,
     brackets,
     matches,
+    standings,
+    archiveTournaments,
+    archivePage,
+    archiveTotalPages,
+    archiveTotalElements,
+    isArchiveLoading,
+    isStandingsLoading,
     isLoading,
     error,
     createTournament,
     fetchTournaments,
+    fetchArchive,
+    fetchStandings,
     fetchTournamentById,
     register,
     acceptInvite,

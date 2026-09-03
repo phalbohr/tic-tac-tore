@@ -477,3 +477,7 @@ status: open
 - Ambiguous participant array indexing in 2v2 submissions [frontend/src/features/match/stores/matchDraftStore.ts:701] — Pre-existing indexing convention in store.
 - Playwright skipped tests in api/tournament-rule-enforcement.spec.ts [frontend/e2e/tests/api/tournament-rule-enforcement.spec.ts:29] — Skipped due to lack of DB seed fixtures for API integration test.
 
+## Deferred from: code review of 8-7-tournament-standings-and-archive.md (2026-09-03)
+- Missing alias route GET /api/v1/tournaments/archive [src/main/java/com/tictactore/controller/TournamentController.java:30] — deferred, pre-existing status query parameter works.
+- Playwright skipped tests in tournament-standings-archive [frontend/e2e/tournament-standings-archive.spec.ts:14] — deferred, skipped due to lack of DB seed fixtures in local Playwright test harness.
+

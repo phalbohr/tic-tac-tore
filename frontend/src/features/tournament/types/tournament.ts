@@ -45,6 +45,7 @@ export interface TournamentDto {
   creatorId: string
   creatorNickname: string
   createdAt: string
+  updatedAt?: string | null
 }
 
 export interface RegisterTournamentPayload {
@@ -122,4 +123,33 @@ export interface TournamentBracketDto {
   totalRounds: number
   rounds: RoundMatchesDto[]
   seededParticipants: TournamentRegistrationDto[]
+}
+
+export interface TournamentStandingDto {
+  registrationId: string
+  userId?: string | null
+  nickname: string
+  avatarUrl?: string | null
+  partnerUserId?: string | null
+  partnerNickname?: string | null
+  partnerAvatarUrl?: string | null
+  matchesPlayed: number
+  wins: number
+  losses: number
+  gamesWon: number
+  gamesLost: number
+  gameDifference: number
+  points: number
+  isEliminated: boolean
+  rank?: number
+}
+
+export interface PageDto<T> {
+  content: T[]
+  totalPages: number
+  totalElements: number
+  number: number
+  size: number
+  first?: boolean
+  last?: boolean
 }
