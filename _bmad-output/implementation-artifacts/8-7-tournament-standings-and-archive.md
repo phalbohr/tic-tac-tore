@@ -1,6 +1,6 @@
 ---
 baseline_commit: d4cc6e4c61c55b85a49510d2029b6263720fc529
-status: review
+status: in-progress
 ---
 
 # Story 8.7: Tournament Standings & Archive
@@ -151,6 +151,24 @@ so that I can track competition progress, identify champions, and retain histori
       - Embed `TournamentStandings.vue` when `Standings` tab is selected.
   - [x] Add i18n translation keys in `frontend/src/locales/en.json` and `frontend/src/locales/de.json` under `tournament.standings.*` and `tournament.archive.*`.
   - [x] Update component tests in `frontend/src/features/tournament/views/__tests__/TournamentsView.spec.ts`.
+
+### Review Findings
+
+- [ ] [Review][Patch] Implement CUP tournament standings ranking by deepest round reached and match wins (AC 3) [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:132-139]
+- [ ] [Review][Patch] Prevent CUP tournament completion without declared winner [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:122-125]
+- [ ] [Review][Patch] Fix inverted score calculation when primary participant is anonymized or in 2v2 partner slot [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:69-89]
+- [ ] [Review][Patch] Add Anonymous fallback for deleted 2v2 partner nickname under GDPR [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:191]
+- [ ] [Review][Patch] Return 404 ResourceNotFoundException for nonexistent tournament UUID in standings API [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:38-41]
+- [ ] [Review][Patch] Filter tournament registrations to CONFIRMED status in standings calculation [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:38]
+- [ ] [Review][Patch] Add deterministic tie-breaker (registrationId) to standings comparator [src/main/java/com/tictactore/service/tournament/impl/TournamentStandingsServiceImpl.java:138]
+- [ ] [Review][Patch] Remove dead calculateStandings call in TournamentMatchServiceImpl.completeMatch [src/main/java/com/tictactore/service/tournament/impl/TournamentMatchServiceImpl.java:108]
+- [ ] [Review][Patch] Add missing GW and GL columns to TournamentStandings table [frontend/src/features/tournament/components/TournamentStandings.vue:53-70]
+- [ ] [Review][Patch] Fix incorrect Active badge for non-eliminated participants in completed tournaments [frontend/src/features/tournament/components/TournamentStandings.vue:192-198]
+- [ ] [Review][Patch] Display tournament completion date (updatedAt) instead of createdAt on archive cards [frontend/src/features/tournament/views/TournamentsView.vue:518]
+- [ ] [Review][Patch] Handle rejected promises in openBracket and prevent silent failure [frontend/src/features/tournament/views/TournamentsView.vue:105-112]
+- [ ] [Review][Patch] Isolate standings loading state in tournamentStore to avoid collapsing main view [frontend/src/features/tournament/stores/tournamentStore.ts:84,94]
+- [x] [Review][Defer] Missing alias route GET /api/v1/tournaments/archive [src/main/java/com/tictactore/controller/TournamentController.java:30] — deferred, pre-existing status query parameter works
+- [x] [Review][Defer] Playwright skipped tests in tournament-standings-archive [frontend/e2e/tournament-standings-archive.spec.ts:14] — deferred, skipped due to lack of DB seed fixtures in local Playwright test harness
 
 ## Dev Agent Guardrails & Implementation Details
 

@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: '2026-09-02T15:07:18Z'
+# last_updated: '2026-09-03T21:40:05Z'
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -109,6 +109,6 @@ development_status:
   8-4-equal-match-distribution-2v2-random-pairing: in-progress
   8-5-asynchronous-tournament-match-execution: review
   8-6-tournament-rule-system-enforcement: review
-  8-7-tournament-standings-and-archive: review
+  8-7-tournament-standings-and-archive: in-progress
   8-8-tournament-confirmation-deadline: backlog
   epic-8-retrospective: optional
