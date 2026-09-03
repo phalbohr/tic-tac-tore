@@ -152,6 +152,8 @@ async function handleStartMatch(matchId: string) {
       query: {
         tournamentId: activeBracketTournament.value.id,
         tournamentMatchId: matchId,
+        ruleConfigId: activeBracketTournament.value.ruleConfiguration?.id,
+        ruleSystemName: activeBracketTournament.value.ruleConfiguration?.name,
       },
     })
   } catch (err: unknown) {

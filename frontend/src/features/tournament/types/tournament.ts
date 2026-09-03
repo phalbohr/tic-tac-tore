@@ -103,6 +103,8 @@ export interface TournamentMatchDto {
   isAvailable?: boolean
   isOpponentBusy?: boolean
   busyParticipantNicknames?: string[]
+  ruleConfigurationId?: string | null
+  ruleConfigurationName?: string | null
 }
 
 export interface RoundMatchesDto {

@@ -12,7 +12,7 @@ async function loginUser(page: Page, prefix = 'tourn-rule') {
 }
 
 test.describe('Tournament Rule System Enforcement E2E (Story 8.6)', () => {
-  test.skip('[P0] should lock rule system and prefill participants when match entry initiated from tournament (AC1, AC2)', async ({
+  test('[P0] should lock rule system and prefill participants when match entry initiated from tournament (AC1, AC2)', async ({
     page,
   }) => {
     await loginUser(page)
@@ -27,6 +27,24 @@ test.describe('Tournament Rule System Enforcement E2E (Story 8.6)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ id: currentUserId, nickname: 'Alice' }),
+      }),
+    )
+
+    await page.route('**/api/v1/rule-configurations*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: ruleConfigId,
+            name: 'Official 10pt Standard',
+            type: 'PRESET',
+            scoreLimit: 10,
+            gameLimit: 3,
+            winsNeeded: 2,
+            winByTwo: false,
+          },
+        ]),
       }),
     )
 
@@ -46,7 +64,7 @@ test.describe('Tournament Rule System Enforcement E2E (Story 8.6)', () => {
     // "+ Custom Rule" action button is hidden
     await expect(
       page.locator('[data-testid="create-custom-rule-inline-btn"]'),
-    ).not.toBeVisible()
+    ).toBeHidden()
 
     // Selected rule chip displays lock indicator
     const selectedChip = rulePicker.locator('.active, [data-rule-id="rule-official-10pt"]')

@@ -27,5 +27,7 @@ public record TournamentMatchResponse(
         Instant createdAt,
         boolean isAvailable,
         boolean isOpponentBusy,
-        java.util.List<String> busyParticipantNicknames
+        java.util.List<String> busyParticipantNicknames,
+        UUID ruleConfigurationId,
+        String ruleConfigurationName
 ) {}

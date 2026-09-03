@@ -45,6 +45,34 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
   const frequentOpponents = ref<PlayerDto[]>([])
   const fetchedPlayers = ref<Record<string, PlayerDto>>({})
 
+  const isTournamentMatch = computed(() => Boolean(tournamentMatchId.value))
+
+  function setTournamentContext(params: {
+    tournamentId: string
+    tournamentMatchId: string
+    ruleConfigId?: string
+    ruleSystemName?: string
+    matchType?: MatchType
+    playerIds?: string[]
+  }) {
+    tournamentId.value = params.tournamentId
+    tournamentMatchId.value = params.tournamentMatchId
+    if (params.ruleConfigId) {
+      ruleConfigurationId.value = params.ruleConfigId
+    }
+    if (params.ruleSystemName) {
+      ruleSystem.value = params.ruleSystemName
+    } else if (params.ruleConfigId) {
+      ruleSystem.value = params.ruleConfigId
+    }
+    if (params.matchType) {
+      matchType.value = params.matchType
+    }
+    if (params.playerIds && params.playerIds.length > 0) {
+      selectedPlayers.value = [...params.playerIds]
+    }
+  }
+
   const ruleConfig = ref<RuleConfig | null>(null)
   const games = ref<GameScore[]>([])
   const currentGame = ref<GameScore>({ team1Score: 0, team2Score: 0 })
@@ -675,6 +703,7 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
       teamBAttackerId,
       teamBDefenderId,
       tournamentMatchId: tournamentMatchId.value || undefined,
+      ruleConfigId: ruleConfigurationId.value || undefined,
       games: games.value.map((g) => ({
         teamAScore: g.team1Score,
         teamBScore: g.team2Score,
@@ -721,6 +750,8 @@ export const useMatchDraftStore = defineStore('matchDraft', () => {
     ruleConfigurationId,
     tournamentId,
     tournamentMatchId,
+    isTournamentMatch,
+    setTournamentContext,
     ruleSystem,
     frequentOpponents,
     fetchedPlayers,

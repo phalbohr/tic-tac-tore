@@ -50,15 +50,29 @@ class TournamentMatchQueryServiceTest {
     private TournamentRegistration reg2;
     private TournamentRegistration reg3;
 
+    private UUID ruleConfigId;
+    private String ruleConfigName;
+
     @BeforeEach
     void setUp() {
         tournamentId = UUID.randomUUID();
+        ruleConfigId = UUID.randomUUID();
+        ruleConfigName = "Official 3-Game Standard";
+
+        var ruleConfiguration = com.tictactore.model.RuleConfiguration.builder()
+                .id(ruleConfigId)
+                .name(ruleConfigName)
+                .gameLimit(3)
+                .goalLimit(10)
+                .build();
+
         tournament = Tournament.builder()
                 .id(tournamentId)
                 .name("Championship 2026")
                 .format(TournamentFormat.CHAMPIONSHIP)
                 .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
                 .status(TournamentStatus.IN_PROGRESS)
+                .ruleConfiguration(ruleConfiguration)
                 .build();
 
         var u1 = User.builder().id(UUID.randomUUID()).nickname("Alice").build();
@@ -152,5 +166,31 @@ class TournamentMatchQueryServiceTest {
         assertThat(bracket.rounds()).hasSize(1);
         assertThat(bracket.rounds().get(0).matches().get(0).isAvailable()).isTrue();
         assertThat(bracket.seededParticipants()).hasSize(3);
+    }
+
+    @Test
+    void shouldPopulateRuleConfigurationFieldsInMatchResponse() {
+        var match = TournamentMatch.builder()
+                .id(UUID.randomUUID())
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.READY)
+                .build();
+
+        when(tournamentRepository.existsById(tournamentId)).thenReturn(true);
+        when(tournamentMatchRepository.findByTournamentIdOrderByRoundAscMatchOrderAsc(tournamentId))
+                .thenReturn(List.of(match));
+        when(tournamentMatchRepository.findByTournamentIdAndStatus(tournamentId, TournamentMatchStatus.IN_PROGRESS))
+                .thenReturn(List.of());
+
+        var response = queryService.getTournamentMatches(tournamentId, null);
+
+        assertThat(response).hasSize(1);
+        var matchResponse = response.get(0);
+        assertThat(matchResponse.ruleConfigurationId()).isEqualTo(ruleConfigId);
+        assertThat(matchResponse.ruleConfigurationName()).isEqualTo(ruleConfigName);
     }
 }

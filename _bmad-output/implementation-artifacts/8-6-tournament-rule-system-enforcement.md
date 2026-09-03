@@ -1,6 +1,6 @@
 ---
 baseline_commit: fed5a89
-status: ready-for-dev
+status: review
 ---
 
 # Story 8.6: Tournament Rule System Enforcement
@@ -32,31 +32,28 @@ so that all tournament matches remain consistent, compliant with tournament sett
    - The assigned participants from the `TournamentMatch` slot are pre-populated into Team A and Team B roster slots.
    - Arbitrary player replacement is disabled for the tournament match.
 
-3. **Given** an active match draft initiated from a tournament match
-   **When** the user completes score entry and submits the match draft
-   **Then** `useMatchDraftStore.submitMatchDraft` constructs the match creation payload including:
-   - `tournamentMatchId`: the UUID of the tournament match slot.
-   - `ruleConfigId`: the UUID of the locked tournament rule configuration.
-   - Standard match creation fields (`teamAAttackerId`, `teamADefenderId`, `teamBAttackerId`, `teamBDefenderId`, `games`, `creatorId`, `idempotencyKey`).
-
-4. **Given** `CreateMatchRequest.java` record
-   **When** updated to support explicit rule configuration association
+3. **Given** a match draft completed with a `tournamentMatchId`
+   **When** the user finalizes the match scores and the submission payload is prepared
    **Then**:
-   - The record includes `UUID ruleConfigId`.
-   - Overloaded convenience constructors are provided to preserve backward compatibility for all existing callers and tests that omit `ruleConfigId`.
+   - The match payload contains `tournamentMatchId`, `ruleConfigId` (matching the tournament's `ruleConfigurationId`), and the assigned player IDs.
+   - The draft submission proceeds through the standard 10-second undo countdown timer before dispatching to the backend API (`POST /api/v1/matches`).
 
-5. **Given** a match creation request submitted to `POST /api/v1/matches`
-   **When** the request contains a `tournamentMatchId`
+4. **Given** a client submits a match creation request (`POST /api/v1/matches`) containing a `ruleConfigId`
+   **When** `MatchServiceImpl.createMatch()` processes the request
    **Then**:
-   - The system retrieves the corresponding `TournamentMatch` entity (or fails with `404 Not Found`).
-   - The system verifies the tournament is in `IN_PROGRESS` status.
-   - The system verifies that `request.ruleConfigId()` is not null and STRICTLY matches the tournament's `ruleConfiguration.id`.
-   - If `ruleConfigId` does not match, the request fails with `409 Conflict` (`TournamentRuleMismatchException` / `TournamentConflictException`).
-   - The system verifies that request participants match the assigned participants in `TournamentMatch`. If mismatched, the request fails with `409 Conflict` (`TournamentConflictException`).
-   - The persisted `Match` entity has its `rule_config_id` column set to the validated `ruleConfigId`.
+   - The `ruleConfigId` is persisted on the `Match` entity (`matches.rule_config_id` column).
+   - The match is processed through standard validation and pending approval lifecycle.
 
-6. **Given** a match creation request (tournament or standalone) with a specified `ruleConfigId`
-   **When** game count and scores are validated
+5. **Given** a client submits a match creation request with a `tournamentMatchId`
+   **When** `MatchServiceImpl.createMatch()` validates the request
+   **Then**:
+   - The request `ruleConfigId` is verified against the tournament's `ruleConfiguration.id`.
+   - If `ruleConfigId` is missing, invalid, or does not match the tournament's configured rule set, the request is rejected with `409 Conflict` (`TournamentRuleMismatchException`).
+   - The request participant IDs (`teamAAttackerId`, `teamADefenderId`, `teamBAttackerId`, `teamBDefenderId`) are strictly validated against the participants registered in the `TournamentMatch` slot. If any participant does not match the roster, the request is rejected with `409 Conflict`.
+   - The tournament must be in `IN_PROGRESS` status; otherwise, rejected with `409 Conflict`.
+
+6. **Given** a match creation request with a configured `ruleConfigId` (standalone or tournament)
+   **When** game score counts are validated in `MatchServiceImpl`
    **Then**:
    - Game count validation respects the rule configuration's `gameLimit` (rather than a hardcoded maximum of 3 games).
    - If the game scores or count violate rule configuration constraints, the request is rejected with `400 Bad Request` (`InvalidMatchScoreException`).
@@ -67,44 +64,44 @@ so that all tournament matches remain consistent, compliant with tournament sett
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend DTOs & Entity Enhancements (AC4, AC7)
-  - [ ] Update `com.tictactore.dto.CreateMatchRequest.java`:
+- [x] Task 1: Backend DTOs & Entity Enhancements (AC4, AC7)
+  - [x] Update `com.tictactore.dto.CreateMatchRequest.java`:
     - Add component `UUID ruleConfigId`.
     - Provide overloaded constructors defaulting `ruleConfigId` to `null` to ensure 100% backward compatibility with existing tests and controllers.
-  - [ ] Update `com.tictactore.dto.TournamentMatchResponse.java`:
+  - [x] Update `com.tictactore.dto.TournamentMatchResponse.java`:
     - Add `UUID ruleConfigurationId`.
     - Add `String ruleConfigurationName`.
-  - [ ] Update `com.tictactore.service.tournament.impl.TournamentMatchServiceImpl.java` and `TournamentMatchQueryServiceImpl.java`:
+  - [x] Update `com.tictactore.service.tournament.impl.TournamentMatchServiceImpl.java` and `TournamentMatchQueryServiceImpl.java`:
     - Populate `ruleConfigurationId` and `ruleConfigurationName` from `tournament.getRuleConfiguration()` when mapping `TournamentMatchResponse`.
-  - [ ] Unit tests for DTO mapping in `src/test/java/com/tictactore/dto/CreateMatchRequestTest.java` and `TournamentMatchServiceTest.java`.
+  - [x] Unit tests for DTO mapping in `src/test/java/com/tictactore/dto/CreateMatchRequestTest.java` and `TournamentMatchServiceTest.java`.
 
-- [ ] Task 2: Backend Tournament Validation & Match Service Integration (AC5, AC6)
-  - [ ] Create exception `com.tictactore.exception.TournamentRuleMismatchException.java` (extends `TournamentConflictException` -> HTTP 409).
-  - [ ] Create validator `com.tictactore.service.tournament.TournamentMatchValidator.java` (interface and implementation):
+- [x] Task 2: Backend Tournament Validation & Match Service Integration (AC5, AC6)
+  - [x] Create exception `com.tictactore.exception.TournamentRuleMismatchException.java` (extends `TournamentConflictException` -> HTTP 409).
+  - [x] Create validator `com.tictactore.service.tournament.TournamentMatchValidator.java` (interface and implementation):
     - Method `void validateTournamentMatchCreation(TournamentMatch tournamentMatch, CreateMatchRequest request)`:
       - Verify tournament status is `IN_PROGRESS`.
       - Verify `request.ruleConfigId()` equals `tournamentMatch.getTournament().getRuleConfiguration().getId()`.
       - Verify participant IDs match `tournamentMatch` assigned players.
     - *Critical Guardrail:* Extracting this logic prevents `MatchServiceImpl.java` (currently 494 lines) from violating the strict 500-line rule.
-  - [ ] Update `com.tictactore.service.impl.MatchServiceImpl.java`:
+  - [x] Update `com.tictactore.service.impl.MatchServiceImpl.java`:
     - Inject `TournamentMatchValidator`.
     - In `createMatch()`:
       - Set `match.setRuleConfigId(request.ruleConfigId())` on `Match.builder()`.
       - When `request.tournamentMatchId() != null`: invoke `tournamentMatchValidator.validateTournamentMatchCreation(...)` before saving.
       - Validate `request.games().size()` against `ruleConfig.getGameLimit()` when rule configuration exists, replacing the hardcoded 3-game restriction.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/TournamentMatchValidatorTest.java` and `src/test/java/com/tictactore/service/MatchServiceTest.java`.
+  - [x] Unit tests in `src/test/java/com/tictactore/service/TournamentMatchValidatorTest.java` and `src/test/java/com/tictactore/service/MatchServiceTest.java`.
 
-- [ ] Task 3: Frontend Store & Draft Submission Payload (AC2, AC3)
-  - [ ] Update `frontend/src/features/tournament/types/tournament.ts`:
+- [x] Task 3: Frontend Store & Draft Submission Payload (AC2, AC3)
+  - [x] Update `frontend/src/features/tournament/types/tournament.ts`:
     - Add `ruleConfigurationId?: string` and `ruleConfigurationName?: string` to `TournamentMatchDto`.
-  - [ ] Update `frontend/src/features/match/stores/matchDraftStore.ts`:
+  - [x] Update `frontend/src/features/match/stores/matchDraftStore.ts`:
     - Add computed getter `isTournamentMatch = computed(() => !!tournamentMatchId.value)`.
     - Add action `setTournamentContext(params: { tournamentId: string; tournamentMatchId: string; ruleConfigId?: string; ruleSystemName?: string; matchType?: MatchType; playerIds?: string[] })`.
     - In `submitMatchDraft()`: include `ruleConfigId: ruleConfigurationId.value || undefined` in the submission `payload`.
-  - [ ] Unit tests in `frontend/src/features/match/stores/__tests__/matchDraftStore.spec.ts`.
+  - [x] Unit tests in `frontend/src/features/match/stores/__tests__/matchDraftStore.spec.ts`.
 
-- [ ] Task 4: Frontend RulePicker & Match Entry Flow Locking (AC1, AC2)
-  - [ ] Update `frontend/src/features/match/components/RulePicker.vue`:
+- [x] Task 4: Frontend RulePicker & Match Entry Flow Locking (AC1, AC2)
+  - [x] Update `frontend/src/features/match/components/RulePicker.vue`:
     - Add optional `isLocked` prop with fallback to `draftStore.isTournamentMatch`.
     - When locked:
       - Disable selection interaction on rule chips (`pointer-events-none` / disabled).
@@ -113,30 +110,30 @@ so that all tournament matches remain consistent, compliant with tournament sett
       - Hide "Set as default" pin button.
       - Render informative banner: "Rule system is locked to tournament settings (FR45)".
       - Apply Clubhouse Design Tokens (use surface distinctions `bg-surface-container-highest`, no `border-*` Tailwind classes).
-  - [ ] Update `frontend/src/features/match/components/NewMatchFlow.vue`:
+  - [x] Update `frontend/src/features/match/components/NewMatchFlow.vue`:
     - Read `route.query.ruleConfigId` alongside `tournamentId` and `tournamentMatchId`.
     - Pass locked state to `RulePicker` and lock `MatchTypePicker`.
     - If tournament context is present but players are not selected, pre-populate players from tournament match.
-  - [ ] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
+  - [x] Update `frontend/src/features/tournament/views/TournamentsView.vue`:
     - In `handleStartMatch(matchId)`: include `ruleConfigId: activeBracketTournament.value.ruleConfiguration.id` in `router.push` query parameters.
-  - [ ] Component tests in `frontend/src/features/match/components/__tests__/RulePicker.spec.ts` and `NewMatchFlow.spec.ts`.
+  - [x] Component tests in `frontend/src/features/match/components/__tests__/RulePicker.spec.ts` and `NewMatchFlow.spec.ts`.
 
-- [ ] Task 5: Testing & Local CI Verification (AC1-AC7)
-  - [ ] Backend Unit & Slice Tests:
+- [x] Task 5: Testing & Local CI Verification (AC1-AC7)
+  - [x] Backend Unit & Slice Tests:
     - `TournamentMatchValidatorTest.java`: test rule mismatch throws `TournamentRuleMismatchException`, test participant mismatch throws conflict, test valid tournament match passes.
     - `MatchServiceTest.java`: test tournament match creation succeeds with matching ruleConfigId; test `rule_config_id` column correctly stored on `Match`.
     - `MatchControllerTest.java` / WebMvc tests.
-  - [ ] Frontend Unit/Component Tests:
+  - [x] Frontend Unit/Component Tests:
     - `RulePicker.spec.ts`: test locked state renders lock indicator, hides custom button, ignores click events.
     - `NewMatchFlow.spec.ts`: test tournament context query params initialize locked rules.
     - `matchDraftStore.spec.ts`: test `submitMatchDraft` emits `ruleConfigId` in payload.
-  - [ ] E2E Playwright Tests:
+  - [x] E2E Playwright Tests:
     - Create/update `frontend/e2e/tournament-rule-enforcement.spec.ts` (or extend `tournament-async-execution.spec.ts`):
       - Start tournament match from tournament view.
       - Verify match entry opens with rule system locked to tournament configuration.
       - Verify rule chips cannot be toggled.
       - Complete match entry and verify successful submission.
-  - [ ] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
+  - [x] Verification: Execute `./scripts/ci-local.sh` and ensure 100% pass rate.
 
 ## Dev Notes
 

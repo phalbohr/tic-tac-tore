@@ -20,11 +20,23 @@ const emit = defineEmits<{
 onMounted(() => {
   store.fetchDefaults()
   authStore.fetchProfile()
-  if (route.query.tournamentId) {
-    store.tournamentId = String(route.query.tournamentId)
-  }
-  if (route.query.tournamentMatchId) {
-    store.tournamentMatchId = String(route.query.tournamentMatchId)
+  if (route.query.tournamentId && route.query.tournamentMatchId) {
+    store.setTournamentContext({
+      tournamentId: String(route.query.tournamentId),
+      tournamentMatchId: String(route.query.tournamentMatchId),
+      ruleConfigId: route.query.ruleConfigId ? String(route.query.ruleConfigId) : undefined,
+      ruleSystemName: route.query.ruleSystemName ? String(route.query.ruleSystemName) : undefined,
+    })
+  } else {
+    if (route.query.tournamentId) {
+      store.tournamentId = String(route.query.tournamentId)
+    }
+    if (route.query.tournamentMatchId) {
+      store.tournamentMatchId = String(route.query.tournamentMatchId)
+    }
+    if (route.query.ruleConfigId) {
+      store.ruleConfigurationId = String(route.query.ruleConfigId)
+    }
   }
 })
 
@@ -86,10 +98,10 @@ function handleMatchReady() {
 
     <div class="w-full flex flex-col gap-2 text-start">
       <h3 class="text-on-surface font-headline font-bold mb-1">Match Type</h3>
-      <MatchTypePicker />
+      <MatchTypePicker :is-locked="store.isTournamentMatch" />
     </div>
 
-    <RulePicker />
+    <RulePicker :is-locked="store.isTournamentMatch" />
 
     <PlayerSelection />
     <div v-if="errorMsg" class="text-red-500 text-sm mt-2">{{ errorMsg }}</div>

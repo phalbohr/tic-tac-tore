@@ -130,6 +130,7 @@ async function handleSaveGroup(payload: {
       </div>
       <!-- Create Group Inline CTA -->
       <button
+        v-if="!store.isTournamentMatch"
         type="button"
         @click="isGroupModalOpen = true"
         class="text-xs font-bold text-primary hover:opacity-80 flex items-center gap-1 cursor-pointer transition-opacity"
@@ -142,7 +143,7 @@ async function handleSaveGroup(payload: {
 
     <!-- Player Group Chips -->
     <div
-      v-if="playerGroupStore.groups.length > 0"
+      v-if="!store.isTournamentMatch && playerGroupStore.groups.length > 0"
       class="flex gap-2 overflow-x-auto pb-2 mb-1 no-scrollbar select-none"
       data-testid="player-group-chips"
     >
@@ -211,7 +212,7 @@ async function handleSaveGroup(payload: {
         }}
       </span>
       <button
-        v-if="store.selectedPlayers[index - 1]"
+        v-if="!store.isTournamentMatch && store.selectedPlayers[index - 1]"
         type="button"
         @click="store.removePlayer(store.selectedPlayers[index - 1]!)"
         class="text-error font-bold px-2 cursor-pointer"
@@ -219,7 +220,7 @@ async function handleSaveGroup(payload: {
         X
       </button>
       <button
-        v-else
+        v-else-if="!store.isTournamentMatch"
         type="button"
         @click="store.openSearch()"
         class="text-on-surface-variant hover:text-primary transition-colors px-2 cursor-pointer"
@@ -231,7 +232,7 @@ async function handleSaveGroup(payload: {
     </div>
 
     <!-- Quick Player Selection (Filtered by group or Frequent Opponents) -->
-    <div v-if="quickPlayers.length > 0 && store.selectedPlayers.length < maxPlayers" class="mt-4">
+    <div v-if="!store.isTournamentMatch && quickPlayers.length > 0 && store.selectedPlayers.length < maxPlayers" class="mt-4">
       <h3 class="text-on-surface-variant font-bold text-sm mb-2">
         {{ activeGroup ? activeGroup.name : t('match.frequentOpponents', 'Frequent Opponents') }}
       </h3>

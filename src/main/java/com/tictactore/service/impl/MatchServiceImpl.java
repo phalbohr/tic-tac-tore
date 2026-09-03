@@ -42,17 +42,18 @@ public class MatchServiceImpl implements MatchService {
     private final com.tictactore.service.operation.MatchResponseMapper matchResponseMapper;
     private final com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
     private final com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository;
+    private final com.tictactore.service.tournament.TournamentMatchValidator tournamentMatchValidator;
+    private final com.tictactore.repository.RuleConfigurationRepository ruleConfigurationRepository;
 
     @org.springframework.beans.factory.annotation.Autowired
     public MatchServiceImpl(
-            MatchRepository matchRepository,
-            UserRepository userRepository,
-            MatchOperation matchOperation,
-            PushNotificationService pushNotificationService,
-            RateLimitService rateLimitService,
-            com.tictactore.service.operation.MatchResponseMapper matchResponseMapper,
+            MatchRepository matchRepository, UserRepository userRepository,
+            MatchOperation matchOperation, PushNotificationService pushNotificationService,
+            RateLimitService rateLimitService, com.tictactore.service.operation.MatchResponseMapper matchResponseMapper,
             com.tictactore.repository.PlayerGroupRepository playerGroupRepository,
-            com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository
+            com.tictactore.repository.TournamentMatchRepository tournamentMatchRepository,
+            com.tictactore.service.tournament.TournamentMatchValidator tournamentMatchValidator,
+            com.tictactore.repository.RuleConfigurationRepository ruleConfigurationRepository
     ) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
@@ -62,25 +63,23 @@ public class MatchServiceImpl implements MatchService {
         this.matchResponseMapper = matchResponseMapper != null ? matchResponseMapper : new com.tictactore.service.operation.MatchResponseMapper(userRepository);
         this.playerGroupRepository = playerGroupRepository;
         this.tournamentMatchRepository = tournamentMatchRepository;
+        this.tournamentMatchValidator = tournamentMatchValidator;
+        this.ruleConfigurationRepository = ruleConfigurationRepository;
     }
 
     public MatchServiceImpl(
-            MatchRepository matchRepository,
-            UserRepository userRepository,
-            MatchOperation matchOperation,
-            PushNotificationService pushNotificationService,
+            MatchRepository matchRepository, UserRepository userRepository,
+            MatchOperation matchOperation, PushNotificationService pushNotificationService,
             RateLimitService rateLimitService
     ) {
-        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null, null);
+        this(matchRepository, userRepository, matchOperation, pushNotificationService, rateLimitService, new com.tictactore.service.operation.MatchResponseMapper(userRepository), null, null, null, null);
     }
 
     @Override
     public MatchResponse createMatch(CreateMatchRequest request) {
         if (request.idempotencyKey() != null && !request.idempotencyKey().isBlank()) {
             var existing = matchRepository.findByIdempotencyKey(request.idempotencyKey());
-            if (existing.isPresent()) {
-                return matchResponseMapper.mapToResponse(existing.get());
-            }
+            if (existing.isPresent()) return matchResponseMapper.mapToResponse(existing.get());
         }
 
         rateLimitService.checkSubmissionLimit(request.creatorId() != null ? request.creatorId() : request.teamAAttackerId());
@@ -88,9 +87,20 @@ public class MatchServiceImpl implements MatchService {
         if (request.teamAAttackerId() == null || request.teamBAttackerId() == null) {
             throw new InvalidPositionException("Attacker IDs must not be null");
         }
-
         if ((request.teamADefenderId() == null) != (request.teamBDefenderId() == null)) {
             throw new InvalidPositionException("Asymmetric defenders: both teams must have a defender in 2v2 matches");
+        }
+
+        com.tictactore.model.TournamentMatch tournamentMatch = null;
+        if (request.tournamentMatchId() != null) {
+            if (tournamentMatchRepository == null) {
+                throw new ResourceNotFoundException("TournamentMatch", request.tournamentMatchId().toString());
+            }
+            tournamentMatch = tournamentMatchRepository.findById(request.tournamentMatchId())
+                    .orElseThrow(() -> new ResourceNotFoundException("TournamentMatch", request.tournamentMatchId().toString()));
+            if (tournamentMatchValidator != null) {
+                tournamentMatchValidator.validateTournamentMatchCreation(tournamentMatch, request);
+            }
         }
 
         List<UUID> playerIds = new ArrayList<>();
@@ -104,7 +114,6 @@ public class MatchServiceImpl implements MatchService {
             throw new DuplicatePlayerException("Same player selected in multiple positions");
         }
 
-
         List<User> foundUsers = userRepository.findAllById(playerIds);
         if (foundUsers.size() != playerIds.size()) {
             Set<UUID> foundIds = foundUsers.stream().map(User::getId).collect(Collectors.toSet());
@@ -112,8 +121,15 @@ public class MatchServiceImpl implements MatchService {
             throw new ParticipantNotFoundException("Player not found with ID: " + missingId);
         }
 
-        if (request.games() == null || request.games().isEmpty() || request.games().size() > 3) {
-            throw new InvalidMatchScoreException("Match must have between 1 and 3 games");
+        int maxGames = 3;
+        if (request.ruleConfigId() != null && ruleConfigurationRepository != null) {
+            var ruleConfig = ruleConfigurationRepository.findById(request.ruleConfigId())
+                    .orElseThrow(() -> new ResourceNotFoundException("RuleConfiguration", request.ruleConfigId().toString()));
+            maxGames = ruleConfig.getGameLimit();
+        }
+
+        if (request.games() == null || request.games().isEmpty() || request.games().size() > maxGames) {
+            throw new InvalidMatchScoreException("Match must have between 1 and " + maxGames + " games");
         }
 
         for (GameDto gameDto : request.games()) {
@@ -124,7 +140,6 @@ public class MatchServiceImpl implements MatchService {
         }
 
         UUID creator = request.creatorId() != null ? request.creatorId() : request.teamAAttackerId();
-
         boolean isParticipant = creator != null && (
                 creator.equals(request.teamAAttackerId())
                         || creator.equals(request.teamADefenderId())
@@ -144,6 +159,7 @@ public class MatchServiceImpl implements MatchService {
                 .status("PENDING_APPROVAL")
                 .entryMode(entryMode)
                 .matchFormat(matchFormat)
+                .ruleConfigId(request.ruleConfigId())
                 .createdAt(Instant.now())
                 .build();
 
@@ -196,11 +212,9 @@ public class MatchServiceImpl implements MatchService {
         }
 
         Match savedMatch = matchOperation.saveMatch(match);
-        if (request.tournamentMatchId() != null && tournamentMatchRepository != null) {
-            tournamentMatchRepository.findById(request.tournamentMatchId()).ifPresent(tm -> {
-                tm.setMatch(savedMatch);
-                tournamentMatchRepository.save(tm);
-            });
+        if (tournamentMatch != null) {
+            tournamentMatch.setMatch(savedMatch);
+            tournamentMatchRepository.save(tournamentMatch);
         }
 
         try {
@@ -255,11 +269,9 @@ public class MatchServiceImpl implements MatchService {
         Map<UUID, User> userMap = new HashMap<>();
         if (userRepository != null && !allUserIds.isEmpty()) {
             try {
-                for (User u : userRepository.findAllById(allUserIds)) {
-                    if (u != null && u.getId() != null) {
-                        userMap.put(u.getId(), u);
-                    }
-                }
+                userRepository.findAllById(allUserIds).forEach(u -> {
+                    if (u != null && u.getId() != null) userMap.put(u.getId(), u);
+                });
             } catch (Exception e) {
                 log.warn("Failed to resolve users for pending matches", e);
             }
@@ -307,9 +319,7 @@ public class MatchServiceImpl implements MatchService {
             if (request.teamADefenderId() != null) opponents.add(request.teamADefenderId());
         } else {
             opponents.addAll(allParticipants);
-            if (creatorId != null) {
-                opponents.remove(creatorId);
-            }
+            if (creatorId != null) opponents.remove(creatorId);
         }
         return opponents;
     }
@@ -325,16 +335,12 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found with ID: " + matchId));
 
         if (Match.STATUS_CONFIRMED.equals(match.getStatus())) {
-            if (match.hasConfirmed(userId)) {
-                return matchResponseMapper.mapToResponse(match);
-            }
+            if (match.hasConfirmed(userId)) return matchResponseMapper.mapToResponse(match);
             throw new InvalidMatchStateException("Match is already confirmed");
         }
 
-        if (Match.STATUS_PARTIALLY_CONFIRMED.equals(match.getStatus())) {
-            if (match.hasConfirmed(userId)) {
-                return matchResponseMapper.mapToResponse(match);
-            }
+        if (Match.STATUS_PARTIALLY_CONFIRMED.equals(match.getStatus()) && match.hasConfirmed(userId)) {
+            return matchResponseMapper.mapToResponse(match);
         }
 
         var updatedMatch = matchOperation.confirmMatch(match, userId);
@@ -452,11 +458,8 @@ public class MatchServiceImpl implements MatchService {
 
         Set<UUID> allUserIds = new HashSet<>();
         for (Match m : matchPage.getContent()) {
+            allUserIds.addAll(m.getParticipantIds());
             if (m.getCreatorId() != null) allUserIds.add(m.getCreatorId());
-            if (m.getTeamAAttackerId() != null) allUserIds.add(m.getTeamAAttackerId());
-            if (m.getTeamADefenderId() != null) allUserIds.add(m.getTeamADefenderId());
-            if (m.getTeamBAttackerId() != null) allUserIds.add(m.getTeamBAttackerId());
-            if (m.getTeamBDefenderId() != null) allUserIds.add(m.getTeamBDefenderId());
             if (m.getConfirmedByUserId() != null) allUserIds.add(m.getConfirmedByUserId());
             if (m.getRejectedByUserId() != null) allUserIds.add(m.getRejectedByUserId());
         }
@@ -464,11 +467,9 @@ public class MatchServiceImpl implements MatchService {
         Map<UUID, User> userMap = new HashMap<>();
         if (!allUserIds.isEmpty()) {
             try {
-                for (User u : userRepository.findAllById(allUserIds)) {
-                    if (u != null && u.getId() != null) {
-                        userMap.put(u.getId(), u);
-                    }
-                }
+                userRepository.findAllById(allUserIds).forEach(u -> {
+                    if (u != null && u.getId() != null) userMap.put(u.getId(), u);
+                });
             } catch (Exception e) {
                 log.warn("Failed to resolve users for match history", e);
             }
