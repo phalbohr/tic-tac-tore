@@ -1,5 +1,5 @@
 # generated: 2026-05-02
-# last_updated: '2026-09-04T07:32:18Z'
+# last_updated: '2026-09-04T20:25:00Z'
 # project: tic-tac-tore
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,13 +35,13 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-02"
-last_updated: '2026-09-04T07:32:18Z'
+last_updated: '2026-09-04T20:25:00Z'
 project: tic-tac-tore
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-project-initialization-and-authentication-via-google-oauth2: done
   1-1a-stateless-jwt-with-redis-denylist-and-bloom-filters: done
   1-1b-e2e-test-for-oauth2-login-flow: done
@@ -52,7 +52,7 @@ development_status:
   1-6-avatar-selection-and-management: done
   1-7-onboarding-tutorial: done
   epic-1-retrospective: done
-  epic-2: in-progress
+  epic-2: done
   2-1-rule-system-selection-and-inline-creation: done
   2-2-match-type-and-player-selection-portrait: done
   2-3-score-entry-and-automatic-completion: done
@@ -62,7 +62,7 @@ development_status:
   2-7-global-player-search-and-selection: done
 
   epic-2-retrospective: optional
-  epic-3: in-progress
+  epic-3: done
   3-1-confirmation-requests-and-push-notifications: done
   3-2-single-tap-confirmation-with-undo-window: done
   3-3-match-rejection-with-reason: done
@@ -71,44 +71,43 @@ development_status:
   3-6-submission-rate-limiting-anti-spam: done
   3-7-match-confirmation-visual-improvements: done
   epic-3-retrospective: optional
-  epic-4: in-progress
+  epic-4: done
   4-1-empty-state-and-demo-data: done
   4-2-global-leaderboard-with-filtering: done
   4-3-positional-statistics-attack-vs-defense: done
   4-4-team-pair-statistics: done
-  4-5-head-to-head-h2h-comparison: review
-  4-6-unified-match-history-my-matches: review
+  4-5-head-to-head-h2h-comparison: done
+  4-6-unified-match-history-my-matches: done
   epic-4-retrospective: optional
-  epic-5: in-progress
+  epic-5: done
   5-1-real-time-scoring-interface-landscape: done
-  5-2-live-activity-timeline-and-undo: review
-  5-3-live-position-swapping: review
-  5-4-third-party-referee-mode: review
-  5-5-screen-wake-lock-and-continuity: review
+  5-2-live-activity-timeline-and-undo: done
+  5-3-live-position-swapping: done
+  5-4-third-party-referee-mode: done
+  5-5-screen-wake-lock-and-continuity: done
   epic-5-retrospective: optional
-  epic-6: in-progress
-  6-1-named-player-groups-teams: review
-  6-1b-create-rule-template: review
-  6-2-default-team-and-rule-template: review
-  6-3-create-want-to-play-pool: review
-  6-4-join-existing-pool: review
-  6-5-pool-notifications: review
-  6-6-challenge-player-or-group: review
+  epic-6: done
+  6-1-named-player-groups-teams: done
+  6-1b-create-rule-template: done
+  6-2-default-team-and-rule-template: done
+  6-3-create-want-to-play-pool: done
+  6-4-join-existing-pool: done
+  6-5-pool-notifications: done
+  6-6-challenge-player-or-group: done
+  epic-7: done
+  7-1-achievement-system-badges: done
+  7-2-humorous-anti-achievements: done
+  7-3-award-wall-and-progress-tracking: done
+  7-4-narrative-match-broadcasts: done
+  7-5-auto-generated-statistical-insights: done
   epic-7-retrospective: optional
-  epic-7: in-progress
-  7-1-achievement-system-badges: in-progress
-  7-2-humorous-anti-achievements: review
-  7-3-award-wall-and-progress-tracking: review
-  7-4-narrative-match-broadcasts: backlog
-  7-5-auto-generated-statistical-insights: review
-  epic-7-retrospective: optional
-  epic-8: in-progress
-  8-1-tournament-creation-and-configuration: in-progress
-  8-2-team-registration-and-confirmation: review
-  8-3-automated-bracket-generation-and-seeding: in-progress
-  8-4-equal-match-distribution-2v2-random-pairing: in-progress
-  8-5-asynchronous-tournament-match-execution: review
-  8-6-tournament-rule-system-enforcement: review
-  8-7-tournament-standings-and-archive: review
-  8-8-tournament-confirmation-deadline: review
+  epic-8: done
+  8-1-tournament-creation-and-configuration: done
+  8-2-team-registration-and-confirmation: done
+  8-3-automated-bracket-generation-and-seeding: done
+  8-4-equal-match-distribution-2v2-random-pairing: done
+  8-5-asynchronous-tournament-match-execution: done
+  8-6-tournament-rule-system-enforcement: done
+  8-7-tournament-standings-and-archive: done
+  8-8-tournament-confirmation-deadline: done
   epic-8-retrospective: optional
