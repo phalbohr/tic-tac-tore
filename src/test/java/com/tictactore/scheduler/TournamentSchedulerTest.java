@@ -3,6 +3,7 @@ package com.tictactore.scheduler;
 import com.tictactore.model.Tournament;
 import com.tictactore.model.TournamentStatus;
 import com.tictactore.repository.TournamentRepository;
+import com.tictactore.service.tournament.TournamentConfirmationDeadlineService;
 import com.tictactore.service.tournament.TournamentLifecycleService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,9 @@ class TournamentSchedulerTest {
 
     @Mock
     private TournamentLifecycleService tournamentLifecycleService;
+
+    @Mock
+    private TournamentConfirmationDeadlineService tournamentConfirmationDeadlineService;
 
     @InjectMocks
     private TournamentScheduler scheduler;
@@ -50,5 +55,24 @@ class TournamentSchedulerTest {
 
         verify(tournamentLifecycleService).startTournament(t1);
         verify(tournamentLifecycleService).startTournament(t2);
+    }
+
+    @Test
+    void shouldInvokeProcessExpiredConfirmationDeadlines() {
+        when(tournamentConfirmationDeadlineService.processExpiredConfirmationDeadlines()).thenReturn(2);
+
+        scheduler.checkConfirmationDeadlines();
+
+        verify(tournamentConfirmationDeadlineService).processExpiredConfirmationDeadlines();
+    }
+
+    @Test
+    void shouldCatchException_whenDeadlineServiceThrows() {
+        doThrow(new RuntimeException("Database error"))
+                .when(tournamentConfirmationDeadlineService).processExpiredConfirmationDeadlines();
+
+        scheduler.checkConfirmationDeadlines();
+
+        verify(tournamentConfirmationDeadlineService).processExpiredConfirmationDeadlines();
     }
 }

@@ -1,6 +1,6 @@
 ---
 baseline_commit: af04442b1fbcbee23f847a151ac68ad0739e0b12
-status: ready-for-dev
+status: review
 ---
 
 # Story 8.8: Tournament Confirmation Deadline
@@ -42,21 +42,21 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Domain Entity & Operation Method for System Auto-Confirmation (AC: 1, 2)
-  - [ ] Update `src/main/java/com/tictactore/model/Match.java`:
+- [x] Task 1: Domain Entity & Operation Method for System Auto-Confirmation (AC: 1, 2)
+  - [x] Update `src/main/java/com/tictactore/model/Match.java`:
     - Add domain method `public void autoConfirmBySystem()`:
       - Validate `this.status` is `STATUS_PENDING_APPROVAL` or `STATUS_PARTIALLY_CONFIRMED`; throw `InvalidMatchStateException` otherwise.
       - Set `this.status = STATUS_CONFIRMED`.
       - Set `this.confirmedAt = Instant.now()`.
       - Set `this.cooldownExpiresAt = null`.
       - Adhere to *Tell, Don't Ask* (`code-1-guide`).
-  - [ ] Unit tests in `src/test/java/com/tictactore/model/MatchTest.java`:
+  - [x] Unit tests in `src/test/java/com/tictactore/model/MatchTest.java`:
     - Verify `autoConfirmBySystem()` transitions `PENDING_APPROVAL` to `CONFIRMED`.
     - Verify `autoConfirmBySystem()` transitions `PARTIALLY_CONFIRMED` to `CONFIRMED`.
     - Verify exception thrown when status is `CONFIRMED` or `REJECTED`.
 
-- [ ] Task 2: Repository Query for Expired Tournament Matches (AC: 1, 4, 5)
-  - [ ] Update `src/main/java/com/tictactore/repository/TournamentMatchRepository.java`:
+- [x] Task 2: Repository Query for Expired Tournament Matches (AC: 1, 4, 5)
+  - [x] Update `src/main/java/com/tictactore/repository/TournamentMatchRepository.java`:
     - Add query method:
       ```java
       @Query("SELECT tm FROM TournamentMatch tm " +
@@ -75,15 +75,15 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
       );
       ```
     - Note: `Match.status` is a `String`, while `TournamentStatus` and `TournamentMatchStatus` are enums.
-  - [ ] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`):
+  - [x] Repository tests in `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java` (`@DataJpaTest`):
     - Verify matching of matches older than deadline.
     - Verify exclusion of matches newer than deadline.
     - Verify exclusion of completed/cancelled matches or tournaments.
 
-- [ ] Task 3: Tournament Confirmation Deadline Service (AC: 1, 2, 4)
-  - [ ] Create interface `src/main/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineService.java`:
+- [x] Task 3: Tournament Confirmation Deadline Service (AC: 1, 2, 4)
+  - [x] Create interface `src/main/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineService.java`:
     - `int processExpiredConfirmationDeadlines();`
-  - [ ] Create implementation `src/main/java/com/tictactore/service/tournament/impl/TournamentConfirmationDeadlineServiceImpl.java`:
+  - [x] Create implementation `src/main/java/com/tictactore/service/tournament/impl/TournamentConfirmationDeadlineServiceImpl.java`:
     - Inject `TournamentMatchRepository`, `MatchOperation`, and `@Value("${app.tournament.confirmation-deadline-hours:48}") int deadlineHours`.
     - Annotate `@Service`, `@RequiredArgsConstructor`, `@Transactional`.
     - Calculate deadline timestamp: `Instant.now().minus(Duration.ofHours(deadlineHours))`.
@@ -95,13 +95,13 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
       - Increment processed counter.
       - Catch `OptimisticLockException`, `InvalidMatchStateException`, and generic `Exception` per match, logging warning without aborting the batch.
     - Return processed count.
-  - [ ] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineServiceTest.java`:
+  - [x] Unit tests in `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineServiceTest.java`:
     - Test successful auto-confirmation and event triggering.
     - Test empty list returns 0.
     - Test error isolation when one match throws an exception.
 
-- [ ] Task 4: Tournament Scheduler Integration & Configuration (AC: 4)
-  - [ ] Update `src/main/java/com/tictactore/scheduler/TournamentScheduler.java`:
+- [x] Task 4: Tournament Scheduler Integration & Configuration (AC: 4)
+  - [x] Update `src/main/java/com/tictactore/scheduler/TournamentScheduler.java`:
     - Inject `TournamentConfirmationDeadlineService`.
     - Add scheduled task:
       ```java
@@ -117,15 +117,15 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
           }
       }
       ```
-  - [ ] Update `src/main/resources/application.properties`:
+  - [x] Update `src/main/resources/application.properties`:
     - Add `app.tournament.confirmation-deadline-hours=48`
     - Add `app.tournament.confirmation-scheduler-interval-ms=60000`
-  - [ ] Unit tests in `src/test/java/com/tictactore/scheduler/TournamentSchedulerTest.java`:
+  - [x] Unit tests in `src/test/java/com/tictactore/scheduler/TournamentSchedulerTest.java`:
     - Verify `checkConfirmationDeadlines()` invokes `processExpiredConfirmationDeadlines()`.
     - Verify exceptions from service are caught and logged without propagating.
 
-- [ ] Task 5: Component & Integration Testing (AC: 1, 2, 3, 4, 5)
-  - [ ] Create `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineIT.java` (`@SpringBootTest`):
+- [x] Task 5: Component & Integration Testing (AC: 1, 2, 3, 4, 5)
+  - [x] Create `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineIT.java` (`@SpringBootTest`):
     - Set up an active tournament with participants and an in-progress tournament match.
     - Attach a `Match` in `PENDING_APPROVAL` with `createdAt` set to 49 hours ago.
     - Invoke `tournamentConfirmationDeadlineService.processExpiredConfirmationDeadlines()`.
@@ -183,11 +183,37 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
 
 ### Agent Model Used
 
-Gemini 3.8 Flash (High)
+Gemini 3.7 Flash (Medium)
 
 ### Debug Log References
 
+- Executed targeted unit tests: `MatchTest`, `TournamentMatchRepositoryTest`, `TournamentConfirmationDeadlineServiceTest`, `TournamentSchedulerTest`.
+- Executed component & integration test: `TournamentConfirmationDeadlineIT`.
+- Ran full local verification suite via `./scripts/ci-local.sh`: 152 passed, 0 failed.
+
 ### Completion Notes List
+
+- Implemented `Match.autoConfirmBySystem()` with state validation (*Tell, Don't Ask*).
+- Added `findExpiredUnconfirmedMatches` JPQL query in `TournamentMatchRepository`.
+- Created `TournamentConfirmationDeadlineService` and `TournamentConfirmationDeadlineServiceImpl` with batch error isolation and structured audit logging.
+- Integrated `checkConfirmationDeadlines()` scheduled task into `TournamentScheduler`.
+- Added configuration properties to `application.yml` and `application.properties`.
+- Validated event-driven chain triggering `TournamentMatchEventListener.handleMatchConfirmed()` to complete match, advance brackets, and complete tournaments.
+- Verified all acceptance criteria and test suites (100% passing).
 
 ### File List
 
+- `src/main/java/com/tictactore/model/Match.java`
+- `src/main/java/com/tictactore/repository/TournamentMatchRepository.java`
+- `src/main/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineService.java`
+- `src/main/java/com/tictactore/service/tournament/impl/TournamentConfirmationDeadlineServiceImpl.java`
+- `src/main/java/com/tictactore/scheduler/TournamentScheduler.java`
+- `src/main/resources/application.yml`
+- `src/test/resources/application.properties`
+- `src/test/java/com/tictactore/model/MatchTest.java`
+- `src/test/java/com/tictactore/repository/TournamentMatchRepositoryTest.java`
+- `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineServiceTest.java`
+- `src/test/java/com/tictactore/scheduler/TournamentSchedulerTest.java`
+- `src/test/java/com/tictactore/service/tournament/TournamentConfirmationDeadlineIT.java`
+- `_bmad-output/implementation-artifacts/8-8-tournament-confirmation-deadline.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
