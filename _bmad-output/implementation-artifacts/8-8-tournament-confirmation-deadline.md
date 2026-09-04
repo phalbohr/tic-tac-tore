@@ -144,6 +144,16 @@ so that unconfirmed matches do not block tournament progress, and unresponsive p
 - **Batch Error Isolation**: The scheduler processes background jobs. Any individual match failure (e.g. concurrent opponent action, database lock) must be caught inside the loop and logged; it must not fail the execution of subsequent matches.
 - **Technical Defeat Semantics**: Per PRD FR18 and product specifications, a technical defeat for an unresponsive opponent is achieved by auto-confirming the recorded match submission. `determineWinner()` evaluates `match.getGames()` and designates the winning registration accordingly.
 
+### ATDD Artifacts
+
+- **Checklist:** `_bmad-output/test-artifacts/atdd-checklist-8-8-tournament-confirmation-deadline.md`
+- **Red-phase Test Scaffolds:**
+  - `_bmad-output/test-artifacts/atdd-redphase-8-8/MatchTest.java`
+  - `_bmad-output/test-artifacts/atdd-redphase-8-8/TournamentMatchRepositoryDeadlineTest.java`
+  - `_bmad-output/test-artifacts/atdd-redphase-8-8/TournamentConfirmationDeadlineServiceTest.java`
+  - `_bmad-output/test-artifacts/atdd-redphase-8-8/TournamentSchedulerDeadlineTest.java`
+  - `_bmad-output/test-artifacts/atdd-redphase-8-8/TournamentConfirmationDeadlineIT.java`
+
 ### Project Structure Notes
 
 - `src/main/java/com/tictactore/model/Match.java` (UPDATE)
