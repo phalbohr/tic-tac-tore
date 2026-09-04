@@ -1,6 +1,6 @@
 ---
 baseline_commit: af04442b1fbcbee23f847a151ac68ad0739e0b12
-status: in-progress
+status: review
 ---
 
 # Story 8.8: Tournament Confirmation Deadline
@@ -189,13 +189,13 @@ Gemini 3.7 Flash (Medium)
 
 - Executed targeted unit tests: `MatchTest`, `TournamentMatchRepositoryTest`, `TournamentConfirmationDeadlineServiceTest`, `TournamentSchedulerTest`.
 - Executed component & integration test: `TournamentConfirmationDeadlineIT`.
-- Ran full local verification suite via `./scripts/ci-local.sh`: 152 passed, 0 failed.
+- Ran full local verification suite via `./scripts/ci-local.sh`: 149 passed, 3 flaky/retried (passed), 17 skipped, 0 failed.
 
 ### Completion Notes List
 
 - Implemented `Match.autoConfirmBySystem()` with state validation (*Tell, Don't Ask*).
-- Added `findExpiredUnconfirmedMatches` JPQL query in `TournamentMatchRepository`.
-- Created `TournamentConfirmationDeadlineService` and `TournamentConfirmationDeadlineServiceImpl` with batch error isolation and structured audit logging.
+- Added `findExpiredUnconfirmedMatches` JPQL query in `TournamentMatchRepository` with `JOIN FETCH` for associations and `Pageable` pagination to eliminate N+1 queries.
+- Created `TournamentConfirmationDeadlineService` and `TournamentConfirmationDeadlineServiceImpl` with proper transactional error isolation (per-match transactions via `MatchOperation`), fail-fast constructor validation for `deadlineHours`, structured audit logging including participant IDs and unresponsive opponent IDs, and sanitized error logging without loop stack traces.
 - Integrated `checkConfirmationDeadlines()` scheduled task into `TournamentScheduler`.
 - Added configuration properties to `application.yml` and `application.properties`.
 - Validated event-driven chain triggering `TournamentMatchEventListener.handleMatchConfirmed()` to complete match, advance brackets, and complete tournaments.
@@ -220,28 +220,13 @@ Gemini 3.7 Flash (Medium)
 
 ### Review Findings
 
-- [ ] [Review][Patch] Batch Loop Transactional Error Isolation Broken []
-- [ ] [Review][Patch] Missing participant IDs in audit log []
-- [ ] [Review][Patch] JPQL query findExpiredUnconfirmedMatches causes N+1 problem []
-- [ ] [Review][Patch] findExpiredUnconfirmedMatches lacks pagination []
-- [ ] [Review][Patch] Redundant coreMatch null check []
-- [ ] [Review][Patch] Logging full stack trace in a loop []
-- [ ] [Review][Patch] Lack of boundary validation for deadlineHours []
-- [x] [Review][Defer] Scheduler lacks distributed locking mechanism [] — deferred, pre-existing
-- [x] [Review][Defer] Domain entity state transitions rely on primitive string literals [] — deferred, pre-existing
-- [x] [Review][Defer] Manual construction of dependency trees in tests — deferred, pre-existing
-- [x] [Review][Defer] Hardcoded temporal offsets in unit tests — deferred, pre-existing
-- [x] [Review][Defer] Hidden side-effects in MatchOperation.saveMatch() — deferred, pre-existing
-
-### Review Findings
-
-- [ ] [Review][Patch] Batch Loop Transactional Error Isolation Broken [TournamentConfirmationDeadlineServiceImpl.java]
-- [ ] [Review][Patch] Missing participant IDs in audit log [TournamentConfirmationDeadlineServiceImpl.java]
-- [ ] [Review][Patch] JPQL query findExpiredUnconfirmedMatches causes N+1 problem [TournamentMatchRepository.java]
-- [ ] [Review][Patch] findExpiredUnconfirmedMatches lacks pagination [TournamentMatchRepository.java]
-- [ ] [Review][Patch] Redundant coreMatch null check [TournamentConfirmationDeadlineServiceImpl.java]
-- [ ] [Review][Patch] Logging full stack trace in a loop [TournamentConfirmationDeadlineServiceImpl.java]
-- [ ] [Review][Patch] Lack of boundary validation for deadlineHours [TournamentConfirmationDeadlineServiceImpl.java]
+- [x] [Review][Patch] Batch Loop Transactional Error Isolation Broken [TournamentConfirmationDeadlineServiceImpl.java]
+- [x] [Review][Patch] Missing participant IDs in audit log [TournamentConfirmationDeadlineServiceImpl.java]
+- [x] [Review][Patch] JPQL query findExpiredUnconfirmedMatches causes N+1 problem [TournamentMatchRepository.java]
+- [x] [Review][Patch] findExpiredUnconfirmedMatches lacks pagination [TournamentMatchRepository.java]
+- [x] [Review][Patch] Redundant coreMatch null check [TournamentConfirmationDeadlineServiceImpl.java]
+- [x] [Review][Patch] Logging full stack trace in a loop [TournamentConfirmationDeadlineServiceImpl.java]
+- [x] [Review][Patch] Lack of boundary validation for deadlineHours [TournamentConfirmationDeadlineServiceImpl.java]
 - [x] [Review][Defer] Scheduler lacks distributed locking mechanism [TournamentScheduler.java] — deferred, pre-existing
 - [x] [Review][Defer] Domain entity state transitions rely on primitive string literals [Match.java] — deferred, pre-existing
 - [x] [Review][Defer] Manual construction of dependency trees in tests — deferred, pre-existing

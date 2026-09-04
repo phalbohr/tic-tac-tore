@@ -12,8 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -73,7 +77,8 @@ class TournamentConfirmationDeadlineServiceTest {
                 eq(TournamentMatchStatus.IN_PROGRESS),
                 eq(Match.STATUS_PENDING_APPROVAL),
                 eq(Match.STATUS_PARTIALLY_CONFIRMED),
-                any(Instant.class)
+                any(Instant.class),
+                any(Pageable.class)
         )).thenReturn(List.of(tournamentMatch));
 
         int processed = deadlineService.processExpiredConfirmationDeadlines();
@@ -92,7 +97,8 @@ class TournamentConfirmationDeadlineServiceTest {
                 eq(TournamentMatchStatus.IN_PROGRESS),
                 eq(Match.STATUS_PENDING_APPROVAL),
                 eq(Match.STATUS_PARTIALLY_CONFIRMED),
-                any(Instant.class)
+                any(Instant.class),
+                any(Pageable.class)
         )).thenReturn(Collections.emptyList());
 
         int processed = deadlineService.processExpiredConfirmationDeadlines();
@@ -138,7 +144,8 @@ class TournamentConfirmationDeadlineServiceTest {
                 eq(TournamentMatchStatus.IN_PROGRESS),
                 eq(Match.STATUS_PENDING_APPROVAL),
                 eq(Match.STATUS_PARTIALLY_CONFIRMED),
-                any(Instant.class)
+                any(Instant.class),
+                any(Pageable.class)
         )).thenReturn(List.of(failingTournamentMatch, successTournamentMatch));
 
         doThrow(new RuntimeException("Database lock error"))
@@ -150,5 +157,18 @@ class TournamentConfirmationDeadlineServiceTest {
         assertThat(successCoreMatch.getStatus()).isEqualTo(Match.STATUS_CONFIRMED);
         verify(matchOperation).saveMatch(failingCoreMatch);
         verify(matchOperation).saveMatch(successCoreMatch);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1, -48})
+    @DisplayName("Should throw IllegalArgumentException when deadlineHours is non-positive")
+    void shouldThrowException_whenDeadlineHoursIsNonPositive(int invalidDeadlineHours) {
+        assertThatThrownBy(() -> new TournamentConfirmationDeadlineServiceImpl(
+                tournamentMatchRepository,
+                matchOperation,
+                invalidDeadlineHours
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Deadline hours must be greater than 0");
     }
 }

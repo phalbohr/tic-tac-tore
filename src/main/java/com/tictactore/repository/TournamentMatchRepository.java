@@ -3,6 +3,7 @@ package com.tictactore.repository;
 import com.tictactore.model.TournamentMatch;
 import com.tictactore.model.TournamentMatchStatus;
 import com.tictactore.model.TournamentStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -91,8 +92,8 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
     );
 
     @Query("SELECT tm FROM TournamentMatch tm " +
-           "JOIN tm.match m " +
-           "JOIN tm.tournament t " +
+           "JOIN FETCH tm.match m " +
+           "JOIN FETCH tm.tournament t " +
            "WHERE tm.status = :matchStatus " +
            "AND t.status = :tournamentStatus " +
            "AND (m.status = :pendingStatus OR m.status = :partialStatus) " +
@@ -102,6 +103,7 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
             @Param("matchStatus") TournamentMatchStatus matchStatus,
             @Param("pendingStatus") String pendingStatus,
             @Param("partialStatus") String partialStatus,
-            @Param("deadline") Instant deadline
+            @Param("deadline") Instant deadline,
+            Pageable pageable
     );
 }

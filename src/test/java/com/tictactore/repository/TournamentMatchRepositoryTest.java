@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -427,7 +428,8 @@ class TournamentMatchRepositoryTest {
                 TournamentMatchStatus.IN_PROGRESS,
                 Match.STATUS_PENDING_APPROVAL,
                 Match.STATUS_PARTIALLY_CONFIRMED,
-                deadline
+                deadline,
+                PageRequest.of(0, 10)
         );
 
         assertThat(results).hasSize(1);
@@ -461,7 +463,8 @@ class TournamentMatchRepositoryTest {
                 TournamentMatchStatus.IN_PROGRESS,
                 Match.STATUS_PENDING_APPROVAL,
                 Match.STATUS_PARTIALLY_CONFIRMED,
-                deadline
+                deadline,
+                PageRequest.of(0, 10)
         );
 
         assertThat(results).isEmpty();
@@ -496,7 +499,8 @@ class TournamentMatchRepositoryTest {
                 TournamentMatchStatus.IN_PROGRESS,
                 Match.STATUS_PENDING_APPROVAL,
                 Match.STATUS_PARTIALLY_CONFIRMED,
-                deadline
+                deadline,
+                PageRequest.of(0, 10)
         );
 
         assertThat(results).isEmpty();
