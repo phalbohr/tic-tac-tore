@@ -481,3 +481,11 @@ status: open
 - Missing alias route GET /api/v1/tournaments/archive [src/main/java/com/tictactore/controller/TournamentController.java:30] — deferred, pre-existing status query parameter works.
 - Playwright skipped tests in tournament-standings-archive [frontend/e2e/tournament-standings-archive.spec.ts:14] — deferred, skipped due to lack of DB seed fixtures in local Playwright test harness.
 
+
+## Deferred from: code review (2026-09-04) of 8-8-tournament-confirmation-deadline.md
+
+- Scheduler lacks distributed locking mechanism [TournamentScheduler.java]
+- Domain entity state transitions rely on primitive string literals [Match.java]
+- Manual construction of dependency trees in tests
+- Hardcoded temporal offsets in unit tests
+- Hidden side-effects in MatchOperation.saveMatch()

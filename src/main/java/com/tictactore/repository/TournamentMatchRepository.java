@@ -2,12 +2,15 @@ package com.tictactore.repository;
 
 import com.tictactore.model.TournamentMatch;
 import com.tictactore.model.TournamentMatchStatus;
+import com.tictactore.model.TournamentStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -86,5 +89,21 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
     List<TournamentMatch> findByAnyParticipantRegistrationId(
             @Param("tournamentId") UUID tournamentId,
             @Param("regId") UUID regId
+    );
+
+    @Query("SELECT tm FROM TournamentMatch tm " +
+           "JOIN FETCH tm.match m " +
+           "JOIN FETCH tm.tournament t " +
+           "WHERE tm.status = :matchStatus " +
+           "AND t.status = :tournamentStatus " +
+           "AND (m.status = :pendingStatus OR m.status = :partialStatus) " +
+           "AND m.createdAt <= :deadline")
+    List<TournamentMatch> findExpiredUnconfirmedMatches(
+            @Param("tournamentStatus") TournamentStatus tournamentStatus,
+            @Param("matchStatus") TournamentMatchStatus matchStatus,
+            @Param("pendingStatus") String pendingStatus,
+            @Param("partialStatus") String partialStatus,
+            @Param("deadline") Instant deadline,
+            Pageable pageable
     );
 }

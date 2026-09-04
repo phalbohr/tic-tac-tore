@@ -128,6 +128,16 @@ public class Match {
         }
     }
 
+    public void autoConfirmBySystem() {
+        if (!STATUS_PENDING_APPROVAL.equals(this.status)
+                && !STATUS_PARTIALLY_CONFIRMED.equals(this.status)) {
+            throw new InvalidMatchStateException("Cannot auto-confirm match in status " + this.status);
+        }
+        this.status = STATUS_CONFIRMED;
+        this.confirmedAt = Instant.now();
+        this.cooldownExpiresAt = null;
+    }
+
     public void confirmByOpponent(UUID opponentId) {
         if (!STATUS_PENDING_APPROVAL.equals(this.status)
                 && !STATUS_PARTIALLY_CONFIRMED.equals(this.status)) {

@@ -1,5 +1,6 @@
 package com.tictactore.repository;
 
+import com.tictactore.model.Match;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RegistrationStatus;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -397,5 +399,110 @@ class TournamentMatchRepositoryTest {
         assertThat(activeForReg1).hasSize(1);
         assertThat(activeForReg4).hasSize(1);
         assertThat(activeForNonBusy).isEmpty();
+    }
+
+    @Test
+    void shouldFindExpiredUnconfirmedMatches_whenMatchCreatedAtIsOlderThanDeadline() {
+        var expiredMatch = entityManager.persist(Match.builder()
+                .creatorId(player1.getId())
+                .teamAAttackerId(player1.getId())
+                .teamBAttackerId(player2.getId())
+                .status(Match.STATUS_PENDING_APPROVAL)
+                .createdAt(Instant.now().minus(49, ChronoUnit.HOURS))
+                .build());
+        var tournamentMatch = tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.IN_PROGRESS)
+                .match(expiredMatch)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var deadline = Instant.now().minus(48, ChronoUnit.HOURS);
+        var results = tournamentMatchRepository.findExpiredUnconfirmedMatches(
+                TournamentStatus.IN_PROGRESS,
+                TournamentMatchStatus.IN_PROGRESS,
+                Match.STATUS_PENDING_APPROVAL,
+                Match.STATUS_PARTIALLY_CONFIRMED,
+                deadline,
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getId()).isEqualTo(tournamentMatch.getId());
+    }
+
+    @Test
+    void shouldNotFindMatch_whenMatchCreatedAtIsWithinDeadline() {
+        var freshMatch = entityManager.persist(Match.builder()
+                .creatorId(player1.getId())
+                .teamAAttackerId(player1.getId())
+                .teamBAttackerId(player2.getId())
+                .status(Match.STATUS_PENDING_APPROVAL)
+                .createdAt(Instant.now().minus(10, ChronoUnit.HOURS))
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.IN_PROGRESS)
+                .match(freshMatch)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var deadline = Instant.now().minus(48, ChronoUnit.HOURS);
+        var results = tournamentMatchRepository.findExpiredUnconfirmedMatches(
+                TournamentStatus.IN_PROGRESS,
+                TournamentMatchStatus.IN_PROGRESS,
+                Match.STATUS_PENDING_APPROVAL,
+                Match.STATUS_PARTIALLY_CONFIRMED,
+                deadline,
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void shouldNotFindMatch_whenTournamentIsNotInProgress() {
+        tournament.setStatus(TournamentStatus.COMPLETED);
+        tournamentRepository.save(tournament);
+        var expiredMatch = entityManager.persist(Match.builder()
+                .creatorId(player1.getId())
+                .teamAAttackerId(player1.getId())
+                .teamBAttackerId(player2.getId())
+                .status(Match.STATUS_PENDING_APPROVAL)
+                .createdAt(Instant.now().minus(49, ChronoUnit.HOURS))
+                .build());
+        tournamentMatchRepository.save(TournamentMatch.builder()
+                .tournament(tournament)
+                .round(1)
+                .matchOrder(1)
+                .participant1(reg1)
+                .participant2(reg2)
+                .status(TournamentMatchStatus.IN_PROGRESS)
+                .match(expiredMatch)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        var deadline = Instant.now().minus(48, ChronoUnit.HOURS);
+        var results = tournamentMatchRepository.findExpiredUnconfirmedMatches(
+                TournamentStatus.IN_PROGRESS,
+                TournamentMatchStatus.IN_PROGRESS,
+                Match.STATUS_PENDING_APPROVAL,
+                Match.STATUS_PARTIALLY_CONFIRMED,
+                deadline,
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(results).isEmpty();
     }
 }
