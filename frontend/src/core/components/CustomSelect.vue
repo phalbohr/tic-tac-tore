@@ -25,6 +25,7 @@ function onChange(e: Event) {
       :disabled="disabled"
       :data-testid="dataTestid"
       class="w-full pl-3 pr-8 py-2 rounded-lg bg-surface-container text-on-surface text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-container-high transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      style="color-scheme: dark;"
       @change="onChange"
     >
       <option
@@ -32,6 +33,7 @@ function onChange(e: Event) {
         :key="opt.value"
         :value="opt.value"
         class="bg-surface-container-highest text-on-surface py-1"
+        style="background-color: #393431; color: #ebe0dd;"
       >
         {{ opt.label }}
       </option>

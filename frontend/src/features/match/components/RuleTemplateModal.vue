@@ -359,7 +359,7 @@ function handleClose() {
               type="text"
               maxlength="50"
               placeholder="e.g. ITSF Championship Fast"
-              class="w-full px-3 py-2 rounded-lg bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-container-high transition-colors"
+              class="w-full px-3 py-2 rounded-lg bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-container-high transition-colors"
               data-testid="template-name-input"
             />
             <p
@@ -411,7 +411,48 @@ function handleClose() {
             </div>
           </div>
 
-          <!-- Game and Goal Limits -->
+          <!-- Game Limit & Games to Win (Row 1) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex items-center mb-1">
+                <label
+                  for="game-limit-input"
+                  class="block text-xs font-semibold text-on-surface"
+                >
+                  {{ t('rules.fields.gameLimit', 'Game Limit') }}
+                </label>
+                <BaseTooltip :text="t('rules.tooltips.gameLimit')" />
+              </div>
+              <NumberInput
+                id="game-limit-input"
+                v-model="gameLimit"
+                :min="1"
+                :max="15"
+                data-testid="game-limit-input"
+              />
+            </div>
+
+            <div v-if="matchFormat === 'BEST_OF_N'">
+              <div class="flex items-center mb-1">
+                <label
+                  for="games-to-win-input"
+                  class="block text-xs font-semibold text-on-surface"
+                >
+                  {{ t('rules.fields.gamesToWin', 'Games to Win') }}
+                </label>
+                <BaseTooltip :text="t('rules.tooltips.gamesToWin')" />
+              </div>
+              <NumberInput
+                id="games-to-win-input"
+                v-model="gamesToWin"
+                :min="1"
+                :max="gameLimit"
+                data-testid="games-to-win-input"
+              />
+            </div>
+          </div>
+
+          <!-- Goal Limit (Row 2) -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <div class="flex items-center mb-1">
@@ -431,45 +472,6 @@ function handleClose() {
                 data-testid="goal-limit-input"
               />
             </div>
-
-            <div>
-              <div class="flex items-center mb-1">
-                <label
-                  for="game-limit-input"
-                  class="block text-xs font-semibold text-on-surface"
-                >
-                  {{ t('rules.fields.gameLimit', 'Game Limit') }}
-                </label>
-                <BaseTooltip :text="t('rules.tooltips.gameLimit')" />
-              </div>
-              <NumberInput
-                id="game-limit-input"
-                v-model="gameLimit"
-                :min="1"
-                :max="15"
-                data-testid="game-limit-input"
-              />
-            </div>
-          </div>
-
-          <!-- Games to win (Only for Best of N) -->
-          <div v-if="matchFormat === 'BEST_OF_N'">
-            <div class="flex items-center mb-1">
-              <label
-                for="games-to-win-input"
-                class="block text-xs font-semibold text-on-surface"
-              >
-                {{ t('rules.fields.gamesToWin', 'Games to Win') }}
-              </label>
-              <BaseTooltip :text="t('rules.tooltips.gamesToWin')" />
-            </div>
-            <NumberInput
-              id="games-to-win-input"
-              v-model="gamesToWin"
-              :min="1"
-              :max="gameLimit"
-              data-testid="games-to-win-input"
-            />
           </div>
         </div>
 
@@ -557,7 +559,7 @@ function handleClose() {
                   for="timeout-duration-input"
                   class="block text-xs font-semibold text-on-surface"
                 >
-                  {{ t('rules.fields.timeoutDuration', 'Duration (s)') }}
+                  {{ t('rules.fields.timeoutDuration', 'Timeout Duration') }}
                 </label>
                 <BaseTooltip :text="t('rules.tooltips.timeoutDuration')" />
               </div>
@@ -580,7 +582,7 @@ function handleClose() {
                   for="possession-5bar-input"
                   class="block text-xs font-semibold text-on-surface"
                 >
-                  {{ t('rules.fields.possession5Bar', '5-Bar Limit (s)') }}
+                  {{ t('rules.fields.possession5Bar', '5-Bar Posession Limit (s)') }}
                 </label>
                 <BaseTooltip :text="t('rules.tooltips.possession5Bar')" />
               </div>
@@ -599,7 +601,7 @@ function handleClose() {
                   for="possession-other-input"
                   class="block text-xs font-semibold text-on-surface"
                 >
-                  {{ t('rules.fields.possessionOther', 'Other Rods (s)') }}
+                  {{ t('rules.fields.possessionOther', 'Other Rods Posession Limit (s)') }}
                 </label>
                 <BaseTooltip :text="t('rules.tooltips.possessionOther')" />
               </div>

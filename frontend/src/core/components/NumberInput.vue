@@ -79,14 +79,14 @@ function handleWheel(e: WheelEvent) {
 
 <template>
   <div
-    class="flex items-center bg-surface-container rounded-lg transition-all focus-within:bg-surface-container-high focus-within:ring-1 focus-within:ring-primary overflow-hidden"
+    class="inline-flex items-center w-fit bg-surface-container rounded-lg transition-all focus-within:bg-surface-container-high focus-within:ring-1 focus-within:ring-primary overflow-hidden"
     :class="{ 'opacity-50 cursor-not-allowed': disabled }"
     @wheel.prevent="handleWheel"
   >
     <button
       type="button"
       :disabled="disabled || (currentVal != null && min != null && currentVal <= min)"
-      class="px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed transition select-none flex items-center justify-center font-bold text-sm cursor-pointer"
+      class="px-2.5 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed transition select-none flex items-center justify-center font-bold text-sm cursor-pointer"
       aria-label="Decrease value"
       tabindex="-1"
       @click="decrement"
@@ -104,14 +104,14 @@ function handleWheel(e: WheelEvent) {
       :disabled="disabled"
       :placeholder="placeholder"
       :data-testid="dataTestid"
-      class="number-input-field w-full text-center bg-transparent text-on-surface font-semibold text-sm focus:outline-none py-2 px-1"
+      class="number-input-field w-11 text-center bg-transparent text-on-surface font-semibold text-sm focus:outline-none py-1.5 px-0.5"
       @input="handleInput"
     />
 
     <button
       type="button"
       :disabled="disabled || (currentVal != null && max != null && currentVal >= max)"
-      class="px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed transition select-none flex items-center justify-center font-bold text-sm cursor-pointer"
+      class="px-2.5 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed transition select-none flex items-center justify-center font-bold text-sm cursor-pointer"
       aria-label="Increase value"
       tabindex="-1"
       @click="increment"
