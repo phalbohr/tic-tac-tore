@@ -98,4 +98,17 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         const borderBottomWidth = await modal.evaluate((el) => window.getComputedStyle(el).borderBottomWidth);
         expect(borderBottomWidth).toBe('0px');
     });
+
+    test('[P1] should close RuleTemplateModal when Escape key is pressed', async ({ page }) => {
+        await loginUser(page);
+        await page.goto('/matches/new');
+        await page.getByRole('button', { name: /Create Custom Template|\+ Custom Rule/i }).click();
+
+        const modal = page.locator('[data-testid="rule-template-modal"]');
+        await expect(modal).toBeVisible();
+
+        await page.keyboard.press('Escape');
+        await expect(modal).toBeHidden();
+    });
 });
+

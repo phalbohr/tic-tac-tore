@@ -102,7 +102,7 @@ function resetForm() {
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-  if (event.key === 'Escape' && props.isOpen) {
+  if (event.key === 'Escape' || event.key === 'Esc' || event.code === 'Escape') {
     handleClose()
   }
 }
@@ -113,11 +113,13 @@ watch(
   (val) => {
     if (val) {
       document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
+      window.addEventListener('keydown', handleKeyDown, true)
+      document.addEventListener('keydown', handleKeyDown, true)
       resetForm()
     } else {
       document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown, true)
+      document.removeEventListener('keydown', handleKeyDown, true)
     }
   },
   { immediate: true },
@@ -125,7 +127,8 @@ watch(
 
 onUnmounted(() => {
   document.body.style.overflow = ''
-  window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('keydown', handleKeyDown, true)
+  document.removeEventListener('keydown', handleKeyDown, true)
 })
 
 watch(

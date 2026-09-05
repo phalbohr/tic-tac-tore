@@ -51,7 +51,7 @@ function onNativeSelectChange(e: Event) {
 </script>
 
 <template>
-  <div ref="containerRef" class="relative w-full">
+  <div ref="containerRef" class="relative w-full" @keydown.escape.stop="isOpen = false">
     <!-- Custom Trigger Button -->
     <button
       :id="id"
