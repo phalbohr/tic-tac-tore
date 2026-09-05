@@ -1,18 +1,27 @@
 import { getCsrfHeaders } from '../utils/cookieUtils'
 
+export type MatchFormat = 'BEST_OF_N' | 'FIXED_GAMES'
+export type WinByTwoRule = 'NONE' | 'ALL_GAMES' | 'DECISIVE_GAME_ONLY'
 export type SideSwapRule = 'NONE' | 'BETWEEN_GAMES' | 'AFTER_HALF_POINTS'
 export type RestartRule = 'CONCEDING_TEAM' | 'RANDOM_DROP'
 export type PositionSwapRule = 'BETWEEN_GAMES' | 'NEVER' | 'FREE'
-export type PointDistribution = 'WIN_LOSS_3_0' | 'WIN_LOSS_2_0' | 'WIN_DRAW_LOSS_3_1_0'
+export type PointDistribution =
+  | 'WIN_LOSS_3_0'
+  | 'WIN_LOSS_2_0'
+  | 'WIN_DRAW_LOSS_3_1_0'
+  | 'ONE_POINT_PER_GAME_WON'
 export type RuleConfigurationType = 'PRESET' | 'CUSTOM'
 
 export interface RuleConfig {
   id: string
   name: string
   type: RuleConfigurationType
+  matchFormat: MatchFormat
   goalLimit: number
   gameLimit: number
-  winByTwo: boolean
+  gamesToWin: number
+  winByTwoRule: WinByTwoRule
+  winByTwo?: boolean
   absoluteScoreCap?: number | null
   timeoutsPerGame: number
   timeoutDurationSeconds: number
@@ -30,9 +39,11 @@ export interface RuleConfig {
 
 export interface CreateRuleConfigRequest {
   name: string
+  matchFormat: MatchFormat
   goalLimit: number
   gameLimit: number
-  winByTwo: boolean
+  gamesToWin: number
+  winByTwoRule: WinByTwoRule
   absoluteScoreCap?: number | null
   timeoutsPerGame: number
   timeoutDurationSeconds: number

@@ -292,12 +292,15 @@
     "sections": {
       "general": "General",
       "gameFlow": "Game Flow & Tie-Break",
-      "conduct": "Match Conduct & Rules"
+      "inGameMechanics": "In-Game Mechanics",
+      "conduct": "In-Game Mechanics"
     },
     "fields": {
       "name": "Template Name",
+      "matchFormat": "Match Format",
       "goalLimit": "Goal Limit",
       "gameLimit": "Game Limit",
+      "gamesToWin": "Games to Win",
       "winByTwo": "Win by 2 Goals",
       "absoluteCap": "Absolute Score Cap",
       "timeouts": "Timeouts / Game",
@@ -311,8 +314,59 @@
       "spinningAllowed": "Allow Spinning",
       "aerialsAllowed": "Allow Aerials"
     },
+    "options": {
+      "matchFormat": {
+        "BEST_OF_N": "Best of N",
+        "FIXED_GAMES": "Fixed Games"
+      },
+      "winByTwo": {
+        "NONE": "Disabled",
+        "ALL_GAMES": "Every Game",
+        "DECISIVE_GAME_ONLY": "Decisive Game Only"
+      },
+      "sideSwap": {
+        "NONE": "None",
+        "BETWEEN_GAMES": "Between Games",
+        "AFTER_HALF_POINTS": "After Half Points"
+      },
+      "restart": {
+        "CONCEDING_TEAM": "Conceding Team",
+        "RANDOM_DROP": "Random Drop"
+      },
+      "positionSwap": {
+        "FREE": "Free",
+        "BETWEEN_GAMES": "Between Games",
+        "NEVER": "Never"
+      },
+      "points": {
+        "WIN_LOSS_3_0": "3 - 0 (Win/Loss)",
+        "WIN_LOSS_2_0": "2 - 0 (Win/Loss)",
+        "WIN_DRAW_LOSS_3_1_0": "3 - 1 - 0 (Win/Draw/Loss)",
+        "ONE_POINT_PER_GAME_WON": "1 win - 1 pt (Per Game Won)"
+      }
+    },
+    "tooltips": {
+      "matchFormat": "Choose between 'Best of N' (first team to win required games wins the match) or 'Fixed Games' (teams always play an exact number of games, allowing match draws).",
+      "goalLimit": "Goals required to win an individual game (standard is 5 goals in official ITSF/DTFB tournaments).",
+      "gameLimit": "Total games played in Fixed Games mode, or maximum possible games in Best of N mode (e.g. 5 for Best of 5).",
+      "gamesToWin": "Number of games a team must win to conclude the match (e.g. 3 wins in a Best of 5 match).",
+      "winByTwo": "Decides when a 2-goal lead is required: Disabled (first to goal limit wins), Every Game (all games require 2-goal lead), or Decisive Game Only (official ITSF tie-break: only the final deciding game requires 2-goal lead).",
+      "absoluteCap": "Maximum score cap when Win by 2 is active. The game ends immediately once reached, even with only a 1-goal lead (e.g. 8 goals in ITSF to prevent endless games).",
+      "timeouts": "Number of official 30-second tactical pauses permitted per team in each individual game (ITSF standard: 2 timeouts).",
+      "timeoutDuration": "Length of each called timeout in seconds (official tournament standard: 30 seconds).",
+      "possession5Bar": "Maximum ball possession time in seconds on the 5-man midfield rod before passing or shooting (ITSF rule: 10 seconds).",
+      "possessionOther": "Maximum ball control time in seconds on goalkeeper, 2-man defense, and 3-man forward rods (ITSF rule: 15 seconds).",
+      "sideSwap": "When teams switch table sides: Between Games (after each set), After Half Points (mid-game switch), or None (teams remain on same side).",
+      "restart": "Where the ball enters play after a scored goal: Conceding Team (served by team that was scored upon, standard ITSF) or Random Drop.",
+      "positionSwap": "When partners in doubles may switch offense/defense: Free (any time during timeouts/dead balls, ITSF), Between Games (only between sets), or Never (fixed roles, DTFB standard).",
+      "points": "Points awarded for match standings: 3-0 (Win/Loss), 2-0 (Win/Loss), 3-1-0 (Win/Draw/Loss), or 1 win - 1 point (teams get 1 point per individual game won, typical for DTFB 2-game sets).",
+      "spinningAllowed": "Whether 360-degree continuous rod spins ('kurbeln') without ball contact are permitted (strictly illegal in competitive ITSF/DTFB play).",
+      "aerialsAllowed": "Whether intentional airborne shots or aerial flips over opponent rods are permitted."
+    },
     "validation": {
-      "nameRequired": "Name is required (max 50 characters)"
+      "nameRequired": "Name is required (max 50 characters)",
+      "capMustBeGreater": "Absolute score cap must be greater than goal limit",
+      "gamesToWinInvalid": "Games to win must be between 1 and the game limit"
     },
     "summary": {
       "gameLimit": "Best of {limit}",

@@ -20,18 +20,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
- * Red-phase acceptance test scaffolds for Story 3.5: Publication Rules & 24-hour Cooldown.
+ * Red-phase acceptance test scaffolds for Story 3.5: Publication Rules &
+ * 24-hour Cooldown.
  * <p>
- * These tests are emitted in the TDD RED PHASE. They assert the expected behavior
- * defined by the acceptance criteria (AC1–AC5) and would fail if the implementation
- * were absent. In the current green-phase state they are disabled to avoid duplicate
- * coverage with the active specs in {@link MatchServiceTest} and {@link MatchCooldownServiceTest}.
+ * These tests are emitted in the TDD RED PHASE. They assert the expected
+ * behavior
+ * defined by the acceptance criteria (AC1–AC5) and would fail if the
+ * implementation
+ * were absent. In the current green-phase state they are disabled to avoid
+ * duplicate
+ * coverage with the active specs in {@link MatchServiceTest} and
+ * {@link MatchCooldownServiceTest}.
  * <p>
  * To activate: remove {@code @Disabled} and run.
  */
@@ -183,12 +187,13 @@ class MatchCooldownRedPhaseTest {
                     .cooldownExpiresAt(Instant.now().minusSeconds(60))
                     .build();
 
-            when(matchRepository.findByCooldownExpiresAtBeforeAndStatus(any(Instant.class), eq(Match.STATUS_PARTIALLY_CONFIRMED)))
+            when(matchRepository.findByCooldownExpiresAtBeforeAndStatus(any(Instant.class),
+                    eq(Match.STATUS_PARTIALLY_CONFIRMED)))
                     .thenReturn(List.of(expired));
             when(matchRepository.save(any(Match.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            com.tictactore.service.MatchCooldownService cooldownService =
-                    new com.tictactore.service.MatchCooldownService(matchRepository);
+            com.tictactore.service.MatchCooldownService cooldownService = new com.tictactore.service.MatchCooldownService(
+                    matchRepository);
             cooldownService.processExpiredCooldowns();
 
             assertThat(expired.getStatus()).isEqualTo(Match.STATUS_CONFIRMED);

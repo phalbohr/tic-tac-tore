@@ -13,9 +13,11 @@ vi.mock('vue-i18n', () => ({
 describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
   const defaultRuleTemplate = {
     name: '',
+    matchFormat: 'BEST_OF_N',
     goalLimit: 5,
-    gameLimit: 3,
-    winByTwo: true,
+    gameLimit: 5,
+    gamesToWin: 3,
+    winByTwoRule: 'DECISIVE_GAME_ONLY',
     absoluteScoreCap: 8,
     timeoutsPerGame: 2,
     timeoutDurationSeconds: 30,
@@ -25,7 +27,7 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     restartRule: 'CONCEDING_TEAM',
     spinningAllowed: false,
     aerialsAllowed: false,
-    positionSwapRule: 'BETWEEN_GAMES',
+    positionSwapRule: 'FREE',
     pointDistribution: 'WIN_LOSS_3_0',
   }
 
@@ -33,9 +35,11 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     id: '11111111-1111-1111-1111-111111111111',
     name: 'Office Blitz',
     type: 'CUSTOM',
+    matchFormat: 'BEST_OF_N',
     goalLimit: 7,
     gameLimit: 1,
-    winByTwo: false,
+    gamesToWin: 1,
+    winByTwoRule: 'NONE',
     absoluteScoreCap: null,
     timeoutsPerGame: 1,
     timeoutDurationSeconds: 15,
@@ -65,8 +69,11 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
       (wrapper.find('[data-testid="game-limit-input"]').element as HTMLInputElement).value,
     ).toBe('3')
     expect(
-      (wrapper.find('[data-testid="win-by-two-checkbox"]').element as HTMLInputElement).checked,
-    ).toBe(true)
+      (wrapper.find('[data-testid="games-to-win-input"]').element as HTMLInputElement).value,
+    ).toBe('2')
+    expect(
+      (wrapper.find('[data-testid="win-by-two-select"]').element as HTMLSelectElement).value,
+    ).toBe('DECISIVE_GAME_ONLY')
   })
 
   it('should populate fields with existing template in "Edit as New" mode', () => {
@@ -87,12 +94,34 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
       (wrapper.find('[data-testid="game-limit-input"]').element as HTMLInputElement).value,
     ).toBe('1')
     expect(
-      (wrapper.find('[data-testid="win-by-two-checkbox"]').element as HTMLInputElement).checked,
-    ).toBe(false)
+      (wrapper.find('[data-testid="win-by-two-select"]').element as HTMLSelectElement).value,
+    ).toBe('NONE')
     expect(
       (wrapper.find('[data-testid="spinning-allowed-checkbox"]').element as HTMLInputElement)
         .checked,
     ).toBe(true)
+  })
+
+  it('should switch settings when toggling match format to Fixed Games', async () => {
+    const wrapper = mount(RuleTemplateModal, {
+      props: {
+        isOpen: true,
+        initialTemplate: null,
+      },
+    })
+
+    await wrapper.find('[data-testid="match-format-fixed"]').trigger('click')
+
+    expect(
+      (wrapper.find('[data-testid="game-limit-input"]').element as HTMLInputElement).value,
+    ).toBe('2')
+    expect(wrapper.find('[data-testid="games-to-win-input"]').exists()).toBe(false)
+    expect(
+      (wrapper.find('[data-testid="win-by-two-select"]').element as HTMLSelectElement).value,
+    ).toBe('NONE')
+    expect(
+      (wrapper.find('[data-testid="point-distribution-select"]').element as HTMLSelectElement).value,
+    ).toBe('ONE_POINT_PER_GAME_WON')
   })
 
   it('should prevent submission when template name is empty or exceeds 50 characters', async () => {
@@ -128,6 +157,8 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     expect(emittedPayload.name).toBe('Friday Tourney Rules')
     expect(emittedPayload.goalLimit).toBe(5)
     expect(emittedPayload.gameLimit).toBe(3)
+    expect(emittedPayload.gamesToWin).toBe(2)
+    expect(emittedPayload.winByTwoRule).toBe('DECISIVE_GAME_ONLY')
   })
 
   it('should display error message when errorMessage prop is provided', () => {

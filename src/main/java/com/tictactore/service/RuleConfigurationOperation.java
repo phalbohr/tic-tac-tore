@@ -2,8 +2,10 @@ package com.tictactore.service;
 
 import com.tictactore.annotation.Idempotent;
 import com.tictactore.dto.RuleConfigurationRequest;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.RuleConfiguration;
 import com.tictactore.model.RuleConfigurationType;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.repository.RuleConfigurationRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,13 @@ public class RuleConfigurationOperation {
     @Idempotent
     @Transactional(propagation = Propagation.REQUIRED)
     public RuleConfiguration createCustomRule(RuleConfigurationRequest request, UUID createdBy) {
+        if (request.matchFormat() == MatchFormat.BEST_OF_N) {
+            if (request.gamesToWin() <= 0 || request.gamesToWin() > request.gameLimit()) {
+                throw new IllegalArgumentException("Games to win must be between 1 and game limit");
+            }
+        }
         if (request.absoluteScoreCap() != null) {
-            if (!request.winByTwo()) {
+            if (request.winByTwoRule() == WinByTwoRule.NONE) {
                 throw new IllegalArgumentException("Absolute score cap requires win-by-two to be enabled");
             }
             if (request.absoluteScoreCap() <= request.goalLimit()) {
@@ -40,10 +47,12 @@ public class RuleConfigurationOperation {
         RuleConfiguration rule = RuleConfiguration.builder()
                 .name(request.name().trim())
                 .type(RuleConfigurationType.CUSTOM)
+                .matchFormat(request.matchFormat())
                 .goalLimit(request.goalLimit())
                 .gameLimit(request.gameLimit())
-                .winByTwo(request.winByTwo())
-                .absoluteScoreCap(request.absoluteScoreCap())
+                .gamesToWin(request.matchFormat() == MatchFormat.FIXED_GAMES ? request.gameLimit() : request.gamesToWin())
+                .winByTwoRule(request.winByTwoRule())
+                .absoluteScoreCap(request.winByTwoRule() == WinByTwoRule.NONE ? null : request.absoluteScoreCap())
                 .timeoutsPerGame(request.timeoutsPerGame())
                 .timeoutDurationSeconds(request.timeoutDurationSeconds())
                 .possessionLimit5BarSeconds(request.possessionLimit5BarSeconds())

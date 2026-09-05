@@ -16,11 +16,7 @@ import org.redisson.api.RAtomicLong;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
-import org.redisson.client.codec.StringCodec;
-import org.redisson.client.protocol.ScoredEntry;
-
 import java.time.Duration;
-import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -248,7 +244,8 @@ class RateLimitServiceTest {
 
             RateLimitExceededException ex = assertThrows(RateLimitExceededException.class,
                     () -> service.checkSubmissionLimit(userId));
-            int expectedWindowSeconds = (int) java.util.concurrent.TimeUnit.HOURS.toSeconds(DEFAULT_REJECTION_WINDOW_HOURS);
+            int expectedWindowSeconds = (int) java.util.concurrent.TimeUnit.HOURS
+                    .toSeconds(DEFAULT_REJECTION_WINDOW_HOURS);
             assertThat(ex.getRetryAfterSeconds()).isEqualTo(expectedWindowSeconds);
         }
     }

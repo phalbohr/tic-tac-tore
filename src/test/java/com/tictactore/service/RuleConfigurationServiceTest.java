@@ -3,12 +3,14 @@ package com.tictactore.service;
 import com.tictactore.dto.RuleConfigurationRequest;
 import com.tictactore.dto.RuleConfigurationResponse;
 import com.tictactore.exception.ResourceNotFoundException;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.RuleConfiguration;
 import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.SideSwapRule;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.repository.RuleConfigurationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,9 +58,11 @@ class RuleConfigurationServiceTest {
                 .id(UUID.randomUUID())
                 .name("ITSF Standard Matchplay")
                 .type(RuleConfigurationType.PRESET)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(true)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.DECISIVE_GAME_ONLY)
                 .absoluteScoreCap(8)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
@@ -78,9 +82,11 @@ class RuleConfigurationServiceTest {
                 .id(ruleId)
                 .name("Office Fast 7")
                 .type(RuleConfigurationType.CUSTOM)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(7)
                 .gameLimit(1)
-                .winByTwo(false)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(null)
                 .timeoutsPerGame(1)
                 .timeoutDurationSeconds(20)
@@ -98,9 +104,11 @@ class RuleConfigurationServiceTest {
 
         sampleRequest = RuleConfigurationRequest.builder()
                 .name("Office Fast 7")
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(7)
                 .gameLimit(1)
-                .winByTwo(false)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(null)
                 .timeoutsPerGame(1)
                 .timeoutDurationSeconds(20)

@@ -5,7 +5,6 @@ import com.tictactore.dto.PageResponse;
 import com.tictactore.dto.PlayerStatsResponse;
 import com.tictactore.model.Game;
 import com.tictactore.model.Match;
-import com.tictactore.model.Position;
 import com.tictactore.repository.LeaderboardRepository;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.LeaderboardService;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class LeaderboardServiceImpl implements LeaderboardService {
@@ -28,12 +26,12 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     }
 
     @Override
-    public PageResponse<LeaderboardEntry> getLeaderboard(String type, String period, int minMatches, String matchType, String matchFormat, int page, int size) {
+    public PageResponse<LeaderboardEntry> getLeaderboard(String type, String period, int minMatches, String matchType,
+            String matchFormat, int page, int size) {
         Instant startDate = resolveStartDate(period);
 
         List<Match> matches = leaderboardRepository.findConfirmedMatchesWithFilters(
-            matchFormat, matchType, startDate, Instant.now()
-        );
+                matchFormat, matchType, startDate, Instant.now());
 
         Map<UUID, PlayerStats> statsMap = new HashMap<>();
 
@@ -46,8 +44,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             }
             if (matchType != null && !matchType.isBlank()) {
                 boolean is1v1 = match.getTeamADefenderId() == null && match.getTeamBDefenderId() == null;
-                if ("1v1".equals(matchType) && !is1v1) continue;
-                if ("2v2".equals(matchType) && is1v1) continue;
+                if ("1v1".equals(matchType) && !is1v1)
+                    continue;
+                if ("2v2".equals(matchType) && is1v1)
+                    continue;
             }
 
             int teamAGames = 0;
@@ -70,15 +70,15 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         }
 
         List<LeaderboardEntry> entries = statsMap.values().stream()
-            .filter(s -> s.totalMatches >= minMatches)
-            .map(s -> {
-                double winRate = s.totalMatches > 0 ? (double) s.wins / s.totalMatches : 0.0;
-                return new LeaderboardEntry(s.playerId, s.playerName, s.totalMatches, s.wins, s.losses, winRate);
-            })
-            .sorted(Comparator.comparingDouble((LeaderboardEntry e) -> e.winRate()).reversed()
-                .thenComparingInt(e -> e.wins())
-                .thenComparing(e -> e.playerName()))
-            .toList();
+                .filter(s -> s.totalMatches >= minMatches)
+                .map(s -> {
+                    double winRate = s.totalMatches > 0 ? (double) s.wins / s.totalMatches : 0.0;
+                    return new LeaderboardEntry(s.playerId, s.playerName, s.totalMatches, s.wins, s.losses, winRate);
+                })
+                .sorted(Comparator.comparingDouble((LeaderboardEntry e) -> e.winRate()).reversed()
+                        .thenComparingInt(e -> e.wins())
+                        .thenComparing(e -> e.playerName()))
+                .toList();
 
         int totalElements = entries.size();
         int totalPages = totalElements == 0 ? 0 : (int) Math.ceil((double) totalElements / size);
@@ -111,8 +111,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         allPlayers.addAll(teamBPlayers);
 
         for (UUID playerId : allPlayers) {
-            if (playerId == null) continue;
-            if (!isPlayerInPosition(match, playerId, type)) continue;
+            if (playerId == null)
+                continue;
+            if (!isPlayerInPosition(match, playerId, type))
+                continue;
             PlayerStats stats = statsMap.computeIfAbsent(playerId, id -> {
                 PlayerStats s = new PlayerStats();
                 s.playerId = id;
@@ -131,8 +133,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         Set<UUID> losers = teamAWon ? teamBPlayers : teamAPlayers;
 
         for (UUID playerId : winners) {
-            if (playerId == null) continue;
-            if (!isPlayerInPosition(match, playerId, type)) continue;
+            if (playerId == null)
+                continue;
+            if (!isPlayerInPosition(match, playerId, type))
+                continue;
             PlayerStats stats = statsMap.computeIfAbsent(playerId, id -> {
                 PlayerStats s = new PlayerStats();
                 s.playerId = id;
@@ -143,8 +147,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             stats.wins++;
         }
         for (UUID playerId : losers) {
-            if (playerId == null) continue;
-            if (!isPlayerInPosition(match, playerId, type)) continue;
+            if (playerId == null)
+                continue;
+            if (!isPlayerInPosition(match, playerId, type))
+                continue;
             PlayerStats stats = statsMap.computeIfAbsent(playerId, id -> {
                 PlayerStats s = new PlayerStats();
                 s.playerId = id;
@@ -160,10 +166,12 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         Set<UUID> players = new HashSet<>();
         if (teamA) {
             players.add(match.getTeamAAttackerId());
-            if (match.getTeamADefenderId() != null) players.add(match.getTeamADefenderId());
+            if (match.getTeamADefenderId() != null)
+                players.add(match.getTeamADefenderId());
         } else {
             players.add(match.getTeamBAttackerId());
-            if (match.getTeamBDefenderId() != null) players.add(match.getTeamBDefenderId());
+            if (match.getTeamBDefenderId() != null)
+                players.add(match.getTeamBDefenderId());
         }
         return players;
     }
@@ -192,7 +200,8 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 .orElse("Unknown");
 
         for (Match match : matches) {
-            if (!match.isParticipant(userId)) continue;
+            if (!match.isParticipant(userId))
+                continue;
 
             int teamAGames = 0;
             int teamBGames = 0;
@@ -208,9 +217,12 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             boolean teamBWon = teamBGames > teamAGames;
             boolean isTied = !teamAWon && !teamBWon;
 
-            boolean userIsAttacker = userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamBAttackerId());
-            boolean userIsDefender = userId.equals(match.getTeamADefenderId()) || userId.equals(match.getTeamBDefenderId());
-            boolean userOnTeamA = userId.equals(match.getTeamAAttackerId()) || userId.equals(match.getTeamADefenderId());
+            boolean userIsAttacker = userId.equals(match.getTeamAAttackerId())
+                    || userId.equals(match.getTeamBAttackerId());
+            boolean userIsDefender = userId.equals(match.getTeamADefenderId())
+                    || userId.equals(match.getTeamBDefenderId());
+            boolean userOnTeamA = userId.equals(match.getTeamAAttackerId())
+                    || userId.equals(match.getTeamADefenderId());
 
             overall = increment(overall, userOnTeamA, teamAWon, teamBWon, isTied);
             if (userIsAttacker) {
@@ -226,21 +238,21 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 playerName,
                 withRate(overall),
                 withRate(attacker),
-                withRate(defender)
-        );
+                withRate(defender));
     }
 
     private PlayerStatsResponse.PositionStatsResponse increment(
             PlayerStatsResponse.PositionStatsResponse stats,
-            boolean userOnTeamA, boolean teamAWon, boolean teamBWon, boolean isTied
-    ) {
+            boolean userOnTeamA, boolean teamAWon, boolean teamBWon, boolean isTied) {
         int matches = stats.matches() + 1;
         int wins = stats.wins();
         int losses = stats.losses();
         if (!isTied) {
             boolean userWon = (userOnTeamA && teamAWon) || (!userOnTeamA && teamBWon);
-            if (userWon) wins++;
-            else losses++;
+            if (userWon)
+                wins++;
+            else
+                losses++;
         }
         return new PlayerStatsResponse.PositionStatsResponse(matches, wins, losses, 0.0);
     }

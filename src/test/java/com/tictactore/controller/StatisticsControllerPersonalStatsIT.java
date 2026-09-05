@@ -1,6 +1,5 @@
 package com.tictactore.controller;
 
-import com.tictactore.dto.PlayerStatsResponse;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.MatchRepository;
@@ -20,8 +19,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -91,7 +88,7 @@ class StatisticsControllerPersonalStatsIT {
         @DisplayName("[P0] Should return 401 when unauthenticated")
         void shouldReturn401WhenUnauthenticated() throws Exception {
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .accept(MediaType.APPLICATION_JSON))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -101,8 +98,8 @@ class StatisticsControllerPersonalStatsIT {
             aliceId = seedUser("Alice");
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.playerId").value(aliceId.toString()))
                     .andExpect(jsonPath("$.playerName").value("Alice"))
@@ -134,12 +131,11 @@ class StatisticsControllerPersonalStatsIT {
             seedMatches(
                     StatsTestDataFactory.confirmedOneVOne(aliceId, bobId, 10, 8, now),
                     StatsTestDataFactory.confirmedOneVOne(aliceId, bobId, 5, 10, now),
-                    StatsTestDataFactory.confirmedOneVOne(bobId, aliceId, 10, 5, now)
-            );
+                    StatsTestDataFactory.confirmedOneVOne(bobId, aliceId, 10, 5, now));
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.playerId").value(aliceId.toString()))
                     .andExpect(jsonPath("$.playerName").value("Alice"))
@@ -161,8 +157,8 @@ class StatisticsControllerPersonalStatsIT {
             aliceId = seedUser("Alice");
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.playerId").value(aliceId.toString()))
                     .andExpect(jsonPath("$.playerName").value("Alice"))
@@ -181,12 +177,11 @@ class StatisticsControllerPersonalStatsIT {
             bobId = seedUser("Bob");
             Instant now = Instant.now();
             seedMatches(
-                    StatsTestDataFactory.confirmedOneVOne(aliceId, bobId, 10, 10, now)
-            );
+                    StatsTestDataFactory.confirmedOneVOne(aliceId, bobId, 10, 10, now));
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.overall.matches").value(1))
                     .andExpect(jsonPath("$.overall.wins").value(0))
@@ -206,12 +201,11 @@ class StatisticsControllerPersonalStatsIT {
             daveId = seedUser("Dave");
             Instant now = Instant.now();
             seedMatches(
-                    StatsTestDataFactory.confirmedTwoVTwo(aliceId, carolId, bobId, daveId, 10, 8, now)
-            );
+                    StatsTestDataFactory.confirmedTwoVTwo(aliceId, carolId, bobId, daveId, 10, 8, now));
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.overall.matches").value(1))
                     .andExpect(jsonPath("$.attacker.matches").value(1))
@@ -220,8 +214,8 @@ class StatisticsControllerPersonalStatsIT {
                     .andExpect(jsonPath("$.defender.matches").value(0));
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(carolId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(carolId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.overall.matches").value(1))
                     .andExpect(jsonPath("$.attacker.matches").value(0))
@@ -243,12 +237,11 @@ class StatisticsControllerPersonalStatsIT {
             Instant now = Instant.now();
             seedMatches(
                     StatsTestDataFactory.confirmedOneVOne(aliceId, bobId, 10, 8, now),
-                    StatsTestDataFactory.pendingOneVOne(aliceId, bobId, 10, 8, now)
-            );
+                    StatsTestDataFactory.pendingOneVOne(aliceId, bobId, 10, 8, now));
 
             mockMvc.perform(get("/api/v1/statistics/me")
-                            .with(authentication(buildAuthentication(aliceId)))
-                            .accept(MediaType.APPLICATION_JSON))
+                    .with(authentication(buildAuthentication(aliceId)))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.overall.matches").value(1))
                     .andExpect(jsonPath("$.overall.wins").value(1))

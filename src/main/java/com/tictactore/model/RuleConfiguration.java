@@ -46,8 +46,16 @@ public class RuleConfiguration {
     @Column(name = "game_limit", nullable = false)
     private int gameLimit;
 
-    @Column(name = "win_by_two", nullable = false)
-    private boolean winByTwo;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_format", nullable = false, length = 30, columnDefinition = "varchar(30) default 'BEST_OF_N'")
+    private MatchFormat matchFormat;
+
+    @Column(name = "games_to_win", nullable = false, columnDefinition = "integer default 3")
+    private int gamesToWin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "win_by_two_rule", nullable = false, length = 30, columnDefinition = "varchar(30) default 'ALL_GAMES'")
+    private WinByTwoRule winByTwoRule;
 
     @Column(name = "absolute_score_cap")
     private Integer absoluteScoreCap;

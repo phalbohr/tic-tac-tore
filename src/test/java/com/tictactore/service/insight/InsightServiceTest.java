@@ -1,6 +1,5 @@
 package com.tictactore.service.insight;
 
-import com.tictactore.dto.AchievementDto;
 import com.tictactore.dto.InsightCategory;
 import com.tictactore.dto.InsightImportance;
 import com.tictactore.dto.InsightType;
@@ -54,8 +53,10 @@ class InsightServiceTest {
     void shouldReturnInsufficientData_whenFewerThan3Matches() {
         var playerId = UUID.randomUUID();
         when(userRepository.existsById(playerId)).thenReturn(true);
-        when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(List.of(Match.builder().id(UUID.randomUUID()).build()));
-        when(achievementService.getPlayerAchievements(playerId)).thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
+        when(matchRepository.findConfirmedMatchesByPlayerId(playerId))
+                .thenReturn(List.of(Match.builder().id(UUID.randomUUID()).build()));
+        when(achievementService.getPlayerAchievements(playerId))
+                .thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
 
         var service = new InsightServiceImpl(matchRepository, achievementService, List.of(generator1), userRepository);
         var response = service.getPlayerInsights(playerId);
@@ -77,20 +78,23 @@ class InsightServiceTest {
         var matches = List.of(
                 Match.builder().id(UUID.randomUUID()).build(),
                 Match.builder().id(UUID.randomUUID()).build(),
-                Match.builder().id(UUID.randomUUID()).build()
-        );
+                Match.builder().id(UUID.randomUUID()).build());
         when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(matches);
-        when(achievementService.getPlayerAchievements(playerId)).thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
+        when(achievementService.getPlayerAchievements(playerId))
+                .thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
 
-        var lowInsight = new PlayerInsightDto(UUID.randomUUID(), InsightType.INSUFFICIENT_DATA, InsightCategory.GENERAL, InsightImportance.LOW, "low", "low", Map.of(), "icon", null);
-        var highInsight = new PlayerInsightDto(UUID.randomUUID(), InsightType.WIN_STREAK, InsightCategory.STREAK, InsightImportance.HIGH, "high", "high", Map.of(), "icon", null);
+        var lowInsight = new PlayerInsightDto(UUID.randomUUID(), InsightType.INSUFFICIENT_DATA, InsightCategory.GENERAL,
+                InsightImportance.LOW, "low", "low", Map.of(), "icon", null);
+        var highInsight = new PlayerInsightDto(UUID.randomUUID(), InsightType.WIN_STREAK, InsightCategory.STREAK,
+                InsightImportance.HIGH, "high", "high", Map.of(), "icon", null);
 
         when(generator1.getOrder()).thenReturn(1);
         when(generator2.getOrder()).thenReturn(2);
         when(generator1.generate(eq(playerId), any(), any(), any())).thenReturn(Optional.of(lowInsight));
         when(generator2.generate(eq(playerId), any(), any(), any())).thenReturn(Optional.of(highInsight));
 
-        var service = new InsightServiceImpl(matchRepository, achievementService, List.of(generator1, generator2), userRepository);
+        var service = new InsightServiceImpl(matchRepository, achievementService, List.of(generator1, generator2),
+                userRepository);
         var response = service.getPlayerInsights(playerId);
 
         assertThat(response).isNotNull();
@@ -107,13 +111,14 @@ class InsightServiceTest {
         var matches = List.of(
                 Match.builder().id(UUID.randomUUID()).build(),
                 Match.builder().id(UUID.randomUUID()).build(),
-                Match.builder().id(UUID.randomUUID()).build()
-        );
+                Match.builder().id(UUID.randomUUID()).build());
         when(matchRepository.findConfirmedMatchesByPlayerId(playerId)).thenReturn(matches);
         when(matchRepository.sumGoalsAsAttacker(playerId)).thenReturn(null);
-        when(achievementService.getPlayerAchievements(playerId)).thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
+        when(achievementService.getPlayerAchievements(playerId))
+                .thenReturn(new PlayerAchievementsSummaryResponse(playerId, 0, 0, Collections.emptyList()));
 
-        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(), userRepository);
+        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(),
+                userRepository);
         var response = service.getPlayerInsights(playerId);
 
         assertThat(response).isNotNull();
@@ -126,7 +131,8 @@ class InsightServiceTest {
         var playerId = UUID.randomUUID();
         when(userRepository.existsById(playerId)).thenReturn(false);
 
-        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(), userRepository);
+        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(),
+                userRepository);
 
         assertThatThrownBy(() -> service.getPlayerInsights(playerId))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -135,7 +141,8 @@ class InsightServiceTest {
     @Test
     @DisplayName("[P1] [AC4] should throw ResourceNotFoundException when playerId is null")
     void shouldThrowNotFound_whenPlayerIdIsNull() {
-        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(), userRepository);
+        var service = new InsightServiceImpl(matchRepository, achievementService, Collections.emptyList(),
+                userRepository);
 
         assertThatThrownBy(() -> service.getPlayerInsights(null))
                 .isInstanceOf(ResourceNotFoundException.class);

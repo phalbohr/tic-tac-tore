@@ -11,10 +11,7 @@ import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.impl.PushNotificationServiceImpl;
 import com.tictactore.service.operation.NotificationOperation;
-import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,8 +54,7 @@ class PushNotificationServiceTest {
                 notificationOperation,
                 userRepository,
                 vapidProperties,
-                objectMapper
-        );
+                objectMapper);
     }
 
     @Nested
@@ -73,7 +69,8 @@ class PushNotificationServiceTest {
 
             pushNotificationService.subscribe(userId, request);
 
-            verify(notificationOperation).saveSubscription(userId, request.endpoint(), request.p256dh(), request.auth());
+            verify(notificationOperation).saveSubscription(userId, request.endpoint(), request.p256dh(),
+                    request.auth());
         }
 
         @Test
@@ -189,7 +186,8 @@ class PushNotificationServiceTest {
                 NotificationLog log = captor.getValue();
                 assertThat(log.getPayload()).isNotNull();
 
-                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(), PushNotificationPayload.class);
+                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(),
+                        PushNotificationPayload.class);
                 assertThat(payload.matchId()).isEqualTo(matchId);
                 assertThat(payload.creatorName()).isEqualTo("player1");
                 assertThat(payload.isDuplicateWarning()).isTrue();
@@ -222,7 +220,8 @@ class PushNotificationServiceTest {
                 verify(notificationOperation, times(1)).saveNotificationLog(captor.capture());
                 NotificationLog log = captor.getValue();
 
-                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(), PushNotificationPayload.class);
+                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(),
+                        PushNotificationPayload.class);
                 assertThat(payload.creatorName()).isEqualTo("A retired player");
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -249,7 +248,8 @@ class PushNotificationServiceTest {
                 verify(notificationOperation, times(1)).saveNotificationLog(captor.capture());
                 NotificationLog log = captor.getValue();
 
-                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(), PushNotificationPayload.class);
+                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(),
+                        PushNotificationPayload.class);
                 assertThat(payload.creatorName()).isEqualTo("A retired player");
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -277,7 +277,8 @@ class PushNotificationServiceTest {
                 verify(notificationOperation, times(1)).saveNotificationLog(captor.capture());
                 NotificationLog log = captor.getValue();
 
-                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(), PushNotificationPayload.class);
+                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(),
+                        PushNotificationPayload.class);
                 assertThat(payload.creatorName()).isEqualTo("alice");
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -305,7 +306,8 @@ class PushNotificationServiceTest {
                 verify(notificationOperation, times(1)).saveNotificationLog(captor.capture());
                 NotificationLog log = captor.getValue();
 
-                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(), PushNotificationPayload.class);
+                PushNotificationPayload payload = objectMapper.readValue(log.getPayload(),
+                        PushNotificationPayload.class);
                 assertThat(payload.summary()).isEqualTo("0 games submitted");
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -383,8 +385,7 @@ class PushNotificationServiceTest {
                     "Host",
                     com.tictactore.model.MatchType.ONE_VS_ONE,
                     com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
-                    List.of()
-            )).doesNotThrowAnyException();
+                    List.of())).doesNotThrowAnyException();
 
             verify(notificationOperation, never()).saveNotificationLog(any());
         }
@@ -395,8 +396,7 @@ class PushNotificationServiceTest {
             assertThatCode(() -> pushNotificationService.sendPoolFilledNotification(
                     UUID.randomUUID(),
                     com.tictactore.model.MatchType.ONE_VS_ONE,
-                    List.of()
-            )).doesNotThrowAnyException();
+                    List.of())).doesNotThrowAnyException();
 
             verify(notificationOperation, never()).saveNotificationLog(any());
         }
@@ -414,8 +414,7 @@ class PushNotificationServiceTest {
             when(notificationOperation.getSubscriptionsForUser(recipientId)).thenReturn(List.of());
 
             pushNotificationService.sendTournamentRegistrationCancelledNotification(
-                    tournamentId, "Autumn Cup", "Player", recipient
-            );
+                    tournamentId, "Autumn Cup", "Player", recipient);
 
             ArgumentCaptor<NotificationLog> captor = ArgumentCaptor.forClass(NotificationLog.class);
             verify(notificationOperation).saveNotificationLog(captor.capture());
@@ -433,8 +432,7 @@ class PushNotificationServiceTest {
             when(notificationOperation.getSubscriptionsForUser(recipientId)).thenReturn(List.of());
 
             pushNotificationService.sendTournamentInviteDeclinedNotification(
-                    tournamentId, "Autumn Cup", "Partner", recipient
-            );
+                    tournamentId, "Autumn Cup", "Partner", recipient);
 
             ArgumentCaptor<NotificationLog> captor = ArgumentCaptor.forClass(NotificationLog.class);
             verify(notificationOperation).saveNotificationLog(captor.capture());
