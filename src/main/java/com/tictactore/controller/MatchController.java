@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,8 +27,7 @@ public class MatchController {
     @PostMapping
     public ResponseEntity<MatchResponse> createMatch(
             @Valid @RequestBody CreateMatchRequest request,
-            @AuthenticationPrincipal User principal
-    ) {
+            @AuthenticationPrincipal User principal) {
         CreateMatchRequest finalRequest = request;
         if (principal != null) {
             finalRequest = new CreateMatchRequest(
@@ -42,8 +40,7 @@ public class MatchController {
                     request.games(),
                     request.entryMode(),
                     request.matchFormat(),
-                    request.tournamentMatchId()
-            );
+                    request.tournamentMatchId());
         }
 
         MatchResponse response = matchService.createMatch(finalRequest);
@@ -61,12 +58,12 @@ public class MatchController {
             @PathVariable("id") UUID id,
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyHeader,
             @RequestBody(required = false) MatchConfirmationRequest request,
-            @AuthenticationPrincipal User principal
-    ) {
+            @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        String idempotencyKey = idempotencyHeader != null ? idempotencyHeader : (request != null ? request.idempotencyKey() : null);
+        String idempotencyKey = idempotencyHeader != null ? idempotencyHeader
+                : (request != null ? request.idempotencyKey() : null);
         MatchResponse response = matchService.confirmMatch(id, principal.getId(), idempotencyKey);
         return ResponseEntity.ok(response);
     }
@@ -76,8 +73,7 @@ public class MatchController {
             @PathVariable("id") UUID id,
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyHeader,
             @Valid @RequestBody MatchRejectionRequest request,
-            @AuthenticationPrincipal User principal
-    ) {
+            @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -94,20 +90,17 @@ public class MatchController {
             @RequestParam(value = "matchType", required = false) String matchType,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-            @AuthenticationPrincipal User principal
-    ) {
+            @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         PagedResponse<MatchResponse> response;
         if (groupId != null) {
             response = matchService.getMatchHistory(
-                    principal.getId(), status, playerId, groupId, ruleConfigId, matchType, page, size
-            );
+                    principal.getId(), status, playerId, groupId, ruleConfigId, matchType, page, size);
         } else {
             response = matchService.getMatchHistory(
-                    principal.getId(), status, playerId, ruleConfigId, matchType, page, size
-            );
+                    principal.getId(), status, playerId, ruleConfigId, matchType, page, size);
         }
         return ResponseEntity.ok(response);
     }
@@ -115,8 +108,7 @@ public class MatchController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMatch(
             @PathVariable("id") UUID id,
-            @AuthenticationPrincipal User principal
-    ) {
+            @AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

@@ -32,7 +32,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,390 +45,425 @@ import static org.mockito.Mockito.when;
 @DisplayName("TournamentRegistrationService Unit Tests")
 class TournamentRegistrationServiceTest {
 
-    @Mock
-    private TournamentRegistrationRepository registrationRepository;
+        @Mock
+        private TournamentRegistrationRepository registrationRepository;
 
-    @Mock
-    private TournamentRepository tournamentRepository;
+        @Mock
+        private TournamentRepository tournamentRepository;
 
-    @Mock
-    private UserRepository userRepository;
+        @Mock
+        private UserRepository userRepository;
 
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
+        @Mock
+        private ApplicationEventPublisher eventPublisher;
 
-    @InjectMocks
-    private TournamentRegistrationServiceImpl service;
+        @InjectMocks
+        private TournamentRegistrationServiceImpl service;
 
-    private final UUID tournamentId = UUID.randomUUID();
-    private final UUID playerId = UUID.randomUUID();
-    private final UUID partnerId = UUID.randomUUID();
-    private final UUID strangerId = UUID.randomUUID();
-    private final UUID registrationId = UUID.randomUUID();
+        private final UUID tournamentId = UUID.randomUUID();
+        private final UUID playerId = UUID.randomUUID();
+        private final UUID partnerId = UUID.randomUUID();
+        private final UUID strangerId = UUID.randomUUID();
+        private final UUID registrationId = UUID.randomUUID();
 
-    private Tournament tournament1v1;
-    private Tournament tournament2v2;
-    private User player;
-    private User partner;
+        private Tournament tournament1v1;
+        private Tournament tournament2v2;
+        private User player;
+        private User partner;
 
-    @BeforeEach
-    void setUp() {
-        player = User.builder().id(playerId).nickname("Player").avatar("https://avatar.com/p.png").build();
-        partner = User.builder().id(partnerId).nickname("Partner").avatar("https://avatar.com/partner.png").build();
+        @BeforeEach
+        void setUp() {
+                player = User.builder().id(playerId).nickname("Player").avatar("https://avatar.com/p.png").build();
+                partner = User.builder().id(partnerId).nickname("Partner").avatar("https://avatar.com/partner.png")
+                                .build();
 
-        tournament1v1 = Tournament.builder()
-                .id(tournamentId)
-                .name("Solo Cup")
-                .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
-                .status(TournamentStatus.REGISTRATION_OPEN)
-                .registrationDeadline(Instant.now().plus(2, ChronoUnit.DAYS))
-                .maxParticipants(8)
-                .build();
+                tournament1v1 = Tournament.builder()
+                                .id(tournamentId)
+                                .name("Solo Cup")
+                                .mode(TournamentMode.ONE_VS_ONE_PERSONAL)
+                                .status(TournamentStatus.REGISTRATION_OPEN)
+                                .registrationDeadline(Instant.now().plus(2, ChronoUnit.DAYS))
+                                .maxParticipants(8)
+                                .build();
 
-        tournament2v2 = Tournament.builder()
-                .id(tournamentId)
-                .name("Duo Championship")
-                .mode(TournamentMode.TWO_VS_TWO_FIXED_TEAMS)
-                .status(TournamentStatus.REGISTRATION_OPEN)
-                .registrationDeadline(Instant.now().plus(2, ChronoUnit.DAYS))
-                .maxParticipants(8)
-                .build();
-    }
-
-    @Nested
-    @DisplayName("Registration Scenarios")
-    class RegisterTests {
-
-        @Test
-        void shouldRegisterSoloSuccessfully_when1v1Mode() {
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED))
-                    .thenReturn(0L);
-            when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
-            when(registrationRepository.save(any(TournamentRegistration.class)))
-                    .thenAnswer(invocation -> {
-                        TournamentRegistration r = invocation.getArgument(0);
-                        r.setId(registrationId);
-                        return r;
-                    });
-
-            var response = service.register(tournamentId, playerId, request);
-
-            assertThat(response.id()).isEqualTo(registrationId);
-            assertThat(response.status()).isEqualTo(RegistrationStatus.CONFIRMED);
-            assertThat(response.playerId()).isEqualTo(playerId);
-            assertThat(response.partnerId()).isNull();
+                tournament2v2 = Tournament.builder()
+                                .id(tournamentId)
+                                .name("Duo Championship")
+                                .mode(TournamentMode.TWO_VS_TWO_FIXED_TEAMS)
+                                .status(TournamentStatus.REGISTRATION_OPEN)
+                                .registrationDeadline(Instant.now().plus(2, ChronoUnit.DAYS))
+                                .maxParticipants(8)
+                                .build();
         }
 
-        @Test
-        void shouldRegisterWithPartner_when2v2FixedTeamsMode() {
-            var request = new RegisterTournamentRequest(partnerId);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED))
-                    .thenReturn(0L);
-            when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
-            when(userRepository.findById(partnerId)).thenReturn(Optional.of(partner));
-            when(registrationRepository.save(any(TournamentRegistration.class)))
-                    .thenAnswer(invocation -> {
-                        TournamentRegistration r = invocation.getArgument(0);
-                        r.setId(registrationId);
-                        return r;
-                    });
+        @Nested
+        @DisplayName("Registration Scenarios")
+        class RegisterTests {
 
-            var response = service.register(tournamentId, playerId, request);
+                @Test
+                void shouldRegisterSoloSuccessfully_when1v1Mode() {
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED))
+                                        .thenReturn(0L);
+                        when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(invocation -> {
+                                                TournamentRegistration r = invocation.getArgument(0);
+                                                r.setId(registrationId);
+                                                return r;
+                                        });
 
-            assertThat(response.id()).isEqualTo(registrationId);
-            assertThat(response.status()).isEqualTo(RegistrationStatus.PENDING_CONFIRMATION);
-            assertThat(response.partnerId()).isEqualTo(partnerId);
-            assertThat(response.partnerNickname()).isEqualTo("Partner");
-            verify(eventPublisher).publishEvent(any(TournamentInviteCreatedEvent.class));
+                        var response = service.register(tournamentId, playerId, request);
+
+                        assertThat(response.id()).isEqualTo(registrationId);
+                        assertThat(response.status()).isEqualTo(RegistrationStatus.CONFIRMED);
+                        assertThat(response.playerId()).isEqualTo(playerId);
+                        assertThat(response.partnerId()).isNull();
+                }
+
+                @Test
+                void shouldRegisterWithPartner_when2v2FixedTeamsMode() {
+                        var request = new RegisterTournamentRequest(partnerId);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED))
+                                        .thenReturn(0L);
+                        when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
+                        when(userRepository.findById(partnerId)).thenReturn(Optional.of(partner));
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(invocation -> {
+                                                TournamentRegistration r = invocation.getArgument(0);
+                                                r.setId(registrationId);
+                                                return r;
+                                        });
+
+                        var response = service.register(tournamentId, playerId, request);
+
+                        assertThat(response.id()).isEqualTo(registrationId);
+                        assertThat(response.status()).isEqualTo(RegistrationStatus.PENDING_CONFIRMATION);
+                        assertThat(response.partnerId()).isEqualTo(partnerId);
+                        assertThat(response.partnerNickname()).isEqualTo("Partner");
+                        verify(eventPublisher).publishEvent(any(TournamentInviteCreatedEvent.class));
+                }
+
+                @Test
+                void shouldThrowResourceNotFoundException_whenTournamentNotFound() {
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.empty());
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(ResourceNotFoundException.class);
+                }
+
+                @Test
+                void shouldThrowTournamentConflictException_whenTournamentNotOpen() {
+                        tournament1v1.setStatus(TournamentStatus.IN_PROGRESS);
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(TournamentConflictException.class)
+                                        .hasMessageContaining("Tournament is not open for registration");
+                }
+
+                @Test
+                void shouldThrowIllegalArgumentException_whenDeadlinePassed() {
+                        tournament1v1.setRegistrationDeadline(Instant.now().minus(1, ChronoUnit.HOURS));
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(IllegalArgumentException.class)
+                                        .hasMessageContaining("deadline has passed");
+                }
+
+                @Test
+                void shouldThrowIllegalArgumentException_whenPartnerMissingIn2v2Fixed() {
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(IllegalArgumentException.class)
+                                        .hasMessageContaining("Partner ID is required");
+                }
+
+                @Test
+                void shouldThrowIllegalArgumentException_whenPartnerNotFoundInUserRepository() {
+                        var request = new RegisterTournamentRequest(partnerId);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED))
+                                        .thenReturn(0L);
+                        when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
+                        when(userRepository.findById(partnerId)).thenReturn(Optional.empty());
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(IllegalArgumentException.class)
+                                        .hasMessageContaining("Partner not found");
+                }
+
+                @Test
+                void shouldThrowIllegalArgumentException_whenPartnerProvidedIn1v1() {
+                        var request = new RegisterTournamentRequest(partnerId);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(IllegalArgumentException.class)
+                                        .hasMessageContaining("Partner cannot be specified");
+                }
+
+                @Test
+                void shouldThrowTournamentConflictException_whenCapacityReached() {
+                        var request = new RegisterTournamentRequest(null);
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED))
+                                        .thenReturn(8L);
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(TournamentConflictException.class)
+                                        .hasMessageContaining("maximum participant capacity");
+                }
+
+                @Test
+                void shouldThrowTournamentConflictException_whenUserAlreadyHasActiveRegistration() {
+                        var request = new RegisterTournamentRequest(null);
+                        var existingReg = TournamentRegistration.builder().id(UUID.randomUUID()).build();
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament1v1));
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
+                                        .thenReturn(Optional.of(existingReg));
+
+                        assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
+                                        .isInstanceOf(TournamentConflictException.class)
+                                        .hasMessageContaining("User already has an active registration");
+                }
         }
 
-        @Test
-        void shouldThrowResourceNotFoundException_whenTournamentNotFound() {
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.empty());
+        @Nested
+        @DisplayName("Invitation Response Scenarios")
+        class InvitationTests {
 
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(ResourceNotFoundException.class);
+                @Test
+                void shouldAcceptInvitationSuccessfully_whenPartnerAccepts() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED)).thenReturn(2L);
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
+                                        .thenReturn(Optional.empty());
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(i -> i.getArgument(0));
+
+                        var response = service.acceptInvitation(tournamentId, registrationId, partnerId);
+
+                        assertThat(response.status()).isEqualTo(RegistrationStatus.CONFIRMED);
+                        verify(eventPublisher).publishEvent(any(TournamentInviteAcceptedEvent.class));
+                }
+
+                @Test
+                void shouldThrowTournamentConflictException_whenPartnerHasOtherConfirmedRegistration() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        var otherReg = TournamentRegistration.builder()
+                                        .id(UUID.randomUUID())
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.CONFIRMED)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED)).thenReturn(2L);
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
+                                        .thenReturn(Optional.of(otherReg));
+
+                        assertThatThrownBy(() -> service.acceptInvitation(tournamentId, registrationId, partnerId))
+                                        .isInstanceOf(TournamentConflictException.class)
+                                        .hasMessageContaining("Partner already has an active confirmed registration");
+                }
+
+                @Test
+                void shouldThrowAccessDeniedException_whenNonPartnerAccepts() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(tournamentRepository.findByIdWithLock(tournamentId))
+                                        .thenReturn(Optional.of(tournament2v2));
+                        when(registrationRepository.countByTournamentIdAndStatus(tournamentId,
+                                        RegistrationStatus.CONFIRMED)).thenReturn(0L);
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(strangerId), any()))
+                                        .thenReturn(Optional.empty());
+
+                        assertThatThrownBy(() -> service.acceptInvitation(tournamentId, registrationId, strangerId))
+                                        .isInstanceOf(AccessDeniedException.class);
+                }
+
+                @Test
+                void shouldDeclineInvitationSuccessfully_whenPartnerDeclines() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(i -> i.getArgument(0));
+
+                        var response = service.declineInvitation(tournamentId, registrationId, partnerId);
+
+                        assertThat(response.status()).isEqualTo(RegistrationStatus.DECLINED);
+                        verify(eventPublisher).publishEvent(any(TournamentInviteDeclinedEvent.class));
+                }
         }
 
-        @Test
-        void shouldThrowTournamentConflictException_whenTournamentNotOpen() {
-            tournament1v1.setStatus(TournamentStatus.IN_PROGRESS);
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
+        @Nested
+        @DisplayName("Cancellation & Queries")
+        class CancelAndQueryTests {
 
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(TournamentConflictException.class)
-                    .hasMessageContaining("Tournament is not open for registration");
+                @Test
+                void shouldCancelRegistrationAndNotifyPartner_whenPlayerCancelsTeamRegistration() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.CONFIRMED)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(i -> i.getArgument(0));
+
+                        service.cancelRegistration(tournamentId, registrationId, playerId);
+
+                        assertThat(registration.getStatus()).isEqualTo(RegistrationStatus.CANCELLED);
+                        ArgumentCaptor<TournamentRegistrationCancelledEvent> captor = ArgumentCaptor
+                                        .forClass(TournamentRegistrationCancelledEvent.class);
+                        verify(eventPublisher).publishEvent(captor.capture());
+                        assertThat(captor.getValue().notifyUserId()).isEqualTo(partnerId);
+                        assertThat(captor.getValue().cancelledByName()).isEqualTo("Player");
+                }
+
+                @Test
+                void shouldCancelSoloRegistrationWithoutNotification_whenPlayerCancels() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament1v1)
+                                        .player(player)
+                                        .partner(null)
+                                        .status(RegistrationStatus.CONFIRMED)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+                        when(registrationRepository.save(any(TournamentRegistration.class)))
+                                        .thenAnswer(i -> i.getArgument(0));
+
+                        service.cancelRegistration(tournamentId, registrationId, playerId);
+
+                        assertThat(registration.getStatus()).isEqualTo(RegistrationStatus.CANCELLED);
+                }
+
+                @Test
+                void shouldThrowAccessDeniedException_whenStrangerCancels() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament1v1)
+                                        .player(player)
+                                        .partner(null)
+                                        .status(RegistrationStatus.CONFIRMED)
+                                        .build();
+                        when(registrationRepository.findByIdWithDetails(registrationId))
+                                        .thenReturn(Optional.of(registration));
+
+                        assertThatThrownBy(() -> service.cancelRegistration(tournamentId, registrationId, strangerId))
+                                        .isInstanceOf(AccessDeniedException.class);
+                }
+
+                @Test
+                void shouldReturnMyRegistrationStatus_whenRegistered() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        when(tournamentRepository.existsById(tournamentId)).thenReturn(true);
+                        when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
+                                        .thenReturn(Optional.of(registration));
+
+                        var status = service.getMyRegistrationStatus(tournamentId, partnerId);
+
+                        assertThat(status.registered()).isTrue();
+                        assertThat(status.isPendingInvite()).isTrue();
+                        assertThat(status.registration().id()).isEqualTo(registrationId);
+                }
+
+                @Test
+                void shouldReturnPendingInvitations() {
+                        var registration = TournamentRegistration.builder()
+                                        .id(registrationId)
+                                        .tournament(tournament2v2)
+                                        .player(player)
+                                        .partner(partner)
+                                        .status(RegistrationStatus.PENDING_CONFIRMATION)
+                                        .build();
+                        when(registrationRepository.findPendingInvitationsForUser(partnerId))
+                                        .thenReturn(List.of(registration));
+
+                        var list = service.getPendingInvitations(partnerId);
+
+                        assertThat(list).hasSize(1);
+                        assertThat(list.get(0).id()).isEqualTo(registrationId);
+                }
         }
-
-        @Test
-        void shouldThrowIllegalArgumentException_whenDeadlinePassed() {
-            tournament1v1.setRegistrationDeadline(Instant.now().minus(1, ChronoUnit.HOURS));
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("deadline has passed");
-        }
-
-        @Test
-        void shouldThrowIllegalArgumentException_whenPartnerMissingIn2v2Fixed() {
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Partner ID is required");
-        }
-
-        @Test
-        void shouldThrowIllegalArgumentException_whenPartnerNotFoundInUserRepository() {
-            var request = new RegisterTournamentRequest(partnerId);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED))
-                    .thenReturn(0L);
-            when(userRepository.findById(playerId)).thenReturn(Optional.of(player));
-            when(userRepository.findById(partnerId)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Partner not found");
-        }
-
-        @Test
-        void shouldThrowIllegalArgumentException_whenPartnerProvidedIn1v1() {
-            var request = new RegisterTournamentRequest(partnerId);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Partner cannot be specified");
-        }
-
-        @Test
-        void shouldThrowTournamentConflictException_whenCapacityReached() {
-            var request = new RegisterTournamentRequest(null);
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
-                    .thenReturn(Optional.empty());
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED))
-                    .thenReturn(8L);
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(TournamentConflictException.class)
-                    .hasMessageContaining("maximum participant capacity");
-        }
-
-        @Test
-        void shouldThrowTournamentConflictException_whenUserAlreadyHasActiveRegistration() {
-            var request = new RegisterTournamentRequest(null);
-            var existingReg = TournamentRegistration.builder().id(UUID.randomUUID()).build();
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament1v1));
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(playerId), any()))
-                    .thenReturn(Optional.of(existingReg));
-
-            assertThatThrownBy(() -> service.register(tournamentId, playerId, request))
-                    .isInstanceOf(TournamentConflictException.class)
-                    .hasMessageContaining("User already has an active registration");
-        }
-    }
-
-    @Nested
-    @DisplayName("Invitation Response Scenarios")
-    class InvitationTests {
-
-        @Test
-        void shouldAcceptInvitationSuccessfully_whenPartnerAccepts() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED)).thenReturn(2L);
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any())).thenReturn(Optional.empty());
-            when(registrationRepository.save(any(TournamentRegistration.class))).thenAnswer(i -> i.getArgument(0));
-
-            var response = service.acceptInvitation(tournamentId, registrationId, partnerId);
-
-            assertThat(response.status()).isEqualTo(RegistrationStatus.CONFIRMED);
-            verify(eventPublisher).publishEvent(any(TournamentInviteAcceptedEvent.class));
-        }
-
-        @Test
-        void shouldThrowTournamentConflictException_whenPartnerHasOtherConfirmedRegistration() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            var otherReg = TournamentRegistration.builder()
-                    .id(UUID.randomUUID())
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.CONFIRMED)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED)).thenReturn(2L);
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any())).thenReturn(Optional.of(otherReg));
-
-            assertThatThrownBy(() -> service.acceptInvitation(tournamentId, registrationId, partnerId))
-                    .isInstanceOf(TournamentConflictException.class)
-                    .hasMessageContaining("Partner already has an active confirmed registration");
-        }
-
-        @Test
-        void shouldThrowAccessDeniedException_whenNonPartnerAccepts() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(tournamentRepository.findByIdWithLock(tournamentId)).thenReturn(Optional.of(tournament2v2));
-            when(registrationRepository.countByTournamentIdAndStatus(tournamentId, RegistrationStatus.CONFIRMED)).thenReturn(0L);
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(strangerId), any())).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.acceptInvitation(tournamentId, registrationId, strangerId))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void shouldDeclineInvitationSuccessfully_whenPartnerDeclines() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(registrationRepository.save(any(TournamentRegistration.class))).thenAnswer(i -> i.getArgument(0));
-
-            var response = service.declineInvitation(tournamentId, registrationId, partnerId);
-
-            assertThat(response.status()).isEqualTo(RegistrationStatus.DECLINED);
-            verify(eventPublisher).publishEvent(any(TournamentInviteDeclinedEvent.class));
-        }
-    }
-
-    @Nested
-    @DisplayName("Cancellation & Queries")
-    class CancelAndQueryTests {
-
-        @Test
-        void shouldCancelRegistrationAndNotifyPartner_whenPlayerCancelsTeamRegistration() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.CONFIRMED)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(registrationRepository.save(any(TournamentRegistration.class))).thenAnswer(i -> i.getArgument(0));
-
-            service.cancelRegistration(tournamentId, registrationId, playerId);
-
-            assertThat(registration.getStatus()).isEqualTo(RegistrationStatus.CANCELLED);
-            ArgumentCaptor<TournamentRegistrationCancelledEvent> captor = ArgumentCaptor.forClass(TournamentRegistrationCancelledEvent.class);
-            verify(eventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().notifyUserId()).isEqualTo(partnerId);
-            assertThat(captor.getValue().cancelledByName()).isEqualTo("Player");
-        }
-
-        @Test
-        void shouldCancelSoloRegistrationWithoutNotification_whenPlayerCancels() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament1v1)
-                    .player(player)
-                    .partner(null)
-                    .status(RegistrationStatus.CONFIRMED)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-            when(registrationRepository.save(any(TournamentRegistration.class))).thenAnswer(i -> i.getArgument(0));
-
-            service.cancelRegistration(tournamentId, registrationId, playerId);
-
-            assertThat(registration.getStatus()).isEqualTo(RegistrationStatus.CANCELLED);
-        }
-
-        @Test
-        void shouldThrowAccessDeniedException_whenStrangerCancels() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament1v1)
-                    .player(player)
-                    .partner(null)
-                    .status(RegistrationStatus.CONFIRMED)
-                    .build();
-            when(registrationRepository.findByIdWithDetails(registrationId)).thenReturn(Optional.of(registration));
-
-            assertThatThrownBy(() -> service.cancelRegistration(tournamentId, registrationId, strangerId))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void shouldReturnMyRegistrationStatus_whenRegistered() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            when(tournamentRepository.existsById(tournamentId)).thenReturn(true);
-            when(registrationRepository.findActiveUserRegistration(eq(tournamentId), eq(partnerId), any()))
-                    .thenReturn(Optional.of(registration));
-
-            var status = service.getMyRegistrationStatus(tournamentId, partnerId);
-
-            assertThat(status.registered()).isTrue();
-            assertThat(status.isPendingInvite()).isTrue();
-            assertThat(status.registration().id()).isEqualTo(registrationId);
-        }
-
-        @Test
-        void shouldReturnPendingInvitations() {
-            var registration = TournamentRegistration.builder()
-                    .id(registrationId)
-                    .tournament(tournament2v2)
-                    .player(player)
-                    .partner(partner)
-                    .status(RegistrationStatus.PENDING_CONFIRMATION)
-                    .build();
-            when(registrationRepository.findPendingInvitationsForUser(partnerId))
-                    .thenReturn(List.of(registration));
-
-            var list = service.getPendingInvitations(partnerId);
-
-            assertThat(list).hasSize(1);
-            assertThat(list.get(0).id()).isEqualTo(registrationId);
-        }
-    }
 }

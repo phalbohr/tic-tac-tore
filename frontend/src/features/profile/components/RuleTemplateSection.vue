@@ -134,12 +134,12 @@ async function confirmDelete() {
             }}</span>
           </div>
           <div class="text-[11px] text-on-surface-variant flex flex-wrap gap-x-2 gap-y-0.5">
-            <span>Best of {{ rule.gameLimit }}</span>
+            <span>{{ rule.matchFormat === 'FIXED_GAMES' ? `${rule.gameLimit} games` : `Best of ${rule.gameLimit}` }}</span>
             <span>•</span>
             <span>{{ rule.goalLimit }} goals</span>
-            <template v-if="rule.winByTwo">
+            <template v-if="rule.winByTwoRule ? rule.winByTwoRule !== 'NONE' : rule.winByTwo">
               <span>•</span>
-              <span>Win by 2</span>
+              <span>{{ rule.winByTwoRule === 'DECISIVE_GAME_ONLY' ? 'Win by 2 (Tie-break)' : 'Win by 2' }}</span>
             </template>
           </div>
         </div>

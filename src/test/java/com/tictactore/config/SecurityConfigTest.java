@@ -13,9 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +38,8 @@ class SecurityConfigTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(securityConfig, "allowedOrigins", List.of("http://localhost:3000", "https://prod.com"));
+        ReflectionTestUtils.setField(securityConfig, "allowedOrigins",
+                List.of("http://localhost:3000", "https://prod.com"));
     }
 
     @Test
@@ -55,9 +53,11 @@ class SecurityConfigTest {
 
         assertThat(config).isNotNull();
         assertThat(config.getAllowedOrigins()).isNullOrEmpty();
-        assertThat(config.getAllowedOriginPatterns()).containsExactlyInAnyOrder("http://localhost:3000", "https://prod.com");
+        assertThat(config.getAllowedOriginPatterns()).containsExactlyInAnyOrder("http://localhost:3000",
+                "https://prod.com");
         assertThat(config.getAllowCredentials()).isTrue();
         assertThat(config.getAllowedMethods()).contains("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH");
-        assertThat(config.getAllowedHeaders()).contains("Authorization", "Cache-Control", "Content-Type", "X-XSRF-TOKEN", "X-Requested-With", "Accept", "Origin");
+        assertThat(config.getAllowedHeaders()).contains("Authorization", "Cache-Control", "Content-Type",
+                "X-XSRF-TOKEN", "X-Requested-With", "Accept", "Origin");
     }
 }

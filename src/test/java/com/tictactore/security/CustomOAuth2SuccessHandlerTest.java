@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,8 +83,7 @@ class CustomOAuth2SuccessHandlerTest {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
                 ATTR_EMAIL, TEST_EMAIL,
-                ATTR_SUB, TEST_PROVIDER_ID
-        ));
+                ATTR_SUB, TEST_PROVIDER_ID));
         when(userService.findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID)).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn(TEST_JWT);
         when(request.isSecure()).thenReturn(true);
@@ -97,7 +95,8 @@ class CustomOAuth2SuccessHandlerTest {
 
         handler.onAuthenticationSuccess(request, response, token);
 
-        verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), contains(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=" + TEST_JWT));
+        verify(response).addHeader(eq(HttpHeaders.SET_COOKIE),
+                contains(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=" + TEST_JWT));
         verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), contains("Secure"));
         verify(response).sendRedirect(TEST_REDIRECT_URI);
     }
@@ -113,8 +112,7 @@ class CustomOAuth2SuccessHandlerTest {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
                 ATTR_EMAIL, TEST_EMAIL,
-                ATTR_SUB, TEST_PROVIDER_ID
-        ));
+                ATTR_SUB, TEST_PROVIDER_ID));
         when(userService.findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID)).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn(TEST_JWT);
         when(request.isSecure()).thenReturn(false);
@@ -126,7 +124,8 @@ class CustomOAuth2SuccessHandlerTest {
 
         handler.onAuthenticationSuccess(request, response, token);
 
-        verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), contains(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=" + TEST_JWT));
+        verify(response).addHeader(eq(HttpHeaders.SET_COOKIE),
+                contains(CustomOAuth2SuccessHandler.AUTH_COOKIE_NAME + "=" + TEST_JWT));
         verify(response, never()).addHeader(eq(HttpHeaders.SET_COOKIE), contains("Secure"));
         verify(response).sendRedirect(TEST_REDIRECT_URI);
     }
@@ -152,7 +151,8 @@ class CustomOAuth2SuccessHandlerTest {
         handler.onAuthenticationSuccess(request, response, token);
 
         verify(userService).findOrCreate(TEST_EMAIL, TEST_PROVIDER_ID);
-        // We verify that findOrCreate was called ONLY with email and providerId, meaning ATTR_NAME was ignored.
+        // We verify that findOrCreate was called ONLY with email and providerId,
+        // meaning ATTR_NAME was ignored.
     }
 
     @Test
@@ -160,10 +160,10 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_missingEmail_shouldThrowException() {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
-                ATTR_SUB, TEST_PROVIDER_ID
-        ));
+                ATTR_SUB, TEST_PROVIDER_ID));
 
-        assertThrows(OAuth2AuthenticationException.class, () -> handler.onAuthenticationSuccess(request, response, token));
+        assertThrows(OAuth2AuthenticationException.class,
+                () -> handler.onAuthenticationSuccess(request, response, token));
 
         verify(userService, never()).findOrCreate(anyString(), anyString());
     }
@@ -173,10 +173,10 @@ class CustomOAuth2SuccessHandlerTest {
     void onAuthenticationSuccess_missingProviderId_shouldThrowException() {
         when(token.getPrincipal()).thenReturn(oauth2User);
         when(oauth2User.getAttributes()).thenReturn(Map.of(
-                ATTR_EMAIL, TEST_EMAIL
-        ));
+                ATTR_EMAIL, TEST_EMAIL));
 
-        assertThrows(OAuth2AuthenticationException.class, () -> handler.onAuthenticationSuccess(request, response, token));
+        assertThrows(OAuth2AuthenticationException.class,
+                () -> handler.onAuthenticationSuccess(request, response, token));
 
         verify(userService, never()).findOrCreate(anyString(), anyString());
     }

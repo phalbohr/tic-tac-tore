@@ -2,15 +2,16 @@ package com.tictactore.service;
 
 import com.tictactore.dto.GameDto;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.RuleConfiguration;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.service.impl.MatchScoreValidatorImpl;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,7 +57,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(false)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .build();
         var games = List.of(
                 new GameDto(10, 5, null, null, null, null),
@@ -75,7 +76,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(false)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .build();
         var games = List.of(new GameDto(10, 10, null, null, null, null));
 
@@ -94,7 +95,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(false)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .build();
         var games = List.of(new GameDto(scoreA, scoreB, null, null, null, null));
 
@@ -107,7 +108,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(false)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .build();
         var games = List.of(new GameDto(11, 9, null, null, null, null));
 
@@ -121,7 +122,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(false)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .build();
         var games = List.of(new GameDto(9, 7, null, null, null, null));
 
@@ -141,7 +142,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(true)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .build();
         var games = List.of(new GameDto(scoreA, scoreB, null, null, null, null));
 
@@ -154,7 +155,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(true)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .build();
         var games = List.of(new GameDto(10, 9, null, null, null, null));
 
@@ -168,7 +169,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(10)
-                .winByTwo(true)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .build();
         var games = List.of(new GameDto(13, 10, null, null, null, null));
 
@@ -182,7 +183,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(5)
-                .winByTwo(true)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(8)
                 .build();
         var games = List.of(new GameDto(8, 7, null, null, null, null));
@@ -196,7 +197,7 @@ class MatchScoreValidatorTest {
         var ruleConfig = RuleConfiguration.builder()
                 .gameLimit(3)
                 .goalLimit(5)
-                .winByTwo(true)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(8)
                 .build();
         var games = List.of(new GameDto(9, 7, null, null, null, null));
@@ -204,5 +205,52 @@ class MatchScoreValidatorTest {
         assertThatThrownBy(() -> validator.validateScores(ruleConfig, games))
                 .isInstanceOf(InvalidMatchScoreException.class)
                 .hasMessageContaining("Game score cannot exceed absolute score cap of 8");
+    }
+
+    @Test
+    void shouldAllowOneGoalMarginInRegularGames_andRequireWinByTwoInDecisiveGame_whenDecisiveGameOnly() {
+        var ruleConfig = RuleConfiguration.builder()
+                .matchFormat(MatchFormat.BEST_OF_N)
+                .gameLimit(5)
+                .gamesToWin(3)
+                .goalLimit(5)
+                .winByTwoRule(WinByTwoRule.DECISIVE_GAME_ONLY)
+                .absoluteScoreCap(8)
+                .build();
+
+        var regularGamesWithOneGoalMargin = List.of(
+                new GameDto(5, 4, null, null, null, null), // Game 1: 5-4 valid without win-by-2
+                new GameDto(4, 5, null, null, null, null), // Game 2: 4-5 valid without win-by-2
+                new GameDto(5, 4, null, null, null, null), // Game 3: 5-4 valid
+                new GameDto(4, 5, null, null, null, null), // Game 4: 4-5 valid (tied 2-2)
+                new GameDto(8, 7, null, null, null, null)  // Game 5: decisive game reaching cap 8
+        );
+
+        assertThatCode(() -> validator.validateScores(ruleConfig, regularGamesWithOneGoalMargin))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldRejectDecisiveGameWithoutWinByTwo_whenDecisiveGameOnly() {
+        var ruleConfig = RuleConfiguration.builder()
+                .matchFormat(MatchFormat.BEST_OF_N)
+                .gameLimit(5)
+                .gamesToWin(3)
+                .goalLimit(5)
+                .winByTwoRule(WinByTwoRule.DECISIVE_GAME_ONLY)
+                .absoluteScoreCap(8)
+                .build();
+
+        var decisiveGameInvalid = List.of(
+                new GameDto(5, 4, null, null, null, null), // 1-0
+                new GameDto(4, 5, null, null, null, null), // 1-1
+                new GameDto(5, 4, null, null, null, null), // 2-1
+                new GameDto(4, 5, null, null, null, null), // 2-2
+                new GameDto(5, 4, null, null, null, null)  // Decisive game 5: 5-4 invalid (needs win by 2 or cap)
+        );
+
+        assertThatThrownBy(() -> validator.validateScores(ruleConfig, decisiveGameInvalid))
+                .isInstanceOf(InvalidMatchScoreException.class)
+                .hasMessageContaining("Winning margin must be at least 2 goals");
     }
 }

@@ -4,7 +4,6 @@ import com.tictactore.config.ApplicationProperties;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -116,7 +114,7 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.findOrCreate(EMAIL_VICTIM, SUB_ATTACKER))
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessageContaining(ERR_PROVIDER_MISMATCH);
-        
+
         verify(userCreator, never()).createUser(any());
     }
 
@@ -194,8 +192,6 @@ class UserServiceTest {
         verify(userCreator, never()).createUser(any());
     }
 
-
-
     @Test
     @DisplayName("Get Profile - should return user when found")
     void getProfile_returnsUser_whenFound() {
@@ -237,7 +233,8 @@ class UserServiceTest {
     @DisplayName("Nickname Collision - should use UUID fallback after max attempts")
     void shouldHandleNicknameCollisionExhaustion() {
         when(userRepository.findByEmail(EMAIL_NEW)).thenReturn(Optional.empty());
-        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true, true, true, true, false);
+        when(userRepository.existsByNickname(anyString())).thenReturn(true, true, true, true, true, true, true, true,
+                true, true, true, false);
         when(userCreator.createUser(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var user = userService.findOrCreate(EMAIL_NEW, SUB_NEW);
@@ -264,12 +261,14 @@ class UserServiceTest {
                 .build();
         var expectedUser = new User();
         expectedUser.setNickname("newNickname");
-        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false, null)).thenReturn(expectedUser);
+        when(userOperation.updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false,
+                false, null)).thenReturn(expectedUser);
 
         var actualUser = userService.updateProfile(userId, request);
 
         assertThat(actualUser).isSameAs(expectedUser);
-        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false, false, null);
+        verify(userOperation).updateProfile(userId, "newNickname", "DE", "ball-classic", true, groupId, ruleId, false,
+                false, null);
     }
 
     @Test
@@ -321,4 +320,3 @@ class UserServiceTest {
         verify(userRepository, never()).searchActiveUsers(anyString(), any(Pageable.class));
     }
 }
-

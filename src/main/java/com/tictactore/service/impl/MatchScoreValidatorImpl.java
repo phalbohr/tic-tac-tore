@@ -2,11 +2,12 @@ package com.tictactore.service.impl;
 
 import com.tictactore.dto.GameDto;
 import com.tictactore.exception.InvalidMatchScoreException;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.RuleConfiguration;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.service.MatchScoreValidator;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MatchScoreValidatorImpl implements MatchScoreValidator {
@@ -22,12 +23,31 @@ public class MatchScoreValidatorImpl implements MatchScoreValidator {
             throw new InvalidMatchScoreException("Match must have between 1 and " + maxGames + " games");
         }
 
-        for (GameDto gameDto : games) {
-            validateSingleGame(ruleConfig, gameDto);
+        int winsA = 0;
+        int winsB = 0;
+        for (int i = 0; i < games.size(); i++) {
+            GameDto gameDto = games.get(i);
+            boolean isDecisiveGame = false;
+            if (ruleConfig != null) {
+                if (ruleConfig.getMatchFormat() == null || ruleConfig.getMatchFormat() == MatchFormat.BEST_OF_N) {
+                    int target = ruleConfig.getGamesToWin() > 0 ? ruleConfig.getGamesToWin() : (ruleConfig.getGameLimit() / 2 + 1);
+                    isDecisiveGame = (winsA == target - 1 && winsB == target - 1);
+                } else if (ruleConfig.getMatchFormat() == MatchFormat.FIXED_GAMES) {
+                    isDecisiveGame = (i == ruleConfig.getGameLimit() - 1 && winsA == winsB);
+                }
+            }
+
+            validateSingleGame(ruleConfig, gameDto, isDecisiveGame);
+
+            if (gameDto.teamAScore() > gameDto.teamBScore()) {
+                winsA++;
+            } else if (gameDto.teamBScore() > gameDto.teamAScore()) {
+                winsB++;
+            }
         }
     }
 
-    private void validateSingleGame(RuleConfiguration ruleConfig, GameDto gameDto) {
+    private void validateSingleGame(RuleConfiguration ruleConfig, GameDto gameDto, boolean isDecisiveGame) {
         int scoreA = gameDto.teamAScore();
         int scoreB = gameDto.teamBScore();
 
@@ -43,7 +63,12 @@ public class MatchScoreValidatorImpl implements MatchScoreValidator {
         }
 
         int goalLimit = ruleConfig.getGoalLimit();
-        boolean winByTwo = ruleConfig.isWinByTwo();
+        boolean winByTwo = false;
+        if (ruleConfig.getWinByTwoRule() == WinByTwoRule.ALL_GAMES) {
+            winByTwo = true;
+        } else if (ruleConfig.getWinByTwoRule() == WinByTwoRule.DECISIVE_GAME_ONLY) {
+            winByTwo = isDecisiveGame;
+        }
         Integer absoluteScoreCap = ruleConfig.getAbsoluteScoreCap();
 
         if (scoreA == scoreB) {

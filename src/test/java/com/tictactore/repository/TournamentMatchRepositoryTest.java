@@ -1,6 +1,7 @@
 package com.tictactore.repository;
 
 import com.tictactore.model.Match;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RegistrationStatus;
@@ -16,6 +17,7 @@ import com.tictactore.model.TournamentMode;
 import com.tictactore.model.TournamentRegistration;
 import com.tictactore.model.TournamentStatus;
 import com.tictactore.model.User;
+import com.tictactore.model.WinByTwoRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -67,9 +69,11 @@ class TournamentMatchRepositoryTest {
         var ruleConfig = ruleConfigurationRepository.save(RuleConfiguration.builder()
                 .name("Standard 5-Point")
                 .type(RuleConfigurationType.PRESET)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(1)
-                .winByTwo(false)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
                 .possessionLimit5BarSeconds(10)

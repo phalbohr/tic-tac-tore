@@ -2,11 +2,13 @@ package com.tictactore.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tictactore.dto.RuleConfigurationRequest;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.SideSwapRule;
 import com.tictactore.model.User;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.repository.RuleConfigurationRepository;
 import com.tictactore.repository.UserRepository;
 import com.tictactore.service.RuleConfigurationOperation;
@@ -85,9 +87,11 @@ public class RuleConfigurationApiIT {
     private RuleConfigurationRequest createSampleRequest(String name) {
         return RuleConfigurationRequest.builder()
                 .name(name)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(true)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(8)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
@@ -125,7 +129,7 @@ public class RuleConfigurationApiIT {
                 .andExpect(jsonPath("$.name").value(request.name()))
                 .andExpect(jsonPath("$.type").value("CUSTOM"))
                 .andExpect(jsonPath("$.goalLimit").value(5))
-                .andExpect(jsonPath("$.winByTwo").value(true))
+                .andExpect(jsonPath("$.winByTwoRule").value("ALL_GAMES"))
                 .andExpect(jsonPath("$.absoluteScoreCap").value(8))
                 .andExpect(jsonPath("$.id").exists());
     }
@@ -150,9 +154,11 @@ public class RuleConfigurationApiIT {
     void createRuleConfiguration_InvalidScoreCap_ReturnsBadRequest() throws Exception {
         var request = RuleConfigurationRequest.builder()
                 .name("Invalid Cap " + UUID.randomUUID().toString().substring(0, 8))
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(true)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(5)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)

@@ -1,7 +1,6 @@
 package com.tictactore.service;
 
 import com.tictactore.dto.CreateMatchRequest;
-import com.tictactore.dto.MatchRejectionRequest;
 import com.tictactore.exception.RateLimitExceededException;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
@@ -60,8 +59,7 @@ class MatchServiceRateLimitTest {
 
         when(userRepository.findAllById(any())).thenReturn(List.of(
                 user(p1, "Player1"),
-                user(p2, "Player2")
-        ));
+                user(p2, "Player2")));
     }
 
     @Nested
@@ -74,8 +72,7 @@ class MatchServiceRateLimitTest {
             var request = new CreateMatchRequest(
                     null, p1, p1, null, p2, null,
                     List.of(new com.tictactore.dto.GameDto(10, 5, null, null, null, null)),
-                    null, null
-            );
+                    null, null);
 
             when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             doThrow(new RateLimitExceededException(30, "Rate limit exceeded"))
@@ -91,8 +88,7 @@ class MatchServiceRateLimitTest {
             var request = new CreateMatchRequest(
                     null, p1, p1, null, p2, null,
                     List.of(new com.tictactore.dto.GameDto(10, 5, null, null, null, null)),
-                    null, null
-            );
+                    null, null);
 
             when(matchRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             when(matchOperation.saveMatch(any())).thenAnswer(i -> i.getArgument(0));
@@ -108,8 +104,7 @@ class MatchServiceRateLimitTest {
             var request = new CreateMatchRequest(
                     "idem-key", p1, p1, null, p2, null,
                     List.of(new com.tictactore.dto.GameDto(10, 5, null, null, null, null)),
-                    null, null
-            );
+                    null, null);
             var existing = Match.builder()
                     .idempotencyKey("idem-key")
                     .teamAAttackerId(p1)

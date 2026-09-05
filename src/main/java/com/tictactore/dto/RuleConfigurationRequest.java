@@ -1,9 +1,11 @@
 package com.tictactore.dto;
 
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.SideSwapRule;
+import com.tictactore.model.WinByTwoRule;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +19,9 @@ public record RuleConfigurationRequest(
     @Size(max = 50)
     String name,
 
+    @NotNull
+    MatchFormat matchFormat,
+
     @Min(1)
     @Max(100)
     int goalLimit,
@@ -25,7 +30,12 @@ public record RuleConfigurationRequest(
     @Max(15)
     int gameLimit,
 
-    boolean winByTwo,
+    @Min(1)
+    @Max(15)
+    int gamesToWin,
+
+    @NotNull
+    WinByTwoRule winByTwoRule,
 
     @Min(1)
     @Max(100)

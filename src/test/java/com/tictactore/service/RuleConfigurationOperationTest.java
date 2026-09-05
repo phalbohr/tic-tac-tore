@@ -1,13 +1,16 @@
 package com.tictactore.service;
 
 import com.tictactore.dto.RuleConfigurationRequest;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.RuleConfiguration;
 import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.SideSwapRule;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.repository.RuleConfigurationRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,9 +44,11 @@ class RuleConfigurationOperationTest {
     void setUp() {
         sampleRequest = RuleConfigurationRequest.builder()
                 .name("Office Fast 7")
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(7)
                 .gameLimit(1)
-                .winByTwo(true)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(10)
                 .timeoutsPerGame(1)
                 .timeoutDurationSeconds(20)
@@ -73,7 +76,10 @@ class RuleConfigurationOperationTest {
         assertThat(result.getName()).isEqualTo("Office Fast 7");
         assertThat(result.getType()).isEqualTo(RuleConfigurationType.CUSTOM);
         assertThat(result.getCreatedBy()).isEqualTo(userId);
+        assertThat(result.getMatchFormat()).isEqualTo(MatchFormat.BEST_OF_N);
         assertThat(result.getGoalLimit()).isEqualTo(7);
+        assertThat(result.getGamesToWin()).isEqualTo(1);
+        assertThat(result.getWinByTwoRule()).isEqualTo(WinByTwoRule.ALL_GAMES);
         assertThat(result.getAbsoluteScoreCap()).isEqualTo(10);
         verify(repository).save(any(RuleConfiguration.class));
     }
@@ -83,9 +89,11 @@ class RuleConfigurationOperationTest {
     void shouldThrowException_whenAbsoluteScoreCapSetWithoutWinByTwo() {
         RuleConfigurationRequest invalidRequest = RuleConfigurationRequest.builder()
                 .name("Invalid Cap")
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(false)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(8)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
@@ -109,9 +117,11 @@ class RuleConfigurationOperationTest {
     void shouldThrowException_whenAbsoluteScoreCapLessOrEqualToGoalLimit() {
         RuleConfigurationRequest invalidRequest = RuleConfigurationRequest.builder()
                 .name("Invalid Cap 2")
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(true)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.ALL_GAMES)
                 .absoluteScoreCap(5)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
@@ -141,9 +151,9 @@ class RuleConfigurationOperationTest {
     }
 
     @Test
-    @DisplayName("createCustomRule should throw IllegalArgumentException when name is duplicate for creator")
-    void shouldThrowException_whenNameDuplicate() {
-        when(repository.countByCreatedBy(userId)).thenReturn(3L);
+    @DisplayName("createCustomRule should throw IllegalArgumentException when duplicate name exists")
+    void shouldThrowException_whenDuplicateName() {
+        when(repository.countByCreatedBy(userId)).thenReturn(5L);
         when(repository.existsByCreatedByAndNameIgnoreCase(userId, "Office Fast 7")).thenReturn(true);
 
         assertThatThrownBy(() -> operation.createCustomRule(sampleRequest, userId))
@@ -153,7 +163,7 @@ class RuleConfigurationOperationTest {
 
     @Test
     @DisplayName("deleteCustomRule should call repository deleteById")
-    void shouldDeleteCustomRuleById() {
+    void shouldDeleteCustomRule() {
         operation.deleteCustomRule(ruleId);
 
         verify(repository).deleteById(ruleId);

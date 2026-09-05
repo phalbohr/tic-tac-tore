@@ -59,3 +59,7 @@ gh pr edit <N> --remove-label <old> --add-label <new>
 ```
 
 After `bmad-code-review`: `gh issue edit <N> --add-label review` — triggers Jules.
+
+## Knowledge Base (Brain)
+
+When "brain" is mentioned in this project context, refer to `/Users/ppolukhin/Brain/projects/tic-tac-tore` (or root `/Users/ppolukhin/Brain`).

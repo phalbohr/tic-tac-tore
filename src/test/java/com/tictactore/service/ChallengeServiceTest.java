@@ -1,13 +1,10 @@
 package com.tictactore.service;
 
-import com.tictactore.dto.ChallengeActionResponse;
-import com.tictactore.dto.ChallengeResponse;
 import com.tictactore.dto.CreateChallengeRequest;
 import com.tictactore.event.ChallengeAcceptedEvent;
 import com.tictactore.event.ChallengeCreatedEvent;
 import com.tictactore.event.ChallengeDeclinedEvent;
 import com.tictactore.exception.ChallengeConflictException;
-import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.exception.ValidationException;
 import com.tictactore.model.ChallengeStatus;
 import com.tictactore.model.MatchChallenge;
@@ -86,7 +83,8 @@ class ChallengeServiceTest {
         targetPlayerUser = User.builder().id(targetPlayerId).nickname("Target").email("target@example.com").build();
 
         targetGroupId = UUID.randomUUID();
-        targetGroup = PlayerGroup.builder().id(targetGroupId).name("Alpha Squad").creatorId(targetPlayerId).members(Set.of(targetPlayerUser)).build();
+        targetGroup = PlayerGroup.builder().id(targetGroupId).name("Alpha Squad").creatorId(targetPlayerId)
+                .members(Set.of(targetPlayerUser)).build();
     }
 
     @Nested
@@ -98,7 +96,8 @@ class ChallengeServiceTest {
             var request = new CreateChallengeRequest(targetPlayerId, null, MatchType.ONE_VS_ONE, null, "Game on!");
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(userRepository.findById(targetPlayerId)).thenReturn(Optional.of(targetPlayerUser));
-            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(false);
+            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId,
+                    ChallengeStatus.PENDING)).thenReturn(false);
 
             var saved = MatchChallenge.builder()
                     .id(UUID.randomUUID())
@@ -125,11 +124,13 @@ class ChallengeServiceTest {
         void shouldCreateGroupChallengeWithRuleConfigSuccessfully() {
             var ruleConfigId = UUID.randomUUID();
             var ruleConfig = RuleConfiguration.builder().id(ruleConfigId).name("Pro Rules").build();
-            var request = new CreateChallengeRequest(null, targetGroupId, MatchType.TWO_VS_TWO, ruleConfigId, "Team match!");
+            var request = new CreateChallengeRequest(null, targetGroupId, MatchType.TWO_VS_TWO, ruleConfigId,
+                    "Team match!");
 
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(playerGroupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
-            when(matchChallengeRepository.existsByChallengerIdAndTargetGroupIdAndStatus(challengerId, targetGroupId, ChallengeStatus.PENDING)).thenReturn(false);
+            when(matchChallengeRepository.existsByChallengerIdAndTargetGroupIdAndStatus(challengerId, targetGroupId,
+                    ChallengeStatus.PENDING)).thenReturn(false);
             when(ruleConfigurationRepository.findById(ruleConfigId)).thenReturn(Optional.of(ruleConfig));
 
             var saved = MatchChallenge.builder()
@@ -185,7 +186,8 @@ class ChallengeServiceTest {
             var request = new CreateChallengeRequest(targetPlayerId, null, MatchType.ONE_VS_ONE, null, null);
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(userRepository.findById(targetPlayerId)).thenReturn(Optional.of(targetPlayerUser));
-            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId, ChallengeStatus.PENDING)).thenReturn(true);
+            when(matchChallengeRepository.existsPendingBetweenPlayers(challengerId, targetPlayerId,
+                    ChallengeStatus.PENDING)).thenReturn(true);
 
             assertThatThrownBy(() -> challengeService.createChallenge(challengerId, request))
                     .isInstanceOf(ChallengeConflictException.class)
@@ -197,7 +199,8 @@ class ChallengeServiceTest {
             var request = new CreateChallengeRequest(null, targetGroupId, MatchType.TWO_VS_TWO, null, null);
             when(userRepository.findById(challengerId)).thenReturn(Optional.of(challengerUser));
             when(playerGroupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
-            when(matchChallengeRepository.existsByChallengerIdAndTargetGroupIdAndStatus(challengerId, targetGroupId, ChallengeStatus.PENDING)).thenReturn(true);
+            when(matchChallengeRepository.existsByChallengerIdAndTargetGroupIdAndStatus(challengerId, targetGroupId,
+                    ChallengeStatus.PENDING)).thenReturn(true);
 
             assertThatThrownBy(() -> challengeService.createChallenge(challengerId, request))
                     .isInstanceOf(ChallengeConflictException.class)
@@ -220,7 +223,8 @@ class ChallengeServiceTest {
                     .build();
 
             when(playerGroupRepository.findGroupIdsByMemberId(targetPlayerId)).thenReturn(List.of(targetGroupId));
-            when(matchChallengeRepository.findIncomingChallenges(eq(targetPlayerId), eq(List.of(targetGroupId)), eq(ChallengeStatus.PENDING)))
+            when(matchChallengeRepository.findIncomingChallenges(eq(targetPlayerId), eq(List.of(targetGroupId)),
+                    eq(ChallengeStatus.PENDING)))
                     .thenReturn(List.of(challenge));
 
             var incoming = challengeService.getIncomingChallenges(targetPlayerId);

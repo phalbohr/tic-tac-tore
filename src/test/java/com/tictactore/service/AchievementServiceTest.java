@@ -30,7 +30,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,7 +98,8 @@ class AchievementServiceTest {
                 }
 
                 @Override
-                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId,
+                        PlayerStatsContext stats) {
                     return new com.tictactore.service.achievement.ProgressInfo(1, 1, true);
                 }
             });
@@ -116,13 +116,15 @@ class AchievementServiceTest {
                 }
 
                 @Override
-                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId,
+                        PlayerStatsContext stats) {
                     return new com.tictactore.service.achievement.ProgressInfo(4, 10, true);
                 }
             });
 
             when(achievementRepository.findAll()).thenReturn(List.of(badge1, badge2));
-            when(playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(playerId)).thenReturn(List.of(playerAchievement));
+            when(playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(playerId))
+                    .thenReturn(List.of(playerAchievement));
             when(matchRepository.countConfirmedMatchesByPlayerId(playerId)).thenReturn(4L);
             when(matchRepository.countConfirmedMatchesAsDefender(playerId)).thenReturn(2L);
             when(matchRepository.sumGoalsAsAttacker(playerId)).thenReturn(8L);
@@ -134,13 +136,15 @@ class AchievementServiceTest {
             assertThat(response.totalUnlocked()).isEqualTo(1);
             assertThat(response.totalAvailable()).isEqualTo(2);
             assertThat(response.achievements()).hasSize(2);
-            var firstWinDto = response.achievements().stream().filter(a -> a.code().equals("FIRST_WIN")).findFirst().orElseThrow();
+            var firstWinDto = response.achievements().stream().filter(a -> a.code().equals("FIRST_WIN")).findFirst()
+                    .orElseThrow();
             assertThat(firstWinDto.isUnlocked()).isTrue();
             assertThat(firstWinDto.unlockedAt()).isNotNull();
             assertThat(firstWinDto.hasProgress()).isTrue();
             assertThat(firstWinDto.currentProgress()).isEqualTo(1L);
             assertThat(firstWinDto.targetValue()).isEqualTo(1L);
-            var matches10Dto = response.achievements().stream().filter(a -> a.code().equals("MATCHES_10")).findFirst().orElseThrow();
+            var matches10Dto = response.achievements().stream().filter(a -> a.code().equals("MATCHES_10")).findFirst()
+                    .orElseThrow();
             assertThat(matches10Dto.isUnlocked()).isFalse();
             assertThat(matches10Dto.unlockedAt()).isNull();
             assertThat(matches10Dto.hasProgress()).isTrue();
@@ -173,7 +177,8 @@ class AchievementServiceTest {
                 }
 
                 @Override
-                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId, PlayerStatsContext stats) {
+                public com.tictactore.service.achievement.ProgressInfo getProgress(UUID userId,
+                        PlayerStatsContext stats) {
                     return new com.tictactore.service.achievement.ProgressInfo(10, 10, true);
                 }
             });
@@ -303,7 +308,8 @@ class AchievementServiceTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(user));
             when(playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(userId)).thenReturn(List.of());
             when(playerAchievementRepository.existsByUserIdAndAchievementId(userId, badge.getId())).thenReturn(false);
-            when(playerAchievementRepository.save(any(PlayerAchievement.class))).thenThrow(new DataIntegrityViolationException("duplicate key"));
+            when(playerAchievementRepository.save(any(PlayerAchievement.class)))
+                    .thenThrow(new DataIntegrityViolationException("duplicate key"));
 
             achievementService.evaluateMatchAchievements(matchId, List.of(userId));
 

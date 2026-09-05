@@ -4,7 +4,6 @@ import com.tictactore.dto.AchievementDto;
 import com.tictactore.dto.PlayerAchievementsSummaryResponse;
 import com.tictactore.exception.ResourceNotFoundException;
 import com.tictactore.model.Achievement;
-import com.tictactore.model.Game;
 import com.tictactore.model.Match;
 import com.tictactore.model.PlayerAchievement;
 import com.tictactore.model.User;
@@ -25,7 +24,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,16 +68,14 @@ public class AchievementServiceImpl implements AchievementService {
                         unlockedMap.get(achievement.getId()),
                         evaluatorMap.get(achievement.getCode()),
                         playerId,
-                        statsContext
-                ))
+                        statsContext))
                 .toList();
 
         return new PlayerAchievementsSummaryResponse(
                 playerId,
                 unlockedMap.size(),
                 allCatalog.size(),
-                dtos
-        );
+                dtos);
     }
 
     @Override
@@ -112,7 +108,8 @@ public class AchievementServiceImpl implements AchievementService {
         }
         User user = userOpt.get();
 
-        List<PlayerAchievement> existingUnlocked = playerAchievementRepository.findByUserIdOrderByUnlockedAtDesc(participantId);
+        List<PlayerAchievement> existingUnlocked = playerAchievementRepository
+                .findByUserIdOrderByUnlockedAtDesc(participantId);
         Set<String> unlockedCodes = existingUnlocked.stream()
                 .filter(pa -> pa.getAchievement() != null)
                 .map(pa -> pa.getAchievement().getCode())
@@ -150,7 +147,8 @@ public class AchievementServiceImpl implements AchievementService {
             playerAchievementRepository.save(playerAchievement);
             log.info("Awarded achievement {} to user {}", achievement.getCode(), user.getId());
         } catch (DataIntegrityViolationException e) {
-            log.debug("Achievement {} already awarded to user {} (concurrent insert)", achievement.getCode(), user.getId());
+            log.debug("Achievement {} already awarded to user {} (concurrent insert)", achievement.getCode(),
+                    user.getId());
         }
     }
 
@@ -166,8 +164,7 @@ public class AchievementServiceImpl implements AchievementService {
                 totalMatches,
                 totalWins,
                 totalGoalsAsAttacker,
-                totalMatchesAsDefender
-        );
+                totalMatchesAsDefender);
     }
 
     private long countTotalWins(UUID playerId) {
@@ -200,8 +197,7 @@ public class AchievementServiceImpl implements AchievementService {
             PlayerAchievement unlockedRecord,
             AchievementEvaluator evaluator,
             UUID playerId,
-            PlayerStatsContext statsContext
-    ) {
+            PlayerStatsContext statsContext) {
         boolean isUnlocked = unlockedRecord != null;
         OffsetDateTime unlockedAt = isUnlocked && unlockedRecord.getUnlockedAt() != null
                 ? unlockedRecord.getUnlockedAt().atOffset(ZoneOffset.UTC)
@@ -235,7 +231,6 @@ public class AchievementServiceImpl implements AchievementService {
                 unlockedAt,
                 currentProgress,
                 targetValue,
-                hasProgress
-        );
+                hasProgress);
     }
 }

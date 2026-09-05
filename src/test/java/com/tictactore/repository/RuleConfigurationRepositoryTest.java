@@ -1,11 +1,13 @@
 package com.tictactore.repository;
 
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.RuleConfiguration;
 import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.SideSwapRule;
+import com.tictactore.model.WinByTwoRule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,11 @@ class RuleConfigurationRepositoryTest {
         return RuleConfiguration.builder()
                 .name(name)
                 .type(type)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(false)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(null)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)

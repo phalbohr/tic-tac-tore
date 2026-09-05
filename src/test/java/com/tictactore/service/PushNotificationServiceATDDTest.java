@@ -2,7 +2,6 @@ package com.tictactore.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tictactore.config.VapidProperties;
-import com.tictactore.dto.PushNotificationPayload;
 import com.tictactore.model.Match;
 import com.tictactore.model.User;
 import com.tictactore.repository.UserRepository;
@@ -22,7 +21,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,8 +43,7 @@ class PushNotificationServiceATDDTest {
                 notificationOperation,
                 userRepository,
                 vapidProperties,
-                objectMapper
-        );
+                objectMapper);
     }
 
     @Nested
@@ -63,7 +60,8 @@ class PushNotificationServiceATDDTest {
             User opponent = new User();
             opponent.setId(UUID.randomUUID());
 
-            when(userRepository.findById(match.getCreatorId())).thenReturn(Optional.of(User.builder().nickname("player1").build()));
+            when(userRepository.findById(match.getCreatorId()))
+                    .thenReturn(Optional.of(User.builder().nickname("player1").build()));
 
             assertThatCode(() -> {
                 pushNotificationService.sendConfirmationRequest(match, List.of(opponent), false);
@@ -128,8 +126,10 @@ class PushNotificationServiceATDDTest {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
             String creatorNickname = "PavelHost";
-            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
-            when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname(creatorNickname).build()));
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true)
+                    .build();
+            when(userRepository.findById(creatorId))
+                    .thenReturn(Optional.of(User.builder().nickname(creatorNickname).build()));
 
             assertThatCode(() -> {
                 pushNotificationService.sendPoolCreatedNotification(
@@ -138,8 +138,7 @@ class PushNotificationServiceATDDTest {
                         creatorNickname,
                         com.tictactore.model.MatchType.ONE_VS_ONE,
                         com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
-                        List.of(recipient)
-                );
+                        List.of(recipient));
             }).doesNotThrowAnyException();
         }
 
@@ -149,7 +148,8 @@ class PushNotificationServiceATDDTest {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
             User retiredCreator = User.builder().id(creatorId).nickname("ex-player-9999").build();
-            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true)
+                    .build();
             when(userRepository.findById(creatorId)).thenReturn(Optional.of(retiredCreator));
 
             assertThatCode(() -> {
@@ -159,8 +159,7 @@ class PushNotificationServiceATDDTest {
                         "ex-player-9999",
                         com.tictactore.model.MatchType.TWO_VS_TWO,
                         com.tictactore.model.SkillLevel.ADVANCED,
-                        List.of(recipient)
-                );
+                        List.of(recipient));
             }).doesNotThrowAnyException();
         }
 
@@ -169,7 +168,8 @@ class PushNotificationServiceATDDTest {
         void shouldRecordNotificationLogWithPoolIdOnPoolCreated() {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
-            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true)
+                    .build();
             when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname("Host").build()));
 
             pushNotificationService.sendPoolCreatedNotification(
@@ -178,10 +178,10 @@ class PushNotificationServiceATDDTest {
                     "Host",
                     com.tictactore.model.MatchType.ONE_VS_ONE,
                     com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
-                    List.of(recipient)
-            );
+                    List.of(recipient));
 
-            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor.forClass(com.tictactore.model.NotificationLog.class);
+            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor
+                    .forClass(com.tictactore.model.NotificationLog.class);
             org.mockito.Mockito.verify(notificationOperation).saveNotificationLog(logCaptor.capture());
             assertThat(logCaptor.getValue().getPoolId()).isEqualTo(poolId);
             assertThat(logCaptor.getValue().getRecipientId()).isEqualTo(recipient.getId());
@@ -192,7 +192,8 @@ class PushNotificationServiceATDDTest {
         void shouldHandlePushExceptionGracefullyAndLogFailed() {
             UUID poolId = UUID.randomUUID();
             UUID creatorId = UUID.randomUUID();
-            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true).build();
+            User recipient = User.builder().id(UUID.randomUUID()).nickname("Recipient").poolNotificationsEnabled(true)
+                    .build();
             when(userRepository.findById(creatorId)).thenReturn(Optional.of(User.builder().nickname("Host").build()));
 
             assertThatCode(() -> {
@@ -202,8 +203,7 @@ class PushNotificationServiceATDDTest {
                         "Host",
                         com.tictactore.model.MatchType.ONE_VS_ONE,
                         com.tictactore.model.SkillLevel.OPEN_FOR_ALL,
-                        List.of(recipient)
-                );
+                        List.of(recipient));
             }).doesNotThrowAnyException();
         }
     }
@@ -223,8 +223,7 @@ class PushNotificationServiceATDDTest {
                 pushNotificationService.sendPoolFilledNotification(
                         poolId,
                         com.tictactore.model.MatchType.ONE_VS_ONE,
-                        List.of(host, player)
-                );
+                        List.of(host, player));
             }).doesNotThrowAnyException();
         }
 
@@ -238,11 +237,12 @@ class PushNotificationServiceATDDTest {
             pushNotificationService.sendPoolFilledNotification(
                     poolId,
                     com.tictactore.model.MatchType.TWO_VS_TWO,
-                    List.of(host, player)
-            );
+                    List.of(host, player));
 
-            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor.forClass(com.tictactore.model.NotificationLog.class);
-            org.mockito.Mockito.verify(notificationOperation, org.mockito.Mockito.atLeastOnce()).saveNotificationLog(logCaptor.capture());
+            org.mockito.ArgumentCaptor<com.tictactore.model.NotificationLog> logCaptor = org.mockito.ArgumentCaptor
+                    .forClass(com.tictactore.model.NotificationLog.class);
+            org.mockito.Mockito.verify(notificationOperation, org.mockito.Mockito.atLeastOnce())
+                    .saveNotificationLog(logCaptor.capture());
             assertThat(logCaptor.getAllValues()).allMatch(log -> poolId.equals(log.getPoolId()));
         }
     }

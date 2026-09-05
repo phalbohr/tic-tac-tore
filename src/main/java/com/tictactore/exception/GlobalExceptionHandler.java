@@ -1,7 +1,5 @@
 package com.tictactore.exception;
 
-import com.tictactore.exception.ApiError;
-import com.tictactore.exception.RateLimitExceededException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,17 +17,16 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(503).body(new ApiError(
                     "RATE_LIMIT_UNAVAILABLE",
                     e.getMessage() != null ? e.getMessage() : "Rate limit service unavailable",
-                    Map.of("retryAfter", e.getRetryAfterSeconds())
-            ));
+                    Map.of("retryAfter", e.getRetryAfterSeconds())));
         }
         return ResponseEntity.status(429).body(new ApiError(
                 "RATE_LIMIT_EXCEEDED",
                 e.getMessage() != null ? e.getMessage() : "Rate limit exceeded",
-                Map.of("retryAfter", e.getRetryAfterSeconds())
-        ));
+                Map.of("retryAfter", e.getRetryAfterSeconds())));
     }
 
-    @ExceptionHandler({DuplicatePlayerException.class, InvalidMatchScoreException.class, InvalidPositionException.class, DuplicatePositionException.class, InvalidMatchStateException.class})
+    @ExceptionHandler({ DuplicatePlayerException.class, InvalidMatchScoreException.class,
+            InvalidPositionException.class, DuplicatePositionException.class, InvalidMatchStateException.class })
     public ResponseEntity<Map<String, String>> handleDomainValidation(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Invalid match data";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
@@ -42,7 +39,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDenied(org.springframework.security.access.AccessDeniedException e) {
+    public ResponseEntity<Map<String, String>> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Access denied";
         return ResponseEntity.status(403).body(Map.of("message", msg));
     }
@@ -58,7 +56,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
+    @ExceptionHandler({ ValidationException.class, IllegalArgumentException.class })
     public ResponseEntity<Map<String, String>> handleValidationException(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Invalid input";
         return ResponseEntity.badRequest().body(Map.of("message", msg));
@@ -78,10 +76,12 @@ public class GlobalExceptionHandler {
             org.springframework.dao.DataIntegrityViolationException.class
     })
     public ResponseEntity<Map<String, String>> handleOptimisticLocking(Exception e) {
-        return ResponseEntity.status(409).body(Map.of("message", "The record has been modified by another transaction"));
+        return ResponseEntity.status(409)
+                .body(Map.of("message", "The record has been modified by another transaction"));
     }
 
-    @ExceptionHandler({PoolConflictException.class, ChallengeConflictException.class, TournamentConflictException.class})
+    @ExceptionHandler({ PoolConflictException.class, ChallengeConflictException.class,
+            TournamentConflictException.class })
     public ResponseEntity<Map<String, String>> handlePoolConflict(RuntimeException e) {
         var msg = e.getMessage() != null ? e.getMessage() : "Conflict";
         return ResponseEntity.status(409).body(Map.of("message", msg));

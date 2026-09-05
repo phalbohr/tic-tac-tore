@@ -69,11 +69,11 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         await page.goto('/cabinet');
 
         // Click "Edit as New" on ITSF Preset
-        await page.getByRole('button', { name: /Edit as New/i }).first().click();
+        await page.locator('.rule-template-list').locator('div', { hasText: 'ITSF Standard Matchplay' }).getByRole('button', { name: /Edit as New/i }).click();
 
         // Builder opens pre-filled with preset values
         await expect(page.getByLabel(/Goal Limit/i)).toHaveValue('5');
-        await expect(page.getByLabel(/Game Limit/i)).toHaveValue('3');
+        await expect(page.getByLabel(/Game Limit/i)).toHaveValue('5');
 
         // Modify and save as new custom template
         const modifiedName = `Modified ITSF ${crypto.randomUUID().substring(0, 6)}`;
@@ -98,4 +98,17 @@ test.describe('Rule System Selection & Inline Creation E2E (Story 6.1b)', () => 
         const borderBottomWidth = await modal.evaluate((el) => window.getComputedStyle(el).borderBottomWidth);
         expect(borderBottomWidth).toBe('0px');
     });
+
+    test('[P1] should close RuleTemplateModal when Escape key is pressed', async ({ page }) => {
+        await loginUser(page);
+        await page.goto('/matches/new');
+        await page.getByRole('button', { name: /Create Custom Template|\+ Custom Rule/i }).click();
+
+        const modal = page.locator('[data-testid="rule-template-modal"]');
+        await expect(modal).toBeVisible();
+
+        await page.keyboard.press('Escape');
+        await expect(modal).toBeHidden();
+    });
 });
+

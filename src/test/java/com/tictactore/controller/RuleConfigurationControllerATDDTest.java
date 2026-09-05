@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tictactore.dto.RuleConfigurationRequest;
 import com.tictactore.dto.RuleConfigurationResponse;
 import com.tictactore.exception.GlobalExceptionHandler;
+import com.tictactore.model.MatchFormat;
 import com.tictactore.model.PointDistribution;
 import com.tictactore.model.PositionSwapRule;
 import com.tictactore.model.RestartRule;
 import com.tictactore.model.RuleConfigurationType;
 import com.tictactore.model.SideSwapRule;
 import com.tictactore.model.User;
+import com.tictactore.model.WinByTwoRule;
 import com.tictactore.service.RuleConfigurationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,9 +96,11 @@ class RuleConfigurationControllerATDDTest {
                 .name("ITSF Standard Matchplay")
                 .type(RuleConfigurationType.PRESET)
                 .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(5)
                 .gameLimit(3)
-                .winByTwo(true)
+                .gamesToWin(2)
+                .winByTwoRule(WinByTwoRule.DECISIVE_GAME_ONLY)
                 .absoluteScoreCap(8)
                 .timeoutsPerGame(2)
                 .timeoutDurationSeconds(30)
@@ -118,9 +122,11 @@ class RuleConfigurationControllerATDDTest {
                 .name("Office Fast 7")
                 .type(RuleConfigurationType.CUSTOM)
                 .createdBy(userId)
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(7)
                 .gameLimit(1)
-                .winByTwo(false)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(null)
                 .timeoutsPerGame(1)
                 .timeoutDurationSeconds(20)
@@ -139,9 +145,11 @@ class RuleConfigurationControllerATDDTest {
     private RuleConfigurationRequest createValidCustomRequest() {
         return RuleConfigurationRequest.builder()
                 .name("Office Fast 7")
+                .matchFormat(MatchFormat.BEST_OF_N)
                 .goalLimit(7)
                 .gameLimit(1)
-                .winByTwo(false)
+                .gamesToWin(1)
+                .winByTwoRule(WinByTwoRule.NONE)
                 .absoluteScoreCap(null)
                 .timeoutsPerGame(1)
                 .timeoutDurationSeconds(20)

@@ -292,18 +292,21 @@
     "sections": {
       "general": "Allgemein",
       "gameFlow": "Spielablauf & Tie-Break",
-      "conduct": "Spielregeln & Verhalten"
+      "inGameMechanics": "Spielmechanik & Regeln",
+      "conduct": "Spielmechanik & Regeln"
     },
     "fields": {
       "name": "Vorlagenname",
+      "matchFormat": "Spielformat",
       "goalLimit": "Tore zum Sieg",
       "gameLimit": "Sätze",
+      "gamesToWin": "Gewinnsätze",
       "winByTwo": "2 Tore Vorsprung",
       "absoluteCap": "Maximale Punktzahl",
       "timeouts": "Auszeiten / Satz",
-      "timeoutDuration": "Dauer (s)",
-      "possession5Bar": "5er-Stange Limit (s)",
-      "possessionOther": "Andere Stangen (s)",
+      "timeoutDuration": "Auszeit-Dauer",
+      "possession5Bar": "5er-Stange Ballbesitzlimit (s)",
+      "possessionOther": "Andere Stangen Ballbesitzlimit (s)",
       "sideSwap": "Seitenwechsel",
       "restart": "Wiederanstoß",
       "positionSwap": "Positionswechsel",
@@ -311,8 +314,65 @@
       "spinningAllowed": "Kurbeln erlaubt",
       "aerialsAllowed": "Heber erlaubt"
     },
+    "options": {
+      "matchFormat": {
+        "BEST_OF_N": "Best of N",
+        "FIXED_GAMES": "Feste Satzanzahl"
+      },
+      "winByTwo": {
+        "NONE": "Deaktiviert",
+        "ALL_GAMES": "Jeder Satz",
+        "DECISIVE_GAME_ONLY": "Nur Entscheidungssatz"
+      },
+      "sideSwap": {
+        "NONE": "Keiner",
+        "BETWEEN_GAMES": "Zwischen den Sätzen",
+        "AFTER_HALF_POINTS": "Nach halber Punktzahl"
+      },
+      "restart": {
+        "CONCEDING_TEAM": "Gegentor-Team",
+        "RANDOM_DROP": "Zufälliger Einwurf"
+      },
+      "positionSwap": {
+        "FREE": "Frei",
+        "BETWEEN_GAMES": "Zwischen den Sätzen",
+        "NEVER": "Nie"
+      },
+      "points": {
+        "WIN_LOSS_3_0": "3 - 0 (Sieg/Niederlage)",
+        "WIN_LOSS_2_0": "2 - 0 (Sieg/Niederlage)",
+        "WIN_DRAW_LOSS_3_1_0": "3 - 1 - 0 (Sieg/Unentsch./Niederl.)",
+        "ONE_POINT_PER_GAME_WON": "1 Sieg - 1 Pkt. (Pro Satzgewinn)"
+      }
+    },
+    "tooltips": {
+      "matchFormat": "Wähle zwischen 'Best of N' (das erste Team mit der benötigten Anzahl an Satzsiegen gewinnt das gesamte Match) oder 'Feste Satzanzahl' (es wird immer eine feste Anzahl an Sätzen gespielt; Unentschieden im Match sind möglich).",
+      "goalLimit": "Tore, die zum Gewinn eines einzelnen Satzes erzielt werden müssen (Standard bei ITSF/DTFB sind 5 Tore).",
+      "gameLimit": "Gesamtzahl der Sätze bei fester Satzanzahl oder maximale Satzanzahl im Best-of-Modus (z. B. 5 bei Best of 5).",
+      "gamesToWin": "Anzahl der Sätze, die ein Team gewinnen muss, um das Match für sich zu entscheiden (z. B. 3 Gewinnsätze bei Best of 5).",
+      "winByTwo": "Regelt die Anforderung von 2 Toren Vorsprung: Deaktiviert (erstes Erreichen der Toranzahl gewinnt), Jeder Satz (in jedem Satz sind 2 Tore Vorsprung nötig) oder Nur Entscheidungssatz (offizieller ITSF-Tie-Break: nur im letzten entscheidenden Satz ist ein 2-Tore-Vorsprung erforderlich).",
+      "absoluteCap": "Maximale Punktzahl bei aktivem 2-Tore-Vorsprung. Sobald diese erreicht ist, endet der Satz sofort, selbst bei nur 1 Tor Führung (z. B. 8 Tore bei ITSF, um endlose Sätze zu verhindern).",
+      "timeouts": "Anzahl der erlaubten 30-sekündigen taktischen Auszeiten pro Team in jedem Satz (ITSF-Standard: 2 Auszeiten).",
+      "timeoutDuration": "Dauer einer Auszeit in Sekunden (Standard bei offiziellen Turnieren: 30 Sekunden).",
+      "possession5Bar": "Maximale Ballbesitzzeit in Sekunden an der 5er-Mittelfeldstange vor einem Pass oder Schuss (ITSF-Regel: 10 Sekunden).",
+      "possessionOther": "Maximale Ballbesitzzeit in Sekunden an Torwart-, 2er-Abwehr- und 3er-Sturmstangen (ITSF-Regel: 15 Sekunden).",
+      "sideSwap": "Wann die Tischseiten gewechselt werden: Zwischen den Sätzen (nach jedem Satz), Nach halber Punktzahl (Mitte des Satzes) oder Keiner (Teams bleiben auf ihrer Seite).",
+      "restart": "Wo der Ball nach einem erzielten Tor wieder ins Spiel gebracht wird: Gegentor-Team (das Team, das das Tor kassiert hat, hat Anstoß, Standard bei ITSF) oder Zufälliger Einwurf.",
+      "positionSwap": "Wann Partner im Doppel Angriff und Abwehr tauschen dürfen: Frei (jederzeit bei Auszeiten oder Ball im Aus, ITSF), Zwischen den Sätzen oder Nie (feste Positionen, DTFB-Standard).",
+      "points": "Punktevergabe für die Matchwertung: 3-0 (Sieg/Niederlage), 2-0 (Sieg/Niederlage), 3-1-0 (Sieg/Unentschieden/Niederlage) oder 1 Sieg - 1 Punkt (Teams erhalten genau 1 Punkt pro gewonnenem Satz, typisch für DTFB 2-Satz-Spiele).",
+      "spinningAllowed": "Ob das freie Drehen der Spielerstangen um mehr als 360 Grad ('Kurbeln') erlaubt ist (im Turniersport strikt verboten).",
+      "aerialsAllowed": "Ob absichtliche Heber oder Flugbälle über gegnerische Stangen hinweg gestattet sind."
+    },
     "validation": {
-      "nameRequired": "Name ist erforderlich (max. 50 Zeichen)"
+      "nameRequired": "Name ist erforderlich (max. 50 Zeichen)",
+      "goalLimitRange": "Tore zum Sieg müssen zwischen 1 und 100 liegen",
+      "gameLimitRange": "Sätze müssen zwischen 1 und 15 liegen",
+      "gamesToWinInvalid": "Gewinnsätze müssen zwischen 1 und {max} liegen",
+      "capMustBeGreater": "Die maximale Punktzahl muss höher sein als die Tore zum Sieg (max. 100)",
+      "timeoutsRange": "Auszeiten müssen zwischen 0 und 10 liegen",
+      "timeoutDurationRange": "Auszeit-Dauer muss zwischen 0 und 300s liegen",
+      "possession5BarRange": "5er-Stange Limit muss zwischen 0 und 60s liegen",
+      "possessionOtherRange": "Andere Stangen Limit muss zwischen 0 und 60s liegen"
     },
     "summary": {
       "gameLimit": "Best of {limit}",

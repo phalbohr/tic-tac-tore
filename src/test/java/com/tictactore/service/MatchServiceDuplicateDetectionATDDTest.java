@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,283 +30,273 @@ import static org.mockito.Mockito.when;
 @DisplayName("Match Duplicate Detection ATDD Tests")
 class MatchServiceDuplicateDetectionATDDTest {
 
-    @Mock
-    private MatchRepository matchRepository;
+        @Mock
+        private MatchRepository matchRepository;
 
-    @Mock
-    private UserRepository userRepository;
+        @Mock
+        private UserRepository userRepository;
 
-    @Mock
-    private MatchOperation matchOperation;
+        @Mock
+        private MatchOperation matchOperation;
 
-    @Mock
-    private PushNotificationService pushNotificationService;
+        @Mock
+        private PushNotificationService pushNotificationService;
 
-    @Mock
-    private RateLimitService rateLimitService;
+        @Mock
+        private RateLimitService rateLimitService;
 
-    private MatchServiceImpl matchService;
+        private MatchServiceImpl matchService;
 
-    @BeforeEach
-    void setUp() {
-        matchService = new MatchServiceImpl(
-                matchRepository,
-                userRepository,
-                matchOperation,
-                pushNotificationService,
-                rateLimitService
-        );
-    }
-
-    @Nested
-    @DisplayName("Same-day Duplicate Detection (1v1)")
-    class SameDayDuplicateDetection1v1 {
-
-        @Test
-        @DisplayName("[P0] Should flag isDuplicateWarning = true when match submitted with identical participants on same UTC calendar day")
-        void shouldFlagDuplicateMatchWarningOnSameUtcDay() {
-            UUID playerA = UUID.randomUUID();
-            UUID playerB = UUID.randomUUID();
-
-            User userA = User.builder().id(playerA).nickname("Player A").build();
-            User userB = User.builder().id(playerB).nickname("Player B").build();
-
-            when(userRepository.findAllById(any())).thenReturn(List.of(userA, userB));
-
-            Match savedMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamBAttackerId(playerB)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
-
-            Match existingDuplicate = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamBAttackerId(playerB)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
-                    .thenReturn(List.of(existingDuplicate, savedMatch));
-
-            CreateMatchRequest request = new CreateMatchRequest(
-                    "key-1",
-                    playerA,
-                    playerA, null,
-                    playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
-            );
-
-            matchService.createMatch(request);
-
-            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
+        @BeforeEach
+        void setUp() {
+                matchService = new MatchServiceImpl(
+                                matchRepository,
+                                userRepository,
+                                matchOperation,
+                                pushNotificationService,
+                                rateLimitService);
         }
 
-        @Test
-        @DisplayName("[P1] Should NOT flag duplicate warning when no existing matches on same day")
-        void shouldNotFlagDuplicateWhenNoExistingMatches() {
-            UUID playerA = UUID.randomUUID();
-            UUID playerB = UUID.randomUUID();
+        @Nested
+        @DisplayName("Same-day Duplicate Detection (1v1)")
+        class SameDayDuplicateDetection1v1 {
 
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(playerA).build(),
-                    User.builder().id(playerB).build()
-            ));
+                @Test
+                @DisplayName("[P0] Should flag isDuplicateWarning = true when match submitted with identical participants on same UTC calendar day")
+                void shouldFlagDuplicateMatchWarningOnSameUtcDay() {
+                        UUID playerA = UUID.randomUUID();
+                        UUID playerB = UUID.randomUUID();
 
-            Match savedMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamBAttackerId(playerB)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
+                        User userA = User.builder().id(playerA).nickname("Player A").build();
+                        User userB = User.builder().id(playerB).nickname("Player B").build();
 
-            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
-            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
-                    .thenReturn(List.of(savedMatch));
+                        when(userRepository.findAllById(any())).thenReturn(List.of(userA, userB));
 
-            CreateMatchRequest request = new CreateMatchRequest(
-                    "key-1",
-                    playerA,
-                    playerA, null,
-                    playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
-            );
+                        Match savedMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamBAttackerId(playerB)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
 
-            matchService.createMatch(request);
+                        when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
 
-            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+                        Match existingDuplicate = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamBAttackerId(playerB)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                                        .thenReturn(List.of(existingDuplicate, savedMatch));
+
+                        CreateMatchRequest request = new CreateMatchRequest(
+                                        "key-1",
+                                        playerA,
+                                        playerA, null,
+                                        playerB, null,
+                                        List.of(new GameDto(10, 8, null, null, null, null)), null, null);
+
+                        matchService.createMatch(request);
+
+                        verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
+                }
+
+                @Test
+                @DisplayName("[P1] Should NOT flag duplicate warning when no existing matches on same day")
+                void shouldNotFlagDuplicateWhenNoExistingMatches() {
+                        UUID playerA = UUID.randomUUID();
+                        UUID playerB = UUID.randomUUID();
+
+                        when(userRepository.findAllById(any())).thenReturn(List.of(
+                                        User.builder().id(playerA).build(),
+                                        User.builder().id(playerB).build()));
+
+                        Match savedMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamBAttackerId(playerB)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+                        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                                        .thenReturn(List.of(savedMatch));
+
+                        CreateMatchRequest request = new CreateMatchRequest(
+                                        "key-1",
+                                        playerA,
+                                        playerA, null,
+                                        playerB, null,
+                                        List.of(new GameDto(10, 8, null, null, null, null)), null, null);
+
+                        matchService.createMatch(request);
+
+                        verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+                }
+
+                @Test
+                @DisplayName("[P1] Should NOT flag duplicate warning when existing match has different participants")
+                void shouldNotFlagDuplicateWhenParticipantsDiffer() {
+                        UUID playerA = UUID.randomUUID();
+                        UUID playerB = UUID.randomUUID();
+                        UUID playerC = UUID.randomUUID();
+
+                        when(userRepository.findAllById(any())).thenReturn(List.of(
+                                        User.builder().id(playerA).build(),
+                                        User.builder().id(playerB).build()));
+
+                        Match savedMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamBAttackerId(playerB)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        Match differentMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamBAttackerId(playerC)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+                        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                                        .thenReturn(List.of(differentMatch));
+
+                        CreateMatchRequest request = new CreateMatchRequest(
+                                        "key-1",
+                                        playerA,
+                                        playerA, null,
+                                        playerB, null,
+                                        List.of(new GameDto(10, 8, null, null, null, null)), null, null);
+
+                        matchService.createMatch(request);
+
+                        verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+                }
         }
 
-        @Test
-        @DisplayName("[P1] Should NOT flag duplicate warning when existing match has different participants")
-        void shouldNotFlagDuplicateWhenParticipantsDiffer() {
-            UUID playerA = UUID.randomUUID();
-            UUID playerB = UUID.randomUUID();
-            UUID playerC = UUID.randomUUID();
+        @Nested
+        @DisplayName("Same-day Duplicate Detection (2v2)")
+        class SameDayDuplicateDetection2v2 {
 
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(playerA).build(),
-                    User.builder().id(playerB).build()
-            ));
+                @Test
+                @DisplayName("[P1] Should flag isDuplicateWarning = true when 2v2 match has identical participants on same day")
+                void shouldFlagDuplicateWarningOnSameUtcDay2v2() {
+                        UUID playerA = UUID.randomUUID();
+                        UUID playerB = UUID.randomUUID();
+                        UUID playerC = UUID.randomUUID();
+                        UUID playerD = UUID.randomUUID();
 
-            Match savedMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamBAttackerId(playerB)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
+                        when(userRepository.findAllById(any())).thenReturn(List.of(
+                                        User.builder().id(playerA).build(),
+                                        User.builder().id(playerB).build(),
+                                        User.builder().id(playerC).build(),
+                                        User.builder().id(playerD).build()));
 
-            Match differentMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamBAttackerId(playerC)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
+                        Match savedMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamADefenderId(playerB)
+                                        .teamBAttackerId(playerC)
+                                        .teamBDefenderId(playerD)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
 
-            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
-            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
-                    .thenReturn(List.of(differentMatch));
+                        when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
 
-            CreateMatchRequest request = new CreateMatchRequest(
-                    "key-1",
-                    playerA,
-                    playerA, null,
-                    playerB, null,
-                    List.of(new GameDto(10, 8, null, null, null, null)),                    null, null
-            );
+                        Match existingDuplicate = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamADefenderId(playerB)
+                                        .teamBAttackerId(playerC)
+                                        .teamBDefenderId(playerD)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
 
-            matchService.createMatch(request);
+                        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                                        .thenReturn(List.of(existingDuplicate, savedMatch));
 
-            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+                        CreateMatchRequest request = new CreateMatchRequest(
+                                        "key-2",
+                                        playerA,
+                                        playerA, playerB,
+                                        playerC, playerD,
+                                        List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
+                                        null, null);
+
+                        matchService.createMatch(request);
+
+                        verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
+                }
+
+                @Test
+                @DisplayName("[P1] Should NOT flag duplicate warning when 2v2 match has different team composition")
+                void shouldNotFlagDuplicateWhenTeamCompositionDiffers() {
+                        UUID playerA = UUID.randomUUID();
+                        UUID playerB = UUID.randomUUID();
+                        UUID playerC = UUID.randomUUID();
+                        UUID playerD = UUID.randomUUID();
+
+                        when(userRepository.findAllById(any())).thenReturn(List.of(
+                                        User.builder().id(playerA).build(),
+                                        User.builder().id(playerB).build(),
+                                        User.builder().id(playerC).build(),
+                                        User.builder().id(playerD).build()));
+
+                        Match savedMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamADefenderId(playerB)
+                                        .teamBAttackerId(playerC)
+                                        .teamBDefenderId(playerD)
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        Match differentMatch = Match.builder()
+                                        .id(UUID.randomUUID())
+                                        .creatorId(playerA)
+                                        .teamAAttackerId(playerA)
+                                        .teamADefenderId(playerB)
+                                        .teamBAttackerId(playerC)
+                                        .teamBDefenderId(UUID.randomUUID())
+                                        .status("PENDING_APPROVAL")
+                                        .createdAt(Instant.now())
+                                        .build();
+
+                        when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
+                        when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
+                                        .thenReturn(List.of(differentMatch));
+
+                        CreateMatchRequest request = new CreateMatchRequest(
+                                        "key-3",
+                                        playerA,
+                                        playerA, playerB,
+                                        playerC, playerD,
+                                        List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
+                                        null, null);
+
+                        matchService.createMatch(request);
+
+                        verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
+                }
         }
-    }
-
-    @Nested
-    @DisplayName("Same-day Duplicate Detection (2v2)")
-    class SameDayDuplicateDetection2v2 {
-
-        @Test
-        @DisplayName("[P1] Should flag isDuplicateWarning = true when 2v2 match has identical participants on same day")
-        void shouldFlagDuplicateWarningOnSameUtcDay2v2() {
-            UUID playerA = UUID.randomUUID();
-            UUID playerB = UUID.randomUUID();
-            UUID playerC = UUID.randomUUID();
-            UUID playerD = UUID.randomUUID();
-
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(playerA).build(),
-                    User.builder().id(playerB).build(),
-                    User.builder().id(playerC).build(),
-                    User.builder().id(playerD).build()
-            ));
-
-            Match savedMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamADefenderId(playerB)
-                    .teamBAttackerId(playerC)
-                    .teamBDefenderId(playerD)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
-
-            Match existingDuplicate = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamADefenderId(playerB)
-                    .teamBAttackerId(playerC)
-                    .teamBDefenderId(playerD)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
-                    .thenReturn(List.of(existingDuplicate, savedMatch));
-
-            CreateMatchRequest request = new CreateMatchRequest(
-                    "key-2",
-                    playerA,
-                    playerA, playerB,
-                    playerC, playerD,
-                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
-                    null, null
-            );
-
-            matchService.createMatch(request);
-
-            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(true));
-        }
-
-        @Test
-        @DisplayName("[P1] Should NOT flag duplicate warning when 2v2 match has different team composition")
-        void shouldNotFlagDuplicateWhenTeamCompositionDiffers() {
-            UUID playerA = UUID.randomUUID();
-            UUID playerB = UUID.randomUUID();
-            UUID playerC = UUID.randomUUID();
-            UUID playerD = UUID.randomUUID();
-
-            when(userRepository.findAllById(any())).thenReturn(List.of(
-                    User.builder().id(playerA).build(),
-                    User.builder().id(playerB).build(),
-                    User.builder().id(playerC).build(),
-                    User.builder().id(playerD).build()
-            ));
-
-            Match savedMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamADefenderId(playerB)
-                    .teamBAttackerId(playerC)
-                    .teamBDefenderId(playerD)
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            Match differentMatch = Match.builder()
-                    .id(UUID.randomUUID())
-                    .creatorId(playerA)
-                    .teamAAttackerId(playerA)
-                    .teamADefenderId(playerB)
-                    .teamBAttackerId(playerC)
-                    .teamBDefenderId(UUID.randomUUID())
-                    .status("PENDING_APPROVAL")
-                    .createdAt(Instant.now())
-                    .build();
-
-            when(matchOperation.saveMatch(any())).thenReturn(savedMatch);
-            when(matchRepository.findDuplicatesOnDate(any(), any(), any(), any(), any(), any()))
-                    .thenReturn(List.of(differentMatch));
-
-            CreateMatchRequest request = new CreateMatchRequest(
-                    "key-3",
-                    playerA,
-                    playerA, playerB,
-                    playerC, playerD,
-                    List.of(new GameDto(10, 8, playerA, playerB, playerC, playerD)),
-                    null, null
-            );
-
-            matchService.createMatch(request);
-
-            verify(pushNotificationService).sendConfirmationRequest(eq(savedMatch), anyList(), eq(false));
-        }
-    }
 }

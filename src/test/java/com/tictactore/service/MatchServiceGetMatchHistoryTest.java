@@ -1,6 +1,5 @@
 package com.tictactore.service;
 
-import com.tictactore.dto.GameDto;
 import com.tictactore.dto.MatchResponse;
 import com.tictactore.dto.PagedResponse;
 import com.tictactore.model.Game;
@@ -34,170 +33,170 @@ import static org.mockito.Mockito.when;
 @DisplayName("MatchService getMatchHistory Unit Tests")
 class MatchServiceGetMatchHistoryTest {
 
-    @Mock
-    private MatchRepository matchRepository;
+        @Mock
+        private MatchRepository matchRepository;
 
-    @Mock
-    private UserRepository userRepository;
+        @Mock
+        private UserRepository userRepository;
 
-    @Mock
-    private MatchOperation matchOperation;
+        @Mock
+        private MatchOperation matchOperation;
 
-    @Mock
-    private PushNotificationService pushNotificationService;
+        @Mock
+        private PushNotificationService pushNotificationService;
 
-    @Mock
-    private RateLimitService rateLimitService;
+        @Mock
+        private RateLimitService rateLimitService;
 
-    @Mock
-    private com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
+        @Mock
+        private com.tictactore.repository.PlayerGroupRepository playerGroupRepository;
 
-    @InjectMocks
-    private MatchServiceImpl matchService;
+        @InjectMocks
+        private MatchServiceImpl matchService;
 
-    private UUID currentUserId;
-    private UUID opponentId;
-    private UUID ruleConfigId;
+        private UUID currentUserId;
+        private UUID opponentId;
+        private UUID ruleConfigId;
 
-    @BeforeEach
-    void setUp() {
-        currentUserId = UUID.randomUUID();
-        opponentId = UUID.randomUUID();
-        ruleConfigId = UUID.randomUUID();
-    }
+        @BeforeEach
+        void setUp() {
+                currentUserId = UUID.randomUUID();
+                opponentId = UUID.randomUUID();
+                ruleConfigId = UUID.randomUUID();
+        }
 
-    @Test
-    void shouldReturnEmptyPagedResponse_whenCurrentUserIdIsNull() {
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(null, "CONFIRMED", null, null, null, 0, 10);
+        @Test
+        void shouldReturnEmptyPagedResponse_whenCurrentUserIdIsNull() {
+                PagedResponse<MatchResponse> response = matchService.getMatchHistory(null, "CONFIRMED", null, null,
+                                null, 0, 10);
 
-        assertThat(response.content()).isEmpty();
-        assertThat(response.totalElements()).isZero();
-    }
+                assertThat(response.content()).isEmpty();
+                assertThat(response.totalElements()).isZero();
+        }
 
-    @Test
-    void shouldReturnPagedMatchHistoryWithResolvedUserNames_whenMatchesFound() {
-        UUID matchId = UUID.randomUUID();
-        Match match = Match.builder()
-                .id(matchId)
-                .idempotencyKey("match-1")
-                .creatorId(currentUserId)
-                .teamAAttackerId(currentUserId)
-                .teamBAttackerId(opponentId)
-                .status("CONFIRMED")
-                .createdAt(Instant.now())
-                .build();
-        match.addGame(Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build());
+        @Test
+        void shouldReturnPagedMatchHistoryWithResolvedUserNames_whenMatchesFound() {
+                UUID matchId = UUID.randomUUID();
+                Match match = Match.builder()
+                                .id(matchId)
+                                .idempotencyKey("match-1")
+                                .creatorId(currentUserId)
+                                .teamAAttackerId(currentUserId)
+                                .teamBAttackerId(opponentId)
+                                .status("CONFIRMED")
+                                .createdAt(Instant.now())
+                                .build();
+                match.addGame(Game.builder().gameOrder(1).teamAScore(10).teamBScore(5).build());
 
-        Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
-        when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), eq(opponentId), eq(ruleConfigId), eq("1v1"), any()))
-                .thenReturn(page);
+                Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
+                when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), eq(opponentId),
+                                eq(ruleConfigId), eq("1v1"), any()))
+                                .thenReturn(page);
 
-        User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
-        User opponent = User.builder().id(opponentId).nickname("Bob").build();
-        when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, opponent));
+                User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
+                User opponent = User.builder().id(opponentId).nickname("Bob").build();
+                when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, opponent));
 
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
-                currentUserId, "CONFIRMED", opponentId, ruleConfigId, "1v1", 0, 10
-        );
+                PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                                currentUserId, "CONFIRMED", opponentId, ruleConfigId, "1v1", 0, 10);
 
-        assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).id()).isEqualTo(matchId);
-        assertThat(response.content().get(0).teamAAttackerNickname()).isEqualTo("Alice");
-        assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Bob");
-        assertThat(response.totalElements()).isEqualTo(1L);
-        assertThat(response.totalPages()).isEqualTo(1);
-    }
+                assertThat(response.content()).hasSize(1);
+                assertThat(response.content().get(0).id()).isEqualTo(matchId);
+                assertThat(response.content().get(0).teamAAttackerNickname()).isEqualTo("Alice");
+                assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Bob");
+                assertThat(response.totalElements()).isEqualTo(1L);
+                assertThat(response.totalPages()).isEqualTo(1);
+        }
 
-    @Test
-    void shouldMaskDeletedUserAsRetiredPlayer_whenNicknameStartsWithExPlayer() {
-        UUID matchId = UUID.randomUUID();
-        Match match = Match.builder()
-                .id(matchId)
-                .creatorId(currentUserId)
-                .teamAAttackerId(currentUserId)
-                .teamBAttackerId(opponentId)
-                .status("CONFIRMED")
-                .createdAt(Instant.now())
-                .build();
+        @Test
+        void shouldMaskDeletedUserAsRetiredPlayer_whenNicknameStartsWithExPlayer() {
+                UUID matchId = UUID.randomUUID();
+                Match match = Match.builder()
+                                .id(matchId)
+                                .creatorId(currentUserId)
+                                .teamAAttackerId(currentUserId)
+                                .teamBAttackerId(opponentId)
+                                .status("CONFIRMED")
+                                .createdAt(Instant.now())
+                                .build();
 
-        Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
-        when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), any(), any()))
-                .thenReturn(page);
+                Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
+                when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), any(), any()))
+                                .thenReturn(page);
 
-        User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
-        User retiredOpponent = User.builder().id(opponentId).nickname("ex-player-9999").email("deleted@example.com").avatar("http://avatar.png").build();
-        when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, retiredOpponent));
+                User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
+                User retiredOpponent = User.builder().id(opponentId).nickname("ex-player-9999")
+                                .email("deleted@example.com").avatar("http://avatar.png").build();
+                when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, retiredOpponent));
 
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
-                currentUserId, "CONFIRMED", null, null, null, 0, 10
-        );
+                PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                                currentUserId, "CONFIRMED", null, null, null, 0, 10);
 
-        assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
-        assertThat(response.content().get(0).teamBAttackerAvatar()).isNull();
-    }
+                assertThat(response.content()).hasSize(1);
+                assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
+                assertThat(response.content().get(0).teamBAttackerAvatar()).isNull();
+        }
 
-    @Test
-    void shouldNeverLeakEmailWhenNicknameIsBlank_andNormalizeBlankMatchTypeToNull() {
-        UUID matchId = UUID.randomUUID();
-        Match match = Match.builder()
-                .id(matchId)
-                .creatorId(currentUserId)
-                .teamAAttackerId(currentUserId)
-                .teamBAttackerId(opponentId)
-                .status("CONFIRMED")
-                .createdAt(Instant.now())
-                .build();
+        @Test
+        void shouldNeverLeakEmailWhenNicknameIsBlank_andNormalizeBlankMatchTypeToNull() {
+                UUID matchId = UUID.randomUUID();
+                Match match = Match.builder()
+                                .id(matchId)
+                                .creatorId(currentUserId)
+                                .teamAAttackerId(currentUserId)
+                                .teamBAttackerId(opponentId)
+                                .status("CONFIRMED")
+                                .createdAt(Instant.now())
+                                .build();
 
-        Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
-        when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), eq(null), any()))
-                .thenReturn(page);
+                Page<Match> page = new PageImpl<>(List.of(match), PageRequest.of(0, 10), 1);
+                when(matchRepository.findMatchHistory(eq(currentUserId), eq("CONFIRMED"), any(), any(), eq(null),
+                                any()))
+                                .thenReturn(page);
 
-        User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
-        User noNickUser = User.builder().id(opponentId).nickname("").email("secret_user@example.com").build();
-        when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, noNickUser));
+                User currentUser = User.builder().id(currentUserId).nickname("Alice").build();
+                User noNickUser = User.builder().id(opponentId).nickname("").email("secret_user@example.com").build();
+                when(userRepository.findAllById(any())).thenReturn(List.of(currentUser, noNickUser));
 
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
-                currentUserId, "CONFIRMED", null, null, "   ", 0, 10
-        );
+                PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                                currentUserId, "CONFIRMED", null, null, "   ", 0, 10);
 
-        assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
-        assertThat(response.content().get(0).teamBAttackerNickname()).doesNotContain("secret_user@example.com");
-    }
+                assertThat(response.content()).hasSize(1);
+                assertThat(response.content().get(0).teamBAttackerNickname()).isEqualTo("Retired Player");
+                assertThat(response.content().get(0).teamBAttackerNickname()).doesNotContain("secret_user@example.com");
+        }
 
-    @Test
-    void shouldThrowAccessDeniedExceptionWhenFilteringByGroupOwnedByAnotherUser() {
-        UUID foreignCreatorId = UUID.randomUUID();
-        UUID groupId = UUID.randomUUID();
-        com.tictactore.model.PlayerGroup foreignGroup = com.tictactore.model.PlayerGroup.builder()
-                .id(groupId)
-                .name("Secret Group")
-                .creatorId(foreignCreatorId)
-                .build();
-        when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(foreignGroup));
+        @Test
+        void shouldThrowAccessDeniedExceptionWhenFilteringByGroupOwnedByAnotherUser() {
+                UUID foreignCreatorId = UUID.randomUUID();
+                UUID groupId = UUID.randomUUID();
+                com.tictactore.model.PlayerGroup foreignGroup = com.tictactore.model.PlayerGroup.builder()
+                                .id(groupId)
+                                .name("Secret Group")
+                                .creatorId(foreignCreatorId)
+                                .build();
+                when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(foreignGroup));
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> matchService.getMatchHistory(
-                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10
-        )).isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
-    }
+                org.assertj.core.api.Assertions.assertThatThrownBy(() -> matchService.getMatchHistory(
+                                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10))
+                                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        }
 
-    @Test
-    void shouldReturnEmptyPageImmediatelyWhenGroupHasNoMembers() {
-        UUID groupId = UUID.randomUUID();
-        com.tictactore.model.PlayerGroup emptyGroup = com.tictactore.model.PlayerGroup.builder()
-                .id(groupId)
-                .name("Empty Squad")
-                .creatorId(currentUserId)
-                .members(java.util.Set.of())
-                .build();
-        when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(emptyGroup));
+        @Test
+        void shouldReturnEmptyPageImmediatelyWhenGroupHasNoMembers() {
+                UUID groupId = UUID.randomUUID();
+                com.tictactore.model.PlayerGroup emptyGroup = com.tictactore.model.PlayerGroup.builder()
+                                .id(groupId)
+                                .name("Empty Squad")
+                                .creatorId(currentUserId)
+                                .members(java.util.Set.of())
+                                .build();
+                when(playerGroupRepository.findById(groupId)).thenReturn(java.util.Optional.of(emptyGroup));
 
-        PagedResponse<MatchResponse> response = matchService.getMatchHistory(
-                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10
-        );
+                PagedResponse<MatchResponse> response = matchService.getMatchHistory(
+                                currentUserId, "CONFIRMED", null, groupId, null, null, 0, 10);
 
-        assertThat(response.content()).isEmpty();
-        assertThat(response.totalElements()).isZero();
-    }
+                assertThat(response.content()).isEmpty();
+                assertThat(response.totalElements()).isZero();
+        }
 }
