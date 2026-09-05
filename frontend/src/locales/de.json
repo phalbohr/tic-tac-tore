@@ -365,8 +365,14 @@
     },
     "validation": {
       "nameRequired": "Name ist erforderlich (max. 50 Zeichen)",
-      "capMustBeGreater": "Die maximale Punktzahl muss höher sein als die Tore zum Sieg",
-      "gamesToWinInvalid": "Gewinnsätze müssen zwischen 1 und der Gesamtsatzanzahl liegen"
+      "goalLimitRange": "Tore zum Sieg müssen zwischen 1 und 100 liegen",
+      "gameLimitRange": "Sätze müssen zwischen 1 und 15 liegen",
+      "gamesToWinInvalid": "Gewinnsätze müssen zwischen 1 und {max} liegen",
+      "capMustBeGreater": "Die maximale Punktzahl muss höher sein als die Tore zum Sieg (max. 100)",
+      "timeoutsRange": "Auszeiten müssen zwischen 0 und 10 liegen",
+      "timeoutDurationRange": "Auszeit-Dauer muss zwischen 0 und 300s liegen",
+      "possession5BarRange": "5er-Stange Limit muss zwischen 0 und 60s liegen",
+      "possessionOtherRange": "Andere Stangen Limit muss zwischen 0 und 60s liegen"
     },
     "summary": {
       "gameLimit": "Best of {limit}",

@@ -245,10 +245,21 @@ function handleSave() {
     return
   }
 
+  if (Number(gameLimit.value) < 1 || Number(gameLimit.value) > 15) {
+    formError.value = t('rules.validation.gameLimitRange', 'Game limit must be between 1 and 15')
+    return
+  }
+
+  if (Number(goalLimit.value) < 1 || Number(goalLimit.value) > 100) {
+    formError.value = t('rules.validation.goalLimitRange', 'Goal limit must be between 1 and 100')
+    return
+  }
+
   if (matchFormat.value === 'BEST_OF_N') {
     if (gamesToWin.value < 1 || gamesToWin.value > gameLimit.value) {
       formError.value = t(
         'rules.validation.gamesToWinInvalid',
+        { max: gameLimit.value },
         'Games to win must be between 1 and the game limit',
       )
       return
@@ -258,12 +269,32 @@ function handleSave() {
   if (
     winByTwoRule.value !== 'NONE' &&
     absoluteScoreCap.value != null &&
-    Number(absoluteScoreCap.value) <= Number(goalLimit.value)
+    (Number(absoluteScoreCap.value) <= Number(goalLimit.value) || Number(absoluteScoreCap.value) > 100)
   ) {
     formError.value = t(
       'rules.validation.capMustBeGreater',
-      'Absolute score cap must be greater than goal limit',
+      'Absolute score cap must be greater than goal limit (max 100)',
     )
+    return
+  }
+
+  if (Number(timeoutsPerGame.value) < 0 || Number(timeoutsPerGame.value) > 10) {
+    formError.value = t('rules.validation.timeoutsRange', 'Timeouts must be between 0 and 10')
+    return
+  }
+
+  if (Number(timeoutDurationSeconds.value) < 0 || Number(timeoutDurationSeconds.value) > 300) {
+    formError.value = t('rules.validation.timeoutDurationRange', 'Timeout duration must be between 0 and 300s')
+    return
+  }
+
+  if (Number(possessionLimit5BarSeconds.value) < 0 || Number(possessionLimit5BarSeconds.value) > 60) {
+    formError.value = t('rules.validation.possession5BarRange', '5-Bar limit must be between 0 and 60s')
+    return
+  }
+
+  if (Number(possessionLimitOtherSeconds.value) < 0 || Number(possessionLimitOtherSeconds.value) > 60) {
+    formError.value = t('rules.validation.possessionOtherRange', 'Other rods limit must be between 0 and 60s')
     return
   }
 
@@ -436,6 +467,13 @@ function handleClose() {
                 :max="15"
                 data-testid="game-limit-input"
               />
+              <p
+                v-if="gameLimit != null && (Number(gameLimit) < 1 || Number(gameLimit) > 15)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="game-limit-warning"
+              >
+                {{ t('rules.validation.gameLimitRange', 'Game limit must be between 1 and 15') }}
+              </p>
             </div>
 
             <div v-if="matchFormat === 'BEST_OF_N'">
@@ -455,6 +493,13 @@ function handleClose() {
                 :max="gameLimit"
                 data-testid="games-to-win-input"
               />
+              <p
+                v-if="gamesToWin != null && (Number(gamesToWin) < 1 || Number(gamesToWin) > Number(gameLimit))"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="games-to-win-warning"
+              >
+                {{ t('rules.validation.gamesToWinInvalid', { max: gameLimit }, `Games to win must be between 1 and ${gameLimit}`) }}
+              </p>
             </div>
           </div>
 
@@ -477,6 +522,13 @@ function handleClose() {
                 :max="100"
                 data-testid="goal-limit-input"
               />
+              <p
+                v-if="goalLimit != null && (Number(goalLimit) < 1 || Number(goalLimit) > 100)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="goal-limit-warning"
+              >
+                {{ t('rules.validation.goalLimitRange', 'Goal limit must be between 1 and 100') }}
+              </p>
             </div>
           </div>
         </div>
@@ -564,6 +616,13 @@ function handleClose() {
                 :max="10"
                 data-testid="timeouts-per-game-input"
               />
+              <p
+                v-if="timeoutsPerGame != null && (Number(timeoutsPerGame) < 0 || Number(timeoutsPerGame) > 10)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="timeouts-warning"
+              >
+                {{ t('rules.validation.timeoutsRange', 'Timeouts must be between 0 and 10') }}
+              </p>
             </div>
 
             <div>
@@ -584,6 +643,13 @@ function handleClose() {
                 :step="5"
                 data-testid="timeout-duration-input"
               />
+              <p
+                v-if="timeoutDurationSeconds != null && (Number(timeoutDurationSeconds) < 0 || Number(timeoutDurationSeconds) > 300)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="timeout-duration-warning"
+              >
+                {{ t('rules.validation.timeoutDurationRange', 'Timeout duration must be between 0 and 300s') }}
+              </p>
             </div>
           </div>
 
@@ -606,6 +672,13 @@ function handleClose() {
                 :max="60"
                 data-testid="possession-5bar-input"
               />
+              <p
+                v-if="possessionLimit5BarSeconds != null && (Number(possessionLimit5BarSeconds) < 0 || Number(possessionLimit5BarSeconds) > 60)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="possession-5bar-warning"
+              >
+                {{ t('rules.validation.possession5BarRange', '5-Bar limit must be between 0 and 60s') }}
+              </p>
             </div>
 
             <div>
@@ -625,6 +698,13 @@ function handleClose() {
                 :max="60"
                 data-testid="possession-other-input"
               />
+              <p
+                v-if="possessionLimitOtherSeconds != null && (Number(possessionLimitOtherSeconds) < 0 || Number(possessionLimitOtherSeconds) > 60)"
+                class="text-error text-xs mt-1 font-medium"
+                data-testid="possession-other-warning"
+              >
+                {{ t('rules.validation.possessionOtherRange', 'Other rods limit must be between 0 and 60s') }}
+              </p>
             </div>
           </div>
 

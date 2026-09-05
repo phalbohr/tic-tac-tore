@@ -11,11 +11,18 @@ const positionClass = ref<'center' | 'left' | 'right'>('center')
 
 function show() {
   if (triggerRef.value) {
-    const rect = triggerRef.value.getBoundingClientRect()
+    const dialog = triggerRef.value.closest('[role="dialog"]') || document.body
+    const dialogRect = dialog.getBoundingClientRect()
+    const triggerRect = triggerRef.value.getBoundingClientRect()
+
+    const triggerCenter = triggerRect.left + triggerRect.width / 2
+    const distFromDialogLeft = triggerCenter - dialogRect.left
+    const distFromDialogRight = dialogRect.right - triggerCenter
+
     const tooltipHalfWidth = 135
-    if (rect.left < tooltipHalfWidth + 20) {
+    if (distFromDialogLeft < tooltipHalfWidth + 16) {
       positionClass.value = 'left'
-    } else if (window.innerWidth - rect.right < tooltipHalfWidth + 20) {
+    } else if (distFromDialogRight < tooltipHalfWidth + 16) {
       positionClass.value = 'right'
     } else {
       positionClass.value = 'center'

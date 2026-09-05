@@ -198,6 +198,31 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     expect(wrapper.find('[data-testid="cap-validation-warning"]').exists()).toBe(false)
   })
 
+  it('should show instant validation warnings when numeric inputs are out of bounds', async () => {
+    const wrapper = mount(RuleTemplateModal, {
+      props: {
+        isOpen: true,
+        initialTemplate: null,
+      },
+    })
+
+    // Goal limit out of bounds (> 100)
+    await wrapper.find('[data-testid="goal-limit-input"]').setValue(150)
+    expect(wrapper.find('[data-testid="goal-limit-warning"]').exists()).toBe(true)
+
+    // Game limit out of bounds (< 1)
+    await wrapper.find('[data-testid="game-limit-input"]').setValue(0)
+    expect(wrapper.find('[data-testid="game-limit-warning"]').exists()).toBe(true)
+
+    // Timeouts out of bounds (> 10)
+    await wrapper.find('[data-testid="timeouts-per-game-input"]').setValue(15)
+    expect(wrapper.find('[data-testid="timeouts-warning"]').exists()).toBe(true)
+
+    // 5-bar limit out of bounds (> 60)
+    await wrapper.find('[data-testid="possession-5bar-input"]').setValue(75)
+    expect(wrapper.find('[data-testid="possession-5bar-warning"]').exists()).toBe(true)
+  })
+
   it('should display error message when errorMessage prop is provided', () => {
     const wrapper = mount(RuleTemplateModal, {
       props: {

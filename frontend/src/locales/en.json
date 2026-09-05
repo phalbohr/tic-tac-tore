@@ -365,8 +365,14 @@
     },
     "validation": {
       "nameRequired": "Name is required (max 50 characters)",
-      "capMustBeGreater": "Absolute score cap must be greater than goal limit",
-      "gamesToWinInvalid": "Games to win must be between 1 and the game limit"
+      "goalLimitRange": "Goal limit must be between 1 and 100",
+      "gameLimitRange": "Game limit must be between 1 and 15",
+      "gamesToWinInvalid": "Games to win must be between 1 and {max}",
+      "capMustBeGreater": "Absolute score cap must be greater than goal limit (max 100)",
+      "timeoutsRange": "Timeouts must be between 0 and 10",
+      "timeoutDurationRange": "Timeout duration must be between 0 and 300s",
+      "possession5BarRange": "5-Bar limit must be between 0 and 60s",
+      "possessionOtherRange": "Other rods limit must be between 0 and 60s"
     },
     "summary": {
       "gameLimit": "Best of {limit}",
