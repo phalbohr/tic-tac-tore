@@ -101,15 +101,23 @@ function resetForm() {
   formError.value = ''
 }
 
-// Lock body scrolling when modal is open
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.isOpen) {
+    handleClose()
+  }
+}
+
+// Lock body scrolling and bind Escape listener when modal is open
 watch(
   () => props.isOpen,
   (val) => {
     if (val) {
       document.body.style.overflow = 'hidden'
+      window.addEventListener('keydown', handleKeyDown)
       resetForm()
     } else {
       document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
     }
   },
   { immediate: true },
@@ -117,6 +125,7 @@ watch(
 
 onUnmounted(() => {
   document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 watch(
@@ -337,6 +346,8 @@ function handleClose() {
     v-if="isOpen"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     data-testid="rule-template-modal-overlay"
+    @click.self="handleClose"
+    @keydown.escape="handleClose"
   >
     <div
       role="dialog"

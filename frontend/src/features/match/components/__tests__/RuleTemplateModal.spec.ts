@@ -223,6 +223,18 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     expect(wrapper.find('[data-testid="possession-5bar-warning"]').exists()).toBe(true)
   })
 
+  it('should emit close event when Escape key is pressed', async () => {
+    const wrapper = mount(RuleTemplateModal, {
+      props: {
+        isOpen: true,
+        initialTemplate: null,
+      },
+    })
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(wrapper.emitted('close')).toBeTruthy()
+  })
+
   it('should display error message when errorMessage prop is provided', () => {
     const wrapper = mount(RuleTemplateModal, {
       props: {
