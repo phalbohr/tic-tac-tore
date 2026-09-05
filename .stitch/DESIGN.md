@@ -91,3 +91,77 @@ A custom component for displaying live scores. Inspired by the foosball rod, it 
 
 ### Accessibility Note
 Ensure that text on `primary-container` (Deep Green) uses `on-primary-container` (#9dd090) to maintain high contrast. Despite the "moody" lighting, the statistics must remain legible for quick glances during an intense match.
+
+---
+
+## 7. Modal Windows, Form Controls & Interactive Patterns
+
+To maintain the Speakeasy Stadium feel across all overlay and form interactions, every modal window and interactive input must adhere to the following strict conventions:
+
+### Modal Window Architecture
+1. **Backdrop Overlay:**
+   - Classes: `fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm`
+   - Dismissal: Clicking the backdrop (`@click.self="handleClose"`) must close the modal.
+2. **Scroll Lock:**
+   - When the modal opens (`isOpen: true`), lock the page scroll via `document.body.style.overflow = 'hidden'`.
+   - Restore on modal close and on component unmount (`document.body.style.overflow = ''`).
+3. **Card Shell (No-Line Elevation):**
+   - Classes: `bg-surface-container-low rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border-0` with explicit inline style `style="border-width: 0px;"`.
+   - Strict adherence to the 0px border rule: depth is achieved solely via tonal hierarchy and dark elevation.
+4. **Header & Footer Framing:**
+   - **Header:** `flex items-center justify-between p-4 bg-surface-container` with close button `p-1 rounded-full text-on-surface-variant hover:bg-surface-container-high`.
+   - **Footer:** `p-4 bg-surface-container flex gap-3 justify-end` containing secondary and primary action buttons.
+   - **Body:** `flex-1 overflow-y-auto p-4 space-y-4 text-start custom-modal-scroll overscroll-contain`.
+5. **Section Inlays:**
+   - Group related fields into visual inlays using `bg-surface-container-highest/60 p-4 rounded-xl space-y-3`.
+   - Section headers must be uppercase bold: `text-xs font-bold uppercase tracking-wider text-primary`.
+6. **Custom Scrollbar:**
+   - Apply `custom-modal-scroll`: `scrollbar-width: thin; scrollbar-color: #393431 transparent;` with hover thumb `#4b4440` and 0 background.
+
+---
+
+### Keyboard Interaction & Escape Key Handling
+1. **Capture-Phase Escape Listener:**
+   - Register a capture-phase key listener on `window` and `document`: `addEventListener('keydown', handleKeyDown, true)`.
+   - Check `event.key === 'Escape' || event.key === 'Esc' || event.code === 'Escape'`.
+   - Always remove listener in `onUnmounted` and when modal closes.
+2. **Nested Popover Escape Priority:**
+   - Nested dropdowns / popovers (e.g. `CustomSelect`) must intercept Escape first with `@keydown.escape.stop="isOpen = false"`, closing the dropdown on first press, and closing the modal on subsequent press.
+
+---
+
+### Form Controls & Input Mechanics
+
+#### 1. Text Inputs (`<input type="text">`)
+- **Styling:** `w-full px-3 py-2 rounded-lg bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-container-high transition-colors`.
+- **Autofill & Autocomplete:**
+  - Always specify `autocomplete="off"` on named inputs to prevent white browser history popups.
+  - Global CSS resets `-webkit-autofill` with dark box-shadow insets (`#262220`) and text color `#ebe0dd`.
+
+#### 2. Number Steppers (`NumberInput.vue`)
+- **Compact Geometry:**
+  - Outer wrapper: `inline-flex items-center w-fit bg-surface-container rounded-lg transition-all focus-within:bg-surface-container-high focus-within:ring-1 focus-within:ring-primary overflow-hidden`.
+  - Minus button: Pinned to left edge with `px-2.5 py-1.5`.
+  - Input field: Tight `w-11` (maximum 3 digits visible) with `text-center font-semibold text-sm py-1.5 px-0.5`.
+  - Plus button: `px-2.5 py-1.5` positioned snug next to the number.
+- **Interaction & Normalization:**
+  - Allows natural keyboard typing without mid-typing truncation.
+  - On `@blur`: automatically validates and clamps the typed value to `min` and `max`, normalizing the DOM value.
+  - Mouse wheel support via `@wheel.prevent="handleWheel"`.
+
+#### 3. Custom Dark Dropdowns (`CustomSelect.vue`)
+- **Pure Dark Popovers:**
+  - Replaces OS native select popups with custom Vue listbox overlays using `bg-surface-container-high` (`#302b29`), `text-on-surface`, `hover:bg-surface-container-highest`, and active item highlights `bg-primary/20 text-primary font-bold` with checkmark.
+  - Closes on click outside and on Escape.
+  - Keeps a hidden native `<select :data-testid="dataTestid" class="sr-only">` to preserve automated testing and accessibility parity.
+
+#### 4. Tooltips (`BaseTooltip.vue`)
+- **Modal Boundary Collision Detection:**
+  - Tooltips measure trigger coordinates relative to the active dialog (`.closest('[role="dialog"]')`).
+  - Dynamically sets placement (`left`, `center`, `right`) and adjusts arrow offset (`left-2`, `left-1/2`, `right-2`), ensuring tooltips in left or right grid columns never clip outside modal edges.
+
+#### 5. Real-Time Validation Feedback
+- **Inline Warnings:**
+  - Every numeric field displays an instant red message (`text-error text-xs mt-1 font-medium`) directly beneath the field if the entered value exceeds bounds or violates logical constraints.
+  - `handleSave` performs full range validation against internationalized error messages before emitting save payloads.
+
