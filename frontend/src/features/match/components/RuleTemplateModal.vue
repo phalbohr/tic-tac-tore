@@ -171,13 +171,18 @@ watch(gameLimit, (newVal) => {
 })
 
 // Reactively update score cap when goalLimit changes
-watch(goalLimit, (newVal) => {
-  if (
-    winByTwoRule.value !== 'NONE' &&
-    absoluteScoreCap.value != null &&
-    Number(absoluteScoreCap.value) <= Number(newVal)
-  ) {
-    absoluteScoreCap.value = Number(newVal) + 3
+watch(goalLimit, (newVal, oldVal) => {
+  if (winByTwoRule.value !== 'NONE' && absoluteScoreCap.value != null) {
+    const prevCap = Number(absoluteScoreCap.value)
+    const prevGoal = Number(oldVal ?? 5)
+    const currentGoal = Number(newVal ?? 5)
+
+    if (prevCap === prevGoal + 3 || prevCap <= currentGoal) {
+      absoluteScoreCap.value = currentGoal + 3
+    } else {
+      const delta = currentGoal - prevGoal
+      absoluteScoreCap.value = Math.max(currentGoal + 1, prevCap + delta)
+    }
   }
 })
 
@@ -358,6 +363,7 @@ function handleClose() {
               v-model="name"
               type="text"
               maxlength="50"
+              autocomplete="off"
               placeholder="e.g. ITSF Championship Fast"
               class="w-full px-3 py-2 rounded-lg bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-container-high transition-colors"
               data-testid="template-name-input"
@@ -521,6 +527,13 @@ function handleClose() {
               placeholder="e.g. 8"
               data-testid="absolute-score-cap-input"
             />
+            <p
+              v-if="absoluteScoreCap != null && Number(absoluteScoreCap) <= Number(goalLimit)"
+              class="text-error text-xs mt-1 font-medium"
+              data-testid="cap-validation-warning"
+            >
+              {{ t('rules.validation.capMustBeGreater', 'Absolute score cap must be greater than goal limit') }}
+            </p>
           </div>
         </div>
 

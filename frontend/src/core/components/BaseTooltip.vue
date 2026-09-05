@@ -6,8 +6,21 @@ defineProps<{
 }>()
 
 const isVisible = ref(false)
+const triggerRef = ref<HTMLElement | null>(null)
+const positionClass = ref<'center' | 'left' | 'right'>('center')
 
 function show() {
+  if (triggerRef.value) {
+    const rect = triggerRef.value.getBoundingClientRect()
+    const tooltipHalfWidth = 135
+    if (rect.left < tooltipHalfWidth + 20) {
+      positionClass.value = 'left'
+    } else if (window.innerWidth - rect.right < tooltipHalfWidth + 20) {
+      positionClass.value = 'right'
+    } else {
+      positionClass.value = 'center'
+    }
+  }
   isVisible.value = true
 }
 
@@ -17,7 +30,7 @@ function hide() {
 </script>
 
 <template>
-  <div class="relative inline-flex items-center ml-1" @mouseenter="show" @mouseleave="hide">
+  <div ref="triggerRef" class="relative inline-flex items-center ml-1" @mouseenter="show" @mouseleave="hide">
     <button
       type="button"
       class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-1 focus:ring-primary cursor-help"
@@ -40,13 +53,23 @@ function hide() {
       <div
         v-if="isVisible"
         role="tooltip"
-        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 rounded-lg bg-surface-container-highest text-on-surface text-xs leading-relaxed shadow-2xl z-50 pointer-events-none border-0"
+        class="absolute bottom-full mb-2 w-64 p-2.5 rounded-lg bg-surface-container-highest text-on-surface text-xs leading-relaxed shadow-2xl z-50 pointer-events-none border-0"
+        :class="{
+          'left-1/2 -translate-x-1/2': positionClass === 'center',
+          'left-0 translate-x-0': positionClass === 'left',
+          'right-0 translate-x-0': positionClass === 'right',
+        }"
         style="box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);"
       >
         <div class="font-normal">{{ text }}</div>
         <!-- Arrow pointer -->
         <div
-          class="absolute top-full left-1/2 -translate-x-1/2 border-solid border-t-surface-container-highest border-t-4 border-x-transparent border-x-4 border-b-0"
+          class="absolute top-full border-solid border-t-surface-container-highest border-t-4 border-x-transparent border-x-4 border-b-0"
+          :class="{
+            'left-1/2 -translate-x-1/2': positionClass === 'center',
+            'left-2': positionClass === 'left',
+            'right-2': positionClass === 'right',
+          }"
         ></div>
       </div>
     </transition>

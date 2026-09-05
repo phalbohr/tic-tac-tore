@@ -34,10 +34,7 @@ function updateValue(val: number | null) {
     emit('update:modelValue', null)
     return
   }
-  let clamped = val
-  if (props.min != null && clamped < props.min) clamped = props.min
-  if (props.max != null && clamped > props.max) clamped = props.max
-  emit('update:modelValue', clamped)
+  emit('update:modelValue', val)
 }
 
 function handleInput(e: Event) {
@@ -48,6 +45,25 @@ function handleInput(e: Event) {
     const num = Number(target.value)
     if (!isNaN(num)) {
       updateValue(num)
+    }
+  }
+}
+
+function handleBlur(e: FocusEvent) {
+  const target = e.target as HTMLInputElement
+  if (target.value === '') {
+    if (props.min != null) {
+      target.value = String(props.min)
+      updateValue(props.min)
+    }
+  } else {
+    const num = Number(target.value)
+    if (!isNaN(num)) {
+      let clamped = num
+      if (props.min != null && clamped < props.min) clamped = props.min
+      if (props.max != null && clamped > props.max) clamped = props.max
+      target.value = String(clamped)
+      updateValue(clamped)
     }
   }
 }
@@ -106,6 +122,7 @@ function handleWheel(e: WheelEvent) {
       :data-testid="dataTestid"
       class="number-input-field w-11 text-center bg-transparent text-on-surface font-semibold text-sm focus:outline-none py-1.5 px-0.5"
       @input="handleInput"
+      @blur="handleBlur"
     />
 
     <button

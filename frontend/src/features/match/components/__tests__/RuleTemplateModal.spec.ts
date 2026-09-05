@@ -161,6 +161,43 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     expect(emittedPayload.winByTwoRule).toBe('DECISIVE_GAME_ONLY')
   })
 
+  it('should dynamically adjust absolute score cap both upwards and downwards on goalLimit changes', async () => {
+    const wrapper = mount(RuleTemplateModal, {
+      props: {
+        isOpen: true,
+        initialTemplate: null,
+      },
+    })
+
+    // Default: goalLimit = 5, score cap = 8
+    expect((wrapper.find('[data-testid="absolute-score-cap-input"]').element as HTMLInputElement).value).toBe('8')
+
+    // Increase goalLimit to 8 -> score cap increases to 11
+    await wrapper.find('[data-testid="goal-limit-input"]').setValue(8)
+    expect((wrapper.find('[data-testid="absolute-score-cap-input"]').element as HTMLInputElement).value).toBe('11')
+
+    // Decrease goalLimit to 4 -> score cap decreases down to 7
+    await wrapper.find('[data-testid="goal-limit-input"]').setValue(4)
+    expect((wrapper.find('[data-testid="absolute-score-cap-input"]').element as HTMLInputElement).value).toBe('7')
+  })
+
+  it('should show instant validation warning when absoluteScoreCap is less than or equal to goalLimit', async () => {
+    const wrapper = mount(RuleTemplateModal, {
+      props: {
+        isOpen: true,
+        initialTemplate: null,
+      },
+    })
+
+    // Set score cap to 4 when goalLimit is 5
+    await wrapper.find('[data-testid="absolute-score-cap-input"]').setValue(4)
+    expect(wrapper.find('[data-testid="cap-validation-warning"]').exists()).toBe(true)
+
+    // Increase score cap to 6 (> 5) -> warning disappears
+    await wrapper.find('[data-testid="absolute-score-cap-input"]').setValue(6)
+    expect(wrapper.find('[data-testid="cap-validation-warning"]').exists()).toBe(false)
+  })
+
   it('should display error message when errorMessage prop is provided', () => {
     const wrapper = mount(RuleTemplateModal, {
       props: {
@@ -175,3 +212,4 @@ describe('RuleTemplateModal.vue Component ATDD Specifications', () => {
     expect(errorEl.text()).toContain('Custom rule limit reached (max 20)')
   })
 })
+
